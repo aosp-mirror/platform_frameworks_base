@@ -23,9 +23,14 @@
         <item name="android:windowElevation">0dp</item>
         <item name="buttonStyle">@style/AppTheme.Button</item>
         <item name="colorAccent">#bbffffff</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
     <style name="AppTheme.Button" parent="Widget.AppCompat.Button">
         <item name="android:textColor">#ffffffff</item>
+    </style>
+
+    <style name="Theme.UsefulDefault" parent="android:Theme.Material">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
     </style>
 
 </resources>

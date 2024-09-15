@@ -44,7 +44,8 @@ public class StatusBarIconTest {
         final int dummyIconNumber = 2;
         final CharSequence dummyIconContentDescription = "dummyIcon";
         final StatusBarIcon original = new StatusBarIcon(dummyIconPackageName, dummyUserHandle,
-                dummyIconId, dummyIconLevel, dummyIconNumber, dummyIconContentDescription);
+                dummyIconId, dummyIconLevel, dummyIconNumber, dummyIconContentDescription,
+                StatusBarIcon.Type.SystemIcon);
 
         final StatusBarIcon copy = clone(original);
 

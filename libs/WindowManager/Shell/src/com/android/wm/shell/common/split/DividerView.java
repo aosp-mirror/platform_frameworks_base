@@ -185,7 +185,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 nextTarget = snapAlgorithm.getDismissStartTarget();
             }
             if (nextTarget != null) {
-                mSplitLayout.snapToTarget(mSplitLayout.getDividePosition(), nextTarget);
+                mSplitLayout.snapToTarget(mSplitLayout.getDividerPosition(), nextTarget);
                 return true;
             }
             return super.performAccessibilityAction(host, action, args);
@@ -336,6 +336,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 setTouching();
                 mStartPos = touchPos;
                 mMoving = false;
+                // This triggers initialization of things like the resize veil in preparation for
+                // showing it when the user moves the divider past the slop, and has to be done
+                // before onStartDragging() which starts the jank interaction tracing
+                mSplitLayout.updateDividerBounds(mSplitLayout.getDividerPosition(),
+                        false /* shouldUseParallaxEffect */);
                 mSplitLayout.onStartDragging();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -345,9 +350,9 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                     mMoving = true;
                 }
                 if (mMoving) {
-                    final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
+                    final int position = mSplitLayout.getDividerPosition() + touchPos - mStartPos;
                     mLastDraggingPosition = position;
-                    mSplitLayout.updateDivideBounds(position);
+                    mSplitLayout.updateDividerBounds(position, true /* shouldUseParallaxEffect */);
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -363,7 +368,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 final float velocity = isLeftRightSplit
                         ? mVelocityTracker.getXVelocity()
                         : mVelocityTracker.getYVelocity();
-                final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
+                final int position = mSplitLayout.getDividerPosition() + touchPos - mStartPos;
                 final DividerSnapAlgorithm.SnapTarget snapTarget =
                         mSplitLayout.findSnapTarget(position, velocity, false /* hardDismiss */);
                 mSplitLayout.snapToTarget(position, snapTarget);
@@ -472,12 +477,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mInteractive = interactive;
         mHideHandle = hideHandle;
         if (!mInteractive && mHideHandle && mMoving) {
-            final int position = mSplitLayout.getDividePosition();
-            mSplitLayout.flingDividePosition(
+            final int position = mSplitLayout.getDividerPosition();
+            mSplitLayout.flingDividerPosition(
                     mLastDraggingPosition,
                     position,
                     mSplitLayout.FLING_RESIZE_DURATION,
-                    () -> mSplitLayout.setDividePosition(position, true /* applyLayoutChange */));
+                    () -> mSplitLayout.setDividerPosition(position, true /* applyLayoutChange */));
             mMoving = false;
         }
         releaseTouching();

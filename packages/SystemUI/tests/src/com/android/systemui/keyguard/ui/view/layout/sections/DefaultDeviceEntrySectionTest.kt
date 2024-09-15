@@ -21,9 +21,9 @@ import android.graphics.Point
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.keyguard.LockIconViewController
+import com.android.keyguard.LegacyLockIconViewController
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
@@ -37,29 +37,30 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class DefaultDeviceEntrySectionTest : SysuiTestCase() {
-    @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
     @Mock private lateinit var notificationPanelView: NotificationPanelView
     private lateinit var featureFlags: FakeFeatureFlags
-    @Mock private lateinit var lockIconViewController: LockIconViewController
+    @Mock private lateinit var lockIconViewController: LegacyLockIconViewController
     @Mock private lateinit var falsingManager: FalsingManager
+    @Mock private lateinit var deviceEntryIconViewModel: DeviceEntryIconViewModel
     private lateinit var underTest: DefaultDeviceEntrySection
 
     @Before
@@ -73,14 +74,13 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
         underTest =
             DefaultDeviceEntrySection(
                 TestScope().backgroundScope,
-                keyguardUpdateMonitor,
                 authController,
                 windowManager,
                 context,
                 notificationPanelView,
                 featureFlags,
                 { lockIconViewController },
-                { mock(DeviceEntryIconViewModel::class.java) },
+                { deviceEntryIconViewModel },
                 { mock(DeviceEntryForegroundViewModel::class.java) },
                 { mock(DeviceEntryBackgroundViewModel::class.java) },
                 { falsingManager },
@@ -107,6 +107,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally_migrateFlagOff() {
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
@@ -129,6 +130,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Test
     fun applyConstraints_udfps_refactor_on() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        whenever(deviceEntryIconViewModel.isUdfpsSupported).thenReturn(MutableStateFlow(false))
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
 

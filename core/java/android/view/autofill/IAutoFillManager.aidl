@@ -38,7 +38,7 @@ import com.android.internal.os.IResultReceiver;
 oneway interface IAutoFillManager {
     // Returns flags: FLAG_ADD_CLIENT_ENABLED | FLAG_ADD_CLIENT_DEBUG | FLAG_ADD_CLIENT_VERBOSE
     void addClient(in IAutoFillManagerClient client, in ComponentName componentName, int userId,
-        in IResultReceiver result);
+        in IResultReceiver result, boolean credmanRequested);
     void removeClient(in IAutoFillManagerClient client, int userId);
     void startSession(IBinder activityToken, in IBinder appCallback, in AutofillId autoFillId,
         in Rect bounds, in AutofillValue value, int userId, boolean hasCallback, int flags,
@@ -49,6 +49,7 @@ oneway interface IAutoFillManager {
     void updateSession(int sessionId, in AutofillId id, in Rect bounds,
         in AutofillValue value, int action, int flags, int userId);
     void setAutofillFailure(int sessionId, in List<AutofillId> ids, int userId);
+    void setViewAutofilled(int sessionId, in AutofillId id, int userId);
     void finishSession(int sessionId, int userId, int commitReason);
     void cancelSession(int sessionId, int userId);
     void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);

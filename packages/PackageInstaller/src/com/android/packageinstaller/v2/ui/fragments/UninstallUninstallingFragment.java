@@ -19,6 +19,7 @@ package com.android.packageinstaller.v2.ui.fragments;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
@@ -29,6 +30,7 @@ import com.android.packageinstaller.v2.model.UninstallUninstalling;
  */
 public class UninstallUninstallingFragment extends DialogFragment {
 
+    private static final String LOG_TAG = UninstallUninstallingFragment.class.getSimpleName();
     UninstallUninstalling mDialogData;
 
     public UninstallUninstallingFragment(UninstallUninstalling dialogData) {
@@ -38,6 +40,7 @@ public class UninstallUninstallingFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
             .setCancelable(false);
         if (mDialogData.isCloneUser()) {

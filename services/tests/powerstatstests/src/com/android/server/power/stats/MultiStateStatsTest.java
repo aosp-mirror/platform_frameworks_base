@@ -29,8 +29,6 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
@@ -165,7 +163,7 @@ public class MultiStateStatsTest {
     }
 
     @Test
-    public void dump() {
+    public void test_toString() {
         MultiStateStats.Factory factory = makeFactory(true, true, false);
         MultiStateStats multiStateStats = factory.create();
         multiStateStats.setState(0 /* batteryState */, 0 /* off */, 1000);
@@ -175,13 +173,10 @@ public class MultiStateStatsTest {
         multiStateStats.setState(1 /* procState */, BatteryConsumer.PROCESS_STATE_BACKGROUND, 3000);
         multiStateStats.increment(new long[]{100, 200}, 5000);
 
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw, true);
-        multiStateStats.dump(pw, Arrays::toString);
-        assertThat(sw.toString()).isEqualTo(
-                "plugged-in fg [25, 50]\n"
-                + "on-battery fg [25, 50]\n"
-                + "on-battery bg [50, 100]\n"
+        assertThat(multiStateStats.toString()).isEqualTo(
+                "(plugged-in fg) [25, 50]\n"
+                + "(on-battery fg) [25, 50]\n"
+                + "(on-battery bg) [50, 100]"
         );
     }
 

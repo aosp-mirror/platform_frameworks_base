@@ -66,6 +66,7 @@ public class AudioServiceTest {
     @Mock private AppOpsManager mMockAppOpsManager;
     @Mock private AudioPolicyFacade mMockAudioPolicy;
     @Mock private PermissionEnforcer mMockPermissionEnforcer;
+    @Mock private AudioServerPermissionProvider mMockPermissionProvider;
 
     // the class being unit-tested here
     private AudioService mAudioService;
@@ -86,7 +87,7 @@ public class AudioServiceTest {
                 .thenReturn(AppOpsManager.MODE_ALLOWED);
         mAudioService = new AudioService(mContext, mSpyAudioSystem, mSpySystemServer,
                 mSettingsAdapter, mAudioVolumeGroupHelper, mMockAudioPolicy, null,
-                mMockAppOpsManager, mMockPermissionEnforcer);
+                mMockAppOpsManager, mMockPermissionEnforcer, mMockPermissionProvider);
     }
 
     /**

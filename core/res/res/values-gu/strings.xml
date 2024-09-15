@@ -84,13 +84,13 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"મોબાઇલ નેટવર્ક સુધી પહોંચી શકાતું નથી"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"પસંદગીનું નેટવર્ક બદલવાનો પ્રયાસ કરો. બદલવા માટે ટૅપ કરો."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"કટોકટીની કૉલિંગ સેવા અનુપલબ્ધ"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"વાઇ-ફાઇ પરથી કટોકટીના કૉલ કરી શકાતા નથી"</string>
+    <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ઇમર્જન્સી કૉલ માટે મોબાઇલ નેટવર્કની આવશ્યકતા છે"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"અલર્ટ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"કૉલ ફૉર્વર્ડિંગ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"કટોકટી કૉલબૅક મોડ"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"મોબાઇલ ડેટાની સ્થિતિ"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS મેસેજ"</string>
-    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"વૉઇસમેઇલ સંદેશા"</string>
+    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"વૉઇસમેઇલ મેસેજ"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"વાઇ-ફાઇ કૉલિંગ"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"સિમનું સ્ટેટસ"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"સિમ કાર્ડનું ઉચ્ચ પ્રાધાન્યતાનું સ્ટેટસ"</string>
@@ -122,7 +122,7 @@
     <string name="roamingTextSearching" msgid="5323235489657753486">"સેવા શોધી રહ્યું છે"</string>
     <string name="wfcRegErrorTitle" msgid="3193072971584858020">"વાઇ-ફાઇ કૉલિંગ સેટ કરી શકાયું નથી"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="468830943567116703">"વાઇ-ફાઇ પરથી કૉલ કરવા અને સંદેશા મોકલવા માટે પહેલાં તમારા કૅરિઅરને આ સેવા સેટ કરવા માટે કહો. પછી સેટિંગમાંથી વાઇ-ફાઇ કૉલિંગ ફરીથી ચાલુ કરો. (ભૂલ કોડ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
+    <item msgid="468830943567116703">"વાઇ-ફાઇ પરથી કૉલ કરવા અને મેસેજ મોકલવા માટે પહેલાં તમારા મોબાઇલ ઑપરેટરને આ સેવા સેટ કરવા માટે કહો. પછી સેટિંગમાંથી વાઇ-ફાઇ કૉલિંગ ફરીથી ચાલુ કરો. (ભૂલ કોડ: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="4795145070505729156">"તમારા કૅરિઅરમાં વાઇ-ફાઇ કૉલિંગ રજિસ્ટર કરવામાં સમસ્યા આવી: <xliff:g id="CODE">%1$s</xliff:g>"</item>
@@ -153,16 +153,19 @@
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="TIME_DELAY">{2}</xliff:g> સેકન્ડ પછી <xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
     <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ફોરવર્ડ કર્યો નથી"</string>
-    <string name="scCellularNetworkSecurityTitle" msgid="90330018476923559">"સેલ્યુલર નેટવર્ક સંબંધી સુરક્ષા"</string>
-    <string name="scCellularNetworkSecuritySummary" msgid="8659128412709908263">"સેટિંગ રિવ્યૂ કરો"</string>
-    <string name="scIdentifierDisclosureIssueTitle" msgid="3737384845335568193">"ઍક્સેસ કરવામાં આવેલા ડિવાઇસના ઓળખકર્તા"</string>
-    <string name="scIdentifierDisclosureIssueSummary" msgid="3870743771498510600">"<xliff:g id="DISCLOSURE_NETWORK">%4$s</xliff:g> કનેક્શન પરના નેટવર્કે <xliff:g id="DISCLOSURE_WINDOW_START_TIME">%2$tr</xliff:g> અને <xliff:g id="DISCLOSURE_WINDOW_END_TIME">%3$tr</xliff:g> વચ્ચેના સમયગાળામાં તમારા ડિવાઇસના વિશિષ્ટ રીતે ઓળખી શકાય એવા (IMSI) નંબરને <xliff:g id="DISCLOSURE_COUNT">%1$d</xliff:g> વખત રેકોર્ડ કર્યો છે."</string>
-    <string name="scNullCipherIssueEncryptedTitle" msgid="8426373579673205292">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> માટે એન્ક્રિપ્ટેડ કનેક્શન"</string>
-    <string name="scNullCipherIssueEncryptedSummary" msgid="6437468449554283998">"તમે હવે વધુ સુરક્ષિત સેલ્યુલર નેટવર્કથી કનેક્ટેડ છો."</string>
-    <string name="scNullCipherIssueNonEncryptedTitle" msgid="2069674849204163569">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> માટે એન્ક્રિપ્ટેડ ના હોય તેવું કનેક્શન"</string>
-    <string name="scNullCipherIssueNonEncryptedSummary" msgid="3577092996366374833">"તમે એન્ક્રિપ્ટેડ ના હોય તેવા સેલ્યુલર નેટવર્ક સાથે કનેક્ટેડ છો. તમારા કૉલ, મેસેજ અને ડેટા ઇન્ટરસેપ્શન માટે સંવેદનશીલ છે."</string>
-    <string name="scNullCipherIssueActionSettings" msgid="8378372959891478470">"સેલ્યુલરની સુરક્ષા સંબંધી સેટિંગ"</string>
+    <string name="scCellularNetworkSecurityTitle" msgid="7752521808690294384">"મોબાઇલ નેટવર્ક સુરક્ષા"</string>
+    <string name="scCellularNetworkSecuritySummary" msgid="7042036754550545005">"એન્ક્રિપ્શન, એન્ક્રિપ્ટ નહીં થયેલા નેટવર્ક માટે નોટિફિકેશન"</string>
+    <string name="scIdentifierDisclosureIssueTitle" msgid="2898888825129970328">"ડિવાઇસ ID ઍક્સેસ કર્યાનો સમય"</string>
+    <string name="scIdentifierDisclosureIssueSummaryNotification" msgid="3699930821270580416">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> પર, તમારા <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે નજીકના કોઈ નેટવર્ક દ્વારા તમારા ડિવાઇસનું અજોડ ID (IMSI અથવા IMEI) રેકોર્ડ કરવામાં આવ્યું હતું"</string>
+    <string name="scIdentifierDisclosureIssueSummary" msgid="7283387338827749276">"<xliff:g id="DISCLOSURE_TIME">%1$s</xliff:g> પર, તમારા <xliff:g id="DISCLOSURE_NETWORK">%2$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે નજીકના કોઈ નેટવર્ક દ્વારા તમારા ડિવાઇસનું અજોડ ID (IMSI અથવા IMEI) રેકોર્ડ કરવામાં આવ્યું હતું.\n\nઆનો અર્થ એ છે કે તમારું લોકેશન, ઍક્ટિવિટી અથવા ઓળખ લૉગ કરવામાં આવી છે. આ સામાન્ય પદ્ધતિ છે પરંતુ પ્રાઇવસી વિશે ચિંતિત લોકો માટે સમસ્યા હોઈ શકે છે."</string>
+    <string name="scNullCipherIssueEncryptedTitle" msgid="234717016411824969">"એન્ક્રિપ્ટેડ નેટવર્ક <xliff:g id="NETWORK_NAME">%1$s</xliff:g> સાથે કનેક્ટેડ છે"</string>
+    <string name="scNullCipherIssueEncryptedSummary" msgid="8577510708842150475">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> સિમ કાર્ડ કનેક્શન હવે વધુ સુરક્ષિત છે"</string>
+    <string name="scNullCipherIssueNonEncryptedTitle" msgid="3978071464929453915">"એન્ક્રિપ્ટ નહીં થયેલા નેટવર્ક સાથે કનેકટેડ છે"</string>
+    <string name="scNullCipherIssueNonEncryptedSummaryNotification" msgid="7386936934128110388">"તમારા <xliff:g id="NETWORK_NAME">%1$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે કૉલ, મેસેજ અને ડેટા હાલમાં વધુ સંવેદનશીલ છે"</string>
+    <string name="scNullCipherIssueNonEncryptedSummary" msgid="5093428974513703253">"તમારા <xliff:g id="NETWORK_NAME">%1$s</xliff:g> સિમ કાર્ડનો ઉપયોગ કરતી વખતે કૉલ, મેસેજ અને ડેટા હાલમાં વધુ સંવેદનશીલ છે.\n\nજ્યારે તમારું કનેક્શન ફરીથી એન્ક્રિપ્ટ કરવામાં આવે છે, ત્યારે તમને બીજું નોટિફિકેશન મળશે."</string>
+    <string name="scNullCipherIssueActionSettings" msgid="5888857706424639946">"મોબાઇલ નેટવર્ક સુરક્ષા સંબંધી સેટિંગ"</string>
     <string name="scNullCipherIssueActionLearnMore" msgid="7896642417214757769">"વધુ જાણો"</string>
+    <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"સમજાઈ ગયું"</string>
     <string name="fcComplete" msgid="1080909484660507044">"સુવિધા કોડ પૂર્ણ."</string>
     <string name="fcError" msgid="5325116502080221346">"કનેક્શન સમસ્યા અથવા અમાન્ય સુવિધા કોડ."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ઓકે"</string>
@@ -198,8 +201,10 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"આ ઉપકરણ પર તમારી કાર્યાલયની પ્રોફાઇલ હવે ઉપલબ્ધ નથી"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"પાસવર્ડના ઘણા વધુ પ્રયત્નો"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"વ્યવસ્થાપકે ડિવાઇસ વ્યક્તિગત ઉપયોગ માટે આપી દીધું છે"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલ છે"</string>
-    <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ઉપકરણનું સંચાલન કરે છે અને નેટવર્ક ટ્રાફિફનું નિયમન કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
+    <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"ખાનગી સ્પેસ કાઢી નાખી"</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"મેનેજ કરેલા ડિવાઇસ પર, તમારી સંસ્થા દ્વારા ખાનગી સ્પેસને મંજૂરી આપવામાં આવતી નથી."</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"ડિવાઇસ મેનેજ થયેલું છે"</string>
+    <string name="network_logging_notification_text" msgid="1327373071132562512">"તમારી સંસ્થા આ ડિવાઇસને મેનેજ કરે છે અને નેટવર્ક ટ્રાફિફ મૉનિટર કરી શકે છે. વિગતો માટે ટૅપ કરો."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ઍપ તમારા સ્થાનને ઍક્સેસ કરી શકે છે"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"વધુ જાણવા માટે તમારા IT વ્યવસ્થાપકનો સંપર્ક કરો"</string>
     <string name="geofencing_service" msgid="3826902410740315456">"જીઓફેન્સિંગ સેવા"</string>
@@ -261,7 +266,7 @@
     <string name="global_action_logout" msgid="6093581310002476511">"સત્ર સમાપ્ત કરો"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"સ્ક્રીનશૉટ"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"બગ રિપોર્ટ"</string>
-    <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
+    <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ મેસેજ તરીકે મોકલવા માટે, તમારા વર્તમાન ડિવાઇસના સ્ટેટસ વિશે માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટના શરુ થવાથી લઈને મોકલવા માટે તૈયાર થવા સુધીની પ્રક્રિયામાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ક્રિયાપ્રતિક્રિયાત્મક રિપોર્ટ"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"મોટાભાગના સંજોગોમાં આનો ઉપયોગ કરો. તે રિપોર્ટની પ્રગતિને ટ્રૅક કરવા, સમસ્યા વિશે વધુ વિગતો દાખલ કરવાની અને સ્ક્રીનશૉટ્સ લેવાની મંજૂરી આપે છે. તે કેટલાક ઓછા ઉપયોગમાં આવતાં વિભાગો કે જે જાણ કરવામાં વધુ સમય લેતાં હોય તેને છોડી દઈ શકે છે."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"પૂર્ણ રિપોર્ટ"</string>
@@ -280,13 +285,14 @@
     <string name="global_action_voice_assist" msgid="6655788068555086695">"વૉઇસ સહાય"</string>
     <string name="global_action_lockdown" msgid="2475471405907902963">"લૉકડાઉન"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
+    <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"જવાબ આપો"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"નવું નોટિફિકેશન"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"ભૌતિક કીબોર્ડ"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"સુરક્ષા"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"કાર મોડ"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"એકાઉન્ટ સ્થિતિ"</string>
-    <string name="notification_channel_developer" msgid="1691059964407549150">"વિકાસકર્તા માટેના સંદેશા"</string>
-    <string name="notification_channel_developer_important" msgid="7197281908918789589">"ડેવલપર માટેના મહત્ત્વપૂર્ણ સંદેશા"</string>
+    <string name="notification_channel_developer" msgid="1691059964407549150">"ડેવલપર માટેના મેસેજ"</string>
+    <string name="notification_channel_developer_important" msgid="7197281908918789589">"ડેવલપર માટેના મહત્ત્વપૂર્ણ મેસેજ"</string>
     <string name="notification_channel_updates" msgid="7907863984825495278">"અપડેટ્સ"</string>
     <string name="notification_channel_network_status" msgid="2127687368725272809">"નેટવર્ક સ્થિતિ"</string>
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"નેટવર્ક ચેતવણીઓ"</string>
@@ -318,7 +324,7 @@
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"કૅલેન્ડર"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"તમારા કેલેન્ડરને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS સંદેશા મોકલવાની અને જોવાની"</string>
+    <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS મેસેજ મોકલો અને જુઓ"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ફાઇલો"</string>
     <string name="permgroupdesc_storage" msgid="5378659041354582769">"તમારા ડિવાઇસ પરની ફાઇલો ઍક્સેસ કરો"</string>
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"મ્યુઝિક અને ઑડિયો"</string>
@@ -356,6 +362,7 @@
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"સ્ક્રીનશૉટ લો"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ડિસ્પ્લેનો સ્ક્રીનશૉટ લઈ શકે છે."</string>
     <string name="dream_preview_title" msgid="5570751491996100804">"પ્રીવ્યૂ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
+    <string name="dream_accessibility_action_click" msgid="7392398629967797805">"છોડી દો"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"સ્ટેટસ બારને અક્ષમ કરો અથવા તેમાં ફેરફાર કરો"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ઍપ્લિકેશનને સ્ટેટસ બાર અક્ષમ કરવાની અથવા સિસ્ટમ આયકન્સ ઉમેરવા અને દૂર કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"સ્ટેટસ બારમાં બતાવો"</string>
@@ -372,28 +379,28 @@
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"એપ્લિકેશનને આઉટગોઇંગ કૉલ દરમિયાન કૉલને એક અલગ નંબર પર રીડાયરેક્ટ કરવા અથવા કૉલને સંપૂર્ણપણે છોડી દેવાનાં વિકલ્પ સાથે ડાયલ થઈ રહેલા નંબરને જોવાની મંજૂરી આપે છે."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"ફોન કૉલને જવાબ આપો"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"ઍપ્લિકેશનને ઇનકમિંગ ફોન કૉલને જવાબ આપવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_receiveSms" msgid="505961632050451881">"ટેક્સ્ટ સંદેશા (SMS) પ્રાપ્ત કરો"</string>
-    <string name="permdesc_receiveSms" msgid="1797345626687832285">"ઍપ્લિકેશનને SMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
-    <string name="permlab_receiveMms" msgid="4000650116674380275">"ટેક્સ્ટ સંદેશા (MMS) પ્રાપ્ત કરો"</string>
-    <string name="permdesc_receiveMms" msgid="958102423732219710">"ઍપ્લિકેશનને MMS સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ્લિકેશન તમને દર્શાવ્યા વિના તમારા ઉપકરણ પર મોકલેલ સંદેશાઓનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
-    <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"સેલ બ્રોડકાસ્ટ સંદેશા ફૉરવર્ડ કરો"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"સેલ બ્રોડકાસ્ટ સંદેશા પ્રાપ્ત થાય કે તરત ફૉરવર્ડ કરવા માટે સેલ બ્રોડકાસ્ટ મૉડ્યૂલ સાથે પ્રતિબદ્ધ થવા બાબતે ઍપને મંજૂરી આપે છે. તમને કટોકટીની પરિસ્થિતિની ચેતવણી આપવા માટે સેલ બ્રોડકાસ્ટ અલર્ટ અમુક સ્થાનોમાં ડિલિવર કરવામાં આવે છે. કટોકટી અંગેનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય, ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઑપરેશનમાં વિક્ષેપ પાડે તેમ બની શકે છે."</string>
+    <string name="permlab_receiveSms" msgid="505961632050451881">"ટેક્સ્ટ મેસેજ (SMS) મેળવો"</string>
+    <string name="permdesc_receiveSms" msgid="1797345626687832285">"ઍપને SMS મેસેજ મેળવવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ તમને દર્શાવ્યા વિના તમારા ડિવાઇસ પર મોકલેલા મેસેજનું નિરીક્ષણ કરી શકે છે અથવા કાઢી નાખી શકે છે."</string>
+    <string name="permlab_receiveMms" msgid="4000650116674380275">"ટેક્સ્ટ મેસેજ (MMS) મેળવો"</string>
+    <string name="permdesc_receiveMms" msgid="958102423732219710">"ઍપને MMS મેસેજ પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આનો અર્થ એ કે ઍપ તમને દર્શાવ્યા વિના તમારા ડિવાઇસ પર મોકલેલા મેસેજને મૉનિટર કરી શકે છે અથવા ડિલીટ કરી શકે છે."</string>
+    <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"સેલ બ્રોડકાસ્ટ મેસેજ ફૉરવર્ડ કરો"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"સેલ બ્રોડકાસ્ટ મેસેજ પ્રાપ્ત થાય કે તરત ફૉરવર્ડ કરવા માટે સેલ બ્રોડકાસ્ટ મૉડ્યૂલ સાથે પ્રતિબદ્ધ થવા બાબતે ઍપને મંજૂરી આપે છે. તમને કટોકટીની પરિસ્થિતિની ચેતવણી આપવા માટે સેલ બ્રોડકાસ્ટ અલર્ટ અમુક સ્થાનોમાં ડિલિવર કરવામાં આવે છે. કટોકટી અંગેનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય, ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઑપરેશનમાં વિક્ષેપ પાડે તેમ બની શકે છે."</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"ચાલી રહેલા કૉલ મેનેજ કરો"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"ઍપને તમારા ડિવાઇસ પર ચાલુ કૉલ વિશેની વિગતો જોવાની અને આ કૉલને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_accessLastKnownCellId" msgid="7638226620825665130">"છેલ્લી જ્ઞાત સેલ ઓળખને ઍક્સેસ કરો."</string>
     <string name="permdesc_accessLastKnownCellId" msgid="6664621339249308857">"ઍપને ટેલિફોન દ્વારા પ્રદાન કરવામાં આવેલી છેલ્લી જ્ઞાત સેલ ઓળખને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"સેલ બ્રોડકાસ્ટ સંદેશા વાંચો"</string>
+    <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"સેલ બ્રોડકાસ્ટ મેસેજ વાંચો"</string>
     <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ઍપ તમારા ડિવાઇસ દ્વારા પ્રાપ્ત થયેલ સેલ બ્રોડકાસ્ટ સંદેશાને વાંચવાની મંજૂરી આપે છે. સેલ બ્રોડકાસ્ટ ચેતવણીઓ તમને ઇમર્જન્સીની સ્થિતિઓ અંગે ચેતવવા માટે કેટલાક સ્થાનોમાં વિતરિત થાય છે. જ્યારે ઇમર્જન્સીનો સેલ બ્રોડકાસ્ટ પ્રાપ્ત થાય ત્યારે દુર્ભાવનાપૂર્ણ ઍપ તમારા ડિવાઇસના કાર્યપ્રદર્શન અથવા ઓપરેશનમાં હસ્તક્ષેપ કરી શકે છે."</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"સબ્સ્ક્રાઇબ કરેલ ફીડ્સ વાંચો"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"એપ્લિકેશનને હાલમાં સમન્વયિત ફીડ્સ વિશે વિગતો મેળવવાની મંજૂરી આપે છે."</string>
-    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS સંદેશા મોકલો અને જુઓ"</string>
-    <string name="permdesc_sendSms" msgid="6757089798435130769">"એપ્લિકેશનને SMS સંદેશા મોકલવાની મંજૂરી આપે છે. આના પરિણામે અનપેક્ષિત શુલ્ક લાગી શકે છે. દુર્ભાવનાપૂર્ણ ઍપ્લિકેશનો તમારી પુષ્ટિ વિના સંદેશા મોકલીને તમારા નાણા ખર્ચાવી શકે છે."</string>
-    <string name="permlab_readSms" msgid="5164176626258800297">"તમારા ટેક્સ્ટ સંદેશા (SMS અથવા MMS) વાંચો"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) સંદેશા વાંચી શકે છે."</string>
-    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) સંદેશા વાંચી શકે છે."</string>
-    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"આ ઍપ્લિકેશન, તમારા ફોન પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) સંદેશા વાંચી શકે છે."</string>
-    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ટેક્સ્ટ સંદેશા (WAP) પ્રાપ્ત કરો"</string>
-    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"એપ્લિકેશનને WAP સંદેશા પ્રાપ્ત કરવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલ સંદેશાઓનું નિરીક્ષણ કરવાની અને કાઢી નાખવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
+    <string name="permlab_sendSms" msgid="7757368721742014252">"SMS મેસેજ મોકલો અને જુઓ"</string>
+    <string name="permdesc_sendSms" msgid="6757089798435130769">"ઍપને SMS મેસેજ મોકલવાની મંજૂરી આપે છે. આના પરિણામે અનપેક્ષિત શુલ્ક લાગી શકે છે. દુર્ભાવનાપૂર્ણ ઍપ તમારા કન્ફર્મેશન વિના મેસેજ મોકલીને તમારા નાણા ખર્ચાવી શકે છે."</string>
+    <string name="permlab_readSms" msgid="5164176626258800297">"તમારા ટેક્સ્ટ મેસેજ (SMS અથવા MMS) વાંચો"</string>
+    <string name="permdesc_readSms" product="tablet" msgid="7912990447198112829">"આ ઍપ, તમારા ટેબ્લેટ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
+    <string name="permdesc_readSms" product="tv" msgid="3054753345758011986">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
+    <string name="permdesc_readSms" product="default" msgid="774753371111699782">"આ ઍપ, તમારા ફોન પર સંગ્રહિત તમામ SMS (ટેક્સ્ટ) મેસેજ વાંચી શકે છે."</string>
+    <string name="permlab_receiveWapPush" msgid="4223747702856929056">"ટેક્સ્ટ મેસેજ  (WAP) મેળવો"</string>
+    <string name="permdesc_receiveWapPush" msgid="1638677888301778457">"ઍપને WAP મેસેજ મેળવવાની અને તેના પર પ્રક્રિયા કરવાની મંજૂરી આપે છે. આ પરવાનગીમાં તમને દર્શાવ્યા વિના તમને મોકલેલા મેસેજનું નિરીક્ષણ કરવાની અને ડિલીટ કરવાની ક્ષમતાનો સમાવેશ થાય છે."</string>
     <string name="permlab_getTasks" msgid="7460048811831750262">"ચાલુ ઍપ્લિકેશનો પુનઃપ્રાપ્ત કરો"</string>
     <string name="permdesc_getTasks" msgid="7388138607018233726">"એપ્લિકેશનને વર્તમાનમાં અને તાજેતરમાં ચાલી રહેલ Tasks વિશેની વિગતવાર માહિતી પુનઃપ્રાપ્ત કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને ઉપકરણ પર કઈ એપ્લિકેશન્સનો ઉપયોગ થાય છે તેના વિશેની માહિતી શોધવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_manageProfileAndDeviceOwners" msgid="639849495253987493">"પ્રોફાઇલ અને ડિવાઇસ માલિકોને મેનેજ કરો"</string>
@@ -485,9 +492,9 @@
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"આ ઍપ, તમારા Android TV ડિવાઇસ પર સંગ્રહિત બધા કૅલેન્ડર ઇવેન્ટને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permdesc_readCalendar" product="default" msgid="9118823807655829957">"આ ઍપ્લિકેશન, તમારા ફોન પર સંગ્રહિત તમામ કૅલેન્ડર ઇવેન્ટ્સને વાંચી શકે છે અને તમારા કૅલેન્ડર ડેટાને શેર કરી અથવા સાચવી શકે છે."</string>
     <string name="permlab_writeCalendar" msgid="6422137308329578076">"કૅલેન્ડર  ઇવેન્ટ્સ ઉમેરો અથવા સંશોધિત કરો અને માલિકની જાણ બહાર અતિથિઓને ઇમેઇલ મોકલો"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"આ ઍપ્લિકેશન, તમારા ટેબ્લેટ પર કૅલેન્ડર ઇવેન્ટ્સ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ્લિકેશન, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ્સ બદલી શકે છે."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"આ ઍપ, તમારા Android TV ડિવાઇસ પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, કાઢી નાખી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ બદલી શકે છે."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"આ ઍપ્લિકેશન, તમારા ફોન પર કૅલેન્ડર ઇવેન્ટ્સ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ્લિકેશન, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં સંદેશા મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ્સ બદલી શકે છે."</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="8722230940717092850">"આ ઍપ, તમારા ટેબ્લેટ પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં મેસેજ મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના કૅલેન્ડર બદલી શકે છે."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="951246749004952706">"આ ઍપ, તમારા Android TV ડિવાઇસ પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, કાઢી નાખી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં મેસેજ મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ બદલી શકે છે."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"આ ઍપ, તમારા ફોન પર કૅલેન્ડર ઇવેન્ટ ઉમેરી, દૂર કરી અથવા બદલી શકે છે. આ ઍપ, કૅલેન્ડર માલિકો તરફથી આવતાં હોય તેવા લાગતાં મેસેજ મોકલી શકે છે અથવા તેમના માલિકોને સૂચિત કર્યા વિના ઇવેન્ટ બદલી શકે છે."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરો"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ફૉરગ્રાઉન્ડમાં ફક્ત ચોક્કસ સ્થાન ઍક્સેસ કરો"</string>
@@ -662,7 +669,7 @@
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ફિંગરપ્રિન્ટ ઓળખી શકાઈ નથી"</string>
-    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6226091888364083421">"ચહેરો ઓળખી શકતા નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
+    <string name="fingerprint_dialog_use_fingerprint_instead" msgid="5590293588784953188">"ચહેરો ઓળખાયો નથી. તેને બદલે ફિંગરપ્રિન્ટ વાપરો."</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ચહેરા પ્રમાણિત"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
@@ -828,7 +835,7 @@
     <string name="policylab_limitPassword" msgid="4851829918814422199">"પાસવર્ડ નિયમો સેટ કરો"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"સ્ક્રીન લૉક પાસવર્ડ અને પિનમાં મંજૂર લંબાઈ અને અક્ષરોને નિયંત્રિત કરો."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"સ્ક્રીનને અનલૉક કરવાના પ્રયત્નોને મૉનિટર કરો"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ટેબ્લેટને લૉક કરો અથવા ટેબ્લેટનો તમામ ડેટા કાઢી નાખો."</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="2388436408621909298">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ લખ્યાં છે તો ટૅબ્લેટને લૉક કરો અથવા ટૅબ્લેટનો તમામ ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="tv" msgid="2140588224468517507">"સ્ક્રીનને અનલૉક કરતી વખતે ટાઇપ કરેલા ખોટા પાસવર્ડની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ ટાઇપ કર્યા હોય, તો તમારા Android TV ડિવાઇસના ડેટાને લૉક કરો અથવા આ વપરાશકર્તાનો બધો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="automotive" msgid="7011438994051251521">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ લખ્યા હોય તો ઇન્ફોટેનમેન્ટ સિસ્ટમને લૉક કરો અથવા ઇન્ફોટેનમેન્ટ સિસ્ટમનો બધો ડેટા કાઢી નાખો."</string>
     <string name="policydesc_watchLogin" product="default" msgid="4885030206253600299">"સ્ક્રીનને અનલૉક કરતી વખતે લખેલા ખોટા પાસવર્ડ્સની સંખ્યાને મૉનિટર કરો અને જો ઘણા બધા ખોટા પાસવર્ડ્સ લખ્યાં છે તો ફોનને લૉક કરો અથવા ફોનનો તમામ ડેટા કાઢી નાખો."</string>
@@ -1094,7 +1101,7 @@
     <string name="permlab_setAlarm" msgid="1158001610254173567">"એલાર્મ સેટ કરો"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"એપ્લિકેશનને ઇન્સ્ટોલ કરેલ અલાર્મ ઘડિયાળ એપ્લિકેશનમાં અલાર્મ સેટ કરવાની મંજૂરી આપે છે. કેટલીક અલાર્મ ઘડિયાળ ઍપ્લિકેશનો, આ સુવિધા લાગુ કરી શકતી નથી."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"વૉઇસમેઇલ ઉમેરો"</string>
-    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"એપ્લિકેશનને તમારા વૉઇસમેઇલ ઇનબોક્સ પર સંદેશા ઉમેરવાની મંજૂરી આપે છે."</string>
+    <string name="permdesc_addVoicemail" msgid="5470312139820074324">"એપને તમારા વૉઇસમેઇલ ઇનબોક્સ પર મેસેજ ઉમેરવાની મંજૂરી આપે છે."</string>
     <string name="pasted_from_clipboard" msgid="7355790625710831847">"<xliff:g id="PASTING_APP_NAME">%1$s</xliff:g> દ્વારા તમારા ક્લિપબોર્ડ પરથી પેસ્ટ કરવામાં આવ્યું"</string>
     <string name="more_item_label" msgid="7419249600215749115">"વધુ"</string>
     <string name="prepend_shortcut_label" msgid="1743716737502867951">"મેનૂ+"</string>
@@ -1183,6 +1190,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ટેક્સ્ટ ક્રિયાઓ"</string>
+    <string name="error_handwriting_unsupported" msgid="7809438534946014050">"આ ફીલ્ડમાં હસ્તલેખન સપોર્ટેડ નથી"</string>
+    <string name="error_handwriting_unsupported_password" msgid="5095401146106891087">"પાસવર્ડ ફીલ્ડમાં હસ્તલેખન સપોર્ટેડ નથી"</string>
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"પાછળ"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ઇનપુટ પદ્ધતિ સ્વિચ કરો"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
@@ -1348,11 +1357,11 @@
     <string name="accept" msgid="5447154347815825107">"સ્વીકારો"</string>
     <string name="decline" msgid="6490507610282145874">"નકારો"</string>
     <string name="select_character" msgid="3352797107930786979">"અક્ષર શામેલ કરો"</string>
-    <string name="sms_control_title" msgid="4748684259903148341">"SMS સંદેશા મોકલી રહ્યું છે"</string>
-    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; મોટા પ્રમાણમાં SMS સંદેશા મોકલી રહ્યું છે. શું તમે સંદેશા મોકલવાનું ચાલુ રાખવા માટે આ એપ્લિકેશનને મંજૂરી આપવા માગો છો?"</string>
+    <string name="sms_control_title" msgid="4748684259903148341">"SMS મેસેજ મોકલી રહ્યાં છે"</string>
+    <string name="sms_control_message" msgid="6574313876316388239">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; મોટા પ્રમાણમાં SMS મેસેજ મોકલી રહ્યું છે. શું તમે મેસેજ મોકલવાનું ચાલુ રાખવા માટે આ એપને મંજૂરી આપવા માગો છો?"</string>
     <string name="sms_control_yes" msgid="4858845109269524622">"મંજૂરી આપો"</string>
     <string name="sms_control_no" msgid="4845717880040355570">"નકારો"</string>
-    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; તમને &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; પર સંદેશ મોકલવા માગે છે."</string>
+    <string name="sms_short_code_confirm_message" msgid="1385416688897538724">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;, &lt;b&gt;<xliff:g id="DEST_ADDRESS">%2$s</xliff:g>&lt;/b&gt; પર મેસેજ મોકલવા માગે છે."</string>
     <string name="sms_short_code_details" msgid="2723725738333388351">"આનાથી તમારા મોબાઇલ એકાઉન્ટ પર "<b>"શુલ્ક લાગી શકે છે"</b>"."</string>
     <string name="sms_premium_short_code_details" msgid="1400296309866638111"><b>"આનાથી તમારા મોબાઇલ એકાઉન્ટ પર શુલ્ક લાગશે."</b></string>
     <string name="sms_short_code_confirm_allow" msgid="920477594325526691">"મોકલો"</string>
@@ -1424,7 +1433,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ભાષા અને લેઆઉટ પસંદ કરવા માટે ટૅપ કરો"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"અન્ય ઍપથી ઉપર બતાવો"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"અન્ય ઍપની ઉપર ડિસ્પ્લે કરો"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે"</string>
     <string name="alert_windows_notification_message" msgid="6538171456970725333">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
@@ -1874,7 +1883,7 @@
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"પિન ખૂબ નાનો છે. ઓછામાં ઓછો 4 અંકનો હોવો આવશ્યક છે."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"પછી ફરી પ્રયાસ કરો"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"પૂર્ણ સ્ક્રીન પર જુઓ"</string>
-    <string name="immersive_cling_description" msgid="7092737175345204832">"બહાર નીકળવા માટે, ટોચ પરથી નીચે સ્વાઇપ કરો."</string>
+    <string name="immersive_cling_description" msgid="2896205051090870978">"બહાર નીકળવા માટે, તમારી સ્ક્રીનની સૌથી ઉપરથી નીચેની તરફ સ્વાઇપ કરો"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"સમજાઈ ગયું"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"બહેતર વ્યૂ માટે ફેરવો"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"બહેતર વ્યૂ માટે, પૂર્ણ સ્ક્રીનમાં <xliff:g id="NAME">%s</xliff:g> ખોલો"</string>
@@ -1894,7 +1903,7 @@
     <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"અનપિન કરતા પહેલાં અનલૉક પૅટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
-    <string name="package_installed_device_owner" msgid="7035926868974878525">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટૉલ કરવામાં આવેલ છે"</string>
+    <string name="package_installed_device_owner" msgid="8684974629306529138">"તમારા ઍડમિન દ્વારા ઇન્સ્ટૉલ કરવામાં આવ્યું છે.\nઆપેલી પરવાનગીઓ જોવા માટે સેટિંગ પર જાઓ"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ઓકે"</string>
@@ -1927,6 +1936,9 @@
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> દ્વારા મેનેજ કરવામાં આવે છે"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ચાલુ છે"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"બંધ છે"</string>
+    <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"કોઈપણ કૅલેન્ડર"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> અમુક અવાજોને મ્યૂટ કરે છે"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે અને જ્યાં સુધી તમે ફેક્ટરી ડેટા ફરીથી સેટ કરશો નહીં ત્યાં સુધી તે અસ્થિર રહી શકે છે."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"તમારા ઉપકરણમાં આંતરિક સમસ્યા છે. વિગતો માટે તમારા નિર્માતાનો સંપર્ક કરો."</string>
@@ -2015,7 +2027,7 @@
     <string name="deprecated_target_sdk_message" msgid="5246906284426844596">"Androidના કોઈ જૂના વર્ઝન માટે આ ઍપ બનાવવામાં આવી હતી. તે કદાચ યોગ્ય રીતે કામ કરતી નથી અને તેમાં નવીનતમ સુરક્ષા અને પ્રાઇવસી સંબંધિત સંરક્ષણો શામેલ નથી. કોઈ અપડેટ ચેક કરો અથવા ઍપના ડેવલપરનો સંપર્ક કરો."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"અપડેટ માટે તપાસો"</string>
     <string name="deprecated_abi_message" msgid="6820548011196218091">"આ ઍપ Androidના નવીનતમ વર્ઝન સાથે સુસંગત નથી. કોઈ અપડેટ ચેક કરો અથવા ઍપના ડેવલપરનો સંપર્ક કરો."</string>
-    <string name="new_sms_notification_title" msgid="6528758221319927107">"તમારી પાસે નવા સંદેશા છે"</string>
+    <string name="new_sms_notification_title" msgid="6528758221319927107">"તમારી પાસે નવા મેસેજ છે"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"જોવા માટે SMS ઍપ્લિકેશન ખોલો"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"કેટલીક કાર્યક્ષમતા મર્યાદિત હોઈ શકે છે"</string>
     <string name="profile_encrypted_detail" msgid="5279730442756849055">"કાર્યાલયની પ્રોફાઇલ લૉક કરી"</string>
@@ -2131,10 +2143,12 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ઓકે"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"બંધ કરો"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"વધુ જાણો"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે તેમજ તમારા નોટિફિકેશનની યોગ્ય ગોઠવણી કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કોના નામ અને સંદેશા જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડવાની કે તેનો જવાબ આપવાની ક્રિયા પણ કરી શકે છે."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12માં Android માટે અનુકૂળ નોટિફિકેશનને બદલે વધુ સારા નોટિફિકેશન છે. આ સુવિધા સૂચિત ક્રિયાઓ અને જવાબો બતાવે છે તેમજ તમારા નોટિફિકેશનની યોગ્ય ગોઠવણી કરે છે.\n\nવધુ સારા નોટિફિકેશન સંપર્કોના નામ અને મેસેજ જેવી વ્યક્તિગત માહિતી સહિત નોટિફિકેશનનું બધું કન્ટેન્ટ ઍક્સેસ કરી શકે છે. આ સુવિધા ફોન કૉલના જવાબ આપવા કે \'ખલેલ પાડશો નહીં\'નું નિયંત્રણ કરવા જેવા નોટિફિકેશન છોડવાની કે તેનો જવાબ આપવાની ક્રિયા પણ કરી શકે છે."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"રૂટિન મોડની માહિતીનું નોટિફિકેશન"</string>
     <string name="dynamic_mode_notification_title" msgid="1388718452788985481">"બૅટરી સેવરની સુવિધા ચાલુ કરી છે"</string>
     <string name="dynamic_mode_notification_summary" msgid="1639031262484979689">"બૅટરીની આવરદા વધારવા માટે બૅટરીનો વપરાશ ઘટાડી રહ્યાં છીએ"</string>
+    <string name="dynamic_mode_notification_title_v2" msgid="5072385242078021152">"બૅટરી સેવર ચાલુ છે"</string>
+    <string name="dynamic_mode_notification_summary_v2" msgid="2142444344663147938">"બૅટરીની આવરદા વધારવા માટે, બૅટરી સેવર ચાલુ કરવામાં આવ્યું છે"</string>
     <string name="battery_saver_notification_channel_name" msgid="3918243458067916913">"બૅટરી સેવર"</string>
     <string name="battery_saver_off_notification_title" msgid="7637255960468032515">"બૅટરી સેવર બંધ કર્યું"</string>
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"ફોનમાં પૂરતો ચાર્જ છે. સુવિધાઓ હવે મર્યાદિત નથી."</string>
@@ -2177,12 +2191,13 @@
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"સ્ક્રીન પરના ઍક્સેસિબિલિટી શૉર્ટકટના પસંદકર્તા"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ઍક્સેસિબિલિટી શૉર્ટકટ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"નોટિફિકેશન શેડ છોડી દો"</string>
+    <string name="accessibility_system_action_menu_label" msgid="3385283204496447040">"મેનૂ"</string>
+    <string name="accessibility_system_action_media_play_pause_label" msgid="1905647491347119748">"મીડિયા ચલાવો/થોભાવો"</string>
     <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"ડી-પૅડ ઉપર"</string>
     <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"ડી-પૅડ નીચે"</string>
     <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"ડી-પૅડ ડાબે"</string>
     <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"ડી-પૅડ જમણે"</string>
     <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"ડી-પૅડ મધ્યમાં"</string>
-    <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>નું કૅપ્શન બાર."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>ને પ્રતિબંધિત સમૂહમાં મૂકવામાં આવ્યું છે"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"છબી મોકલી"</string>
@@ -2209,6 +2224,8 @@
     <string name="miniresolver_switch_to_work" msgid="1042640606122638596">"શું ઑફિસ માટેની ઍપ પર સ્વિચ કરીએ?"</string>
     <string name="miniresolver_call_information" msgid="6739417525304184083">"તમારી સંસ્થા તમને માત્ર ઑફિસ માટેની ઍપ પરથી કૉલ કરવાની મંજૂરી આપે છે"</string>
     <string name="miniresolver_sms_information" msgid="4311292661329483088">"તમારી સંસ્થા તમને માત્ર ઑફિસ માટેની ઍપ પરથી મેસેજ મોકલવાની મંજૂરી આપે છે"</string>
+    <string name="miniresolver_private_space_phone_information" msgid="4469511223312488570">"ફક્ત તમે તમારી વ્યક્તિગત ફોન ઍપથી જ ફોન કૉલ કરી શકો છો. વ્યક્તિગત ફોન વડે કરેલા કૉલ તમારા વ્યક્તિગત કૉલ ઇતિહાસમાં ઉમેરવામાં આવશે."</string>
+    <string name="miniresolver_private_space_messages_information" msgid="111285656327622118">"તમે તમારી વ્યક્તિગત Messages ઍપથી જ SMS મેસેજ મોકલી શકો છો."</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"વ્યક્તિગત બ્રાઉઝરનો ઉપયોગ કરો"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ઑફિસના બ્રાઉઝરના ઉપયોગ કરો"</string>
     <string name="miniresolver_call" msgid="6386870060423480765">"કૉલ કરો"</string>
@@ -2388,9 +2405,26 @@
     <string name="profile_label_work_3" msgid="4834572253956798917">"ઑફિસ 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"પરીક્ષણ કરો"</string>
     <string name="profile_label_communal" msgid="8743921499944800427">"કૉમ્યુનલ"</string>
+    <string name="accessibility_label_managed_profile" msgid="3366526886209832641">"ઑફિસની પ્રોફાઇલ"</string>
+    <string name="accessibility_label_private_profile" msgid="1436459319135548969">"ખાનગી સ્પેસ"</string>
+    <string name="accessibility_label_clone_profile" msgid="7579118375042398784">"ક્લોન"</string>
+    <string name="accessibility_label_communal_profile" msgid="1437173163111334791">"કૉમ્યુનલ"</string>
+    <string name="private_space_biometric_prompt_title" msgid="5777592909271728154">"ખાનગી સ્પેસ"</string>
+    <string name="redacted_notification_message" msgid="1520587845842228816">"સંવેદનશીલ માહિતીવાળા નોટિફિકેશનનું કન્ટેન્ટ છુપાવ્યું"</string>
     <string name="redacted_notification_action_title" msgid="6942924973335920935"></string>
+    <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"સુરક્ષા માટે સ્ક્રીન શેર કરતી વખતે ઍપનું કન્ટેન્ટ છુપાવેલું છે"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"સેટેલાઇટ સાથે ઑટોમૅટિક રીતે કનેક્ટેડ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"તમે મોબાઇલ અથવા વાઇ-ફાઇ નેટવર્ક વિના મેસેજ મોકલી અને પ્રાપ્ત કરી શકો છો"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ખોલો"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"તેની કામ કરવાની રીત"</string>
+    <string name="unarchival_session_app_label" msgid="6811856981546348205">"બાકી..."</string>
+    <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
+    <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"હવે <xliff:g id="FINGERPRINT">%s</xliff:g> ઓળખી શકાતી નથી."</string>
+    <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"હવે <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ઓળખી શકાતી નથી."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_1" msgid="1824812666549916586">"હવે <xliff:g id="FINGERPRINT">%s</xliff:g> ઓળખી શકાતી નથી. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
+    <string name="fingerprint_dangling_notification_msg_all_deleted_2" msgid="5974657382960155099">"હવે <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> અને <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ઓળખી શકાતી નથી. ફિંગરપ્રિન્ટ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
+    <string name="face_dangling_notification_title" msgid="947852541060975473">"ફેસ અનલૉક સુવિધાનું ફરી સેટઅપ કરો"</string>
+    <string name="face_dangling_notification_msg" msgid="746235263598985384">"હવે તમારા ચહેરાનું મૉડલ ઓળખી શકાતું નથી. ફેસ અનલૉક સુવિધાનું ફરી સેટઅપ કરો."</string>
+    <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"સેટઅપ કરો"</string>
+    <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"હમણાં નહીં"</string>
 </resources>

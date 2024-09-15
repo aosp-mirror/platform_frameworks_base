@@ -20,6 +20,7 @@
 #include "include/core/SkTypes.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <log/log.h>
 
 typedef int Dot14;

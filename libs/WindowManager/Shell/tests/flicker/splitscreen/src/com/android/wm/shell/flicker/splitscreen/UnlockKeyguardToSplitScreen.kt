@@ -19,13 +19,13 @@ package com.android.wm.shell.flicker.splitscreen
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.NavBar
-import android.tools.flicker.subject.layers.LayersTraceSubject
-import android.tools.flicker.subject.region.RegionSubject
-import android.tools.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.flicker.subject.layers.LayersTraceSubject
+import android.tools.flicker.subject.region.RegionSubject
+import android.tools.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.splitscreen.benchmark.UnlockKeyguardToSplitScreenBenchmark
@@ -47,7 +47,7 @@ import org.junit.runners.Parameterized
  * To run this test: `atest WMShellFlickerTestsSplitScreen:UnlockKeyguardToSplitScreen`
  */
 @RequiresDevice
-@Postsubmit
+@FlakyTest(bugId = 293578017)
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -61,7 +61,6 @@ class UnlockKeyguardToSplitScreen(override val flicker: LegacyFlickerTest) :
         }
 
     @Test
-    @FlakyTest(bugId = 293578017)
     override fun visibleLayersShownMoreThanOneConsecutiveEntry() =
         super.visibleLayersShownMoreThanOneConsecutiveEntry()
 

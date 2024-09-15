@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"在我们向无密码未来迈进的过程中，密码仍会与通行密钥并行使用。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"选择保存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"请选择一款密码管理工具来保存您的信息，以便下次更快地登录"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"要创建通行密钥以便登录 <xliff:g id="APPNAME">%1$s</xliff:g> 吗？"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"要保存密码以便登录 <xliff:g id="APPNAME">%1$s</xliff:g> 吗？"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"要保存“<xliff:g id="APPNAME">%1$s</xliff:g>”的登录信息吗？"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"要创建通行密钥以便登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”吗？"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"要保存密码以便登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”吗？"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"要保存“<xliff:g id="APP_NAME">%1$s</xliff:g>”的登录信息吗？"</string>
     <string name="passkey" msgid="632353688396759522">"通行密钥"</string>
     <string name="password" msgid="6738570945182936667">"密码"</string>
     <string name="passkeys" msgid="5733880786866559847">"通行密钥"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"返回上一页"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"关闭"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"忽略"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"要使用您为“<xliff:g id="APP_NAME">%1$s</xliff:g>”保存的通行密钥吗？"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"要使用已保存的密码登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”吗？"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"是否使用您的<xliff:g id="APP_NAME">%1$s</xliff:g>登录凭据继续？"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"要解锁“<xliff:g id="APP_NAME">%1$s</xliff:g>”的登录选项吗？"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"使用已保存的通行密钥登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"使用已保存的密码登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"使用您的账号登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"使用您的屏锁以 <xliff:g id="USERNAME">%2$s</xliff:g> 的身份登录 <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"解锁“<xliff:g id="APP_NAME">%1$s</xliff:g>”的登录选项"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"选择一个已保存的通行密钥来登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"选择一个已保存的密码来登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"选择一种已保存的登录方式来登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"选择一种登录<xliff:g id="APP_NAME">%1$s</xliff:g>的方式"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"选择一个账号登录“<xliff:g id="APP_NAME">%1$s</xliff:g>”"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"要为“<xliff:g id="APP_NAME">%1$s</xliff:g>”选择一个选项吗？"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"要将此信息用于“<xliff:g id="APP_NAME">%1$s</xliff:g>”吗？"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"使用其他登录方式"</string>

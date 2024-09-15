@@ -50,9 +50,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     data: [
@@ -79,11 +79,12 @@ android_ravenwood_test {
         "services",
     ],
     libs: [
-        "android.test.base",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
     srcs: [
         "src/com/android/server/inputmethod/**/ClientControllerTest.java",
+        "src/com/android/server/inputmethod/**/UserDataRepositoryTest.java",
     ],
     auto_gen_config: true,
 }
@@ -121,9 +122,9 @@ android_test {
     ],
 
     libs: [
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     data: [

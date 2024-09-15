@@ -275,7 +275,6 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::isUpdatableSystem,
         AndroidPackage::getEmergencyInstaller,
         AndroidPackage::isAllowCrossUidActivitySwitchFromBelow,
-        PackageImpl::isAppMetadataFileInApk,
     )
 
     override fun extraParams() = listOf(

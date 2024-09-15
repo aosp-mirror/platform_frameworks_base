@@ -21,10 +21,16 @@ import android.hardware.display.DisplayManager
 import android.os.Handler
 import android.os.RemoteException
 import android.os.Trace
+import androidx.annotation.AnyThread
+import com.android.systemui.unfold.dagger.UnfoldBg
 import com.android.systemui.unfold.util.CallbackController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.atomic.AtomicInteger
+
+private const val INVALID_ROTATION = -1
 
 /**
  * Allows to subscribe to rotation changes. Updates are provided for the display associated to
@@ -35,16 +41,17 @@ class RotationChangeProvider
 constructor(
     private val displayManager: DisplayManager,
     private val context: Context,
-    @Assisted private val handler: Handler,
+    @UnfoldBg private val bgHandler: Handler,
+    @Assisted private val callbackHandler: Handler,
 ) : CallbackController<RotationChangeProvider.RotationListener> {
 
-    private val listeners = mutableListOf<RotationListener>()
+    private val listeners = CopyOnWriteArrayList<RotationListener>()
 
     private val displayListener = RotationDisplayListener()
-    private var lastRotation: Int? = null
+    private val lastRotation = AtomicInteger(INVALID_ROTATION)
 
     override fun addCallback(listener: RotationListener) {
-        handler.post {
+        bgHandler.post {
             if (listeners.isEmpty()) {
                 subscribeToRotation()
             }
@@ -53,18 +60,18 @@ constructor(
     }
 
     override fun removeCallback(listener: RotationListener) {
-        handler.post {
+        bgHandler.post {
             listeners -= listener
             if (listeners.isEmpty()) {
                 unsubscribeToRotation()
-                lastRotation = null
+                lastRotation.set(INVALID_ROTATION)
             }
         }
     }
 
     private fun subscribeToRotation() {
         try {
-            displayManager.registerDisplayListener(displayListener, handler)
+            displayManager.registerDisplayListener(displayListener, callbackHandler)
         } catch (e: RemoteException) {
             throw e.rethrowFromSystemServer()
         }
@@ -80,8 +87,11 @@ constructor(
 
     /** Gets notified of rotation changes. */
     fun interface RotationListener {
-        /** Called once rotation changes. */
-        fun onRotationChanged(newRotation: Int)
+        /**
+         * Called once rotation changes. This callback is called on the handler provided to
+         * [RotationChangeProvider.Factory.create].
+         */
+        @AnyThread fun onRotationChanged(newRotation: Int)
     }
 
     private inner class RotationDisplayListener : DisplayManager.DisplayListener {
@@ -93,9 +103,8 @@ constructor(
 
                 if (displayId == display.displayId) {
                     val currentRotation = display.rotation
-                    if (lastRotation == null || lastRotation != currentRotation) {
+                    if (lastRotation.compareAndSet(lastRotation.get(), currentRotation)) {
                         listeners.forEach { it.onRotationChanged(currentRotation) }
-                        lastRotation = currentRotation
                     }
                 }
             } finally {
@@ -110,7 +119,7 @@ constructor(
 
     @AssistedFactory
     interface Factory {
-        /** Creates a new [RotationChangeProvider] that provides updated using [handler]. */
-        fun create(handler: Handler): RotationChangeProvider
+        /** Creates a new [RotationChangeProvider] that provides updated using [callbackHandler]. */
+        fun create(callbackHandler: Handler): RotationChangeProvider
     }
 }

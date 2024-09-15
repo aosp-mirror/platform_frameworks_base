@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.content.pm.SigningDetails;
 import android.os.Binder;
 import android.os.UserHandle;
 
@@ -122,6 +124,48 @@ public interface PackageManagerLocal {
     @SuppressWarnings("UserHandleName") // Ignore naming convention, not invoking action as user
     @NonNull
     FilteredSnapshot withFilteredSnapshot(int callingUid, @NonNull UserHandle user);
+
+    /**
+     * Add a pair of signing details so that packages signed with {@code oldSigningDetails} will
+     * behave as if they are signed by the {@code newSigningDetails}.
+     * <p>
+     * This is only available on {@link android.os.Build#isDebuggable debuggable} builds.
+     *
+     * @param oldSigningDetails the original signing detail of the package
+     * @param newSigningDetails the new signing detail that will replace the original one
+     * @throws SecurityException if the build is not debuggable
+     *
+     * @hide
+     */
+    @TestApi
+    void addOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails,
+            @NonNull SigningDetails newSigningDetails);
+
+    /**
+     * Remove a pair of signing details previously added via {@link #addOverrideSigningDetails} by
+     * the old signing details.
+     * <p>
+     * This is only available on {@link android.os.Build#isDebuggable debuggable} builds.
+     *
+     * @param oldSigningDetails the original signing detail of the package
+     * @throws SecurityException if the build is not debuggable
+     *
+     * @hide
+     */
+    @TestApi
+    void removeOverrideSigningDetails(@NonNull SigningDetails oldSigningDetails);
+
+    /**
+     * Clear all pairs of signing details previously added via {@link #addOverrideSigningDetails}.
+     * <p>
+     * This is only available on {@link android.os.Build#isDebuggable debuggable} builds.
+     *
+     * @throws SecurityException if the build is not debuggable
+     *
+     * @hide
+     */
+    @TestApi
+    void clearOverrideSigningDetails();
 
     /**
      * @hide

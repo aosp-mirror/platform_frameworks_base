@@ -66,6 +66,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
+import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -338,6 +339,10 @@ public final class VirtualDeviceManager {
     @TestApi
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
+        if (deviceId == Context.DEVICE_ID_DEFAULT) {
+            // Avoid unnecessary binder call, for default device, policy will be always default.
+            return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
+        }
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve device policy; no virtual device manager service.");
             return VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
@@ -357,6 +362,10 @@ public final class VirtualDeviceManager {
     @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
     @TestApi
     public int getDeviceIdForDisplayId(int displayId) {
+        if (displayId == Display.DEFAULT_DISPLAY || displayId == Display.INVALID_DISPLAY) {
+            // Avoid unnecessary binder call for default / invalid display id.
+            return Context.DEVICE_ID_DEFAULT;
+        }
         if (mService == null) {
             Log.w(TAG, "Failed to retrieve virtual devices; no virtual device manager service.");
             return Context.DEVICE_ID_DEFAULT;
@@ -972,6 +981,7 @@ public final class VirtualDeviceManager {
          *
          * @param config camera configuration.
          * @return newly created camera.
+         * @throws UnsupportedOperationException if virtual camera isn't supported on this device.
          * @see VirtualDeviceParams#POLICY_TYPE_CAMERA
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)

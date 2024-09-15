@@ -142,9 +142,14 @@ final class MediaRoute2ProviderWatcher {
                     MediaRoute2ProviderServiceProxy proxy =
                             new MediaRoute2ProviderServiceProxy(
                                     mContext,
+                                    mHandler.getLooper(),
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     isSelfScanOnlyProvider,
                                     mUserId);
+                    Slog.i(
+                            TAG,
+                            "Enabling proxy for MediaRoute2ProviderService: "
+                                    + proxy.mComponentName);
                     proxy.start(/* rebindIfDisconnected= */ false);
                     mProxies.add(targetIndex++, proxy);
                     mCallback.onAddProviderService(proxy);
@@ -162,6 +167,9 @@ final class MediaRoute2ProviderWatcher {
         if (targetIndex < mProxies.size()) {
             for (int i = mProxies.size() - 1; i >= targetIndex; i--) {
                 MediaRoute2ProviderServiceProxy proxy = mProxies.get(i);
+                Slog.i(
+                        TAG,
+                        "Disabling proxy for MediaRoute2ProviderService: " + proxy.mComponentName);
                 mCallback.onRemoveProviderService(proxy);
                 mProxies.remove(proxy);
                 proxy.stop();

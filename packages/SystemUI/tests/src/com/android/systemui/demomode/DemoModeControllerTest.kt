@@ -18,8 +18,8 @@ package com.android.systemui.demomode
 
 import android.content.Intent
 import android.os.Bundle
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.demomode.DemoMode.ACTION_DEMO
@@ -40,7 +40,7 @@ import org.mockito.MockitoAnnotations
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @SmallTest
 class DemoModeControllerTest : SysuiTestCase() {

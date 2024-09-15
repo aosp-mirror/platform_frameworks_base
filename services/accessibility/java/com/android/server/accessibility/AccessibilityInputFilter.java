@@ -347,8 +347,13 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         final int eventSource = event.getSource();
         final int displayId = event.getDisplayId();
         if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) == 0) {
-            state.reset();
-            clearEventStreamHandler(displayId, eventSource);
+            if (!Flags.doNotResetKeyEventState()) {
+                state.reset();
+                clearEventStreamHandler(displayId, eventSource);
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Not processing event " + event);
+            }
             super.onInputEvent(event, policyFlags);
             return;
         }
@@ -503,8 +508,14 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private void processKeyEvent(EventStreamState state, KeyEvent event, int policyFlags) {
         if (!state.shouldProcessKeyEvent(event)) {
+            if (DEBUG) {
+                Slog.d(TAG, "processKeyEvent: not processing: " + event);
+            }
             super.onInputEvent(event, policyFlags);
             return;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "processKeyEvent: " + event);
         }
         // Since the display id of KeyEvent always would be -1 and there is only one
         // KeyboardInterceptor for all display, pass KeyEvent to the mEventHandler of
@@ -1076,21 +1087,15 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
     }
 
-    private boolean anyServiceWantsToObserveMotionEvent(MotionEvent event) {
-        // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
-        // touch exploration.
-        if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
-                && (mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
-            return false;
-        }
-        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
-        return (mCombinedGenericMotionEventSources
-                        & mCombinedMotionEventObservedSources
-                        & eventSourceWithoutClass)
-                != 0;
-    }
-
     private boolean anyServiceWantsGenericMotionEvent(MotionEvent event) {
+        if (Flags.alwaysAllowObservingTouchEvents()) {
+            final boolean isTouchEvent = event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN);
+            if (isTouchEvent && !canShareGenericTouchEvent()) {
+                return false;
+            }
+            final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+            return (mCombinedGenericMotionEventSources & eventSourceWithoutClass) != 0;
+        }
         // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
         // touch exploration.
         if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
@@ -1099,6 +1104,36 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
         final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
         return (mCombinedGenericMotionEventSources & eventSourceWithoutClass) != 0;
+    }
+
+    private boolean anyServiceWantsToObserveMotionEvent(MotionEvent event) {
+        if (Flags.alwaysAllowObservingTouchEvents()) {
+            final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+            return (mCombinedMotionEventObservedSources & eventSourceWithoutClass) != 0;
+        }
+        // Disable SOURCE_TOUCHSCREEN generic event interception if any service is performing
+        // touch exploration.
+        if (event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN)
+                && (mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) != 0) {
+            return false;
+        }
+        final int eventSourceWithoutClass = event.getSource() & ~InputDevice.SOURCE_CLASS_MASK;
+        return (mCombinedGenericMotionEventSources
+                & mCombinedMotionEventObservedSources
+                & eventSourceWithoutClass)
+                != 0;
+    }
+
+    private boolean canShareGenericTouchEvent() {
+        if ((mCombinedMotionEventObservedSources & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
+            // Share touch events if a MotionEvent-observing service wants them.
+            return true;
+        }
+        if ((mEnabledFeatures & FLAG_FEATURE_TOUCH_EXPLORATION) == 0) {
+            // Share touch events if touch exploration is not enabled.
+            return true;
+        }
+        return false;
     }
 
     public void setCombinedGenericMotionEventSources(int sources) {

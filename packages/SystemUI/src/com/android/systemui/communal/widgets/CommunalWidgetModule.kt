@@ -38,7 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 @Module
 interface CommunalWidgetModule {
     companion object {
-        private const val APP_WIDGET_HOST_ID = 116
+        const val APP_WIDGET_HOST_ID = 116
         const val DEFAULT_WIDGETS = "default_widgets"
 
         @SysUISingleton
@@ -69,16 +69,18 @@ interface CommunalWidgetModule {
         @SysUISingleton
         @Provides
         fun provideCommunalWidgetHost(
+            @Application applicationScope: CoroutineScope,
             appWidgetManager: Optional<AppWidgetManager>,
             appWidgetHost: CommunalAppWidgetHost,
             selectedUserInteractor: SelectedUserInteractor,
             @CommunalLog logBuffer: LogBuffer,
         ): CommunalWidgetHost {
             return CommunalWidgetHost(
+                applicationScope,
                 appWidgetManager,
                 appWidgetHost,
                 selectedUserInteractor,
-                logBuffer
+                logBuffer,
             )
         }
 

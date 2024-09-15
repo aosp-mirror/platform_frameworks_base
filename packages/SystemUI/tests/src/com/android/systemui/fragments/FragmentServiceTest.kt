@@ -2,7 +2,7 @@ package com.android.systemui.fragments
 
 import android.app.Fragment
 import android.os.Looper
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.mock

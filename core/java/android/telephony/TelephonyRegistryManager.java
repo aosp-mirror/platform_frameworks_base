@@ -1073,6 +1073,24 @@ public class TelephonyRegistryManager {
     }
 
     /**
+     * Notify external listeners that carrier roaming non-terrestrial network mode changed.
+     * @param subId subscription ID.
+     * @param active {@code true} If the device is connected to carrier roaming
+     *                           non-terrestrial network or was connected within the
+     *                           {CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT}
+     *                           duration, {code false} otherwise.
+     * @hide
+     */
+    public void notifyCarrierRoamingNtnModeChanged(int subId, boolean active) {
+        try {
+            sRegistry.notifyCarrierRoamingNtnModeChanged(subId, active);
+        } catch (RemoteException ex) {
+            // system server crash
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Processes potential event changes from the provided {@link TelephonyCallback}.
      *
      * @param telephonyCallback callback for monitoring callback changes to the telephony state.
@@ -1223,6 +1241,10 @@ public class TelephonyRegistryManager {
                 instanceof TelephonyCallback.SimultaneousCellularCallingSupportListener) {
             eventList.add(
                     TelephonyCallback.EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED);
+        }
+
+        if (telephonyCallback instanceof TelephonyCallback.CarrierRoamingNtnModeListener) {
+            eventList.add(TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED);
         }
         return eventList;
     }

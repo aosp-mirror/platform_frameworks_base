@@ -49,6 +49,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -144,7 +145,7 @@ public class TrustedOverlayTests {
                         }
                     }
                     return false;
-                }, TIMEOUT_S, TimeUnit.SECONDS);
+                }, Duration.ofSeconds(TIMEOUT_S));
 
         assertAndDumpWindowState(TAG, "Failed to find window or was not marked trusted",
                 foundTrusted[0]);
@@ -209,7 +210,7 @@ public class TrustedOverlayTests {
                         }
                     }
                     return foundTrusted[0] && foundTrusted[1];
-                }, TIMEOUT_S, TimeUnit.SECONDS);
+                }, Duration.ofSeconds(TIMEOUT_S));
 
         if (!foundTrusted[0] || !foundTrusted[1]) {
             CtsWindowInfoUtils.dumpWindowsOnScreen(TAG, mName.getMethodName());

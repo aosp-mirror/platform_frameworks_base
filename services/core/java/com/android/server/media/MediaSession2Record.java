@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import android.app.ForegroundServiceDelegationOptions;
+import android.app.Notification;
 import android.media.MediaController2;
 import android.media.Session2CommandGroup;
 import android.media.Session2Token;
@@ -66,7 +67,6 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
         // The lock is required to prevent `Controller2Callback` from using partially initialized
         // `MediaSession2Record.this`.
         synchronized (mLock) {
-            mUniqueId = sNextMediaSessionRecordId.getAndIncrement();
             mSessionToken = sessionToken;
             mService = service;
             mHandlerExecutor = new HandlerExecutor(new Handler(handlerLooper));
@@ -156,6 +156,11 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
     }
 
     @Override
+    public void expireTempEngaged() {
+        // NA as MediaSession2 doesn't support UserEngagementStates for FGS.
+    }
+
+    @Override
     public boolean sendMediaButton(String packageName, int pid, int uid, boolean asSystemService,
             KeyEvent ke, int sequenceId, ResultReceiver cb) {
         // TODO(jaewan): Implement.
@@ -165,6 +170,12 @@ public class MediaSession2Record extends MediaSessionRecordImpl {
     @Override
     public boolean canHandleVolumeKey() {
         // TODO: Implement when MediaSession2 starts to get key events.
+        return false;
+    }
+
+    @Override
+    boolean isLinkedToNotification(Notification notification) {
+        // Currently it's not possible to link MediaSession2 with a Notification
         return false;
     }
 

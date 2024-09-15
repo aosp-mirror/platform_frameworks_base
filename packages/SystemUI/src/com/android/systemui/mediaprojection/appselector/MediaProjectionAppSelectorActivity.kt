@@ -174,7 +174,7 @@ class MediaProjectionAppSelectorActivity(
         // is created and ready to be captured.
         val activityStarted =
             activityLauncher.startActivityAsUser(intent, userHandle, activityOptions.toBundle()) {
-                returnSelectedApp(launchCookie)
+                returnSelectedApp(launchCookie, taskId = -1)
             }
 
         // Rely on the ActivityManager to pop up a dialog regarding app suspension
@@ -232,7 +232,7 @@ class MediaProjectionAppSelectorActivity(
         }
     }
 
-    override fun returnSelectedApp(launchCookie: LaunchCookie) {
+    override fun returnSelectedApp(launchCookie: LaunchCookie, taskId: Int) {
         taskSelected = true
         if (intent.hasExtra(EXTRA_CAPTURE_REGION_RESULT_RECEIVER)) {
             // The client requested to return the result in the result receiver instead of
@@ -242,7 +242,7 @@ class MediaProjectionAppSelectorActivity(
                     EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
                     ResultReceiver::class.java
                 ) as ResultReceiver
-            val captureRegion = MediaProjectionCaptureTarget(launchCookie)
+            val captureRegion = MediaProjectionCaptureTarget(launchCookie, taskId)
             val data = Bundle().apply { putParcelable(KEY_CAPTURE_TARGET, captureRegion) }
             resultReceiver.send(RESULT_OK, data)
             // TODO(b/279175710): Ensure consent result is always set here. Skipping this for now
@@ -255,6 +255,7 @@ class MediaProjectionAppSelectorActivity(
             val projection = IMediaProjection.Stub.asInterface(mediaProjectionBinder)
 
             projection.setLaunchCookie(launchCookie)
+            projection.setTaskId(taskId)
 
             val intent = Intent()
             intent.putExtra(EXTRA_MEDIA_PROJECTION, projection.asBinder())

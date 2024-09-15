@@ -27,7 +27,7 @@ import androidx.preference.DropDownPreference;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.statusbar.phone.StatusBarIconController;
+import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 
 public class BatteryPreference extends DropDownPreference implements TunerService.Tunable {
 

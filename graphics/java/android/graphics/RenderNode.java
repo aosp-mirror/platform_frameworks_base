@@ -16,6 +16,7 @@
 
 package android.graphics;
 
+import android.animation.Animator;
 import android.annotation.BytesLong;
 import android.annotation.ColorInt;
 import android.annotation.FloatRange;
@@ -1639,7 +1640,7 @@ public final class RenderNode {
      */
     public interface AnimationHost {
         /** @hide */
-        void registerAnimatingRenderNode(RenderNode animator);
+        void registerAnimatingRenderNode(RenderNode renderNode, Animator animator);
 
         /** @hide */
         void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator);
@@ -1654,7 +1655,7 @@ public final class RenderNode {
             throw new IllegalStateException("Cannot start this animator on a detached view!");
         }
         nAddAnimator(mNativeRenderNode, animator.getNativeAnimator());
-        mAnimationHost.registerAnimatingRenderNode(this);
+        mAnimationHost.registerAnimatingRenderNode(this, animator);
     }
 
     /** @hide */

@@ -16,15 +16,23 @@
 
 package com.android.server.broadcastradio.hal2;
 
+import static org.junit.Assert.assertThrows;
+
 import android.hardware.broadcastradio.V2_0.AmFmBandRange;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.DabTableEntry;
 import android.hardware.broadcastradio.V2_0.IdentifierType;
+import android.hardware.broadcastradio.V2_0.Metadata;
+import android.hardware.broadcastradio.V2_0.MetadataKey;
+import android.hardware.broadcastradio.V2_0.ProgramInfo;
 import android.hardware.broadcastradio.V2_0.Properties;
+import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.broadcastradio.V2_0.VendorKeyValue;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.hardware.radio.RadioMetadata;
+import android.util.ArrayMap;
 
 import com.google.common.truth.Expect;
 
@@ -70,6 +78,15 @@ public final class ConvertTest {
 
     @Rule
     public final Expect expect = Expect.create();
+
+    @Test
+    public void throwOnError() {
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () ->
+                Convert.throwOnError("tune", Result.INVALID_ARGUMENTS));
+
+        expect.withMessage("Exception for illegeal argument").that(thrown)
+                .hasMessageThat().contains("INVALID_ARGUMENTS");
+    }
 
     @Test
     public void propertiesFromHalProperties_idsMatch() {
@@ -149,6 +166,26 @@ public final class ConvertTest {
     }
 
     @Test
+    public void propertiesFromHalProperties_withInvalidBand() {
+        AmFmRegionConfig amFmRegionConfig = new AmFmRegionConfig();
+        amFmRegionConfig.ranges = new ArrayList<>(Arrays.asList(createAmFmBandRange(
+                /* lowerBound= */ 50000, /* upperBound= */ 60000, /* spacing= */ 10),
+                createAmFmBandRange(FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING)));
+
+        RadioManager.ModuleProperties properties = convertToModuleProperties(amFmRegionConfig,
+                new ArrayList<>());
+
+        RadioManager.BandDescriptor[] bands = properties.getBands();
+        expect.withMessage("Band descriptors").that(bands).hasLength(1);
+        expect.withMessage("FM band frequency lower limit")
+                .that(bands[0].getLowerLimit()).isEqualTo(FM_LOWER_LIMIT);
+        expect.withMessage("FM band frequency upper limit")
+                .that(bands[0].getUpperLimit()).isEqualTo(FM_UPPER_LIMIT);
+        expect.withMessage("FM band frequency spacing")
+                .that(bands[0].getSpacing()).isEqualTo(FM_SPACING);
+    }
+
+    @Test
     public void announcementFromHalAnnouncement_typesMatch() {
         expect.withMessage("Announcement type")
                 .that(ANNOUNCEMENT.getType()).isEqualTo(TEST_ENABLED_TYPE);
@@ -173,20 +210,85 @@ public final class ConvertTest {
                 .that(ANNOUNCEMENT.getVendorInfo()).isEmpty();
     }
 
+    @Test
+    public void getBands_withInvalidFrequency() {
+        expect.withMessage("Band for invalid frequency")
+                .that(Utils.getBand(/* freq= */ 110000)).isEqualTo(FrequencyBand.UNKNOWN);
+    }
+
+    @Test
+    public void vendorInfoToHal_withNull() {
+        expect.withMessage("Null vendor info converted to HAL")
+                .that(Convert.vendorInfoToHal(/* info= */ null)).isEmpty();
+    }
+
+    @Test
+    public void vendorInfoToHal_withNullValue() {
+        Map<String, String> vendorInfo = new ArrayMap<>();
+        vendorInfo.put(VENDOR_INFO_KEY_1, null);
+
+        expect.withMessage("Vendor info with null value converted to HAL")
+                .that(Convert.vendorInfoToHal(vendorInfo)).isEmpty();
+    }
+
+    @Test
+    public void vendorInfoFromHalVendorKeyValues_withNullElements() {
+        VendorKeyValue halVendorInfo = new VendorKeyValue();
+        halVendorInfo.key = null;
+        halVendorInfo.value = "VendorValue";
+        List<VendorKeyValue> halVendorInfoArray = List.of(halVendorInfo);
+
+        expect.withMessage("Null vendor info converted from HAL")
+                .that(Convert.vendorInfoFromHal(halVendorInfoArray)).isEmpty();
+    }
+
+    @Test
+    public void programInfoFromHal_withMetadata() {
+        int freq = 97900;
+        int signalQuality = 90;
+        String songTitle = "titleTest";
+        int albumArt = 1;
+        android.hardware.broadcastradio.V2_0.ProgramSelector halSelector =
+                TestUtils.makeHalFmSelector(freq);
+        ArrayList<Metadata> metadata = new ArrayList<>(List.of(
+                createIntMetadata(MetadataKey.ALBUM_ART, albumArt),
+                createStringMetadata(MetadataKey.SONG_TITLE, songTitle),
+                createStringMetadata(/* key= */ 1000, "valueForInvalidMetadataType")));
+        ProgramInfo halInfo = TestUtils.makeHalProgramInfo(halSelector, signalQuality,
+                /* relatedContent= */ new ArrayList<>(), metadata);
+
+        RadioManager.ProgramInfo info = Convert.programInfoFromHal(halInfo);
+
+        RadioMetadata convertedMetadata = info.getMetadata();
+        expect.withMessage("Metadata converted from HAL")
+                .that(convertedMetadata.size()).isEqualTo(2);
+        expect.withMessage("Song title")
+                .that(convertedMetadata.getString(RadioMetadata.METADATA_KEY_TITLE))
+                .isEqualTo(songTitle);
+        expect.withMessage("Album art")
+                .that(convertedMetadata.getInt(RadioMetadata.METADATA_KEY_ART))
+                .isEqualTo(albumArt);
+    }
+
     private static RadioManager.ModuleProperties convertToModuleProperties() {
         AmFmRegionConfig amFmConfig = createAmFmRegionConfig();
         List<DabTableEntry> dabTableEntries = Arrays.asList(
                 createDabTableEntry(DAB_ENTRY_LABEL_1, DAB_ENTRY_FREQUENCY_1),
                 createDabTableEntry(DAB_ENTRY_LABEL_2, DAB_ENTRY_FREQUENCY_2));
-        Properties properties = createHalProperties();
 
+        return convertToModuleProperties(amFmConfig, dabTableEntries);
+    }
+
+    private static RadioManager.ModuleProperties convertToModuleProperties(
+            AmFmRegionConfig amFmConfig, List<DabTableEntry> dabTableEntries) {
+        Properties properties = createHalProperties();
         return Convert.propertiesFromHal(TEST_ID, TEST_SERVICE_NAME, properties,
                 amFmConfig, dabTableEntries);
     }
 
     private static AmFmRegionConfig createAmFmRegionConfig() {
         AmFmRegionConfig amFmRegionConfig = new AmFmRegionConfig();
-        amFmRegionConfig.ranges = new ArrayList<AmFmBandRange>(Arrays.asList(
+        amFmRegionConfig.ranges = new ArrayList<>(Arrays.asList(
                 createAmFmBandRange(FM_LOWER_LIMIT, FM_UPPER_LIMIT, FM_SPACING),
                 createAmFmBandRange(AM_LOWER_LIMIT, AM_UPPER_LIMIT, AM_SPACING)));
         return amFmRegionConfig;
@@ -211,14 +313,29 @@ public final class ConvertTest {
     private static Properties createHalProperties() {
         Properties halProperties = new Properties();
         halProperties.supportedIdentifierTypes = new ArrayList<Integer>(Arrays.asList(
-                IdentifierType.AMFM_FREQUENCY, IdentifierType.RDS_PI, IdentifierType.DAB_SID_EXT));
+                IdentifierType.AMFM_FREQUENCY, IdentifierType.RDS_PI, IdentifierType.DAB_SID_EXT,
+                IdentifierType.HD_STATION_ID_EXT, IdentifierType.DRMO_SERVICE_ID));
         halProperties.maker = TEST_MAKER;
         halProperties.product = TEST_PRODUCT;
         halProperties.version = TEST_VERSION;
         halProperties.serial = TEST_SERIAL;
-        halProperties.vendorInfo = new ArrayList<VendorKeyValue>(Arrays.asList(
+        halProperties.vendorInfo = new ArrayList<>(Arrays.asList(
                 TestUtils.makeVendorKeyValue(VENDOR_INFO_KEY_1, VENDOR_INFO_VALUE_1),
                 TestUtils.makeVendorKeyValue(VENDOR_INFO_KEY_2, VENDOR_INFO_VALUE_2)));
         return halProperties;
+    }
+
+    private Metadata createStringMetadata(int key, String value) {
+        Metadata metadata = new Metadata();
+        metadata.key = key;
+        metadata.stringValue = value;
+        return metadata;
+    }
+
+    private Metadata createIntMetadata(int key, int value) {
+        Metadata metadata = new Metadata();
+        metadata.key = key;
+        metadata.intValue = value;
+        return metadata;
     }
 }

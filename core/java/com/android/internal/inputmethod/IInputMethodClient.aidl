@@ -30,6 +30,7 @@ oneway interface IInputMethodClient {
     void onUnbindAccessibilityService(int sequence, int id);
     void setActive(boolean active, boolean fullscreen);
     void setInteractive(boolean active, boolean fullscreen);
+    void setImeVisibility(boolean visible);
     void scheduleStartInputIfNecessary(boolean fullscreen);
     void reportFullscreenMode(boolean fullscreen);
     void setImeTraceEnabled(boolean enabled);

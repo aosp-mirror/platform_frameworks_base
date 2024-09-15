@@ -27,9 +27,11 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.deviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
@@ -221,13 +223,66 @@ class OccludingAppDeviceEntryInteractorTest : SysuiTestCase() {
             assertThat(message).isNull()
         }
 
-    private fun givenOnOccludingApp(isOnOccludingApp: Boolean) {
+    @Test
+    fun noMessage_fpErrorsWhileDozing() =
+        testScope.runTest {
+            val message by collectLastValue(underTest.message)
+
+            givenOnOccludingApp(true)
+            givenFingerprintAllowed(true)
+            keyguardRepository.setIsDozing(true)
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.DOZING,
+                testScope
+            )
+            runCurrent()
+
+            // ERROR message
+            fingerprintAuthRepository.setAuthenticationStatus(
+                ErrorFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                    "testError",
+                )
+            )
+            assertThat(message).isNull()
+
+            // HELP message
+            fingerprintAuthRepository.setAuthenticationStatus(
+                HelpFingerprintAuthenticationStatus(
+                    FingerprintManager.FINGERPRINT_ACQUIRED_PARTIAL,
+                    "testHelp",
+                )
+            )
+            assertThat(message).isNull()
+
+            // FAIL message
+            fingerprintAuthRepository.setAuthenticationStatus(FailFingerprintAuthenticationStatus)
+            assertThat(message).isNull()
+        }
+
+    private suspend fun givenOnOccludingApp(isOnOccludingApp: Boolean) {
         powerRepository.setInteractive(true)
+        keyguardRepository.setIsDozing(false)
         keyguardRepository.setKeyguardOccluded(isOnOccludingApp)
         keyguardRepository.setKeyguardShowing(isOnOccludingApp)
         keyguardRepository.setDreaming(false)
         bouncerRepository.setPrimaryShow(!isOnOccludingApp)
         bouncerRepository.setAlternateVisible(!isOnOccludingApp)
+
+        if (isOnOccludingApp) {
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.OCCLUDED,
+                testScope
+            )
+        } else {
+            kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OCCLUDED,
+                to = KeyguardState.LOCKSCREEN,
+                testScope
+            )
+        }
     }
 
     private fun givenFingerprintAllowed(allowed: Boolean) {

@@ -23,17 +23,42 @@
 
 #include "GraphicsJNI.h"
 #include "SkColorFilter.h"
-#include "SkiaWrapper.h"
 
 namespace android {
 namespace uirenderer {
 
-class ColorFilter : public SkiaWrapper<SkColorFilter> {
+class ColorFilter : public VirtualLightRefBase {
 public:
     static ColorFilter* fromJava(jlong handle) { return reinterpret_cast<ColorFilter*>(handle); }
 
+    sk_sp<SkColorFilter> getInstance() {
+        if (mInstance != nullptr && shouldDiscardInstance()) {
+            mInstance = nullptr;
+        }
+
+        if (mInstance == nullptr) {
+            mInstance = createInstance();
+            if (mInstance) {
+                mInstance = mInstance->makeWithWorkingColorSpace(SkColorSpace::MakeSRGB());
+            }
+            mGenerationId++;
+        }
+        return mInstance;
+    }
+
+    virtual bool shouldDiscardInstance() const { return false; }
+
+    void discardInstance() { mInstance = nullptr; }
+
+    [[nodiscard]] int32_t getGenerationId() const { return mGenerationId; }
+
 protected:
     ColorFilter() = default;
+    virtual sk_sp<SkColorFilter> createInstance() = 0;
+
+private:
+    sk_sp<SkColorFilter> mInstance = nullptr;
+    int32_t mGenerationId = 0;
 };
 
 class BlendModeColorFilter : public ColorFilter {

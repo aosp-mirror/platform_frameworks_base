@@ -442,14 +442,17 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
         }
 
         // TODO: maybe we want to get rid of the WCG check if overlay properties just works?
-        const bool canUseFp16 = DeviceInfo::get()->isSupportFp16ForHdr() ||
-                                DeviceInfo::get()->getWideColorType() == kRGBA_F16_SkColorType;
+        bool canUseFp16 = DeviceInfo::get()->isSupportFp16ForHdr() ||
+                DeviceInfo::get()->getWideColorType() == kRGBA_F16_SkColorType;
 
-        if (canUseFp16) {
-            if (mEglConfigF16 == EGL_NO_CONFIG_KHR) {
-                colorMode = ColorMode::Default;
-            } else {
-                config = mEglConfigF16;
+        if (colorMode == ColorMode::Hdr) {
+            if (canUseFp16 && !DeviceInfo::get()->isSupportRgba10101010ForHdr()) {
+                if (mEglConfigF16 == EGL_NO_CONFIG_KHR) {
+                    // If the driver doesn't support fp16 then fallback to 8-bit
+                    canUseFp16 = false;
+                } else {
+                    config = mEglConfigF16;
+                }
             }
         }
 

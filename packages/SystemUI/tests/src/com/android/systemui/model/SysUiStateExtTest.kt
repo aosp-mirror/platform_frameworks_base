@@ -17,6 +17,7 @@
 package com.android.systemui.model
 
 import android.view.Display
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeDisplayTracker
@@ -24,10 +25,9 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class SysUiStateExtTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -42,13 +42,13 @@ class SysUiStateExtTest : SysuiTestCase() {
     fun updateFlags() {
         underTest.updateFlags(
             Display.DEFAULT_DISPLAY,
-            1 to true,
-            2 to false,
-            3 to true,
+            1L to true,
+            2L to false,
+            3L to true,
         )
 
-        assertThat(underTest.flags and 1).isNotEqualTo(0)
-        assertThat(underTest.flags and 2).isEqualTo(0)
-        assertThat(underTest.flags and 3).isNotEqualTo(0)
+        assertThat(underTest.flags and 1L).isNotEqualTo(0L)
+        assertThat(underTest.flags and 2L).isEqualTo(0L)
+        assertThat(underTest.flags and 3L).isNotEqualTo(0L)
     }
 }

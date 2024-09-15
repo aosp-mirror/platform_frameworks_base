@@ -141,6 +141,7 @@ public class VirtualDeviceTest {
     @Test
     public void virtualDevice_hasCustomAudioInputSupport() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_VDM_PUBLIC_APIS);
+        mSetFlagsRule.enableFlags(android.media.audiopolicy.Flags.FLAG_AUDIO_MIX_TEST_API);
 
         VirtualDevice virtualDevice =
                 new VirtualDevice(
@@ -150,6 +151,10 @@ public class VirtualDeviceTest {
         assertThat(virtualDevice.hasCustomAudioInputSupport()).isFalse();
 
         when(mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO)).thenReturn(DEVICE_POLICY_CUSTOM);
+        when(mVirtualDevice.hasCustomAudioInputSupport()).thenReturn(false);
+        assertThat(virtualDevice.hasCustomAudioInputSupport()).isFalse();
+
+        when(mVirtualDevice.hasCustomAudioInputSupport()).thenReturn(true);
         assertThat(virtualDevice.hasCustomAudioInputSupport()).isTrue();
     }
 

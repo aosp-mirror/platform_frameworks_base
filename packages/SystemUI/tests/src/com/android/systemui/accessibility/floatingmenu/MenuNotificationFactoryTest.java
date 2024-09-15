@@ -19,8 +19,8 @@ package com.android.systemui.accessibility.floatingmenu;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Notification;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MenuNotificationFactoryTest extends SysuiTestCase {
     private MenuNotificationFactory mMenuNotificationFactory;

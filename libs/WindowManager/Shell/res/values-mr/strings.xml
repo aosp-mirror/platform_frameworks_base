@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"व्यवस्थापित करा"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"बबल डिसमिस केला."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"बबल"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"बबल दाखवा"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"अधिक चांगल्या दृश्यासाठी हे अ‍ॅप रीस्टार्ट करण्याकरिता टॅप करा"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"सेटिंग्ज मध्ये या ॲपचा आस्पेक्ट रेशो बदला"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"आस्पेक्ट रेशो बदला"</string>
@@ -117,4 +119,6 @@
     <string name="close_text" msgid="4986518933445178928">"बंद करा"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेनू बंद करा"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"मेनू उघडा"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"स्क्रीन मोठी करा"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"स्क्रीन स्नॅप करा"</string>
 </resources>

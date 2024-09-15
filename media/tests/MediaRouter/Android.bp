@@ -9,12 +9,13 @@ package {
 
 android_test {
     name: "mediaroutertest",
+    team: "trendy_team_android_media_solutions",
 
     srcs: ["**/*.java"],
 
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
 
     static_libs: [

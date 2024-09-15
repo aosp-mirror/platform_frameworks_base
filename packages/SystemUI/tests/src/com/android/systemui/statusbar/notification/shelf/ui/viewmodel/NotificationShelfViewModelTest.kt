@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.notification.shelf.ui.viewmodel
 
 import android.os.PowerManager
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
@@ -44,7 +44,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class NotificationShelfViewModelTest : SysuiTestCase() {
 

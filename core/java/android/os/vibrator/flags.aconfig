@@ -10,13 +10,6 @@ flag {
 
 flag {
     namespace: "haptics"
-    name: "haptics_customization_enabled"
-    description: "Enables the haptics customization feature"
-    bug: "241918098"
-}
-
-flag {
-    namespace: "haptics"
     name: "haptic_feedback_vibration_oem_customization_enabled"
     description: "Enables OEMs/devices to customize vibrations for haptic feedback"
     # Make read only. This is because the flag is used only once, and this could happen before
@@ -37,4 +30,14 @@ flag {
     name: "adaptive_haptics_enabled"
     description: "Enables the adaptive haptics feature"
     bug: "305961689"
+}
+
+flag {
+    namespace: "haptics"
+    name: "fix_audio_coupled_haptics_scaling"
+    description: "Fix the audio-coupled haptics scaling to use same function as VibrationEffect"
+    bug: "356144312"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

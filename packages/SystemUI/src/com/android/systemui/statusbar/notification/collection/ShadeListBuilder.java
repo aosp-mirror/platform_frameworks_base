@@ -1243,8 +1243,9 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         if (cmp != 0) return cmp;
 
         cmp = -1 * Long.compare(
-                o1.getRepresentativeEntry().getSbn().getNotification().when,
-                o2.getRepresentativeEntry().getSbn().getNotification().when);
+                o1.getRepresentativeEntry().getSbn().getNotification().getWhen(),
+                o2.getRepresentativeEntry().getSbn().getNotification().getWhen());
+
         return cmp;
     };
 
@@ -1256,8 +1257,8 @@ public class ShadeListBuilder implements Dumpable, PipelineDumpable {
         if (cmp != 0) return cmp;
 
         cmp = -1 * Long.compare(
-                o1.getRepresentativeEntry().getSbn().getNotification().when,
-                o2.getRepresentativeEntry().getSbn().getNotification().when);
+                o1.getRepresentativeEntry().getSbn().getNotification().getWhen(),
+                o2.getRepresentativeEntry().getSbn().getNotification().getWhen());
         return cmp;
     };
 

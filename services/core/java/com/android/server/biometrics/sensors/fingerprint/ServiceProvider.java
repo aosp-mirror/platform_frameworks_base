@@ -28,7 +28,6 @@ import android.hardware.fingerprint.FingerprintEnrollOptions;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
-import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 
@@ -135,14 +134,9 @@ public interface ServiceProvider extends
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
-    void onPowerPressed();
+    void setIgnoreDisplayTouches(long requestId, int sensorId, boolean ignoreTouches);
 
-    // TODO(b/288175061): remove with Flags.FLAG_SIDEFPS_CONTROLLER_REFACTOR
-    /**
-     * Sets side-fps controller
-     * @param controller side-fps controller
-     */
-    void setSidefpsController(@NonNull ISidefpsController controller);
+    void onPowerPressed();
 
     @NonNull
     ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,

@@ -27,6 +27,9 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * (e.g. clicking on a notification, tapping on the settings icon in the notification guts)
  */
 public interface NotificationActivityStarter {
+    /** Called when the user clicks on the notification bubble icon. */
+    void onNotificationBubbleIconClicked(NotificationEntry entry);
+
     /** Called when the user clicks on the surface of a notification. */
     void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row);
 

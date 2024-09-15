@@ -21,7 +21,8 @@ import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.Flags.migrateClocksToBlueprint
+import com.android.app.tracing.coroutines.launch
+import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
@@ -30,7 +31,6 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.shared.R as sharedR
-import kotlinx.coroutines.launch
 
 object KeyguardSmartspaceViewBinder {
     @JvmStatic
@@ -41,9 +41,9 @@ object KeyguardSmartspaceViewBinder {
         blueprintInteractor: KeyguardBlueprintInteractor,
     ) {
         keyguardRootView.repeatWhenAttached {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                launch("$TAG#clockViewModel.hasCustomWeatherDataDisplay") {
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     clockViewModel.hasCustomWeatherDataDisplay.collect { hasCustomWeatherDataDisplay
                         ->
                         updateDateWeatherToBurnInLayer(
@@ -61,8 +61,8 @@ object KeyguardSmartspaceViewBinder {
                     }
                 }
 
-                launch {
-                    if (!migrateClocksToBlueprint()) return@launch
+                launch("$TAG#smartspaceViewModel.bcSmartspaceVisibility") {
+                    if (!MigrateClocksToBlueprint.isEnabled) return@launch
                     smartspaceViewModel.bcSmartspaceVisibility.collect {
                         updateBCSmartspaceInBurnInLayer(keyguardRootView, clockViewModel)
                         blueprintInteractor.refreshBlueprint(
@@ -121,10 +121,7 @@ object KeyguardSmartspaceViewBinder {
             ) {
                 val dateView =
                     constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
-                val weatherView =
-                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
                 addView(dateView)
-                addView(weatherView)
             }
         }
     }
@@ -141,11 +138,10 @@ object KeyguardSmartspaceViewBinder {
             ) {
                 val dateView =
                     constraintLayout.requireViewById<View>(sharedR.id.date_smartspace_view)
-                val weatherView =
-                    constraintLayout.requireViewById<View>(sharedR.id.weather_smartspace_view)
-                removeView(weatherView)
                 removeView(dateView)
             }
         }
     }
+
+    private const val TAG = "KeyguardSmartspaceViewBinder"
 }

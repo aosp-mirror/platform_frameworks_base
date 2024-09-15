@@ -52,21 +52,22 @@ constructor(
         with(input) {
             when (action) {
                 is QSTileUserAction.Click -> {
-                    // We animate from the touched view only if we are not on the keyguard
-                    val animateFromView: Boolean =
-                        action.view != null && !keyguardStateController.isShowing
+                    // We animate from the touched expandable only if we are not on the keyguard
+                    val animateFromExpandable: Boolean =
+                        action.expandable != null && !keyguardStateController.isShowing
                     val runnable = Runnable {
                         val dialog: SystemUIDialog =
                             fontScalingDialogDelegateProvider.get().createDialog()
-                        if (animateFromView) {
-                            dialogTransitionAnimator.showFromView(
-                                dialog,
-                                action.view!!,
-                                DialogCuj(
-                                    InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                    INTERACTION_JANK_TAG
+                        if (animateFromExpandable) {
+                            action.expandable
+                                ?.dialogTransitionController(
+                                    DialogCuj(
+                                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                        INTERACTION_JANK_TAG
+                                    )
                                 )
-                            )
+                                ?.let { dialogTransitionAnimator.show(dialog, it) }
+                                ?: dialog.show()
                         } else {
                             dialog.show()
                         }
@@ -84,7 +85,7 @@ constructor(
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
-                        action.view,
+                        action.expandable,
                         Intent(Settings.ACTION_TEXT_READING_SETTINGS)
                     )
                 }

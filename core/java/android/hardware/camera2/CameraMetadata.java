@@ -911,10 +911,10 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * <p>Combinations of logical and physical streams, or physical streams from different
      * physical cameras are not guaranteed. However, if the camera device supports
-     * {@link CameraManager#isSessionConfigurationWithParametersSupported },
+     * {@link CameraDevice#isSessionConfigurationSupported },
      * application must be able to query whether a stream combination involving physical
      * streams is supported by calling
-     * {@link CameraManager#isSessionConfigurationWithParametersSupported }.</p>
+     * {@link CameraDevice#isSessionConfigurationSupported }.</p>
      * <p>Camera application shouldn't assume that there are at most 1 rear camera and 1 front
      * camera in the system. For an application that switches between front and back cameras,
      * the recommendation is to switch between the first rear camera and the first front
@@ -2359,9 +2359,9 @@ public abstract class CameraMetadata<TKey> {
      * FPS.</p>
      * <p>If the session configuration is not supported, the AE mode reported in the
      * CaptureResult will be 'ON' instead of 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY'.</p>
-     * <p>The application can observe the CapturerResult field
-     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} to determine when low light boost is 'ACTIVE' or
-     * 'INACTIVE'.</p>
+     * <p>When this AE mode is enabled, the CaptureResult field
+     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} will indicate when low light boost is 'ACTIVE'
+     * or 'INACTIVE'. By default {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} will be 'INACTIVE'.</p>
      * <p>The low light boost is 'ACTIVE' once the scene lighting condition is less than the
      * upper bound lux value defined by {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange}.
      * This mode will be 'INACTIVE' once the scene lighting condition is greater than the
@@ -3905,7 +3905,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EFV_STABILIZATION_MODE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_OFF = 0;
 
     /**
@@ -3913,7 +3913,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EFV_STABILIZATION_MODE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_GIMBAL = 1;
 
     /**
@@ -3923,7 +3923,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#EFV_STABILIZATION_MODE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EFV_STABILIZATION_MODE_LOCKED = 2;
 
     //

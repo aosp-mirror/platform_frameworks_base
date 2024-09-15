@@ -15,11 +15,11 @@
  */
 package com.android.hoststubgen.filters
 
-import com.android.hoststubgen.UnknownApiException
 import com.android.hoststubgen.addNonNullElement
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.asm.toHumanReadableMethodName
+import com.android.hoststubgen.log
 
 // TODO: Validate all input names.
 
@@ -48,30 +48,30 @@ class InMemoryOutputFilter(
         return mPolicies[getClassKey(className)] ?: super.getPolicyForClass(className)
     }
 
-    private fun ensureClassExists(className: String) {
+    private fun checkClass(className: String) {
         if (classes.findClass(className) == null) {
-            throw UnknownApiException("Unknown class $className")
+            log.w("Unknown class $className")
         }
     }
 
-    private fun ensureFieldExists(className: String, fieldName: String) {
+    private fun checkField(className: String, fieldName: String) {
         if (classes.findField(className, fieldName) == null) {
-            throw UnknownApiException("Unknown field $className.$fieldName")
+            log.w("Unknown field $className.$fieldName")
         }
     }
 
-    private fun ensureMethodExists(
+    private fun checkMethod(
         className: String,
         methodName: String,
         descriptor: String
     ) {
         if (classes.findMethod(className, methodName, descriptor) == null) {
-            throw UnknownApiException("Unknown method $className.$methodName$descriptor")
+            log.w("Unknown method $className.$methodName$descriptor")
         }
     }
 
     fun setPolicyForClass(className: String, policy: FilterPolicyWithReason) {
-        ensureClassExists(className)
+        checkClass(className)
         mPolicies[getClassKey(className)] = policy
     }
 
@@ -81,7 +81,7 @@ class InMemoryOutputFilter(
     }
 
     fun setPolicyForField(className: String, fieldName: String, policy: FilterPolicyWithReason) {
-        ensureFieldExists(className, fieldName)
+        checkField(className, fieldName)
         mPolicies[getFieldKey(className, fieldName)] = policy
     }
 
@@ -100,7 +100,7 @@ class InMemoryOutputFilter(
             descriptor: String,
             policy: FilterPolicyWithReason,
             ) {
-        ensureMethodExists(className, methodName, descriptor)
+        checkMethod(className, methodName, descriptor)
         mPolicies[getMethodKey(className, methodName, descriptor)] = policy
     }
 
@@ -110,8 +110,8 @@ class InMemoryOutputFilter(
     }
 
     fun setRenameTo(className: String, methodName: String, descriptor: String, toName: String) {
-        ensureMethodExists(className, methodName, descriptor)
-        ensureMethodExists(className, toName, descriptor)
+        checkMethod(className, methodName, descriptor)
+        checkMethod(className, toName, descriptor)
         mRenames[getMethodKey(className, methodName, descriptor)] = toName
     }
 
@@ -121,7 +121,7 @@ class InMemoryOutputFilter(
     }
 
     fun setNativeSubstitutionClass(from: String, to: String) {
-        ensureClassExists(from)
+        checkClass(from)
 
         // Native substitute classes may be provided from other jars, so we can't do this check.
         // ensureClassExists(to)

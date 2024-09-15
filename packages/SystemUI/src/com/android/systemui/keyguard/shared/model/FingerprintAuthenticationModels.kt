@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.shared.model
 import android.hardware.biometrics.BiometricFingerprintConstants
 import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD
 import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START
+import android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_UNKNOWN
 import android.hardware.fingerprint.FingerprintManager
 import android.os.SystemClock.elapsedRealtime
 import com.android.systemui.biometrics.shared.model.AuthenticationReason
@@ -26,26 +27,43 @@ import com.android.systemui.biometrics.shared.model.AuthenticationReason
 /**
  * Fingerprint authentication status provided by
  * [com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository]
+ *
+ * @isEngaged whether fingerprint is actively engaged by the user. This is distinct from fingerprint
+ * running on the device. Can be null if the status does not have an associated isEngaged state.
  */
-sealed class FingerprintAuthenticationStatus
+sealed class FingerprintAuthenticationStatus(val isEngaged: Boolean?)
 
 /** Fingerprint authentication success status. */
 data class SuccessFingerprintAuthenticationStatus(
     val userId: Int,
     val isStrongBiometric: Boolean,
-) : FingerprintAuthenticationStatus()
+) : FingerprintAuthenticationStatus(isEngaged = false)
 
 /** Fingerprint authentication help message. */
 data class HelpFingerprintAuthenticationStatus(
     val msgId: Int,
     val msg: String?,
-) : FingerprintAuthenticationStatus()
+) : FingerprintAuthenticationStatus(isEngaged = null)
 
 /** Fingerprint acquired message. */
 data class AcquiredFingerprintAuthenticationStatus(
     val authenticationReason: AuthenticationReason,
     val acquiredInfo: Int
-) : FingerprintAuthenticationStatus() {
+) :
+    FingerprintAuthenticationStatus(
+        isEngaged =
+            if (acquiredInfo == FINGERPRINT_ACQUIRED_START) {
+                true
+            } else if (
+                acquiredInfo == FINGERPRINT_ACQUIRED_UNKNOWN ||
+                    acquiredInfo == FINGERPRINT_ACQUIRED_GOOD
+            ) {
+                null
+            } else {
+                // soft errors that indicate fingerprint activity ended
+                false
+            }
+    ) {
 
     val fingerprintCaptureStarted: Boolean = acquiredInfo == FINGERPRINT_ACQUIRED_START
 
@@ -53,7 +71,8 @@ data class AcquiredFingerprintAuthenticationStatus(
 }
 
 /** Fingerprint authentication failed message. */
-data object FailFingerprintAuthenticationStatus : FingerprintAuthenticationStatus()
+data object FailFingerprintAuthenticationStatus :
+    FingerprintAuthenticationStatus(isEngaged = false)
 
 /** Fingerprint authentication error message */
 data class ErrorFingerprintAuthenticationStatus(
@@ -61,7 +80,7 @@ data class ErrorFingerprintAuthenticationStatus(
     val msg: String? = null,
     // present to break equality check if the same error occurs repeatedly.
     val createdAt: Long = elapsedRealtime(),
-) : FingerprintAuthenticationStatus() {
+) : FingerprintAuthenticationStatus(isEngaged = false) {
     fun isCancellationError(): Boolean =
         msgId == BiometricFingerprintConstants.FINGERPRINT_ERROR_CANCELED ||
             msgId == BiometricFingerprintConstants.FINGERPRINT_ERROR_USER_CANCELED

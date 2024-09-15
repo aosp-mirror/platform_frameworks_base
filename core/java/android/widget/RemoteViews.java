@@ -345,7 +345,7 @@ public class RemoteViews implements Parcelable, Filter {
      *
      * @hide
      */
-    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 5000;
+    private static final int MAX_ADAPTER_CONVERSION_WAITING_TIME_MS = 20_000;
 
     /**
      * Application that hosts the remote views.
@@ -382,7 +382,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Maps Intent ID to RemoteCollectionItems to avoid duplicate items
      */
-    private RemoteCollectionCache mCollectionCache = new RemoteCollectionCache();
+    private @NonNull RemoteCollectionCache mCollectionCache = new RemoteCollectionCache();
 
     /** Cache of ApplicationInfos used by collection items. */
     private ApplicationInfoCache mApplicationInfoCache = new ApplicationInfoCache();
@@ -775,6 +775,16 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Return {@code true} only if this {@code RemoteViews} is a legacy list widget that uses
+     * {@code Intent} for inflating child entries.
+     *
+     * @hide
+     */
+    public boolean isLegacyListRemoteViews() {
+        return mCollectionCache.mIdToUriMapping.size() > 0;
+    }
+
+    /**
      * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
      * grants will need to be issued to ensure the recipient of this object is able to render its
      * contents.
@@ -1034,11 +1044,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntentTemplate.visitUris(visitor);
-        }
     }
 
     /**
@@ -1105,6 +1110,7 @@ public class RemoteViews implements Parcelable, Filter {
         SetRemoteCollectionItemListAdapterAction(Parcel parcel) {
             mViewId = parcel.readInt();
             mIntentId = parcel.readInt();
+            mIsReplacedIntoAction = parcel.readBoolean();
             mServiceIntent = parcel.readTypedObject(Intent.CREATOR);
             mItems = mServiceIntent != null
                     ? null
@@ -1128,6 +1134,7 @@ public class RemoteViews implements Parcelable, Filter {
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mViewId);
             dest.writeInt(mIntentId);
+            dest.writeBoolean(mIsReplacedIntoAction);
             dest.writeTypedObject(mServiceIntent, flags);
             if (mItems != null) {
                 mItems.writeToParcel(dest, flags, /* attached= */ true);
@@ -1209,6 +1216,19 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * The maximum size for RemoteViews with converted RemoteCollectionItemsAdapter.
+     * When converting RemoteViewsAdapter to RemoteCollectionItemsAdapter, we want to put size
+     * limits on each unique RemoteCollectionItems in order to not exceed the transaction size limit
+     * for each parcel (typically 1 MB). We leave a certain ratio of the maximum size as a buffer
+     * for missing calculations of certain parameters (e.g. writing a RemoteCollectionItems to the
+     * parcel will write its Id array as well, but that is missing when writing itschild RemoteViews
+     * directly to the parcel as we did in RemoteViewsService)
+     *
+     * @hide
+     */
+    private static final int MAX_SINGLE_PARCEL_SIZE = (int) (1_000_000 * 0.8);
+
+    /**
      * @hide
      */
     public CompletableFuture<Void> collectAllIntents() {
@@ -1216,8 +1236,8 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class RemoteCollectionCache {
-        private SparseArray<String> mIdToUriMapping = new SparseArray<>();
-        private HashMap<String, RemoteCollectionItems> mUriToCollectionMapping = new HashMap<>();
+        private final SparseArray<String> mIdToUriMapping = new SparseArray<>();
+        private final Map<String, RemoteCollectionItems> mUriToCollectionMapping = new HashMap<>();
 
         RemoteCollectionCache() { }
 
@@ -1260,17 +1280,47 @@ public class RemoteViews implements Parcelable, Filter {
             return mUriToCollectionMapping.get(uri);
         }
 
-        CompletableFuture<Void> collectAllIntentsNoComplete(@NonNull RemoteViews inViews) {
-            CompletableFuture<Void> collectionFuture = CompletableFuture.completedFuture(null);
+        public @NonNull CompletableFuture<Void> collectAllIntentsNoComplete(
+                @NonNull RemoteViews inViews) {
+            SparseArray<Intent> idToIntentMapping = new SparseArray<>();
+            // Collect the number of uinque Intent (which is equal to the number of new connections
+            // to make) for size allocation and exclude certain collections from being written to
+            // the parcel to better estimate the space left for reallocation.
+            collectAllIntentsInternal(inViews, idToIntentMapping);
+
+            // Calculate the individual size here
+            int numOfIntents = idToIntentMapping.size();
+            if (numOfIntents == 0) {
+                Log.e(LOG_TAG, "Possibly notifying updates for nonexistent view Id");
+                return CompletableFuture.completedFuture(null);
+            }
+
+            Parcel sizeTestParcel = Parcel.obtain();
+            // Write self RemoteViews to the parcel, which includes the actions/bitmaps/collection
+            // cache to see how much space is left for the RemoteCollectionItems that are to be
+            // updated.
+            RemoteViews.this.writeToParcel(sizeTestParcel,
+                    /* flags= */ 0,
+                    /* intentsToIgnore= */ idToIntentMapping);
+            int remainingSize = MAX_SINGLE_PARCEL_SIZE - sizeTestParcel.dataSize();
+            sizeTestParcel.recycle();
+
+            int individualSize = remainingSize < 0
+                    ? 0
+                    : remainingSize / numOfIntents;
+
+            return connectAllUniqueIntents(individualSize, idToIntentMapping);
+        }
+
+        private void collectAllIntentsInternal(@NonNull RemoteViews inViews,
+                @NonNull SparseArray<Intent> idToIntentMapping) {
             if (inViews.hasSizedRemoteViews()) {
                 for (RemoteViews remoteViews : inViews.mSizedRemoteViews) {
-                    collectionFuture = CompletableFuture.allOf(collectionFuture,
-                            collectAllIntentsNoComplete(remoteViews));
+                    collectAllIntentsInternal(remoteViews, idToIntentMapping);
                 }
             } else if (inViews.hasLandscapeAndPortraitLayouts()) {
-                collectionFuture = CompletableFuture.allOf(
-                        collectAllIntentsNoComplete(inViews.mLandscape),
-                        collectAllIntentsNoComplete(inViews.mPortrait));
+                collectAllIntentsInternal(inViews.mLandscape, idToIntentMapping);
+                collectAllIntentsInternal(inViews.mPortrait, idToIntentMapping);
             } else if (inViews.mActions != null) {
                 for (Action action : inViews.mActions) {
                     if (action instanceof SetRemoteCollectionItemListAdapterAction rca) {
@@ -1280,13 +1330,16 @@ public class RemoteViews implements Parcelable, Filter {
                         }
 
                         if (rca.mIntentId != -1 && rca.mIsReplacedIntoAction) {
-                            final String uri = mIdToUriMapping.get(rca.mIntentId);
-                            collectionFuture = CompletableFuture.allOf(collectionFuture,
-                                    getItemsFutureFromIntentWithTimeout(rca.mServiceIntent)
-                                            .thenAccept(rc -> {
-                                                rc.setHierarchyRootData(getHierarchyRootData());
-                                                mUriToCollectionMapping.put(uri, rc);
-                                            }));
+                            rca.mIsReplacedIntoAction = false;
+
+                            // Avoid redundant connections for the same intent. Also making sure
+                            // that the number of connections we are making is always equal to the
+                            // nmuber of unique intents that are being used for the updates.
+                            if (idToIntentMapping.contains(rca.mIntentId)) {
+                                continue;
+                            }
+
+                            idToIntentMapping.put(rca.mIntentId, rca.mServiceIntent);
                             rca.mItems = null;
                             continue;
                         }
@@ -1295,7 +1348,7 @@ public class RemoteViews implements Parcelable, Filter {
                         // intents.
                         if (rca.mServiceIntent != null) {
                             final String uri = rca.mServiceIntent.toUri(0);
-                            int index = mIdToUriMapping.indexOfValue(uri);
+                            int index = mIdToUriMapping.indexOfValueByValue(uri);
                             if (index == -1) {
                                 int newIntentId = mIdToUriMapping.size();
                                 rca.mIntentId = newIntentId;
@@ -1305,41 +1358,50 @@ public class RemoteViews implements Parcelable, Filter {
                                 rca.mItems = null;
                                 continue;
                             }
-                            collectionFuture = CompletableFuture.allOf(collectionFuture,
-                                    getItemsFutureFromIntentWithTimeout(rca.mServiceIntent)
-                                            .thenAccept(rc -> {
-                                                rc.setHierarchyRootData(getHierarchyRootData());
-                                                mUriToCollectionMapping.put(uri, rc);
-                                            }));
+
+                            idToIntentMapping.put(rca.mIntentId, rca.mServiceIntent);
                             rca.mItems = null;
                         } else {
                             for (RemoteViews views : rca.mItems.mViews) {
-                                collectionFuture = CompletableFuture.allOf(collectionFuture,
-                                        collectAllIntentsNoComplete(views));
+                                collectAllIntentsInternal(views, idToIntentMapping);
                             }
                         }
                     } else if (action instanceof ViewGroupActionAdd vgaa
                             && vgaa.mNestedViews != null) {
-                        collectionFuture = CompletableFuture.allOf(collectionFuture,
-                                collectAllIntentsNoComplete(vgaa.mNestedViews));
+                        collectAllIntentsInternal(vgaa.mNestedViews, idToIntentMapping);
                     }
                 }
             }
+        }
 
-            return collectionFuture;
+        private @NonNull CompletableFuture<Void> connectAllUniqueIntents(int individualSize,
+                @NonNull SparseArray<Intent> idToIntentMapping) {
+            List<CompletableFuture<Void>> intentFutureList = new ArrayList<>();
+            for (int i = 0; i < idToIntentMapping.size(); i++) {
+                String currentIntentUri = mIdToUriMapping.get(idToIntentMapping.keyAt(i));
+                Intent currentIntent = idToIntentMapping.valueAt(i);
+                intentFutureList.add(getItemsFutureFromIntentWithTimeout(currentIntent,
+                        individualSize)
+                        .thenAccept(items -> {
+                            items.setHierarchyRootData(getHierarchyRootData());
+                            mUriToCollectionMapping.put(currentIntentUri, items);
+                        }));
+            }
+
+            return CompletableFuture.allOf(intentFutureList.toArray(CompletableFuture[]::new));
         }
 
         private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
-                Intent intent) {
+                Intent intent, int individualSize) {
             if (intent == null) {
                 Log.e(LOG_TAG, "Null intent received when generating adapter future");
                 return CompletableFuture.completedFuture(new RemoteCollectionItems
-                    .Builder().build());
+                        .Builder().build());
             }
 
             final Context context = ActivityThread.currentApplication();
-            final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
 
+            final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
             context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
                     result.defaultExecutor(), new ServiceConnection() {
                         @Override
@@ -1348,13 +1410,17 @@ public class RemoteViews implements Parcelable, Filter {
                             RemoteCollectionItems items;
                             try {
                                 items = IRemoteViewsFactory.Stub.asInterface(iBinder)
-                                    .getRemoteCollectionItems();
+                                        .getRemoteCollectionItems(individualSize);
                             } catch (RemoteException re) {
                                 items = new RemoteCollectionItems.Builder().build();
-                                Log.e(LOG_TAG, "Error getting collection items from the factory",
-                                        re);
+                                Log.e(LOG_TAG, "Error getting collection items from the"
+                                        + " factory", re);
                             } finally {
                                 context.unbindService(this);
+                            }
+
+                            if (items == null) {
+                                items = new RemoteCollectionItems.Builder().build();
                             }
 
                             result.complete(items);
@@ -1371,10 +1437,17 @@ public class RemoteViews implements Parcelable, Filter {
             return result;
         }
 
-        public void writeToParcel(Parcel out, int flags) {
+        public void writeToParcel(Parcel out, int flags,
+                @Nullable SparseArray<Intent> intentsToIgnore) {
             out.writeInt(mIdToUriMapping.size());
             for (int i = 0; i < mIdToUriMapping.size(); i++) {
-                out.writeInt(mIdToUriMapping.keyAt(i));
+                int currentIntentId = mIdToUriMapping.keyAt(i);
+                if (intentsToIgnore != null && intentsToIgnore.contains(currentIntentId)) {
+                    // Skip writing collections that are to be updated in the following steps to
+                    // better estimate the RemoteViews size.
+                    continue;
+                }
+                out.writeInt(currentIntentId);
                 String intentUri = mIdToUriMapping.valueAt(i);
                 out.writeString8(intentUri);
                 mUriToCollectionMapping.get(intentUri).writeToParcel(out, flags, true);
@@ -1449,11 +1522,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_REMOTE_VIEW_ADAPTER_INTENT_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mIntent.visitUris(visitor);
         }
     }
 
@@ -1533,11 +1601,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_ON_CLICK_RESPONSE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
-        }
     }
 
     /** Helper action to configure handwriting delegation via {@link PendingIntent}. */
@@ -1584,11 +1647,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntent.visitUris(visitor);
         }
     }
 
@@ -1659,11 +1717,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_CHECKED_CHANGE_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
         }
     }
 
@@ -2223,10 +2276,6 @@ public class RemoteViews implements Parcelable, Filter {
                 case ICON:
                     final Icon icon = (Icon) getParameterValue(null);
                     if (icon != null) visitIconUri(icon, visitor);
-                    break;
-                case INTENT:
-                    final Intent intent = (Intent) getParameterValue(null);
-                    if (intent != null) intent.visitUris(visitor);
                     break;
                 // TODO(b/281044385): Should we do anything about type BUNDLE?
             }
@@ -4235,7 +4284,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         if (mode == MODE_NORMAL) {
-            mApplication = ApplicationInfo.CREATOR.createFromParcel(parcel);
+            mApplication = parcel.readTypedObject(ApplicationInfo.CREATOR);
             mIdealSize = parcel.readInt() == 0 ? null : SizeF.CREATOR.createFromParcel(parcel);
             mLayoutId = parcel.readInt();
             mViewId = parcel.readInt();
@@ -5063,7 +5112,10 @@ public class RemoteViews implements Parcelable, Filter {
      * @param viewId The id of the {@link AdapterView}
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
+     * @deprecated use
+     * {@link #setRemoteAdapter(int, android.widget.RemoteViews.RemoteCollectionItems)} instead
      */
+    @Deprecated
     public void setRemoteAdapter(@IdRes int viewId, Intent intent) {
         if (remoteAdapterConversion()) {
             addAction(new SetRemoteCollectionItemListAdapterAction(viewId, intent));
@@ -6584,7 +6636,8 @@ public class RemoteViews implements Parcelable, Filter {
     public static final class ColorResources {
         // Set of valid colors resources.
         private static final int FIRST_RESOURCE_COLOR_ID = android.R.color.system_neutral1_0;
-        private static final int LAST_RESOURCE_COLOR_ID = android.R.color.system_accent3_1000;
+        private static final int LAST_RESOURCE_COLOR_ID =
+            android.R.color.system_error_1000;
         // Size, in bytes, of an entry in the array of colors in an ARSC file.
         private static final int ARSC_ENTRY_SIZE = 16;
 
@@ -6724,7 +6777,13 @@ public class RemoteViews implements Parcelable, Filter {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int flags) {
+        writeToParcel(dest, flags, /* intentsToIgnore= */ null);
+    }
+
+    private void writeToParcel(Parcel dest, int flags,
+            @Nullable SparseArray<Intent> intentsToIgnore) {
         boolean prevSquashingAllowed = dest.allowSquashing();
 
         if (!hasMultipleLayouts()) {
@@ -6733,9 +6792,9 @@ public class RemoteViews implements Parcelable, Filter {
             // is shared by all children.
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
-                mCollectionCache.writeToParcel(dest, flags);
+                mCollectionCache.writeToParcel(dest, flags, intentsToIgnore);
             }
-            mApplication.writeToParcel(dest, flags);
+            dest.writeTypedObject(mApplication, flags);
             if (mIsRoot || mIdealSize == null) {
                 dest.writeInt(0);
             } else {
@@ -6750,7 +6809,7 @@ public class RemoteViews implements Parcelable, Filter {
             dest.writeInt(MODE_HAS_SIZED_REMOTEVIEWS);
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
-                mCollectionCache.writeToParcel(dest, flags);
+                mCollectionCache.writeToParcel(dest, flags, intentsToIgnore);
             }
             dest.writeInt(mSizedRemoteViews.size());
             for (RemoteViews view : mSizedRemoteViews) {
@@ -6762,7 +6821,7 @@ public class RemoteViews implements Parcelable, Filter {
             // is shared by all children.
             if (mIsRoot) {
                 mBitmapCache.writeBitmapsToParcel(dest, flags);
-                mCollectionCache.writeToParcel(dest, flags);
+                mCollectionCache.writeToParcel(dest, flags, intentsToIgnore);
             }
             mLandscape.writeToParcel(dest, flags);
             // Both RemoteViews already share the same package and user
@@ -6823,7 +6882,8 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     public boolean hasSameAppInfo(ApplicationInfo info) {
-        return mApplication.packageName.equals(info.packageName) && mApplication.uid == info.uid;
+        return mApplication == null || mApplication.packageName.equals(info.packageName)
+                && mApplication.uid == info.uid;
     }
 
     /**
@@ -7135,20 +7195,6 @@ public class RemoteViews implements Parcelable, Filter {
             int[] viewIds = parcel.createIntArray();
             mViewIds = viewIds == null ? null : IntArray.wrap(viewIds);
             mElementNames = parcel.createStringArrayList();
-        }
-
-        /**
-         * See {@link RemoteViews#visitUris(Consumer)}.
-         *
-         * @hide
-         */
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mPendingIntent != null) {
-                mPendingIntent.visitUris(visitor);
-            }
-            if (mFillIntent != null) {
-                mFillIntent.visitUris(visitor);
-            }
         }
 
         private void handleViewInteraction(
@@ -7602,8 +7648,7 @@ public class RemoteViews implements Parcelable, Filter {
             byte[] instruction;
             final List<byte[]> instructions = new ArrayList<>(size);
             for (int i = 0; i < size; i++) {
-                instruction = new byte[in.readInt()];
-                in.readByteArray(instruction);
+                instruction = in.readBlob();
                 instructions.add(instruction);
             }
             return new DrawInstructions(instructions);
@@ -7618,8 +7663,7 @@ public class RemoteViews implements Parcelable, Filter {
             final List<byte[]> instructions = drawInstructions.mInstructions;
             dest.writeInt(instructions.size());
             for (byte[] instruction : instructions) {
-                dest.writeInt(instruction.length);
-                dest.writeByteArray(instruction);
+                dest.writeBlob(instruction);
             }
         }
 

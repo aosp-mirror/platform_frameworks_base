@@ -16,37 +16,36 @@
 
 package com.android.systemui.keyguard.ui.composable.blueprint
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.IntRect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
 import com.android.systemui.keyguard.ui.composable.section.BottomAreaSection
-import com.android.systemui.keyguard.ui.composable.section.DefaultClockSection
 import com.android.systemui.keyguard.ui.composable.section.LockSection
-import com.android.systemui.keyguard.ui.composable.section.MediaCarouselSection
 import com.android.systemui.keyguard.ui.composable.section.NotificationSection
 import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
-import com.android.systemui.keyguard.ui.composable.section.SmartSpaceSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
+import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
-import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
 import java.util.Optional
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 /**
  * Renders the lockscreen scene when showing with the default layout (e.g. vertical phone form
@@ -57,15 +56,12 @@ class ShortcutsBesideUdfpsBlueprint
 constructor(
     private val viewModel: LockscreenContentViewModel,
     private val statusBarSection: StatusBarSection,
-    private val clockSection: DefaultClockSection,
-    private val smartSpaceSection: SmartSpaceSection,
-    private val notificationSection: NotificationSection,
     private val lockSection: LockSection,
     private val ambientIndicationSectionOptional: Optional<AmbientIndicationSection>,
     private val bottomAreaSection: BottomAreaSection,
     private val settingsMenuSection: SettingsMenuSection,
-    private val mediaCarouselSection: MediaCarouselSection,
-    private val clockInteractor: KeyguardClockInteractor,
+    private val topAreaSection: TopAreaSection,
+    private val notificationSection: NotificationSection,
 ) : ComposableLockscreenSceneBlueprint {
 
     override val id: String = "shortcuts-besides-udfps"
@@ -73,8 +69,9 @@ constructor(
     @Composable
     override fun SceneScope.Content(modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
-        val burnIn = rememberBurnIn(clockInteractor)
-        val resources = LocalContext.current.resources
+        val shouldUseSplitNotificationShade by
+            viewModel.shouldUseSplitNotificationShade.collectAsStateWithLifecycle()
+        val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
 
         LockscreenLongPress(
             viewModel = viewModel.longPress,
@@ -84,49 +81,47 @@ constructor(
                 content = {
                     // Constrained to above the lock icon.
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxSize(),
                     ) {
-                        with(statusBarSection) { StatusBar(modifier = Modifier.fillMaxWidth()) }
-                        with(clockSection) {
-                            SmallClock(
-                                onTopChanged = burnIn.onSmallClockTopChanged,
-                                modifier = Modifier.fillMaxWidth(),
-                                burnInParams = burnIn.parameters,
-                            )
-                        }
-                        with(smartSpaceSection) {
-                            SmartSpace(
-                                burnInParams = burnIn.parameters,
-                                onTopChanged = burnIn.onSmartspaceTopChanged,
+                        with(statusBarSection) {
+                            StatusBar(
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(
-                                            top = { viewModel.getSmartSpacePaddingTop(resources) }
+                                            horizontal = { unfoldTranslations.start.roundToInt() },
                                         )
-                                        .padding(
-                                            bottom =
-                                                dimensionResource(
-                                                    R.dimen.keyguard_status_view_bottom_margin
-                                                )
-                                        ),
                             )
                         }
 
-                        if (viewModel.isLargeClockVisible) {
-                            Spacer(modifier = Modifier.weight(weight = 1f))
-                            with(clockSection) { LargeClock(modifier = Modifier.fillMaxWidth()) }
+                        Box {
+                            with(topAreaSection) {
+                                DefaultClockLayout(
+                                    modifier =
+                                        Modifier.graphicsLayer {
+                                            translationX = unfoldTranslations.start
+                                        },
+                                )
+                            }
+                            if (shouldUseSplitNotificationShade) {
+                                with(notificationSection) {
+                                    Notifications(
+                                        burnInParams = null,
+                                        modifier =
+                                            Modifier.fillMaxWidth(0.5f)
+                                                .fillMaxHeight()
+                                                .align(alignment = Alignment.TopEnd)
+                                    )
+                                }
+                            }
                         }
-
-                        with(mediaCarouselSection) { MediaCarousel() }
-
-                        if (viewModel.areNotificationsVisible(resources = resources)) {
+                        if (!shouldUseSplitNotificationShade) {
                             with(notificationSection) {
                                 Notifications(
-                                    modifier = Modifier.fillMaxWidth().weight(weight = 1f)
+                                    burnInParams = null,
+                                    modifier = Modifier.weight(weight = 1f)
                                 )
                             }
                         }
-
                         if (!isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
                                 AmbientIndication(modifier = Modifier.fillMaxWidth())
@@ -135,12 +130,26 @@ constructor(
                     }
 
                     // Constrained to the left of the lock icon (in left-to-right layouts).
-                    with(bottomAreaSection) { Shortcut(isStart = true, applyPadding = false) }
+                    with(bottomAreaSection) {
+                        Shortcut(
+                            isStart = true,
+                            applyPadding = false,
+                            modifier =
+                                Modifier.graphicsLayer { translationX = unfoldTranslations.start },
+                        )
+                    }
 
                     with(lockSection) { LockIcon() }
 
                     // Constrained to the right of the lock icon (in left-to-right layouts).
-                    with(bottomAreaSection) { Shortcut(isStart = false, applyPadding = false) }
+                    with(bottomAreaSection) {
+                        Shortcut(
+                            isStart = false,
+                            applyPadding = false,
+                            modifier =
+                                Modifier.graphicsLayer { translationX = unfoldTranslations.end },
+                        )
+                    }
 
                     // Aligned to bottom and constrained to below the lock icon.
                     Column(modifier = Modifier.fillMaxWidth()) {

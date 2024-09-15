@@ -3,7 +3,7 @@ package com.android.systemui.user
 import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.os.UserManager
-import android.test.suitebuilder.annotation.SmallTest
+import androidx.test.filters.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase

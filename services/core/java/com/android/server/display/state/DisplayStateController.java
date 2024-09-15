@@ -18,6 +18,7 @@ package com.android.server.display.state;
 
 import android.hardware.display.DisplayManagerInternal;
 import android.util.IndentingPrintWriter;
+import android.util.Pair;
 import android.view.Display;
 
 import com.android.server.display.DisplayPowerProximityStateController;
@@ -33,6 +34,7 @@ public class DisplayStateController {
     private DisplayPowerProximityStateController mDisplayPowerProximityStateController;
     private boolean mPerformScreenOffTransition = false;
     private int mDozeStateOverride = Display.STATE_UNKNOWN;
+    private int mDozeStateOverrideReason = Display.STATE_REASON_UNKNOWN;
 
     public DisplayStateController(DisplayPowerProximityStateController
             displayPowerProximityStateController) {
@@ -47,14 +49,19 @@ public class DisplayStateController {
      * @param isDisplayEnabled      A boolean flag representing if the display is enabled
      * @param isDisplayInTransition A boolean flag representing if the display is undergoing the
      *                              transition phase
+     * @return a {@link Pair} of integers, the first being the updated display state, and the second
+     *                              being the reason behind the new display state.
      */
-    public int updateDisplayState(DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
-            boolean isDisplayEnabled, boolean isDisplayInTransition) {
+    public Pair<Integer, Integer> updateDisplayState(
+            DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
+            boolean isDisplayEnabled,
+            boolean isDisplayInTransition) {
         mPerformScreenOffTransition = false;
         // Compute the basic display state using the policy.
         // We might override this below based on other factors.
         // Initialise brightness as invalid.
         int state;
+        int reason = Display.STATE_REASON_DEFAULT_POLICY;
         switch (displayPowerRequest.policy) {
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF:
                 state = Display.STATE_OFF;
@@ -63,8 +70,10 @@ public class DisplayStateController {
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE:
                 if (mDozeStateOverride != Display.STATE_UNKNOWN) {
                     state = mDozeStateOverride;
+                    reason = mDozeStateOverrideReason;
                 } else if (displayPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
                     state = displayPowerRequest.dozeScreenState;
+                    reason = displayPowerRequest.dozeScreenStateReason;
                 } else {
                     state = Display.STATE_DOZE;
                 }
@@ -84,11 +93,13 @@ public class DisplayStateController {
             state = Display.STATE_OFF;
         }
 
-        return state;
+        return new Pair(state, reason);
     }
 
-    public void overrideDozeScreenState(int displayState) {
+    /** Overrides the doze screen state with a given reason. */
+    public void overrideDozeScreenState(int displayState, @Display.StateReason int reason) {
         mDozeStateOverride = displayState;
+        mDozeStateOverrideReason = reason;
     }
 
     /**

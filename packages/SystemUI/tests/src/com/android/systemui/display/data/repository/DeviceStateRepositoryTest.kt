@@ -17,8 +17,8 @@
 package com.android.systemui.display.data.repository
 
 import android.hardware.devicestate.DeviceStateManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
@@ -41,7 +41,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -85,7 +85,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onStateChanged(TEST_FOLDED)
+            deviceStateManagerListener.value.onDeviceStateChanged(
+                getDeviceStateForIdentifier(TEST_FOLDED)
+            )
 
             assertThat(state()).isEqualTo(DeviceState.FOLDED)
         }
@@ -95,7 +97,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onStateChanged(TEST_HALF_FOLDED)
+            deviceStateManagerListener.value.onDeviceStateChanged(
+                getDeviceStateForIdentifier(TEST_HALF_FOLDED)
+            )
 
             assertThat(state()).isEqualTo(DeviceState.HALF_FOLDED)
         }
@@ -105,7 +109,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onStateChanged(TEST_UNFOLDED)
+            deviceStateManagerListener.value.onDeviceStateChanged(
+                getDeviceStateForIdentifier(TEST_UNFOLDED)
+            )
 
             assertThat(state()).isEqualTo(DeviceState.UNFOLDED)
         }
@@ -115,7 +121,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onStateChanged(TEST_REAR_DISPLAY)
+            deviceStateManagerListener.value.onDeviceStateChanged(
+                getDeviceStateForIdentifier(TEST_REAR_DISPLAY)
+            )
 
             assertThat(state()).isEqualTo(DeviceState.REAR_DISPLAY)
         }
@@ -125,7 +133,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onStateChanged(TEST_CONCURRENT_DISPLAY)
+            deviceStateManagerListener.value.onDeviceStateChanged(
+                getDeviceStateForIdentifier(TEST_CONCURRENT_DISPLAY)
+            )
 
             assertThat(state()).isEqualTo(DeviceState.CONCURRENT_DISPLAY)
         }
@@ -135,7 +145,9 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val state = displayState()
 
-            deviceStateManagerListener.value.onStateChanged(123456)
+            deviceStateManagerListener.value.onDeviceStateChanged(
+                getDeviceStateForIdentifier(123456)
+            )
 
             assertThat(state()).isEqualTo(DeviceState.UNKNOWN)
         }
@@ -151,6 +163,13 @@ class DeviceStateRepositoryTest : SysuiTestCase() {
     }
 
     private fun Int.toIntArray() = listOf(this).toIntArray()
+
+    private fun getDeviceStateForIdentifier(id: Int): android.hardware.devicestate.DeviceState {
+        return android.hardware.devicestate.DeviceState(
+            android.hardware.devicestate.DeviceState.Configuration.Builder(id, /* name= */ "")
+                .build()
+        )
+    }
 
     private companion object {
         // Used to fake the ids in the test. Note that there is no guarantees different devices will

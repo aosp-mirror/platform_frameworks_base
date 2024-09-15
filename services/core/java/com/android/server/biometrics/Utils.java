@@ -89,11 +89,23 @@ public class Utils {
         return true;
     }
 
-    /** If virtualized biometrics are supported (requires debug build). */
-    public static boolean isVirtualEnabled(@NonNull Context context) {
+    /** If virtualized fingerprint sensor is supported. */
+    public static boolean isFingerprintVirtualEnabled(@NonNull Context context) {
         return Build.isDebuggable()
-                && Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+                && (Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.BIOMETRIC_FINGERPRINT_VIRTUAL_ENABLED, 0,
+                UserHandle.USER_CURRENT) == 1
+                || Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 0, UserHandle.USER_CURRENT) == 1);
+    }
+
+    /** If virtualized face sensor is supported. */
+    public static boolean isFaceVirtualEnabled(@NonNull Context context) {
+        return Build.isDebuggable()
+                && (Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.BIOMETRIC_FACE_VIRTUAL_ENABLED, 0, UserHandle.USER_CURRENT) == 1
+                || Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.BIOMETRIC_VIRTUAL_ENABLED, 0, UserHandle.USER_CURRENT) == 1);
     }
 
     /**

@@ -887,7 +887,7 @@ public final class UserProperties implements Parcelable {
      * <p> Setting this property to true will enable the user's CE storage to remain unlocked when
      * the user is stopped using
      * {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int,
-     * boolean, IStopUserCallback)}.
+     * IStopUserCallback)}.
      *
      * <p> When this property is false, delayed locking may still be applicable at a global
      * level for all users via the {@code config_multiuserDelayUserDataLocking}. That is, delayed

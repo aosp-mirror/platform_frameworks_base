@@ -39,9 +39,9 @@
     <string name="seamless_transition_detail" msgid="4475509237171739843">"Selvom vi nærmer os en fremtid, hvor adgangskoder er mindre fremtrædende, kan de stadig bruges i samspil med adgangsnøgler."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Vælg, hvor du vil gemme dine <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Vælg en adgangskodeadministrator for at gemme dine oplysninger, så du kan logge ind hurtigere næste gang"</string>
-    <string name="choose_create_option_passkey_title" msgid="7980430650778623135">"Vil du oprette en adgangsnøgle for at logge ind på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_password_title" msgid="6238446571944651980">"Vil du gemme adgangskoden for at logge ind på <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
-    <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Vil du gemme loginoplysningerne til <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_passkey_title" msgid="8762295821604276511">"Vil du oprette en adgangsnøgle for at logge ind på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_password_title" msgid="4481366993598649224">"Vil du gemme adgangskoden for at logge ind på <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="choose_create_option_sign_in_title" msgid="7092914088455358079">"Vil du gemme loginoplysningerne til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"adgangsnøgle"</string>
     <string name="password" msgid="6738570945182936667">"adgangskode"</string>
     <string name="passkeys" msgid="5733880786866559847">"adgangsnøgler"</string>
@@ -68,14 +68,15 @@
     <string name="accessibility_back_arrow_button" msgid="3233198183497842492">"Gå tilbage til den forrige side"</string>
     <string name="accessibility_close_button" msgid="1163435587545377687">"Luk"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Luk"</string>
-    <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vil du bruge din gemte adgangsnøgle til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Vil du bruge din gemte adgangskode til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Vil du bruge dine loginoplysninger til <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Vil du låse enheden op for at se loginmetoder for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_passkey_for" msgid="479261099705979148">"Brug din gemte adgangsnøgle til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_password_for" msgid="688557784207167647">"Brug din gemte adgangskode til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="4233553937542583226">"Brug din konto til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_description_single_tap" msgid="2797059565126030879">"Brug din skærmlås til at logge ind på <xliff:g id="APP_NAME">%1$s</xliff:g> med <xliff:g id="USERNAME">%2$s</xliff:g>"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7096423827682163270">"Lås loginmetoder for <xliff:g id="APP_NAME">%1$s</xliff:g> op"</string>
     <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Vælg en gemt adgangsnøgle til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Vælg en gemt adgangskode til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Vælg en gemt loginmetode til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Vælg loginoplysninger til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="645728947702442421">"Vælg en konto til <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Vil du vælge en mulighed for <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Vil du bruge disse oplysninger i <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Log ind på en anden måde"</string>

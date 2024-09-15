@@ -15,7 +15,8 @@
  */
 package com.android.systemui.statusbar.phone
 
-import android.testing.AndroidTestingRunner
+import android.hardware.devicestate.DeviceState
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.systemui.SysuiTestCase
@@ -29,7 +30,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations.initMocks
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @SmallTest
 class FoldStateListenerTest : SysuiTestCase() {
 
@@ -40,52 +41,52 @@ class FoldStateListenerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         initMocks(this)
-        setFoldedStates(DEVICE_STATE_FOLDED)
-        setGoToSleepStates(DEVICE_STATE_FOLDED)
+        setFoldedStates(DEVICE_STATE_FOLDED.identifier)
+        setGoToSleepStates(DEVICE_STATE_FOLDED.identifier)
         sut = FoldStateListener(mContext, listener)
     }
 
     @Test
     fun onStateChanged_stateFolded_notifiesWithFoldedAndGoingToSleep() {
-        sut.onStateChanged(DEVICE_STATE_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_FOLDED)
 
         verify(listener).onFoldStateChanged(FOLDED, WILL_GO_TO_SLEEP)
     }
 
     @Test
     fun onStateChanged_stateHalfFolded_notifiesWithNotFoldedAndNotGoingToSleep() {
-        sut.onStateChanged(DEVICE_STATE_HALF_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_HALF_FOLDED)
 
         verify(listener).onFoldStateChanged(NOT_FOLDED, WILL_NOT_SLEEP)
     }
 
     @Test
     fun onStateChanged_stateUnfolded_notifiesWithNotFoldedAndNotGoingToSleep() {
-        sut.onStateChanged(DEVICE_STATE_UNFOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_UNFOLDED)
 
         verify(listener).onFoldStateChanged(NOT_FOLDED, WILL_NOT_SLEEP)
     }
 
     @Test
     fun onStateChanged_stateUnfoldedThenHalfFolded_notifiesOnce() {
-        sut.onStateChanged(DEVICE_STATE_UNFOLDED)
-        sut.onStateChanged(DEVICE_STATE_HALF_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_UNFOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_HALF_FOLDED)
 
         verify(listener, times(1)).onFoldStateChanged(NOT_FOLDED, WILL_NOT_SLEEP)
     }
 
     @Test
     fun onStateChanged_stateHalfFoldedThenUnfolded_notifiesOnce() {
-        sut.onStateChanged(DEVICE_STATE_HALF_FOLDED)
-        sut.onStateChanged(DEVICE_STATE_UNFOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_HALF_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_UNFOLDED)
 
         verify(listener, times(1)).onFoldStateChanged(NOT_FOLDED, WILL_NOT_SLEEP)
     }
 
     @Test
     fun onStateChanged_stateHalfFoldedThenFolded_notifiesTwice() {
-        sut.onStateChanged(DEVICE_STATE_HALF_FOLDED)
-        sut.onStateChanged(DEVICE_STATE_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_HALF_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_FOLDED)
 
         val inOrder = Mockito.inOrder(listener)
         inOrder.verify(listener).onFoldStateChanged(NOT_FOLDED, WILL_NOT_SLEEP)
@@ -94,8 +95,8 @@ class FoldStateListenerTest : SysuiTestCase() {
 
     @Test
     fun onStateChanged_stateFoldedThenHalfFolded_notifiesTwice() {
-        sut.onStateChanged(DEVICE_STATE_FOLDED)
-        sut.onStateChanged(DEVICE_STATE_HALF_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_FOLDED)
+        sut.onDeviceStateChanged(DEVICE_STATE_HALF_FOLDED)
 
         val inOrder = Mockito.inOrder(listener)
         inOrder.verify(listener).onFoldStateChanged(FOLDED, WILL_GO_TO_SLEEP)
@@ -117,9 +118,18 @@ class FoldStateListenerTest : SysuiTestCase() {
     }
 
     companion object {
-        private const val DEVICE_STATE_FOLDED = 123
-        private const val DEVICE_STATE_HALF_FOLDED = 456
-        private const val DEVICE_STATE_UNFOLDED = 789
+        private val DEVICE_STATE_FOLDED = DeviceState(
+            DeviceState.Configuration.Builder(123 /* id */, "FOLDED" /* name */)
+                    .build()
+        )
+        private val DEVICE_STATE_HALF_FOLDED = DeviceState(
+            DeviceState.Configuration.Builder(456 /* id */, "HALF_FOLDED" /* name */)
+                    .build()
+        )
+        private val DEVICE_STATE_UNFOLDED = DeviceState(
+            DeviceState.Configuration.Builder(789 /* id */, "UNFOLDED" /* name */)
+                    .build()
+        )
 
         private const val FOLDED = true
         private const val NOT_FOLDED = false

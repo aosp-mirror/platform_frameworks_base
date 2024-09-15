@@ -129,7 +129,6 @@ public class TransitionAnimation {
     private final int mDefaultWindowAnimationStyleResId;
 
     private final boolean mDebug;
-    private final boolean mGridLayoutRecentsEnabled;
     private final boolean mLowRamRecentsEnabled;
 
     public TransitionAnimation(Context context, boolean debug, String tag) {
@@ -166,7 +165,6 @@ public class TransitionAnimation {
         mConfigShortAnimTime = context.getResources().getInteger(
                 com.android.internal.R.integer.config_shortAnimTime);
 
-        mGridLayoutRecentsEnabled = SystemProperties.getBoolean("ro.recents.grid", false);
         mLowRamRecentsEnabled = ActivityManager.isLowRamDeviceStatic();
 
         final TypedArray windowStyle = mContext.getTheme().obtainStyledAttributes(
@@ -768,10 +766,8 @@ public class TransitionAnimation {
                         // We scale the width and clip to the top/left square
                         float scale =
                                 thumbWidth / (appWidth - contentInsets.left - contentInsets.right);
-                        if (!mGridLayoutRecentsEnabled) {
-                            int unscaledThumbHeight = (int) (thumbHeight / scale);
-                            mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
-                        }
+                        int unscaledThumbHeight = (int) (thumbHeight / scale);
+                        mTmpFromClipRect.bottom = mTmpFromClipRect.top + unscaledThumbHeight;
 
                         Animation scaleAnim = new ScaleAnimation(
                                 scaleUp ? scale : 1, scaleUp ? 1 : scale,
@@ -887,12 +883,6 @@ public class TransitionAnimation {
             toY = appRect.height() / 2 * (1 - 1 / scaleW) + appRect.top;
             pivotX = mTmpRect.width() / 2;
             pivotY = appRect.height() / 2 / scaleW;
-            if (mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header is displayed above the thumbnail instead of
-                // overlapping it.
-                fromY -= thumbHeightI;
-                toY -= thumbHeightI * scaleW;
-            }
         } else {
             pivotX = 0;
             pivotY = 0;
@@ -936,10 +926,7 @@ public class TransitionAnimation {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
+            set.addAnimation(alpha);
             set.addAnimation(translate);
             set.addAnimation(clipAnim);
             a = set;
@@ -958,10 +945,7 @@ public class TransitionAnimation {
             // This AnimationSet uses the Interpolators assigned above.
             AnimationSet set = new AnimationSet(false);
             set.addAnimation(scale);
-            if (!mGridLayoutRecentsEnabled) {
-                // In the grid layout, the header should be shown for the whole animation.
-                set.addAnimation(alpha);
-            }
+            set.addAnimation(alpha);
             set.addAnimation(translate);
             a = set;
 
@@ -1081,8 +1065,7 @@ public class TransitionAnimation {
      * @return whether the transition should show the thumbnail being scaled down.
      */
     private boolean shouldScaleDownThumbnailTransition(int orientation) {
-        return mGridLayoutRecentsEnabled
-                || orientation == Configuration.ORIENTATION_PORTRAIT;
+        return orientation == Configuration.ORIENTATION_PORTRAIT;
     }
 
     private static int updateToTranslucentAnimIfNeeded(int anim, @TransitionOldType int transit) {
@@ -1316,6 +1299,21 @@ public class TransitionAnimation {
                 == HardwareBuffer.USAGE_PROTECTED_CONTENT;
     }
 
+    /**
+     * Returns the luminance in 0~1. The surface control is the source of the hardware buffer,
+     * which will be used if the buffer is protected from reading.
+     */
+    public static float getBorderLuma(@NonNull HardwareBuffer hwBuffer,
+            @NonNull ColorSpace colorSpace, @NonNull SurfaceControl sourceSurfaceControl) {
+        if (hasProtectedContent(hwBuffer)) {
+            // The buffer cannot be read. Capture another buffer which excludes protected content
+            // from the source surface.
+            return getBorderLuma(sourceSurfaceControl, hwBuffer.getWidth(), hwBuffer.getHeight());
+        }
+        // Use the existing buffer directly.
+        return getBorderLuma(hwBuffer, colorSpace);
+    }
+
     /** Returns the luminance in 0~1. */
     public static float getBorderLuma(SurfaceControl surfaceControl, int w, int h) {
         final ScreenCapture.ScreenshotHardwareBuffer buffer =
@@ -1357,35 +1355,39 @@ public class TransitionAnimation {
         final int pixelStride = plane.getPixelStride();
         final int rowStride = plane.getRowStride();
         final int sampling = 10;
-        final int[] borderLumas = new int[(width + height) * 2 / sampling];
+        final int[] histogram = new int[256];
 
         // Grab the top and bottom borders.
         int i = 0;
         for (int x = 0, size = width - sampling; x < size; x += sampling) {
-            borderLumas[i++] = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
-            borderLumas[i++] = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+            final int topLm = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
+            final int bottomLm = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
+            histogram[topLm]++;
+            histogram[bottomLm]++;
         }
 
         // Grab the left and right borders.
         for (int y = 0, size = height - sampling; y < size; y += sampling) {
-            borderLumas[i++] = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
-            borderLumas[i++] = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+            final int leftLm = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
+            final int rightLm = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
+            histogram[leftLm]++;
+            histogram[rightLm]++;
         }
 
         ir.close();
 
-        // Get "mode" by histogram.
-        final int[] histogram = new int[256];
-        int maxCount = 0;
-        int mostLuma = 0;
-        for (int luma : borderLumas) {
-            final int count = ++histogram[luma];
-            if (count > maxCount) {
-                maxCount = count;
-                mostLuma = luma;
+        // Find the median from histogram.
+        final int halfNum = (width + height) / sampling;
+        int sum = 0;
+        int medianLuminance = 0;
+        for (i = 0; i < histogram.length; i++) {
+            sum += histogram[i];
+            if (sum >= halfNum) {
+                medianLuminance = i;
+                break;
             }
         }
-        return mostLuma / 255f;
+        return medianLuminance / 255f;
     }
 
     /** Returns the luminance of the pixel in 0~255. */

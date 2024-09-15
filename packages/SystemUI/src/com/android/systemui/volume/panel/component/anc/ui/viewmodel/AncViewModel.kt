@@ -16,52 +16,83 @@
 
 package com.android.systemui.volume.panel.component.anc.ui.viewmodel
 
-import android.content.Context
+import android.content.Intent
 import androidx.slice.Slice
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.res.R
+import androidx.slice.SliceItem
+import com.android.systemui.volume.panel.component.anc.domain.AncAvailabilityCriteria
 import com.android.systemui.volume.panel.component.anc.domain.interactor.AncSliceInteractor
-import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
+import com.android.systemui.volume.panel.component.anc.domain.model.AncSlices
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /** Volume Panel ANC component view model. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @VolumePanelScope
 class AncViewModel
 @Inject
 constructor(
-    @Application private val context: Context,
     @VolumePanelScope private val coroutineScope: CoroutineScope,
     private val interactor: AncSliceInteractor,
+    private val availabilityCriteria: AncAvailabilityCriteria,
 ) {
 
-    /** ANC [Slice]. Null when there is no slice available for ANC. */
-    val slice: StateFlow<Slice?> =
-        interactor.ancSlice.stateIn(coroutineScope, SharingStarted.Eagerly, null)
+    val isAvailable: Flow<Boolean>
+        get() = availabilityCriteria.isAvailable()
 
-    /**
-     * ButtonViewModel to be shown in the VolumePanel. Null when there is no ANC Slice available.
-     */
-    val button: StateFlow<ButtonViewModel?> =
-        interactor.ancSlice
-            .map { slice ->
-                slice?.let {
-                    ButtonViewModel(
-                        Icon.Resource(R.drawable.ic_noise_aware, null),
-                        context.getString(R.string.volume_panel_noise_control_title)
-                    )
-                }
-            }
+    /** ANC [Slice]. Null when there is no slice available for ANC. */
+    val popupSlice: StateFlow<Slice?> =
+        interactor.ancSlices
+            .filterIsInstance<AncSlices.Ready>()
+            .map { it.popupSlice }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
-    /** Call this to update [slice] width in a reaction to container size change. */
-    fun changeSliceWidth(width: Int) {
-        interactor.changeWidth(width)
+    /** Button [Slice] to be shown in the VolumePanel. Null when there is no ANC Slice available. */
+    val buttonSlice: StateFlow<Slice?> =
+        interactor.ancSlices
+            .filterIsInstance<AncSlices.Ready>()
+            .map { it.buttonSlice }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+
+    fun isClickable(slice: Slice?): Boolean {
+        slice ?: return false
+        val slices = ArrayDeque<SliceItem>()
+        slices.addAll(slice.items)
+        while (slices.isNotEmpty()) {
+            val item: SliceItem = slices.removeFirst()
+            when (item.format) {
+                android.app.slice.SliceItem.FORMAT_ACTION -> {
+                    val itemActionIntent: Intent? = item.action?.intent
+                    if (itemActionIntent?.hasExtra(EXTRA_ANC_ENABLED) == true) {
+                        return itemActionIntent.getBooleanExtra(EXTRA_ANC_ENABLED, true)
+                    }
+                }
+                android.app.slice.SliceItem.FORMAT_SLICE -> {
+                    item.slice?.items?.let(slices::addAll)
+                }
+            }
+        }
+        return true
+    }
+
+    private companion object {
+        const val EXTRA_ANC_ENABLED = "EXTRA_ANC_ENABLED"
+    }
+
+    /** Call this to update [popupSlice] width in a reaction to container size change. */
+    fun onPopupSliceWidthChanged(width: Int) {
+        interactor.onPopupSliceWidthChanged(width)
+    }
+
+    /** Call this to update [buttonSlice] width in a reaction to container size change. */
+    fun onButtonSliceWidthChanged(width: Int) {
+        interactor.onButtonSliceWidthChanged(width)
     }
 }

@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -37,8 +38,7 @@ import com.android.packageinstaller.v2.ui.InstallActionListener;
  */
 public class InstallConfirmationFragment extends DialogFragment {
 
-    public static String TAG = InstallConfirmationFragment.class.getSimpleName();
-
+    public static final String LOG_TAG = InstallConfirmationFragment.class.getSimpleName();
     @NonNull
     private final InstallUserActionRequired mDialogData;
     @NonNull
@@ -59,6 +59,7 @@ public class InstallConfirmationFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "Creating " + LOG_TAG + "\n" + mDialogData);
         View dialogView = getLayoutInflater().inflate(R.layout.install_content_view, null);
 
         int positiveBtnTextRes;

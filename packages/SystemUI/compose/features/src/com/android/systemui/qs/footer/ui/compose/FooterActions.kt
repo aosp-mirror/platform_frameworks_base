@@ -16,6 +16,12 @@
 
 package com.android.systemui.qs.footer.ui.compose
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.LocalIndication
@@ -38,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,8 +68,10 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.Expandable
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.background
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.colorAttr
@@ -76,8 +83,44 @@ import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsForegroundServicesButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsSecurityButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.qs.ui.composable.QuickSettings
+import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
+
+@Composable
+fun SceneScope.FooterActionsWithAnimatedVisibility(
+    viewModel: FooterActionsViewModel,
+    isCustomizing: Boolean,
+    customizingAnimationDuration: Int,
+    lifecycleOwner: LifecycleOwner,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = !isCustomizing,
+        enter =
+            expandVertically(
+                animationSpec = tween(customizingAnimationDuration),
+                initialHeight = { 0 },
+            ) + fadeIn(tween(customizingAnimationDuration)),
+        exit =
+            shrinkVertically(
+                animationSpec = tween(customizingAnimationDuration),
+                targetHeight = { 0 },
+            ) + fadeOut(tween(customizingAnimationDuration)),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        QuickSettingsTheme {
+            // This view has its own horizontal padding
+            // TODO(b/321716470) This should use a lifecycle tied to the scene.
+            FooterActions(
+                viewModel = viewModel,
+                qsVisibilityLifecycleOwner = lifecycleOwner,
+                modifier = Modifier.element(QuickSettings.Elements.FooterActions),
+            )
+        }
+    }
+}
 
 /** The Quick Settings footer actions row. */
 @Composable
@@ -89,8 +132,8 @@ fun FooterActions(
     val context = LocalContext.current
 
     // Collect alphas as soon as we are composed, even when not visible.
-    val alpha by viewModel.alpha.collectAsState()
-    val backgroundAlpha = viewModel.backgroundAlpha.collectAsState()
+    val alpha by viewModel.alpha.collectAsStateWithLifecycle()
+    val backgroundAlpha = viewModel.backgroundAlpha.collectAsStateWithLifecycle()
 
     var security by remember { mutableStateOf<FooterActionsSecurityButtonViewModel?>(null) }
     var foregroundServices by remember {

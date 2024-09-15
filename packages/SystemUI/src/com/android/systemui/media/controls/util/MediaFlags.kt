@@ -21,16 +21,11 @@ import android.os.UserHandle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
 
 @SysUISingleton
-class MediaFlags
-@Inject
-constructor(
-    private val featureFlags: FeatureFlagsClassic,
-    private val sceneContainerFlags: SceneContainerFlags
-) {
+class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClassic) {
     /**
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
@@ -56,9 +51,5 @@ constructor(
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
 
     /** Check whether to use scene framework */
-    fun isSceneContainerEnabled() =
-        sceneContainerFlags.isEnabled() && MediaInSceneContainerFlag.isEnabled
-
-    /** Check whether to use media refactor code */
-    fun isMediaControlsRefactorEnabled() = MediaControlsRefactorFlag.isEnabled
+    fun isSceneContainerEnabled() = SceneContainerFlag.isEnabled
 }

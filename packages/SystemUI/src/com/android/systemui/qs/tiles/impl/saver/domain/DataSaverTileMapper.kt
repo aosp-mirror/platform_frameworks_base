@@ -36,7 +36,6 @@ constructor(
     override fun map(config: QSTileConfig, data: DataSaverTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             with(data) {
-                val iconRes: Int
                 if (isEnabled) {
                     activationState = QSTileState.ActivationState.ACTIVE
                     iconRes = R.drawable.qs_data_saver_icon_on
@@ -47,7 +46,7 @@ constructor(
                     secondaryLabel = resources.getStringArray(R.array.tile_states_saver)[1]
                 }
                 val loadedIcon =
-                    Icon.Loaded(resources.getDrawable(iconRes, theme), contentDescription = null)
+                    Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
                 icon = { loadedIcon }
                 contentDescription = label
                 supportedActions =

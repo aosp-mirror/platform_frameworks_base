@@ -25,7 +25,7 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.service.notification.NotificationListenerService.Ranking
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -48,7 +48,7 @@ private const val PACKAGE = "pkg"
 private const val USER_ID = -1
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class TargetSdkResolverTest : SysuiTestCase() {
     private val packageManager: PackageManager = mock()
     private val applicationInfo = ApplicationInfo().apply { targetSdkVersion = SDK_VERSION }

@@ -64,8 +64,8 @@ public final class DataStoreUtils {
      * IMPORTANT: the method will ALWAYS return the same {@link AtomicFile} object, which makes it
      * possible to synchronize reads and writes to the file using the returned object.
      *
-     * @param userId              the userId to retrieve the storage file
-     * @param fileName         the storage file name
+     * @param userId the userId to retrieve the storage file
+     * @param fileName the storage file name
      * @return an AtomicFile for the user
      */
     @NonNull

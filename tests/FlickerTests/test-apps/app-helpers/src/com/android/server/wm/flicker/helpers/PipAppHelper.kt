@@ -18,10 +18,11 @@ package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
 import android.content.Intent
+import android.graphics.Rect
+import android.graphics.Region
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.tools.datatypes.Rect
-import android.tools.datatypes.Region
+import android.tools.datatypes.coversMoreThan
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.helpers.FIND_TIMEOUT
 import android.tools.helpers.SYSTEMUI_PACKAGE
@@ -62,7 +63,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
 
     /** Drags the PIP window to the provided final coordinates without releasing the pointer. */
     fun dragPipWindowAwayFromEdgeWithoutRelease(wmHelper: WindowManagerStateHelper, steps: Int) {
-        val initWindowRect = getWindowRect(wmHelper).clone()
+        val initWindowRect = Rect(getWindowRect(wmHelper))
 
         // initial pointer at the center of the window
         val initialCoord =
@@ -101,7 +102,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
      * @throws IllegalStateException if default display bounds are not available
      */
     fun dragPipWindowAwayFromEdge(wmHelper: WindowManagerStateHelper, steps: Int) {
-        val initWindowRect = getWindowRect(wmHelper).clone()
+        val initWindowRect = Rect(getWindowRect(wmHelper))
 
         // initial pointer at the center of the window
         val startX = initWindowRect.centerX()
@@ -153,12 +154,12 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         val windowRect = getWindowRect(wmHelper)
 
         // first pointer's initial x coordinate is halfway between the left edge and the center
-        val initLeftX = (windowRect.centerX() - windowRect.width / 4).toFloat()
+        val initLeftX = (windowRect.centerX() - windowRect.width() / 4).toFloat()
         // second pointer's initial x coordinate is halfway between the right edge and the center
-        val initRightX = (windowRect.centerX() + windowRect.width / 4).toFloat()
+        val initRightX = (windowRect.centerX() + windowRect.width() / 4).toFloat()
 
         // horizontal distance the window should increase by
-        val distIncrease = windowRect.width * percent
+        val distIncrease = windowRect.width() * percent
 
         // final x-coordinates
         val finalLeftX = initLeftX - (distIncrease / 2)
@@ -183,7 +184,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             adjustedSteps
         )
 
-        waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
+        waitForPipWindowToExpandFrom(wmHelper, Region(windowRect))
     }
 
     /**
@@ -201,12 +202,12 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         val windowRect = getWindowRect(wmHelper)
 
         // first pointer's initial x coordinate is halfway between the left edge and the center
-        val initLeftX = (windowRect.centerX() - windowRect.width / 4).toFloat()
+        val initLeftX = (windowRect.centerX() - windowRect.width() / 4).toFloat()
         // second pointer's initial x coordinate is halfway between the right edge and the center
-        val initRightX = (windowRect.centerX() + windowRect.width / 4).toFloat()
+        val initRightX = (windowRect.centerX() + windowRect.width() / 4).toFloat()
 
         // decrease by the distance specified through the percentage
-        val distDecrease = windowRect.width * percent
+        val distDecrease = windowRect.width() * percent
 
         // get the final x-coordinates and make sure they are not passing the center of the window
         val finalLeftX = Math.min(initLeftX + (distDecrease / 2), windowRect.centerX().toFloat())
@@ -231,7 +232,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             adjustedSteps
         )
 
-        waitForPipWindowToMinimizeFrom(wmHelper, Region.from(windowRect))
+        waitForPipWindowToMinimizeFrom(wmHelper, Region(windowRect))
     }
 
     /**
@@ -375,7 +376,7 @@ open class PipAppHelper(instrumentation: Instrumentation) :
         uiDevice.click(windowRect.centerX(), windowRect.centerY())
         Log.d(TAG, "Wait for app transition to end")
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
-        waitForPipWindowToExpandFrom(wmHelper, Region.from(windowRect))
+        waitForPipWindowToExpandFrom(wmHelper, Region(windowRect))
     }
 
     private fun waitForPipWindowToExpandFrom(

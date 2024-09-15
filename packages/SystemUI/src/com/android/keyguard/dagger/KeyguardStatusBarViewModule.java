@@ -17,8 +17,8 @@
 package com.android.keyguard.dagger;
 
 import com.android.keyguard.CarrierText;
-import com.android.systemui.res.R;
 import com.android.systemui.battery.BatteryMeterView;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherContainer;

@@ -22,6 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.database.sqlite.Flags;
 import android.database.sqlite.SQLiteAbortException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
@@ -1609,13 +1610,68 @@ public class DatabaseUtils {
      * Comments either start with "--" and run to the end of the line or are C-style block
      * comments.  The function returns null if a prefix could not be found.
      */
-    private static String getSqlStatementPrefixExtended(String sql) {
+    private static String getSqlStatementPrefixExtendedRegex(String sql) {
         Matcher m = sPrefixPattern.matcher(sql);
         if (m.lookingAt()) {
             return m.group(PREFIX_GROUP_NUM).toUpperCase(Locale.ROOT);
         } else {
             return null;
         }
+    }
+
+    /**
+     * Return the index of the first character past comments and whitespace.  -1 is returned if
+     * a comment is malformed.
+     */
+    private static int getSqlStatementPrefixOffset(String s) {
+        final int limit = s.length() - 2;
+        if (limit < 0) return -1;
+        int i = 0;
+        while (i < limit) {
+            final char c = s.charAt(i);
+            if (c <= ' ') {
+                // This behavior conforms to String.trim(), which is used by the legacy Android
+                // SQL prefix logic.  This test is not unicode-aware.  Notice that it accepts the
+                // null character as whitespace even though the null character will terminate the
+                // SQL string in native code.
+                i++;
+            } else if (c == '-') {
+                if (s.charAt(i+1) != '-') return i;
+                i = s.indexOf('\n', i+2);
+                if (i < 0) return -1;
+                i++;
+            } else if (c == '/') {
+                if (s.charAt(i+1) != '*') return i;
+                i++;
+                do {
+                    i = s.indexOf('*', i+1);
+                    if (i < 0) return -1;
+                    i++;
+                } while (s.charAt(i) != '/');
+                i++;
+            } else {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Scan past leading comments without using the Java regex routines.
+     */
+    private static String getSqlStatementPrefixExtendedNoRegex(String sql) {
+        int n = getSqlStatementPrefixOffset(sql);
+        if (n < 0) {
+            // Bad comment syntax.
+            return null;
+        }
+        final int end = sql.length();
+        if (n > end) {
+            // Bad scanning.  This indicates a programming error.
+            return null;
+        }
+        final int eos = Math.min(n+3, end);
+        return sql.substring(n, eos).toUpperCase(Locale.ROOT);
     }
 
     /**
@@ -1663,11 +1719,15 @@ public class DatabaseUtils {
      * @hide
      */
     public static int getSqlStatementTypeExtended(@NonNull String sql) {
-        int type = categorizeStatement(getSqlStatementPrefixSimple(sql), sql);
-        if (type == STATEMENT_COMMENT) {
-            type = categorizeStatement(getSqlStatementPrefixExtended(sql), sql);
+        if (Flags.simpleSqlCommentScanner()) {
+            return categorizeStatement(getSqlStatementPrefixExtendedNoRegex(sql), sql);
+        } else {
+            int type = categorizeStatement(getSqlStatementPrefixSimple(sql), sql);
+            if (type == STATEMENT_COMMENT) {
+                type = categorizeStatement(getSqlStatementPrefixExtendedRegex(sql), sql);
+            }
+            return type;
         }
-        return type;
     }
 
     /**

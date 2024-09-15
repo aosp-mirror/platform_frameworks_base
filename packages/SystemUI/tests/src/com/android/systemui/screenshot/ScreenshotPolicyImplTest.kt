@@ -18,11 +18,6 @@ package com.android.systemui.screenshot
 
 import android.app.ActivityTaskManager.RootTaskInfo
 import android.app.IActivityTaskManager
-import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
-import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
-import android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED
-import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-import android.app.WindowConfiguration.WINDOWING_MODE_PINNED
 import android.content.ComponentName
 import android.content.Context
 import android.graphics.Rect
@@ -31,6 +26,12 @@ import android.os.UserManager
 import android.testing.AndroidTestingRunner
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenshot.ScreenshotPolicy.DisplayContentInfo
+import com.android.systemui.screenshot.policy.ActivityType.Home
+import com.android.systemui.screenshot.policy.ActivityType.Undefined
+import com.android.systemui.screenshot.policy.WindowingMode.FullScreen
+import com.android.systemui.screenshot.policy.WindowingMode.PictureInPicture
+import com.android.systemui.screenshot.policy.newChildTask
+import com.android.systemui.screenshot.policy.newRootTaskInfo
 import com.android.systemui.settings.FakeDisplayTracker
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
@@ -58,20 +59,19 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
                     ),
                     Rect(0, 0, 1080, 2400),
                     UserHandle.of(MANAGED_PROFILE_USER),
-                    65))
+                    65
+                )
+            )
     }
 
     @Test
     fun findPrimaryContent_ignoresPipTask() = runBlocking {
-        val policy = fakeTasksPolicyImpl(
-            mContext,
-            shadeExpanded = false,
-            tasks = listOf(
-                    pipTask,
-                    fullScreenWorkProfileTask,
-                    launcherTask,
-                    emptyTask)
-        )
+        val policy =
+            fakeTasksPolicyImpl(
+                mContext,
+                shadeExpanded = false,
+                tasks = listOf(pipTask, fullScreenWorkProfileTask, launcherTask, emptyTask)
+            )
 
         val info = policy.findPrimaryContent(DISPLAY_ID)
         assertThat(info).isEqualTo(fullScreenWorkProfileTask.toDisplayContentInfo())
@@ -79,14 +79,12 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
 
     @Test
     fun findPrimaryContent_shadeExpanded_ignoresTopTask() = runBlocking {
-        val policy = fakeTasksPolicyImpl(
-            mContext,
-            shadeExpanded = true,
-            tasks = listOf(
-                fullScreenWorkProfileTask,
-                launcherTask,
-                emptyTask)
-        )
+        val policy =
+            fakeTasksPolicyImpl(
+                mContext,
+                shadeExpanded = true,
+                tasks = listOf(fullScreenWorkProfileTask, launcherTask, emptyTask)
+            )
 
         val info = policy.findPrimaryContent(DISPLAY_ID)
         assertThat(info).isEqualTo(policy.systemUiContent)
@@ -94,11 +92,7 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
 
     @Test
     fun findPrimaryContent_emptyTaskList() = runBlocking {
-        val policy = fakeTasksPolicyImpl(
-            mContext,
-            shadeExpanded = false,
-            tasks = listOf()
-        )
+        val policy = fakeTasksPolicyImpl(mContext, shadeExpanded = false, tasks = listOf())
 
         val info = policy.findPrimaryContent(DISPLAY_ID)
         assertThat(info).isEqualTo(policy.systemUiContent)
@@ -106,14 +100,12 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
 
     @Test
     fun findPrimaryContent_workProfileNotOnTop() = runBlocking {
-        val policy = fakeTasksPolicyImpl(
-            mContext,
-            shadeExpanded = false,
-            tasks = listOf(
-                launcherTask,
-                fullScreenWorkProfileTask,
-                emptyTask)
-        )
+        val policy =
+            fakeTasksPolicyImpl(
+                mContext,
+                shadeExpanded = false,
+                tasks = listOf(launcherTask, fullScreenWorkProfileTask, emptyTask)
+            )
 
         val info = policy.findPrimaryContent(DISPLAY_ID)
         assertThat(info).isEqualTo(launcherTask.toDisplayContentInfo())
@@ -129,102 +121,80 @@ class ScreenshotPolicyImplTest : SysuiTestCase() {
         val dispatcher = Dispatchers.Unconfined
         val displayTracker = FakeDisplayTracker(context)
 
-        return object : ScreenshotPolicyImpl(context, userManager, atmService, dispatcher,
-                displayTracker) {
+        return object :
+            ScreenshotPolicyImpl(context, userManager, atmService, dispatcher, displayTracker) {
             override suspend fun isManagedProfile(userId: Int) = (userId == MANAGED_PROFILE_USER)
             override suspend fun getAllRootTaskInfosOnDisplay(displayId: Int) = tasks
             override suspend fun isNotificationShadeExpanded() = shadeExpanded
         }
     }
 
-    private val pipTask = RootTaskInfo().apply {
-        configuration.windowConfiguration.apply {
-            windowingMode = WINDOWING_MODE_PINNED
-            setBounds(Rect(628, 1885, 1038, 2295))
-            activityType = ACTIVITY_TYPE_STANDARD
+    private val pipTask =
+        newRootTaskInfo(
+            taskId = 66,
+            userId = PRIMARY_USER,
+            displayId = DISPLAY_ID,
+            bounds = Rect(628, 1885, 1038, 2295),
+            windowingMode = PictureInPicture,
+            topActivity = ComponentName.unflattenFromString(YOUTUBE_PIP_ACTIVITY),
+        ) {
+            listOf(newChildTask(taskId = 66, userId = 0, name = YOUTUBE_HOME_ACTIVITY))
         }
-        displayId = DISPLAY_ID
-        userId = PRIMARY_USER
-        taskId = 66
-        visible = true
-        isVisible = true
-        isRunning = true
-        numActivities = 1
-        topActivity = ComponentName(
-            "com.google.android.youtube",
-            "com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity"
-        )
-        childTaskIds = intArrayOf(66)
-        childTaskNames = arrayOf("com.google.android.youtube/" +
-                "com.google.android.youtube.app.honeycomb.Shell\$HomeActivity")
-        childTaskUserIds = intArrayOf(0)
-        childTaskBounds = arrayOf(Rect(628, 1885, 1038, 2295))
-    }
 
-    private val fullScreenWorkProfileTask = RootTaskInfo().apply {
-        configuration.windowConfiguration.apply {
-            windowingMode = WINDOWING_MODE_FULLSCREEN
-            setBounds(Rect(0, 0, 1080, 2400))
-            activityType = ACTIVITY_TYPE_STANDARD
+    private val fullScreenWorkProfileTask =
+        newRootTaskInfo(
+            taskId = 65,
+            userId = MANAGED_PROFILE_USER,
+            displayId = DISPLAY_ID,
+            bounds = Rect(0, 0, 1080, 2400),
+            windowingMode = FullScreen,
+            topActivity = ComponentName.unflattenFromString(FILES_HOME_ACTIVITY),
+        ) {
+            listOf(
+                newChildTask(taskId = 65, userId = MANAGED_PROFILE_USER, name = FILES_HOME_ACTIVITY)
+            )
         }
-        displayId = DISPLAY_ID
-        userId = MANAGED_PROFILE_USER
-        taskId = 65
-        visible = true
-        isVisible = true
-        isRunning = true
-        numActivities = 1
-        topActivity = ComponentName(
-            "com.google.android.apps.nbu.files",
-            "com.google.android.apps.nbu.files.home.HomeActivity"
-        )
-        childTaskIds = intArrayOf(65)
-        childTaskNames = arrayOf("com.google.android.apps.nbu.files/" +
-                "com.google.android.apps.nbu.files.home.HomeActivity")
-        childTaskUserIds = intArrayOf(MANAGED_PROFILE_USER)
-        childTaskBounds = arrayOf(Rect(0, 0, 1080, 2400))
-    }
+    private val launcherTask =
+        newRootTaskInfo(
+            taskId = 1,
+            userId = PRIMARY_USER,
+            displayId = DISPLAY_ID,
+            activityType = Home,
+            windowingMode = FullScreen,
+            bounds = Rect(0, 0, 1080, 2400),
+            topActivity = ComponentName.unflattenFromString(LAUNCHER_ACTIVITY),
+        ) {
+            listOf(newChildTask(taskId = 1, userId = 0, name = LAUNCHER_ACTIVITY))
+        }
 
-    private val launcherTask = RootTaskInfo().apply {
-        configuration.windowConfiguration.apply {
-            windowingMode = WINDOWING_MODE_FULLSCREEN
-            setBounds(Rect(0, 0, 1080, 2400))
-            activityType = ACTIVITY_TYPE_HOME
+    private val emptyTask =
+        newRootTaskInfo(
+            taskId = 2,
+            userId = PRIMARY_USER,
+            displayId = DISPLAY_ID,
+            visible = false,
+            running = false,
+            numActivities = 0,
+            activityType = Undefined,
+            bounds = Rect(0, 0, 1080, 2400),
+        ) {
+            listOf(
+                newChildTask(taskId = 3, name = ""),
+                newChildTask(taskId = 4, name = ""),
+            )
         }
-        displayId = DISPLAY_ID
-        taskId = 1
-        userId = PRIMARY_USER
-        visible = true
-        isVisible = true
-        isRunning = true
-        numActivities = 1
-        topActivity = ComponentName(
-            "com.google.android.apps.nexuslauncher",
-            "com.google.android.apps.nexuslauncher.NexusLauncherActivity",
-        )
-        childTaskIds = intArrayOf(1)
-        childTaskNames = arrayOf("com.google.android.apps.nexuslauncher/" +
-                "com.google.android.apps.nexuslauncher.NexusLauncherActivity")
-        childTaskUserIds = intArrayOf(0)
-        childTaskBounds = arrayOf(Rect(0, 0, 1080, 2400))
-    }
-
-    private val emptyTask = RootTaskInfo().apply {
-        configuration.windowConfiguration.apply {
-            windowingMode = WINDOWING_MODE_FULLSCREEN
-            setBounds(Rect(0, 0, 1080, 2400))
-            activityType = ACTIVITY_TYPE_UNDEFINED
-        }
-        displayId = DISPLAY_ID
-        taskId = 2
-        userId = PRIMARY_USER
-        visible = false
-        isVisible = false
-        isRunning = false
-        numActivities = 0
-        childTaskIds = intArrayOf(3, 4)
-        childTaskNames = arrayOf("", "")
-        childTaskUserIds = intArrayOf(0, 0)
-        childTaskBounds = arrayOf(Rect(0, 0, 1080, 2400), Rect(0, 2400, 1080, 4800))
-    }
 }
+
+private const val YOUTUBE_HOME_ACTIVITY =
+    "com.google.android.youtube/" + "com.google.android.youtube.app.honeycomb.Shell\$HomeActivity"
+
+private const val FILES_HOME_ACTIVITY =
+    "com.google.android.apps.nbu.files/" + "com.google.android.apps.nbu.files.home.HomeActivity"
+
+private const val YOUTUBE_PIP_ACTIVITY =
+    "com.google.android.youtube/" +
+        "com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity"
+
+private const val LAUNCHER_ACTIVITY =
+    "com.google.android.apps.nexuslauncher/" +
+        "com.google.android.apps.nexuslauncher.NexusLauncherActivity"

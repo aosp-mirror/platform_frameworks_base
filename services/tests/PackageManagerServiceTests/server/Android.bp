@@ -65,9 +65,9 @@ android_test {
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.vibrator-V2-java",
         "android.hidl.manager-V1.0-java",
-        "android.test.mock",
-        "android.test.base",
-        "android.test.runner",
+        "android.test.mock.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.runner.stubs.system",
     ],
 
     platform_apis: true,
@@ -105,6 +105,7 @@ android_test {
         ":PackageParserTestApp5",
         ":PackageParserTestApp6",
         ":PackageParserTestApp7",
+        ":PackageParserTestApp8",
     ],
     resource_zips: [":PackageManagerServiceServerTests_apks_as_resources"],
 
@@ -184,4 +185,14 @@ test_module_config {
     ],
     include_filters: ["com.android.server.pm."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
+}
+
+test_module_config {
+    name: "PackageManagerServiceServerTests_Presubmit",
+    base: "PackageManagerServiceServerTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
 }

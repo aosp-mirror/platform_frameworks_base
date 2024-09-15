@@ -104,14 +104,14 @@ public abstract class GeocodeProviderBase {
      */
     public abstract void onForwardGeocode(
             @NonNull ForwardGeocodeRequest request,
-            @NonNull OutcomeReceiver<List<Address>, Exception> callback);
+            @NonNull OutcomeReceiver<List<Address>, Throwable> callback);
 
     /**
      * Requests reverse geocoding of the given arguments. The given callback must be invoked once.
      */
     public abstract void onReverseGeocode(
             @NonNull ReverseGeocodeRequest request,
-            @NonNull OutcomeReceiver<List<Address>, Exception> callback);
+            @NonNull OutcomeReceiver<List<Address>, Throwable> callback);
 
     private class Service extends IGeocodeProvider.Stub {
         @Override
@@ -145,7 +145,7 @@ public abstract class GeocodeProviderBase {
         }
     }
 
-    private static class SingleUseCallback implements OutcomeReceiver<List<Address>, Exception> {
+    private static class SingleUseCallback implements OutcomeReceiver<List<Address>, Throwable> {
 
         private final AtomicReference<IGeocodeCallback> mCallback;
 
@@ -154,7 +154,7 @@ public abstract class GeocodeProviderBase {
         }
 
         @Override
-        public void onError(Exception e) {
+        public void onError(Throwable e) {
             try {
                 Objects.requireNonNull(mCallback.getAndSet(null)).onError(e.toString());
             } catch (RemoteException r) {

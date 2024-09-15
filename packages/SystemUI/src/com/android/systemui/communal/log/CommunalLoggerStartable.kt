@@ -88,12 +88,12 @@ constructor(
 
 /** Whether currently in communal scene. */
 private fun ObservableTransitionState.isOnCommunal(): Boolean {
-    return this is ObservableTransitionState.Idle && scene == CommunalScenes.Communal
+    return this is ObservableTransitionState.Idle && currentScene == CommunalScenes.Communal
 }
 
 /** Whether currently in a scene other than communal. */
 private fun ObservableTransitionState.isNotOnCommunal(): Boolean {
-    return this is ObservableTransitionState.Idle && scene != CommunalScenes.Communal
+    return this is ObservableTransitionState.Idle && currentScene != CommunalScenes.Communal
 }
 
 /** Whether currently transitioning from another scene to communal. */

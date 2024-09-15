@@ -16,6 +16,7 @@
 
 package com.android.server.policy;
 
+import android.annotation.NonNull;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 
 import com.android.internal.R;
@@ -34,7 +36,6 @@ import com.android.internal.R;
  * This dialog is used by {@link SideFpsEventHandler}
  */
 public class SideFpsToast extends Dialog {
-
     SideFpsToast(Context context) {
         super(context);
     }
@@ -64,6 +65,29 @@ public class SideFpsToast extends Dialog {
         final Button turnOffScreen = findViewById(R.id.turn_off_screen);
         if (turnOffScreen != null) {
             turnOffScreen.setOnClickListener(listener);
+        }
+    }
+
+    /**
+     * When accessibility mode is on, add AccessibilityDelegate to dismiss dialog when focus is
+     * moved away from the dialog.
+     */
+    public void addAccessibilityDelegate() {
+        final Button turnOffScreen = findViewById(R.id.turn_off_screen);
+        if (turnOffScreen != null) {
+            turnOffScreen.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+                @Override
+                public void onInitializeAccessibilityEvent(@NonNull View host,
+                        @NonNull AccessibilityEvent event) {
+                    if (event.getEventType()
+                            == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED
+                            && isShowing()) {
+                        dismiss();
+                    }
+                    super.onInitializeAccessibilityEvent(host, event);
+                }
+            });
+
         }
     }
 }

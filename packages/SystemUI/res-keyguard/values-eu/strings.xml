@@ -42,7 +42,7 @@
     <string name="keyguard_sim_puk_locked_message" msgid="2503428315518592542">"SIMa PUKaren bidez desblokeatu behar da."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="8489092646014631659">"SIMa desblokeatzen…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7403009340414014734">"PIN kodearen eremua"</string>
-    <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Gailuaren pasahitza"</string>
+    <string name="keyguard_accessibility_password" msgid="3524161948484801450">"Gailuko pasahitza"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="6272116591533888062">"SIM txartelaren PIN kodearen eremua"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="5537294043180237374">"SIM txartelaren PUK kodearen eremua"</string>
     <string name="keyboardview_keycode_delete" msgid="8489719929424895174">"Ezabatu"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Babestuago egoteko, erabili eredua"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Babestuago egoteko, erabili PINa"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Babestuago egoteko, erabili pasahitza"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"PINa behar da gailua babestuago izateko"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Eredua behar da gailua babestuago izateko"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Pasahitza behar da gailua babestuago izateko"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Administratzaileak blokeatu egin du gailua"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Eskuz blokeatu da gailua"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Ez da ezagutu"</string>

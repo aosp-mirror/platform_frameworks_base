@@ -51,7 +51,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 class DeviceStateToLayoutMap {
     private static final String TAG = "DeviceStateToLayoutMap";
 
-    public static final int STATE_DEFAULT = DeviceStateManager.INVALID_DEVICE_STATE;
+    public static final int STATE_DEFAULT = DeviceStateManager.INVALID_DEVICE_STATE_IDENTIFIER;
 
     // Direction of the display relative to the default display, whilst in this state
     private static final int POSITION_UNKNOWN = Layout.Display.POSITION_UNKNOWN;

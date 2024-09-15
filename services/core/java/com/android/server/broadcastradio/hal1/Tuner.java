@@ -26,7 +26,6 @@ import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
 
 import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
@@ -44,9 +43,9 @@ class Tuner extends ITuner.Stub {
     private final long mNativeContext;
 
     private final Object mLock = new Object();
-    @NonNull private final TunerCallback mTunerCallback;
-    @NonNull private final ITunerCallback mClientCallback;
-    @NonNull private final IBinder.DeathRecipient mDeathRecipient;
+    private final TunerCallback mTunerCallback;
+    private final ITunerCallback mClientCallback;
+    private final IBinder.DeathRecipient mDeathRecipient;
 
     private boolean mIsClosed = false;
     private boolean mIsMuted = false;
@@ -122,7 +121,7 @@ class Tuner extends ITuner.Stub {
 
     private boolean checkConfiguredLocked() {
         if (mTunerCallback.isInitialConfigurationDone()) return true;
-        Slog.w(TAG, "Initial configuration is still pending, skipping the operation");
+        Slogf.w(TAG, "Initial configuration is still pending, skipping the operation");
         return false;
     }
 
@@ -159,14 +158,14 @@ class Tuner extends ITuner.Stub {
             checkNotClosedLocked();
             if (mIsMuted == mute) return;
             mIsMuted = mute;
-            Slog.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
+            Slogf.w(TAG, "Mute via RadioService is not implemented - please handle it via app");
         }
     }
 
     @Override
     public boolean isMuted() {
         if (!mWithAudio) {
-            Slog.w(TAG, "Tuner did not request audio, pretending it was muted");
+            Slogf.w(TAG, "Tuner did not request audio, pretending it was muted");
             return true;
         }
         synchronized (mLock) {
@@ -210,7 +209,7 @@ class Tuner extends ITuner.Stub {
         if (selector == null) {
             throw new IllegalArgumentException("The argument must not be a null pointer");
         }
-        Slog.i(TAG, "Tuning to " + selector);
+        Slogf.i(TAG, "Tuning to " + selector);
         synchronized (mLock) {
             checkNotClosedLocked();
             if (!checkConfiguredLocked()) return;

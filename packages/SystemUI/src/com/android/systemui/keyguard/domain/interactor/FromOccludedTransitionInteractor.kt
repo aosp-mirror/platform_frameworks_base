@@ -18,21 +18,22 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.restartDreamOnUnocclude
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.Utils.Companion.sample
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @SysUISingleton
@@ -44,21 +45,25 @@ constructor(
     @Background private val scope: CoroutineScope,
     @Background bgDispatcher: CoroutineDispatcher,
     @Main mainDispatcher: CoroutineDispatcher,
-    private val keyguardInteractor: KeyguardInteractor,
-    private val powerInteractor: PowerInteractor,
+    keyguardInteractor: KeyguardInteractor,
+    powerInteractor: PowerInteractor,
     private val communalInteractor: CommunalInteractor,
+    keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
 ) :
     TransitionInteractor(
         fromState = KeyguardState.OCCLUDED,
         transitionInteractor = transitionInteractor,
         mainDispatcher = mainDispatcher,
         bgDispatcher = bgDispatcher,
+        powerInteractor = powerInteractor,
+        keyguardOcclusionInteractor = keyguardOcclusionInteractor,
+        keyguardInteractor = keyguardInteractor,
     ) {
 
     override fun start() {
         listenForOccludedToLockscreenOrHub()
         listenForOccludedToDreaming()
-        listenForOccludedToAodOrDozing()
+        listenForOccludedToAsleep()
         listenForOccludedToGone()
         listenForOccludedToAlternateBouncer()
         listenForOccludedToPrimaryBouncer()
@@ -67,114 +72,111 @@ constructor(
     private fun listenForOccludedToPrimaryBouncer() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isBouncerShowing, lastStartedTransitionStep) ->
-                    if (
-                        isBouncerShowing && lastStartedTransitionStep.to == KeyguardState.OCCLUDED
-                    ) {
-                        startTransitionTo(KeyguardState.PRIMARY_BOUNCER)
-                    }
-                }
+                .filterRelevantKeyguardStateAnd { isBouncerShowing -> isBouncerShowing }
+                .collect { startTransitionTo(KeyguardState.PRIMARY_BOUNCER) }
         }
     }
 
     private fun listenForOccludedToDreaming() {
         scope.launch {
-            keyguardInteractor.isAbleToDream.sample(finishedKeyguardState, ::Pair).collect {
-                (isAbleToDream, keyguardState) ->
-                if (isAbleToDream && keyguardState == KeyguardState.OCCLUDED) {
-                    startTransitionTo(KeyguardState.DREAMING)
-                }
-            }
+            keyguardInteractor.isAbleToDream
+                .filterRelevantKeyguardStateAnd { isAbleToDream -> isAbleToDream }
+                .collect { startTransitionTo(KeyguardState.DREAMING) }
         }
     }
 
     private fun listenForOccludedToLockscreenOrHub() {
-        scope.launch {
-            keyguardInteractor.isKeyguardOccluded
-                .sample(
-                    keyguardInteractor.isKeyguardShowing,
-                    startedKeyguardTransitionStep,
-                    communalInteractor.isIdleOnCommunal,
-                )
-                .collect { (isOccluded, isShowing, lastStartedKeyguardState, isIdleOnCommunal) ->
-                    // Occlusion signals come from the framework, and should interrupt any
-                    // existing transition
-                    if (
-                        !isOccluded &&
-                            isShowing &&
-                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
-                    ) {
-                        val to =
-                            if (isIdleOnCommunal) {
-                                KeyguardState.GLANCEABLE_HUB
-                            } else {
-                                KeyguardState.LOCKSCREEN
-                            }
-                        startTransitionTo(to)
+        if (KeyguardWmStateRefactor.isEnabled) {
+            scope.launch {
+                keyguardOcclusionInteractor.isShowWhenLockedActivityOnTop
+                    .filterRelevantKeyguardStateAnd { onTop -> !onTop }
+                    .sample(
+                        communalInteractor.isIdleOnCommunal,
+                        communalInteractor.showCommunalFromOccluded,
+                        communalInteractor.dreamFromOccluded,
+                    )
+                    .collect { (_, isIdleOnCommunal, showCommunalFromOccluded, dreamFromOccluded) ->
+                        startTransitionToLockscreenOrHub(
+                            isIdleOnCommunal,
+                            showCommunalFromOccluded,
+                            dreamFromOccluded
+                        )
                     }
-                }
+            }
+        } else {
+            scope.launch {
+                keyguardInteractor.isKeyguardOccluded
+                    .sample(
+                        keyguardInteractor.isKeyguardShowing,
+                        communalInteractor.isIdleOnCommunal,
+                        communalInteractor.showCommunalFromOccluded,
+                        communalInteractor.dreamFromOccluded,
+                    )
+                    .filterRelevantKeyguardStateAnd { (isOccluded, isShowing, _, _, _) ->
+                        !isOccluded && isShowing
+                    }
+                    .collect { (_, _, isIdleOnCommunal, showCommunalFromOccluded, dreamFromOccluded)
+                        ->
+                        startTransitionToLockscreenOrHub(
+                            isIdleOnCommunal,
+                            showCommunalFromOccluded,
+                            dreamFromOccluded
+                        )
+                    }
+            }
+        }
+    }
+
+    private suspend fun FromOccludedTransitionInteractor.startTransitionToLockscreenOrHub(
+        isIdleOnCommunal: Boolean,
+        showCommunalFromOccluded: Boolean,
+        dreamFromOccluded: Boolean,
+    ) {
+        if (restartDreamOnUnocclude() && dreamFromOccluded) {
+            startTransitionTo(KeyguardState.DREAMING)
+        } else if (isIdleOnCommunal || showCommunalFromOccluded) {
+            // TODO(b/336576536): Check if adaptation for scene framework is needed
+            if (SceneContainerFlag.isEnabled) return
+            startTransitionTo(KeyguardState.GLANCEABLE_HUB)
+        } else {
+            startTransitionTo(KeyguardState.LOCKSCREEN)
         }
     }
 
     private fun listenForOccludedToGone() {
+        // TODO(b/336576536): Check if adaptation for scene framework is needed
+        if (SceneContainerFlag.isEnabled) return
+        if (KeyguardWmStateRefactor.isEnabled) {
+            // We don't think OCCLUDED to GONE is possible. You should always have to go via a
+            // *_BOUNCER state to end up GONE. Launching an activity over a dismissable keyguard
+            // dismisses it, and even "extend unlock" doesn't unlock the device in the background.
+            // If we're wrong - sorry, add it back here.
+            return
+        }
+
         scope.launch {
             keyguardInteractor.isKeyguardOccluded
-                .sample(
-                    combine(
-                        keyguardInteractor.isKeyguardShowing,
-                        startedKeyguardTransitionStep,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isOccluded, isShowing, lastStartedKeyguardState) ->
+                .sample(keyguardInteractor.isKeyguardShowing, ::Pair)
+                .filterRelevantKeyguardStateAnd { (occluded, showing) -> !occluded && !showing }
+                .collect {
                     // Occlusion signals come from the framework, and should interrupt any
                     // existing transition
-                    if (
-                        !isOccluded &&
-                            !isShowing &&
-                            lastStartedKeyguardState.to == KeyguardState.OCCLUDED
-                    ) {
-                        startTransitionTo(KeyguardState.GONE)
-                    }
+                    startTransitionTo(KeyguardState.GONE)
                 }
         }
     }
 
-    private fun listenForOccludedToAodOrDozing() {
-        scope.launch {
-            powerInteractor.isAsleep
-                .sample(
-                    combine(
-                        startedKeyguardTransitionStep,
-                        keyguardInteractor.isAodAvailable,
-                        ::Pair
-                    ),
-                    ::toTriple
-                )
-                .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
-                    if (lastStartedStep.to == KeyguardState.OCCLUDED && isAsleep) {
-                        startTransitionTo(
-                            if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
-                        )
-                    }
-                }
-        }
+    private fun listenForOccludedToAsleep() {
+        scope.launch { listenForSleepTransition() }
     }
 
     private fun listenForOccludedToAlternateBouncer() {
         scope.launch {
             keyguardInteractor.alternateBouncerShowing
-                .sample(startedKeyguardTransitionStep, ::Pair)
-                .collect { (isAlternateBouncerShowing, lastStartedTransitionStep) ->
-                    if (
-                        isAlternateBouncerShowing &&
-                            lastStartedTransitionStep.to == KeyguardState.OCCLUDED
-                    ) {
-                        startTransitionTo(KeyguardState.ALTERNATE_BOUNCER)
-                    }
+                .filterRelevantKeyguardStateAnd { isAlternateBouncerShowing ->
+                    isAlternateBouncerShowing
                 }
+                .collect { startTransitionTo(KeyguardState.ALTERNATE_BOUNCER) }
         }
     }
 
@@ -189,6 +191,7 @@ constructor(
             duration =
                 when (toState) {
                     KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -198,6 +201,8 @@ constructor(
         const val TAG = "FromOccludedTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 933.milliseconds
+        val TO_GLANCEABLE_HUB_DURATION = 250.milliseconds
         val TO_AOD_DURATION = DEFAULT_DURATION
+        val TO_DOZING_DURATION = DEFAULT_DURATION
     }
 }

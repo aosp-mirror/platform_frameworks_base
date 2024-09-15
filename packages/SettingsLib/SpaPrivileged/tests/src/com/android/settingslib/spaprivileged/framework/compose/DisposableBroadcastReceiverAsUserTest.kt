@@ -27,9 +27,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,11 +70,11 @@ class DisposableBroadcastReceiverAsUserTest {
             }
         }
 
-        assertThat(registeredBroadcastReceiver).isNotNull()
+        composeTestRule.waitUntil { registeredBroadcastReceiver != null }
     }
 
     @Test
-    fun broadcastReceiver_isCalledOnReceive() = runBlocking {
+    fun broadcastReceiver_isCalledOnReceive() {
         var onReceiveIsCalled = false
         composeTestRule.setContent {
             CompositionLocalProvider(
@@ -91,9 +88,8 @@ class DisposableBroadcastReceiverAsUserTest {
         }
 
         registeredBroadcastReceiver!!.onReceive(context, Intent())
-        delay(100)
 
-        assertThat(onReceiveIsCalled).isTrue()
+        composeTestRule.waitUntil { onReceiveIsCalled }
     }
 
     private companion object {

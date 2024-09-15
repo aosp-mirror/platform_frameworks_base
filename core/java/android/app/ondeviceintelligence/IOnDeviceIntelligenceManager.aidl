@@ -21,9 +21,11 @@
  import android.os.ParcelFileDescriptor;
  import android.os.PersistableBundle;
  import android.os.RemoteCallback;
- import android.app.ondeviceintelligence.Content;
+ import android.os.Bundle;
  import android.app.ondeviceintelligence.Feature;
  import android.app.ondeviceintelligence.FeatureDetails;
+ import android.app.ondeviceintelligence.InferenceInfo;
+ import java.util.List;
  import android.app.ondeviceintelligence.IDownloadCallback;
  import android.app.ondeviceintelligence.IListFeaturesCallback;
  import android.app.ondeviceintelligence.IFeatureCallback;
@@ -31,7 +33,7 @@
  import android.app.ondeviceintelligence.IResponseCallback;
  import android.app.ondeviceintelligence.IStreamingResponseCallback;
  import android.app.ondeviceintelligence.IProcessingSignal;
- import android.app.ondeviceintelligence.ITokenCountCallback;
+ import android.app.ondeviceintelligence.ITokenInfoCallback;
 
 
  /**
@@ -39,7 +41,7 @@
   *
   * @hide
   */
- oneway interface IOnDeviceIntelligenceManager {
+interface IOnDeviceIntelligenceManager {
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void getVersion(in RemoteCallback remoteCallback) = 1;
 
@@ -53,18 +55,25 @@
       void getFeatureDetails(in Feature feature, in IFeatureDetailsCallback featureDetailsCallback) = 4;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestFeatureDownload(in Feature feature, ICancellationSignal signal, in IDownloadCallback callback) = 5;
+      void requestFeatureDownload(in Feature feature, in  AndroidFuture cancellationSignalFuture, in IDownloadCallback callback) = 5;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void requestTokenCount(in Feature feature, in Content request, in  ICancellationSignal signal,
-                                                        in ITokenCountCallback tokenCountcallback) = 6;
+      void requestTokenInfo(in Feature feature, in Bundle requestBundle, in  AndroidFuture cancellationSignalFuture,
+                                                        in ITokenInfoCallback tokenInfocallback) = 6;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
-      void processRequest(in Feature feature, in Content request, int requestType, in  ICancellationSignal cancellationSignal, in IProcessingSignal signal,
-                                                        in IResponseCallback responseCallback) = 7;
+      void processRequest(in Feature feature, in Bundle requestBundle, int requestType,
+                                                in  AndroidFuture cancellationSignalFuture,
+                                                in AndroidFuture processingSignalFuture,
+                                                in IResponseCallback responseCallback) = 7;
 
       @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)")
       void processRequestStreaming(in Feature feature,
-                    in Content request, int requestType, in  ICancellationSignal cancellationSignal, in  IProcessingSignal signal,
+                    in Bundle requestBundle, int requestType, in  AndroidFuture cancellationSignalFuture,
+                    in  AndroidFuture processingSignalFuture,
                     in IStreamingResponseCallback streamingCallback) = 8;
+
+      String getRemoteServicePackageName() = 9;
+
+      List<InferenceInfo> getLatestInferenceInfo(long startTimeEpochMillis) = 10;
  }

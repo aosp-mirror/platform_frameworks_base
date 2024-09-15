@@ -16,13 +16,18 @@
 package com.android.hoststubgen.asm
 
 import com.android.hoststubgen.ClassParseException
+import com.android.hoststubgen.InvalidJarFileException
+import com.android.hoststubgen.log
+import org.objectweb.asm.ClassReader
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TypeAnnotationNode
+import java.io.BufferedInputStream
 import java.io.PrintWriter
 import java.util.Arrays
+import java.util.zip.ZipFile
 
 /**
  * Stores all classes loaded from a jar file, in a form of [ClassNode]
@@ -62,8 +67,8 @@ class ClassNodes {
 
     /** Find a field, which may not exist. */
     fun findField(
-            className: String,
-            fieldName: String,
+        className: String,
+        fieldName: String,
     ): FieldNode? {
         return findClass(className)?.fields?.firstOrNull { it.name == fieldName }?.let { fn ->
             return fn
@@ -72,14 +77,14 @@ class ClassNodes {
 
     /** Find a method, which may not exist. */
     fun findMethod(
-            className: String,
-            methodName: String,
-            descriptor: String,
+        className: String,
+        methodName: String,
+        descriptor: String,
     ): MethodNode? {
         return findClass(className)?.methods
-                ?.firstOrNull { it.name == methodName && it.desc == descriptor }?.let { mn ->
-            return mn
-        }
+            ?.firstOrNull { it.name == methodName && it.desc == descriptor }?.let { mn ->
+                return mn
+            }
     }
 
     /** @return true if a class has a class initializer. */
@@ -106,26 +111,33 @@ class ClassNodes {
 
     private fun dumpClass(pw: PrintWriter, cn: ClassNode) {
         pw.printf("Class: %s [access: %x]\n", cn.name, cn.access)
-        dumpAnnotations(pw, "  ",
-                cn.visibleTypeAnnotations, cn.invisibleTypeAnnotations,
-                cn.visibleAnnotations, cn.invisibleAnnotations,
-                )
+        dumpAnnotations(
+            pw, "  ",
+            cn.visibleTypeAnnotations, cn.invisibleTypeAnnotations,
+            cn.visibleAnnotations, cn.invisibleAnnotations,
+        )
 
         for (f in cn.fields ?: emptyList()) {
-            pw.printf("  Field: %s [sig: %s] [desc: %s] [access: %x]\n",
-                    f.name, f.signature, f.desc, f.access)
-            dumpAnnotations(pw, "    ",
-                    f.visibleTypeAnnotations, f.invisibleTypeAnnotations,
-                    f.visibleAnnotations, f.invisibleAnnotations,
-                    )
+            pw.printf(
+                "  Field: %s [sig: %s] [desc: %s] [access: %x]\n",
+                f.name, f.signature, f.desc, f.access
+            )
+            dumpAnnotations(
+                pw, "    ",
+                f.visibleTypeAnnotations, f.invisibleTypeAnnotations,
+                f.visibleAnnotations, f.invisibleAnnotations,
+            )
         }
         for (m in cn.methods ?: emptyList()) {
-            pw.printf("  Method: %s [sig: %s] [desc: %s] [access: %x]\n",
-                    m.name, m.signature, m.desc, m.access)
-            dumpAnnotations(pw, "    ",
-                    m.visibleTypeAnnotations, m.invisibleTypeAnnotations,
-                    m.visibleAnnotations, m.invisibleAnnotations,
-                    )
+            pw.printf(
+                "  Method: %s [sig: %s] [desc: %s] [access: %x]\n",
+                m.name, m.signature, m.desc, m.access
+            )
+            dumpAnnotations(
+                pw, "    ",
+                m.visibleTypeAnnotations, m.invisibleTypeAnnotations,
+                m.visibleAnnotations, m.invisibleAnnotations,
+            )
         }
     }
 
@@ -136,7 +148,7 @@ class ClassNodes {
         invisibleTypeAnnotations: List<TypeAnnotationNode>?,
         visibleAnnotations: List<AnnotationNode>?,
         invisibleAnnotations: List<AnnotationNode>?,
-        ) {
+    ) {
         for (an in visibleTypeAnnotations ?: emptyList()) {
             pw.printf("%sTypeAnnotation(vis): %s\n", prefix, an.desc)
         }
@@ -164,6 +176,57 @@ class ClassNodes {
                 pw.printf("%s  - %s -> %s \n", prefix, an.values[i], an.values[i + 1])
                 i += 2
             }
+        }
+    }
+
+    companion object {
+        /**
+         * Load all the classes, without code.
+         */
+        fun loadClassStructures(inJar: String): ClassNodes {
+            log.i("Reading class structure from $inJar ...")
+            val start = System.currentTimeMillis()
+
+            val allClasses = ClassNodes()
+
+            log.withIndent {
+                ZipFile(inJar).use { inZip ->
+                    val inEntries = inZip.entries()
+
+                    while (inEntries.hasMoreElements()) {
+                        val entry = inEntries.nextElement()
+
+                        BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
+                            if (entry.name.endsWith(".class")) {
+                                val cr = ClassReader(bis)
+                                val cn = ClassNode()
+                                cr.accept(cn, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG
+                                        or ClassReader.SKIP_FRAMES)
+                                if (!allClasses.addClass(cn)) {
+                                    log.w("Duplicate class found: ${cn.name}")
+                                }
+                            } else if (entry.name.endsWith(".dex")) {
+                                // Seems like it's an ART jar file. We can't process it.
+                                // It's a fatal error.
+                                throw InvalidJarFileException(
+                                    "$inJar is not a desktop jar file. It contains a *.dex file.")
+                            } else {
+                                // Unknown file type. Skip.
+                                while (bis.available() > 0) {
+                                    bis.skip((1024 * 1024).toLong())
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (allClasses.size == 0) {
+                log.w("$inJar contains no *.class files.")
+            }
+
+            val end = System.currentTimeMillis()
+            log.i("Done reading class structure in %.1f second(s).", (end - start) / 1000.0)
+            return allClasses
         }
     }
 }

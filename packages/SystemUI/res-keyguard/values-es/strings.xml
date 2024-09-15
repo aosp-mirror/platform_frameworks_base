@@ -67,7 +67,7 @@
     <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Demasiados intentos, se necesita el patrón"</string>
     <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Desbloquea con PIN o huella digital"</string>
     <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Desbloquea con contraseña o huella digital"</string>
-    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Desbloquea con patrón o huella digital"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Desbloquea con tu patrón o huella digital"</string>
     <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Por política del trabajo, se ha bloqueado el dispositivo para mayor seguridad"</string>
     <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Se necesita el PIN después del bloqueo"</string>
     <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Se necesita la contraseña después del bloqueo"</string>
@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Para mayor seguridad, usa el patrón"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Para mayor seguridad, usa el PIN"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Para mayor seguridad, usa la contraseña"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"Debes introducir el PIN como medida de seguridad adicional"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"Debes introducir el patrón como medida de seguridad adicional"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"Debes introducir la contraseña como medida de seguridad adicional"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Dispositivo bloqueado por el administrador"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"El dispositivo se ha bloqueado manualmente"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"No se reconoce"</string>

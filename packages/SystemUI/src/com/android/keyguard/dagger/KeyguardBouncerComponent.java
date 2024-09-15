@@ -19,8 +19,8 @@ package com.android.keyguard.dagger;
 import android.view.ViewGroup;
 
 import com.android.keyguard.KeyguardSecurityContainerController;
-import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.dagger.qualifiers.RootView;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;

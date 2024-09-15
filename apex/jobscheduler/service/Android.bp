@@ -33,6 +33,7 @@ java_library {
         "modules-utils-fastxmlserializer",
         "service-jobscheduler-alarm.flags-aconfig-java",
         "service-jobscheduler-job.flags-aconfig-java",
+        "service-jobscheduler-appidle.flags-aconfig-java",
     ],
 
     // Rename classes shared with the framework

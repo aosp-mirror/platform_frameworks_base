@@ -25,12 +25,13 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.testing.AndroidTestingRunner;
+import android.platform.test.annotations.DisableFlags;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -46,6 +47,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.Clock;
@@ -60,7 +62,7 @@ import org.junit.runner.RunWith;
 import java.util.Optional;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper
 public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
@@ -157,6 +159,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(AsyncGroupHeaderViewInflation.FLAG_NAME)
     public void testHeaderUpdated() {
         mRow.setPinned(true);
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);

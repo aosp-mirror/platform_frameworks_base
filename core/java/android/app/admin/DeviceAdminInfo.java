@@ -21,6 +21,7 @@ import static android.app.admin.flags.Flags.FLAG_HEADLESS_DEVICE_OWNER_SINGLE_US
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.admin.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -176,6 +177,10 @@ public final class DeviceAdminInfo implements Parcelable {
      * provisioned into "affiliated" mode when on a Headless System User Mode device.
      *
      * <p>This mode adds a Profile Owner to all users other than the user the Device Owner is on.
+     *
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * DPCs should set the value of attribute "headless-device-owner-mode" inside the
+     * "headless-system-user" tag as "affiliated".
      */
     public static final int HEADLESS_DEVICE_OWNER_MODE_AFFILIATED = 1;
 
@@ -185,14 +190,21 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>This mode only allows a single secondary user on the device blocking the creation of
      * additional secondary users.
+     *
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * DPCs should set the value of attribute "headless-device-owner-mode" inside the
+     * "headless-system-user" tag as "single_user".
      */
     @FlaggedApi(FLAG_HEADLESS_DEVICE_OWNER_SINGLE_USER_ENABLED)
     public static final int HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER = 2;
 
+    /**
+     * @hide
+     */
     @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED,
             HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER})
     @Retention(RetentionPolicy.SOURCE)
-    private @interface HeadlessDeviceOwnerMode {}
+    public @interface HeadlessDeviceOwnerMode {}
 
     /** @hide */
     public static class PolicyInfo {
@@ -380,17 +392,30 @@ public final class DeviceAdminInfo implements Parcelable {
                     }
                     mSupportsTransferOwnership = true;
                 } else if (tagName.equals("headless-system-user")) {
-                    String deviceOwnerModeStringValue =
-                            parser.getAttributeValue(null, "device-owner-mode");
+                    String deviceOwnerModeStringValue = null;
+                    if (Flags.headlessSingleUserCompatibilityFix()) {
+                        deviceOwnerModeStringValue = parser.getAttributeValue(
+                                 null, "headless-device-owner-mode");
+                    }
+                    if (deviceOwnerModeStringValue == null) {
+                        deviceOwnerModeStringValue =
+                                parser.getAttributeValue(null, "device-owner-mode");
+                    }
 
-                    if (deviceOwnerModeStringValue.equalsIgnoreCase("unsupported")) {
+                    if ("unsupported".equalsIgnoreCase(deviceOwnerModeStringValue)) {
                         mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED;
-                    } else if (deviceOwnerModeStringValue.equalsIgnoreCase("affiliated")) {
+                    } else if ("affiliated".equalsIgnoreCase(deviceOwnerModeStringValue)) {
                         mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_AFFILIATED;
-                    } else if (deviceOwnerModeStringValue.equalsIgnoreCase("single_user")) {
+                    } else if ("single_user".equalsIgnoreCase(deviceOwnerModeStringValue)) {
                         mHeadlessDeviceOwnerMode = HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER;
                     } else {
-                        throw new XmlPullParserException("headless-system-user mode must be valid");
+                        if (Flags.headlessSingleUserCompatibilityFix()) {
+                            Log.e(TAG, "Unknown headless-system-user mode: "
+                                    + deviceOwnerModeStringValue);
+                        } else {
+                            throw new XmlPullParserException(
+                                    "headless-system-user mode must be valid");
+                        }
                     }
                 }
             }

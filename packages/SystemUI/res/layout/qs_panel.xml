@@ -36,8 +36,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
-            android:focusable="true"
-            android:accessibilityTraversalBefore="@android:id/edit"
+            android:focusable="false"
+            android:importantForAccessibility="yes"
             android:clipToPadding="false"
             android:clipChildren="false">
 
@@ -47,13 +47,12 @@
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 
-    <include
-        layout="@layout/footer_actions"
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/qs_footer_actions"
         android:layout_height="@dimen/footer_actions_height"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
-        />
+        android:elevation="@dimen/qs_panel_elevation" />
 
     <include
         android:id="@+id/qs_customize"

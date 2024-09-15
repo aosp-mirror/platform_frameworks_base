@@ -21,26 +21,29 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.text.TextUtils
-import android.util.Log
+import com.android.systemui.volume.domain.interactor.VolumePanelNavigationInteractor
+import com.android.systemui.volume.ui.navigation.VolumeNavigator
 import javax.inject.Inject
 
-private const val TAG = "VolumePanelDialogReceiver"
-private const val LAUNCH_ACTION = "com.android.systemui.action.LAUNCH_VOLUME_PANEL_DIALOG"
-private const val DISMISS_ACTION = "com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG"
-
-/**
- * BroadcastReceiver for handling volume panel dialog intent
- */
-class VolumePanelDialogReceiver @Inject constructor(
-    private val volumePanelFactory: VolumePanelFactory
+/** [BroadcastReceiver] for handling volume panel dialog intent */
+class VolumePanelDialogReceiver
+@Inject
+constructor(
+    private val volumeNavigator: VolumeNavigator,
+    private val volumePanelNavigationInteractor: VolumePanelNavigationInteractor,
 ) : BroadcastReceiver() {
+
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive intent" + intent.action)
-        if (TextUtils.equals(LAUNCH_ACTION, intent.action) ||
-                TextUtils.equals(Settings.Panel.ACTION_VOLUME, intent.action)) {
-            volumePanelFactory.create(true, null)
-        } else if (TextUtils.equals(DISMISS_ACTION, intent.action)) {
-            volumePanelFactory.dismiss()
+        if (
+            TextUtils.equals(LAUNCH_ACTION, intent.action) ||
+                TextUtils.equals(Settings.Panel.ACTION_VOLUME, intent.action)
+        ) {
+            volumeNavigator.openVolumePanel(volumePanelNavigationInteractor.getVolumePanelRoute())
         }
+    }
+
+    companion object {
+        const val LAUNCH_ACTION = "com.android.systemui.action.LAUNCH_VOLUME_PANEL_DIALOG"
+        const val DISMISS_ACTION = "com.android.systemui.action.DISMISS_VOLUME_PANEL_DIALOG"
     }
 }

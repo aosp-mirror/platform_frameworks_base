@@ -86,6 +86,7 @@ android_test {
         "kotlin-test",
         "mockito-target-minus-junit4",
         "androidx.test.uiautomator_uiautomator",
+        "platform-parametric-runner-lib",
         "platform-test-annotations",
         "platform-compat-test-rules",
         "truth",
@@ -102,13 +103,14 @@ android_test {
         "flickerlib-trace_processor_shell",
         "mockito-target-extended-minus-junit4",
         "TestParameterInjector",
+        "android.content.res.flags-aconfig-java",
     ],
 
     libs: [
-        "android.test.runner",
-        "org.apache.http.legacy",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs",
+        "org.apache.http.legacy.stubs",
+        "android.test.base.stubs",
+        "android.test.mock.stubs",
         "framework",
         "ext",
         "framework-res",
@@ -116,6 +118,7 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libviewRootImplTest_jni",
         "libworksourceparceltest_jni",
     ],
 
@@ -153,8 +156,8 @@ android_app {
     use_resource_processor: false,
     libs: [
         "framework-res",
-        "android.test.runner",
-        "org.apache.http.legacy",
+        "android.test.runner.stubs",
+        "org.apache.http.legacy.stubs",
     ],
     uses_libs: [
         "android.test.runner",
@@ -219,9 +222,9 @@ android_library {
     ],
 
     libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
         "framework",
         "framework-res",
     ],
@@ -230,8 +233,8 @@ android_library {
 android_ravenwood_test {
     name: "FrameworksCoreTestsRavenwood",
     libs: [
-        "android.test.runner",
-        "android.test.base",
+        "android.test.runner.stubs.system",
+        "android.test.base.stubs.system",
     ],
     static_libs: [
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
@@ -261,6 +264,7 @@ android_ravenwood_test {
         "src/com/android/internal/os/**/*.java",
         "src/com/android/internal/util/**/*.java",
         "src/com/android/internal/power/EnergyConsumerStatsTest.java",
+        "src/com/android/internal/ravenwood/**/*.java",
 
         // Pull in R.java from FrameworksCoreTests-resonly, not from FrameworksCoreTests,
         // to avoid having a dependency to FrameworksCoreTests.
@@ -275,29 +279,30 @@ android_ravenwood_test {
         generate_get_transaction_name: true,
         local_include_dirs: ["aidl"],
     },
+    java_resources: [
+        "res/xml/power_profile_test.xml",
+        "res/xml/power_profile_test_cpu_legacy.xml",
+        "res/xml/power_profile_test_modem.xml",
+    ],
     auto_gen_config: true,
 }
-
-FLAKY_OR_IGNORED = [
-    "androidx.test.filters.FlakyTest",
-    "org.junit.Ignore",
-]
 
 test_module_config {
     name: "FrameworksCoreTests_Presubmit",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_inputmethod",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -312,39 +317,40 @@ test_module_config {
     name: "FrameworksCoreTests_context",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.content.ContextTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_keyguard_manager",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.app.KeyguardManagerTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_property_invalidated_cache",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.app.PropertyInvalidatedCacheTests"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_content",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -353,36 +359,36 @@ test_module_config {
         "android.content.ComponentCallbacksControllerTest",
         "android.content.ContextWrapperTest",
     ],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_sqlite",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.database.sqlite.SQLiteRawStatementTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_net",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.net"],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_battery_stats",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -394,6 +400,7 @@ test_module_config {
     name: "FrameworksCoreTests_environment",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -404,6 +411,7 @@ test_module_config {
     name: "FrameworksCoreTests_util_data_charset",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -417,6 +425,7 @@ test_module_config {
     name: "FrameworksCoreTests_xml",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -430,6 +439,7 @@ test_module_config {
     name: "FrameworksCoreTests_util_apk",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -440,6 +450,7 @@ test_module_config {
     name: "FrameworksCoreTests_textclassifier",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -451,6 +462,7 @@ test_module_config {
     name: "FrameworksCoreTests_internal_app",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -465,6 +477,7 @@ test_module_config {
     name: "FrameworksCoreTests_internal_content",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -475,6 +488,7 @@ test_module_config {
     name: "FrameworksCoreTests_internal_infra",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -485,17 +499,18 @@ test_module_config {
     name: "FrameworksCoreTests_internal_jank",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.jank"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_internal_os_binder",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -507,6 +522,7 @@ test_module_config {
     name: "FrameworksCoreTests_internal_os_kernel",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -523,6 +539,7 @@ test_module_config {
     name: "FrameworksCoreTests_server_power",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -533,6 +550,7 @@ test_module_config {
     name: "FrameworksCoreTests_internal_security",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -544,28 +562,29 @@ test_module_config {
     name: "FrameworksCoreTests_internal_util_latency_tracker",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.util.LatencyTrackerTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_content_capture_options",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.content.ContentCaptureOptionsTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_content_integrity",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -576,30 +595,31 @@ test_module_config {
     name: "FrameworksCoreTests_android_content_pm_PreSubmit",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.content.pm."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_content_pm_PostSubmit",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.content.pm."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_content_res",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -616,18 +636,19 @@ test_module_config {
     name: "FrameworksCoreTests_android_content_res_PostSubmit",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.content.res."],
     include_annotations: ["android.platform.test.annotations.Postsubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_service",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -647,40 +668,41 @@ test_module_config {
     name: "FrameworksCoreTests_android_view_contentcapture",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.view.contentcapture"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_android_view_contentprotection",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["android.view.contentprotection"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_com_android_internal_content_Presubmit",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_filters: ["com.android.internal.content."],
     include_annotations: ["android.platform.test.annotations.Presubmit"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_drawable",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -688,24 +710,10 @@ test_module_config {
 }
 
 test_module_config {
-    name: "FrameworksCoreTests_accessibility_NO_FLAKES",
-    base: "FrameworksCoreTests",
-    test_suites: [
-        "device-tests",
-        "device-platinum-tests",
-    ],
-    include_filters: [
-        "com.android.internal.accessibility",
-        "android.accessibilityservice",
-        "android.view.accessibility",
-    ],
-    exclude_annotations: ["androidx.test.filters.FlakyTest"],
-}
-
-test_module_config {
     name: "FrameworksCoreTests_accessibility",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -720,6 +728,7 @@ test_module_config {
     name: "FrameworksCoreTests_usage",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -730,6 +739,7 @@ test_module_config {
     name: "FrameworksCoreTests_fastdata",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -740,6 +750,7 @@ test_module_config {
     name: "FrameworksCoreTests_hardware_input",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -750,6 +761,7 @@ test_module_config {
     name: "FrameworksCoreTests_view_verified",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -760,9 +772,34 @@ test_module_config {
 }
 
 test_module_config {
+    name: "FrameworksCoreTests_android_net_Presubmit",
+    base: "FrameworksCoreTests",
+    test_suites: [
+        "automotive-tests",
+        "device-platinum-tests",
+        "device-tests",
+    ],
+    include_filters: ["android.net"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}
+
+test_module_config {
+    name: "FrameworksCoreTests_content_pm_Postsubmit",
+    base: "FrameworksCoreTests",
+    test_suites: [
+        "automotive-tests",
+        "device-platinum-tests",
+        "device-tests",
+    ],
+    include_filters: ["android.content.pm."],
+    include_annotations: ["android.platform.test.annotations.Postsubmit"],
+}
+
+test_module_config {
     name: "FrameworksCoreTests_jank",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
@@ -771,16 +808,15 @@ test_module_config {
         "com.android.internal.jank.InteractionJankMonitorTest",
         "com.android.internal.util.LatencyTrackerTest",
     ],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }
 
 test_module_config {
     name: "FrameworksCoreTests_Platinum",
     base: "FrameworksCoreTests",
     test_suites: [
+        "automotive-tests",
         "device-tests",
         "device-platinum-tests",
     ],
     include_annotations: ["android.platform.test.annotations.PlatinumTest"],
-    exclude_annotations: FLAKY_OR_IGNORED,
 }

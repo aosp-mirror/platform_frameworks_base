@@ -20,10 +20,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 public class RavenwoodRuleImpl {
-    public static boolean isOnRavenwood() {
-        return false;
-    }
-
     public static void init(RavenwoodRule rule) {
         // No-op when running on a real device
     }
@@ -38,5 +34,9 @@ public class RavenwoodRuleImpl {
 
     public static void validate(Statement base, Description description,
             boolean enableOptionalValidation) {
+    }
+
+    public static long realCurrentTimeMillis() {
+        return System.currentTimeMillis();
     }
 }

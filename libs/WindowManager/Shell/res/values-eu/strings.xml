@@ -76,7 +76,7 @@
     <string name="bubbles_user_education_manage" msgid="3460756219946517198">"Aplikazioaren burbuilak desaktibatzeko, sakatu Kudeatu"</string>
     <string name="bubbles_user_education_got_it" msgid="3382046149225428296">"Ados"</string>
     <string name="bubble_overflow_empty_title" msgid="2397251267073294968">"Ez dago azkenaldiko burbuilarik"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Azken burbuilak eta baztertutakoak agertuko dira hemen"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"Azkenaldiko burbuilak eta baztertutakoak agertuko dira hemen"</string>
     <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"Txateatu burbuilak erabilita"</string>
     <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"Elkarrizketa berriak ikono gisa agertzen dira pantailaren beheko izkinan. Zabaltzeko, saka itzazu. Baztertzeko, aldiz, arrasta itzazu."</string>
     <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"Kontrolatu burbuilak edonoiz"</string>
@@ -84,6 +84,8 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Burbuila"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Kudeatu"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Baztertu da globoa."</string>
+    <string name="bubble_shortcut_label" msgid="666269077944378311">"Burbuilak"</string>
+    <string name="bubble_shortcut_long_label" msgid="6088437544312894043">"Erakutsi burbuilak"</string>
     <string name="restart_button_description" msgid="4564728020654658478">"Hobeto ikusteko, sakatu hau, eta aplikazioa berrabiarazi egingo da"</string>
     <string name="user_aspect_ratio_settings_button_hint" msgid="734835849600713016">"Aldatu aplikazioaren aspektu-erlazioa ezarpenetan"</string>
     <string name="user_aspect_ratio_settings_button_description" msgid="4315566801697411684">"Aldatu aspektu-erlazioa"</string>
@@ -117,4 +119,6 @@
     <string name="close_text" msgid="4986518933445178928">"Itxi"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Itxi menua"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Ireki menua"</string>
+    <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Handitu pantaila"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Zatitu pantaila"</string>
 </resources>

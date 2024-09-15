@@ -17,8 +17,8 @@
 package com.android.systemui.camera
 
 import android.content.Intent
-import android.test.suitebuilder.annotation.SmallTest
-import android.testing.AndroidTestingRunner
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -26,7 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class CameraIntentsTest : SysuiTestCase() {
     companion object {
         val VALID_SECURE_INTENT = Intent(CameraIntents.DEFAULT_SECURE_CAMERA_INTENT_ACTION)

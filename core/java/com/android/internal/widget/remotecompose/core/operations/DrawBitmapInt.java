@@ -76,7 +76,8 @@ public class DrawBitmapInt extends PaintOperation {
     }
 
     public static class Companion implements CompanionOperation {
-        private Companion() {}
+        private Companion() {
+        }
 
         @Override
         public String name() {
@@ -89,9 +90,9 @@ public class DrawBitmapInt extends PaintOperation {
         }
 
         public void apply(WireBuffer buffer, int imageId,
-                   int srcLeft, int srcTop, int srcRight, int srcBottom,
-                   int dstLeft, int dstTop, int dstRight, int dstBottom,
-                   int cdId) {
+                          int srcLeft, int srcTop, int srcRight, int srcBottom,
+                          int dstLeft, int dstTop, int dstRight, int dstBottom,
+                          int cdId) {
             buffer.start(Operations.DRAW_BITMAP_INT);
             buffer.writeInt(imageId);
             buffer.writeInt(srcLeft);

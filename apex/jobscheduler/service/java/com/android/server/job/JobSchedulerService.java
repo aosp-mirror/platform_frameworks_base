@@ -45,7 +45,6 @@ import android.app.job.JobService;
 import android.app.job.JobSnapshot;
 import android.app.job.JobWorkItem;
 import android.app.job.UserVisibleJobSummary;
-import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -81,11 +80,11 @@ import android.os.Process;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.storage.StorageManagerInternal;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -130,13 +129,10 @@ import com.android.server.job.controllers.QuotaController;
 import com.android.server.job.controllers.RestrictingController;
 import com.android.server.job.controllers.StateController;
 import com.android.server.job.controllers.StorageController;
-import com.android.server.job.controllers.TareController;
 import com.android.server.job.controllers.TimeController;
 import com.android.server.job.restrictions.JobRestriction;
 import com.android.server.job.restrictions.ThermalStatusRestriction;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.tare.EconomyManagerInternal;
-import com.android.server.tare.JobSchedulerEconomicPolicy;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import com.android.server.utils.quota.Categorizer;
@@ -183,6 +179,8 @@ public class JobSchedulerService extends com.android.server.SystemService
     public static final String TAG = "JobScheduler";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     public static final boolean DEBUG_STANDBY = DEBUG || false;
+
+    public static final String TRACE_TRACK_NAME = "JobScheduler";
 
     /** The maximum number of jobs that we allow an app to schedule */
     private static final int MAX_JOBS_PER_APP = 150;
@@ -304,18 +302,19 @@ public class JobSchedulerService extends com.android.server.SystemService
     private final ConnectivityController mConnectivityController;
     /** Need directly for sending uid state changes */
     private final DeviceIdleJobsController mDeviceIdleJobsController;
+    /** Need direct access to this for testing. */
+    private final FlexibilityController mFlexibilityController;
     /** Needed to get next estimated launch time. */
     private final PrefetchController mPrefetchController;
     /** Needed to get remaining quota time. */
     private final QuotaController mQuotaController;
-    /** Needed to get max execution time and expedited-job allowance. */
-    private final TareController mTareController;
     /**
      * List of restrictions.
      * Note: do not add to or remove from this list at runtime except in the constructor, because we
      * do not synchronize access to this list.
      */
-    private final List<JobRestriction> mJobRestrictions;
+    @VisibleForTesting
+    final List<JobRestriction> mJobRestrictions;
 
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -483,8 +482,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int EXEMPTED_INDEX = 6;
 
-    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
-            EconomyManagerInternal.TareStateChangeListener {
+    private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener {
         @Nullable
         @GuardedBy("mLock")
         private DeviceConfig.Properties mLastPropertiesPulled;
@@ -514,16 +512,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         public void start() {
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     AppSchedulingModuleThread.getExecutor(), this);
-            final EconomyManagerInternal economyManagerInternal =
-                    LocalServices.getService(EconomyManagerInternal.class);
-            economyManagerInternal
-                    .registerTareStateChangeListener(this, JobSchedulerEconomicPolicy.POLICY_JOB);
-            // Load all the constants.
-            synchronized (mLock) {
-                mConstants.updateTareSettingsLocked(
-                        economyManagerInternal.getEnabledMode(
-                                JobSchedulerEconomicPolicy.POLICY_JOB));
-            }
             onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
         }
 
@@ -643,16 +631,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             mHandler.sendEmptyMessage(MSG_CHECK_JOB);
         }
 
-        @Override
-        public void onTareEnabledModeChanged(@EconomyManager.EnabledMode int enabledMode) {
-            if (mConstants.updateTareSettingsLocked(enabledMode)) {
-                for (int controller = 0; controller < mControllers.size(); controller++) {
-                    final StateController sc = mControllers.get(controller);
-                    sc.onConstantsUpdatedLocked();
-                }
-                onControllerStateChanged(null);
-            }
-        }
     }
 
     @VisibleForTesting
@@ -1049,12 +1027,6 @@ public class JobSchedulerService extends com.android.server.SystemService
          */
         public int MAX_NUM_PERSISTED_JOB_WORK_ITEMS = DEFAULT_MAX_NUM_PERSISTED_JOB_WORK_ITEMS;
 
-        /**
-         * If true, use TARE policy for job limiting. If false, use quotas.
-         */
-        public boolean USE_TARE_POLICY = EconomyManager.DEFAULT_ENABLE_POLICY_JOB_SCHEDULER
-                && EconomyManager.DEFAULT_ENABLE_TARE_MODE == EconomyManager.ENABLED_MODE_ON;
-
         public Constants() {
             copyTransportBatchThresholdDefaults();
         }
@@ -1298,16 +1270,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_RUNTIME_USE_DATA_ESTIMATES_FOR_LIMITS);
         }
 
-        private boolean updateTareSettingsLocked(@EconomyManager.EnabledMode int enabledMode) {
-            boolean changed = false;
-            final boolean useTare = enabledMode == EconomyManager.ENABLED_MODE_ON;
-            if (USE_TARE_POLICY != useTare) {
-                USE_TARE_POLICY = useTare;
-                changed = true;
-            }
-            return changed;
-        }
-
         void dump(IndentingPrintWriter pw) {
             pw.println("Settings:");
             pw.increaseIndent();
@@ -1380,8 +1342,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_PERSIST_IN_SPLIT_FILES, PERSIST_IN_SPLIT_FILES).println();
             pw.print(KEY_MAX_NUM_PERSISTED_JOB_WORK_ITEMS, MAX_NUM_PERSISTED_JOB_WORK_ITEMS)
                     .println();
-
-            pw.print(Settings.Global.ENABLE_TARE, USE_TARE_POLICY).println();
 
             pw.decreaseIndent();
         }
@@ -1867,9 +1827,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             // Return failure early if expedited job quota used up.
             if (jobStatus.isRequestedExpeditedJob()) {
-                if ((mConstants.USE_TARE_POLICY && !mTareController.canScheduleEJ(jobStatus))
-                        || (!mConstants.USE_TARE_POLICY
-                        && !mQuotaController.isWithinEJQuotaLocked(jobStatus))) {
+                if (!mQuotaController.isWithinEJQuotaLocked(jobStatus)) {
                     Counter.logIncrementWithUid(
                             "job_scheduler.value_cntr_w_uid_schedule_failure_ej_out_of_quota",
                             callingUid);
@@ -2701,17 +2659,16 @@ public class JobSchedulerService extends com.android.server.SystemService
         mControllers = new ArrayList<StateController>();
         mPrefetchController = new PrefetchController(this);
         mControllers.add(mPrefetchController);
-        final FlexibilityController flexibilityController =
-                new FlexibilityController(this, mPrefetchController);
-        mControllers.add(flexibilityController);
+        mFlexibilityController = new FlexibilityController(this, mPrefetchController);
+        mControllers.add(mFlexibilityController);
         mConnectivityController =
-                new ConnectivityController(this, flexibilityController);
+                new ConnectivityController(this, mFlexibilityController);
         mControllers.add(mConnectivityController);
         mControllers.add(new TimeController(this));
-        final IdleController idleController = new IdleController(this, flexibilityController);
+        final IdleController idleController = new IdleController(this, mFlexibilityController);
         mControllers.add(idleController);
         final BatteryController batteryController =
-                new BatteryController(this, flexibilityController);
+                new BatteryController(this, mFlexibilityController);
         mControllers.add(batteryController);
         mStorageController = new StorageController(this);
         mControllers.add(mStorageController);
@@ -2725,9 +2682,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 new QuotaController(this, backgroundJobsController, mConnectivityController);
         mControllers.add(mQuotaController);
         mControllers.add(new ComponentController(this));
-        mTareController =
-                new TareController(this, backgroundJobsController, mConnectivityController);
-        mControllers.add(mTareController);
 
         startControllerTrackingAsync();
 
@@ -3548,8 +3502,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     /**
      * Check if a job is restricted by any of the declared {@link JobRestriction JobRestrictions}.
-     * Note, that the jobs with {@link JobInfo#BIAS_FOREGROUND_SERVICE} bias or higher may not
-     * be restricted, thus we won't even perform the check, but simply return null early.
      *
      * @param job to be checked
      * @return the first {@link JobRestriction} restricting the given job that has been found; null
@@ -3558,13 +3510,9 @@ public class JobSchedulerService extends com.android.server.SystemService
      */
     @GuardedBy("mLock")
     JobRestriction checkIfRestricted(JobStatus job) {
-        if (evaluateJobBiasLocked(job) >= JobInfo.BIAS_FOREGROUND_SERVICE) {
-            // Jobs with BIAS_FOREGROUND_SERVICE or higher should not be restricted
-            return null;
-        }
         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
             final JobRestriction restriction = mJobRestrictions.get(i);
-            if (restriction.isJobRestricted(job)) {
+            if (restriction.isJobRestricted(job, evaluateJobBiasLocked(job))) {
                 return restriction;
             }
         }
@@ -4242,10 +4190,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                             job.getTimeoutBlamePackageName(), timeoutTag)
                             ? normalUpperLimitMs
                             : mConstants.RUNTIME_MIN_GUARANTEE_MS;
-            return Math.min(upperLimitMs,
-                    mConstants.USE_TARE_POLICY
-                            ? mTareController.getMaxJobExecutionTimeMsLocked(job)
-                            : mQuotaController.getMaxJobExecutionTimeMsLocked(job));
+            return Math.min(upperLimitMs, mQuotaController.getMaxJobExecutionTimeMsLocked(job));
         }
     }
 
@@ -4274,6 +4219,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         return curBias;
     }
 
+    /** Gets and returns the adjusted Job Bias **/
     int evaluateJobBiasLocked(JobStatus job) {
         int bias = job.getBias();
         if (bias >= JobInfo.BIAS_BOUND_FOREGROUND_SERVICE) {
@@ -4401,7 +4347,11 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                 final boolean wasConsideredCharging = isConsideredCharging();
                 mChargingPolicy = newPolicy;
-
+                if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                    Trace.instantForTrack(Trace.TRACE_TAG_SYSTEM_SERVER,
+                            JobSchedulerService.TRACE_TRACK_NAME,
+                            "CHARGING POLICY CHANGED#" + mChargingPolicy);
+                }
                 if (isConsideredCharging() != wasConsideredCharging) {
                     for (int c = mControllers.size() - 1; c >= 0; --c) {
                         mControllers.get(c).onBatteryStateChangedLocked();
@@ -4613,11 +4563,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
-        public boolean hasRunBackupJobsPermission(@NonNull String packageName, int packageUid) {
-            return JobSchedulerService.this.hasRunBackupJobsPermission(packageName, packageUid);
-        }
-
-        @Override
         public JobStorePersistStats getPersistStats() {
             synchronized (mLock) {
                 return new JobStorePersistStats(mJobs.getPersistStats());
@@ -4777,22 +4722,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pidPermissions.add(pid, permission, permissionGranted);
             return permissionGranted;
         }
-    }
-
-    /**
-     * Returns whether the app holds the {@link Manifest.permission.RUN_BACKUP_JOBS} permission.
-     */
-    private boolean hasRunBackupJobsPermission(@NonNull String packageName, int packageUid) {
-        if (packageName == null) {
-            Slog.wtfStack(TAG,
-                    "Expected a non-null package name when calling hasRunBackupJobsPermission");
-            return false;
-        }
-
-        return PermissionChecker.checkPermissionForPreflight(getTestableContext(),
-                android.Manifest.permission.RUN_BACKUP_JOBS,
-                PermissionChecker.PID_UNKNOWN, packageUid, packageName)
-                    == PermissionChecker.PERMISSION_GRANTED;
     }
 
     /**
@@ -5556,6 +5485,15 @@ public class JobSchedulerService extends com.android.server.SystemService
         return 0;
     }
 
+    // Shell command infrastructure: set flex policy
+    void setFlexPolicy(boolean override, int appliedConstraints) {
+        if (DEBUG) {
+            Slog.v(TAG, "setFlexPolicy(): " + override + "/" + appliedConstraints);
+        }
+
+        mFlexibilityController.setLocalPolicyForTesting(override, appliedConstraints);
+    }
+
     void setMonitorBattery(boolean enabled) {
         synchronized (mLock) {
             mBatteryStateTracker.setMonitorBatteryLocked(enabled);
@@ -5729,11 +5667,6 @@ public class JobSchedulerService extends com.android.server.SystemService
     @VisibleForTesting
     protected QuotaController getQuotaController() {
         return mQuotaController;
-    }
-
-    @VisibleForTesting
-    protected TareController getTareController() {
-        return mTareController;
     }
 
     @VisibleForTesting
@@ -5977,7 +5910,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     if (isRestricted) {
                         for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                             final JobRestriction restriction = mJobRestrictions.get(i);
-                            if (restriction.isJobRestricted(job)) {
+                            if (restriction.isJobRestricted(job, evaluateJobBiasLocked(job))) {
                                 final int reason = restriction.getInternalReason();
                                 pw.print(" ");
                                 pw.print(JobParameters.getInternalReasonCodeDescription(reason));
@@ -6310,7 +6243,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         proto.write(JobSchedulerServiceDumpProto.JobRestriction.REASON,
                                 restriction.getInternalReason());
                         proto.write(JobSchedulerServiceDumpProto.JobRestriction.IS_RESTRICTING,
-                                restriction.isJobRestricted(job));
+                                restriction.isJobRestricted(job, evaluateJobBiasLocked(job)));
                         proto.end(restrictionsToken);
                     }
 

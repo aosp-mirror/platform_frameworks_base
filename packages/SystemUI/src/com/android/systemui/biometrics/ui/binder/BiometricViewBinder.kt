@@ -22,6 +22,7 @@ import android.content.Context
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.Flags
 import android.hardware.face.FaceManager
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -63,6 +64,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 private const val TAG = "BiometricViewBinder"
+private const val MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER = 30
 
 /** Top-most view binder for BiometricPrompt views. */
 object BiometricViewBinder {
@@ -86,7 +88,9 @@ object BiometricViewBinder {
          *
          * TODO(b/288175072): May be able to remove this once constraint layout is implemented
          */
-        view.visibility = View.INVISIBLE
+        if (!constraintBp()) {
+            view.visibility = View.INVISIBLE
+        }
         val accessibilityManager = view.context.getSystemService(AccessibilityManager::class.java)!!
 
         val textColorError =
@@ -101,12 +105,14 @@ object BiometricViewBinder {
         val descriptionView = view.requireViewById<TextView>(R.id.description)
         val customizedViewContainer =
             view.requireViewById<LinearLayout>(R.id.customized_view_container)
+        val udfpsGuidanceView =
+            if (constraintBp()) {
+                view.requireViewById<View>(R.id.panel)
+            } else {
+                backgroundView
+            }
 
         // set selected to enable marquee unless a screen reader is enabled
-        logoView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
-        logoDescriptionView.isSelected =
-            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
@@ -134,7 +140,7 @@ object BiometricViewBinder {
         val confirmationButton = view.requireViewById<Button>(R.id.button_confirm)
         val retryButton = view.requireViewById<Button>(R.id.button_try_again)
 
-        // TODO(b/251476085): temporary workaround for the unsafe callbacks & legacy controllers
+        // TODO(b/330788871): temporary workaround for the unsafe callbacks & legacy controllers
         val adapter =
             Spaghetti(
                 view = view,
@@ -162,15 +168,21 @@ object BiometricViewBinder {
             }
 
             logoView.setImageDrawable(viewModel.logo.first())
-            logoDescriptionView.text = viewModel.logoDescription.first()
+            // The ellipsize effect on xml happens only when the TextView does not have any free
+            // space on the screen to show the text. So we need to manually truncate.
+            logoDescriptionView.text =
+                viewModel.logoDescription.first().ellipsize(MAX_LOGO_DESCRIPTION_CHARACTER_NUMBER)
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
-            BiometricCustomizedViewBinder.bind(
-                customizedViewContainer,
-                view.requireViewById(R.id.space_above_content),
-                viewModel
-            )
+
+            if (Flags.customBiometricPrompt() && constraintBp()) {
+                BiometricCustomizedViewBinder.bind(
+                    customizedViewContainer,
+                    viewModel.contentView.first(),
+                    legacyCallback
+                )
+            }
 
             // set button listeners
             negativeButton.setOnClickListener { legacyCallback.onButtonNegative() }
@@ -222,8 +234,8 @@ object BiometricViewBinder {
             }
 
             lifecycleScope.launch {
-                viewModel.showBpWithoutIconForCredential.collect {
-                    if (!it) {
+                viewModel.hideSensorIcon.collect { showWithoutIcon ->
+                    if (!showWithoutIcon) {
                         PromptIconViewBinder.bind(
                             iconView,
                             iconOverlayView,
@@ -284,12 +296,14 @@ object BiometricViewBinder {
                 // set padding
                 launch {
                     viewModel.promptPadding.collect { promptPadding ->
-                        view.setPadding(
-                            promptPadding.left,
-                            promptPadding.top,
-                            promptPadding.right,
-                            promptPadding.bottom
-                        )
+                        if (!constraintBp()) {
+                            view.setPadding(
+                                promptPadding.left,
+                                promptPadding.top,
+                                promptPadding.right,
+                                promptPadding.bottom
+                            )
+                        }
                     }
                 }
 
@@ -405,24 +419,11 @@ object BiometricViewBinder {
                         indicatorMessageView.isSelected =
                             !accessibilityManager.isEnabled ||
                                 !accessibilityManager.isTouchExplorationEnabled
-
-                        /**
-                         * Note: Talkback 14.0 has new rate-limitation design to reduce frequency of
-                         * TYPE_WINDOW_CONTENT_CHANGED events to once every 30 seconds. (context:
-                         * b/281765653#comment18) Using {@link View#announceForAccessibility}
-                         * instead as workaround since sending events exceeding this frequency is
-                         * required.
-                         */
-                        indicatorMessageView?.text?.let {
-                            if (it.isNotBlank()) {
-                                view.announceForAccessibility(it)
-                            }
-                        }
                     }
                 }
 
                 // Talkback directional guidance
-                backgroundView.setOnHoverListener { _, event ->
+                udfpsGuidanceView.setOnHoverListener { _, event ->
                     launch {
                         viewModel.onAnnounceAccessibilityHint(
                             event,
@@ -457,6 +458,16 @@ object BiometricViewBinder {
                         }
                     }
                 }
+
+                // Retry and confirmation when finger on sensor
+                launch {
+                    combine(viewModel.canTryAgainNow, viewModel.hasFingerOnSensor, ::Pair)
+                        .collect { (canRetry, fingerAcquired) ->
+                            if (canRetry && fingerAcquired) {
+                                legacyCallback.onButtonTryAgain()
+                            }
+                        }
+                }
             }
         }
 
@@ -472,7 +483,7 @@ object BiometricViewBinder {
  *
  * Do not reference the [view] for anything other than [asView].
  */
-@Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+@Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
 class Spaghetti(
     private val view: View,
     private val viewModel: PromptViewModel,
@@ -480,19 +491,28 @@ class Spaghetti(
     private val applicationScope: CoroutineScope,
 ) {
 
-    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     interface Callback {
         fun onAuthenticated()
+
         fun onUserCanceled()
+
         fun onButtonNegative()
+
         fun onButtonTryAgain()
+
+        fun onContentViewMoreOptionsButtonPressed()
+
         fun onError()
+
         fun onUseDeviceCredential()
+
         fun onStartDelayedFingerprintSensor()
+
         fun onAuthenticatedAndConfirmed()
     }
 
-    @Deprecated("TODO(b/251476085): remove after replacing AuthContainerView")
+    @Deprecated("TODO(b/330788871): remove after replacing AuthContainerView")
     enum class BiometricState {
         /** Authentication hardware idle. */
         STATE_IDLE,
@@ -564,17 +584,22 @@ class Spaghetti(
         }
     }
 
-    private suspend fun getHelpForSuccessfulAuthentication(
+    private fun getHelpForSuccessfulAuthentication(
         authenticatedModality: BiometricModality,
-    ): Int? =
-        when {
-            // for coex, show a message when face succeeds after fingerprint has also started
-            modalities.hasFaceAndFingerprint &&
-                (viewModel.fingerprintStartMode.first() != FingerprintStartMode.Pending) &&
-                (authenticatedModality == BiometricModality.Face) ->
-                R.string.biometric_dialog_tap_confirm_with_face_alt_1
-            else -> null
+    ): Int? {
+        // for coex, show a message when face succeeds after fingerprint has also started
+        if (authenticatedModality != BiometricModality.Face) {
+            return null
         }
+
+        if (modalities.hasUdfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_alt_1
+        }
+        if (modalities.hasSfps) {
+            return R.string.biometric_dialog_tap_confirm_with_face_sfps
+        }
+        return null
+    }
 
     fun onAuthenticationFailed(
         @BiometricAuthenticator.Modality modality: Int,
@@ -662,6 +687,9 @@ private fun BiometricModalities.asDefaultHelpMessage(context: Context): String =
         hasFingerprint -> context.getString(R.string.fingerprint_dialog_touch_sensor)
         else -> ""
     }
+
+private fun String.ellipsize(cutOffLength: Int) =
+    if (length <= cutOffLength) this else replaceRange(cutOffLength, length, "...")
 
 private fun Boolean.asVisibleOrGone(): Int = if (this) View.VISIBLE else View.GONE
 

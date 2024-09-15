@@ -23,13 +23,15 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.fakeScenes
 import com.android.systemui.scene.sceneContainerConfig
 import com.android.systemui.scene.sceneKeys
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
+import com.android.systemui.scene.scenes
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.testKosmos
@@ -45,25 +47,26 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableSceneContainer
 class SceneContainerViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope by lazy { kosmos.testScope }
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
-    private val fakeSceneDataSource = kosmos.fakeSceneDataSource
-    private val sceneContainerConfig = kosmos.sceneContainerConfig
-    private val falsingManager = kosmos.fakeFalsingManager
+    private val fakeSceneDataSource by lazy { kosmos.fakeSceneDataSource }
+    private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
+    private val falsingManager by lazy { kosmos.fakeFalsingManager }
 
     private lateinit var underTest: SceneContainerViewModel
 
     @Before
     fun setUp() {
-        kosmos.fakeSceneContainerFlags.enabled = true
         underTest =
             SceneContainerViewModel(
                 sceneInteractor = sceneInteractor,
                 falsingInteractor = kosmos.falsingInteractor,
                 powerInteractor = kosmos.powerInteractor,
+                scenes = kosmos.scenes,
             )
     }
 
@@ -213,5 +216,24 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             )
 
             assertThat(isVisible).isFalse()
+        }
+
+    @Test
+    fun currentDestinationScenes_onlyTheCurrentSceneIsCollected() =
+        testScope.runTest {
+            val unused by collectLastValue(underTest.currentDestinationScenes(backgroundScope))
+            val currentScene by collectLastValue(sceneInteractor.currentScene)
+            kosmos.fakeScenes.forEach { scene ->
+                fakeSceneDataSource.changeScene(toScene = scene.key)
+                runCurrent()
+                assertThat(currentScene).isEqualTo(scene.key)
+
+                assertThat(scene.isDestinationScenesBeingCollected).isTrue()
+                kosmos.fakeScenes
+                    .filter { it.key != scene.key }
+                    .forEach { otherScene ->
+                        assertThat(otherScene.isDestinationScenesBeingCollected).isFalse()
+                    }
+            }
         }
 }

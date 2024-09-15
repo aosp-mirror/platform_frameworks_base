@@ -16,18 +16,36 @@
 
 package com.android.systemui.volume.panel.component.captioning.domain
 
+import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
 import com.android.systemui.volume.panel.dagger.scope.VolumePanelScope
 import com.android.systemui.volume.panel.domain.ComponentAvailabilityCriteria
+import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 
 @VolumePanelScope
 class CaptioningAvailabilityCriteria
 @Inject
-constructor(private val captioningInteractor: CaptioningInteractor) :
-    ComponentAvailabilityCriteria {
+constructor(
+    captioningInteractor: CaptioningInteractor,
+    @VolumePanelScope private val scope: CoroutineScope,
+    private val uiEventLogger: UiEventLogger,
+) : ComponentAvailabilityCriteria {
 
-    override fun isAvailable(): Flow<Boolean> =
+    private val availability =
         captioningInteractor.isSystemAudioCaptioningUiEnabled
+            .onEach { visible ->
+                uiEventLogger.log(
+                    if (visible) VolumePanelUiEvent.VOLUME_PANEL_LIVE_CAPTION_TOGGLE_SHOWN
+                    else VolumePanelUiEvent.VOLUME_PANEL_LIVE_CAPTION_TOGGLE_GONE
+                )
+            }
+            .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    override fun isAvailable(): Flow<Boolean> = availability
 }

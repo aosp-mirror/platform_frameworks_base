@@ -253,7 +253,13 @@ class MobileIconInteractorImpl(
             )
 
     override val showSliceAttribution: StateFlow<Boolean> =
-        connectionRepository.hasPrioritizedNetworkCapabilities
+        combine(
+                connectionRepository.allowNetworkSliceIndicator,
+                connectionRepository.hasPrioritizedNetworkCapabilities,
+            ) { allowed, hasPrioritizedNetworkCapabilities ->
+                allowed && hasPrioritizedNetworkCapabilities
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val isNonTerrestrial: StateFlow<Boolean> =
         if (Flags.carrierEnabledSatelliteFlag()) {
@@ -350,7 +356,8 @@ class MobileIconInteractorImpl(
         shownLevel.map {
             SignalIconModel.Satellite(
                 level = it,
-                icon = SatelliteIconModel.fromSignalStrength(it)
+                icon =
+                    SatelliteIconModel.fromSignalStrength(it)
                         ?: SatelliteIconModel.fromSignalStrength(0)!!
             )
         }

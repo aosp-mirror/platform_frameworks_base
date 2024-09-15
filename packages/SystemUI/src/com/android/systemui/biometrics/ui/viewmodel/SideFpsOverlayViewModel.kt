@@ -28,18 +28,17 @@ import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import com.airbnb.lottie.model.KeyPath
+import com.android.systemui.Flags.constraintBp
 import com.android.systemui.biometrics.Utils
-import com.android.systemui.biometrics.domain.interactor.BiometricStatusInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
 import com.android.systemui.biometrics.domain.model.SideFpsSensorLocation
-import com.android.systemui.biometrics.shared.model.AuthenticationReason
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.LottieCallback
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.DeviceEntrySideFpsOverlayInteractor
-import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
 import com.android.systemui.res.R
+import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -53,11 +52,9 @@ class SideFpsOverlayViewModel
 @Inject
 constructor(
     @Application private val applicationContext: Context,
-    biometricStatusInteractor: BiometricStatusInteractor,
     deviceEntrySideFpsOverlayInteractor: DeviceEntrySideFpsOverlayInteractor,
     displayStateInteractor: DisplayStateInteractor,
     sfpsSensorInteractor: SideFpsSensorInteractor,
-    sideFpsProgressBarViewModel: SideFpsProgressBarViewModel
 ) {
     /** Contains properties of the side fingerprint sensor indicator */
     data class OverlayViewProperties(
@@ -155,17 +152,19 @@ constructor(
             ->
             val topLeft = Point(sensorLocation.left, sensorLocation.top)
 
-            if (sensorLocation.isSensorVerticalInDefaultOrientation) {
-                if (displayRotation == DisplayRotation.ROTATION_0) {
-                    topLeft.x -= bounds!!.width()
-                } else if (displayRotation == DisplayRotation.ROTATION_270) {
-                    topLeft.y -= bounds!!.height()
-                }
-            } else {
-                if (displayRotation == DisplayRotation.ROTATION_180) {
-                    topLeft.y -= bounds!!.height()
-                } else if (displayRotation == DisplayRotation.ROTATION_270) {
-                    topLeft.x -= bounds!!.width()
+            if (!constraintBp()) {
+                if (sensorLocation.isSensorVerticalInDefaultOrientation) {
+                    if (displayRotation == DisplayRotation.ROTATION_0) {
+                        topLeft.x -= bounds!!.width()
+                    } else if (displayRotation == DisplayRotation.ROTATION_270) {
+                        topLeft.y -= bounds!!.height()
+                    }
+                } else {
+                    if (displayRotation == DisplayRotation.ROTATION_180) {
+                        topLeft.y -= bounds!!.height()
+                    } else if (displayRotation == DisplayRotation.ROTATION_270) {
+                        topLeft.x -= bounds!!.width()
+                    }
                 }
             }
             defaultOverlayViewParams.apply {
@@ -176,12 +175,9 @@ constructor(
 
     /** List of LottieCallbacks use for adding dynamic color to the overlayView */
     val lottieCallbacks: Flow<List<LottieCallback>> =
-        combine(
-            biometricStatusInteractor.sfpsAuthenticationReason,
-            deviceEntrySideFpsOverlayInteractor.showIndicatorForDeviceEntry,
-            sideFpsProgressBarViewModel.isVisible
-        ) { reason: AuthenticationReason, showIndicatorForDeviceEntry: Boolean, progressBarIsVisible
-            ->
+        _lottieBounds.sample(deviceEntrySideFpsOverlayInteractor.showIndicatorForDeviceEntry) {
+            _,
+            showIndicatorForDeviceEntry: Boolean ->
             val callbacks = mutableListOf<LottieCallback>()
             if (showIndicatorForDeviceEntry) {
                 val indicatorColor =

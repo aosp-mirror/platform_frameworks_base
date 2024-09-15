@@ -19,6 +19,7 @@ package android.hardware.camera2.params;
 
 import static com.android.internal.util.Preconditions.*;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +28,9 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.graphics.ColorSpace;
 import android.graphics.ImageFormat;
+import android.graphics.ImageFormat.Format;
+import android.hardware.HardwareBuffer;
+import android.hardware.HardwareBuffer.Usage;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
@@ -43,6 +47,8 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
+import com.android.internal.camera.flags.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -50,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A class for describing camera output, which contains a {@link Surface} and its specific
@@ -361,6 +368,21 @@ public final class OutputConfiguration implements Parcelable {
     private final int SURFACE_TYPE_SURFACE_TEXTURE = 1;
 
     /**
+     * The surface is obtained from {@link android.media.MediaRecorder}.
+     */
+    private static final int SURFACE_TYPE_MEDIA_RECORDER = 2;
+
+    /**
+     * The surface is obtained from {@link android.media.MediaCodec}.
+     */
+    private static final int SURFACE_TYPE_MEDIA_CODEC = 3;
+
+    /**
+     * The surface is obtained from {@link android.media.ImageReader}.
+     */
+    private static final int SURFACE_TYPE_IMAGE_READER = 4;
+
+    /**
      * Maximum number of surfaces supported by one {@link OutputConfiguration}.
      *
      * <p>The combined number of surfaces added by the constructor and
@@ -576,6 +598,7 @@ public final class OutputConfiguration implements Parcelable {
         mMirrorMode = MIRROR_MODE_AUTO;
         mReadoutTimestampEnabled = false;
         mIsReadoutSensorTimestampBase = false;
+        mUsage = 0;
     }
 
     /**
@@ -592,13 +615,7 @@ public final class OutputConfiguration implements Parcelable {
             @NonNull MultiResolutionImageReader multiResolutionImageReader)  {
         checkNotNull(multiResolutionImageReader, "Multi-resolution image reader must not be null");
 
-        int groupId = MULTI_RESOLUTION_GROUP_ID_COUNTER;
-        MULTI_RESOLUTION_GROUP_ID_COUNTER++;
-        // Skip in case the group id counter overflows to -1, the invalid value.
-        if (MULTI_RESOLUTION_GROUP_ID_COUNTER == -1) {
-            MULTI_RESOLUTION_GROUP_ID_COUNTER++;
-        }
-
+        int groupId = getAndIncreaseMultiResolutionGroupId();
         ImageReader[] imageReaders = multiResolutionImageReader.getReaders();
         ArrayList<OutputConfiguration> configs = new ArrayList<OutputConfiguration>();
         for (int i = 0; i < imageReaders.length; i++) {
@@ -620,6 +637,117 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Create a list of {@link OutputConfiguration} instances for a
+     * {@link MultiResolutionImageReader}.
+     *
+     * <p>This method can be used to create query OutputConfigurations for a
+     * MultiResolutionImageReader that can be included in a SessionConfiguration passed into
+     * {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * before opening and setting up a camera device in full, at which point {@link
+     * #setSurfacesForMultiResolutionOutput} can be used to link to the actual
+     * MultiResolutionImageReader.</p>
+     *
+     * <p>This constructor takes same arguments used to create a {@link
+     * MultiResolutionImageReader}: a collection of {@link MultiResolutionStreamInfo}
+     * objects and the format.</p>
+     *
+     * @param streams The group of multi-resolution stream info objects, which are used to create a
+     *                multi-resolution image reader containing a number of ImageReaders.
+     * @param format The format of the MultiResolutionImageReader. This must be one of the {@link
+     *               android.graphics.ImageFormat} or {@link android.graphics.PixelFormat} constants
+     *               supported by the camera device. Note that not all formats are supported, like
+     *               {@link ImageFormat#NV21}. The supported multi-resolution reader format can be
+     *               queried by {@link MultiResolutionStreamConfigurationMap#getOutputFormats}.
+     *
+     * @return The list of {@link OutputConfiguration} objects for a MultiResolutionImageReader.
+     *
+     * @throws IllegalArgumentException If the {@code streams} is null or doesn't contain
+     *                                 at least 2 items, or if {@code format} isn't a valid camera
+     *                                 format.
+     *
+     * @see MultiResolutionImageReader
+     * @see MultiResolutionStreamInfo
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public static @NonNull List<OutputConfiguration> createInstancesForMultiResolutionOutput(
+            @NonNull Collection<MultiResolutionStreamInfo> streams,
+            @Format int format)  {
+        if (streams == null || streams.size() <= 1) {
+            throw new IllegalArgumentException(
+                "The streams list must contain at least 2 entries");
+        }
+        if (format == ImageFormat.NV21) {
+            throw new IllegalArgumentException(
+                    "NV21 format is not supported");
+        }
+
+        int groupId = getAndIncreaseMultiResolutionGroupId();
+        ArrayList<OutputConfiguration> configs = new ArrayList<OutputConfiguration>();
+        for (MultiResolutionStreamInfo stream : streams) {
+            Size surfaceSize = new Size(stream.getWidth(), stream.getHeight());
+            OutputConfiguration config = new OutputConfiguration(
+                    groupId, format, surfaceSize);
+            config.setPhysicalCameraId(stream.getPhysicalCameraId());
+            config.setMultiResolutionOutput();
+            configs.add(config);
+
+            // No need to call addSensorPixelModeUsed for ultra high resolution sensor camera,
+            // because regular and max resolution output configurations are used for DEFAULT mode
+            // and MAX_RESOLUTION mode respectively by default.
+        }
+
+        return configs;
+    }
+
+    /**
+     * Set the OutputConfiguration surfaces corresponding to the {@link MultiResolutionImageReader}.
+     *
+     * <p>This function should be used together with {@link
+     * #createInstancesForMultiResolutionOutput}. The application calls {@link
+     * #createInstancesForMultiResolutionOutput} first to create a list of
+     * OutputConfiguration objects without the actual MultiResolutionImageReader.
+     * Once the MultiResolutionImageReader is created later during full camera setup, the
+     * application then calls this function to assign the surfaces to the OutputConfiguration
+     * instances.</p>
+     *
+     * @param outputConfigurations The OutputConfiguration objects created by {@link
+     *                             #createInstancesForMultiResolutionOutput}
+     * @param multiResolutionImageReader The MultiResolutionImageReader object created from the same
+     *                                   MultiResolutionStreamInfo parameters as
+     *                                   {@code outputConfigurations}.
+     * @throws IllegalArgumentException If {@code outputConfigurations} or {@code
+     *                                  multiResolutionImageReader} is {@code null}, the {@code
+     *                                  outputConfigurations} and {@code multiResolutionImageReader}
+     *                                  sizes don't match, or if the
+     *                                  {@code multiResolutionImageReader}'s surfaces don't match
+     *                                  with the {@code outputConfigurations}.
+     * @throws IllegalStateException If {@code outputConfigurations} already contains valid output
+     *                               surfaces.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public static void setSurfacesForMultiResolutionOutput(
+            @NonNull Collection<OutputConfiguration> outputConfigurations,
+            @NonNull MultiResolutionImageReader multiResolutionImageReader) {
+        checkNotNull(outputConfigurations, "outputConfigurations must not be null");
+        checkNotNull(multiResolutionImageReader, "multiResolutionImageReader must not be null");
+        if (outputConfigurations.size() != multiResolutionImageReader.getReaders().length) {
+            throw new IllegalArgumentException(
+                    "outputConfigurations and multiResolutionImageReader sizes must match");
+        }
+
+        for (OutputConfiguration config : outputConfigurations) {
+            String physicalCameraId = config.getPhysicalCameraId();
+            if (physicalCameraId == null) {
+                physicalCameraId = "";
+            }
+            Surface surface = multiResolutionImageReader.getSurface(config.getConfiguredSize(),
+                    physicalCameraId);
+            config.addSurface(surface);
+        }
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance, with desired Surface size and Surface
      * source class.
      * <p>
@@ -628,30 +756,66 @@ public final class OutputConfiguration implements Parcelable {
      * with a deferred Surface. The application can use this output configuration to create a
      * session.
      * </p>
-     * <p>
-     * However, the actual output Surface must be set via {@link #addSurface} and the deferred
-     * Surface configuration must be finalized via {@link
-     * CameraCaptureSession#finalizeOutputConfigurations} before submitting a request with this
-     * Surface target. The deferred Surface can only be obtained either from {@link
-     * android.view.SurfaceView} by calling {@link android.view.SurfaceHolder#getSurface}, or from
+     *
+     * <p>Starting from {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM Android V},
+     * the deferred Surface can be obtained: (1) from {@link android.view.SurfaceView}
+     * by calling {@link android.view.SurfaceHolder#getSurface}, (2) from
      * {@link android.graphics.SurfaceTexture} via
-     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}).
-     * </p>
+     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}, (3) from
+     * {@link android.media.MediaRecorder} via {@link android.media.MediaRecorder#getSurface} or
+     * {@link android.media.MediaCodec#createPersistentInputSurface}, or (4) from
+     * {@link android.media.MediaCodec} via {@link android.media.MediaCodec#createInputSurface} or
+     * {@link android.media.MediaCodec#createPersistentInputSurface}.</p>
+     *
+     * <ul>
+     * <li>Surfaces for {@link android.view.SurfaceView} and {@link android.graphics.SurfaceTexture}
+     * can be deferred until after {@link CameraDevice#createCaptureSession}. In that case, the
+     * output Surface must be set via {@link #addSurface}, and the Surface configuration must be
+     * finalized via {@link CameraCaptureSession#finalizeOutputConfigurations} before submitting
+     * a request with the Surface target.</li>
+     * <li>For all other target types, the output Surface must be set by {@link #addSurface},
+     * and {@link CameraCaptureSession#finalizeOutputConfigurations} is not needed because the
+     * OutputConfiguration used to create the session will contain the actual Surface.</li>
+     * </ul>
+     *
+     * <p>Before {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM Android V}, only {@link
+     * android.view.SurfaceView} and {@link android.graphics.SurfaceTexture} are supported. Both
+     * kind of outputs can be deferred until after {@link
+     * CameraDevice#createCaptureSessionByOutputConfigurations}.</p>
+     *
+     * <p>An OutputConfiguration object created by this constructor can be used for {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
      *
      * @param surfaceSize Size for the deferred surface.
      * @param klass a non-{@code null} {@link Class} object reference that indicates the source of
-     *            this surface. Only {@link android.view.SurfaceHolder SurfaceHolder.class} and
-     *            {@link android.graphics.SurfaceTexture SurfaceTexture.class} are supported.
+     *            this surface. Only {@link android.view.SurfaceHolder SurfaceHolder.class},
+     *            {@link android.graphics.SurfaceTexture SurfaceTexture.class}, {@link
+     *            android.media.MediaRecorder MediaRecorder.class}, and
+     *            {@link android.media.MediaCodec MediaCodec.class} are supported.
+     *            Before {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM Android V}, only
+     *            {@link android.view.SurfaceHolder SurfaceHolder.class} and {@link
+     *            android.graphics.SurfaceTexture SurfaceTexture.class} are supported.
      * @throws IllegalArgumentException if the Surface source class is not supported, or Surface
      *         size is zero.
      */
     public <T> OutputConfiguration(@NonNull Size surfaceSize, @NonNull Class<T> klass) {
-        checkNotNull(klass, "surfaceSize must not be null");
+        checkNotNull(surfaceSize, "surfaceSize must not be null");
         checkNotNull(klass, "klass must not be null");
         if (klass == android.view.SurfaceHolder.class) {
             mSurfaceType = SURFACE_TYPE_SURFACE_VIEW;
+            mIsDeferredConfig = true;
         } else if (klass == android.graphics.SurfaceTexture.class) {
             mSurfaceType = SURFACE_TYPE_SURFACE_TEXTURE;
+            mIsDeferredConfig = true;
+        } else if (klass == android.media.MediaRecorder.class) {
+            mSurfaceType = SURFACE_TYPE_MEDIA_RECORDER;
+            mIsDeferredConfig = false;
+        } else if (klass == android.media.MediaCodec.class) {
+            mSurfaceType = SURFACE_TYPE_MEDIA_CODEC;
+            mIsDeferredConfig = false;
         } else {
             mSurfaceType = SURFACE_TYPE_UNKNOWN;
             throw new IllegalArgumentException("Unknown surface source class type");
@@ -668,7 +832,6 @@ public final class OutputConfiguration implements Parcelable {
         mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(ImageFormat.PRIVATE);
         mConfiguredDataspace = StreamConfigurationMap.imageFormatToDataspace(ImageFormat.PRIVATE);
         mConfiguredGenerationId = 0;
-        mIsDeferredConfig = true;
         mIsShared = false;
         mPhysicalCameraId = null;
         mIsMultiResolution = false;
@@ -678,6 +841,139 @@ public final class OutputConfiguration implements Parcelable {
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
         mReadoutTimestampEnabled = false;
         mIsReadoutSensorTimestampBase = false;
+        mUsage = 0;
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance for an {@link ImageReader} for a given
+     * format and size.
+     *
+     * <p>This constructor creates an OutputConfiguration for an ImageReader without providing
+     * the actual output Surface. The actual output Surface must be set via {@link #addSurface}
+     * before creating the capture session.</p>
+     *
+     * <p>An OutputConfiguration object created by this constructor can be used for {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
+     *
+     * @param format The format of the ImageReader output. This must be one of the
+     *               {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
+     *               constants. Note that not all formats are supported by the camera device.
+     * @param surfaceSize Size for the ImageReader surface.
+     * @throws IllegalArgumentException if the Surface size is null or zero.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public OutputConfiguration(@Format int format, @NonNull Size surfaceSize) {
+        this(format, surfaceSize,
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN);
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance for an {@link ImageReader} for a given
+     * surfaceGroupId, format, and size.
+     *
+     * <p>This constructor creates an OutputConfiguration for an ImageReader without providing
+     * the actual output Surface. The actual output Surface must be set via {@link #addSurface}
+     * before creating the capture session.</p>
+     *
+     * <p>An OutputConfiguration object created by this constructor can be used for {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
+     *
+     * @param surfaceGroupId A group ID for this output, used for sharing memory between multiple
+     *                       outputs.
+     * @param format The format of the ImageReader output. This must be one of the
+     *               {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
+     *               constants. Note that not all formats are supported by the camera device.
+     * @param surfaceSize Size for the ImageReader surface.
+     * @throws IllegalArgumentException if the Surface size is null or zero.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public OutputConfiguration(int surfaceGroupId, @Format int format, @NonNull Size surfaceSize) {
+        this(surfaceGroupId, format, surfaceSize,
+                format == ImageFormat.PRIVATE ? 0 : HardwareBuffer.USAGE_CPU_READ_OFTEN);
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance for an {@link ImageReader} for a given
+     * format, size, and usage flags.
+     *
+     * <p>This constructor creates an OutputConfiguration for an ImageReader without providing
+     * the actual output Surface. The actual output Surface must be set via {@link #addSurface}
+     * before creating the capture session.</p>
+     *
+     * <p>An OutputConfiguration object created by this constructor can be used for {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
+     *
+     * @param format The format of the ImageReader output. This must be one of the
+     *               {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
+     *               constants. Note that not all formats are supported by the camera device.
+     * @param surfaceSize Size for the ImageReader surface.
+     * @param usage The usage flags of the ImageReader output surface.
+     * @throws IllegalArgumentException if the Surface size is null or zero.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public OutputConfiguration(@Format int format, @NonNull Size surfaceSize, @Usage long usage) {
+        this(SURFACE_GROUP_ID_NONE, format, surfaceSize, usage);
+    }
+
+    /**
+     * Create a new {@link OutputConfiguration} instance for an {@link ImageReader} for a given
+     * surface group id, format, size, and usage flags.
+     *
+     * <p>This constructor creates an OutputConfiguration for an ImageReader without providing
+     * the actual output Surface. The actual output Surface must be set via {@link #addSurface}
+     * before creating the capture session.</p>
+     *
+     * <p>An OutputConfiguration object created by this constructor can be used for {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#isSessionConfigurationSupported}
+     * and {@link
+     * android.hardware.camera2.CameraDevice.CameraDeviceSetup#getSessionCharacteristics} without
+     * having called {@link #addSurface}.</p>
+     *
+     * @param surfaceGroupId A group ID for this output, used for sharing memory between multiple
+     *                       outputs.
+     * @param format The format of the ImageReader output. This must be one of the
+     *               {@link android.graphics.ImageFormat} or {@link android.graphics.PixelFormat}
+     *               constants. Note that not all formats are supported by the camera device.
+     * @param surfaceSize Size for the ImageReader surface.
+     * @param usage The usage flags of the ImageReader output surface.
+     * @throws IllegalArgumentException if the Surface size is null or zero.
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_DEVICE_SETUP)
+    public OutputConfiguration(int surfaceGroupId, @Format int format,
+            @NonNull Size surfaceSize, @Usage long usage) {
+        checkNotNull(surfaceSize, "surfaceSize must not be null");
+        if (surfaceSize.getWidth() == 0 || surfaceSize.getHeight() == 0) {
+            throw new IllegalArgumentException("Surface size needs to be non-zero");
+        }
+
+        mSurfaceType = SURFACE_TYPE_IMAGE_READER;
+        mSurfaceGroupId = surfaceGroupId;
+        mSurfaces = new ArrayList<Surface>();
+        mRotation = ROTATION_0;
+        mConfiguredSize = surfaceSize;
+        mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(format);
+        mConfiguredDataspace = StreamConfigurationMap.imageFormatToDataspace(format);
+        mConfiguredGenerationId = 0;
+        mIsDeferredConfig = false;
+        mIsShared = false;
+        mPhysicalCameraId = null;
+        mIsMultiResolution = false;
+        mSensorPixelModesUsed = new ArrayList<Integer>();
+        mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mColorSpace = ColorSpaceProfiles.UNSPECIFIED;
+        mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
+        mReadoutTimestampEnabled = false;
+        mIsReadoutSensorTimestampBase = false;
+        mUsage = usage;
     }
 
     /**
@@ -852,7 +1148,8 @@ public final class OutputConfiguration implements Parcelable {
     /**
      * Check if this configuration has deferred configuration.
      *
-     * <p>This will return true if the output configuration was constructed with surface deferred by
+     * <p>This will return true if the output configuration was constructed with {@link
+     * android.view.SurfaceView} or {@link android.graphics.SurfaceTexture} deferred by
      * {@link OutputConfiguration#OutputConfiguration(Size, Class)}. It will return true even after
      * the deferred surface is added later by {@link OutputConfiguration#addSurface}.</p>
      *
@@ -872,13 +1169,28 @@ public final class OutputConfiguration implements Parcelable {
      * {@link CameraCaptureSession#finalizeOutputConfigurations}. It is possible to call this method
      * after the output configurations have been finalized only in cases of enabled surface sharing
      * see {@link #enableSurfaceSharing}. The modified output configuration must be updated with
-     * {@link CameraCaptureSession#updateOutputConfiguration}.</p>
+     * {@link CameraCaptureSession#updateOutputConfiguration}. If this function is called before
+     * session creation, {@link CameraCaptureSession#finalizeOutputConfigurations} doesn't need to
+     * be called.</p>
      *
-     * <p> If the OutputConfiguration was constructed with a deferred surface by {@link
-     * OutputConfiguration#OutputConfiguration(Size, Class)}, the added surface must be obtained
-     * from {@link android.view.SurfaceView} by calling {@link android.view.SurfaceHolder#getSurface},
-     * or from {@link android.graphics.SurfaceTexture} via
-     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}).</p>
+     * <p> If the OutputConfiguration was constructed by {@link
+     * OutputConfiguration#OutputConfiguration(Size, Class)}, the added surface must be obtained:
+     * <ul>
+     * <li>from {@link android.view.SurfaceView} by calling
+     * {@link android.view.SurfaceHolder#getSurface}</li>
+     * <li>from {@link android.graphics.SurfaceTexture} by calling
+     * {@link android.view.Surface#Surface(android.graphics.SurfaceTexture)}</li>
+     * <li>from {@link android.media.MediaRecorder} by calling
+     * {@link android.media.MediaRecorder#getSurface} or {@link
+     * android.media.MediaCodec#createPersistentInputSurface}</li>
+     * <li>from {@link android.media.MediaCodec} by calling
+     * {@link android.media.MediaCodec#createInputSurface} or
+     * {@link android.media.MediaCodec#createPersistentInputSurface()}</li>
+     * </ul>
+     *
+     * <p> If the OutputConfiguration was constructed by {@link #OutputConfiguration(int, Size)}
+     * or its variants, the added surface must be obtained from {@link android.media.ImageReader}
+     * by calling {@link android.media.ImageReader#getSurface}.</p>
      *
      * <p> If the OutputConfiguration was constructed by other constructors, the added
      * surface must be compatible with the existing surface. See {@link #enableSurfaceSharing} for
@@ -934,9 +1246,13 @@ public final class OutputConfiguration implements Parcelable {
      *
      * <p> Surfaces added via calls to {@link #addSurface} can also be removed from the
      *  OutputConfiguration. The only notable exception is the surface associated with
-     *  the OutputConfiguration see {@link #getSurface} which was passed as part of the constructor
-     *  or was added first in the deferred case
-     *  {@link OutputConfiguration#OutputConfiguration(Size, Class)}.</p>
+     *  the OutputConfiguration (see {@link #getSurface}) which was passed as part of the
+     *  constructor or was added first in the case of
+     *  {@link OutputConfiguration#OutputConfiguration(Size, Class)}, {@link
+     *  OutputConfiguration#OutputConfiguration(int, Size)}, {@link
+     *  OutputConfiguration#OutputConfiguration(int, Size, long)}, {@link
+     *  OutputConfiguration#OutputConfiguration(int, int, Size)}, {@link
+     *  OutputConfiguration#OutputConfiguration(int, int, Size, long)}.</p>
      *
      * @param surface The surface to be removed.
      *
@@ -945,6 +1261,7 @@ public final class OutputConfiguration implements Parcelable {
      *                                  with {@link #addSurface}.
      */
     public void removeSurface(@NonNull Surface surface) {
+        checkNotNull(surface, "Surface must not be null");
         if (getSurface() == surface) {
             throw new IllegalArgumentException(
                     "Cannot remove surface associated with this output configuration");
@@ -1175,6 +1492,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mTimestampBase = other.mTimestampBase;
         this.mMirrorMode = other.mMirrorMode;
         this.mReadoutTimestampEnabled = other.mReadoutTimestampEnabled;
+        this.mUsage = other.mUsage;
     }
 
     /**
@@ -1203,6 +1521,9 @@ public final class OutputConfiguration implements Parcelable {
         int timestampBase = source.readInt();
         int mirrorMode = source.readInt();
         boolean readoutTimestampEnabled = source.readInt() == 1;
+        int format = source.readInt();
+        int dataSpace = source.readInt();
+        long usage = source.readLong();
 
         mSurfaceGroupId = surfaceSetId;
         mRotation = rotation;
@@ -1211,6 +1532,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsDeferredConfig = isDeferred;
         mIsShared = isShared;
         mSurfaces = surfaces;
+        mUsage = 0;
         if (mSurfaces.size() > 0) {
             mSurfaceType = SURFACE_TYPE_UNKNOWN;
             mConfiguredFormat = SurfaceUtils.getSurfaceFormat(mSurfaces.get(0));
@@ -1218,9 +1540,16 @@ public final class OutputConfiguration implements Parcelable {
             mConfiguredGenerationId = mSurfaces.get(0).getGenerationId();
         } else {
             mSurfaceType = surfaceType;
-            mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(ImageFormat.PRIVATE);
-            mConfiguredDataspace =
-                    StreamConfigurationMap.imageFormatToDataspace(ImageFormat.PRIVATE);
+            if (mSurfaceType != SURFACE_TYPE_IMAGE_READER) {
+                mConfiguredFormat = StreamConfigurationMap.imageFormatToInternal(
+                        ImageFormat.PRIVATE);
+                mConfiguredDataspace =
+                        StreamConfigurationMap.imageFormatToDataspace(ImageFormat.PRIVATE);
+            } else {
+                mConfiguredFormat = format;
+                mConfiguredDataspace = dataSpace;
+                mUsage = usage;
+            }
             mConfiguredGenerationId = 0;
         }
         mPhysicalCameraId = physicalCameraId;
@@ -1293,6 +1622,31 @@ public final class OutputConfiguration implements Parcelable {
         return mSurfaceGroupId;
     }
 
+    /**
+     * Get the configured size associated with this {@link OutputConfiguration}.
+     *
+     * @return The configured size associated with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public Size getConfiguredSize() {
+        return mConfiguredSize;
+    }
+
+    /**
+     * Get the physical camera ID associated with this {@link OutputConfiguration}.
+     *
+     * <p>If this OutputConfiguration isn't targeting a physical camera of a logical
+     * multi-camera, this function returns {@code null}.</p>
+     *
+     * @return The physical camera Id associated with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @Nullable String getPhysicalCameraId() {
+        return mPhysicalCameraId;
+    }
+
     public static final @android.annotation.NonNull Parcelable.Creator<OutputConfiguration> CREATOR =
             new Parcelable.Creator<OutputConfiguration>() {
         @Override
@@ -1353,6 +1707,9 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mTimestampBase);
         dest.writeInt(mMirrorMode);
         dest.writeInt(mReadoutTimestampEnabled ? 1 : 0);
+        dest.writeInt(mConfiguredFormat);
+        dest.writeInt(mConfiguredDataspace);
+        dest.writeLong(mUsage);
     }
 
     /**
@@ -1372,22 +1729,24 @@ public final class OutputConfiguration implements Parcelable {
             return true;
         } else if (obj instanceof OutputConfiguration) {
             final OutputConfiguration other = (OutputConfiguration) obj;
-            if (mRotation != other.mRotation ||
-                    !mConfiguredSize.equals(other.mConfiguredSize) ||
-                    mConfiguredFormat != other.mConfiguredFormat ||
-                    mSurfaceGroupId != other.mSurfaceGroupId ||
-                    mSurfaceType != other.mSurfaceType ||
-                    mIsDeferredConfig != other.mIsDeferredConfig ||
-                    mIsShared != other.mIsShared ||
-                    mConfiguredDataspace != other.mConfiguredDataspace ||
-                    mConfiguredGenerationId != other.mConfiguredGenerationId ||
-                    !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId) ||
-                    mIsMultiResolution != other.mIsMultiResolution ||
-                    mStreamUseCase != other.mStreamUseCase ||
-                    mTimestampBase != other.mTimestampBase ||
-                    mMirrorMode != other.mMirrorMode ||
-                    mReadoutTimestampEnabled != other.mReadoutTimestampEnabled)
+            if (mRotation != other.mRotation
+                    || !mConfiguredSize.equals(other.mConfiguredSize)
+                    || mConfiguredFormat != other.mConfiguredFormat
+                    || mSurfaceGroupId != other.mSurfaceGroupId
+                    || mSurfaceType != other.mSurfaceType
+                    || mIsDeferredConfig != other.mIsDeferredConfig
+                    || mIsShared != other.mIsShared
+                    || mConfiguredDataspace != other.mConfiguredDataspace
+                    || mConfiguredGenerationId != other.mConfiguredGenerationId
+                    || !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId)
+                    || mIsMultiResolution != other.mIsMultiResolution
+                    || mStreamUseCase != other.mStreamUseCase
+                    || mTimestampBase != other.mTimestampBase
+                    || mMirrorMode != other.mMirrorMode
+                    || mReadoutTimestampEnabled != other.mReadoutTimestampEnabled
+                    || mUsage != other.mUsage) {
                 return false;
+            }
             if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
                 return false;
             }
@@ -1416,6 +1775,16 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Get and increase the next MultiResolution group id.
+     *
+     * If the ID reaches -1, skip it.
+     */
+    private static int getAndIncreaseMultiResolutionGroupId() {
+        return sNextMultiResolutionGroupId.getAndUpdate(i ->
+                i + 1 == SURFACE_GROUP_ID_NONE ? i + 2 : i + 1);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -1430,7 +1799,8 @@ public final class OutputConfiguration implements Parcelable {
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                     mDynamicRangeProfile, mColorSpace, mStreamUseCase,
-                    mTimestampBase, mMirrorMode, mReadoutTimestampEnabled ? 1 : 0);
+                    mTimestampBase, mMirrorMode, mReadoutTimestampEnabled ? 1 : 0,
+                    Long.hashCode(mUsage));
         }
 
         return HashCodeHelpers.hashCode(
@@ -1440,14 +1810,14 @@ public final class OutputConfiguration implements Parcelable {
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
                 mDynamicRangeProfile, mColorSpace, mStreamUseCase, mTimestampBase,
-                mMirrorMode, mReadoutTimestampEnabled ? 1 : 0);
+                mMirrorMode, mReadoutTimestampEnabled ? 1 : 0, Long.hashCode(mUsage));
     }
 
     private static final String TAG = "OutputConfiguration";
 
     // A surfaceGroupId counter used for MultiResolutionImageReader. Its value is
     // incremented every time {@link createInstancesForMultiResolutionOutput} is called.
-    private static int MULTI_RESOLUTION_GROUP_ID_COUNTER = 0;
+    private static AtomicInteger sNextMultiResolutionGroupId = new AtomicInteger(0);
 
     private ArrayList<Surface> mSurfaces;
     private final int mRotation;
@@ -1486,4 +1856,6 @@ public final class OutputConfiguration implements Parcelable {
     private boolean mReadoutTimestampEnabled;
     // Whether the timestamp base is set to READOUT_SENSOR
     private boolean mIsReadoutSensorTimestampBase;
+    // The usage flags. Only set for instances created for ImageReader without specifying surface.
+    private long mUsage;
 }

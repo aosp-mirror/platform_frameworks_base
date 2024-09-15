@@ -24,7 +24,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-import android.annotation.XmlRes;
+import android.content.Context;
+import android.content.res.Resources;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
 import android.os.BatteryStats;
@@ -35,9 +36,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UidBatteryConsumer;
 import android.os.UserBatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.SparseArray;
-
-import androidx.test.InstrumentationRegistry;
+import android.util.Xml;
 
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
@@ -47,6 +48,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.mockito.stubbing.Answer;
+import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,6 +83,7 @@ public class BatteryUsageStatsRule implements TestRule {
     private boolean[] mSupportedStandardBuckets;
     private String[] mCustomPowerComponentNames;
     private Throwable mThrowable;
+    private final BatteryStatsImpl.BatteryStatsConfig.Builder mBatteryStatsConfigBuilder;
 
     public BatteryUsageStatsRule() {
         this(0);
@@ -94,6 +97,13 @@ public class BatteryUsageStatsRule implements TestRule {
         mCpusByPolicy.put(4, new int[]{4, 5, 6, 7});
         mFreqsByPolicy.put(0, new int[]{300000, 1000000, 2000000});
         mFreqsByPolicy.put(4, new int[]{300000, 1000000, 2500000, 3000000});
+        mBatteryStatsConfigBuilder = new BatteryStatsImpl.BatteryStatsConfig.Builder()
+                .setPowerStatsThrottlePeriodMillis(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_CPU), 10000)
+                .setPowerStatsThrottlePeriodMillis(
+                        BatteryConsumer.powerComponentIdToString(
+                                BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO), 10000);
     }
 
     private void initBatteryStats() {
@@ -107,7 +117,8 @@ public class BatteryUsageStatsRule implements TestRule {
             }
             clearDirectory();
         }
-        mBatteryStats = new MockBatteryStatsImpl(mMockClock, mHistoryDir, mHandler);
+        mBatteryStats = new MockBatteryStatsImpl(mBatteryStatsConfigBuilder.build(),
+                mMockClock, mHistoryDir, mHandler, new PowerStatsUidResolver());
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.setCpuScalingPolicies(new CpuScalingPolicies(mCpusByPolicy, mFreqsByPolicy));
         synchronized (mBatteryStats) {
@@ -115,8 +126,6 @@ public class BatteryUsageStatsRule implements TestRule {
                     mCustomPowerComponentNames);
         }
         mBatteryStats.informThatAllExternalStatsAreFlushed();
-
-        mBatteryStats.onSystemReady();
 
         if (mDisplayCount != -1) {
             mBatteryStats.setDisplayCountLocked(mDisplayCount);
@@ -148,9 +157,25 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
-    public BatteryUsageStatsRule setTestPowerProfile(@XmlRes int xmlId) {
-        mPowerProfile.forceInitForTesting(InstrumentationRegistry.getContext(), xmlId);
+    public BatteryUsageStatsRule setTestPowerProfile(String resourceName) {
+        mPowerProfile.initForTesting(resolveParser(resourceName));
         return this;
+    }
+
+    public static XmlPullParser resolveParser(String resourceName) {
+        if (RavenwoodRule.isOnRavenwood()) {
+            try {
+                return Xml.resolvePullParser(BatteryUsageStatsRule.class.getClassLoader()
+                        .getResourceAsStream("res/xml/" + resourceName + ".xml"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Context context = androidx.test.InstrumentationRegistry.getContext();
+            Resources resources = context.getResources();
+            int resId = resources.getIdentifier(resourceName, "xml", context.getPackageName());
+            return resources.getXml(resId);
+        }
     }
 
     public BatteryUsageStatsRule setCpuScalingPolicy(int policy, int[] relatedCpus,
@@ -265,6 +290,13 @@ public class BatteryUsageStatsRule implements TestRule {
         return this;
     }
 
+    public BatteryUsageStatsRule setPowerStatsThrottlePeriodMillis(int powerComponent,
+            long throttleMs) {
+        mBatteryStatsConfigBuilder.setPowerStatsThrottlePeriodMillis(
+                BatteryConsumer.powerComponentIdToString(powerComponent), throttleMs);
+        return this;
+    }
+
     public BatteryUsageStatsRule startWithScreenOn(boolean screenOn) {
         mScreenOn = screenOn;
         return this;
@@ -291,23 +323,21 @@ public class BatteryUsageStatsRule implements TestRule {
     }
 
     private void before() {
-        initBatteryStats();
         HandlerThread bgThread = new HandlerThread("bg thread");
         bgThread.setUncaughtExceptionHandler((thread, throwable)-> {
             mThrowable = throwable;
         });
         bgThread.start();
         mHandler = new Handler(bgThread.getLooper());
-        mBatteryStats.setHandler(mHandler);
+
+        initBatteryStats();
         mBatteryStats.setOnBatteryInternal(true);
         mBatteryStats.getOnBatteryTimeBase().setRunning(true, 0, 0);
         mBatteryStats.getOnBatteryScreenOffTimeBase().setRunning(!mScreenOn, 0, 0);
     }
 
     private void after() throws Throwable {
-        if (mHandler != null) {
-            waitForBackgroundThread();
-        }
+        waitForBackgroundThread();
     }
 
     public void waitForBackgroundThread() throws Throwable {
@@ -316,11 +346,12 @@ public class BatteryUsageStatsRule implements TestRule {
         }
 
         ConditionVariable done = new ConditionVariable();
-        mHandler.post(done::open);
-        assertThat(done.block(10000)).isTrue();
-
-        if (mThrowable != null) {
-            throw mThrowable;
+        if (mHandler.post(done::open)) {
+            boolean success = done.block(5000);
+            if (mThrowable != null) {
+                throw mThrowable;
+            }
+            assertThat(success).isTrue();
         }
     }
 

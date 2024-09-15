@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.annotation.DimenRes
 import android.service.notification.StatusBarNotification
-import android.testing.AndroidTestingRunner
 import android.view.View.VISIBLE
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
@@ -44,7 +44,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class NotificationStackSizeCalculatorTest : SysuiTestCase() {
 
     @Mock private lateinit var sysuiStatusBarStateController: SysuiStatusBarStateController

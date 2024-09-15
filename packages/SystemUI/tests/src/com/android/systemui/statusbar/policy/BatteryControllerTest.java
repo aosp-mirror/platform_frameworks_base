@@ -36,14 +36,15 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.View;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.dx.mockito.inline.extended.StaticInOrder;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.Expandable;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
@@ -71,7 +72,7 @@ public class BatteryControllerTest extends SysuiTestCase {
     @Mock private PowerManager mPowerManager;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private DemoModeController mDemoModeController;
-    @Mock private View mView;
+    @Mock private Expandable mExpandable;
     @Mock private UsbPort mUsbPort;
     @Mock private UsbManager mUsbManager;
     @Mock private UsbPortStatus mUsbPortStatus;
@@ -174,8 +175,8 @@ public class BatteryControllerTest extends SysuiTestCase {
 
     @Test
     public void testBatteryUtilsCalledOnSetPowerSaveMode() {
-        mBatteryController.setPowerSaveMode(true, mView);
-        mBatteryController.setPowerSaveMode(false, mView);
+        mBatteryController.setPowerSaveMode(true, mExpandable);
+        mBatteryController.setPowerSaveMode(false, mExpandable);
 
         StaticInOrder inOrder = inOrder(staticMockMarker(BatterySaverUtils.class));
         inOrder.verify(() -> BatterySaverUtils.setPowerSaveMode(getContext(), true, true,
@@ -186,21 +187,21 @@ public class BatteryControllerTest extends SysuiTestCase {
 
     @Test
     public void testSaveViewReferenceWhenSettingPowerSaveMode() {
-        mBatteryController.setPowerSaveMode(false, mView);
+        mBatteryController.setPowerSaveMode(false, mExpandable);
 
-        Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+        Assert.assertNull(mBatteryController.getLastPowerSaverStartExpandable());
 
-        mBatteryController.setPowerSaveMode(true, mView);
+        mBatteryController.setPowerSaveMode(true, mExpandable);
 
-        Assert.assertSame(mView, mBatteryController.getLastPowerSaverStartView().get());
+        Assert.assertSame(mExpandable, mBatteryController.getLastPowerSaverStartExpandable().get());
     }
 
     @Test
     public void testClearViewReference() {
-        mBatteryController.setPowerSaveMode(true, mView);
-        mBatteryController.clearLastPowerSaverStartView();
+        mBatteryController.setPowerSaveMode(true, mExpandable);
+        mBatteryController.clearLastPowerSaverStartExpandable();
 
-        Assert.assertNull(mBatteryController.getLastPowerSaverStartView());
+        Assert.assertNull(mBatteryController.getLastPowerSaverStartExpandable());
     }
 
     @Test

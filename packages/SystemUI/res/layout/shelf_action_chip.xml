@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2024 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+    android:theme="@style/FloatingOverlay"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/overlay_action_chip_padding_vertical"
+    android:gravity="center"
+    android:background="@drawable/shelf_action_chip_background"
+    >
+    <ImageView
+        android:id="@+id/overlay_action_chip_icon"
+        android:tint="?androidprv:attr/materialColorOnSecondary"
+        android:layout_width="@dimen/overlay_action_chip_icon_size"
+        android:layout_height="@dimen/overlay_action_chip_icon_size"/>
+    <TextView
+        android:id="@+id/overlay_action_chip_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:textSize="@dimen/overlay_action_chip_text_size"
+        android:textColor="?androidprv:attr/materialColorOnSecondary"/>
+</LinearLayout>

@@ -1,0 +1,10 @@
+package: "com.android.internal.compat.flags"
+container: "system"
+
+flag {
+    name: "skip_old_and_disabled_compat_logging"
+    namespace: "app_compat"
+    description: "Feature flag for skipping debug logging for changes that do not target the latest sdk or are disabled"
+    bug: "323949942"
+    is_fixed_read_only: true
+}

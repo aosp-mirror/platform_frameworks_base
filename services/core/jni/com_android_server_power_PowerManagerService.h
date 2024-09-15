@@ -19,6 +19,7 @@
 
 #include <nativehelper/JNIHelp.h>
 #include <powermanager/PowerManager.h>
+#include <ui/LogicalDisplayId.h>
 #include <utils/Timers.h>
 
 #include "jni.h"
@@ -26,7 +27,7 @@
 namespace android {
 
 extern void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType,
-                                                            int32_t displayId);
+                                                            ui::LogicalDisplayId displayId);
 
 } // namespace android
 

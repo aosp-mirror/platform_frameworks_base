@@ -176,6 +176,22 @@ public class CachedBluetoothDeviceManager {
     }
 
     /**
+     * Sync device status of the pair of the hearing aid if needed.
+     *
+     * @param device the remote device
+     */
+    public synchronized void syncDeviceWithinHearingAidSetIfNeeded(CachedBluetoothDevice device,
+            int state, int profileId) {
+        if (profileId == BluetoothProfile.HAP_CLIENT
+                || profileId == BluetoothProfile.HEARING_AID
+                || profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
+            if (state == BluetoothProfile.STATE_CONNECTED) {
+                mHearingAidDeviceManager.syncDeviceIfNeeded(device);
+            }
+        }
+    }
+
+    /**
      * Search for existing sub device {@link CachedBluetoothDevice}.
      *
      * @param device the address of the Bluetooth device

@@ -74,7 +74,7 @@
     <string name="enabled_services_title" msgid="7036986099096582296">"Қосылған қызметтер"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"Ұсынылған қызметтер"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"Өшірілген қызметтер"</string>
-    <string name="all_services_title" msgid="5578662754874906455">"Барлық қызметтер"</string>
+    <string name="all_services_title" msgid="5578662754874906455">"Барлық қызмет"</string>
     <plurals name="print_services_recommendation_subtitle" formatted="false" msgid="5678487708807185138">
       <item quantity="other"><xliff:g id="COUNT_1">%1$s</xliff:g> принтерді табу үшін орнатыңыз</item>
       <item quantity="one"><xliff:g id="COUNT_0">%1$s</xliff:g> принтерді табу үшін орнатыңыз</item>

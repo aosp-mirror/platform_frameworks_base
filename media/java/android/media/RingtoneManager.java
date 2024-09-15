@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -573,12 +572,13 @@ public class RingtoneManager {
             FileUtils.closeQuietly(cursor);
             throw new FileNotFoundException("No item found for " + baseUri);
         } else if (cursor.getCount() > 1) {
+            int resultCount = cursor.getCount();
             // Find more than 1 result.
             // We are not sure which one is the right ringtone file so just abandon this case.
             FileUtils.closeQuietly(cursor);
             throw new FileNotFoundException(
                     "Find multiple ringtone candidates by title+ringtone_type query: count: "
-                            + cursor.getCount());
+                            + resultCount);
         }
         if (cursor.moveToFirst()) {
             ringtoneUri = ContentUris.withAppendedId(baseUri, cursor.getLong(0));
@@ -921,9 +921,13 @@ public class RingtoneManager {
                         + " ignored: failure to find mimeType (no access from this context?)");
                 return;
             }
-            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg"))) {
+            if (!(mimeType.startsWith("audio/") || mimeType.equals("application/ogg")
+                    || mimeType.equals("application/x-flac")
+                    // also check for video ringtones
+                    || mimeType.startsWith("video/") || mimeType.equals("application/mp4"))) {
                 Log.e(TAG, "setActualDefaultRingtoneUri for URI:" + ringtoneUri
-                        + " ignored: associated mimeType:" + mimeType + " is not an audio type");
+                        + " ignored: associated MIME type:" + mimeType
+                        + " is not a recognized audio or video type");
                 return;
             }
         }

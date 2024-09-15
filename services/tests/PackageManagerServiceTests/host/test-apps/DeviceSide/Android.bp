@@ -29,7 +29,7 @@ android_test_helper_app {
     sdk_version: "test_current",
     srcs: ["src/**/*.kt"],
     libs: [
-        "android.test.base",
+        "android.test.base.stubs.test",
     ],
     static_libs: [
         "androidx.annotation_annotation",

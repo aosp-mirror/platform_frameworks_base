@@ -18,7 +18,9 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromDreamingLockscreenHostedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.Edge
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED
+import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -34,8 +36,7 @@ constructor(
     private val transitionAnimation =
         animationFlow.setup(
             duration = TO_LOCKSCREEN_DURATION,
-            from = KeyguardState.DREAMING_LOCKSCREEN_HOSTED,
-            to = KeyguardState.LOCKSCREEN,
+            edge = Edge.create(from = DREAMING_LOCKSCREEN_HOSTED, to = LOCKSCREEN),
         )
 
     val shortcutsAlpha: Flow<Float> =

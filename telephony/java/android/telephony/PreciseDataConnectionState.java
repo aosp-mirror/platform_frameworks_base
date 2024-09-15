@@ -65,6 +65,7 @@ import java.util.Objects;
 public final class PreciseDataConnectionState implements Parcelable {
     private final @TransportType int mTransportType;
     private final int mId;
+    private final int mNetId;
     private final @DataState int mState;
     private final @NetworkType int mNetworkType;
     private final @DataFailureCause int mFailCause;
@@ -134,7 +135,7 @@ public final class PreciseDataConnectionState implements Parcelable {
                                       @ApnType int apnTypes, @NonNull String apn,
                                       @Nullable LinkProperties linkProperties,
                                       @DataFailureCause int failCause) {
-        this(AccessNetworkConstants.TRANSPORT_TYPE_INVALID, -1, state, networkType,
+        this(AccessNetworkConstants.TRANSPORT_TYPE_INVALID, -1, -1, state, networkType,
                 linkProperties, failCause, new ApnSetting.Builder()
                         .setApnTypeBitmask(apnTypes)
                         .setApnName(apn)
@@ -158,13 +159,14 @@ public final class PreciseDataConnectionState implements Parcelable {
      * @param defaultQos If there is a valid QoS for the default bearer supporting this data call,
      *        (supported for LTE and NR), then this is specified. Otherwise it should be null.
      */
-    private PreciseDataConnectionState(@TransportType int transportType, int id,
+    private PreciseDataConnectionState(@TransportType int transportType, int id, int netId,
             @DataState int state, @NetworkType int networkType,
             @Nullable LinkProperties linkProperties, @DataFailureCause int failCause,
             @Nullable ApnSetting apnSetting, @Nullable Qos defaultQos,
             @NetworkValidationStatus int networkValidationStatus) {
         mTransportType = transportType;
         mId = id;
+        mNetId = netId;
         mState = state;
         mNetworkType = networkType;
         mLinkProperties = linkProperties;
@@ -182,6 +184,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     private PreciseDataConnectionState(Parcel in) {
         mTransportType = in.readInt();
         mId = in.readInt();
+        mNetId = in.readInt();
         mState = in.readInt();
         mNetworkType = in.readInt();
         mLinkProperties = in.readParcelable(
@@ -241,6 +244,14 @@ public final class PreciseDataConnectionState implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * @return the current TelephonyNetworkAgent ID. {@code -1} if no network agent.
+     * @hide
+     */
+    public int getNetId() {
+        return mNetId;
     }
 
     /**
@@ -363,6 +374,7 @@ public final class PreciseDataConnectionState implements Parcelable {
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeInt(mTransportType);
         out.writeInt(mId);
+        out.writeInt(mNetId);
         out.writeInt(mState);
         out.writeInt(mNetworkType);
         out.writeParcelable(mLinkProperties, flags);
@@ -386,7 +398,7 @@ public final class PreciseDataConnectionState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTransportType, mId, mState, mNetworkType, mFailCause,
+        return Objects.hash(mTransportType, mId, mNetId, mState, mNetworkType, mFailCause,
                 mLinkProperties, mApnSetting, mDefaultQos, mNetworkValidationStatus);
     }
 
@@ -398,6 +410,7 @@ public final class PreciseDataConnectionState implements Parcelable {
         PreciseDataConnectionState that = (PreciseDataConnectionState) o;
         return mTransportType == that.mTransportType
                 && mId == that.mId
+                && mNetId == that.mNetId
                 && mState == that.mState
                 && mNetworkType == that.mNetworkType
                 && mFailCause == that.mFailCause
@@ -412,17 +425,18 @@ public final class PreciseDataConnectionState implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(" state: " + TelephonyUtils.dataStateToString(mState));
-        sb.append(", transport: "
-                + AccessNetworkConstants.transportTypeToString(mTransportType));
-        sb.append(", id: " + mId);
-        sb.append(", network type: " + TelephonyManager.getNetworkTypeName(mNetworkType));
-        sb.append(", APN Setting: " + mApnSetting);
-        sb.append(", link properties: " + mLinkProperties);
-        sb.append(", default QoS: " + mDefaultQos);
-        sb.append(", fail cause: " + DataFailCause.toString(mFailCause));
-        sb.append(", network validation status: "
-                + networkValidationStatusToString(mNetworkValidationStatus));
+        sb.append(" state: ").append(TelephonyUtils.dataStateToString(mState));
+        sb.append(", transport: ").append(
+                AccessNetworkConstants.transportTypeToString(mTransportType));
+        sb.append(", id: ").append(mId);
+        sb.append(", netId: ").append(mNetId);
+        sb.append(", network type: ").append(TelephonyManager.getNetworkTypeName(mNetworkType));
+        sb.append(", APN Setting: ").append(mApnSetting);
+        sb.append(", link properties: ").append(mLinkProperties);
+        sb.append(", default QoS: ").append(mDefaultQos);
+        sb.append(", fail cause: ").append(DataFailCause.toString(mFailCause));
+        sb.append(", network validation status: ").append(
+                networkValidationStatusToString(mNetworkValidationStatus));
 
         return sb.toString();
     }
@@ -462,6 +476,11 @@ public final class PreciseDataConnectionState implements Parcelable {
          * {@link DataCallResponse)}.
          */
         private int mId = -1;
+
+        /**
+         * The current TelephonyNetworkAgent ID. {@code -1} if no network agent.
+         */
+        private int mNetworkAgentId = -1;
 
         /** The state of the data connection */
         private @DataState int mState = TelephonyManager.DATA_UNKNOWN;
@@ -507,6 +526,17 @@ public final class PreciseDataConnectionState implements Parcelable {
          */
         public @NonNull Builder setId(int id) {
             mId = id;
+            return this;
+        }
+
+        /**
+         * Set the id of the data connection.
+         *
+         * @param agentId The id of the data connection
+         * @return The builder
+         */
+        public @NonNull Builder setNetworkAgentId(int agentId) {
+            mNetworkAgentId = agentId;
             return this;
         }
 
@@ -598,8 +628,8 @@ public final class PreciseDataConnectionState implements Parcelable {
          * @return The {@link PreciseDataConnectionState} instance
          */
         public PreciseDataConnectionState build() {
-            return new PreciseDataConnectionState(mTransportType, mId, mState, mNetworkType,
-                    mLinkProperties, mFailCause, mApnSetting, mDefaultQos,
+            return new PreciseDataConnectionState(mTransportType, mId, mNetworkAgentId, mState,
+                    mNetworkType, mLinkProperties, mFailCause, mApnSetting, mDefaultQos,
                     mNetworkValidationStatus);
         }
     }

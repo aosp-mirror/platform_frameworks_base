@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.stickykeys.ui
 
 import android.app.Dialog
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyboard.data.repository.FakeStickyKeysRepository
@@ -36,13 +37,12 @@ import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class StickyKeysIndicatorCoordinatorTest : SysuiTestCase() {
 
     private lateinit var coordinator: StickyKeysIndicatorCoordinator

@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.ServiceConnection;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraCharacteristics.Key;
@@ -142,7 +143,7 @@ public final class CameraExtensionCharacteristics {
     /**
      * An extension that aims to lock and stabilize a given region or object of interest.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final int EXTENSION_EYES_FREE_VIDEOGRAPHY = 5;
 
     /**
@@ -179,6 +180,16 @@ public final class CameraExtensionCharacteristics {
             EXTENSION_BOKEH,
             EXTENSION_HDR,
             EXTENSION_NIGHT};
+
+    /**
+     * List of synthetic CameraCharacteristics keys that are supported in the extensions.
+     */
+    private static final List<CameraCharacteristics.Key>
+            SUPPORTED_SYNTHETIC_CAMERA_CHARACTERISTICS =
+            Arrays.asList(
+                    CameraCharacteristics.REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES,
+                    CameraCharacteristics.REQUEST_AVAILABLE_COLOR_SPACE_PROFILES
+            );
 
     private final Context mContext;
     private final String mCameraId;
@@ -217,14 +228,19 @@ public final class CameraExtensionCharacteristics {
     private static List<Size> generateSupportedSizes(List<SizeList> sizesList,
                                                      Integer format,
                                                      StreamConfigurationMap streamMap) {
-        // Per API contract it is assumed that the extension is able to support all
-        // camera advertised sizes for a given format in case it doesn't return
-        // a valid non-empty size list.
         ArrayList<Size> ret = getSupportedSizes(sizesList, format);
-        Size[] supportedSizes = streamMap.getOutputSizes(format);
-        if ((ret.isEmpty()) && (supportedSizes != null)) {
-            ret.addAll(Arrays.asList(supportedSizes));
+
+        if (format == ImageFormat.JPEG || format == ImageFormat.YUV_420_888 ||
+                format == ImageFormat.PRIVATE) {
+            // Per API contract it is assumed that the extension is able to support all
+            // camera advertised sizes for JPEG, YUV_420_888 and PRIVATE in case it doesn't return
+            // a valid non-empty size list.
+            Size[] supportedSizes = streamMap.getOutputSizes(format);
+            if ((ret.isEmpty()) && (supportedSizes != null)) {
+                ret.addAll(Arrays.asList(supportedSizes));
+            }
         }
+
         return ret;
     }
 
@@ -263,6 +279,8 @@ public final class CameraExtensionCharacteristics {
         private final Object mLock = new Object();
         private final int PROXY_SERVICE_DELAY_MS = 2000;
         private ExtensionConnectionManager mConnectionManager = new ExtensionConnectionManager();
+        private boolean mPermissionForFallbackEnabled = false;
+        private boolean mIsFallbackEnabled = false;
 
         // Singleton, don't allow construction
         private CameraExtensionManagerGlobal() {}
@@ -310,6 +328,7 @@ public final class CameraExtensionCharacteristics {
                                 "Choosing the fallback software implementation service: "
                                 + serviceName);
                         intent.setClassName(packageName, serviceName);
+                        mIsFallbackEnabled = true;
                     }
                 }
 
@@ -421,6 +440,20 @@ public final class CameraExtensionCharacteristics {
                     releaseProxyConnectionLocked(ctx, extension);
                 }
 
+                if (Flags.concertMode() && ret && useFallback && mIsFallbackEnabled) {
+                    try {
+                        InitializeSessionHandler cb = new InitializeSessionHandler(ctx);
+                        initializeSession(cb, extension);
+                        ret = mPermissionForFallbackEnabled;
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Failed to initialize extension. Extension service does not"
+                                + " respond!");
+                        ret = false;
+                    } finally {
+                        releaseSession(extension);
+                    }
+                }
+
                 return ret;
             }
         }
@@ -449,7 +482,6 @@ public final class CameraExtensionCharacteristics {
                 if (!vendorImpl) {
                     unregisterClient(ctx, token, extension);
                     ret = registerClientHelper(ctx, token, extension, true /*useFallback*/);
-
                 }
             }
 
@@ -493,6 +525,7 @@ public final class CameraExtensionCharacteristics {
                     try {
                         mConnectionManager.getProxy(extension).releaseSession();
                         mConnectionManager.setSessionInitialized(false);
+                        mPermissionForFallbackEnabled = false; // Reset permission status
                     } catch (RemoteException e) {
                         Log.e(TAG, "Failed to release session! Extension service does"
                                 + " not respond!");
@@ -541,6 +574,52 @@ public final class CameraExtensionCharacteristics {
             }
         }
 
+        private class InitializeSessionHandler extends IInitializeSessionCallback.Stub {
+            private Context mContext;
+
+            public InitializeSessionHandler(Context context) {
+                mContext = context;
+            }
+
+            @Override
+            public void onSuccess() {
+                // Verify that the camera permission is granted if using
+                // the fallback implementation for an extension
+                String[] callingUidPackages = mContext.getPackageManager()
+                        .getPackagesForUid(Binder.getCallingUid());
+                String fallbackPackageName = mContext.getResources()
+                        .getString(FALLBACK_PACKAGE_NAME);
+
+                if (!fallbackPackageName.isEmpty()
+                        && Arrays.stream(callingUidPackages)
+                        .anyMatch(fallbackPackageName::equals)) {
+                    String[] cameraPermissions = {
+                        android.Manifest.permission.SYSTEM_CAMERA,
+                        android.Manifest.permission.CAMERA
+                    };
+
+                    boolean allPermissionsGranted = true;
+                    for (String permission : cameraPermissions) {
+                        int permissionResult = mContext.checkPermission(permission,
+                                Binder.getCallingPid(), Binder.getCallingUid());
+                        if (permissionResult != PackageManager.PERMISSION_GRANTED) {
+                            Log.w(TAG, permission + " permission not granted for "
+                                    + fallbackPackageName + ", permission check result: "
+                                    + permissionResult);
+                            allPermissionsGranted = false;
+                        }
+                    }
+
+                    mPermissionForFallbackEnabled = allPermissionsGranted;
+                }
+            }
+
+            @Override
+            public void onFailure() {
+                Log.e(TAG, "Failed to initialize proxy service session!");
+            }
+        }
+
         private class ExtensionConnectionManager {
             // Maps extension to ExtensionConnection
             private Map<Integer, ExtensionConnection> mConnections = new HashMap<>();
@@ -549,7 +628,7 @@ public final class CameraExtensionCharacteristics {
             public ExtensionConnectionManager() {
                 IntArray extensionList = new IntArray(EXTENSION_LIST.length);
                 extensionList.addAll(EXTENSION_LIST);
-                if (Flags.concertMode()) {
+                if (Flags.concertModeApi()) {
                     extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
                 }
 
@@ -752,7 +831,7 @@ public final class CameraExtensionCharacteristics {
 
         IntArray extensionList = new IntArray(EXTENSION_LIST.length);
         extensionList.addAll(EXTENSION_LIST);
-        if (Flags.concertMode()) {
+        if (Flags.concertModeApi()) {
             extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
         }
 
@@ -874,11 +953,17 @@ public final class CameraExtensionCharacteristics {
                 Class<CameraCharacteristics.Key<?>> keyTyped =
                         (Class<CameraCharacteristics.Key<?>>) key;
 
-                // Do not include synthetic keys. Including synthetic keys leads to undefined
-                // behavior. This causes inclusion of capabilities that may not be supported in
-                // camera extensions.
                 ret.addAll(chars.getAvailableKeyList(CameraCharacteristics.class, keyTyped, keys,
                         /*includeSynthetic*/ false));
+
+                // Add synthetic keys to the available key list if they are part of the supported
+                // synthetic camera characteristic key list
+                for (CameraCharacteristics.Key charKey :
+                        SUPPORTED_SYNTHETIC_CAMERA_CHARACTERISTICS) {
+                    if (chars.get(charKey) != null) {
+                        ret.add(charKey);
+                    }
+                }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to query the extension for all available keys! Extension "
@@ -896,8 +981,11 @@ public final class CameraExtensionCharacteristics {
      * image. For example, it can be used as a temporary placeholder for the requested capture
      * while the final image is being processed. The supported sizes for a still capture's postview
      * can be retrieved using
-     * {@link CameraExtensionCharacteristics#getPostviewSupportedSizes(int, Size, int)}.
-     * The formats of the still capture and postview should be equivalent upon capture request.</p>
+     * {@link CameraExtensionCharacteristics#getPostviewSupportedSizes(int, Size, int)}.</p>
+     *
+     * <p>Starting with Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM},
+     * the formats of the still capture and postview are not required to be equivalent upon capture
+     * request.</p>
      *
      * @param extension the extension type
      * @return {@code true} in case postview is supported, {@code false} otherwise
@@ -955,8 +1043,7 @@ public final class CameraExtensionCharacteristics {
      *
      * @param extension the extension type
      * @param captureSize size of the still capture for which the postview is requested
-     * @param format device-specific extension output format of the still capture and
-     * postview
+     * @param format device-specific extension output format of the postview
      * @return non-modifiable list of available sizes or an empty list if the format and
      * size is not supported.
      * @throws IllegalArgumentException in case of unsupported extension or if postview
@@ -990,14 +1077,15 @@ public final class CameraExtensionCharacteristics {
                     case ImageFormat.YUV_420_888:
                     case ImageFormat.JPEG:
                     case ImageFormat.JPEG_R:
+                    case ImageFormat.YCBCR_P010:
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported format: " + format);
                 }
                 IAdvancedExtenderImpl extender = initializeAdvancedExtension(extension);
                 extender.init(mCameraId, mCharacteristicsMapNative);
-                return generateSupportedSizes(extender.getSupportedPostviewResolutions(
-                    sz), format, streamMap);
+                return getSupportedSizes(extender.getSupportedPostviewResolutions(sz),
+                        format);
             } else {
                 Pair<IPreviewExtenderImpl, IImageCaptureExtenderImpl> extenders =
                         initializeExtension(extension);
@@ -1012,17 +1100,16 @@ public final class CameraExtensionCharacteristics {
                 }
 
                 if (format == ImageFormat.YUV_420_888) {
-                    return generateSupportedSizes(
-                            extenders.second.getSupportedPostviewResolutions(sz),
-                            format, streamMap);
+                    return getSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz), format);
                 } else if (format == ImageFormat.JPEG) {
                     // The framework will perform the additional encoding pass on the
                     // processed YUV_420 buffers.
-                    return generateJpegSupportedSizes(
-                            extenders.second.getSupportedPostviewResolutions(sz),
-                                    streamMap);
-                }  else if (format == ImageFormat.JPEG_R) {
-                    // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                    return getSupportedSizes(
+                            extenders.second.getSupportedPostviewResolutions(sz), format);
+                }  else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
+                    // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the basic
+                    // extension case
                     return new ArrayList<>();
                 } else {
                     throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1118,16 +1205,16 @@ public final class CameraExtensionCharacteristics {
      *
      * <p>Device-specific extensions currently support at most three
      * multi-frame capture surface formats. ImageFormat.JPEG will be supported by all
-     * extensions while ImageFormat.YUV_420_888 and ImageFormat.JPEG_R may or may not be
-     * supported.</p>
+     * extensions while ImageFormat.YUV_420_888, ImageFormat.JPEG_R, or ImageFormat.YCBCR_P010
+     * may or may not be supported.</p>
      *
      * @param extension the extension type
      * @param format    device-specific extension output format
      * @return non-modifiable list of available sizes or an empty list if the format is not
      * supported.
      * @throws IllegalArgumentException in case of format different from ImageFormat.JPEG,
-     *                                  ImageFormat.YUV_420_888, ImageFormat.JPEG_R; or
-     *                                  unsupported extension.
+     *                                  ImageFormat.YUV_420_888, ImageFormat.JPEG_R,
+     *                                  ImageFormat.YCBCR_P010; or unsupported extension.
      */
     public @NonNull
     List<Size> getExtensionSupportedSizes(@Extension int extension, int format) {
@@ -1151,6 +1238,7 @@ public final class CameraExtensionCharacteristics {
                         case ImageFormat.YUV_420_888:
                         case ImageFormat.JPEG:
                         case ImageFormat.JPEG_R:
+                        case ImageFormat.YCBCR_P010:
                             break;
                         default:
                             throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1183,8 +1271,9 @@ public final class CameraExtensionCharacteristics {
                         } else {
                             return generateSupportedSizes(null, format, streamMap);
                         }
-                    } else if (format == ImageFormat.JPEG_R) {
-                        // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                    } else if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
+                        // Jpeg_R/UltraHDR + YCBCR_P010 is currently not supported in the
+                        // basic extension case
                         return new ArrayList<>();
                     } else {
                         throw new IllegalArgumentException("Unsupported format: " + format);
@@ -1213,7 +1302,8 @@ public final class CameraExtensionCharacteristics {
      * @return the range of estimated minimal and maximal capture latency in milliseconds
      * or null if no capture latency info can be provided
      * @throws IllegalArgumentException in case of format different from {@link ImageFormat#JPEG},
-     *                                  {@link ImageFormat#YUV_420_888}, {@link ImageFormat#JPEG_R};
+     *                                  {@link ImageFormat#YUV_420_888}, {@link ImageFormat#JPEG_R}
+     *                                  {@link ImageFormat#YCBCR_P010};
      *                                  or unsupported extension.
      */
     public @Nullable Range<Long> getEstimatedCaptureLatencyRangeMillis(@Extension int extension,
@@ -1222,6 +1312,7 @@ public final class CameraExtensionCharacteristics {
             case ImageFormat.YUV_420_888:
             case ImageFormat.JPEG:
             case ImageFormat.JPEG_R:
+            case ImageFormat.YCBCR_P010:
                 //No op
                 break;
             default:
@@ -1269,8 +1360,8 @@ public final class CameraExtensionCharacteristics {
                     // specific and cannot be estimated accurately enough.
                     return  null;
                 }
-                if (format == ImageFormat.JPEG_R) {
-                    // JpegR/UltraHDR is not supported for basic extensions
+                if (format == ImageFormat.JPEG_R || format == ImageFormat.YCBCR_P010) {
+                    // JpegR/UltraHDR + YCBCR_P010 is not supported for basic extensions
                     return null;
                 }
 
@@ -1522,7 +1613,7 @@ public final class CameraExtensionCharacteristics {
     @PublicKey
     @NonNull
     @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
     public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
             CameraCharacteristics.EFV_PADDING_ZOOM_FACTOR_RANGE;
 }

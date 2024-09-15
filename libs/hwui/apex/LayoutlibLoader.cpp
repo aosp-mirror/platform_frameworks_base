@@ -46,6 +46,7 @@ namespace android {
 
 extern int register_android_graphics_Canvas(JNIEnv* env);
 extern int register_android_graphics_CanvasProperty(JNIEnv* env);
+extern int register_android_graphics_Color(JNIEnv* env);
 extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_ColorSpace(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
@@ -87,6 +88,7 @@ static const std::unordered_map<std::string, RegJNIRec> gRegJNIMap = {
         {"android.graphics.Camera", REG_JNI(register_android_graphics_Camera)},
         {"android.graphics.Canvas", REG_JNI(register_android_graphics_Canvas)},
         {"android.graphics.CanvasProperty", REG_JNI(register_android_graphics_CanvasProperty)},
+        {"android.graphics.Color", REG_JNI(register_android_graphics_Color)},
         {"android.graphics.ColorFilter", REG_JNI(register_android_graphics_ColorFilter)},
         {"android.graphics.ColorSpace", REG_JNI(register_android_graphics_ColorSpace)},
         {"android.graphics.CreateJavaOutputStreamAdaptor",
@@ -164,8 +166,10 @@ static vector<string> parseCsv(JNIEnv* env, jstring csvJString) {
 } // namespace android
 
 using namespace android;
+using namespace android::uirenderer;
 
 void init_android_graphics() {
+    Properties::overrideRenderPipelineType(RenderPipelineType::SkiaCpu);
     SkGraphics::Init();
 }
 

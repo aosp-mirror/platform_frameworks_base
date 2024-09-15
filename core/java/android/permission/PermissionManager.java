@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
+import static android.permission.flags.Flags.FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE;
 import static android.permission.flags.Flags.serverSideAttributionRegistration;
 
 import android.Manifest;
@@ -111,7 +112,7 @@ public final class PermissionManager {
     public static final int PERMISSION_GRANTED = 0;
 
     /**
-     * The permission is denied. Applicable only to runtime and app op permissions.
+     * The permission is denied. Applicable only to runtime permissions.
      * <p>
      * The app isn't expecting the permission to be denied so that a "no-op" action should be taken,
      * such as returning an empty result.
@@ -238,6 +239,16 @@ public final class PermissionManager {
     @SystemApi
     public static final String EXTRA_PERMISSION_USAGES =
             "android.permission.extra.PERMISSION_USAGES";
+
+    /**
+     * Specify what permissions are device aware. Only device aware permissions can be granted to
+     * a remote device.
+     * @hide
+     */
+    public static final Set<String> DEVICE_AWARE_PERMISSIONS =
+            Flags.deviceAwarePermissionsEnabled()
+                    ? Set.of(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+                    : Collections.emptySet();
 
     private final @NonNull Context mContext;
 
@@ -1652,6 +1663,8 @@ public final class PermissionManager {
      *
      * @hide
      */
+    @TestApi
+    @FlaggedApi(FLAG_SHOULD_REGISTER_ATTRIBUTION_SOURCE)
     public boolean isRegisteredAttributionSource(@NonNull AttributionSource source) {
         try {
             return mPermissionManager.isRegisteredAttributionSource(source.asState());
@@ -1659,6 +1672,21 @@ public final class PermissionManager {
             e.rethrowFromSystemServer();
         }
         return false;
+    }
+
+    /**
+     * Gets the number of currently registered attribution sources for a particular UID. This should
+     * only be used for testing purposes.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.UPDATE_APP_OPS_STATS)
+    public int getRegisteredAttributionSourceCountForTest(int uid) {
+        try {
+            return mPermissionManager.getRegisteredAttributionSourceCount(uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**
@@ -1788,6 +1816,9 @@ public final class PermissionManager {
 
     /**
      * Gets the permission states for requested package and persistent device.
+     * <p>
+     * <strong>Note: </strong>Default device permissions are not inherited in this API. Returns the
+     * exact permission states for the requested device.
      *
      * @param packageName name of the package you are checking against
      * @param persistentDeviceId id of the persistent device you are checking against
@@ -1797,7 +1828,11 @@ public final class PermissionManager {
      */
     @SystemApi
     @NonNull
-    @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS,
+            android.Manifest.permission.GET_RUNTIME_PERMISSIONS
+    })
     @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public Map<String, PermissionState> getAllPermissionStates(@NonNull String packageName,
             @NonNull String persistentDeviceId) {
@@ -2073,5 +2108,29 @@ public final class PermissionManager {
                 return new PermissionState[size];
             }
         };
+
+        /** @hide */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PermissionState that = (PermissionState) o;
+            return mGranted == that.mGranted && mFlags == that.mFlags;
+        }
+
+        /** @hide */
+        @Override
+        public int hashCode() {
+            return Objects.hash(mGranted, mFlags);
+        }
+
+        /** @hide */
+        @Override
+        public String toString() {
+            return "PermissionState{"
+                    + "mGranted=" + mGranted
+                    + ", mFlags=" + mFlags
+                    + '}';
+        }
     }
 }

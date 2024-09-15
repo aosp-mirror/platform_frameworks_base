@@ -40,6 +40,7 @@ class PasswordBouncerViewModel(
     viewModelScope: CoroutineScope,
     isInputEnabled: StateFlow<Boolean>,
     interactor: BouncerInteractor,
+    private val onIntentionalUserInput: () -> Unit,
     private val inputMethodInteractor: InputMethodInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
 ) :
@@ -73,6 +74,14 @@ class PasswordBouncerViewModel(
                 initialValue = isInputEnabled.value && !isTextFieldFocused.value,
             )
 
+    /** The ID of the currently-selected user. */
+    val selectedUserId: StateFlow<Int> =
+        selectedUserInteractor.selectedUser.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = selectedUserInteractor.getSelectedUserId(),
+        )
+
     override fun onHidden() {
         super.onHidden()
         isTextFieldFocused.value = false
@@ -88,12 +97,8 @@ class PasswordBouncerViewModel(
 
     /** Notifies that the user has changed the password input. */
     fun onPasswordInputChanged(newPassword: String) {
-        if (this.password.value.isEmpty() && newPassword.isNotEmpty()) {
-            interactor.clearMessage()
-        }
-
         if (newPassword.isNotEmpty()) {
-            interactor.onIntentionalUserInput()
+            onIntentionalUserInput()
         }
 
         _password.value = newPassword

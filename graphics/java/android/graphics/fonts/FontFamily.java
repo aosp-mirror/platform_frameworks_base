@@ -25,6 +25,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.text.FontConfig;
 import android.util.SparseIntArray;
 
@@ -73,9 +74,11 @@ public final class FontFamily {
      * A builder class for creating new FontFamily.
      */
     public static final class Builder {
-        private static final NativeAllocationRegistry sFamilyRegistory =
-                NativeAllocationRegistry.createMalloced(FontFamily.class.getClassLoader(),
-                    nGetReleaseNativeFamily());
+        private static class NoImagePreloadHolder {
+            private static final NativeAllocationRegistry sFamilyRegistry =
+                    NativeAllocationRegistry.createMalloced(FontFamily.class.getClassLoader(),
+                            nGetReleaseNativeFamily());
+        }
 
         private final ArrayList<Font> mFonts = new ArrayList<>();
         // Most FontFamily only has  regular, bold, italic, bold-italic. Thus 4 should be good for
@@ -140,11 +143,16 @@ public final class FontFamily {
          * value of the supported `wght`axis, the maximum supported `wght` value is used. The weight
          * value of the font is ignored.
          *
-         * If none of the above conditions are met, this function return {@code null}.
+         * If none of the above conditions are met, the provided font files cannot be used for
+         * variable font family and this function returns {@code null}. Even if this function
+         * returns {@code null}, you can still use {@link #build()} method for creating FontFamily
+         * instance with manually specifying variation settings by using
+         * {@link Font.Builder#setFontVariationSettings(String)}.
          *
          * @return A variable font family. null if a variable font cannot be built from the given
          *         fonts.
          */
+        @SuppressLint("BuilderSetStyle")
         @FlaggedApi(FLAG_NEW_FONTS_FALLBACK_XML)
         public @Nullable FontFamily buildVariableFamily() {
             int variableFamilyType = analyzeAndResolveVariableType(mFonts);
@@ -179,7 +187,7 @@ public final class FontFamily {
             final long ptr = nBuild(builderPtr, langTags, variant, isCustomFallback,
                     isDefaultFallback, variableFamilyType);
             final FontFamily family = new FontFamily(ptr);
-            sFamilyRegistory.registerNativeAllocation(family, ptr);
+            NoImagePreloadHolder.sFamilyRegistry.registerNativeAllocation(family, ptr);
             return family;
         }
 

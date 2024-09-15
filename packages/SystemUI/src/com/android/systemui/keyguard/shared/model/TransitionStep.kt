@@ -15,6 +15,9 @@
  */
 package com.android.systemui.keyguard.shared.model
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+
 /** This information will flow from the [KeyguardTransitionRepository] to control the UI layer */
 data class TransitionStep
 @JvmOverloads
@@ -30,4 +33,15 @@ constructor(
         value: Float,
         transitionState: TransitionState,
     ) : this(info.from, info.to, value, transitionState, info.ownerName)
+
+    fun isTransitioning(from: KeyguardState? = null, to: KeyguardState? = null): Boolean {
+        return (from == null || this.from == from) && (to == null || this.to == to)
+    }
+
+    fun isFinishedIn(state: KeyguardState): Boolean {
+        return to == state && transitionState == TransitionState.FINISHED
+    }
 }
+
+fun Flow<TransitionStep>.filterState(transitionState: TransitionState) =
+    this.filter { it.transitionState == transitionState }

@@ -21,6 +21,7 @@ import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.subject.layers.LayerTraceEntrySubject
+import android.tools.flicker.subject.layers.LayersTraceSubject
 import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.component.IComponentMatcher
 import android.tools.traces.surfaceflinger.Display
@@ -46,6 +47,7 @@ abstract class RotationTransition(flicker: LegacyFlickerTest) : BaseTest(flicker
         flicker.assertLayers {
             this.visibleLayersShownMoreThanOneConsecutiveEntry(
                 ignoreLayers =
+                    LayersTraceSubject.VISIBLE_FOR_MORE_THAN_ONE_ENTRY_IGNORE_LAYERS +
                     listOf(
                         ComponentNameMatcher.SPLASH_SCREEN,
                         ComponentNameMatcher.SNAPSHOT,

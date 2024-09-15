@@ -19,5 +19,5 @@ package android.view
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.layoutInflater: LayoutInflater by
+var Kosmos.layoutInflater: LayoutInflater by
     Kosmos.Fixture { LayoutInflater.from(applicationContext) }

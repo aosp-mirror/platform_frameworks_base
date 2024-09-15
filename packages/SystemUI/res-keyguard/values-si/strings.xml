@@ -111,6 +111,9 @@
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට රටාව භාවිතා කරන්න"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට PIN භාවිතා කරන්න"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට මුරපදය භාවිතා කරන්න"</string>
+    <string name="kg_prompt_added_security_pin" msgid="5487992065995475528">"අමතර ආරක්ෂාව සඳහා PIN අංකය අවශ්‍යයි"</string>
+    <string name="kg_prompt_added_security_pattern" msgid="1017068086102168544">"අමතර ආරක්ෂාව සඳහා රටාව අවශ්‍යයි"</string>
+    <string name="kg_prompt_added_security_password" msgid="6053156069765029006">"අමතර ආරක්ෂාව සඳහා මුරපදය අවශ්‍යයි"</string>
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"ඔබගේ පරිපාලක විසින් උපාංගය අගුළු දමා ඇත"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"උපාංගය හස්තීයව අගුලු දමන ලදී"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"හඳුනා නොගන්නා ලදී"</string>

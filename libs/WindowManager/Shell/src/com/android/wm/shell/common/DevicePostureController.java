@@ -107,7 +107,7 @@ public class DevicePostureController {
                 DeviceStateManager.class);
         if (deviceStateManager != null) {
             deviceStateManager.registerCallback(mMainExecutor, state -> onDevicePostureChanged(
-                    mDeviceStateToPostureMap.get(state, DEVICE_POSTURE_UNKNOWN)));
+                    mDeviceStateToPostureMap.get(state.getIdentifier(), DEVICE_POSTURE_UNKNOWN)));
         }
     }
 

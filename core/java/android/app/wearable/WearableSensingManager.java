@@ -27,11 +27,15 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
+import android.app.compat.CompatChanges;
 import android.companion.CompanionDeviceManager;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
@@ -39,7 +43,13 @@ import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.service.wearable.WearableSensingService;
 import android.system.OsConstants;
+import android.util.Slog;
 
+import com.android.internal.infra.AndroidFuture;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Retention;
@@ -95,11 +105,12 @@ public class WearableSensingManager {
     /**
      * The value of the status code that indicates one or more of the requested events are not
      * supported.
+     *
+     * @deprecated WearableSensingManager does not deal with events. Use {@link
+     * STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation of
+     * {@link WearableSensingService}.
      */
-    // TODO(b/324635656): Deprecate this status code. Update Javadoc:
-    // @deprecated WearableSensingManager does not deal with events. Use {@link
-    // STATUS_UNSUPPORTED_OPERATION} instead for operations not supported by the implementation of
-    // {@link WearableSensingService}.
+    @Deprecated
     public static final int STATUS_UNSUPPORTED = 2;
 
     /**
@@ -121,7 +132,6 @@ public class WearableSensingManager {
      * The value of the status code that indicates the method called is not supported by the
      * implementation of {@link WearableSensingService}.
      */
-
     @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
     public static final int STATUS_UNSUPPORTED_OPERATION = 6;
 
@@ -155,6 +165,17 @@ public class WearableSensingManager {
     public @interface StatusCode {}
 
     /**
+     * If the WearableSensingService implementation belongs to the same APK as the caller, calling
+     * {@link #provideDataStream(ParcelFileDescriptor, Executor, Consumer)} will allow
+     * WearableSensingService to read from the caller's file directory via {@link
+     * Context#openFileInput(String)}. The read will be proxied via the caller's process and
+     * executed by the {@code executor} provided to this method.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long ALLOW_WEARABLE_SENSING_SERVICE_FILE_READ = 330701114L;
+
+    /**
      * Retrieves a {@link WearableSensingDataRequest} from the Intent sent to the PendingIntent
      * provided to {@link #registerDataRequestObserver(int, PendingIntent, Executor, Consumer)}.
      *
@@ -169,6 +190,7 @@ public class WearableSensingManager {
                 EXTRA_WEARABLE_SENSING_DATA_REQUEST, WearableSensingDataRequest.class);
     }
 
+    private static final String TAG = WearableSensingManager.class.getSimpleName();
     private final Context mContext;
     private final IWearableSensingManager mService;
 
@@ -216,6 +238,11 @@ public class WearableSensingManager {
      * dropped during the restart. The caller is responsible for ensuring other method calls are
      * queued until a success status is returned from the {@code statusConsumer}.
      *
+     * <p>If the WearableSensingService implementation belongs to the same APK as the caller,
+     * calling this method will allow WearableSensingService to read from the caller's file
+     * directory via {@link Context#openFileInput(String)}. The read will be proxied via the
+     * caller's process and executed by the {@code executor} provided to this method.
+     *
      * @param wearableConnection The connection to provide
      * @param executor Executor on which to run the consumer callback
      * @param statusConsumer A consumer that handles the status codes for providing the connection
@@ -227,9 +254,14 @@ public class WearableSensingManager {
             @NonNull ParcelFileDescriptor wearableConnection,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
         try {
-            RemoteCallback callback = createStatusCallback(executor, statusConsumer);
-            mService.provideConnection(wearableConnection, callback);
+            // The wearableSensingCallback is included in this method call even though it is not
+            // semantically related to the connection because we want to avoid race conditions
+            // during the process restart triggered by this method call. See
+            // com.android.server.wearable.RemoteWearableSensingService for details.
+            mService.provideConnection(
+                    wearableConnection, createWearableSensingCallback(executor), statusCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -237,24 +269,38 @@ public class WearableSensingManager {
 
     /**
      * Provides a data stream to the WearableSensingService that's backed by the
-     * parcelFileDescriptor, and sends the result to the {@link Consumer} right after the call.
-     * This is used by applications that will also provide an implementation of
-     * an isolated WearableSensingService. If the data stream was provided successfully
-     * {@link WearableSensingManager#STATUS_SUCCESS} will be provided.
+     * parcelFileDescriptor, and sends the result to the {@link Consumer} right after the call. This
+     * is used by applications that will also provide an implementation of an isolated
+     * WearableSensingService. If the data stream was provided successfully {@link
+     * WearableSensingManager#STATUS_SUCCESS} will be provided.
+     *
+     * <p>Starting from target SDK level 35, if the WearableSensingService implementation belongs to
+     * the same APK as the caller, calling this method will allow WearableSensingService to read
+     * from the caller's file directory via {@link Context#openFileInput(String)}. The read will be
+     * proxied via the caller's process and executed by the {@code executor} provided to this
+     * method.
      *
      * @param parcelFileDescriptor The data stream to provide
      * @param executor Executor on which to run the consumer callback
-     * @param statusConsumer A consumer that handles the status codes, which is returned
-     *                 right after the call.
+     * @param statusConsumer A consumer that handles the status codes, which is returned right after
+     *     the call.
+     * @deprecated Use {@link #provideConnection(ParcelFileDescriptor, Executor, Consumer)} instead
+     *     to provide a remote wearable device connection to the WearableSensingService
      */
+    @Deprecated
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void provideDataStream(
             @NonNull ParcelFileDescriptor parcelFileDescriptor,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull @StatusCode Consumer<Integer> statusConsumer) {
+        RemoteCallback statusCallback = createStatusCallback(executor, statusConsumer);
+        IWearableSensingCallback wearableSensingCallback = null;
+        if (CompatChanges.isChangeEnabled(ALLOW_WEARABLE_SENSING_SERVICE_FILE_READ)) {
+            wearableSensingCallback = createWearableSensingCallback(executor);
+        }
         try {
-            RemoteCallback callback = createStatusCallback(executor, statusConsumer);
-            mService.provideDataStream(parcelFileDescriptor, callback);
+            mService.provideDataStream(
+                    parcelFileDescriptor, wearableSensingCallback, statusCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -390,20 +436,20 @@ public class WearableSensingManager {
     /**
      * Requests the wearable to start hotword recognition.
      *
-     * <p>When this method is called, the system will attempt to provide a {@link
-     * android.service.wearable.WearableHotwordAudioConsumer} to {@link WearableSensingService}.
-     * After first-stage hotword is detected on a wearable, {@link WearableSensingService} should
-     * send the hotword audio to the {@link android.service.wearable.WearableHotwordAudioConsumer},
-     * which will forward the data to the {@link android.service.voice.HotwordDetectionService} for
+     * <p>When this method is called, the system will attempt to provide a {@code
+     * Consumer<android.service.voice.HotwordAudioStream>} to {@link WearableSensingService}. After
+     * first-stage hotword is detected on a wearable, {@link WearableSensingService} should send the
+     * hotword audio to the {@code Consumer<android.service.voice.HotwordAudioStream>}, which will
+     * forward the data to the {@link android.service.voice.HotwordDetectionService} for
      * second-stage hotword validation. If hotword is detected there, the audio data will be
      * forwarded to the {@link android.service.voice.VoiceInteractionService}.
      *
      * <p>If the {@code targetVisComponentName} provided here is not null, when {@link
-     * WearableSensingService} sends hotword audio to the {@link
-     * android.service.wearable.WearableHotwordAudioConsumer}, the system will check whether the
-     * {@link android.service.voice.VoiceInteractionService} at that time is {@code
+     * WearableSensingService} sends hotword audio to the {@code
+     * Consumer<android.service.voice.HotwordAudioStream>}, the system will check whether the {@link
+     * android.service.voice.VoiceInteractionService} at that time is {@code
      * targetVisComponentName}. If not, the system will call {@link
-     * WearableSensingService#onActiveHotwordAudioStopRequested()} and will not forward the audio
+     * WearableSensingService#onStopHotwordAudioStream()} and will not forward the audio
      * data to the current {@link android.service.voice.HotwordDetectionService} nor {@link
      * android.service.voice.VoiceInteractionService}. The system will not send a status code to
      * {@code statusConsumer} regarding the {@code targetVisComponentName} check. The caller is
@@ -411,16 +457,16 @@ public class WearableSensingManager {
      * android.service.voice.VoiceInteractionService} is the same as {@code targetVisComponentName}.
      * The check here is just a protection against race conditions.
      *
-     * <p>Calling this method again will send a new {@link
-     * android.service.wearable.WearableHotwordAudioConsumer} to {@link WearableSensingService}. For
+     * <p>Calling this method again will send a new {@code
+     * Consumer<android.service.voice.HotwordAudioStream>} to {@link WearableSensingService}. For
      * audio data sent to the new consumer, the system will perform the above check using the newly
      * provided {@code targetVisComponentName}. The {@link WearableSensingService} should not
      * continue to use the previous consumers after receiving a new one.
      *
      * <p>If the {@code statusConsumer} returns {@link STATUS_SUCCESS}, the caller should call
-     * {@link #stopListeningForHotword(Executor, Consumer)} when it wants the wearable to stop
+     * {@link #stopHotwordRecognition(Executor, Consumer)} when it wants the wearable to stop
      * listening for hotword. If the {@code statusConsumer} returns any other status code, a failure
-     * has occurred and calling {@link #stopListeningForHotword(Executor, Consumer)} is not
+     * has occurred and calling {@link #stopHotwordRecognition(Executor, Consumer)} is not
      * required. The system will not retry listening automatically. The caller should call this
      * method again if they want to retry.
      *
@@ -476,5 +522,48 @@ public class WearableSensingManager {
                         Binder.restoreCallingIdentity(identity);
                     }
                 });
+    }
+
+    private IWearableSensingCallback createWearableSensingCallback(Executor executor) {
+        return new IWearableSensingCallback.Stub() {
+
+            @Override
+            public void openFile(String filename, AndroidFuture<ParcelFileDescriptor> future) {
+                Slog.d(TAG, "IWearableSensingCallback#openFile " + filename);
+                Binder.withCleanCallingIdentity(
+                        () ->
+                                executor.execute(
+                                        () -> {
+                                            File file = new File(mContext.getFilesDir(), filename);
+                                            ParcelFileDescriptor pfd = null;
+                                            try {
+                                                pfd =
+                                                        ParcelFileDescriptor.open(
+                                                                file,
+                                                                ParcelFileDescriptor
+                                                                        .MODE_READ_ONLY);
+                                                Slog.d(
+                                                        TAG,
+                                                        "Successfully opened a file with"
+                                                                + " ParcelFileDescriptor.");
+                                            } catch (FileNotFoundException e) {
+                                                Slog.e(TAG, "Cannot open file.", e);
+                                            } finally {
+                                                future.complete(pfd);
+                                                if (pfd != null) {
+                                                    try {
+                                                        pfd.close();
+                                                    } catch (IOException ex) {
+                                                        Slog.e(
+                                                                TAG,
+                                                                "Error closing"
+                                                                        + " ParcelFileDescriptor.",
+                                                                ex);
+                                                    }
+                                                }
+                                            }
+                                        }));
+            }
+        };
     }
 }

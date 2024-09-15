@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlo
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -40,7 +41,7 @@ constructor(
     private val mobileConnectionsRepository: MobileConnectionsRepository,
 ) {
     /** True if the device is currently in airplane mode. */
-    val isAirplaneMode: Flow<Boolean> = airplaneModeRepository.isAirplaneMode
+    val isAirplaneMode: StateFlow<Boolean> = airplaneModeRepository.isAirplaneMode
 
     /** True if we're configured to force-hide the airplane mode icon and false otherwise. */
     val isForceHidden: Flow<Boolean> =

@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"zařízení"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Tato aplikace bude mít ve vašem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> povolený přístup k těmto oprávněním"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Povolte aplikaci &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; přístup k těmto informacím z vašeho telefonu"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Povolit zařízení &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; streamovat aplikace telefonu?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s bude mít přístup ke všemu, co na telefonu zobrazíte nebo přehrajete, včetně zvuku, fotek, hesel a zpráv.&lt;br/&gt;&lt;br/&gt;%1$s bude moci streamovat aplikace, dokud přístup k tomuto oprávnění neodeberete."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Služby pro více zařízení"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> požaduje za vaše zařízení <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> oprávnění ke streamování aplikací mezi zařízeními"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> požaduje za vaše zařízení <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> oprávnění k zobrazení a streamování obsahu mezi zařízeními"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Povolte aplikaci &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; přístup k těmto informacím z vašeho telefonu"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Služby Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> požaduje za vaše zařízení <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> oprávnění k přístupu k fotkám, médiím a oznámením v telefonu"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Povolit zařízení &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; podniknout tuto akci?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Povolit zařízení &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; streamovat aplikace a systémové funkce telefonu?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s bude mít přístup ke všemu, co na telefonu zobrazíte nebo přehrajete, včetně zvuku, fotek, platebních údajů, hesel a zpráv.&lt;br/&gt;&lt;br/&gt;%1$s bude moci streamovat aplikace a systémové funkce, dokud přístup k tomuto oprávnění neodeberete."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> žádá jménem vašeho zařízení <xliff:g id="DEVICE_NAME">%2$s</xliff:g> o oprávnění streamovat aplikace a další systémové funkce do zařízení v okolí"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"zařízení"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Tato aplikace bude moci synchronizovat údaje, jako je jméno volajícího, mezi vaším telefonem a vybraným zařízením"</string>

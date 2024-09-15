@@ -35,8 +35,6 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.flags.FeatureFlags;
-import com.android.internal.telephony.flags.FeatureFlagsImpl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,8 +46,7 @@ public final class TelephonyPermissions {
     private static final String LOG_TAG = "TelephonyPermissions";
 
     private static final boolean DBG = false;
-    /** Feature flags */
-    private static final FeatureFlags sFeatureFlag = new FeatureFlagsImpl();
+
     /**
      * Whether to disable the new device identifier access restrictions.
      */
@@ -793,7 +790,7 @@ public final class TelephonyPermissions {
         if (isGranted) return;
 
         if (allowCarrierPrivilegeOnAnySub) {
-            if (checkCarrierPrivilegeForAnySubId(context, Binder.getCallingUid())) return;
+            if (checkCarrierPrivilegeForAnySubId(context, uid)) return;
         } else {
             if (checkCarrierPrivilegeForSubId(context, subId)) return;
         }
@@ -886,12 +883,6 @@ public final class TelephonyPermissions {
      */
     public static boolean checkSubscriptionAssociatedWithUser(@NonNull Context context, int subId,
             @NonNull UserHandle callerUserHandle) {
-        if (!sFeatureFlag.rejectBadSubIdInteraction()
-                && !SubscriptionManager.isValidSubscriptionId(subId)) {
-            // Return true for invalid sub Id.
-            return true;
-        }
-
         SubscriptionManager subManager = (SubscriptionManager) context.getSystemService(
                 Context.TELEPHONY_SUBSCRIPTION_SERVICE);
         final long token = Binder.clearCallingIdentity();
@@ -906,7 +897,7 @@ public final class TelephonyPermissions {
         } catch (IllegalArgumentException e) {
             // Found no record of this sub Id.
             Log.e(LOG_TAG, "Subscription[Subscription ID:" + subId + "] has no records on device");
-            return !sFeatureFlag.rejectBadSubIdInteraction();
+            return false;
         } finally {
             Binder.restoreCallingIdentity(token);
         }

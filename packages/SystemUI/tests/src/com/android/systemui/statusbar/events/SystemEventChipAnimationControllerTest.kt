@@ -19,11 +19,11 @@ package com.android.systemui.statusbar.events
 import android.content.Context
 import android.graphics.Insets
 import android.graphics.Rect
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
@@ -46,7 +46,7 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SystemEventChipAnimationControllerTest : SysuiTestCase() {
     private lateinit var controller: SystemEventChipAnimationController

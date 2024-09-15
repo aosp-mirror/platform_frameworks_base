@@ -18,9 +18,9 @@ package com.android.wm.shell.flicker.pip.common
 
 import android.platform.test.annotations.Presubmit
 import android.tools.Rotation
-import android.tools.traces.component.ComponentNameMatcher
 import android.tools.flicker.legacy.LegacyFlickerTest
 import android.tools.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.traces.component.ComponentNameMatcher
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.Test
 import org.junit.runners.Parameterized

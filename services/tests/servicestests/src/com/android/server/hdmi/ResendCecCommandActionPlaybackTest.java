@@ -21,7 +21,9 @@ import static com.android.server.hdmi.ResendCecCommandAction.SEND_COMMAND_RETRY_
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
@@ -72,6 +74,11 @@ public class ResendCecCommandActionPlaybackTest {
             protected void writeStringSystemProperty(String key, String value) {
                 // do nothing
             }
+
+            @Override
+            protected void sendBroadcastAsUser(@RequiresPermission Intent intent) {
+                // do nothing
+            }
         };
         mIsPowerStandby = false;
 
@@ -80,6 +87,8 @@ public class ResendCecCommandActionPlaybackTest {
         mHdmiControlService.setHdmiCecConfig(new FakeHdmiCecConfig(context));
         mHdmiControlService.setDeviceConfig(new FakeDeviceConfigWrapper());
         mNativeWrapper = new FakeNativeWrapper();
+        mPhysicalAddress = 0x2000;
+        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         HdmiCecController hdmiCecController = HdmiCecController.createWithNativeWrapper(
                 this.mHdmiControlService, mNativeWrapper, mHdmiControlService.getAtomWriter());
         mHdmiControlService.setCecController(hdmiCecController);
@@ -88,8 +97,6 @@ public class ResendCecCommandActionPlaybackTest {
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
         mPowerManager = new FakePowerManagerWrapper(context);
         mHdmiControlService.setPowerManager(mPowerManager);
-        mPhysicalAddress = 0x2000;
-        mNativeWrapper.setPhysicalAddress(mPhysicalAddress);
         mTestLooper.dispatchAll();
         mPlaybackDevice = mHdmiControlService.playback();
 

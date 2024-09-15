@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import static com.android.systemui.media.controls.domain.pipeline.MediaDataManagerKt.isMediaNotification;
+import static com.android.systemui.media.controls.domain.pipeline.MediaDataManager.isMediaNotification;
 
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
@@ -61,7 +61,7 @@ public class MediaCoordinator implements Coordinator {
                 return false;
             }
 
-            if (!Flags.notificationsBackgroundMediaIcons()) {
+            if (!Flags.notificationsBackgroundIcons()) {
                 inflateOrUpdateIcons(entry);
             }
 
@@ -73,14 +73,14 @@ public class MediaCoordinator implements Coordinator {
         @Override
         public void onEntryInit(@NonNull NotificationEntry entry) {
             // We default to STATE_ICONS_UNINFLATED anyway, so there's no need to initialize it.
-            if (!Flags.notificationsBackgroundMediaIcons()) {
+            if (!Flags.notificationsBackgroundIcons()) {
                 mIconsState.put(entry, STATE_ICONS_UNINFLATED);
             }
         }
 
         @Override
         public void onEntryAdded(@NonNull NotificationEntry entry) {
-            if (Flags.notificationsBackgroundMediaIcons()) {
+            if (Flags.notificationsBackgroundIcons()) {
                 if (isMediaNotification(entry.getSbn())) {
                     inflateOrUpdateIcons(entry);
                 }
@@ -94,7 +94,7 @@ public class MediaCoordinator implements Coordinator {
                 mIconsState.put(entry, STATE_ICONS_UNINFLATED);
             }
 
-            if (Flags.notificationsBackgroundMediaIcons()) {
+            if (Flags.notificationsBackgroundIcons()) {
                 if (isMediaNotification(entry.getSbn())) {
                     inflateOrUpdateIcons(entry);
                 }
@@ -120,7 +120,7 @@ public class MediaCoordinator implements Coordinator {
                 break;
             case STATE_ICONS_INFLATED:
                 try {
-                    mIconManager.updateIcons(entry);
+                    mIconManager.updateIcons(entry, /* usingCache = */ false);
                 } catch (InflationException e) {
                     reportInflationError(entry, e);
                     mIconsState.put(entry, STATE_ICONS_ERROR);

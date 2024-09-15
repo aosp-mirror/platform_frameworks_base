@@ -20,7 +20,7 @@ option java_multiple_files = true;
 package android.app;
 
 import "frameworks/base/core/proto/android/privacy.proto";
-import "frameworks/proto_logging/stats/enums/app/enums.proto";
+import "frameworks/proto_logging/stats/enums/app/app_enums.proto";
 
 /**
  * An android.app.ApplicationStartInfo object.

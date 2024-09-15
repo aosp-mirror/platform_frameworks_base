@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row
 
+import android.app.Flags
 import android.app.Notification
 import android.app.Notification.MessagingStyle
 import android.app.Person
@@ -131,7 +132,7 @@ internal object SingleLineViewInflater {
         val senderName =
             systemUiContext.resources.getString(
                 R.string.conversation_single_line_name_display,
-                name
+                if (Flags.cleanUpSpansAndNewLines()) name?.toString() else name
             )
 
         // We need to find back-up values for those texts if they are needed and empty
@@ -216,8 +217,9 @@ internal object SingleLineViewInflater {
         var currentGroup: MutableList<MessagingStyle.Message>? = null
         var currentSenderKey: CharSequence? = null
         val groups = mutableListOf<MutableList<MessagingStyle.Message>>()
-        for (i in 0 until (historicMessages.size + messages.size)) {
-            val message = if (i < historicMessages.size) historicMessages[i] else messages[i]
+        val histSize = historicMessages.size
+        for (i in 0 until (histSize + messages.size)) {
+            val message = if (i < histSize) historicMessages[i] else messages[i - histSize]
 
             val sender = message.senderPerson
             val senderKey = sender?.getKeyOrName()
@@ -340,7 +342,7 @@ internal object SingleLineViewInflater {
         reinflateFlags: Int,
         entry: NotificationEntry,
         context: Context,
-        logger: NotificationContentInflaterLogger,
+        logger: NotificationRowContentBinderLogger,
     ): HybridNotificationView? {
         if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return null
         if (reinflateFlags and FLAG_CONTENT_VIEW_SINGLE_LINE == 0) {
@@ -352,7 +354,7 @@ internal object SingleLineViewInflater {
 
         var view: HybridNotificationView? = null
 
-        traceSection("NotificationContentInflater#inflateSingleLineView") {
+        traceSection("SingleLineViewInflater#inflateSingleLineView") {
             val inflater = LayoutInflater.from(context)
             val layoutRes: Int =
                 if (isConversation)

@@ -37,14 +37,16 @@ constructor(
 
     override fun map(config: QSTileConfig, data: LocationTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
+            iconRes =
+                if (data.isEnabled) {
+                    R.drawable.qs_location_icon_on
+                } else {
+                    R.drawable.qs_location_icon_off
+                }
             val icon =
                 Icon.Loaded(
                     resources.getDrawable(
-                        if (data.isEnabled) {
-                            R.drawable.qs_location_icon_on
-                        } else {
-                            R.drawable.qs_location_icon_off
-                        },
+                        iconRes!!,
                         theme,
                     ),
                     contentDescription = null

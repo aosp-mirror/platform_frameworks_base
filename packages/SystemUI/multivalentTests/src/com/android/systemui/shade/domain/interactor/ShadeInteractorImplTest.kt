@@ -19,11 +19,12 @@ package com.android.systemui.shade.domain.interactor
 import android.app.StatusBarManager.DISABLE2_NONE
 import android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE
 import android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.parameterizeSceneContainerFlag
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.DozeStateModel
@@ -36,9 +37,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
-import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.phone.dozeParameters
@@ -52,28 +51,47 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class ShadeInteractorImplTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class ShadeInteractorImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
-    val configurationRepository = kosmos.fakeConfigurationRepository
-    val deviceProvisioningRepository = kosmos.fakeDeviceProvisioningRepository
-    val disableFlagsRepository = kosmos.fakeDisableFlagsRepository
-    val keyguardRepository = kosmos.fakeKeyguardRepository
-    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    val powerRepository = kosmos.fakePowerRepository
-    val sceneInteractor = kosmos.sceneInteractor
-    val shadeRepository = kosmos.fakeShadeRepository
-    val userRepository = kosmos.fakeUserRepository
-    val userSetupRepository = kosmos.fakeUserSetupRepository
-    val dozeParameters = kosmos.dozeParameters
+    val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
+    val deviceProvisioningRepository by lazy { kosmos.fakeDeviceProvisioningRepository }
+    val disableFlagsRepository by lazy { kosmos.fakeDisableFlagsRepository }
+    val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
+    val keyguardTransitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    val powerRepository by lazy { kosmos.fakePowerRepository }
+    val shadeTestUtil by lazy { kosmos.shadeTestUtil }
+    val userRepository by lazy { kosmos.fakeUserRepository }
+    val userSetupRepository by lazy { kosmos.fakeUserSetupRepository }
+    val dozeParameters by lazy { kosmos.dozeParameters }
 
-    val underTest = kosmos.shadeInteractorImpl
+    lateinit var underTest: ShadeInteractorImpl
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return parameterizeSceneContainerFlag()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
+    @Before
+    fun setup() {
+        underTest = kosmos.shadeInteractorImpl
+    }
 
     @Test
     fun isShadeEnabled_matchesDisableFlagsRepo() =
@@ -284,72 +302,13 @@ class ShadeInteractorImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun fullShadeExpansionWhenShadeLocked() =
-        testScope.runTest {
-            val actual by collectLastValue(underTest.shadeExpansion)
-
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
-            shadeRepository.setLockscreenShadeExpansion(0.5f)
-
-            assertThat(actual).isEqualTo(1f)
-        }
-
-    @Test
-    fun fullShadeExpansionWhenStatusBarStateIsNotShadeLocked() =
-        testScope.runTest {
-            val actual by collectLastValue(underTest.shadeExpansion)
-
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-
-            shadeRepository.setLockscreenShadeExpansion(0.5f)
-            assertThat(actual).isEqualTo(0.5f)
-
-            shadeRepository.setLockscreenShadeExpansion(0.8f)
-            assertThat(actual).isEqualTo(0.8f)
-        }
-
-    @Test
-    fun shadeExpansionWhenInSplitShadeAndQsExpanded() =
-        testScope.runTest {
-            val actual by collectLastValue(underTest.shadeExpansion)
-
-            // WHEN split shade is enabled and QS is expanded
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, true)
-            configurationRepository.onAnyConfigurationChange()
-            shadeRepository.setQsExpansion(.5f)
-            shadeRepository.setLegacyShadeExpansion(.7f)
-            runCurrent()
-
-            // THEN legacy shade expansion is passed through
-            assertThat(actual).isEqualTo(.7f)
-        }
-
-    @Test
-    fun shadeExpansionWhenNotInSplitShadeAndQsExpanded() =
-        testScope.runTest {
-            val actual by collectLastValue(underTest.shadeExpansion)
-
-            // WHEN split shade is not enabled and QS is expanded
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            overrideResource(R.bool.config_use_split_notification_shade, false)
-            shadeRepository.setQsExpansion(.5f)
-            shadeRepository.setLegacyShadeExpansion(1f)
-            runCurrent()
-
-            // THEN shade expansion is zero
-            assertThat(actual).isEqualTo(0f)
-        }
-
-    @Test
     fun shadeExpansionWhenNotInSplitShadeAndQsCollapsed() =
         testScope.runTest {
             val actual by collectLastValue(underTest.shadeExpansion)
 
             // WHEN split shade is not enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            shadeRepository.setQsExpansion(0f)
-            shadeRepository.setLegacyShadeExpansion(.6f)
+            shadeTestUtil.setShadeAndQsExpansion(.6f, 0f)
 
             // THEN shade expansion is zero
             assertThat(actual).isEqualTo(.6f)
@@ -359,8 +318,7 @@ class ShadeInteractorImplTest : SysuiTestCase() {
     fun anyExpansion_shadeGreater() =
         testScope.runTest() {
             // WHEN shade is more expanded than QS
-            shadeRepository.setLegacyShadeExpansion(.5f)
-            shadeRepository.setQsExpansion(0f)
+            shadeTestUtil.setShadeAndQsExpansion(.5f, 0f)
             runCurrent()
 
             // THEN anyExpansion is .5f
@@ -371,249 +329,11 @@ class ShadeInteractorImplTest : SysuiTestCase() {
     fun anyExpansion_qsGreater() =
         testScope.runTest() {
             // WHEN qs is more expanded than shade
-            shadeRepository.setLegacyShadeExpansion(0f)
-            shadeRepository.setQsExpansion(.5f)
+            shadeTestUtil.setShadeAndQsExpansion(0f, .5f)
             runCurrent()
 
             // THEN anyExpansion is .5f
             assertThat(underTest.anyExpansion.value).isEqualTo(.5f)
-        }
-
-    @Test
-    fun userInteractingWithShade_shadeDraggedUpAndDown() =
-        testScope.runTest() {
-            val actual by collectLastValue(underTest.isUserInteractingWithShade)
-            // GIVEN shade collapsed and not tracking input
-            shadeRepository.setLegacyShadeExpansion(0f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-
-            // WHEN shade tracking starts
-            shadeRepository.setLegacyShadeTracking(true)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade dragged down halfway
-            shadeRepository.setLegacyShadeExpansion(.5f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade fully expanded but tracking is not stopped
-            shadeRepository.setLegacyShadeExpansion(1f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade fully collapsed but tracking is not stopped
-            shadeRepository.setLegacyShadeExpansion(0f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade dragged halfway and tracking is stopped
-            shadeRepository.setLegacyShadeExpansion(.6f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade completes expansion stopped
-            shadeRepository.setLegacyShadeExpansion(1f)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-        }
-
-    @Test
-    fun userInteractingWithShade_shadeExpanded() =
-        testScope.runTest() {
-            val actual by collectLastValue(underTest.isUserInteractingWithShade)
-            // GIVEN shade collapsed and not tracking input
-            shadeRepository.setLegacyShadeExpansion(0f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-
-            // WHEN shade tracking starts
-            shadeRepository.setLegacyShadeTracking(true)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade dragged down halfway
-            shadeRepository.setLegacyShadeExpansion(.5f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade fully expanded and tracking is stopped
-            shadeRepository.setLegacyShadeExpansion(1f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-        }
-
-    @Test
-    fun userInteractingWithShade_shadePartiallyExpanded() =
-        testScope.runTest() {
-            val actual by collectLastValue(underTest.isUserInteractingWithShade)
-            // GIVEN shade collapsed and not tracking input
-            shadeRepository.setLegacyShadeExpansion(0f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-
-            // WHEN shade tracking starts
-            shadeRepository.setLegacyShadeTracking(true)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade partially expanded
-            shadeRepository.setLegacyShadeExpansion(.4f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN tracking is stopped
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade goes back to collapsed
-            shadeRepository.setLegacyShadeExpansion(0f)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-        }
-
-    @Test
-    fun userInteractingWithShade_shadeCollapsed() =
-        testScope.runTest() {
-            val actual by collectLastValue(underTest.isUserInteractingWithShade)
-            // GIVEN shade expanded and not tracking input
-            shadeRepository.setLegacyShadeExpansion(1f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-
-            // WHEN shade tracking starts
-            shadeRepository.setLegacyShadeTracking(true)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade dragged up halfway
-            shadeRepository.setLegacyShadeExpansion(.5f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN shade fully collapsed and tracking is stopped
-            shadeRepository.setLegacyShadeExpansion(0f)
-            shadeRepository.setLegacyShadeTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-        }
-
-    @Test
-    fun userInteractingWithQs_qsDraggedUpAndDown() =
-        testScope.runTest() {
-            val actual by collectLastValue(underTest.isUserInteractingWithQs)
-            // GIVEN qs collapsed and not tracking input
-            shadeRepository.setQsExpansion(0f)
-            shadeRepository.setLegacyQsTracking(false)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-
-            // WHEN qs tracking starts
-            shadeRepository.setLegacyQsTracking(true)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN qs dragged down halfway
-            shadeRepository.setQsExpansion(.5f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN qs fully expanded but tracking is not stopped
-            shadeRepository.setQsExpansion(1f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN qs fully collapsed but tracking is not stopped
-            shadeRepository.setQsExpansion(0f)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN qs dragged halfway and tracking is stopped
-            shadeRepository.setQsExpansion(.6f)
-            shadeRepository.setLegacyQsTracking(false)
-            runCurrent()
-
-            // THEN user is interacting
-            assertThat(actual).isTrue()
-
-            // WHEN qs completes expansion stopped
-            shadeRepository.setQsExpansion(1f)
-            runCurrent()
-
-            // THEN user is not interacting
-            assertThat(actual).isFalse()
-        }
-
-    @Test
-    fun isShadeTouchable_isFalse_whenFrpIsActive() =
-        testScope.runTest {
-            deviceProvisioningRepository.setFactoryResetProtectionActive(true)
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
-            )
-            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
-            assertThat(isShadeTouchable).isFalse()
         }
 
     @Test
@@ -639,7 +359,6 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                 )
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
             assertThat(isShadeTouchable).isFalse()
         }
 
@@ -666,13 +385,17 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                 )
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
             assertThat(isShadeTouchable).isTrue()
         }
 
     @Test
     fun isShadeTouchable_isFalse_whenStartingToSleepAndNotControlScreenOff() =
         testScope.runTest {
+            whenever(dozeParameters.shouldControlScreenOff()).thenReturn(false)
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            // Assert the default condition is true
+            assertThat(isShadeTouchable).isTrue()
+
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -686,15 +409,17 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            whenever(dozeParameters.shouldControlScreenOff()).thenReturn(false)
-            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
             assertThat(isShadeTouchable).isFalse()
         }
 
     @Test
     fun isShadeTouchable_isTrue_whenStartingToSleepAndControlScreenOff() =
         testScope.runTest {
+            whenever(dozeParameters.shouldControlScreenOff()).thenReturn(true)
+            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
+            // Assert the default condition is true
+            assertThat(isShadeTouchable).isTrue()
+
             powerRepository.updateWakefulness(
                 rawState = WakefulnessState.STARTING_TO_SLEEP,
                 lastWakeReason = WakeSleepReason.POWER_BUTTON,
@@ -708,9 +433,6 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                     transitionState = TransitionState.STARTED,
                 )
             )
-            whenever(dozeParameters.shouldControlScreenOff()).thenReturn(true)
-            val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
             assertThat(isShadeTouchable).isTrue()
         }
 
@@ -728,7 +450,6 @@ class ShadeInteractorImplTest : SysuiTestCase() {
                 )
             )
             val isShadeTouchable by collectLastValue(underTest.isShadeTouchable)
-            runCurrent()
             assertThat(isShadeTouchable).isTrue()
         }
 }

@@ -17,8 +17,6 @@
 package com.android.internal.inputmethod;
 
 import static android.view.inputmethod.InputConnectionProto.CURSOR_CAPS_MODE;
-import static android.view.inputmethod.InputConnectionProto.EDITABLE_TEXT;
-import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_END;
 import static android.view.inputmethod.InputConnectionProto.SELECTED_TEXT_START;
 
@@ -335,16 +333,6 @@ public final class EditableInputConnection extends BaseInputConnection
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
-        CharSequence editableText = mTextView.getText();
-        CharSequence selectedText = getSelectedText(0 /* flags */);
-        if (InputConnectionProtoDumper.DUMP_TEXT) {
-            if (editableText != null) {
-                proto.write(EDITABLE_TEXT, editableText.toString());
-            }
-            if (selectedText != null) {
-                proto.write(SELECTED_TEXT, selectedText.toString());
-            }
-        }
         final Editable content = getEditable();
         if (content != null) {
             int start = Selection.getSelectionStart(content);

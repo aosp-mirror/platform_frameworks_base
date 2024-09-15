@@ -1,13 +1,14 @@
 package com.android.systemui.statusbar.notification
 
 import android.app.Notification.GROUP_ALERT_SUMMARY
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.jank.interactionJankMonitor
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -18,9 +19,9 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.HeadsUpUtil
+import com.android.systemui.testKosmos
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
-import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertSame
 import org.junit.Before
@@ -34,12 +35,11 @@ import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
     @Mock lateinit var notificationListContainer: NotificationListContainer
     @Mock lateinit var headsUpManager: HeadsUpManager
-    @Mock lateinit var jankMonitor: InteractionJankMonitor
     @Mock lateinit var onFinishAnimationCallback: Runnable
 
     private lateinit var notificationTestHelper: NotificationTestHelper
@@ -48,7 +48,8 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
     private val notificationLaunchAnimationInteractor =
         NotificationLaunchAnimationInteractor(NotificationLaunchAnimationRepository())
 
-    private val testScope = TestScope()
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
 
     private val notificationKey: String
         get() = notification.entry.sbn.key
@@ -67,7 +68,7 @@ class NotificationTransitionAnimatorControllerTest : SysuiTestCase() {
                 notificationListContainer,
                 headsUpManager,
                 notification,
-                jankMonitor,
+                kosmos.interactionJankMonitor,
                 onFinishAnimationCallback
             )
     }

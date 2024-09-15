@@ -20,7 +20,9 @@ package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
 import android.content.DialogInterface
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
@@ -53,7 +55,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,16 +66,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformButton
+import com.android.compose.animation.Easings
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -84,7 +93,9 @@ import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.BouncerMessageViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.MessageViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
@@ -96,6 +107,9 @@ import com.android.systemui.res.R
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.pow
+import platform.test.motion.compose.values.MotionTestValueKey
+import platform.test.motion.compose.values.MotionTestValues
+import platform.test.motion.compose.values.motionTestValues
 
 @Composable
 fun BouncerContent(
@@ -103,9 +117,20 @@ fun BouncerContent(
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
 ) {
-    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsState()
+    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsStateWithLifecycle()
     val layout = calculateLayout(isSideBySideSupported = isSideBySideSupported)
 
+    BouncerContent(layout, viewModel, dialogFactory, modifier)
+}
+
+@Composable
+@VisibleForTesting
+fun BouncerContent(
+    layout: BouncerSceneLayout,
+    viewModel: BouncerViewModel,
+    dialogFactory: BouncerDialogFactory,
+    modifier: Modifier
+) {
     Box(
         // Allows the content within each of the layouts to react to the appearance and
         // disappearance of the IME, which is also known as the software keyboard.
@@ -113,7 +138,7 @@ fun BouncerContent(
         // Despite the keyboard only being part of the password bouncer, adding it at this level is
         // both necessary to properly handle the keyboard in all layouts and harmless in cases when
         // the keyboard isn't used (like the PIN or pattern auth methods).
-        modifier = modifier.imePadding(),
+        modifier = modifier.imePadding().onKeyEvent(viewModel::onKeyEvent),
     ) {
         when (layout) {
             BouncerSceneLayout.STANDARD_BOUNCER ->
@@ -156,7 +181,9 @@ private fun StandardLayout(
     FoldAware(
         modifier =
             modifier.padding(
+                start = 32.dp,
                 top = 92.dp,
+                end = 32.dp,
                 bottom = 48.dp,
             ),
         viewModel = viewModel,
@@ -166,7 +193,7 @@ private fun StandardLayout(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 StatusMessage(
-                    viewModel = viewModel,
+                    viewModel = viewModel.message,
                     modifier = Modifier,
                 )
 
@@ -210,7 +237,7 @@ private fun SplitLayout(
     viewModel: BouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val authMethod by viewModel.authMethodViewModel.collectAsState()
+    val authMethod by viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     Row(
         modifier =
@@ -228,7 +255,7 @@ private fun SplitLayout(
             when (authMethod) {
                 is PinBouncerViewModel -> {
                     StatusMessage(
-                        viewModel = viewModel,
+                        viewModel = viewModel.message,
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
 
@@ -241,7 +268,7 @@ private fun SplitLayout(
                 }
                 is PatternBouncerViewModel -> {
                     StatusMessage(
-                        viewModel = viewModel,
+                        viewModel = viewModel.message,
                         modifier = Modifier.align(Alignment.TopCenter),
                     )
 
@@ -280,7 +307,7 @@ private fun SplitLayout(
                         modifier = Modifier.fillMaxWidth().align(Alignment.Center),
                     ) {
                         StatusMessage(
-                            viewModel = viewModel,
+                            viewModel = viewModel.message,
                         )
 
                         OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
@@ -306,7 +333,9 @@ private fun BesideUserSwitcherLayout(
     val (isSwapped, setSwapped) = rememberSaveable(isLeftToRight) { mutableStateOf(!isLeftToRight) }
     val isHeightExpanded =
         LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Expanded
-    val authMethod by viewModel.authMethodViewModel.collectAsState()
+    val authMethod by viewModel.authMethodViewModel.collectAsStateWithLifecycle()
+
+    var swapAnimationEnd by remember { mutableStateOf(false) }
 
     Row(
         modifier =
@@ -321,11 +350,16 @@ private fun BesideUserSwitcherLayout(
                         }
                     )
                 }
+                .testTag("BesideUserSwitcherLayout")
+                .motionTestValues {
+                    swapAnimationEnd exportAs BouncerMotionTestKeys.swapAnimationEnd
+                }
                 .padding(
                     top = if (isHeightExpanded) 128.dp else 96.dp,
                     bottom = if (isHeightExpanded) 128.dp else 48.dp,
                 ),
     ) {
+        LaunchedEffect(isSwapped) { swapAnimationEnd = false }
         val animatedOffset by
             animateFloatAsState(
                 targetValue =
@@ -344,31 +378,35 @@ private fun BesideUserSwitcherLayout(
                         -1f
                     },
                 label = "offset",
-            )
+            ) {
+                swapAnimationEnd = true
+            }
 
         fun Modifier.swappable(inversed: Boolean = false): Modifier {
             return graphicsLayer {
-                translationX =
-                    size.width *
-                        animatedOffset *
-                        if (inversed) {
-                            // A negative sign is used to make sure this is offset in the direction
-                            // that's opposite to the direction that the user switcher is pushed in.
-                            -1
-                        } else {
-                            1
-                        }
-                alpha = animatedAlpha(animatedOffset)
-            }
+                    translationX =
+                        size.width *
+                            animatedOffset *
+                            if (inversed) {
+                                // A negative sign is used to make sure this is offset in the
+                                // direction that's opposite to the direction that the user
+                                // switcher is pushed in.
+                                -1
+                            } else {
+                                1
+                            }
+                    alpha = animatedAlpha(animatedOffset)
+                }
+                .motionTestValues { animatedAlpha(animatedOffset) exportAs MotionTestValues.alpha }
         }
 
         UserSwitcher(
             viewModel = viewModel,
-            modifier = Modifier.weight(1f).swappable(),
+            modifier = Modifier.weight(1f).swappable().testTag("UserSwitcher"),
         )
 
         FoldAware(
-            modifier = Modifier.weight(1f).swappable(inversed = true),
+            modifier = Modifier.weight(1f).swappable(inversed = true).testTag("FoldAware"),
             viewModel = viewModel,
             aboveFold = {
                 Column(
@@ -376,10 +414,13 @@ private fun BesideUserSwitcherLayout(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     StatusMessage(
-                        viewModel = viewModel,
+                        viewModel = viewModel.message,
                     )
 
-                    OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
+                    OutputArea(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(top = 24.dp).testTag("OutputArea")
+                    )
                 }
             },
             belowFold = {
@@ -402,13 +443,13 @@ private fun BesideUserSwitcherLayout(
                             viewModel = viewModel,
                             pinButtonRowVerticalSpacing = 12.dp,
                             centerPatternDotsVertically = true,
-                            modifier = Modifier.align(Alignment.BottomCenter),
+                            modifier = Modifier.align(Alignment.BottomCenter).testTag("InputArea"),
                         )
                     }
 
                     ActionArea(
                         viewModel = viewModel,
-                        modifier = Modifier.padding(top = 48.dp),
+                        modifier = Modifier.padding(top = 48.dp).testTag("ActionArea"),
                     )
                 }
             },
@@ -441,7 +482,7 @@ private fun BelowUserSwitcherLayout(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 StatusMessage(
-                    viewModel = viewModel,
+                    viewModel = viewModel.message,
                 )
 
                 OutputArea(viewModel = viewModel, modifier = Modifier.padding(top = 24.dp))
@@ -470,7 +511,7 @@ private fun FoldAware(
     modifier: Modifier = Modifier,
 ) {
     val foldPosture: FoldPosture by foldPosture()
-    val isSplitAroundTheFoldRequired by viewModel.isFoldSplitRequired.collectAsState()
+    val isSplitAroundTheFoldRequired by viewModel.isFoldSplitRequired.collectAsStateWithLifecycle()
     val isSplitAroundTheFold = foldPosture == FoldPosture.Tabletop && isSplitAroundTheFoldRequired
     val currentSceneKey =
         if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
@@ -480,6 +521,7 @@ private fun FoldAware(
         onChangeScene = {},
         transitions = SceneTransitions,
         modifier = modifier,
+        enableInterruptions = false,
     ) {
         scene(SceneKeys.ContiguousSceneKey) {
             FoldableScene(
@@ -548,26 +590,44 @@ private fun SceneScope.FoldableScene(
 
 @Composable
 private fun StatusMessage(
-    viewModel: BouncerViewModel,
+    viewModel: BouncerMessageViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
+    val message: MessageViewModel? by viewModel.message.collectAsStateWithLifecycle()
+
+    DisposableEffect(Unit) {
+        viewModel.onShown()
+        onDispose {}
+    }
 
     Crossfade(
         targetState = message,
         label = "Bouncer message",
-        animationSpec = if (message.isUpdateAnimated) tween() else snap(),
+        animationSpec = if (message?.isUpdateAnimated == true) tween() else snap(),
         modifier = modifier.fillMaxWidth(),
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
+    ) { msg ->
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Text(
-                text = it.text,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            msg?.let {
+                Text(
+                    text = it.text,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 18.sp,
+                    lineHeight = 24.sp,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = it.secondaryText ?: "",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 2
+                )
+            }
         }
     }
 }
@@ -583,7 +643,7 @@ private fun OutputArea(
     modifier: Modifier = Modifier,
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
-        viewModel.authMethodViewModel.collectAsState()
+        viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel ->
@@ -613,7 +673,7 @@ private fun InputArea(
     modifier: Modifier = Modifier,
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
-        viewModel.authMethodViewModel.collectAsState()
+        viewModel.authMethodViewModel.collectAsStateWithLifecycle()
 
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel -> {
@@ -639,11 +699,44 @@ private fun ActionArea(
     viewModel: BouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val actionButton: BouncerActionButtonModel? by viewModel.actionButton.collectAsState()
+    val actionButton: BouncerActionButtonModel? by
+        viewModel.actionButton.collectAsStateWithLifecycle()
+    val appearFadeInAnimatable = remember { Animatable(0f) }
+    val appearMoveAnimatable = remember { Animatable(0f) }
+    val appearAnimationInitialOffset = with(LocalDensity.current) { 80.dp.toPx() }
 
     actionButton?.let { actionButtonViewModel ->
+        LaunchedEffect(Unit) {
+            appearFadeInAnimatable.animateTo(
+                targetValue = 1f,
+                animationSpec =
+                    tween(
+                        durationMillis = 450,
+                        delayMillis = 133,
+                        easing = Easings.LegacyDecelerate,
+                    )
+            )
+        }
+        LaunchedEffect(Unit) {
+            appearMoveAnimatable.animateTo(
+                targetValue = 1f,
+                animationSpec =
+                    tween(
+                        durationMillis = 450,
+                        delayMillis = 133,
+                        easing = Easings.StandardDecelerate,
+                    )
+            )
+        }
+
         Box(
-            modifier = modifier,
+            modifier =
+                modifier.graphicsLayer {
+                    // Translate the button up from an initially pushed-down position:
+                    translationY = (1 - appearMoveAnimatable.value) * appearAnimationInitialOffset
+                    // Fade the button in:
+                    alpha = appearFadeInAnimatable.value
+                },
         ) {
             Button(
                 onClick = actionButtonViewModel.onClick,
@@ -674,7 +767,7 @@ private fun Dialog(
     bouncerViewModel: BouncerViewModel,
     dialogFactory: BouncerDialogFactory,
 ) {
-    val dialogViewModel by bouncerViewModel.dialogViewModel.collectAsState()
+    val dialogViewModel by bouncerViewModel.dialogViewModel.collectAsStateWithLifecycle()
     var dialog: AlertDialog? by remember { mutableStateOf(null) }
 
     dialogViewModel?.let { viewModel ->
@@ -711,8 +804,8 @@ private fun UserSwitcher(
         return
     }
 
-    val selectedUserImage by viewModel.selectedUserImage.collectAsState(null)
-    val dropdownItems by viewModel.userSwitcherDropdown.collectAsState(emptyList())
+    val selectedUserImage by viewModel.selectedUserImage.collectAsStateWithLifecycle(null)
+    val dropdownItems by viewModel.userSwitcherDropdown.collectAsStateWithLifecycle(emptyList())
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -875,4 +968,9 @@ private object SceneElements {
 
 private val SceneTransitions = transitions {
     from(SceneKeys.ContiguousSceneKey, to = SceneKeys.SplitSceneKey) { spec = tween() }
+}
+
+@VisibleForTesting
+object BouncerMotionTestKeys {
+    val swapAnimationEnd = MotionTestValueKey<Boolean>("swapAnimationEnd")
 }

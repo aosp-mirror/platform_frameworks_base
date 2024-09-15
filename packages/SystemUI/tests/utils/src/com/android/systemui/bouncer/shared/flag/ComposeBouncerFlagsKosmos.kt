@@ -17,8 +17,6 @@
 package com.android.systemui.bouncer.shared.flag
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.scene.shared.flag.fakeSceneContainerFlags
 
-var Kosmos.fakeComposeBouncerFlags by
-    Kosmos.Fixture { FakeComposeBouncerFlags(fakeSceneContainerFlags) }
+var Kosmos.fakeComposeBouncerFlags by Kosmos.Fixture { FakeComposeBouncerFlags() }
 val Kosmos.composeBouncerFlags by Kosmos.Fixture<ComposeBouncerFlags> { fakeComposeBouncerFlags }

@@ -25,6 +25,7 @@ import android.platform.test.annotations.EnableFlags
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WLAN
 import android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN
 import android.telephony.CarrierConfigManager.KEY_INFLATE_SIGNAL_STRENGTH_BOOL
+import android.telephony.CarrierConfigManager.KEY_SHOW_5G_SLICE_ICON_BOOL
 import android.telephony.NetworkRegistrationInfo
 import android.telephony.NetworkRegistrationInfo.DOMAIN_PS
 import android.telephony.NetworkRegistrationInfo.REGISTRATION_STATE_DENIED
@@ -35,6 +36,7 @@ import android.telephony.ServiceState.STATE_OUT_OF_SERVICE
 import android.telephony.SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX
 import android.telephony.SubscriptionManager.PROFILE_CLASS_UNSET
 import android.telephony.TelephonyCallback
+import android.telephony.TelephonyCallback.CarrierRoamingNtnModeListener
 import android.telephony.TelephonyCallback.DataActivityListener
 import android.telephony.TelephonyCallback.DisplayInfoListener
 import android.telephony.TelephonyCallback.ServiceStateListener
@@ -983,26 +985,19 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(com.android.internal.telephony.flags.Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
-    fun isNonTerrestrial_updatesFromServiceState() =
+    fun isNonTerrestrial_updatesFromCallback0() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isNonTerrestrial)
-
-            // Lambda makes it a little clearer what we are testing IMO
-            val serviceStateCreator = { ntn: Boolean ->
-                mock<ServiceState>().also {
-                    whenever(it.isUsingNonTerrestrialNetwork).thenReturn(ntn)
-                }
-            }
 
             // Starts out false
             assertThat(latest).isFalse()
 
-            getTelephonyCallbackForType<ServiceStateListener>()
-                .onServiceStateChanged(serviceStateCreator(true))
+            val callback = getTelephonyCallbackForType<CarrierRoamingNtnModeListener>()
+
+            callback.onCarrierRoamingNtnModeChanged(true)
             assertThat(latest).isTrue()
 
-            getTelephonyCallbackForType<ServiceStateListener>()
-                .onServiceStateChanged(serviceStateCreator(false))
+            callback.onCarrierRoamingNtnModeChanged(false)
             assertThat(latest).isFalse()
         }
 
@@ -1047,6 +1042,24 @@ class MobileConnectionRepositoryTest : SysuiTestCase() {
             )
 
             assertThat(latest).isEqualTo(false)
+        }
+
+    @Test
+    fun allowNetworkSliceIndicator_exposesCarrierConfigValue() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.allowNetworkSliceIndicator)
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_SHOW_5G_SLICE_ICON_BOOL, true)
+            )
+
+            assertThat(latest).isTrue()
+
+            systemUiCarrierConfig.processNewCarrierConfig(
+                configWithOverride(KEY_SHOW_5G_SLICE_ICON_BOOL, false)
+            )
+
+            assertThat(latest).isFalse()
         }
 
     @Test

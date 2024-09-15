@@ -18,7 +18,7 @@ package com.android.systemui.accessibility.data.repository
 
 import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.channels.awaitClose
@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 interface AccessibilityRepository {
     /** @see [AccessibilityManager.isTouchExplorationEnabled] */
     val isTouchExplorationEnabled: Flow<Boolean>
+    /** @see [AccessibilityManager.isEnabled] */
+    val isEnabled: Flow<Boolean>
 
     companion object {
         operator fun invoke(a11yManager: AccessibilityManager): AccessibilityRepository =
@@ -45,6 +47,15 @@ private class AccessibilityRepositoryImpl(
                 manager.addTouchExplorationStateChangeListener(listener)
                 trySend(manager.isTouchExplorationEnabled)
                 awaitClose { manager.removeTouchExplorationStateChangeListener(listener) }
+            }
+            .distinctUntilChanged()
+
+    override val isEnabled: Flow<Boolean> =
+        conflatedCallbackFlow {
+                val listener = AccessibilityManager.AccessibilityStateChangeListener(::trySend)
+                manager.addAccessibilityStateChangeListener(listener)
+                trySend(manager.isEnabled)
+                awaitClose { manager.removeAccessibilityStateChangeListener(listener) }
             }
             .distinctUntilChanged()
 }

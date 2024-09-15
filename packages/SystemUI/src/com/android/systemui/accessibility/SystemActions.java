@@ -55,7 +55,7 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeViewController;
+import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
@@ -203,8 +203,9 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
     private final NotificationShadeWindowController mNotificationShadeController;
     private final KeyguardStateController mKeyguardStateController;
     private final ShadeController mShadeController;
-    private final Lazy<ShadeViewController> mShadeViewController;
+    private final Lazy<PanelExpansionInteractor> mPanelExpansionInteractor;
     private final StatusBarWindowCallback mNotificationShadeCallback;
+    private final ScreenshotHelper mScreenshotHelper;
     private boolean mDismissNotificationShadeActionRegistered;
 
     @Inject
@@ -213,14 +214,14 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
             NotificationShadeWindowController notificationShadeController,
             KeyguardStateController keyguardStateController,
             ShadeController shadeController,
-            Lazy<ShadeViewController> shadeViewController,
+            Lazy<PanelExpansionInteractor> panelExpansionInteractor,
             Optional<Recents> recentsOptional,
             DisplayTracker displayTracker) {
         mContext = context;
         mUserTracker = userTracker;
         mKeyguardStateController = keyguardStateController;
         mShadeController = shadeController;
-        mShadeViewController = shadeViewController;
+        mPanelExpansionInteractor = panelExpansionInteractor;
         mRecentsOptional = recentsOptional;
         mDisplayTracker = displayTracker;
         mReceiver = new SystemActionsBroadcastReceiver();
@@ -234,6 +235,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
                 (keyguardShowing, keyguardOccluded, keyguardGoingAway, bouncerShowing, mDozing,
                         panelExpanded, isDreaming) ->
                         registerOrUnregisterDismissNotificationShadeAction();
+        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     @Override
@@ -353,7 +355,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
     private void registerOrUnregisterDismissNotificationShadeAction() {
         Assert.isMainThread();
 
-        if (mShadeViewController.get().isPanelExpanded()
+        if (mPanelExpansionInteractor.get().isPanelExpanded()
                 && !mKeyguardStateController.isShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
@@ -547,8 +549,7 @@ public class SystemActions implements CoreStartable, ConfigurationController.Con
     }
 
     private void handleTakeScreenshot() {
-        ScreenshotHelper screenshotHelper = new ScreenshotHelper(mContext);
-        screenshotHelper.takeScreenshot(
+        mScreenshotHelper.takeScreenshot(
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 

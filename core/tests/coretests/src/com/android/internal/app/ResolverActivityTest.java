@@ -27,6 +27,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.android.internal.app.MatcherUtils.first;
+import static com.android.internal.app.ResolverActivity.EXTRA_RESTRICT_TO_SINGLE_USER;
 import static com.android.internal.app.ResolverDataProvider.createPackageManagerMockedInfo;
 import static com.android.internal.app.ResolverWrapperActivity.sOverrides;
 
@@ -1162,7 +1163,8 @@ public class ResolverActivityTest {
     @Test
     public void testTriggerFromPrivateProfile_withoutWorkProfile() throws RemoteException {
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         markPrivateProfileUserAvailable();
         Intent sendIntent = createSendImageIntent();
         List<ResolvedComponentInfo> privateResolvedComponentInfos =
@@ -1183,7 +1185,8 @@ public class ResolverActivityTest {
     @Test
     public void testTriggerFromPrivateProfile_withWorkProfilePresent(){
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         ResolverActivity.ENABLE_TABBED_VIEW = false;
         markPrivateProfileUserAvailable();
         markWorkProfileUserAvailable();
@@ -1205,7 +1208,8 @@ public class ResolverActivityTest {
     @Test
     public void testPrivateProfile_triggerFromPrimaryUser_withWorkProfilePresent(){
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         markPrivateProfileUserAvailable();
         markWorkProfileUserAvailable();
         Intent sendIntent = createSendImageIntent();
@@ -1228,7 +1232,8 @@ public class ResolverActivityTest {
     @Test
     public void testPrivateProfile_triggerFromWorkProfile(){
         mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
-                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE);
+                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
         markPrivateProfileUserAvailable();
         markWorkProfileUserAvailable();
         Intent sendIntent = createSendImageIntent();
@@ -1247,6 +1252,53 @@ public class ResolverActivityTest {
             assertTrue(resolvedInfo.getResolveInfoAt(0).userHandle.equals(
                     activity.getPersonalProfileUserHandle()) || resolvedInfo.getResolveInfoAt(
                     0).userHandle.equals(activity.getWorkProfileUserHandle()));
+        }
+    }
+
+    @Test
+    public void testTriggerFromMainProfile_inSingleUserMode_withWorkProfilePresent() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
+        markWorkProfileUserAvailable();
+        setTabOwnerUserHandleForLaunch(PERSONAL_USER_HANDLE);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.putExtra(EXTRA_RESTRICT_TO_SINGLE_USER, true);
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3, PERSONAL_USER_HANDLE);
+        List<ResolvedComponentInfo> workResolvedComponentInfos = createResolvedComponentsForTest(4,
+                sOverrides.workProfileUserHandle);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        assertThat(activity.getPersonalListAdapter().getCount(), is(2));
+        onView(withId(R.id.tabs)).check(matches(not(isDisplayed())));
+        assertEquals(activity.getMultiProfilePagerAdapterCount(), 1);
+        for (ResolvedComponentInfo resolvedInfo : personalResolvedComponentInfos) {
+            assertEquals(resolvedInfo.getResolveInfoAt(0).userHandle, PERSONAL_USER_HANDLE);
+        }
+    }
+
+    @Test
+    public void testTriggerFromWorkProfile_inSingleUserMode() {
+        mSetFlagsRule.enableFlags(android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE,
+                android.multiuser.Flags.FLAG_ALLOW_RESOLVER_SHEET_FOR_PRIVATE_SPACE,
+                android.multiuser.Flags.FLAG_ENABLE_PRIVATE_SPACE_FEATURES);
+        markWorkProfileUserAvailable();
+        setTabOwnerUserHandleForLaunch(sOverrides.workProfileUserHandle);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.putExtra(EXTRA_RESTRICT_TO_SINGLE_USER, true);
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(3, sOverrides.workProfileUserHandle);
+        setupResolverControllers(personalResolvedComponentInfos);
+        final ResolverWrapperActivity activity = mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        assertThat(activity.getPersonalListAdapter().getCount(), is(3));
+        onView(withId(R.id.tabs)).check(matches(not(isDisplayed())));
+        assertEquals(activity.getMultiProfilePagerAdapterCount(), 1);
+        for (ResolvedComponentInfo resolvedInfo : personalResolvedComponentInfos) {
+            assertEquals(resolvedInfo.getResolveInfoAt(0).userHandle,
+                    sOverrides.workProfileUserHandle);
         }
     }
 
@@ -1333,6 +1385,10 @@ public class ResolverActivityTest {
 
     private void markPrivateProfileUserAvailable() {
         ResolverWrapperActivity.sOverrides.privateProfileUserHandle = UserHandle.of(12);
+    }
+
+    private void setTabOwnerUserHandleForLaunch(UserHandle tabOwnerUserHandleForLaunch) {
+        sOverrides.tabOwnerUserHandleForLaunch = tabOwnerUserHandleForLaunch;
     }
 
     private void setupResolverControllers(

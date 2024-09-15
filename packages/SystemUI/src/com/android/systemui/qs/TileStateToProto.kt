@@ -18,6 +18,7 @@ package com.android.systemui.qs
 
 import android.service.quicksettings.Tile
 import android.text.TextUtils
+import android.widget.Switch
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.external.CustomTile
 import com.android.systemui.qs.nano.QsTileState
@@ -44,8 +45,8 @@ fun QSTile.State.toProto(): QsTileState? {
         }
     label?.let { state.label = it.toString() }
     secondaryLabel?.let { state.secondaryLabel = it.toString() }
-    if (this is QSTile.BooleanState) {
-        state.booleanState = value
+    if (expandedAccessibilityClassName == Switch::class.java.name) {
+        state.booleanState = state.state == QsTileState.ACTIVE
     }
     return state
 }

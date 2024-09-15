@@ -20,7 +20,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 
@@ -82,14 +81,8 @@ public final class PhoneWindowTest {
         createPhoneWindowWithTheme(R.style.LayoutInDisplayCutoutModeUnset);
         installDecor();
 
-        if ((mPhoneWindow.getAttributes().privateFlags & PRIVATE_FLAG_EDGE_TO_EDGE_ENFORCED) != 0
-                && !mPhoneWindow.isFloating()) {
-            assertThat(mPhoneWindow.getAttributes().layoutInDisplayCutoutMode,
-                    is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS));
-        } else {
-            assertThat(mPhoneWindow.getAttributes().layoutInDisplayCutoutMode,
-                    is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT));
-        }
+        assertThat(mPhoneWindow.getAttributes().layoutInDisplayCutoutMode,
+                is(LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT));
     }
 
     @Test
@@ -182,7 +175,8 @@ public final class PhoneWindowTest {
 
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
-
+        wmlp.setFrameRatePowerSavingsBalanced(
+                    mPhoneWindow.getAttributes().isFrameRatePowerSavingsBalanced());
         sInstrumentation.runOnMainSync(() -> {
             WindowManager wm = mContext.getSystemService(WindowManager.class);
             wm.addView(decorView, wmlp);
@@ -203,7 +197,8 @@ public final class PhoneWindowTest {
 
         WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
         wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
-
+        wmlp.setFrameRatePowerSavingsBalanced(
+                mPhoneWindow.getAttributes().isFrameRatePowerSavingsBalanced());
         sInstrumentation.runOnMainSync(() -> {
             WindowManager wm = mContext.getSystemService(WindowManager.class);
             wm.addView(decorView, wmlp);

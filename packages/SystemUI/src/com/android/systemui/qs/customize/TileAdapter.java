@@ -46,7 +46,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.res.R;
 import com.android.systemui.qs.QSEditEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.TileLayout;
@@ -57,6 +56,7 @@ import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.dagger.QSThemedContext;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.tileimpl.QSTileViewImpl;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -319,6 +319,9 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         }
         FrameLayout frame = (FrameLayout) inflater.inflate(R.layout.qs_customize_tile_frame, parent,
                 false);
+        if (com.android.systemui.Flags.qsTileFocusState()) {
+            frame.setClipChildren(false);
+        }
         View view = new CustomizeTileView(context);
         frame.addView(view);
         return new Holder(frame);
@@ -327,6 +330,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Override
     public int getItemCount() {
         return mTiles.size();
+    }
+
+    public int getItemCountForAccessibility() {
+        if (mAccessibilityAction == ACTION_MOVE) {
+            return mEditIndex;
+        } else {
+            return getItemCount();
+        }
     }
 
     @Override
@@ -403,6 +414,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         } else if (selectable && mAccessibilityAction == ACTION_MOVE) {
             info.state.contentDescription = mContext.getString(
                     R.string.accessibility_qs_edit_tile_move_to_position, position);
+        } else if (!selectable && (mAccessibilityAction == ACTION_MOVE
+                || mAccessibilityAction == ACTION_ADD)) {
+            info.state.contentDescription = mContext.getString(
+                    R.string.accessibilit_qs_edit_tile_add_move_invalid_position);
         } else {
             info.state.contentDescription = info.state.label;
         }
@@ -421,14 +436,15 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         holder.mTileView.setOnClickListener(null);
         holder.mTileView.setFocusable(true);
         holder.mTileView.setFocusableInTouchMode(true);
+        holder.mTileView.setAccessibilityTraversalBefore(View.NO_ID);
 
         if (mAccessibilityAction != ACTION_NONE) {
             holder.mTileView.setClickable(selectable);
             holder.mTileView.setFocusable(selectable);
             holder.mTileView.setFocusableInTouchMode(selectable);
-            holder.mTileView.setImportantForAccessibility(selectable
-                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+//            holder.mTileView.setImportantForAccessibility(selectable
+//                    ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
+//                    : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
             if (selectable) {
                 holder.mTileView.setOnClickListener(new OnClickListener() {
                     @Override
@@ -908,4 +924,5 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         int estimatedTileViewHeight = mTempTextView.getMeasuredHeight() * 2 + padding * 2;
         mMinTileViewHeight = Math.max(minHeight, estimatedTileViewHeight);
     }
+
 }

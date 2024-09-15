@@ -1,9 +1,9 @@
 package com.android.systemui.statusbar.gesture
 
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.InputEvent
 import android.view.MotionEvent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeDisplayTracker
@@ -13,7 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class GenericGestureDetectorTest : SysuiTestCase() {
 

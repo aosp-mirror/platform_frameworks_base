@@ -16,16 +16,16 @@
 
 #pragma once
 
-#include <utils/RefBase.h>
-
 #include <ui/PixelFormat.h>
-
 #include <utils/Errors.h>
+#include <utils/RefBase.h>
 
 namespace android {
 
 class BufferItem;
+
 class Fence;
+
 class GraphicBuffer;
 
 class IGraphicBufferConsumer : virtual public RefBase {

@@ -26,8 +26,11 @@
     <string name="profile_name_glasses" msgid="3506504967216601277">"уред"</string>
     <string name="summary_glasses" msgid="2872254734959842579">"Апликацијава ќе може да пристапува до овие дозволи на <xliff:g id="DEVICE_NAME">%1$s</xliff:g>"</string>
     <string name="title_app_streaming" msgid="2270331024626446950">"Овозможете &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да пристапува до овие податоци на телефонот"</string>
+    <string name="title_app_streaming_with_mirroring" msgid="3364582597581570658">"Да се дозволи &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да ги стримува апликациите од вашиот телефон?"</string>
+    <string name="summary_app_streaming" msgid="295548145144086753">"%1$s ќе има пристап до сè што е видливо или репродуцирано на телефонот, вклучувајќи ги и аудиото, фотографиите, лозинките и пораките.&lt;br/&gt;&lt;br/&gt;%1$s ќе може да стримува апликации додека не ја повлечете дозволава."</string>
     <string name="helper_title_app_streaming" msgid="4151687003439969765">"Повеќенаменски услуги"</string>
     <string name="helper_summary_app_streaming" msgid="2396773196949578425">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> за да стримува апликации помеѓу вашите уреди"</string>
+    <string name="helper_summary_app_streaming_with_mirroring" msgid="6138581029144467467">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> за да прикажува и стримува апликации меѓу вашите уреди"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
     <string name="title_computer" msgid="4693714143506569253">"Дозволете &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; да пристапува до овие податоци на телефонот"</string>
@@ -35,6 +38,8 @@
     <string name="helper_title_computer" msgid="4671071173916176037">"Услуги на Google Play"</string>
     <string name="helper_summary_computer" msgid="8774832742608187072">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DISPLAY_NAME">%2$s</xliff:g> за да пристапува до фотографиите, аудиовизуелните содржини и известувањата на телефонот"</string>
     <string name="title_nearby_device_streaming" msgid="7269956847378799794">"Ќе дозволите &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; да го преземе ова дејство?"</string>
+    <string name="title_nearby_device_streaming_with_mirroring" msgid="242855799919611657">"Да се дозволи &lt;strong&gt;<xliff:g id="DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; да ги стримува апликациите и системските функции од вашиот телефон?"</string>
+    <string name="summary_nearby_device_streaming" msgid="4039565463149145573">"%1$s ќе има пристап до сè што е видливо или репродуцирано на телефонот, вклучувајќи ги и аудиото, фотографиите, податоците за плаќање, лозинките и пораките.&lt;br/&gt;&lt;br/&gt;%1$s ќе може да стримува апликации и системски функции додека не ја повлечете дозволава."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="2063965070936844876">"<xliff:g id="APP_NAME">%1$s</xliff:g> бара дозвола во име на вашиот <xliff:g id="DEVICE_NAME">%2$s</xliff:g> за да стримува апликации и други системски функции на уредите во близина"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"уред"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Оваа апликација ќе може да ги синхронизира податоците како што се имињата на јавувачите помеѓу вашиот телефон и избраниот уред"</string>
@@ -54,7 +59,7 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Микрофон"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Евиденција на повици"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Уреди во близина"</string>
-    <string name="permission_media_routing_control" msgid="5498639511586715253">"Промена на излезот за аудио"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Менување излез за аудио/видео"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Аудиовизуелни содржини"</string>
     <string name="permission_notifications" msgid="4099418516590632909">"Известувања"</string>
     <string name="permission_app_streaming" msgid="6009695219091526422">"Апликации"</string>

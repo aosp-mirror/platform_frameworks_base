@@ -36,27 +36,31 @@ import java.util.stream.Stream;
 /**
  * A set of identifiers necessary to tune to a given station.
  *
- * This can hold various identifiers, like
- * - AM/FM frequency
- * - HD Radio subchannel
- * - DAB channel info
+ * <p>This can hold various identifiers, like
+ * <ui>
+ *     <li>AM/FM frequency</li>
+ *     <li>HD Radio subchannel</li>
+ *     <li>DAB channel info</li>
+ * </ui>
  *
- * The primary ID uniquely identifies a station and can be used for equality
+ * <p>The primary ID uniquely identifies a station and can be used for equality
  * check. The secondary IDs are supplementary and can speed up tuning process,
  * but the primary ID is sufficient (ie. after a full band scan).
  *
- * Two selectors with different secondary IDs, but the same primary ID are
+ * <p>Two selectors with different secondary IDs, but the same primary ID are
  * considered equal. In particular, secondary IDs vector may get updated for
  * an entry on the program list (ie. when a better frequency for a given
  * station is found).
  *
- * The primaryId of a given programType MUST be of a specific type:
- * - AM, FM: RDS_PI if the station broadcasts RDS, AMFM_FREQUENCY otherwise;
- * - AM_HD, FM_HD: HD_STATION_ID_EXT;
- * - DAB: DAB_SIDECC;
- * - DRMO: DRMO_SERVICE_ID;
- * - SXM: SXM_SERVICE_ID;
- * - VENDOR: VENDOR_PRIMARY.
+ * <p>The primaryId of a given programType MUST be of a specific type:
+ * <ui>
+ *     <li>AM, FM: RDS_PI if the station broadcasts RDS, AMFM_FREQUENCY otherwise;</li>
+ *     <li>AM_HD, FM_HD: HD_STATION_ID_EXT;</li>
+ *     <li>DAB: DAB_SIDECC;</li>
+ *     <li>DRMO: DRMO_SERVICE_ID;</li>
+ *     <li>SXM: SXM_SERVICE_ID;</li>
+ *     <li>VENDOR: VENDOR_PRIMARY.</li>
+ * </ui>
  * @hide
  */
 @SystemApi
@@ -258,10 +262,10 @@ public final class ProgramSelector implements Parcelable {
     /**
      * 64bit additional identifier for HD Radio.
      *
-     * <p>Due to Station ID abuse, some HD_STATION_ID_EXT identifiers may be not
-     * globally unique. To provide a best-effort solution, a short version of
-     * station name may be carried as additional identifier and may be used
-     * by the tuner hardware to double-check tuning.
+     * <p>Due to Station ID abuse, some {@link #IDENTIFIER_TYPE_HD_STATION_ID_EXT}
+     * identifiers may be not globally unique. To provide a best-effort solution, a
+     * short version of station name may be carried as additional identifier and
+     * may be used by the tuner hardware to double-check tuning.
      *
      * <p>The name is limited to the first 8 A-Z0-9 characters (lowercase
      * letters must be converted to uppercase). Encoded in little-endian
@@ -312,15 +316,23 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
     /**
      * 1: AM, 2:FM
+     * @deprecated use {@link #IDENTIFIER_TYPE_DRMO_FREQUENCY} instead
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
     /**
      * 32bit primary identifier for SiriusXM Satellite Radio.
+     *
+     * @deprecated SiriusXM Satellite Radio is not supported
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
     /**
      * 0-999 range
+     *
+     * @deprecated SiriusXM Satellite Radio is not supported
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13;
     /**
      * 44bit compound primary identifier for Digital Audio Broadcasting and
@@ -376,7 +388,7 @@ public final class ProgramSelector implements Parcelable {
      * The value format is determined by a vendor.
      *
      * <p>It must not be used in any other programType than corresponding VENDOR
-     * type between VENDOR_START and VENDOR_END (eg. identifier type 1015 must
+     * type between VENDOR_START and VENDOR_END (e.g. identifier type 1015 must
      * not be used in any program type other than 1015).
      */
     public static final int IDENTIFIER_TYPE_VENDOR_START = PROGRAM_TYPE_VENDOR_START;
@@ -427,9 +439,10 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Constructor for ProgramSelector.
      *
-     * It's not desired to modify selector objects, so all its fields are initialized at creation.
+     * <p>It's not desired to modify selector objects, so all its fields are initialized at
+     * creation.
      *
-     * Identifier lists must not contain any nulls, but can itself be null to be interpreted
+     * <p>Identifier lists must not contain any nulls, but can itself be null to be interpreted
      * as empty list at object creation.
      *
      * @param programType type of a radio technology.
@@ -484,8 +497,8 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Looks up an identifier of a given type (either primary or secondary).
      *
-     * If there are multiple identifiers if a given type, then first in order (where primary id is
-     * before any secondary) is selected.
+     * <p>If there are multiple identifiers if a given type, then first in order (where primary id
+     * is before any secondary) is selected.
      *
      * @param type type of identifier.
      * @return identifier value, if found.
@@ -502,11 +515,11 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Looks up all identifier of a given type (either primary or secondary).
      *
-     * Some identifiers may be provided multiple times, for example
-     * IDENTIFIER_TYPE_AMFM_FREQUENCY for FM Alternate Frequencies.
+     * <p>Some identifiers may be provided multiple times, for example
+     * {@link #IDENTIFIER_TYPE_AMFM_FREQUENCY} for FM Alternate Frequencies.
      *
      * @param type type of identifier.
-     * @return a list of identifiers, generated on each call. May be modified.
+     * @return an array of identifiers, generated on each call. May be modified.
      */
     public @NonNull Identifier[] getAllIds(@IdentifierType int type) {
         List<Identifier> out = new ArrayList<>();
@@ -535,14 +548,14 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Creates an equivalent ProgramSelector with a given secondary identifier preferred.
      *
-     * Used to point to a specific physical identifier for technologies that may broadcast the same
-     * program on different channels. For example, with a DAB program broadcasted over multiple
+     * <p>Used to point to a specific physical identifier for technologies that may broadcast the
+     * same program on different channels. For example, with a DAB program broadcasted over multiple
      * ensembles, the radio hardware may select the one with the strongest signal. The UI may select
      * preferred ensemble though, so the radio hardware may try to use it in the first place.
      *
-     * This is a best-effort hint for the tuner, not a guaranteed behavior.
+     * <p>This is a best-effort hint for the tuner, not a guaranteed behavior.
      *
-     * Setting the given secondary identifier as preferred means filtering out other secondary
+     * <p>Setting the given secondary identifier as preferred means filtering out other secondary
      * identifiers of its type and adding it to the list.
      *
      * @param preferred preferred secondary identifier
@@ -569,7 +582,7 @@ public final class ProgramSelector implements Parcelable {
      *
      * @param band the band.
      * @param frequencyKhz the frequency in kHz.
-     * @return new ProgramSelector object representing given frequency.
+     * @return new {@link ProgramSelector} object representing given frequency.
      * @throws IllegalArgumentException if provided frequency is out of bounds.
      */
     public static @NonNull ProgramSelector createAmFmSelector(
@@ -580,13 +593,13 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Checks, if a given AM/FM frequency is roughly valid and in correct unit.
      *
-     * It does not check the range precisely: it may provide false positives, but not false
+     * <p>It does not check the range precisely: it may provide false positives, but not false
      * negatives. In particular, it may be way off for certain regions.
-     * The main purpose is to avoid passing inproper units, ie. MHz instead of kHz.
+     * The main purpose is to avoid passing improper units, ie. MHz instead of kHz.
      *
      * @param isAm true, if AM, false if FM.
      * @param frequencyKhz the frequency in kHz.
-     * @return true, if the frequency is rougly valid.
+     * @return true, if the frequency is roughly valid.
      */
     private static boolean isValidAmFmFrequency(boolean isAm, int frequencyKhz) {
         if (isAm) {
@@ -599,7 +612,7 @@ public final class ProgramSelector implements Parcelable {
     /**
      * Builds new ProgramSelector for AM/FM frequency.
      *
-     * This method variant supports HD Radio subchannels, but it's undesirable to
+     * <p>This method variant supports HD Radio subchannels, but it's undesirable to
      * select them manually. Instead, the value should be retrieved from program list.
      *
      * @param band the band.
@@ -733,9 +746,9 @@ public final class ProgramSelector implements Parcelable {
     };
 
     /**
-     * A single program identifier component, eg. frequency or channel ID.
+     * A single program identifier component, e.g. frequency or channel ID.
      *
-     * The long value field holds the value in format described in comments for
+     * <p>The long value field holds the value in format described in comments for
      * IdentifierType constants.
      */
     public static final class Identifier implements Parcelable {
@@ -768,11 +781,11 @@ public final class ProgramSelector implements Parcelable {
         }
 
         /**
-         * Returns whether this Identifier's type is considered a category when filtering
+         * Returns whether this identifier's type is considered a category when filtering
          * ProgramLists for category entries.
          *
          * @see ProgramList.Filter#areCategoriesIncluded
-         * @return False if this identifier's type is not tuneable (e.g. DAB ensemble or
+         * @return False if this identifier's type is not tunable (e.g. DAB ensemble or
          *         vendor-specified type). True otherwise.
          */
         public boolean isCategoryType() {
@@ -783,14 +796,14 @@ public final class ProgramSelector implements Parcelable {
         /**
          * Value of an identifier.
          *
-         * Its meaning depends on identifier type, ie. for IDENTIFIER_TYPE_AMFM_FREQUENCY type,
-         * the value is a frequency in kHz.
+         * <p>Its meaning depends on identifier type, ie. for
+         * {@link #IDENTIFIER_TYPE_AMFM_FREQUENCY} type, the value is a frequency in kHz.
          *
-         * The range of a value depends on its type; it does not always require the whole long
+         * <p>The range of a value depends on its type; it does not always require the whole long
          * range. Casting to necessary type (ie. int) without range checking is correct in front-end
          * code - any range violations are either errors in the framework or in the
-         * HAL implementation. For example, IDENTIFIER_TYPE_AMFM_FREQUENCY always fits in int,
-         * as Integer.MAX_VALUE would mean 2.1THz.
+         * HAL implementation. For example, {@link #IDENTIFIER_TYPE_AMFM_FREQUENCY} always fits in
+         * int, as {@link Integer#MAX_VALUE} would mean 2.1THz.
          *
          * @return value of an identifier.
          */

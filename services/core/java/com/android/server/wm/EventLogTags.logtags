@@ -59,6 +59,10 @@ option java_package com.android.server.wm
 31002 wm_task_moved (TaskId|1|5),(Root Task ID|1|5),(Display Id|1|5),(ToTop|1),(Index|1)
 # Task removed with source explanation.
 31003 wm_task_removed (TaskId|1|5),(Root Task ID|1|5),(Display Id|1|5),(Reason|3)
+# Embedded TaskFragment created
+31004 wm_tf_created (Token|1|5),(TaskId|1|5)
+# Embedded TaskFragment removed
+31005 wm_tf_removed (Token|1|5),(TaskId|1|5)
 
 # Set the requested orientation of an activity.
 31006 wm_set_requested_orientation (Orientation|1|5),(Component Name|3)

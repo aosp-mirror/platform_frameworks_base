@@ -121,6 +121,7 @@ filegroup {
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
+        ":services.contextualsearch-sources",
         ":services.coverage-sources",
         ":services.credentials-sources",
         ":services.devicepolicy-sources",
@@ -210,6 +211,7 @@ java_library {
         "services.companion",
         "services.contentcapture",
         "services.contentsuggestions",
+        "services.contextualsearch",
         "services.coverage",
         "services.credentials",
         "services.devicepolicy",
@@ -255,6 +257,7 @@ java_library {
     required: [
         "libukey2_jni_shared",
         "protolog.conf.json.gz",
+        "core.protolog.pb",
     ],
     lint: {
         baseline_filename: "lint-baseline.xml",

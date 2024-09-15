@@ -16,13 +16,17 @@
 
 package com.android.systemui.statusbar.pipeline.satellite.ui.viewmodel
 
+import android.content.Context
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.dagger.OemSatelliteInputLog
+import com.android.systemui.statusbar.pipeline.dagger.DeviceBasedSatelliteInputLog
 import com.android.systemui.statusbar.pipeline.satellite.domain.interactor.DeviceBasedSatelliteInteractor
+import com.android.systemui.statusbar.pipeline.satellite.shared.model.SatelliteConnectionState
 import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -36,30 +40,50 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /**
  * View-Model for the device-based satellite icon. This icon will only show in the status bar if
  * satellite is available AND all other service states are considered OOS.
  */
+interface DeviceBasedSatelliteViewModel {
+    /**
+     * The satellite icon that should be displayed, or null if no satellite icon should be
+     * displayed.
+     */
+    val icon: StateFlow<Icon?>
+
+    /**
+     * The satellite-related text that should be used as the carrier text string when satellite is
+     * active, or null if the carrier text string shouldn't include any satellite information.
+     */
+    val carrierText: StateFlow<String?>
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
-class DeviceBasedSatelliteViewModel
+@SysUISingleton
+class DeviceBasedSatelliteViewModelImpl
 @Inject
 constructor(
+    context: Context,
     interactor: DeviceBasedSatelliteInteractor,
     @Application scope: CoroutineScope,
     airplaneModeRepository: AirplaneModeRepository,
-    @OemSatelliteInputLog logBuffer: LogBuffer,
-) {
+    @DeviceBasedSatelliteInputLog logBuffer: LogBuffer,
+) : DeviceBasedSatelliteViewModel {
     private val shouldShowIcon: Flow<Boolean> =
         interactor.areAllConnectionsOutOfService.flatMapLatest { allOos ->
             if (!allOos) {
                 flowOf(false)
             } else {
-                combine(interactor.isSatelliteAllowed, airplaneModeRepository.isAirplaneMode) {
-                    isSatelliteAllowed,
-                    isAirplaneMode ->
-                    isSatelliteAllowed && !isAirplaneMode
+                combine(
+                    interactor.isSatelliteAllowed,
+                    interactor.isSatelliteProvisioned,
+                    interactor.isWifiActive,
+                    airplaneModeRepository.isAirplaneMode
+                ) { isSatelliteAllowed, isSatelliteProvisioned, isWifiActive, isAirplaneMode ->
+                    isSatelliteAllowed && isSatelliteProvisioned && !isWifiActive && !isAirplaneMode
                 }
             }
         }
@@ -84,7 +108,7 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    val icon: StateFlow<Icon?> =
+    override val icon: StateFlow<Icon?> =
         combine(
                 shouldActuallyShowIcon,
                 interactor.connectionState,
@@ -95,6 +119,44 @@ constructor(
                 } else {
                     null
                 }
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
+    override val carrierText: StateFlow<String?> =
+        combine(
+                shouldActuallyShowIcon,
+                interactor.connectionState,
+            ) { shouldShow, connectionState ->
+                logBuffer.log(
+                    TAG,
+                    LogLevel.INFO,
+                    {
+                        bool1 = shouldShow
+                        str1 = connectionState.name
+                    },
+                    { "Updating carrier text. shouldActuallyShow=$bool1 connectionState=$str1" }
+                )
+                if (shouldShow) {
+                    when (connectionState) {
+                        SatelliteConnectionState.On,
+                        SatelliteConnectionState.Connected ->
+                            context.getString(R.string.satellite_connected_carrier_text)
+                        SatelliteConnectionState.Off,
+                        SatelliteConnectionState.Unknown -> {
+                            null
+                        }
+                    }
+                } else {
+                    null
+                }
+            }
+            .onEach {
+                logBuffer.log(
+                    TAG,
+                    LogLevel.INFO,
+                    { str1 = it },
+                    { "Resulting carrier text = $str1" }
+                )
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
