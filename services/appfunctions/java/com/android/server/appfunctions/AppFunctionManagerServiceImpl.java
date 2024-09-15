@@ -38,6 +38,7 @@ import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallbac
 import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
 
 import java.util.Objects;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -255,6 +256,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     }
 
     private ExecuteAppFunctionResponse mapExceptionToExecuteAppFunctionResponse(Throwable e) {
+        if(e instanceof CompletionException) {
+            e = e.getCause();
+        }
+
         if (e instanceof AppSearchException) {
             AppSearchException appSearchException = (AppSearchException) e;
             return ExecuteAppFunctionResponse.newFailure(
