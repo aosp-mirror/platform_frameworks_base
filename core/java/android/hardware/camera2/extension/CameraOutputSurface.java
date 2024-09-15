@@ -107,7 +107,6 @@ public final class CameraOutputSurface {
      * {@link android.hardware.camera2.params.DynamicRangeProfiles.STANDARD}
      * unless specified by CameraOutputSurface.setDynamicRangeProfile.
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public @DynamicRangeProfiles.Profile long getDynamicRangeProfile() {
         return mOutputSurface.dynamicRangeProfile;
     }
@@ -118,7 +117,6 @@ public final class CameraOutputSurface {
      * unless specified by CameraOutputSurface.setColorSpace.
      */
     @SuppressLint("MethodNameUnits")
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public int getColorSpace() {
         return mOutputSurface.colorSpace;
     }
@@ -128,7 +126,6 @@ public final class CameraOutputSurface {
      * will be {@link android.hardware.camera2.params.DynamicRangeProfiles.STANDARD}
      * unless explicitly set using this method.
      */
-    @FlaggedApi(Flags.FLAG_EXTENSION_10_BIT)
     public void setDynamicRangeProfile(
             @DynamicRangeProfiles.Profile long dynamicRangeProfile) {
         mOutputSurface.dynamicRangeProfile = dynamicRangeProfile;
