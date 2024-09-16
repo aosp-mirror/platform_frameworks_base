@@ -31,6 +31,14 @@ flag {
 }
 
 flag {
+     name: "migrate_wrist_orientation"
+     namespace: "wear_frameworks"
+     description: "Migrate wrist orientation service functionality to wear settings service"
+     bug: "352725980"
+     is_fixed_read_only: true
+}
+
+flag {
     name: "allow_network_time_update_service"
     namespace: "wear_systems"
     description: "Allow NetworkTimeUpdateService on Wear"
