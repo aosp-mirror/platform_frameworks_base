@@ -158,6 +158,13 @@ flag {
 }
 
 flag {
+  name: "notification_lock_screen_settings"
+  namespace: "systemui"
+  description: "This flag enables the new settings page for the notifications on lock screen."
+  bug: "367455695"
+}
+
+flag {
   name: "notification_vibration_in_sound_uri"
   namespace: "systemui"
   description: "This flag enables sound uri with vibration source"
