@@ -81,7 +81,7 @@ class HandleMenu(
     private val taskInfo: RunningTaskInfo = parentDecor.mTaskInfo
 
     private val isViewAboveStatusBar: Boolean
-        get() = (Flags.enableAdditionalWindowsAboveStatusBar() && !taskInfo.isFreeform)
+        get() = (Flags.enableHandleInputFix() && !taskInfo.isFreeform)
 
     private val pillElevation: Int = loadDimensionPixelSize(
         R.dimen.desktop_mode_handle_menu_pill_elevation)
@@ -183,7 +183,7 @@ class HandleMenu(
         val x = handleMenuPosition.x.toInt()
         val y = handleMenuPosition.y.toInt()
         handleMenuViewContainer =
-            if (!taskInfo.isFreeform && Flags.enableAdditionalWindowsAboveStatusBar()) {
+            if (!taskInfo.isFreeform && Flags.enableHandleInputFix()) {
                 AdditionalSystemViewContainer(
                     windowManagerWrapper = windowManagerWrapper,
                     taskId = taskInfo.taskId,
@@ -218,7 +218,7 @@ class HandleMenu(
             menuX = marginMenuStart
             menuY = marginMenuTop
         } else {
-            if (Flags.enableAdditionalWindowsAboveStatusBar()) {
+            if (Flags.enableHandleInputFix()) {
                 // In a focused decor, we use global coordinates for handle menu. Therefore we
                 // need to account for other factors like split stage and menu/handle width to
                 // center the menu.

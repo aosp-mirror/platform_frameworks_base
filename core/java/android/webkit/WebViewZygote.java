@@ -22,6 +22,7 @@ import android.content.pm.PackageInfo;
 import android.os.Build;
 import android.os.ChildZygoteProcess;
 import android.os.Process;
+import android.os.UserHandle;
 import android.os.ZygoteProcess;
 import android.text.TextUtils;
 import android.util.Log;
@@ -141,12 +142,14 @@ public class WebViewZygote {
             String abi = sPackage.applicationInfo.primaryCpuAbi;
             int runtimeFlags = Zygote.getMemorySafetyRuntimeFlagsForSecondaryZygote(
                     sPackage.applicationInfo, null);
+            final int[] sharedAppGid = {
+                    UserHandle.getSharedAppGid(UserHandle.getAppId(sPackage.applicationInfo.uid)) };
             sZygote = Process.ZYGOTE_PROCESS.startChildZygote(
                     "com.android.internal.os.WebViewZygoteInit",
                     "webview_zygote",
                     Process.WEBVIEW_ZYGOTE_UID,
                     Process.WEBVIEW_ZYGOTE_UID,
-                    null,  // gids
+                    sharedAppGid,  // Access to shared app GID for ART profiles
                     runtimeFlags,
                     "webview_zygote",  // seInfo
                     abi,  // abi

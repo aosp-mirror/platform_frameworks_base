@@ -43,6 +43,7 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+import static com.android.systemui.Flags.simPinBouncerReset;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_OPENED;
 
 import android.annotation.AnyThread;
@@ -1703,6 +1704,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         intent.getStringExtra(Intent.EXTRA_SIM_STATE),
                         args.slotId,
                         args.subId);
+                if (args.slotId == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+                    return;
+                }
                 mHandler.obtainMessage(MSG_SIM_STATE_CHANGE, args.subId, args.slotId, args.simState)
                         .sendToTarget();
             } else if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(action)) {
@@ -1940,7 +1944,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
             int state = TelephonyManager.SIM_STATE_UNKNOWN;
             String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
-            int slotId = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
+
+            int defaultSlotId = 0;
+            if (simPinBouncerReset()) {
+                defaultSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
+            }
+            int slotId = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX,
+                    defaultSlotId);
             int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
             if (Intent.SIM_STATE_ABSENT.equals(stateExtra)) {
@@ -2478,6 +2488,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     mSceneInteractor.get().getTransitionState(),
                     this::onTransitionStateChanged
             );
+        }
+
+        // start() can be invoked in the middle of user switching, so check for this state and issue
+        // the call manually as that important event was missed.
+        if (mUserTracker.isUserSwitching()) {
+            handleUserSwitching(mUserTracker.getUserId(), () -> {});
         }
     }
 

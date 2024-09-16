@@ -19,21 +19,7 @@
   ],
   "presubmit": [
     {
-      "name": "FrameworksCoreTests",
-      "options": [
-        {
-          "include-filter": "android.net"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksCoreTests_android_net"
     }
   ]
 }

@@ -372,11 +372,9 @@ public abstract class SessionProcessor {
                 Map<String, CameraMetadataNative> charsMap, OutputSurface previewSurface,
                 OutputSurface imageCaptureSurface, OutputSurface postviewSurface)
                 throws RemoteException {
-            if (Flags.surfaceLeakFix()) {
-                mPreviewSurface = previewSurface;
-                mPostviewSurface = postviewSurface;
-                mImageCaptureSurface = imageCaptureSurface;
-            }
+            mPreviewSurface = previewSurface;
+            mPostviewSurface = postviewSurface;
+            mImageCaptureSurface = imageCaptureSurface;
             ExtensionConfiguration config = SessionProcessor.this.initSession(token, cameraId,
                     new CharacteristicsMap(charsMap),
                     new CameraOutputSurface(previewSurface),
@@ -399,16 +397,14 @@ public abstract class SessionProcessor {
         @Override
         public void deInitSession(IBinder token) throws RemoteException {
             SessionProcessor.this.deInitSession(token);
-            if (Flags.surfaceLeakFix()) {
-                if ((mPreviewSurface != null) && (mPreviewSurface.surface != null)) {
-                    mPreviewSurface.surface.release();
-                }
-                if ((mImageCaptureSurface != null) && (mImageCaptureSurface.surface != null)) {
-                    mImageCaptureSurface.surface.release();
-                }
-                if ((mPostviewSurface != null) && (mPostviewSurface.surface != null)) {
-                    mPostviewSurface.surface.release();
-                }
+            if ((mPreviewSurface != null) && (mPreviewSurface.surface != null)) {
+                mPreviewSurface.surface.release();
+            }
+            if ((mImageCaptureSurface != null) && (mImageCaptureSurface.surface != null)) {
+                mImageCaptureSurface.surface.release();
+            }
+            if ((mPostviewSurface != null) && (mPostviewSurface.surface != null)) {
+                mPostviewSurface.surface.release();
             }
         }
 

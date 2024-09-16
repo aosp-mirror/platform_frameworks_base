@@ -36,6 +36,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.widget.TextView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -326,5 +327,18 @@ public class TouchpadDebugViewTest {
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID + 1);
 
         assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.BLUE);
+    }
+
+    @Test
+    public void testTouchpadGesture() {
+        int gestureType = 3;
+        TextView child = mTouchpadDebugView.getGestureInfoView();
+
+        mTouchpadDebugView.updateGestureInfo(gestureType, TOUCHPAD_DEVICE_ID);
+        assertEquals(child.getText().toString(), TouchpadDebugView.getGestureText(gestureType));
+
+        gestureType = 6;
+        mTouchpadDebugView.updateGestureInfo(gestureType, TOUCHPAD_DEVICE_ID);
+        assertEquals(child.getText().toString(), TouchpadDebugView.getGestureText(gestureType));
     }
 }
