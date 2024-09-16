@@ -8152,13 +8152,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * into account orientation per-app overrides applied by the device manufacturers.
      */
     @Override
+    @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
-        if (mWmService.mConstants.mIgnoreActivityOrientationRequest
-                && info.applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
-            return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        final int candidateOrientation;
+        if (!mWmService.mConstants.mIgnoreActivityOrientationRequest
+                || info.applicationInfo.category == ApplicationInfo.CATEGORY_GAME) {
+            candidateOrientation = super.getOverrideOrientation();
+        } else {
+            candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()
-                .overrideOrientationIfNeeded(super.getOverrideOrientation());
+                .overrideOrientationIfNeeded(candidateOrientation);
     }
 
     /**
