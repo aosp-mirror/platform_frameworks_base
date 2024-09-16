@@ -1887,7 +1887,7 @@ package android.hardware.soundtrigger {
   }
 
   @FlaggedApi("android.media.soundtrigger.manager_api") public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
-    ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
+    ctor @Deprecated public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
     ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[]);
   }
 
