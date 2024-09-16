@@ -3027,8 +3027,6 @@ public final class ContactsContract {
          * specified {@link Account} will be saved in the default account.
          * The default account can have one of the following four states:
          * <ul>
-         * <li> {@link #DEFAULT_ACCOUNT_STATE_INVALID}: An invalid state that should not
-         * occur on the device. </li>
          * <li> {@link #DEFAULT_ACCOUNT_STATE_NOT_SET}: The default account has not
          * been set by the user. </li>
          * <li> {@link #DEFAULT_ACCOUNT_STATE_LOCAL}: The default account is set to
@@ -3037,15 +3035,11 @@ public final class ContactsContract {
          * {@link Account} will be saved in a null or custom local account. </li>
          * <li> {@link #DEFAULT_ACCOUNT_STATE_CLOUD}: The default account is set to a
          * cloud-synced account. New raw contacts requested for insertion without a specified
-         * {@link Account} will be saved in {@link mCloudAccount}. </li>
+         * {@link Account} will be saved in the default cloud account. </li>
          * </ul>
          */
         @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         public static final class DefaultAccountAndState {
-            // The state of the default account.
-            /** A state that is invalid. */
-            public static final int DEFAULT_ACCOUNT_STATE_INVALID = 0;
-
             /** A state indicating that default account is not set. */
             public static final int DEFAULT_ACCOUNT_STATE_NOT_SET = 1;
 
@@ -3086,7 +3080,7 @@ public final class ContactsContract {
              */
             public DefaultAccountAndState(@DefaultAccountState int state,
                     @Nullable Account cloudAccount) {
-                if (state == DEFAULT_ACCOUNT_STATE_INVALID) {
+                if (!isValidDefaultAccountState(state)) {
                     throw new IllegalArgumentException("Invalid default account state.");
                 }
                 if ((state == DEFAULT_ACCOUNT_STATE_CLOUD) != (cloudAccount != null)) {
@@ -3170,6 +3164,12 @@ public final class ContactsContract {
                         that.mCloudAccount);
             }
 
+            private static boolean isValidDefaultAccountState(int state) {
+                return  state == DEFAULT_ACCOUNT_STATE_NOT_SET
+                    || state == DEFAULT_ACCOUNT_STATE_LOCAL
+                    || state == DEFAULT_ACCOUNT_STATE_CLOUD;
+            }
+
             /**
              * Annotation for all default account states.
              *
@@ -3178,8 +3178,7 @@ public final class ContactsContract {
             @Retention(RetentionPolicy.SOURCE)
             @IntDef(
                     prefix = {"DEFAULT_ACCOUNT_STATE_"},
-                    value = {DEFAULT_ACCOUNT_STATE_INVALID,
-                            DEFAULT_ACCOUNT_STATE_NOT_SET,
+                    value = {DEFAULT_ACCOUNT_STATE_NOT_SET,
                             DEFAULT_ACCOUNT_STATE_LOCAL, DEFAULT_ACCOUNT_STATE_CLOUD})
             public @interface DefaultAccountState {
             }
