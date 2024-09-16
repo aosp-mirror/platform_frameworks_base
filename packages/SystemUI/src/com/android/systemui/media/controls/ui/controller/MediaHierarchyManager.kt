@@ -64,6 +64,7 @@ import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -431,6 +432,12 @@ constructor(
     /** Is the communal UI showing */
     private var isCommunalShowing: Boolean = false
 
+    /** Is the primary bouncer showing */
+    private var isPrimaryBouncerShowing: Boolean = false
+
+    /** Is either shade or QS fully expanded */
+    private var isAnyShadeFullyExpanded: Boolean = false
+
     /** Is the communal UI showing and not dreaming */
     private var onCommunalNotDreaming: Boolean = false
 
@@ -587,6 +594,20 @@ constructor(
             }
         }
 
+        coroutineScope.launch {
+            shadeInteractor.isAnyFullyExpanded.collect {
+                isAnyShadeFullyExpanded = it
+                updateUserVisibility()
+            }
+        }
+
+        coroutineScope.launch {
+            keyguardInteractor.primaryBouncerShowing.collect {
+                isPrimaryBouncerShowing = it
+                updateUserVisibility()
+            }
+        }
+
         if (mediaControlsLockscreenShadeBugFix()) {
             coroutineScope.launch {
                 shadeInteractor.shadeExpansion.collect { expansion ->
@@ -638,6 +659,7 @@ constructor(
                         communalShowing && isDreaming && isShadeExpanding
                     onCommunalNotDreaming = communalShowing && !isDreaming
                     updateDesiredLocation(forceNoAnimation = true)
+                    updateUserVisibility()
                 }
         }
     }
@@ -1290,7 +1312,8 @@ constructor(
         val shadeVisible =
             isLockScreenVisibleToUser() ||
                 isLockScreenShadeVisibleToUser() ||
-                isHomeScreenShadeVisibleToUser()
+                isHomeScreenShadeVisibleToUser() ||
+                isGlanceableHubVisibleToUser()
         val mediaVisible = qsExpanded || hasActiveMediaOrRecommendation
         mediaCarouselController.mediaCarouselScrollHandler.visibleToUser =
             shadeVisible && mediaVisible
@@ -1316,6 +1339,10 @@ constructor(
         return !statusBarStateController.isDozing &&
             statusBarStateController.state == StatusBarState.SHADE &&
             statusBarStateController.isExpanded
+    }
+
+    private fun isGlanceableHubVisibleToUser(): Boolean {
+        return isCommunalShowing && !isPrimaryBouncerShowing && !isAnyShadeFullyExpanded
     }
 
     companion object {
