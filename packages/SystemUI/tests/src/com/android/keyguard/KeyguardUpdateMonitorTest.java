@@ -57,6 +57,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -1317,6 +1318,33 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testKeyguardMonitorStartsWhileUserIsSwitching() {
+        int userId = UserHandle.myUserId();
+        when(mUserTracker.getUserId()).thenReturn(userId);
+
+        /* First test the default behavior: handleUserSwitching() is not invoked */
+        when(mUserTracker.isUserSwitching()).thenReturn(false);
+        boolean invokeStartable = true;
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext, invokeStartable);
+        mKeyguardUpdateMonitor.registerCallback(mTestCallback);
+        mTestableLooper.processAllMessages();
+
+        verify(mTestCallback, never()).onUserSwitching(userId);
+
+        reset(mTestCallback);
+
+        /* Next test user switching is already in progress when started */
+        when(mUserTracker.isUserSwitching()).thenReturn(true);
+        invokeStartable = false;
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext, invokeStartable);
+        mKeyguardUpdateMonitor.registerCallback(mTestCallback);
+        mKeyguardUpdateMonitor.start();
+        mTestableLooper.processAllMessages();
+
+        verify(mTestCallback).onUserSwitching(userId);
+    }
+
+    @Test
     public void testSecondaryLockscreenRequirement() {
         when(mSelectedUserInteractor.getSelectedUserId()).thenReturn(UserHandle.myUserId());
         when(mUserTracker.getUserId()).thenReturn(UserHandle.myUserId());
@@ -2448,6 +2476,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         AtomicInteger mCachedSimState = new AtomicInteger(-1);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
+            this(context, true);
+        }
+
+        protected TestableKeyguardUpdateMonitor(Context context, boolean invokeStart) {
             super(context, mUserTracker,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mDumpManager,
@@ -2468,7 +2500,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             setAlternateBouncerVisibility(false);
             setPrimaryBouncerVisibility(false);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
-            start();
+            if (invokeStart) {
+                start();
+            }
         }
 
         public boolean hasSimStateJustChanged() {

@@ -313,6 +313,28 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
     @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testHandleSystemReadyWhileUserIsSwitching() {
+        int userId = 1099;
+        when(mUserTracker.getUserId()).thenReturn(userId);
+
+        /* First test the default behavior: handleUserSwitching() is not invoked */
+        when(mUserTracker.isUserSwitching()).thenReturn(false);
+        mViewMediator.mUpdateCallback = mock(KeyguardUpdateMonitorCallback.class);
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mViewMediator.mUpdateCallback, never()).onUserSwitching(userId);
+
+        /* Next test user switching is already in progress when started */
+        when(mUserTracker.isUserSwitching()).thenReturn(true);
+        mViewMediator.onSystemReady();
+        TestableLooper.get(this).processAllMessages();
+
+        verify(mViewMediator.mUpdateCallback).onUserSwitching(userId);
+    }
+
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void onLockdown_showKeyguard_evenIfKeyguardIsNotEnabledExternally() {
         // GIVEN keyguard is not enabled and isn't showing
         mViewMediator.onSystemReady();
