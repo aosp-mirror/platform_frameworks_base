@@ -204,6 +204,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
 
+    /** Whether this process has ever completed ActivityThread#handleBindApplication. */
+    boolean mHasEverAttached;
+
     /** Non-null if this process may have a window. */
     @Nullable
     Session mWindowSession;

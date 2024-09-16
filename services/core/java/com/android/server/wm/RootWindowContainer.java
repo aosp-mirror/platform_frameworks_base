@@ -1841,6 +1841,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     boolean attachApplication(WindowProcessController app) throws RemoteException {
+        app.mHasEverAttached = true;
         final ArrayList<ActivityRecord> activities = mService.mStartingProcessActivities;
         RemoteException remoteException = null;
         boolean hasActivityStarted = false;
