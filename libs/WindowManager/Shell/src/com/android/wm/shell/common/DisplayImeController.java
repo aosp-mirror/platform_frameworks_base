@@ -303,21 +303,29 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             lastSurfacePosition);
                 } else {
                     if (!haveSameLeash(mImeSourceControl, imeSourceControl)) {
-                        applyVisibilityToLeash(imeSourceControl);
-
                         if (android.view.inputmethod.Flags.refactorInsetsController()) {
                             pendingImeStartAnimation = true;
+                            // The starting point for the IME should be it's previous state
+                            // (whether it is initiallyVisible or not)
+                            updateImeVisibility(imeSourceControl.isInitiallyVisible());
                         }
+                        applyVisibilityToLeash(imeSourceControl);
                     }
                     if (!mImeShowing) {
                         removeImeSurface(mDisplayId);
                     }
                 }
-            } else if (!android.view.inputmethod.Flags.refactorInsetsController()
-                    && mAnimation != null) {
-                // we don"t want to cancel the hide animation, when the control is lost, but
-                // continue the bar to slide to the end (even without visible IME)
-                mAnimation.cancel();
+            } else {
+                if (!android.view.inputmethod.Flags.refactorInsetsController()
+                        && mAnimation != null) {
+                    // we don't want to cancel the hide animation, when the control is lost, but
+                    // continue the bar to slide to the end (even without visible IME)
+                    mAnimation.cancel();
+                } else if (android.view.inputmethod.Flags.refactorInsetsController() && mImeShowing
+                        && mAnimation == null) {
+                    // There is no leash, so the IME cannot be in a showing state
+                    updateImeVisibility(false);
+                }
             }
 
             // Make mImeSourceControl point to the new control before starting the animation.
@@ -341,7 +349,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 if (pendingImeStartAnimation) {
-                    startAnimation(true, true /* forceRestart */);
+                    startAnimation(mImeRequestedVisible, true /* forceRestart */);
                 }
             }
         }
