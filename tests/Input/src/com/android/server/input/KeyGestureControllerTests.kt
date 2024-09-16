@@ -286,6 +286,18 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
+                "META + CTRL + N -> Open Notes",
+                intArrayOf(
+                    KeyEvent.KEYCODE_META_LEFT,
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_N
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES,
+                intArrayOf(KeyEvent.KEYCODE_N),
+                KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
                 "META + CTRL + S -> Take Screenshot",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,

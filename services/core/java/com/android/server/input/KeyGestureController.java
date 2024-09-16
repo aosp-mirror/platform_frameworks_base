@@ -259,7 +259,11 @@ final class KeyGestureController {
             case KeyEvent.KEYCODE_N:
                 if (firstDown && event.isMetaPressed()) {
                     if (event.isCtrlPressed()) {
-                        // TODO(b/358569822): Move open notes handling in System UI instead of PWM
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
                     } else {
                         return handleKeyGesture(deviceId, new int[]{keyCode},
                                 KeyEvent.META_META_ON,
