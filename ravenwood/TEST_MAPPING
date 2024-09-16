@@ -159,11 +159,13 @@
     {
       "name": "RavenwoodServicesTest",
       "host": true
-    },
+    }
+    // AUTO-GENERATED-END
+  ],
+  "ravenwood-postsubmit": [
     {
       "name": "SystemUiRavenTests",
       "host": true
     }
-    // AUTO-GENERATED-END
   ]
 }
