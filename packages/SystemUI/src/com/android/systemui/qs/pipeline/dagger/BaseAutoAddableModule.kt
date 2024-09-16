@@ -27,7 +27,6 @@ import com.android.systemui.qs.pipeline.domain.autoaddable.DataSaverAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.DeviceControlsAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.HotspotAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.NightDisplayAutoAddable
-import com.android.systemui.qs.pipeline.domain.autoaddable.ReduceBrightColorsAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.WalletAutoAddable
 import com.android.systemui.qs.pipeline.domain.autoaddable.WorkTileAutoAddable
 import com.android.systemui.qs.pipeline.domain.model.AutoAddable
@@ -45,11 +44,11 @@ interface BaseAutoAddableModule {
         @ElementsIntoSet
         fun providesAutoAddableSetting(
             @Main resources: Resources,
-            autoAddableSettingFactory: AutoAddableSetting.Factory
+            autoAddableSettingFactory: AutoAddableSetting.Factory,
         ): Set<AutoAddable> {
             return AutoAddableSettingList.parseSettingsResource(
                     resources,
-                    autoAddableSettingFactory
+                    autoAddableSettingFactory,
                 )
                 .toSet()
         }
@@ -74,10 +73,6 @@ interface BaseAutoAddableModule {
     @Binds @IntoSet fun bindHotspotAutoAddable(impl: HotspotAutoAddable): AutoAddable
 
     @Binds @IntoSet fun bindNightDisplayAutoAddable(impl: NightDisplayAutoAddable): AutoAddable
-
-    @Binds
-    @IntoSet
-    fun bindReduceBrightColorsAutoAddable(impl: ReduceBrightColorsAutoAddable): AutoAddable
 
     @Binds @IntoSet fun bindWalletAutoAddable(impl: WalletAutoAddable): AutoAddable
 

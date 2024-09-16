@@ -21,17 +21,12 @@ import static android.view.WindowInsets.Type.ime;
 import static androidx.core.view.WindowInsetsCompat.Type;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_BUTTON_COMPONENT_NAME;
-import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
-import static com.android.internal.accessibility.util.AccessibilityUtils.getAccessibilityServiceFragmentType;
-import static com.android.internal.accessibility.util.AccessibilityUtils.setAccessibilityServiceState;
 import static com.android.systemui.accessibility.floatingmenu.MenuMessageView.Index;
 import static com.android.systemui.accessibility.floatingmenu.MenuNotificationFactory.ACTION_DELETE;
 import static com.android.systemui.accessibility.floatingmenu.MenuNotificationFactory.ACTION_UNDO;
 import static com.android.systemui.util.PluralMessageFormaterKt.icuMessageFormat;
 
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
@@ -39,7 +34,6 @@ import android.app.NotificationManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -174,46 +168,13 @@ class MenuViewLayer extends FrameLayout implements
     final Runnable mDismissMenuAction = new Runnable() {
         @Override
         public void run() {
-            if (android.view.accessibility.Flags.a11yQsShortcut()) {
-                mAccessibilityManager.enableShortcutsForTargets(
-                        /* enable= */ false,
-                        ShortcutConstants.UserShortcutType.SOFTWARE,
-                        new ArraySet<>(
-                                mAccessibilityManager.getAccessibilityShortcutTargets(SOFTWARE)),
-                        mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
-                );
-            } else {
-                mSecureSettings.putStringForUser(
-                        Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
-                        UserHandle.USER_CURRENT);
-
-                final List<ComponentName> hardwareKeyShortcutComponents =
-                        mAccessibilityManager.getAccessibilityShortcutTargets(HARDWARE)
-                                .stream()
-                                .map(ComponentName::unflattenFromString)
-                                .toList();
-
-                // Should disable the corresponding service when the fragment type is
-                // INVISIBLE_TOGGLE, which will enable service when the shortcut is on.
-                final List<AccessibilityServiceInfo> serviceInfoList =
-                        mAccessibilityManager.getEnabledAccessibilityServiceList(
-                                AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
-                serviceInfoList.forEach(info -> {
-                    if (getAccessibilityServiceFragmentType(info) != INVISIBLE_TOGGLE) {
-                        return;
-                    }
-
-                    final ComponentName serviceComponentName = info.getComponentName();
-                    if (hardwareKeyShortcutComponents.contains(serviceComponentName)) {
-                        return;
-                    }
-
-                    setAccessibilityServiceState(
-                            getContext(), serviceComponentName, /* enabled= */ false,
-                            mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
-                });
-            }
-
+            mAccessibilityManager.enableShortcutsForTargets(
+                    /* enable= */ false,
+                    ShortcutConstants.UserShortcutType.SOFTWARE,
+                    new ArraySet<>(
+                            mAccessibilityManager.getAccessibilityShortcutTargets(SOFTWARE)),
+                    mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT)
+            );
             mFloatingMenu.hide();
         }
     };

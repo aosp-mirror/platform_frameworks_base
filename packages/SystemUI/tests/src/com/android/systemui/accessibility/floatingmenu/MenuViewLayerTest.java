@@ -229,7 +229,6 @@ public class MenuViewLayerTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void triggerDismissMenuAction_callsA11yManagerEnableShortcutsForTargets() {
         final List<String> stubShortcutTargets = new ArrayList<>();
         stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
@@ -243,45 +242,6 @@ public class MenuViewLayerTest extends SysuiTestCase {
                 ShortcutConstants.UserShortcutType.SOFTWARE,
                 new ArraySet<>(stubShortcutTargets),
                 mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
-    }
-
-    @Test
-    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
-    public void triggerDismissMenuAction_matchA11yButtonTargetsResult() {
-        mMenuViewLayer.mDismissMenuAction.run();
-        verify(mSecureSettings).putStringForUser(
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS, /* value= */ "",
-                UserHandle.USER_CURRENT);
-    }
-
-    @Test
-    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
-    public void triggerDismissMenuAction_matchEnabledA11yServicesResult() {
-        setupEnabledAccessibilityServiceList();
-
-        mMenuViewLayer.mDismissMenuAction.run();
-        final String value = Settings.Secure.getStringForUser(mSpyContext.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
-
-        assertThat(value).isEqualTo("");
-    }
-
-    @Test
-    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
-    public void triggerDismissMenuAction_hasHardwareKeyShortcut_keepEnabledStatus() {
-        setupEnabledAccessibilityServiceList();
-        final List<String> stubShortcutTargets = new ArrayList<>();
-        stubShortcutTargets.add(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
-        when(mStubAccessibilityManager.getAccessibilityShortcutTargets(
-                ShortcutConstants.UserShortcutType.HARDWARE)).thenReturn(stubShortcutTargets);
-
-        mMenuViewLayer.mDismissMenuAction.run();
-        final String value = Settings.Secure.getStringForUser(mSpyContext.getContentResolver(),
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                mSecureSettings.getRealUserHandle(UserHandle.USER_CURRENT));
-
-        assertThat(value).isEqualTo(TEST_SELECT_TO_SPEAK_COMPONENT_NAME.flattenToString());
     }
 
     @Test

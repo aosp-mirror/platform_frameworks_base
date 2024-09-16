@@ -1506,7 +1506,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_statusBarServiceNotGranted_throwsException() {
         mFakePermissionEnforcer.revoke(Manifest.permission.STATUS_BAR_SERVICE);
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
@@ -1519,7 +1518,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_manageAccessibilityNotGranted_throwsException() {
         mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
         mTestableContext.getTestablePermissions().setPermission(
@@ -1533,7 +1531,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_qsTileChanges_updateA11yTilesInQsPanel() {
         mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
@@ -1553,7 +1550,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_sameQsTiles_noUpdateToA11yTilesInQsPanel() {
         notifyQuickSettingsTilesChanged_qsTileChanges_updateA11yTilesInQsPanel();
         List<ComponentName> tiles =
@@ -1570,7 +1566,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_serviceWarningRequired_qsShortcutRemainDisabled() {
         mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
@@ -1589,7 +1584,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_serviceWarningNotRequired_qsShortcutEnabled() {
         mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
@@ -1611,7 +1605,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_addFrameworkTile_qsShortcutEnabled() {
         mFakePermissionEnforcer.grant(Manifest.permission.STATUS_BAR_SERVICE);
         mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
@@ -1634,7 +1627,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     public void notifyQuickSettingsTilesChanged_removeFrameworkTile_qsShortcutDisabled() {
         notifyQuickSettingsTilesChanged_addFrameworkTile_qsShortcutEnabled();
         Set<ComponentName> qsTiles = mA11yms.getCurrentUserState().getA11yQsTilesInQsPanel();
@@ -1652,7 +1644,6 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
     @DisableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
     public void restoreShortcutTargetsAssumeUser0_qs_a11yQsTargetsRestored() {
         assumeTrue("The test is setup to run as a user 0",
@@ -1661,8 +1652,7 @@ public class AccessibilityManagerServiceTest {
     }
 
     @Test
-    @EnableFlags({android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT,
-            android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE})
+    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
     public void restoreShortcutTargets_qs_a11yQsTargetsRestored() {
         String daltonizerTile =
                 AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
@@ -1678,40 +1668,6 @@ public class AccessibilityManagerServiceTest {
                 /*newValue=*/colorInversionTile, userState.mUserId);
 
         Set<String> expected = Set.of(daltonizerTile, colorInversionTile);
-        assertThat(readStringsFromSetting(ShortcutUtils.convertToKey(QUICK_SETTINGS)))
-                .containsExactlyElementsIn(expected);
-        assertThat(userState.getShortcutTargetsLocked(QUICK_SETTINGS))
-                .containsExactlyElementsIn(expected);
-    }
-
-    @Test
-    @DisableFlags({android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT,
-            android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE})
-    public void restoreShortcutTargetsAssumeUser0_qs_a11yQsTargetsNotRestored() {
-        assumeTrue("The test is setup to run as a user 0",
-                mTestableContext.getUserId() == UserHandle.USER_SYSTEM);
-        restoreShortcutTargets_qs_a11yQsTargetsNotRestored();
-    }
-
-    @Test
-    @DisableFlags(android.view.accessibility.Flags.FLAG_A11Y_QS_SHORTCUT)
-    @EnableFlags(android.view.accessibility.Flags.FLAG_RESTORE_A11Y_SECURE_SETTINGS_ON_HSUM_DEVICE)
-    public void restoreShortcutTargets_qs_a11yQsTargetsNotRestored() {
-        String daltonizerTile =
-                AccessibilityShortcutController.DALTONIZER_COMPONENT_NAME.flattenToString();
-        String colorInversionTile =
-                AccessibilityShortcutController.COLOR_INVERSION_COMPONENT_NAME.flattenToString();
-        final AccessibilityUserState userState = new AccessibilityUserState(
-                mA11yms.getCurrentUserIdLocked(), mTestableContext, mA11yms);
-        userState.updateShortcutTargetsLocked(Set.of(daltonizerTile), QUICK_SETTINGS);
-        putShortcutSettingForUser(QUICK_SETTINGS, daltonizerTile, userState.mUserId);
-        mA11yms.mUserStates.put(userState.mUserId, userState);
-
-        broadcastSettingRestored(
-                ShortcutUtils.convertToKey(QUICK_SETTINGS),
-                /*newValue=*/colorInversionTile, userState.mUserId);
-
-        Set<String> expected = Set.of(daltonizerTile);
         assertThat(readStringsFromSetting(ShortcutUtils.convertToKey(QUICK_SETTINGS)))
                 .containsExactlyElementsIn(expected);
         assertThat(userState.getShortcutTargetsLocked(QUICK_SETTINGS))

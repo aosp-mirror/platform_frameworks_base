@@ -1823,9 +1823,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public void notifyQuickSettingsTilesChanged(
             @UserIdInt int userId, @NonNull List<ComponentName> tileComponentNames) {
         notifyQuickSettingsTilesChanged_enforcePermission();
-        if (!android.view.accessibility.Flags.a11yQsShortcut()) {
-            return;
-        }
         if (DEBUG) {
             Slog.d(LOG_TAG, TextUtils.formatSimple(
                     "notifyQuickSettingsTilesChanged userId: %d, tileComponentNames: %s",
@@ -2260,9 +2257,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void restoreShortcutTargets(
             String newValue, @UserShortcutType int shortcutType, int userId) {
         assertNoTapShortcut(shortcutType);
-        if (shortcutType == QUICK_SETTINGS && !android.view.accessibility.Flags.a11yQsShortcut()) {
-            return;
-        }
 
         synchronized (mLock) {
             final AccessibilityUserState userState = getUserStateLocked(userId);
@@ -3876,9 +3870,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void updateAccessibilityShortcutTargetsLocked(
             AccessibilityUserState userState, @UserShortcutType int shortcutType) {
-        if (shortcutType == QUICK_SETTINGS && !android.view.accessibility.Flags.a11yQsShortcut()) {
-            return;
-        }
         if (shortcutType == SOFTWARE) {
             // Update accessibility button availability.
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
@@ -4061,9 +4052,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final List<Integer> shortcutTypes = new ArrayList<>(4);
         shortcutTypes.add(HARDWARE);
         shortcutTypes.add(SOFTWARE);
-        if (android.view.accessibility.Flags.a11yQsShortcut()) {
-            shortcutTypes.add(QUICK_SETTINGS);
-        }
+        shortcutTypes.add(QUICK_SETTINGS);
         if (android.provider.Flags.a11yStandaloneGestureEnabled()) {
             shortcutTypes.add(GESTURE);
         }
