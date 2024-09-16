@@ -141,6 +141,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             displayId = DISPLAY_ID
             configuration.windowConfiguration.setBounds(STARTING_BOUNDS)
             configuration.windowConfiguration.displayRotation = ROTATION_90
+            isResizeable = true
         }
         `when`(mockDesktopWindowDecoration.calculateValidDragArea()).thenReturn(VALID_DRAG_AREA)
         mockDesktopWindowDecoration.mDisplay = mockDisplay
