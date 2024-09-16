@@ -1484,7 +1484,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_SINGLE_STRENGTH_MAX_LEVEL =
             new Key<Integer>("android.flash.singleStrengthMaxLevel", int.class);
 
@@ -1500,7 +1499,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL =
             new Key<Integer>("android.flash.singleStrengthDefaultLevel", int.class);
 
@@ -1524,7 +1522,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_TORCH_STRENGTH_MAX_LEVEL =
             new Key<Integer>("android.flash.torchStrengthMaxLevel", int.class);
 
@@ -1540,7 +1537,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_TORCH_STRENGTH_DEFAULT_LEVEL =
             new Key<Integer>("android.flash.torchStrengthDefaultLevel", int.class);
 

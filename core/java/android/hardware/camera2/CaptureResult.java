@@ -3022,7 +3022,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_STRENGTH_LEVEL =
             new Key<Integer>("android.flash.strengthLevel", int.class);
 
