@@ -839,7 +839,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
-
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), anyBoolean(), eq(uri), anyInt(),
                 anyInt(), anyInt());

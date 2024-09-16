@@ -548,7 +548,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mResult.mRootView,
                     mOnCaptionTouchListener,
                     mOnCaptionButtonClickListener,
-                    mWindowManagerWrapper
+                    mWindowManagerWrapper,
+                    mHandler
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
