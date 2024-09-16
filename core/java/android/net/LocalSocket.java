@@ -65,7 +65,7 @@ public class LocalSocket implements Closeable {
     }
 
     /**
-     * Creates a AF_LOCAL/UNIX domain stream socket with given socket type
+     * Creates a AF_LOCAL/UNIX domain socket with the given socket type.
      *
      * @param sockType either {@link #SOCKET_DGRAM}, {@link #SOCKET_STREAM}
      * or {@link #SOCKET_SEQPACKET}
