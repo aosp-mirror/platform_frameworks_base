@@ -86,10 +86,13 @@ flag {
 }
 
 flag {
-    name: "enable_additional_windows_above_status_bar"
+    name: "enable_handle_input_fix"
     namespace: "lse_desktop_experience"
-    description: "Allows for additional windows tied to WindowDecoration to be layered between status bar and notification shade."
+    description: "Enables using AdditionalSystemViewContainer to resolve handle input issues."
     bug: "316186265"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

@@ -100,7 +100,7 @@ internal class AppHandleViewHolder(
     private fun createStatusBarInputLayer(handlePosition: Point,
                                           handleWidth: Int,
                                           handleHeight: Int) {
-        if (!Flags.enableAdditionalWindowsAboveStatusBar()) return
+        if (!Flags.enableHandleInputFix()) return
         statusBarInputLayer = AdditionalSystemViewContainer(context, windowManagerWrapper,
             taskInfo.taskId, handlePosition.x, handlePosition.y, handleWidth, handleHeight,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
