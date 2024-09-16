@@ -455,7 +455,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
-        if (!isDragResizable(mTaskInfo)) {
+        if (!isDragResizable(mTaskInfo, mContext)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
                 updateExclusionRegion();
@@ -497,12 +497,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
-    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo,
+            Context context) {
+        if (DesktopModeFlags.SCALED_RESIZING.isEnabled(context)) {
+            return taskInfo.isFreeform();
+        }
         return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
-        if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
+        if (!isDragResizable(mTaskInfo, mContext) || !isMaximizeMenuActive()) {
             return;
         }
         if (!mTaskInfo.isVisible()) {

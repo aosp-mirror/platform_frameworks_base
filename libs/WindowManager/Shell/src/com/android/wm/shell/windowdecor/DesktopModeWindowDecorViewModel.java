@@ -1603,14 +1603,27 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 Transitions transitions,
                 InteractionJankMonitor interactionJankMonitor,
                 Supplier<SurfaceControl.Transaction> transactionFactory) {
-            if (!DesktopModeStatus.isVeiledResizeEnabled()) {
-                return new FluidResizeTaskPositioner(
-                        taskOrganizer, transitions, windowDecoration, displayController,
-                        dragStartListener, transactionFactory);
+            final TaskPositioner taskPositioner = DesktopModeStatus.isVeiledResizeEnabled()
+                    ? new VeiledResizeTaskPositioner(
+                            taskOrganizer,
+                            windowDecoration,
+                            displayController,
+                            dragStartListener,
+                            transitions,
+                            interactionJankMonitor)
+                    : new FluidResizeTaskPositioner(
+                            taskOrganizer,
+                            transitions,
+                            windowDecoration,
+                            displayController,
+                            dragStartListener,
+                            transactionFactory);
+
+            if (DesktopModeFlags.SCALED_RESIZING.isEnabled(windowDecoration.mContext)) {
+                return new FixedAspectRatioTaskPositionerDecorator(windowDecoration,
+                        taskPositioner);
             }
-            return new VeiledResizeTaskPositioner(
-                    taskOrganizer, windowDecoration, displayController,
-                    dragStartListener, transitions, interactionJankMonitor);
+            return taskPositioner;
         }
     }
 }
