@@ -116,12 +116,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Controller for media output dialog
+ * Controller for a dialog that allows users to switch media output and input devices, control
+ * volume, connect to new devices, etc.
  */
-public class MediaOutputController implements LocalMediaManager.DeviceCallback,
-        INearbyMediaDevicesUpdateCallback {
+public class MediaSwitchingController
+        implements LocalMediaManager.DeviceCallback, INearbyMediaDevicesUpdateCallback {
 
-    private static final String TAG = "MediaOutputController";
+    private static final String TAG = "MediaSwitchingController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String PAGE_CONNECTED_DEVICES_KEY =
             "top_level_connected_devices";
@@ -182,7 +183,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     @AssistedInject
-    public MediaOutputController(
+    public MediaSwitchingController(
             Context context,
             @Assisted String packageName,
             @Assisted @Nullable UserHandle userHandle,
@@ -245,8 +246,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     @AssistedFactory
     public interface Factory {
-        /** Construct a MediaOutputController */
-        MediaOutputController create(
+        /** Construct a MediaSwitchingController */
+        MediaSwitchingController create(
                 String packageName, UserHandle userHandle, MediaSession.Token token);
     }
 
@@ -986,8 +987,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
-        MediaOutputController controller =
-                new MediaOutputController(
+        MediaSwitchingController controller =
+                new MediaSwitchingController(
                         mContext,
                         mPackageName,
                         mUserHandle,
