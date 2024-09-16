@@ -21,6 +21,7 @@ import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import static com.android.hardware.input.Flags.touchpadVisualizer;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
 
 import android.Manifest;
 import android.annotation.EnforcePermission;
@@ -2116,6 +2117,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyboardBacklightController.dump(ipw);
         mKeyboardLedController.dump(ipw);
         mKeyboardGlyphManager.dump(ipw);
+        mKeyGestureController.dump(ipw);
     }
 
     private void dumpAssociations(IndentingPrintWriter pw) {
@@ -2457,13 +2459,18 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
-        // TODO(b/358569822): Move shortcut trigger logic from PWM to KeyGestureController
-        long value = mKeyGestureController.interceptKeyBeforeDispatching(focus, event, policyFlags);
-        if (value != 0) { // If key is consumed (i.e. non-zero value)
-            return value;
+    @VisibleForTesting
+    long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
+        final long keyNotConsumed = 0;
+        long value = keyNotConsumed;
+        if (useKeyGestureEventHandler()) {
+            value = mKeyGestureController.interceptKeyBeforeDispatching(focus, event, policyFlags);
         }
-        return mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event, policyFlags);
+        if (value == keyNotConsumed) {
+            value = mWindowManagerCallbacks.interceptKeyBeforeDispatching(focus, event,
+                    policyFlags);
+        }
+        return value;
     }
 
     // Native callback.
@@ -2748,12 +2755,14 @@ public class InputManagerService extends IInputManager.Stub
     private void enforceManageKeyGesturePermission() {
         // TODO(b/361567988): Use @EnforcePermission to enforce permission once flag guarding the
         //  permission is rolled out
-        String systemUIPackage = mContext.getString(R.string.config_systemUi);
-        int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
-                .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
-                        UserHandle.USER_SYSTEM));
-        if (UserHandle.getCallingAppId() == systemUIAppId) {
-            return;
+        if (mSystemReady) {
+            String systemUIPackage = mContext.getString(R.string.config_systemUi);
+            int systemUIAppId = UserHandle.getAppId(mPackageManagerInternal
+                    .getPackageUid(systemUIPackage, PackageManager.MATCH_SYSTEM_ONLY,
+                            UserHandle.USER_SYSTEM));
+            if (UserHandle.getCallingAppId() == systemUIAppId) {
+                return;
+            }
         }
         if (mContext.checkCallingOrSelfPermission(
                 Manifest.permission.MANAGE_KEY_GESTURES) == PackageManager.PERMISSION_GRANTED) {
