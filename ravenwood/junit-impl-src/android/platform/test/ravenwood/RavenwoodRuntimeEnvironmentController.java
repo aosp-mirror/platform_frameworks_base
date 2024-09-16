@@ -16,12 +16,10 @@
 
 package android.platform.test.ravenwood;
 
-import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_EMPTY_RESOURCES_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.ActivityManager;
 import android.app.Instrumentation;
@@ -34,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.view.DisplayAdjustments;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -163,31 +160,52 @@ public class RavenwoodRuntimeEnvironmentController {
             main = null;
         }
 
-        // TODO This should be integrated into LoadedApk
-        final Supplier<Resources> resourcesSupplier = () -> {
-            var resApkFile = new File(RAVENWOOD_RESOURCE_APK);
-            if (!resApkFile.isFile()) {
-                resApkFile = new File(RAVENWOOD_EMPTY_RESOURCES_APK);
-            }
-            assertTrue(resApkFile.isFile());
-            final String res = resApkFile.getAbsolutePath();
-            final var emptyPaths = new String[0];
+        final boolean isSelfInstrumenting =
+                Objects.equals(config.mTestPackageName, config.mTargetPackageName);
 
-            ResourcesManager.getInstance().initializeApplicationPaths(res, emptyPaths);
-
-            final var ret = ResourcesManager.getInstance().getResources(null, res,
-                    emptyPaths, emptyPaths, emptyPaths,
-                    emptyPaths, null, null,
-                    new DisplayAdjustments().getCompatibilityInfo(),
-                    RavenwoodRuntimeEnvironmentController.class.getClassLoader(), null);
-
-            assertNotNull(ret);
-            return ret;
+        // This will load the resources from the apk set to `resource_apk` in the build file.
+        // This is supposed to be the "target app"'s resources.
+        final Supplier<Resources> targetResourcesLoader = () -> {
+            var file = new File(RAVENWOOD_RESOURCE_APK);
+            return config.mState.loadResources(file.exists() ? file : null);
         };
+        // Set up test context's resources.
+        // If the target package name == test package name, then we use the main resources.
+        // Otherwise, we don't simulate loading resources from the test APK yet.
+        // (we need to add `test_resource_apk` to `android_ravenwood_test`)
+        final Supplier<Resources> testResourcesLoader;
+        if (isSelfInstrumenting) {
+            testResourcesLoader = targetResourcesLoader;
+        } else {
+            testResourcesLoader = () -> {
+                fail("Cannot load resources from the test context (yet)."
+                        + " Use target context's resources instead.");
+                return null; // unreachable.
+            };
+        }
 
-        config.mContext = new RavenwoodContext(config.mPackageName, main, resourcesSupplier);
+        var testContext = new RavenwoodContext(
+                config.mTestPackageName, main, testResourcesLoader);
+        var targetContext = new RavenwoodContext(
+                config.mTargetPackageName, main, targetResourcesLoader);
+
+        // Set up app context.
+        var appContext = new RavenwoodContext(
+                config.mTargetPackageName, main, targetResourcesLoader);
+        appContext.setApplicationContext(appContext);
+        if (isSelfInstrumenting) {
+            testContext.setApplicationContext(appContext);
+            targetContext.setApplicationContext(appContext);
+        } else {
+            // When instrumenting into another APK, the test context doesn't have an app context.
+            targetContext.setApplicationContext(appContext);
+        }
+        config.mTestContext = testContext;
+        config.mTargetContext = targetContext;
+
+        // Prepare other fields.
         config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(config.mContext);
+        config.mInstrumentation.basicInit(config.mTestContext, config.mTargetContext);
         InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
         RavenwoodSystemServer.init(config);
@@ -224,10 +242,14 @@ public class RavenwoodRuntimeEnvironmentController {
 
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
         config.mInstrumentation = null;
-        if (config.mContext != null) {
-            ((RavenwoodContext) config.mContext).cleanUp();
+        if (config.mTestContext != null) {
+            ((RavenwoodContext) config.mTestContext).cleanUp();
         }
-        config.mContext = null;
+        if (config.mTargetContext != null) {
+            ((RavenwoodContext) config.mTargetContext).cleanUp();
+        }
+        config.mTestContext = null;
+        config.mTargetContext = null;
 
         if (config.mProvideMainThread) {
             Looper.getMainLooper().quit();
@@ -240,7 +262,9 @@ public class RavenwoodRuntimeEnvironmentController {
         ServiceManager.reset$ravenwood();
 
         setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
-        Binder.restoreCallingIdentity(sOriginalIdentityToken);
+        if (sOriginalIdentityToken != -1) {
+            Binder.restoreCallingIdentity(sOriginalIdentityToken);
+        }
         android.os.Process.reset$ravenwood();
 
         ResourcesManager.setInstance(null); // Better structure needed.

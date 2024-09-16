@@ -184,7 +184,7 @@ class RunnerRewritingAdapter private constructor(
             av.visit("value", ravenwoodTestRunnerType.type)
             av.visitEnd()
         }
-        log.i("Update the @RunWith: ${classInternalName.toHumanReadableClassName()}")
+        log.v("Update the @RunWith: ${classInternalName.toHumanReadableClassName()}")
     }
 
     /*
@@ -442,7 +442,7 @@ class RunnerRewritingAdapter private constructor(
             // Don't process a class if it has a @NoRavenizer annotation.
             classes.findClass(className)?.let { cn ->
                 if (cn.findAnyAnnotation(noRavenizerAnotType.descAsSet) != null) {
-                    log.w("Class ${className.toHumanReadableClassName()} has" +
+                    log.i("Class ${className.toHumanReadableClassName()} has" +
                         " @${noRavenizerAnotType.humanReadableName}. Skipping."
                     )
                     return false

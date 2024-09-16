@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.ravenwoodtest.bivalentinst;
 
-package com.android.systemui.scene
-
-import com.android.systemui.qs.ui.composable.QuickSettingsShadeScene
-import com.android.systemui.scene.ui.composable.Scene
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
-
-@Module
-interface QuickSettingsShadeSceneModule {
-
-    @Binds @IntoSet fun quickSettingsShade(scene: QuickSettingsShadeScene): Scene
+/**
+ * Empty class. We need it because an instrumentation target APK must have code.
+ */
+public class Empty {
 }

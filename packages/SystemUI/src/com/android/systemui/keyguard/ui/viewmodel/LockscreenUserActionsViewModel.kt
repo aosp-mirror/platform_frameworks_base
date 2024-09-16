@@ -21,13 +21,11 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
-import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.Overlays
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
@@ -71,9 +69,8 @@ constructor(
 
                             addAll(
                                 when (shadeMode) {
-                                    ShadeMode.Single -> fullscreenShadeActions()
-                                    ShadeMode.Split ->
-                                        fullscreenShadeActions(transitionKey = ToSplitShade)
+                                    ShadeMode.Single -> singleShadeActions()
+                                    ShadeMode.Split -> splitShadeActions()
                                     ShadeMode.Dual -> dualShadeActions()
                                 }
                             )
@@ -84,18 +81,26 @@ constructor(
             .collect { setActions(it) }
     }
 
-    private fun fullscreenShadeActions(
-        transitionKey: TransitionKey? = null
-    ): Array<Pair<UserAction, UserActionResult>> {
-        val notifShadeSceneKey = UserActionResult(SceneFamilies.NotifShade, transitionKey)
-        val qsShadeSceneKey = UserActionResult(SceneFamilies.QuickSettings, transitionKey)
+    private fun singleShadeActions(): Array<Pair<UserAction, UserActionResult>> {
         return arrayOf(
             // Swiping down, not from the edge, always goes to shade.
-            Swipe.Down to notifShadeSceneKey,
-            swipeDown(pointerCount = 2) to notifShadeSceneKey,
+            Swipe.Down to Scenes.Shade,
+            swipeDown(pointerCount = 2) to Scenes.Shade,
             // Swiping down from the top edge goes to QS.
-            swipeDownFromTop(pointerCount = 1) to qsShadeSceneKey,
-            swipeDownFromTop(pointerCount = 2) to qsShadeSceneKey,
+            swipeDownFromTop(pointerCount = 1) to Scenes.QuickSettings,
+            swipeDownFromTop(pointerCount = 2) to Scenes.QuickSettings,
+        )
+    }
+
+    private fun splitShadeActions(): Array<Pair<UserAction, UserActionResult>> {
+        val splitShadeSceneKey = UserActionResult(Scenes.Shade, ToSplitShade)
+        return arrayOf(
+            // Swiping down, not from the edge, always goes to shade.
+            Swipe.Down to splitShadeSceneKey,
+            swipeDown(pointerCount = 2) to splitShadeSceneKey,
+            // Swiping down from the top edge goes to QS.
+            swipeDownFromTop(pointerCount = 1) to splitShadeSceneKey,
+            swipeDownFromTop(pointerCount = 2) to splitShadeSceneKey,
         )
     }
 
