@@ -13,17 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package android.platform.test.ravenwood;
 
-package com.android.systemui.scene
-
-import com.android.systemui.notifications.ui.composable.NotificationsShadeScene
-import com.android.systemui.scene.ui.composable.Scene
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.IntoSet
-
-@Module
-interface NotificationsShadeSceneModule {
-
-    @Binds @IntoSet fun notificationsShade(scene: NotificationsShadeScene): Scene
+/** Stub class. The actual implementaetion is in junit-impl-src. */
+public class RavenwoodConfigState {
+    public RavenwoodConfigState(RavenwoodConfig config) {
+    }
 }

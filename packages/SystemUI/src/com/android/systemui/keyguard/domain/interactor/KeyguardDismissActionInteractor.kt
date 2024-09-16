@@ -29,8 +29,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
-import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -64,8 +62,6 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     sceneInteractor: Lazy<SceneInteractor>,
     deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
-    quickSettingsSceneFamilyResolver: Lazy<QuickSettingsSceneFamilyResolver>,
-    notifShadeSceneFamilyResolver: Lazy<NotifShadeSceneFamilyResolver>,
     powerInteractor: PowerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
     shadeInteractor: Lazy<ShadeInteractor>,
@@ -109,8 +105,7 @@ constructor(
                     deviceUnlockedInteractor.get().deviceUnlockStatus,
                 ) { scene, unlockStatus ->
                     unlockStatus.isUnlocked &&
-                        (quickSettingsSceneFamilyResolver.get().includesScene(scene) ||
-                            notifShadeSceneFamilyResolver.get().includesScene(scene))
+                        (scene == Scenes.QuickSettings || scene == Scenes.Shade)
                 }
                 .distinctUntilChanged()
         } else if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
@@ -133,7 +128,7 @@ constructor(
         merge(
                 finishedTransitionToGone,
                 isOnShadeWhileUnlocked.filter { it }.map {},
-                dismissInteractor.dismissKeyguardRequestWithImmediateDismissAction
+                dismissInteractor.dismissKeyguardRequestWithImmediateDismissAction,
             )
             .sample(dismissAction)
             .filterNot { it is DismissAction.None }
@@ -143,11 +138,11 @@ constructor(
         combine(
                 transitionInteractor.isFinishedIn(
                     scene = Scenes.Gone,
-                    stateWithoutSceneContainer = GONE
+                    stateWithoutSceneContainer = GONE,
                 ),
                 transitionInteractor.isFinishedIn(
                     scene = Scenes.Bouncer,
-                    stateWithoutSceneContainer = PRIMARY_BOUNCER
+                    stateWithoutSceneContainer = PRIMARY_BOUNCER,
                 ),
                 alternateBouncerInteractor.isVisible,
                 isOnShadeWhileUnlocked,

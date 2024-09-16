@@ -23,8 +23,6 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.domain.resolver.notifShadeSceneFamilyResolver
-import com.android.systemui.scene.domain.resolver.quickSettingsSceneFamilyResolver
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -38,8 +36,6 @@ val Kosmos.keyguardDismissActionInteractor by
             applicationScope = testScope.backgroundScope,
             sceneInteractor = { sceneInteractor },
             deviceUnlockedInteractor = { deviceUnlockedInteractor },
-            quickSettingsSceneFamilyResolver = { quickSettingsSceneFamilyResolver },
-            notifShadeSceneFamilyResolver = { notifShadeSceneFamilyResolver },
             powerInteractor = powerInteractor,
             alternateBouncerInteractor = alternateBouncerInteractor,
             shadeInteractor = { shadeInteractor },
