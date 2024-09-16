@@ -16,8 +16,14 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.app.StatusBarManager.DISABLE2_NONE
+import android.app.StatusBarManager.DISABLE_CLOCK
+import android.app.StatusBarManager.DISABLE_NONE
+import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
+import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,12 +31,10 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -38,8 +42,6 @@ import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.scene.data.repository.sceneContainerRepository
-import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
@@ -48,17 +50,16 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsScreenRecordChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
-import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository.Companion.DISPLAY_ID
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
+import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
-import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
-import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
@@ -83,17 +84,9 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
     private val statusBarModeRepository = kosmos.fakeStatusBarModeRepository
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val disableFlagsRepository = kosmos.fakeDisableFlagsRepository
 
-    private val underTest =
-        CollapsedStatusBarViewModelImpl(
-            kosmos.lightsOutInteractor,
-            kosmos.activeNotificationsInteractor,
-            kosmos.keyguardTransitionInteractor,
-            kosmos.sceneInteractor,
-            kosmos.sceneContainerOcclusionInteractor,
-            kosmos.ongoingActivityChipsViewModel,
-            kosmos.applicationCoroutineScope,
-        )
+    private val underTest = kosmos.collapsedStatusBarViewModel
 
     @Before
     fun setUp() {
@@ -495,14 +488,77 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(latest).isTrue()
         }
 
+    @Test
+    fun isClockVisible_allowedByDisableFlags_visible() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isClockVisible)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    fun isClockVisible_notAllowedByDisableFlags_gone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isClockVisible)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_CLOCK, DISABLE2_NONE)
+
+            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+        }
+
+    @Test
+    fun isNotificationIconContainerVisible_allowedByDisableFlags_visible() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    fun isNotificationIconContainerVisible_notAllowedByDisableFlags_gone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isNotificationIconContainerVisible)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NOTIFICATION_ICONS, DISABLE2_NONE)
+
+            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+        }
+
+    @Test
+    fun isSystemInfoVisible_allowedByDisableFlags_visible() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isSystemInfoVisible)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_NONE, DISABLE2_NONE)
+
+            assertThat(latest!!.visibility).isEqualTo(View.VISIBLE)
+        }
+
+    @Test
+    fun isSystemInfoVisible_notAllowedByDisableFlags_gone() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isSystemInfoVisible)
+
+            disableFlagsRepository.disableFlags.value =
+                DisableFlagsModel(DISABLE_SYSTEM_INFO, DISABLE2_NONE)
+
+            assertThat(latest!!.visibility).isEqualTo(View.GONE)
+        }
+
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =
         ActiveNotificationsStore.Builder()
             .apply { notifications.forEach(::addIndividualNotif) }
             .build()
 
     private val testNotifications =
-        listOf(
-            activeNotificationModel(key = "notif1"),
-            activeNotificationModel(key = "notif2"),
-        )
+        listOf(activeNotificationModel(key = "notif1"), activeNotificationModel(key = "notif2"))
 }
