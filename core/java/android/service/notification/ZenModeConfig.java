@@ -313,6 +313,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_DELETION_INSTANT = "deletionInstant";
     private static final String RULE_ATT_DISABLED_ORIGIN = "disabledOrigin";
     private static final String RULE_ATT_LEGACY_SUPPRESSED_EFFECTS = "legacySuppressedEffects";
+    private static final String RULE_ATT_CONDITION_OVERRIDE = "conditionOverride";
 
     private static final String DEVICE_EFFECT_DISPLAY_GRAYSCALE = "zdeDisplayGrayscale";
     private static final String DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY =
@@ -1144,7 +1145,7 @@ public class ZenModeConfig implements Parcelable {
 
         if (manualRule != null) {
             out.startTag(null, MANUAL_TAG);
-            writeRuleXml(manualRule, out);
+            writeRuleXml(manualRule, out, forBackup);
             out.endTag(null, MANUAL_TAG);
         }
         final int N = automaticRules.size();
@@ -1153,7 +1154,7 @@ public class ZenModeConfig implements Parcelable {
             final ZenRule automaticRule = automaticRules.valueAt(i);
             out.startTag(null, AUTOMATIC_TAG);
             out.attribute(null, RULE_ATT_ID, id);
-            writeRuleXml(automaticRule, out);
+            writeRuleXml(automaticRule, out, forBackup);
             out.endTag(null, AUTOMATIC_TAG);
         }
         if (Flags.modesApi() && !forBackup) {
@@ -1161,7 +1162,7 @@ public class ZenModeConfig implements Parcelable {
                 final ZenRule deletedRule = deletedRules.valueAt(i);
                 out.startTag(null, AUTOMATIC_DELETED_TAG);
                 out.attribute(null, RULE_ATT_ID, deletedRule.id);
-                writeRuleXml(deletedRule, out);
+                writeRuleXml(deletedRule, out, forBackup);
                 out.endTag(null, AUTOMATIC_DELETED_TAG);
             }
         }
@@ -1220,12 +1221,15 @@ public class ZenModeConfig implements Parcelable {
                         ORIGIN_UNKNOWN);
                 rt.legacySuppressedEffects = safeInt(parser,
                         RULE_ATT_LEGACY_SUPPRESSED_EFFECTS, 0);
+                rt.conditionOverride = safeInt(parser, RULE_ATT_CONDITION_OVERRIDE,
+                        ZenRule.OVERRIDE_NONE);
             }
         }
         return rt;
     }
 
-    public static void writeRuleXml(ZenRule rule, TypedXmlSerializer out) throws IOException {
+    public static void writeRuleXml(ZenRule rule, TypedXmlSerializer out, boolean forBackup)
+            throws IOException {
         out.attributeBoolean(null, RULE_ATT_ENABLED, rule.enabled);
         if (rule.name != null) {
             out.attribute(null, RULE_ATT_NAME, rule.name);
@@ -1279,6 +1283,9 @@ public class ZenModeConfig implements Parcelable {
                 out.attributeInt(null, RULE_ATT_DISABLED_ORIGIN, rule.disabledOrigin);
                 out.attributeInt(null, RULE_ATT_LEGACY_SUPPRESSED_EFFECTS,
                         rule.legacySuppressedEffects);
+                if (rule.conditionOverride == ZenRule.OVERRIDE_ACTIVATE && !forBackup) {
+                    out.attributeInt(null, RULE_ATT_CONDITION_OVERRIDE, rule.conditionOverride);
+                }
             }
         }
     }
@@ -2622,9 +2629,12 @@ public class ZenModeConfig implements Parcelable {
         int legacySuppressedEffects;
         /**
          * Signals a user's action to (temporarily or permanently) activate or deactivate this
-         * rule, overruling the condition set by the owner. This value is not stored to disk, as
-         * it shouldn't survive reboots or be involved in B&R. It might be reset by certain
-         * owner-provided state transitions as well.
+         * rule, overruling the condition set by the owner.
+         *
+         * <p>An {@link #OVERRIDE_ACTIVATE} is stored to disk, since we want it to survive reboots
+         * (but it's not included in B&R), while an {@link #OVERRIDE_DEACTIVATE} is not (meaning
+         * that snoozed rules may reactivate on reboot). It might be reset by certain owner-provided
+         * state transitions as well.
          */
         @FlaggedApi(Flags.FLAG_MODES_UI)
         @ConditionOverride
