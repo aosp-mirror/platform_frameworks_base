@@ -2956,6 +2956,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
         configuration.windowConfiguration.appBounds = bounds
       }
+      appCompatTaskInfo.topActivityLetterboxAppWidth = bounds.width()
+      appCompatTaskInfo.topActivityLetterboxAppHeight = bounds.height()
       isResizeable = false
     }
 
@@ -3114,6 +3116,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
       appCompatTaskInfo.isUserFullscreenOverrideEnabled = enableUserFullscreenOverride
       appCompatTaskInfo.isSystemFullscreenOverrideEnabled = enableSystemFullscreenOverride
 
+      if (deviceOrientation == ORIENTATION_LANDSCAPE) {
+        configuration.windowConfiguration.appBounds =
+          Rect(0, 0, DISPLAY_DIMENSION_LONG, DISPLAY_DIMENSION_SHORT)
+        appCompatTaskInfo.topActivityLetterboxAppWidth = DISPLAY_DIMENSION_LONG
+        appCompatTaskInfo.topActivityLetterboxAppHeight = DISPLAY_DIMENSION_SHORT
+      } else {
+        configuration.windowConfiguration.appBounds =
+          Rect(0, 0, DISPLAY_DIMENSION_SHORT, DISPLAY_DIMENSION_LONG)
+        appCompatTaskInfo.topActivityLetterboxAppWidth = DISPLAY_DIMENSION_SHORT
+        appCompatTaskInfo.topActivityLetterboxAppHeight = DISPLAY_DIMENSION_LONG
+      }
+
       if (shouldLetterbox) {
         appCompatTaskInfo.setHasMinAspectRatioOverride(aspectRatioOverrideApplied)
         if (deviceOrientation == ORIENTATION_LANDSCAPE &&
@@ -3129,14 +3143,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
           appCompatTaskInfo.topActivityLetterboxAppWidth = 1600
           appCompatTaskInfo.topActivityLetterboxAppHeight = 1200
         }
-      }
-
-      if (deviceOrientation == ORIENTATION_LANDSCAPE) {
-        configuration.windowConfiguration.appBounds =
-            Rect(0, 0, DISPLAY_DIMENSION_LONG, DISPLAY_DIMENSION_SHORT)
-      } else {
-        configuration.windowConfiguration.appBounds =
-            Rect(0, 0, DISPLAY_DIMENSION_SHORT, DISPLAY_DIMENSION_LONG)
       }
     }
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
