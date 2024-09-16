@@ -1,12 +1,7 @@
 {
     "presubmit": [
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.people.data"
-                }
-            ]
+            "name": "FrameworksServicesTests_people_data"
         }
     ]
 }
