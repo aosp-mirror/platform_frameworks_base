@@ -494,7 +494,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testIgnoresSimStateCallback_rebroadcast() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
 
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
@@ -515,7 +515,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTelephonyCapable_SimState_Absent() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE,
                 Intent.SIM_STATE_ABSENT);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
@@ -526,7 +527,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTelephonyCapable_SimState_CardIOError() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE,
                 Intent.SIM_STATE_CARD_IO_ERROR);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
@@ -593,7 +594,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_NOT_READY);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
@@ -608,7 +609,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_READY);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
@@ -649,7 +650,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
         state.fillInNotifierBundle(data);
-        Intent intentSimState = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intentSimState = defaultSimStateChangedIntent();
         intentSimState.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_LOADED);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
@@ -2254,6 +2255,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         userDeviceLockDown();
         mKeyguardUpdateMonitor.tryForceIsDismissibleKeyguard();
         Assert.assertFalse(mKeyguardUpdateMonitor.forceIsDismissibleIsKeepingDeviceUnlocked());
+    }
+
+    private Intent defaultSimStateChangedIntent() {
+        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
+        return intent;
     }
 
     private void verifyFingerprintAuthenticateNeverCalled() {
