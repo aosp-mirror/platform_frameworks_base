@@ -47,10 +47,14 @@ import com.android.systemui.scene.data.repository.setSceneTransition
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shadeTestUtil
+import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.phone.screenOffAnimationController
 import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
@@ -73,7 +77,7 @@ import platform.test.runner.parameterized.Parameters
 @EnableFlags(
     FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,
     FLAG_NEW_AOD_TRANSITION,
-    FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+    FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
 )
 class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
@@ -110,6 +114,20 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
     @Before
     fun setUp() {
         kosmos.sceneContainerRepository.setTransitionState(transitionState)
+
+        // Add sample notif so that the notif shelf has something to display
+        kosmos.activeNotificationListRepository.activeNotifications.value =
+            ActiveNotificationsStore.Builder()
+                .apply {
+                    addIndividualNotif(
+                        activeNotificationModel(
+                            key = "notif",
+                            aodIcon = mock(),
+                            groupKey = "testGroup",
+                        )
+                    )
+                }
+                .build()
     }
 
     @Test
@@ -129,7 +147,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     value = 0f,
-                    transitionState = TransitionState.STARTED
+                    transitionState = TransitionState.STARTED,
                 ),
                 validateStep = false,
             )
@@ -393,7 +411,7 @@ class KeyguardRootViewModelTest(flags: FlagsParameterization) : SysuiTestCase() 
                     flowOf(Scenes.Communal),
                     flowOf(0.5f),
                     false,
-                    emptyFlow()
+                    emptyFlow(),
                 )
 
             keyguardTransitionRepository.sendTransitionSteps(

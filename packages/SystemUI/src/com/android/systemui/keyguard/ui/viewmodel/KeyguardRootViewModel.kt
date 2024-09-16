@@ -43,6 +43,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.NotificationShadeWindowModel
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
@@ -81,6 +82,7 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     notificationShadeWindowModel: NotificationShadeWindowModel,
+    private val aodNotificationIconViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
@@ -130,7 +132,7 @@ constructor(
     val goneToAodTransition =
         keyguardTransitionInteractor.transition(
             edge = Edge.create(Scenes.Gone, AOD),
-            edgeWithoutSceneContainer = Edge.create(GONE, AOD)
+            edgeWithoutSceneContainer = Edge.create(GONE, AOD),
         )
 
     private val goneToAodTransitionRunning: Flow<Boolean> =
@@ -183,7 +185,7 @@ constructor(
                                 /* rangeMax = */ 1f,
                                 /* valueMin = */ 0f,
                                 /* valueMax = */ 0.2f,
-                                /* value = */ max(qsExpansion, shadeExpansion)
+                                /* value = */ max(qsExpansion, shadeExpansion),
                             )
                     emit(alpha)
                 }
@@ -254,7 +256,7 @@ constructor(
                         primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                     )
-                    .onStart { emit(1f) }
+                    .onStart { emit(1f) },
             ) { hideKeyguard, alpha ->
                 if (hideKeyguard) {
                     0f
@@ -304,11 +306,12 @@ constructor(
                     .onStart { emit(false) },
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Gone,
-                    stateWithoutSceneContainer = GONE
+                    stateWithoutSceneContainer = GONE,
                 ),
                 deviceEntryInteractor.isBypassEnabled,
                 areNotifsFullyHiddenAnimated(),
                 isPulseExpandingAnimated(),
+                aodNotificationIconViewModel.icons.map { it.visibleIcons.isNotEmpty() },
             ) { flows ->
                 val goneToAodTransitionRunning = flows[0] as Boolean
                 val isOnLockscreen = flows[1] as Boolean
@@ -316,6 +319,7 @@ constructor(
                 val isBypassEnabled = flows[3] as Boolean
                 val notifsFullyHidden = flows[4] as AnimatedValue<Boolean>
                 val pulseExpanding = flows[5] as AnimatedValue<Boolean>
+                val hasAodIcons = flows[6] as Boolean
 
                 when {
                     // Hide the AOD icons if we're not in the KEYGUARD state unless the screen off
@@ -327,9 +331,10 @@ constructor(
                     else ->
                         zip(notifsFullyHidden, pulseExpanding) {
                             areNotifsFullyHidden,
-                            isPulseExpanding,
-                            ->
+                            isPulseExpanding ->
                             when {
+                                // If there are no notification icons to show, then it can be hidden
+                                !hasAodIcons -> false
                                 // If we're bypassing, then we're visible
                                 isBypassEnabled -> true
                                 // If we are pulsing (and not bypassing), then we are hidden
