@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles
 
-import android.app.Flags
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
@@ -30,7 +29,8 @@ import com.android.internal.logging.MetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.RefactorFlagUtils.isUnexpectedlyInLegacyMode
+import com.android.systemui.modes.shared.ModesUi
+import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
@@ -77,14 +77,14 @@ constructor(
         metricsLogger,
         statusBarStateController,
         activityStarter,
-        qsLogger
+        qsLogger,
     ) {
 
     private lateinit var tileState: QSTileState
     private val config = qsTileConfigProvider.getConfig(TILE_SPEC)
 
     init {
-        /* Check if */ isUnexpectedlyInLegacyMode(Flags.modesUi(), Flags.FLAG_MODES_UI)
+        /* Check if */ ModesUiIcons.isUnexpectedlyInLegacyMode()
 
         lifecycle.coroutineScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
@@ -93,7 +93,7 @@ constructor(
         }
     }
 
-    override fun isAvailable(): Boolean = Flags.modesUi()
+    override fun isAvailable(): Boolean = ModesUi.isEnabled
 
     override fun getTileLabel(): CharSequence = tileState.label
 

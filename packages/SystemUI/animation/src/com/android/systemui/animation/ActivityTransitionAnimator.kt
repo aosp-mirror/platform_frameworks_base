@@ -57,6 +57,7 @@ import com.android.systemui.Flags.activityTransitionUseLargestWindow
 import com.android.systemui.Flags.translucentOccludingActivityFix
 import com.android.systemui.animation.TransitionAnimator.Companion.toTransitionState
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
+import com.android.systemui.shared.Flags.returnAnimationFrameworkLongLived
 import com.android.wm.shell.shared.IShellTransitions
 import com.android.wm.shell.shared.ShellTransitions
 import java.util.concurrent.Executor
@@ -607,8 +608,8 @@ constructor(
      * this registration.
      */
     fun register(controller: Controller) {
-        check(returnAnimationFrameworkLibrary()) {
-            "Long-lived registrations cannot be used when the returnAnimationFrameworkLibrary " +
+        check(returnAnimationFrameworkLongLived()) {
+            "Long-lived registrations cannot be used when the returnAnimationFrameworkLongLived " +
                 "flag is disabled"
         }
 

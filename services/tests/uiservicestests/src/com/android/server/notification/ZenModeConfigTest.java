@@ -32,6 +32,7 @@ import static android.service.notification.Condition.STATE_FALSE;
 import static android.service.notification.Condition.STATE_TRUE;
 import static android.service.notification.NotificationListenerService.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.service.notification.ZenModeConfig.XML_VERSION_MODES_API;
+import static android.service.notification.ZenModeConfig.XML_VERSION_MODES_UI;
 import static android.service.notification.ZenModeConfig.ZEN_TAG;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_DEACTIVATE;
 import static android.service.notification.ZenModeConfig.ZenRule.OVERRIDE_NONE;
@@ -1167,6 +1168,23 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         Policy result = config.toNotificationPolicy();
 
         assertThat(suppressedEffectsOf(result)).isEqualTo(suppressedEffectsOf(policy));
+    }
+
+    @Test
+    public void readXml_fixesWronglyDisabledManualRule() throws Exception {
+        ZenModeConfig config = getCustomConfig();
+        if (!Flags.modesUi()) {
+            config.manualRule = new ZenModeConfig.ZenRule();
+            config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        }
+        config.manualRule.enabled = false;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeConfigXml(config, XML_VERSION_MODES_UI, /* forBackup= */ false, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig fromXml = readConfigXml(bais);
+
+        assertThat(fromXml.manualRule.enabled).isTrue();
     }
 
     private static String suppressedEffectsOf(Policy policy) {

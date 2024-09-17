@@ -303,6 +303,15 @@ class DesktopTasksController(
     private fun getSplitFocusedTask(task1: RunningTaskInfo, task2: RunningTaskInfo) =
         if (task1.taskId == task2.parentTaskId) task2 else task1
 
+    private fun isFreeformDisplay(displayId: Int): Boolean {
+        val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
+        requireNotNull(tdaInfo) {
+            "This method can only be called with the ID of a display having non-null DisplayArea."
+        }
+        val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
+        return tdaWindowingMode == WINDOWING_MODE_FREEFORM
+    }
+
     /** Moves task to desktop mode if task is running, else launches it in desktop mode. */
     fun moveTaskToDesktop(
         taskId: Int,
@@ -1220,7 +1229,9 @@ class DesktopTasksController(
         transition: IBinder
     ): WindowContainerTransaction? {
         logV("handleFullscreenTaskLaunch")
-        if (isDesktopModeShowing(task.displayId)) {
+        val forceEnterDesktop = DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context) &&
+                isFreeformDisplay(task.displayId)
+        if (isDesktopModeShowing(task.displayId) || forceEnterDesktop) {
             logD("Switch fullscreen task to freeform on transition: taskId=%d", task.taskId)
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)

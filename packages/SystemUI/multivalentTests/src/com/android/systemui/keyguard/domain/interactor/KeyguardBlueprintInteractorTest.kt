@@ -17,17 +17,16 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.DisableSceneContainer
+import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardClockRepository
 import com.android.systemui.keyguard.data.repository.keyguardBlueprintRepository
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
@@ -59,8 +58,8 @@ import org.mockito.MockitoAnnotations
 class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val underTest = kosmos.keyguardBlueprintInteractor
-    private val keyguardBlueprintRepository = kosmos.keyguardBlueprintRepository
+    private val underTest by lazy { kosmos.keyguardBlueprintInteractor }
+    private val keyguardBlueprintRepository by lazy { kosmos.keyguardBlueprintRepository }
     private val clockRepository by lazy { kosmos.fakeKeyguardClockRepository }
     private val configurationRepository by lazy { kosmos.fakeConfigurationRepository }
     private val fingerprintPropertyRepository by lazy { kosmos.fakeFingerprintPropertyRepository }
@@ -75,7 +74,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
             sensorId = 1,
             strength = SensorStrength.STRONG,
             sensorType = FingerprintSensorType.POWER_BUTTON,
-            sensorLocations = mapOf()
+            sensorLocations = mapOf(),
         )
     }
 
@@ -93,7 +92,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+    @DisableSceneContainer
     fun testAppliesSplitShadeBlueprint() {
         testScope.runTest {
             val blueprintId by collectLastValue(underTest.blueprintId)
@@ -107,7 +106,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+    @EnableSceneContainer
     fun testDoesNotApplySplitShadeBlueprint() {
         testScope.runTest {
             val blueprintId by collectLastValue(underTest.blueprintId)
@@ -122,7 +121,7 @@ class KeyguardBlueprintInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_COMPOSE_LOCKSCREEN)
+    @DisableSceneContainer
     fun fingerprintPropertyInitialized_updatesBlueprint() {
         testScope.runTest {
             underTest.start()
