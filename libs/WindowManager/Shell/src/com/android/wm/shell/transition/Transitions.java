@@ -1501,16 +1501,16 @@ public class Transitions implements RemoteCallable<Transitions>,
          *                          transition animation. The Transition system will apply it when
          *                          finishCallback is called by the transition handler.
          */
-        void onTransitionReady(@NonNull IBinder transition, @NonNull TransitionInfo info,
+        default void onTransitionReady(@NonNull IBinder transition, @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction startTransaction,
-                @NonNull SurfaceControl.Transaction finishTransaction);
+                @NonNull SurfaceControl.Transaction finishTransaction) {}
 
         /**
          * Called when the transition is starting to play. It isn't called for merged transitions.
          *
          * @param transition the unique token of this transition
          */
-        void onTransitionStarting(@NonNull IBinder transition);
+        default void onTransitionStarting(@NonNull IBinder transition) {}
 
         /**
          * Called when a transition is merged into another transition. There won't be any following
@@ -1519,7 +1519,7 @@ public class Transitions implements RemoteCallable<Transitions>,
          * @param merged the unique token of the transition that's merged to another one
          * @param playing the unique token of the transition that accepts the merge
          */
-        void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing);
+        default void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {}
 
         /**
          * Called when the transition is finished. This isn't called for merged transitions.
@@ -1527,7 +1527,7 @@ public class Transitions implements RemoteCallable<Transitions>,
          * @param transition the unique token of this transition
          * @param aborted {@code true} if this transition is aborted; {@code false} otherwise.
          */
-        void onTransitionFinished(@NonNull IBinder transition, boolean aborted);
+        default void onTransitionFinished(@NonNull IBinder transition, boolean aborted) {}
     }
 
     @BinderThread
