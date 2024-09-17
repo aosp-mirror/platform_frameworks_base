@@ -733,9 +733,8 @@ public class FrameworkServicesModule {
     }
 
     @Provides
-    @Singleton
-    static ClipboardManager provideClipboardManager(Context context) {
-        return context.getSystemService(ClipboardManager.class);
+    static UserScopedService<ClipboardManager> provideClipboardManager(Context context) {
+        return new UserScopedServiceImpl<>(context, ClipboardManager.class);
     }
 
     @Provides
