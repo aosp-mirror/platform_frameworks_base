@@ -43,6 +43,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaDescription;
 import android.media.MediaMetadata;
@@ -58,6 +59,7 @@ import android.os.Bundle;
 import android.os.PowerExemptionManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.service.notification.StatusBarNotification;
 import android.testing.TestableLooper;
 import android.text.TextUtils;
@@ -67,8 +69,10 @@ import androidx.core.graphics.drawable.IconCompat;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.media.InputMediaDevice;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
@@ -528,6 +532,55 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
         assertThat(mMediaSwitchingController.getMediaItemList().size())
                 .isEqualTo(mMediaDevices.size() + 1);
         verify(mCb).onDeviceListChanged();
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void onInputDeviceListUpdate_verifyDeviceListCallback() {
+        AudioDeviceInfo[] audioDeviceInfos = {};
+        when(mAudioManager.getDevices(AudioManager.GET_DEVICES_INPUTS))
+                .thenReturn(audioDeviceInfos);
+        mMediaSwitchingController.start(mCb);
+
+        // Output devices have changed.
+        mMediaSwitchingController.onDeviceListUpdate(mMediaDevices);
+
+        final int MAX_VOLUME = 1;
+        final int CURRENT_VOLUME = 0;
+        final boolean IS_VOLUME_FIXED = true;
+        final MediaDevice mediaDevice3 =
+                InputMediaDevice.create(
+                        mContext,
+                        TEST_DEVICE_3_ID,
+                        AudioDeviceInfo.TYPE_BUILTIN_MIC,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        IS_VOLUME_FIXED);
+        final MediaDevice mediaDevice4 =
+                InputMediaDevice.create(
+                        mContext,
+                        TEST_DEVICE_4_ID,
+                        AudioDeviceInfo.TYPE_WIRED_HEADSET,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        IS_VOLUME_FIXED);
+        final List<MediaDevice> inputDevices = new ArrayList<>();
+        inputDevices.add(mediaDevice3);
+        inputDevices.add(mediaDevice4);
+
+        // Input devices have changed.
+        mMediaSwitchingController.mInputDeviceCallback.onInputDeviceListUpdated(inputDevices);
+
+        final List<MediaDevice> devices = new ArrayList<>();
+        for (MediaItem item : mMediaSwitchingController.getMediaItemList()) {
+            if (item.getMediaDevice().isPresent()) {
+                devices.add(item.getMediaDevice().get());
+            }
+        }
+
+        assertThat(devices).containsAtLeastElementsIn(mMediaDevices);
+        assertThat(devices).hasSize(mMediaDevices.size() + inputDevices.size());
+        verify(mCb, atLeastOnce()).onDeviceListChanged();
     }
 
     @Test
