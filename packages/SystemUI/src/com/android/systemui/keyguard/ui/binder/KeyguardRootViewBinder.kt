@@ -324,12 +324,16 @@ object KeyguardRootViewBinder {
                                     .getDimensionPixelSize(R.dimen.shelf_appear_translation)
                                     .stateIn(this)
                             viewModel.isNotifIconContainerVisible.collect { isVisible ->
-                                childViews[aodNotificationIconContainerId]
-                                    ?.setAodNotifIconContainerIsVisible(
-                                        isVisible,
-                                        iconsAppearTranslationPx.value,
-                                        screenOffAnimationController,
-                                    )
+                                if (isVisible.value) {
+                                    blueprintViewModel.refreshBlueprint()
+                                } else {
+                                    childViews[aodNotificationIconContainerId]
+                                        ?.setAodNotifIconContainerIsVisible(
+                                            isVisible,
+                                            iconsAppearTranslationPx.value,
+                                            screenOffAnimationController,
+                                        )
+                                }
                             }
                         }
 
