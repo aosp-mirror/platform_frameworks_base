@@ -3849,10 +3849,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
                         return true;
                     default:
                         return false;
@@ -4008,25 +4004,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (complete) {
                     int direction = (modifierState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
                     sendSwitchKeyboardLayout(displayId, focusedToken, direction);
-                }
-                return true;
-            // TODO (b/358569822): Move these input specific gesture handling to IMS since we
-            //  are calling into InputManager through internal API anyways
-            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
-                if (complete) {
-                    mInputManagerInternal.incrementKeyboardBacklight(deviceId);
-                }
-                return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
-                if (complete) {
-                    mInputManagerInternal.decrementKeyboardBacklight(deviceId);
-                }
-                return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
-                return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
-                if (complete) {
-                    mInputManagerInternal.toggleCapsLock(deviceId);
                 }
                 return true;
         }
