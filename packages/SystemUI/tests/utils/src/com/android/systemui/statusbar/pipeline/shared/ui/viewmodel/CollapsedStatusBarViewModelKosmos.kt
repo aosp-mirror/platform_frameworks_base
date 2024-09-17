@@ -21,6 +21,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
@@ -35,6 +36,7 @@ val Kosmos.collapsedStatusBarViewModel: CollapsedStatusBarViewModel by
             keyguardTransitionInteractor,
             sceneInteractor,
             sceneContainerOcclusionInteractor,
+            shadeInteractor,
             ongoingActivityChipsViewModel,
             applicationCoroutineScope,
         )
