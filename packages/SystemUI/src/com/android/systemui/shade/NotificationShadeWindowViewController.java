@@ -30,6 +30,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.core.view.ViewKt;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AuthKeyguardMessageArea;
 import com.android.keyguard.KeyguardUnfoldTransition;
@@ -38,6 +40,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.bouncer.ui.binder.BouncerViewBinder;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.SysUISingleton;
@@ -51,10 +54,12 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.shared.model.Edge;
+import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -111,6 +116,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQuickSettingsController;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final GlanceableHubContainerController
             mGlanceableHubContainerController;
     private GestureDetector mPulsingWakeupGestureHandler;
@@ -140,6 +146,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
     private final PanelExpansionInteractor mPanelExpansionInteractor;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
 
+    private ViewGroup mBouncerParentView;
     /**
      * If {@code true}, an external touch sent in {@link #handleExternalTouch(MotionEvent)} has been
      * intercepted and all future touch events for the gesture should be processed by this view.
@@ -217,6 +224,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         mPulsingGestureListener = pulsingGestureListener;
         mLockscreenHostedDreamGestureListener = lockscreenHostedDreamGestureListener;
         mNotificationInsetsController = notificationInsetsController;
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mGlanceableHubContainerController = glanceableHubContainerController;
         mFeatureFlagsClassic = featureFlagsClassic;
         mSysUIKeyEventHandler = sysUIKeyEventHandler;
@@ -227,7 +235,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
         // This view is not part of the newly inflated expanded status bar.
         mBrightnessMirror = mView.findViewById(R.id.brightness_mirror_container);
         mDisableSubpixelTextTransitionListener = new DisableSubpixelTextTransitionListener(mView);
-        bouncerViewBinder.bind(mView.findViewById(R.id.keyguard_bouncer_container));
+        bindBouncer(bouncerViewBinder);
 
         collectFlow(mView, keyguardTransitionInteractor.transition(
                 Edge.create(LOCKSCREEN, DREAMING)),
@@ -254,6 +262,35 @@ public class NotificationShadeWindowViewController implements Dumpable {
 
         lockIconViewController.setLockIconView(mView.findViewById(R.id.lock_icon_view));
         dumpManager.registerDumpable(this);
+    }
+
+    private void bindBouncer(BouncerViewBinder bouncerViewBinder) {
+        if (ComposeBouncerFlags.INSTANCE.isOnlyComposeBouncerEnabled()) {
+            collectFlow(mView, mKeyguardTransitionInteractor.isFinishedIn(Scenes.Gone,
+                    KeyguardState.GONE), this::removeBouncerParentView);
+            collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                            new Edge.StateToState(KeyguardState.GONE, null)),
+                    this::handleGoneToAnyOtherStateTransition);
+            collectFlow(mView, mPrimaryBouncerInteractor.isShowing(),
+                    (showing) -> ViewKt.setVisible(mBouncerParentView, showing));
+        }
+        mBouncerParentView = mView.findViewById(R.id.keyguard_bouncer_container);
+        bouncerViewBinder.bind(mBouncerParentView);
+    }
+
+    private void handleGoneToAnyOtherStateTransition(TransitionStep transitionStep) {
+        if (transitionStep.getTransitionState() == TransitionState.STARTED) {
+            if (mView.indexOfChild(mBouncerParentView) != -1) {
+                mView.removeView(mBouncerParentView);
+            }
+            mView.addView(mBouncerParentView);
+        }
+    }
+
+    private void removeBouncerParentView(boolean isFinishedInGoneState) {
+        if (isFinishedInGoneState) {
+            mView.removeView(mBouncerParentView);
+        }
     }
 
     /**
