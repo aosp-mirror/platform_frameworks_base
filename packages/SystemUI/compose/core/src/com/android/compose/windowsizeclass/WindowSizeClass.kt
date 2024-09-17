@@ -43,9 +43,8 @@ fun calculateWindowSizeClass(): WindowSizeClass {
     val density = LocalDensity.current
     val context = LocalContext.current
     val metrics =
-        remember(context) {
-            context.getSystemService(WindowManager::class.java)!!.currentWindowMetrics
-        }
+        remember(context) { context.getSystemService(WindowManager::class.java)!! }
+            .currentWindowMetrics
     val size = with(density) { metrics.bounds.toComposeRect().size.toDpSize() }
     return WindowSizeClass.calculateFromSize(size)
 }
