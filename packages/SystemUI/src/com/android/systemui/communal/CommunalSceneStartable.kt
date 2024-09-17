@@ -251,9 +251,8 @@ constructor(
                 Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
             }
             from == KeyguardState.DOZING && to == KeyguardState.GLANCEABLE_HUB -> {
-                // Make sure the communal hub is showing (immediately, not fading in) when
-                // transitioning from dozing to hub.
-                Pair(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
+                // Make sure the communal hub is showing when transitioning from dozing to hub.
+                Pair(CommunalScenes.Communal, CommunalTransitionKeys.SimpleFade)
             }
             else -> null
         }

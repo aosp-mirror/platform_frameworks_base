@@ -24,7 +24,6 @@ import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -234,11 +233,9 @@ constructor(
 
     private suspend fun transitionToGlanceableHub() {
         if (communalSceneKtfRefactor()) {
-            communalSceneInteractor.changeScene(
+            communalSceneInteractor.snapToScene(
                 newScene = CommunalScenes.Communal,
                 loggingReason = "from dozing to hub",
-                // Immediately show the hub when transitioning from dozing to hub.
-                transitionKey = CommunalTransitionKeys.Immediately,
             )
         } else {
             startTransitionTo(KeyguardState.GLANCEABLE_HUB)

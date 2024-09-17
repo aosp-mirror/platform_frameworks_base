@@ -162,10 +162,9 @@ constructor(
                 .filterRelevantKeyguardStateAnd { isAsleep -> isAsleep }
                 .collect {
                     if (communalSceneKtfRefactor()) {
-                        communalSceneInteractor.changeScene(
+                        communalSceneInteractor.snapToScene(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub to dozing",
-                            transitionKey = CommunalTransitionKeys.Immediately,
                             keyguardState = KeyguardState.DOZING,
                         )
                     } else {
