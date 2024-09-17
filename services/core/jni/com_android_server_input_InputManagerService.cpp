@@ -1797,9 +1797,30 @@ void NativeInputManager::loadAdditionalMouseResources(
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    for (int32_t iconId = static_cast<int32_t>(PointerIconStyle::TYPE_CONTEXT_MENU);
-         iconId <= static_cast<int32_t>(PointerIconStyle::TYPE_HANDWRITING); ++iconId) {
-        const PointerIconStyle pointerIconStyle = static_cast<PointerIconStyle>(iconId);
+    constexpr static std::array ADDITIONAL_STYLES{PointerIconStyle::TYPE_CONTEXT_MENU,
+                                                  PointerIconStyle::TYPE_HAND,
+                                                  PointerIconStyle::TYPE_HELP,
+                                                  PointerIconStyle::TYPE_WAIT,
+                                                  PointerIconStyle::TYPE_CELL,
+                                                  PointerIconStyle::TYPE_CROSSHAIR,
+                                                  PointerIconStyle::TYPE_TEXT,
+                                                  PointerIconStyle::TYPE_VERTICAL_TEXT,
+                                                  PointerIconStyle::TYPE_ALIAS,
+                                                  PointerIconStyle::TYPE_COPY,
+                                                  PointerIconStyle::TYPE_NO_DROP,
+                                                  PointerIconStyle::TYPE_ALL_SCROLL,
+                                                  PointerIconStyle::TYPE_HORIZONTAL_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_VERTICAL_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_TOP_RIGHT_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_TOP_LEFT_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_ZOOM_IN,
+                                                  PointerIconStyle::TYPE_ZOOM_OUT,
+                                                  PointerIconStyle::TYPE_GRAB,
+                                                  PointerIconStyle::TYPE_GRABBING,
+                                                  PointerIconStyle::TYPE_HANDWRITING,
+                                                  PointerIconStyle::TYPE_SPOT_HOVER};
+
+    for (const auto pointerIconStyle : ADDITIONAL_STYLES) {
         PointerIcon pointerIcon = loadPointerIcon(env, displayId, pointerIconStyle);
         (*outResources)[pointerIconStyle] = toSpriteIcon(pointerIcon);
         if (!pointerIcon.bitmapFrames.empty()) {
