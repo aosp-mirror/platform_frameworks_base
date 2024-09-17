@@ -38,13 +38,13 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.RemoteException;
 
-import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
-import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
 import com.android.server.broadcastradio.RadioServiceUserController;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.mockito.verification.VerificationWithTimeout;
 
@@ -55,7 +55,8 @@ import java.util.List;
 /**
  * Tests for v2 HAL RadioModule.
  */
-public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class StartProgramListUpdatesFanoutTest {
     private static final String TAG = "BroadcastRadioTests.hal2.StartProgramListUpdatesFanout";
 
     private static final VerificationWithTimeout CB_TIMEOUT = timeout(500);
@@ -64,6 +65,8 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
     @Mock IBroadcastRadio mBroadcastRadioMock;
     @Mock ITunerSession mHalTunerSessionMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
+    @Mock
+    private RadioServiceUserController mUserControllerMock;
 
     // RadioModule under test
     private RadioModule mRadioModule;
@@ -110,17 +113,12 @@ public class StartProgramListUpdatesFanoutTest extends ExtendedRadioMockitoTestC
     private static final RadioManager.ProgramInfo TEST_DAB_INFO = TestUtils.makeProgramInfo(
             TEST_DAB_SELECTOR, TEST_QUALITY);
 
-    @Override
-    protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(RadioServiceUserController.class);
-    }
-
     @Before
     public void setup() throws RemoteException {
-        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(true).when(mUserControllerMock).isCurrentOrSystemUser();
 
-        mRadioModule = new RadioModule(mBroadcastRadioMock,
-                TestUtils.makeDefaultModuleProperties());
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TestUtils.makeDefaultModuleProperties(),
+                mUserControllerMock);
 
         doAnswer((Answer) invocation -> {
             mHalTunerCallback = (ITunerCallback) invocation.getArguments()[0];

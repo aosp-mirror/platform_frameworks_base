@@ -36,6 +36,8 @@ import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.RadioManager;
 import android.os.RemoteException;
 
+import com.android.server.broadcastradio.RadioServiceUserController;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,13 +63,16 @@ public final class RadioModuleHidlTest {
     private IAnnouncementListener mListenerMock;
     @Mock
     private android.hardware.broadcastradio.V2_0.ICloseHandle mHalCloseHandleMock;
+    @Mock
+    private RadioServiceUserController mUserControllerMock;
 
     private RadioModule mRadioModule;
     private android.hardware.broadcastradio.V2_0.IAnnouncementListener mHalListener;
 
     @Before
     public void setup() throws RemoteException {
-        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES);
+        mRadioModule = new RadioModule(mBroadcastRadioMock, TEST_MODULE_PROPERTIES,
+                mUserControllerMock);
 
         when(mBroadcastRadioMock.getImage(anyInt())).thenReturn(new ArrayList<Byte>(0));
 
