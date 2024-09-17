@@ -259,10 +259,8 @@ public final class CameraExtensionCharacteristics {
         private static final String PROXY_SERVICE_NAME =
                 "com.android.cameraextensions.CameraExtensionsProxyService";
 
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         private static final int FALLBACK_PACKAGE_NAME =
                 com.android.internal.R.string.config_extensionFallbackPackageName;
-        @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         private static final int FALLBACK_SERVICE_NAME =
                 com.android.internal.R.string.config_extensionFallbackServiceName;
 
@@ -309,7 +307,7 @@ public final class CameraExtensionCharacteristics {
                   intent.setClassName(vendorProxyPackage, vendorProxyService);
                 }
 
-                if (Flags.concertMode() && useFallback) {
+                if (useFallback) {
                     String packageName = ctx.getResources().getString(FALLBACK_PACKAGE_NAME);
                     String serviceName = ctx.getResources().getString(FALLBACK_SERVICE_NAME);
 
@@ -433,7 +431,7 @@ public final class CameraExtensionCharacteristics {
                     releaseProxyConnectionLocked(ctx, extension);
                 }
 
-                if (Flags.concertMode() && ret && useFallback && mIsFallbackEnabled) {
+                if (ret && useFallback && mIsFallbackEnabled) {
                     try {
                         InitializeSessionHandler cb = new InitializeSessionHandler(ctx);
                         initializeSession(cb, extension);
@@ -462,26 +460,24 @@ public final class CameraExtensionCharacteristics {
 
             boolean ret = registerClientHelper(ctx, token, extension, false /*useFallback*/);
 
-            if (Flags.concertMode()) {
-                // Check if user enabled fallback impl
-                ContentResolver resolver = ctx.getContentResolver();
-                int userEnabled = Settings.Secure.getInt(resolver,
-                        Settings.Secure.CAMERA_EXTENSIONS_FALLBACK, 1);
+            // Check if user enabled fallback impl
+            ContentResolver resolver = ctx.getContentResolver();
+            int userEnabled = Settings.Secure.getInt(resolver,
+                    Settings.Secure.CAMERA_EXTENSIONS_FALLBACK, 1);
 
-                boolean vendorImpl = true;
-                if (ret && (mConnectionManager.getProxy(extension) != null) && (userEnabled == 1)) {
-                    // At this point, we are connected to either CameraExtensionsProxyService or
-                    // the vendor extension proxy service. If the vendor does not support the
-                    // extension, unregisterClient and re-register client with the proxy service
-                    // containing the fallback impl
-                    vendorImpl = isExtensionSupported(cameraId, extension,
-                            characteristicsMapNative);
-                }
+            boolean vendorImpl = true;
+            if (ret && (mConnectionManager.getProxy(extension) != null) && (userEnabled == 1)) {
+                // At this point, we are connected to either CameraExtensionsProxyService or
+                // the vendor extension proxy service. If the vendor does not support the
+                // extension, unregisterClient and re-register client with the proxy service
+                // containing the fallback impl
+                vendorImpl = isExtensionSupported(cameraId, extension,
+                        characteristicsMapNative);
+            }
 
-                if (!vendorImpl) {
-                    unregisterClient(ctx, token, extension);
-                    ret = registerClientHelper(ctx, token, extension, true /*useFallback*/);
-                }
+            if (!vendorImpl) {
+                unregisterClient(ctx, token, extension);
+                ret = registerClientHelper(ctx, token, extension, true /*useFallback*/);
             }
 
             return ret;
