@@ -77,6 +77,7 @@ import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastMetadata;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
+import com.android.settingslib.media.InputRouteManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.flags.Flags;
@@ -116,12 +117,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Controller for media output dialog
+ * Controller for a dialog that allows users to switch media output and input devices, control
+ * volume, connect to new devices, etc.
  */
-public class MediaOutputController implements LocalMediaManager.DeviceCallback,
-        INearbyMediaDevicesUpdateCallback {
+public class MediaSwitchingController
+        implements LocalMediaManager.DeviceCallback, INearbyMediaDevicesUpdateCallback {
 
-    private static final String TAG = "MediaOutputController";
+    private static final String TAG = "MediaSwitchingController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final String PAGE_CONNECTED_DEVICES_KEY =
             "top_level_connected_devices";
@@ -137,10 +139,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final DialogTransitionAnimator mDialogTransitionAnimator;
     private final CommonNotifCollection mNotifCollection;
     protected final Object mMediaDevicesLock = new Object();
+    protected final Object mInputMediaDevicesLock = new Object();
     @VisibleForTesting
     final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
-    private final List<MediaItem> mMediaItemList = new CopyOnWriteArrayList<>();
+    private final List<MediaItem> mOutputMediaItemList = new CopyOnWriteArrayList<>();
+    private final List<MediaItem> mInputMediaItemList = new CopyOnWriteArrayList<>();
     private final AudioManager mAudioManager;
     private final PowerExemptionManager mPowerExemptionManager;
     private final KeyguardManager mKeyGuardManager;
@@ -153,6 +157,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @VisibleForTesting
     boolean mNeedRefresh = false;
     private MediaController mMediaController;
+    private InputRouteManager mInputRouteManager;
     @VisibleForTesting
     Callback mCallback;
     @VisibleForTesting
@@ -181,8 +186,20 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         ACTION_BROADCAST_INFO_ICON
     }
 
+    @VisibleForTesting
+    final InputRouteManager.InputDeviceCallback mInputDeviceCallback =
+            new InputRouteManager.InputDeviceCallback() {
+                @Override
+                public void onInputDeviceListUpdated(@NonNull List<MediaDevice> devices) {
+                    synchronized (mInputMediaDevicesLock) {
+                        buildInputMediaItems(devices);
+                        mCallback.onDeviceListChanged();
+                    }
+                }
+            };
+
     @AssistedInject
-    public MediaOutputController(
+    public MediaSwitchingController(
             Context context,
             @Assisted String packageName,
             @Assisted @Nullable UserHandle userHandle,
@@ -241,19 +258,23 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 R.dimen.media_output_dialog_default_margin_end);
         mItemMarginEndSelectable = (int) mContext.getResources().getDimension(
                 R.dimen.media_output_dialog_selectable_margin_end);
+
+        if (enableInputRouting()) {
+            mInputRouteManager = new InputRouteManager(mContext, audioManager);
+        }
     }
 
     @AssistedFactory
     public interface Factory {
-        /** Construct a MediaOutputController */
-        MediaOutputController create(
+        /** Construct a MediaSwitchingController */
+        MediaSwitchingController create(
                 String packageName, UserHandle userHandle, MediaSession.Token token);
     }
 
     protected void start(@NonNull Callback cb) {
         synchronized (mMediaDevicesLock) {
             mCachedMediaDevices.clear();
-            mMediaItemList.clear();
+            mOutputMediaItemList.clear();
         }
         mNearbyDeviceInfoMap.clear();
         if (mNearbyMediaDevicesManager != null) {
@@ -277,6 +298,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mCallback = cb;
         mLocalMediaManager.registerCallback(this);
         mLocalMediaManager.startScan();
+
+        if (enableInputRouting()) {
+            mInputRouteManager.registerCallback(mInputDeviceCallback);
+        }
     }
 
     boolean shouldShowLaunchSection() {
@@ -300,12 +325,19 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mLocalMediaManager.stopScan();
         synchronized (mMediaDevicesLock) {
             mCachedMediaDevices.clear();
-            mMediaItemList.clear();
+            mOutputMediaItemList.clear();
         }
         if (mNearbyMediaDevicesManager != null) {
             mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
         }
         mNearbyDeviceInfoMap.clear();
+
+        if (enableInputRouting()) {
+            mInputRouteManager.unregisterCallback(mInputDeviceCallback);
+            synchronized (mInputMediaDevicesLock) {
+                mInputMediaItemList.clear();
+            }
+        }
     }
 
     private MediaController getMediaController() {
@@ -335,7 +367,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     @Override
     public void onDeviceListUpdate(List<MediaDevice> devices) {
-        boolean isListEmpty = mMediaItemList.isEmpty();
+        boolean isListEmpty = mOutputMediaItemList.isEmpty();
         if (isListEmpty || !mIsRefreshing) {
             buildMediaItems(devices);
             mCallback.onDeviceListChanged();
@@ -352,7 +384,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     public void onSelectedDeviceStateChanged(MediaDevice device,
             @LocalMediaManager.MediaDeviceState int state) {
         mCallback.onRouteChanged();
-        mMetricLogger.logOutputItemSuccess(device.toString(), new ArrayList<>(mMediaItemList));
+        mMetricLogger.logOutputItemSuccess(
+                device.toString(), new ArrayList<>(mOutputMediaItemList));
     }
 
     @Override
@@ -363,7 +396,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     @Override
     public void onRequestFailed(int reason) {
         mCallback.onRouteChanged();
-        mMetricLogger.logOutputItemFailure(new ArrayList<>(mMediaItemList), reason);
+        mMetricLogger.logOutputItemFailure(new ArrayList<>(mOutputMediaItemList), reason);
     }
 
     /**
@@ -382,7 +415,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
         try {
             synchronized (mMediaDevicesLock) {
-                mMediaItemList.removeIf((MediaItem::isMutingExpectedDevice));
+                mOutputMediaItemList.removeIf((MediaItem::isMutingExpectedDevice));
             }
             mAudioManager.cancelMuteAwaitConnection(mAudioManager.getMutingExpectedDevice());
         } catch (Exception e) {
@@ -638,9 +671,9 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     private void buildMediaItems(List<MediaDevice> devices) {
         synchronized (mMediaDevicesLock) {
-            List<MediaItem> updatedMediaItems = buildMediaItems(mMediaItemList, devices);
-            mMediaItemList.clear();
-            mMediaItemList.addAll(updatedMediaItems);
+            List<MediaItem> updatedMediaItems = buildMediaItems(mOutputMediaItemList, devices);
+            mOutputMediaItemList.clear();
+            mOutputMediaItemList.addAll(updatedMediaItems);
         }
     }
 
@@ -714,6 +747,19 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         }
     }
 
+    private boolean enableInputRouting() {
+        return com.android.media.flags.Flags.enableAudioInputDeviceRoutingAndVolumeControl();
+    }
+
+    private void buildInputMediaItems(List<MediaDevice> devices) {
+        synchronized (mInputMediaDevicesLock) {
+            List<MediaItem> updatedInputMediaItems =
+                    devices.stream().map(MediaItem::createDeviceMediaItem).toList();
+            mInputMediaItemList.clear();
+            mInputMediaItemList.addAll(updatedInputMediaItems);
+        }
+    }
+
     /**
      * Initial categorization of current devices, will not be called for updates to the devices
      * list.
@@ -778,7 +824,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 mediaDevice.setRangeZone(mNearbyDeviceInfoMap.get(mediaDevice.getId()));
             }
         }
-
     }
 
     boolean isCurrentConnectedDeviceRemote() {
@@ -837,8 +882,31 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         });
     }
 
+    private void addInputDevices(List<MediaItem> mediaItems) {
+        mediaItems.add(
+                MediaItem.createGroupDividerMediaItem(
+                        mContext.getString(R.string.media_input_group_title)));
+        mediaItems.addAll(mInputMediaItemList);
+    }
+
+    private void addOutputDevices(List<MediaItem> mediaItems) {
+        mediaItems.add(
+                MediaItem.createGroupDividerMediaItem(
+                        mContext.getString(R.string.media_output_group_title)));
+        mediaItems.addAll(mOutputMediaItemList);
+    }
+
     public List<MediaItem> getMediaItemList() {
-        return mMediaItemList;
+        // If input routing is not enabled, only return output media items.
+        if (!enableInputRouting()) {
+            return mOutputMediaItemList;
+        }
+
+        // If input routing is enabled, return both output and input media items.
+        List<MediaItem> mediaItems = new ArrayList<>();
+        addOutputDevices(mediaItems);
+        addInputDevices(mediaItems);
+        return mediaItems;
     }
 
     public MediaDevice getCurrentConnectedMediaDevice() {
@@ -921,7 +989,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
 
     public boolean isAnyDeviceTransferring() {
         synchronized (mMediaDevicesLock) {
-            for (MediaItem mediaItem : mMediaItemList) {
+            for (MediaItem mediaItem : mOutputMediaItemList) {
                 if (mediaItem.getMediaDevice().isPresent()
                         && mediaItem.getMediaDevice().get().getState()
                         == LocalMediaManager.MediaDeviceState.STATE_CONNECTING) {
@@ -986,8 +1054,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     }
 
     void launchMediaOutputBroadcastDialog(View mediaOutputDialog, BroadcastSender broadcastSender) {
-        MediaOutputController controller =
-                new MediaOutputController(
+        MediaSwitchingController controller =
+                new MediaSwitchingController(
                         mContext,
                         mPackageName,
                         mUserHandle,

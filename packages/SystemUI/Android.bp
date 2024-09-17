@@ -452,7 +452,7 @@ filegroup {
         "tests/src/**/systemui/clipboardoverlay/ClipboardListenerTest.java",
         "tests/src/**/systemui/doze/DozeScreenStateTest.java",
         "tests/src/**/systemui/keyguard/WorkLockActivityControllerTest.java",
-        "tests/src/**/systemui/media/dialog/MediaOutputControllerTest.java",
+        "tests/src/**/systemui/media/dialog/MediaSwitchingControllerTest.java",
         "tests/src/**/systemui/navigationbar/views/NavigationBarTest.java",
         "tests/src/**/systemui/power/PowerNotificationWarningsTest.java",
         "tests/src/**/systemui/power/PowerUITest.java",

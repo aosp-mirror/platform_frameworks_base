@@ -3114,6 +3114,10 @@
     <string name="media_output_group_title_speakers_and_displays">Speakers &amp; Displays</string>
     <!-- Title for Suggested Devices group. [CHAR LIMIT=NONE] -->
     <string name="media_output_group_title_suggested_device">Suggested Devices</string>
+    <!-- Title for input device group. [CHAR LIMIT=NONE] -->
+    <string name="media_input_group_title">Input</string>
+    <!-- Title for output device group. [CHAR LIMIT=NONE] -->
+    <string name="media_output_group_title">Output</string>
     <!-- Summary for end session dialog. [CHAR LIMIT=NONE] -->
     <string name="media_output_end_session_dialog_summary">Stop your shared session to move media to another device</string>
     <!-- Button text for stopping session [CHAR LIMIT=60] -->
