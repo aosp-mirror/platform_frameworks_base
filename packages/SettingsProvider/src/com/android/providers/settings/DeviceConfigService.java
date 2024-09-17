@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import static android.provider.DeviceConfig.DUMP_ARG_NAMESPACE;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_NONE;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_PERSISTENT;
 import static android.provider.Settings.Config.SYNC_DISABLED_MODE_UNTIL_REBOOT;
@@ -42,6 +43,7 @@ import android.provider.DeviceConfigShellCommandHandler;
 import android.provider.Settings;
 import android.provider.Settings.Config.SyncDisabledMode;
 import android.provider.UpdatableDeviceConfigServiceReadiness;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
@@ -55,11 +57,13 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Receives shell commands from the command line related to device config flags, and dispatches them
@@ -80,6 +84,7 @@ public final class DeviceConfigService extends Binder {
     final SettingsProvider mProvider;
 
     private static final String TAG = "DeviceConfigService";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public DeviceConfigService(SettingsProvider provider) {
         mProvider = provider;
@@ -97,14 +102,35 @@ public final class DeviceConfigService extends Binder {
         }
     }
 
+    // TODO(b/364399200): add unit test
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        String filter = null;
         if (android.provider.flags.Flags.dumpImprovements()) {
-            pw.print("SyncDisabledForTests: ");
-            MyShellCommand.getSyncDisabledForTests(pw, pw);
+            if (args.length > 0) {
+                switch (args[0]) {
+                    case DUMP_ARG_NAMESPACE:
+                        if (args.length < 2) {
+                            throw new IllegalArgumentException("argument " + DUMP_ARG_NAMESPACE
+                                    + " requires an extra argument");
+                        }
+                        filter = args[1];
+                        if (DEBUG) {
+                            Slog.d(TAG, "dump(): setting filter as " + filter);
+                        }
+                        break;
+                    default:
+                        Slog.w(TAG, "dump(): ignoring invalid arguments: " + Arrays.toString(args));
+                        break;
+                }
+            }
+            if (filter == null) {
+                pw.print("SyncDisabledForTests: ");
+                MyShellCommand.getSyncDisabledForTests(pw, pw);
 
-            pw.print("UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService(): ");
-            pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
+                pw.print("UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService(): ");
+                pw.println(UpdatableDeviceConfigServiceReadiness.shouldStartUpdatableService());
+            }
 
             pw.println("DeviceConfig provider: ");
             try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(fd)) {
@@ -117,8 +143,16 @@ public final class DeviceConfigService extends Binder {
 
         IContentProvider iprovider = mProvider.getIContentProvider();
         pw.println("DeviceConfig flags:");
+        Pattern lineFilter = filter == null ? null : Pattern.compile("^.*" + filter + ".*\\/.*$");
         for (String line : MyShellCommand.listAll(iprovider)) {
-            pw.println(line);
+            if (lineFilter == null || lineFilter.matcher(line).matches()) {
+                pw.println(line);
+            }
+        }
+
+        if (filter != null) {
+            // TODO(b/364399200): use filter to skip instead?
+            return;
         }
 
         ArrayList<String> missingFiles = new ArrayList<String>();
