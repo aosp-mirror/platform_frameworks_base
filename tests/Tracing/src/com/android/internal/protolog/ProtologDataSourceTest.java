@@ -67,7 +67,8 @@ public class ProtologDataSourceTest {
 
     @Test
     public void allEnabledTraceMode() {
-        final ProtoLogDataSource ds = new ProtoLogDataSource((idx, c) -> {}, () -> {}, (idx, c) -> {});
+        final ProtoLogDataSource ds =
+                new ProtoLogDataSource((idx, c) -> {}, () -> {}, (idx, c) -> {});
 
         final ProtoLogDataSource.TlsState tlsState = createTlsState(
                 DataSourceConfigOuterClass.DataSourceConfig.newBuilder().setProtologConfig(

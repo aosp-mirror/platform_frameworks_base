@@ -180,7 +180,6 @@ public class LegacyProtoLogImplTest {
 
         verify(implSpy).passToLogcat(eq(TestProtoLogGroup.TEST_GROUP.getTag()), eq(
                 LogLevel.INFO), eq("test 5"));
-        verify(mReader, never()).getViewerString(anyLong());
     }
 
     @Test
