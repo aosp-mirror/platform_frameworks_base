@@ -101,4 +101,15 @@ class AppFunctionRuntimeMetadataTest {
 
         assertThat(actualPackageName).isEqualTo(expectedPackageName)
     }
+
+    @Test
+    fun testBuild() {
+        val runtimeMetadata = AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").build()
+
+        assertThat(runtimeMetadata.packageName).isEqualTo("com.pkg")
+        assertThat(runtimeMetadata.functionId).isEqualTo("funcId")
+        assertThat(runtimeMetadata.enabled).isNull()
+        assertThat(runtimeMetadata.appFunctionStaticMetadataQualifiedId)
+            .isEqualTo("android\$apps-db/app_functions#com.pkg/funcId")
+    }
 }

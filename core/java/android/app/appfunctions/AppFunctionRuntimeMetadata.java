@@ -180,13 +180,8 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
          *
          * @param packageName the name of the package that owns the function.
          * @param functionId the id of the function.
-         * @param staticMetadataQualifiedId the qualified static metadata id that this runtime
-         *     metadata refers to.
          */
-        public Builder(
-                @NonNull String packageName,
-                @NonNull String functionId,
-                @NonNull String staticMetadataQualifiedId) {
+        public Builder(@NonNull String packageName, @NonNull String functionId) {
             super(
                     APP_FUNCTION_RUNTIME_NAMESPACE,
                     getDocumentIdForAppFunction(
@@ -198,7 +193,9 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
 
             // Set qualified id automatically
             setPropertyString(
-                    PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID, staticMetadataQualifiedId);
+                    PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID,
+                    AppFunctionStaticMetadataHelper.getStaticMetadataQualifiedId(
+                            packageName, functionId));
         }
 
         /**

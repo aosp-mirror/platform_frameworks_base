@@ -316,7 +316,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @DisableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testCreateAndDisposeEventReceiver() {
         val decor = createOpenTaskDecoration(windowingMode = WINDOWING_MODE_FREEFORM)
         desktopModeWindowDecorViewModel.destroyWindowDecoration(decor.mTaskInfo)
@@ -326,7 +326,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
-    @DisableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @DisableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testEventReceiversOnMultipleDisplays() {
         val secondaryDisplay = createVirtualDisplay() ?: return
         val secondaryDisplayId = secondaryDisplay.display.displayId

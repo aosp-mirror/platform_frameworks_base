@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsPrintTestCases",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        }
-      ]
+      "name": "CtsPrintTestCases_Presubmit"
     }
   ]
 }

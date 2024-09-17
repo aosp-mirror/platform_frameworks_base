@@ -112,6 +112,13 @@ flag {
 }
 
 flag {
+    namespace: "input_native"
+    name: "use_key_gesture_event_handler"
+    description: "Use KeyGestureEvent handler APIs to control system shortcuts and key gestures"
+    bug: "358569822"
+}
+
+flag {
   name: "keyboard_repeat_keys"
   namespace: "input_native"
   description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"

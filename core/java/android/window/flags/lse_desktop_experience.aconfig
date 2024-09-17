@@ -86,10 +86,13 @@ flag {
 }
 
 flag {
-    name: "enable_additional_windows_above_status_bar"
+    name: "enable_handle_input_fix"
     namespace: "lse_desktop_experience"
-    description: "Allows for additional windows tied to WindowDecoration to be layered between status bar and notification shade."
+    description: "Enables using AdditionalSystemViewContainer to resolve handle input issues."
     bug: "316186265"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -247,6 +250,16 @@ flag {
     namespace: "lse_desktop_experience"
     description: "Adds a minimize button the the caption bar"
     bug: "356843241"
+}
+
+flag {
+    name: "enable_hold_to_drag_app_handle"
+    namespace: "lse_desktop_experience"
+    description: "Requires hold-to-drag the App Handle when using touchscreen input"
+    bug: "356409496"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {

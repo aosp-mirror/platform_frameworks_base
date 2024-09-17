@@ -180,11 +180,7 @@ public class MetadataSyncAdapter {
             ArraySet<String> addedFunctionIds = addedFunctionsDiffMap.valueAt(i);
             for (String addedFunctionId : addedFunctionIds) {
                 putDocumentRequestBuilder.addGenericDocuments(
-                        new AppFunctionRuntimeMetadata.Builder(
-                                        packageName,
-                                        addedFunctionId,
-                                        AppFunctionRuntimeMetadata
-                                                .PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID)
+                        new AppFunctionRuntimeMetadata.Builder(packageName, addedFunctionId)
                                 .build());
             }
         }
@@ -232,12 +228,11 @@ public class MetadataSyncAdapter {
                     runtimeMetadataSchema.getSchemaType(),
                     true,
                     new PackageIdentifier(packageName, packageCert));
+            setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
+                    runtimeMetadataSchema.getSchemaType(), Set.of(EXECUTE_APP_FUNCTIONS));
+            setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
+                    runtimeMetadataSchema.getSchemaType(), Set.of(EXECUTE_APP_FUNCTIONS_TRUSTED));
         }
-
-        setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
-                RUNTIME_SCHEMA_TYPE, Set.of(EXECUTE_APP_FUNCTIONS));
-        setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
-                RUNTIME_SCHEMA_TYPE, Set.of(EXECUTE_APP_FUNCTIONS_TRUSTED));
         return setSchemaRequestBuilder.build();
     }
 
