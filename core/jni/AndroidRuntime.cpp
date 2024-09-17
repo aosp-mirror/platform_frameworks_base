@@ -158,6 +158,8 @@ extern int register_android_os_SELinux(JNIEnv* env);
 extern int register_android_os_storage_StorageManager(JNIEnv* env);
 extern int register_android_os_SystemProperties(JNIEnv *env);
 extern int register_android_os_SystemClock(JNIEnv* env);
+extern int register_android_os_PerfettoTrace(JNIEnv* env);
+extern int register_android_os_PerfettoTrackEventExtra(JNIEnv* env);
 extern int register_android_os_Trace(JNIEnv* env);
 extern int register_android_os_FileObserver(JNIEnv *env);
 extern int register_android_os_UEventObserver(JNIEnv* env);
@@ -1605,6 +1607,8 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_GraphicsEnvironment),
         REG_JNI(register_android_os_MessageQueue),
         REG_JNI(register_android_os_SELinux),
+        REG_JNI(register_android_os_PerfettoTrace),
+        REG_JNI(register_android_os_PerfettoTrackEventExtra),
         REG_JNI(register_android_os_Trace),
         REG_JNI(register_android_os_UEventObserver),
         REG_JNI(register_android_net_LocalSocketImpl),

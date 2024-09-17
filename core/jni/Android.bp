@@ -179,6 +179,8 @@ cc_library_shared_for_libandroid_runtime {
                 "android_os_NativeHandle.cpp",
                 "android_os_MemoryFile.cpp",
                 "android_os_MessageQueue.cpp",
+                "android_os_PerfettoTrace.cpp",
+                "android_os_PerfettoTrackEventExtra.cpp",
                 "android_os_Parcel.cpp",
                 "android_os_PerformanceHintManager.cpp",
                 "android_os_SELinux.cpp",
