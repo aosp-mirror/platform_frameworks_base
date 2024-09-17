@@ -377,6 +377,8 @@ bool TableMerger::MergeFile(const ResourceFile& file_desc, bool overlay, io::IFi
   file_ref->SetSource(file_desc.source);
   file_ref->type = file_desc.type;
   file_ref->file = file;
+  file_ref->SetFlagStatus(file_desc.flag_status);
+  file_ref->SetFlag(file_desc.flag);
 
   ResourceTablePackage* pkg = table.FindOrCreatePackage(file_desc.name.package);
   pkg->FindOrCreateType(file_desc.name.type)

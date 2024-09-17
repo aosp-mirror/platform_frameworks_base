@@ -49,6 +49,8 @@ struct FeatureFlagProperties {
 
 using FeatureFlagValues = std::map<std::string, FeatureFlagProperties, std::less<>>;
 
+std::optional<FeatureFlagAttribute> ParseFlag(std::optional<std::string_view> flag_text);
+
 std::optional<FlagStatus> GetFlagStatus(const std::optional<FeatureFlagAttribute>& flag,
                                         const FeatureFlagValues& feature_flag_values,
                                         std::string* out_err);

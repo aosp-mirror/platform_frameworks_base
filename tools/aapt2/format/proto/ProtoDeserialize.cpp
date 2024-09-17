@@ -643,6 +643,12 @@ bool DeserializeCompiledFileFromPb(const pb::internal::CompiledFile& pb_file,
   out_file->source.path = pb_file.source_path();
   out_file->type = DeserializeFileReferenceTypeFromPb(pb_file.type());
 
+  out_file->flag_status = (FlagStatus)pb_file.flag_status();
+  if (!pb_file.flag_name().empty()) {
+    out_file->flag =
+        FeatureFlagAttribute{.name = pb_file.flag_name(), .negated = pb_file.flag_negated()};
+  }
+
   std::string config_error;
   if (!DeserializeConfigFromPb(pb_file.config(), &out_file->config, &config_error)) {
     std::ostringstream error;

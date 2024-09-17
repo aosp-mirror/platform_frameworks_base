@@ -29,6 +29,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -130,6 +131,24 @@ public class ResourceFlaggingTest {
         assertThat((View) ll.findViewById(R.id.text1)).isNotNull();
         assertThat((View) ll.findViewById(R.id.disabled_text)).isNull();
         assertThat((View) ll.findViewById(R.id.text2)).isNotNull();
+    }
+
+    @Test
+    public void testEnabledFlagLayoutOverrides() {
+        LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.layout3, null);
+        assertThat(ll).isNotNull();
+        assertThat((View) ll.findViewById(R.id.text1)).isNotNull();
+        assertThat(((TextView) ll.findViewById(R.id.text1)).getText()).isEqualTo("foobar");
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testDisabledLayout() {
+        getLayoutInflater().inflate(R.layout.layout2, null);
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testDisabledDrawable() {
+        mResources.getDrawable(R.drawable.removedpng);
     }
 
     private LayoutInflater getLayoutInflater() {

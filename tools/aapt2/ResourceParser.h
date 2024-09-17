@@ -90,8 +90,6 @@ class ResourceParser {
  private:
   DISALLOW_COPY_AND_ASSIGN(ResourceParser);
 
-  std::optional<FeatureFlagAttribute> GetFlag(xml::XmlPullParser* parser);
-
   std::optional<FlattenedXmlSubTree> CreateFlattenSubTree(xml::XmlPullParser* parser);
 
   // Parses the XML subtree as a StyleString (flattened XML representation for strings with

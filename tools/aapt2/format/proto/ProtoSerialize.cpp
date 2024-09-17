@@ -755,6 +755,11 @@ void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledF
   out_file->set_source_path(file.source.path);
   out_file->set_type(SerializeFileReferenceTypeToPb(file.type));
   SerializeConfig(file.config, out_file->mutable_config());
+  out_file->set_flag_status((uint32_t)file.flag_status);
+  if (file.flag) {
+    out_file->set_flag_negated(file.flag->negated);
+    out_file->set_flag_name(file.flag->name);
+  }
 
   for (const SourcedResourceName& exported : file.exported_symbols) {
     pb::internal::CompiledFile_Symbol* pb_symbol = out_file->add_exported_symbol();

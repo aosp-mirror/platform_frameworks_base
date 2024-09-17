@@ -196,20 +196,11 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     // If visibility was forced, we need to use it when creating a new resource and also error if
     // we try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
     parser_options.visibility = options.visibility;
+    parser_options.flag = ParseFlag(path_data.flag_name);
 
-    if (!path_data.flag_name.empty()) {
-      FeatureFlagAttribute flag;
-      const auto& name = path_data.flag_name;
-      if (name.starts_with('!')) {
-        flag.negated = true;
-        flag.name = name.substr(1);
-      } else {
-        flag.name = name;
-      }
-      parser_options.flag = flag;
-
+    if (parser_options.flag) {
       std::string error;
-      auto flag_status = GetFlagStatus(flag, options.feature_flag_values, &error);
+      auto flag_status = GetFlagStatus(parser_options.flag, options.feature_flag_values, &error);
       if (flag_status) {
         parser_options.flag_status = std::move(flag_status.value());
       } else {
@@ -443,6 +434,18 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
   xmlres->file.config = path_data.config;
   xmlres->file.source = path_data.source;
   xmlres->file.type = ResourceFile::Type::kProtoXml;
+  xmlres->file.flag = ParseFlag(path_data.flag_name);
+
+  if (xmlres->file.flag) {
+    std::string error;
+    auto flag_status = GetFlagStatus(xmlres->file.flag, options.feature_flag_values, &error);
+    if (flag_status) {
+      xmlres->file.flag_status = flag_status.value();
+    } else {
+      context->GetDiagnostics()->Error(android::DiagMessage(path_data.source) << error);
+      return false;
+    }
+  }
 
   // Collect IDs that are defined here.
   XmlIdCollector collector;
@@ -531,6 +534,27 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
   res_file.config = path_data.config;
   res_file.source = path_data.source;
   res_file.type = ResourceFile::Type::kPng;
+
+  if (!path_data.flag_name.empty()) {
+    FeatureFlagAttribute flag;
+    auto name = path_data.flag_name;
+    if (name.starts_with('!')) {
+      flag.negated = true;
+      flag.name = name.substr(1);
+    } else {
+      flag.name = name;
+    }
+    res_file.flag = flag;
+
+    std::string error;
+    auto flag_status = GetFlagStatus(flag, options.feature_flag_values, &error);
+    if (flag_status) {
+      res_file.flag_status = flag_status.value();
+    } else {
+      context->GetDiagnostics()->Error(android::DiagMessage(path_data.source) << error);
+      return false;
+    }
+  }
 
   {
     auto data = file->OpenAsData();
