@@ -87,6 +87,8 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.FocusTransitionListener;
+import com.android.wm.shell.shared.IFocusTransitionListener;
 import com.android.wm.shell.shared.IHomeTransitionListener;
 import com.android.wm.shell.shared.IShellTransitions;
 import com.android.wm.shell.shared.ShellTransitions;
@@ -103,6 +105,7 @@ import com.android.wm.shell.transition.tracing.TransitionTracer;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 /**
  * Plays transition animations. Within this player, each transition has a lifecycle.
@@ -224,6 +227,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     private final ArrayList<TransitionObserver> mObservers = new ArrayList<>();
 
     private HomeTransitionObserver mHomeTransitionObserver;
+    private FocusTransitionObserver mFocusTransitionObserver;
 
     /** List of {@link Runnable} instances to run when the last active transition has finished.  */
     private final ArrayList<Runnable> mRunWhenIdleQueue = new ArrayList<>();
@@ -309,10 +313,12 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull ShellExecutor mainExecutor,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor,
-            @NonNull HomeTransitionObserver observer) {
+            @NonNull HomeTransitionObserver homeTransitionObserver,
+            @NonNull FocusTransitionObserver focusTransitionObserver) {
         this(context, shellInit, new ShellCommandHandler(), shellController, organizer, pool,
                 displayController, mainExecutor, mainHandler, animExecutor,
-                new RootTaskDisplayAreaOrganizer(mainExecutor, context, shellInit), observer);
+                new RootTaskDisplayAreaOrganizer(mainExecutor, context, shellInit),
+                homeTransitionObserver, focusTransitionObserver);
     }
 
     public Transitions(@NonNull Context context,
@@ -326,7 +332,8 @@ public class Transitions implements RemoteCallable<Transitions>,
             @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor,
             @NonNull RootTaskDisplayAreaOrganizer rootTDAOrganizer,
-            @NonNull HomeTransitionObserver observer) {
+            @NonNull HomeTransitionObserver homeTransitionObserver,
+            @NonNull FocusTransitionObserver focusTransitionObserver) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -345,7 +352,8 @@ public class Transitions implements RemoteCallable<Transitions>,
         mHandlers.add(mRemoteTransitionHandler);
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
         shellInit.addInitCallback(this::onInit, this);
-        mHomeTransitionObserver = observer;
+        mHomeTransitionObserver = homeTransitionObserver;
+        mFocusTransitionObserver = focusTransitionObserver;
 
         if (android.tracing.Flags.perfettoTransitionTracing()) {
             mTransitionTracer = new PerfettoTransitionTracer();
@@ -384,6 +392,8 @@ public class Transitions implements RemoteCallable<Transitions>,
 
         mShellCommandHandler.addCommandCallback("transitions", this, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+
+        registerObserver(mFocusTransitionObserver);
     }
 
     public boolean isRegistered() {
@@ -1573,6 +1583,21 @@ public class Transitions implements RemoteCallable<Transitions>,
             mMainExecutor.execute(
                     () -> mRemoteTransitionHandler.removeFiltered(remoteTransition));
         }
+
+        @Override
+        public void setFocusTransitionListener(FocusTransitionListener listener,
+                Executor executor) {
+            mMainExecutor.execute(() ->
+                    mFocusTransitionObserver.setLocalFocusTransitionListener(listener, executor));
+
+        }
+
+        @Override
+        public void unsetFocusTransitionListener(FocusTransitionListener listener) {
+            mMainExecutor.execute(() ->
+                    mFocusTransitionObserver.unsetLocalFocusTransitionListener(listener));
+
+        }
     }
 
     /**
@@ -1630,6 +1655,15 @@ public class Transitions implements RemoteCallable<Transitions>,
                     (transitions) -> {
                         transitions.mHomeTransitionObserver.setHomeTransitionListener(transitions,
                                 listener);
+                    });
+        }
+
+        @Override
+        public void setFocusTransitionListener(IFocusTransitionListener listener) {
+            executeRemoteCallWithTaskPermission(mTransitions, "setFocusTransitionListener",
+                    (transitions) -> {
+                        transitions.mFocusTransitionObserver.setRemoteFocusTransitionListener(
+                                transitions, listener);
                     });
         }
 
