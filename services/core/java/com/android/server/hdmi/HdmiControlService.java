@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.media.tv.flags.Flags.hdmiControlEnhancedBehavior;
+
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_DISABLED;
@@ -5136,5 +5138,9 @@ public class HdmiControlService extends SystemService {
         } else {
             tv().startArcAction(enabled, callback);
         }
+    }
+
+    protected boolean isHdmiControlEnhancedBehaviorFlagEnabled() {
+        return hdmiControlEnhancedBehavior();
     }
 }
