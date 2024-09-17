@@ -106,6 +106,9 @@ internal constructor(
     override var userInfo: UserInfo by SynchronizedDelegate(UserInfo(context.userId, "", 0))
         protected set
 
+    override var isUserSwitching = false
+        protected set
+
     /**
      * Returns a [List<UserInfo>] of all profiles associated with the current user.
      *
@@ -197,6 +200,7 @@ internal constructor(
                 }
 
                 override fun onUserSwitching(newUserId: Int, reply: IRemoteCallback?) {
+                    isUserSwitching = true
                     if (isBackgroundUserSwitchEnabled) {
                         userSwitchingJob?.cancel()
                         userSwitchingJob =
@@ -210,6 +214,7 @@ internal constructor(
                 }
 
                 override fun onUserSwitchComplete(newUserId: Int) {
+                    isUserSwitching = false
                     if (isBackgroundUserSwitchEnabled) {
                         afterUserSwitchingJob?.cancel()
                         afterUserSwitchingJob =
@@ -221,7 +226,7 @@ internal constructor(
                     }
                 }
             },
-            TAG
+            TAG,
         )
     }
 
@@ -349,7 +354,7 @@ internal constructor(
 
 private data class DataItem(
     val callback: WeakReference<UserTracker.Callback>,
-    val executor: Executor
+    val executor: Executor,
 ) {
     fun sameOrEmpty(other: UserTracker.Callback): Boolean {
         return callback.get()?.equals(other) ?: true

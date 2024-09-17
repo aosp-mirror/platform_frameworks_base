@@ -158,7 +158,7 @@ constructor(
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         val context = inflater.context
         return ComposeView(context).apply {
@@ -181,7 +181,7 @@ constructor(
                                     notificationScrimClippingParams.bottom,
                                     notificationScrimClippingParams.radius,
                                 )
-                            }
+                            },
                     ) {
                         AnimatedContent(targetState = qsState) {
                             when (it) {
@@ -272,7 +272,7 @@ constructor(
         qsExpansionFraction: Float,
         panelExpansionFraction: Float,
         headerTranslation: Float,
-        squishinessFraction: Float
+        squishinessFraction: Float,
     ) {
         viewModel.qsExpansionValue = qsExpansionFraction
         viewModel.panelExpansionFractionValue = panelExpansionFraction
@@ -318,12 +318,12 @@ constructor(
     override fun setTransitionToFullShadeProgress(
         isTransitioningToFullShade: Boolean,
         qsTransitionFraction: Float,
-        qsSquishinessFraction: Float
+        qsSquishinessFraction: Float,
     ) {
         super.setTransitionToFullShadeProgress(
             isTransitioningToFullShade,
             qsTransitionFraction,
-            qsSquishinessFraction
+            qsSquishinessFraction,
         )
     }
 
@@ -334,7 +334,7 @@ constructor(
         bottom: Int,
         cornerRadius: Int,
         visible: Boolean,
-        fullWidth: Boolean
+        fullWidth: Boolean,
     ) {
         notificationScrimClippingParams.isEnabled = visible
         notificationScrimClippingParams.top = top
@@ -402,7 +402,7 @@ constructor(
                 launch {
                     setListenerJob(
                         heightListener,
-                        viewModel.containerViewModel.editModeViewModel.isEditing
+                        viewModel.containerViewModel.editModeViewModel.isEditing,
                     ) {
                         onQsHeightChanged()
                     }
@@ -410,7 +410,7 @@ constructor(
                 launch {
                     setListenerJob(
                         qsContainerController,
-                        viewModel.containerViewModel.editModeViewModel.isEditing
+                        viewModel.containerViewModel.editModeViewModel.isEditing,
                     ) {
                         setCustomizerShowing(it)
                     }
@@ -422,6 +422,7 @@ constructor(
     @Composable
     private fun QuickQuickSettingsElement() {
         val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+        val bottomPadding = dimensionResource(id = R.dimen.qqs_layout_padding_bottom)
         DisposableEffect(Unit) {
             qqsVisible.value = true
 
@@ -441,7 +442,7 @@ constructor(
                             )
                         }
                         .onSizeChanged { size -> qqsHeight.value = size.height }
-                        .padding(top = { qqsPadding })
+                        .padding(top = { qqsPadding }, bottom = { bottomPadding.roundToPx() })
             ) {
                 val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
                 if (qsEnabled) {
@@ -450,7 +451,7 @@ constructor(
                         modifier =
                             Modifier.collapseExpandSemanticAction(
                                 stringResource(id = R.string.accessibility_quick_settings_expand)
-                            )
+                            ),
                     )
                 }
             }
@@ -482,7 +483,7 @@ constructor(
                     FooterActions(
                         viewModel = viewModel.footerActionsViewModel,
                         qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                        modifier = Modifier.sysuiResTag("qs_footer_actions")
+                        modifier = Modifier.sysuiResTag("qs_footer_actions"),
                     )
                 }
             }
@@ -562,7 +563,7 @@ private fun View.setBackPressedDispatcher() {
 private suspend inline fun <Listener : Any, Data> setListenerJob(
     listenerFlow: MutableStateFlow<Listener?>,
     dataFlow: Flow<Data>,
-    crossinline onCollect: suspend Listener.(Data) -> Unit
+    crossinline onCollect: suspend Listener.(Data) -> Unit,
 ) {
     coroutineScope {
         try {

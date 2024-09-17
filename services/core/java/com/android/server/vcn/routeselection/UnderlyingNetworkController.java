@@ -360,7 +360,10 @@ public class UnderlyingNetworkController {
         final NetworkRequest.Builder nrBuilder =
                 getBaseNetworkRequestBuilder()
                         .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                        .setNetworkSpecifier(new TelephonyNetworkSpecifier(subId));
+                        .setNetworkSpecifier(
+                                new TelephonyNetworkSpecifier.Builder()
+                                        .setSubscriptionId(subId)
+                                        .build());
 
         for (CapabilityMatchCriteria capMatchCriteria : capsMatchCriteria) {
             final int cap = capMatchCriteria.capability;

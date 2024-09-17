@@ -1,21 +1,12 @@
 {
     "presubmit": [
         {
-            "name": "DisplayServiceTests",
-            "options": [
-                {"include-filter": "com.android.server.display"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-                {"exclude-annotation": "org.junit.Ignore"}
-            ]
+            "name": "DisplayServiceTests_server_display"
         }
     ],
     "postsubmit": [
         {
-            "name": "DisplayServiceTests",
-            "options": [
-                {"include-filter": "com.android.server.display"},
-                {"exclude-annotation": "org.junit.Ignore"}
-            ]
+            "name": "DisplayServiceTests_server_display"
         }
     ]
 }

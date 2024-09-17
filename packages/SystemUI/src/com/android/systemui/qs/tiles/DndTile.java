@@ -49,7 +49,7 @@ import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.RefactorFlagUtils;
+import com.android.systemui.modes.shared.ModesUi;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -108,8 +108,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 statusBarStateController, activityStarter, qsLogger);
 
         // If the flag is on, this shouldn't run at all since the modes tile replaces the DND tile.
-        RefactorFlagUtils.INSTANCE.assertInLegacyMode(android.app.Flags.modesUi(),
-                android.app.Flags.FLAG_MODES_UI);
+        ModesUi.assertInLegacyMode();
 
         mController = zenModeController;
         mSharedPreferences = sharedPreferences;

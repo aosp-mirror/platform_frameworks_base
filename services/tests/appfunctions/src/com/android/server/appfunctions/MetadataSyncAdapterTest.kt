@@ -53,7 +53,7 @@ class MetadataSyncAdapterTest {
     fun getPackageToFunctionIdMap() {
         val searchSession = FakeSearchSession()
         val functionRuntimeMetadata =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId").build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         searchSession.put(putDocumentsRequest).get()
@@ -74,13 +74,13 @@ class MetadataSyncAdapterTest {
     fun getPackageToFunctionIdMap_multipleDocuments() {
         val searchSession = FakeSearchSession()
         val functionRuntimeMetadata =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId").build()
         val functionRuntimeMetadata1 =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId1", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId1").build()
         val functionRuntimeMetadata2 =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId2", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId2").build()
         val functionRuntimeMetadata3 =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId3", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId3").build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder()
                 .addGenericDocuments(
@@ -133,7 +133,7 @@ class MetadataSyncAdapterTest {
         val runtimeSearchSession = FakeSearchSession()
         val staticSearchSession = FakeSearchSession()
         val functionRuntimeMetadata =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId").build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         runtimeSearchSession.put(putDocumentsRequest).get()
@@ -177,7 +177,7 @@ class MetadataSyncAdapterTest {
         val runtimeSearchSession = FakeSearchSession()
         val staticSearchSession = FakeSearchSession()
         val functionRuntimeMetadata =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId").build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         staticSearchSession.put(putDocumentsRequest).get()
@@ -234,7 +234,7 @@ class MetadataSyncAdapterTest {
         val runtimeSearchSession = FakeSearchSession()
         val staticSearchSession = FakeSearchSession()
         val functionRuntimeMetadata =
-            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId", "").build()
+            AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, "testFunctionId").build()
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         runtimeSearchSession.put(putDocumentsRequest).get()

@@ -35,4 +35,18 @@ import java.lang.annotation.Target;
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
 public @interface RavenwoodRemove {
+    /**
+     * One or more classes that aren't yet supported by Ravenwood, which is why this method throws.
+     */
+    Class<?>[] blockedBy() default {};
+
+    /**
+     * General free-form description of why this method throws.
+     */
+    String reason() default "";
+
+    /**
+     * Tracking bug number, if any.
+     */
+    long bug() default 0;
 }

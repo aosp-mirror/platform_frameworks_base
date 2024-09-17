@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Aplikazio bat baimen-eskaera oztopatzen ari da eta, ondorioz, ezin da egiaztatu erantzuna."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Eginbide bat erabiltzen hasteko, saka ezazu:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoiarekin"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Aukeratu zein eginbide erabili nahi duzun bolumen-botoien lasterbidearekin"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Desaktibatu da <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editatu lasterbideak"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>
@@ -2011,6 +2010,8 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ezarri pantailaren blokeoa"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ezarri pantailaren blokeoa"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Eremu pribatua erabiltzeko, ezarri pantailaren blokeoa gailuan"</string>
+    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikazioa ez dago erabilgarri"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ez dago erabilgarri une honetan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ez dago erabilgarri"</string>

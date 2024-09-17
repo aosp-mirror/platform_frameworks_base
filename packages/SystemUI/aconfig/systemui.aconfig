@@ -1313,6 +1313,16 @@ flag {
 }
 
 flag {
+   name: "sim_pin_bouncer_reset"
+   namespace: "systemui"
+   description: "The SIM PIN bouncer does not close after unlocking"
+   bug: "297461589"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "use_transitions_for_keyguard_occluded"
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"

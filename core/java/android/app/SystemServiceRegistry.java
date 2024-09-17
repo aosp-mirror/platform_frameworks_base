@@ -1667,11 +1667,20 @@ public final class SystemServiceRegistry {
                     @Override
                     public WearableSensingManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                        IBinder iBinder = ServiceManager.getService(
                                 Context.WEARABLE_SENSING_SERVICE);
-                        IWearableSensingManager manager =
-                                IWearableSensingManager.Stub.asInterface(iBinder);
-                        return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        if (iBinder != null) {
+                            IWearableSensingManager manager =
+                                    IWearableSensingManager.Stub.asInterface(iBinder);
+                            return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        }
+                        // Wear intentionally removes the service, so do not throw a
+                        // ServiceNotFoundException when the service is not absent.
+                        if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                                && android.server.Flags.removeWearableSensingServiceFromWear()) {
+                            return null;
+                        }
+                        throw new ServiceNotFoundException(Context.WEARABLE_SENSING_SERVICE);
                     }});
 
         registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
