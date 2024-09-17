@@ -17,12 +17,14 @@ package com.android.ravenwoodtest.runnercallbacktests;
 
 import static org.junit.Assume.assumeTrue;
 
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.annotations.NoRavenizer;
 import android.platform.test.ravenwood.RavenwoodAwareTestRunner;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -343,6 +345,36 @@ public class RavenwoodRunnerCallbackTest extends RavenwoodRunnerTestBase {
     // CHECKSTYLE:ON
     public static class ExceptionFromInnerRunnerConstructorTest {
         public ExceptionFromInnerRunnerConstructorTest(String arg1, String arg2) {
+        }
+
+        @Test
+        public void test1() {
+        }
+
+        @Test
+        public void test2() {
+        }
+    }
+
+    /**
+     * The test class is unloadable, but has a @DisabledOnRavenwood.
+     */
+    @RunWith(AndroidJUnit4.class)
+    @DisabledOnRavenwood
+    // CHECKSTYLE:OFF
+    @Expected("""
+    testRunStarted: classes
+    testSuiteStarted: classes
+    testSuiteStarted: ClassUnloadbleTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleTest)
+    testIgnored: ClassUnloadbleTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleTest)
+    testSuiteFinished: ClassUnloadbleTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleTest)
+    testSuiteFinished: classes
+    testRunFinished: 0,0,0,1
+    """)
+    // CHECKSTYLE:ON
+    public static class ClassUnloadbleTest {
+        static {
+            Assert.fail("Class unloadable!");
         }
 
         @Test
