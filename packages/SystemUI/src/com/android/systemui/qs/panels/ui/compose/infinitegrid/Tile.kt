@@ -140,6 +140,7 @@ fun Tile(tile: TileViewModel, iconOnly: Boolean, modifier: Modifier) {
                     }
                 },
                 onLongClick = { tile.onLongClick(expandable) },
+                accessibilityUiState = uiState.accessibilityUiState,
             )
         }
     }
