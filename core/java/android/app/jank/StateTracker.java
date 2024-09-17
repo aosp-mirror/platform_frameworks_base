@@ -36,7 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 @FlaggedApi(Flags.FLAG_DETAILED_APP_JANK_METRICS_API)
-@VisibleForTesting
 public class StateTracker {
 
     // Used to synchronize access to mPreviousStates.
@@ -188,7 +187,6 @@ public class StateTracker {
     /**
      * @hide
      */
-    @VisibleForTesting
     public static class StateData {
 
         // Concatenated string of widget category, widget state and widget id.
