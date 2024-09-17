@@ -2007,7 +2007,7 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void selectionChanged(BubbleViewProvider selectedBubble) {
             // Only need to update the layer view if we're currently expanded for selection changes.
-            if (mLayerView != null && mLayerView.isExpanded()) {
+            if (mLayerView != null && isStackExpanded()) {
                 mLayerView.showExpandedView(selectedBubble);
             }
         }
