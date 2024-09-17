@@ -27,28 +27,39 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 
 /** Creates the state of the current selected tile that is remembered across compositions. */
 @Composable
-fun rememberSelectionState(): MutableSelectionState {
-    return remember { MutableSelectionState() }
+fun rememberSelectionState(
+    onResize: (TileSpec) -> Unit,
+    onResizeEnd: (TileSpec) -> Unit,
+): MutableSelectionState {
+    return remember { MutableSelectionState(onResize, onResizeEnd) }
 }
 
+/**
+ * Holds the selected [TileSpec] and whether the selection was manual, i.e. caused by a tap from the
+ * user.
+ */
+data class Selection(val tileSpec: TileSpec, val manual: Boolean)
+
 /** Holds the state of the current selection. */
-class MutableSelectionState {
-    private var _selectedTile = mutableStateOf<TileSpec?>(null)
+class MutableSelectionState(
+    val onResize: (TileSpec) -> Unit,
+    private val onResizeEnd: (TileSpec) -> Unit,
+) {
+    private var _selection = mutableStateOf<Selection?>(null)
     private var _resizingState = mutableStateOf<ResizingState?>(null)
+
+    /** The [Selection] if a tile is selected, null if not. */
+    val selection by _selection
 
     /** The [ResizingState] of the selected tile is currently being resized, null if not. */
     val resizingState by _resizingState
 
-    fun isSelected(tileSpec: TileSpec): Boolean {
-        return _selectedTile.value?.let { it == tileSpec } ?: false
-    }
-
-    fun select(tileSpec: TileSpec) {
-        _selectedTile.value = tileSpec
+    fun select(tileSpec: TileSpec, manual: Boolean) {
+        _selection.value = Selection(tileSpec, manual)
     }
 
     fun unSelect() {
-        _selectedTile.value = null
+        _selection.value = null
         onResizingDragEnd()
     }
 
@@ -56,14 +67,21 @@ class MutableSelectionState {
         _resizingState.value?.onDrag(offset)
     }
 
-    fun onResizingDragStart(tileWidths: TileWidths, onResize: () -> Unit) {
-        if (_selectedTile.value == null) return
-
-        _resizingState.value = ResizingState(tileWidths, onResize)
+    fun onResizingDragStart(tileWidths: TileWidths) {
+        _selection.value?.let {
+            _resizingState.value = ResizingState(tileWidths) { onResize(it.tileSpec) }
+        }
     }
 
     fun onResizingDragEnd() {
         _resizingState.value = null
+        _selection.value?.let {
+            onResizeEnd(it.tileSpec)
+
+            // Mark the selection as automatic in case the tile ends up moving to a different
+            // row with its new size.
+            _selection.value = it.copy(manual = false)
+        }
     }
 }
 
@@ -76,10 +94,10 @@ fun Modifier.selectableTile(tileSpec: TileSpec, selectionState: MutableSelection
     return pointerInput(Unit) {
         detectTapGestures(
             onTap = {
-                if (selectionState.isSelected(tileSpec)) {
+                if (selectionState.selection?.tileSpec == tileSpec) {
                     selectionState.unSelect()
                 } else {
-                    selectionState.select(tileSpec)
+                    selectionState.select(tileSpec, manual = true)
                 }
             }
         )
