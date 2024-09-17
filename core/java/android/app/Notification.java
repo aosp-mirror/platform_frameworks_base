@@ -772,6 +772,17 @@ public class Notification implements Parcelable
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_SILENT_FLAG)
     public static final int FLAG_SILENT = 1 << 17;  //0x00020000
 
+    /**
+     * Bit to be bitwise-ored into the {@link #flags} field that should be
+     * set by the system if this notification is a promoted ongoing notification, either via a
+     * user setting or allowlist.
+     *
+     * Applications cannot set this flag directly, but the posting app and
+     * {@link android.service.notification.NotificationListenerService} can read it.
+     */
+    @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
+    public static final int FLAG_PROMOTED_ONGOING = 0x00040000;
+
     private static final List<Class<? extends Style>> PLATFORM_STYLE_CLASSES = Arrays.asList(
             BigTextStyle.class, BigPictureStyle.class, InboxStyle.class, MediaStyle.class,
             DecoratedCustomViewStyle.class, DecoratedMediaCustomViewStyle.class,
@@ -3107,6 +3118,53 @@ public class Notification implements Parcelable
         } finally {
             Trace.endSection();
         }
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean containsCustomViews() {
+        return contentView != null
+                || bigContentView != null
+                || headsUpContentView != null
+                || (publicVersion != null
+                && (publicVersion.contentView != null
+                || publicVersion.bigContentView != null
+                || publicVersion.headsUpContentView != null));
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasTitle() {
+        return extras != null
+                && (!TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE))
+                || !TextUtils.isEmpty(extras.getCharSequence(EXTRA_TITLE_BIG)));
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasPromotableStyle() {
+        //TODO(b/367739672): Add progress style
+        return extras == null || !extras.containsKey(Notification.EXTRA_TEMPLATE)
+                || isStyle(Notification.BigPictureStyle.class)
+                || isStyle(Notification.BigTextStyle.class)
+                || isStyle(Notification.CallStyle.class);
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
+    public boolean hasPromotableCharacteristics() {
+        return isColorized()
+                && hasTitle()
+                && !containsCustomViews()
+                && hasPromotableStyle();
     }
 
     /**
