@@ -2790,11 +2790,15 @@ class Task extends TaskFragment {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
+        final int lastDisplayId = getDisplayId();
         super.onDisplayChanged(dc);
         if (isLeafTask()) {
             final int displayId = (dc != null) ? dc.getDisplayId() : INVALID_DISPLAY;
-            mWmService.mAtmService.getTaskChangeNotificationController().notifyTaskDisplayChanged(
-                    mTaskId, displayId);
+            //Send the callback when the task reparented to another display.
+            if (lastDisplayId != displayId) {
+                mWmService.mAtmService.getTaskChangeNotificationController()
+                        .notifyTaskDisplayChanged(mTaskId, displayId);
+            }
         }
         if (isRootTask()) {
             updateSurfaceBounds();
