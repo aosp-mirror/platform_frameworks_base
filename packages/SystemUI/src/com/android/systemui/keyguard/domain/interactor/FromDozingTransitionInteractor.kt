@@ -95,10 +95,7 @@ constructor(
         scope.launch {
             powerInteractor.isAwake
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
-                .sample(
-                    keyguardInteractor.biometricUnlockState,
-                    ::Pair,
-                )
+                .sample(keyguardInteractor.biometricUnlockState, ::Pair)
                 .collect {
                     (
                         _,
@@ -203,21 +200,21 @@ constructor(
                             if (!SceneContainerFlag.isEnabled) {
                                 startTransitionTo(
                                     KeyguardState.GONE,
-                                    ownerReason = "waking from dozing"
+                                    ownerReason = "waking from dozing",
                                 )
                             }
                         } else if (primaryBouncerShowing) {
                             if (!SceneContainerFlag.isEnabled) {
                                 startTransitionTo(
                                     KeyguardState.PRIMARY_BOUNCER,
-                                    ownerReason = "waking from dozing"
+                                    ownerReason = "waking from dozing",
                                 )
                             }
                         } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
                             if (!SceneContainerFlag.isEnabled) {
                                 startTransitionTo(
                                     KeyguardState.GLANCEABLE_HUB,
-                                    ownerReason = "waking from dozing"
+                                    ownerReason = "waking from dozing",
                                 )
                             }
                         } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
@@ -227,7 +224,7 @@ constructor(
                         } else {
                             startTransitionTo(
                                 KeyguardState.LOCKSCREEN,
-                                ownerReason = "waking from dozing"
+                                ownerReason = "waking from dozing",
                             )
                         }
                     }

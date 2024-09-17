@@ -210,12 +210,12 @@ constructor(
                             // ends, to avoid transitioning to OCCLUDED erroneously when exiting
                             // the dream.
                             .debounce(100.milliseconds),
-                        ::Pair
+                        ::Pair,
                     )
                     .sampleFilter(
                         // When launching activities from widgets on the hub, we have a
                         // custom occlusion animation.
-                        communalSceneInteractor.isLaunchingWidget,
+                        communalSceneInteractor.isLaunchingWidget
                     ) { launchingWidget ->
                         !launchingWidget
                     }
@@ -253,7 +253,7 @@ constructor(
                         noneOf(
                             // When launching activities from widgets on the hub, we wait to change
                             // scenes until the activity launch is complete.
-                            communalSceneInteractor.isLaunchingWidget,
+                            communalSceneInteractor.isLaunchingWidget
                         ),
                     )
                     .filterRelevantKeyguardStateAnd { isKeyguardGoingAway -> isKeyguardGoingAway }
@@ -270,7 +270,7 @@ constructor(
                                 newScene = CommunalScenes.Blank,
                                 loggingReason = "hub to gone",
                                 transitionKey = CommunalTransitionKeys.SimpleFade,
-                                keyguardState = KeyguardState.GONE
+                                keyguardState = KeyguardState.GONE,
                             )
                         }
                     }

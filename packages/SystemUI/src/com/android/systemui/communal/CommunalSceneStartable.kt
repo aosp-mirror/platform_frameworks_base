@@ -146,7 +146,7 @@ constructor(
                 screenTimeout =
                     systemSettings.getInt(
                         Settings.System.SCREEN_OFF_TIMEOUT,
-                        DEFAULT_SCREEN_TIMEOUT
+                        DEFAULT_SCREEN_TIMEOUT,
                     )
             }
             .launchIn(bgScope)
@@ -160,7 +160,7 @@ constructor(
             combine(
                     communalSceneInteractor.currentScene,
                     // Emit a value on start so the combine starts.
-                    communalInteractor.userActivity.emitOnStart()
+                    communalInteractor.userActivity.emitOnStart(),
                 ) { scene, _ ->
                     // Only timeout if we're on the hub is open.
                     scene == CommunalScenes.Communal
@@ -219,7 +219,7 @@ constructor(
     }
 
     private suspend fun determineSceneAfterTransition(
-        lastStartedTransition: TransitionStep,
+        lastStartedTransition: TransitionStep
     ): Pair<SceneKey, TransitionKey>? {
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
