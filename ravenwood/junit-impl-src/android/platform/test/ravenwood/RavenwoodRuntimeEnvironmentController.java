@@ -18,6 +18,7 @@ package android.platform.test.ravenwood;
 
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
 
 import static org.junit.Assert.fail;
 
@@ -31,10 +32,14 @@ import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.os.RuntimeInit;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
@@ -114,6 +119,43 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static RavenwoodConfig sConfig;
+    private static boolean sInitialized = false;
+
+    /**
+     * Initialize the global environment.
+     */
+    public static void globalInitOnce() {
+        if (sInitialized) {
+            return;
+        }
+        sInitialized = true;
+
+        // We haven't initialized liblog yet, so directly write to System.out here.
+        RavenwoodCommonUtils.log(TAG, "globalInit()");
+
+        // Do the basic set up for the android sysprops.
+        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
+
+        // Make sure libandroid_runtime is loaded.
+        RavenwoodNativeLoader.loadFrameworkNativeCode();
+
+        // Redirect stdout/stdin to liblog.
+        RuntimeInit.redirectLogStreams();
+
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
+            try {
+                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+            } catch (ErrnoException e) {
+                // Shouldn't happen.
+            }
+        }
+
+        System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
+        // This will let AndroidJUnit4 use the original runner.
+        System.setProperty("android.junit.runner",
+                "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
+    }
 
     /**
      * Initialize the environment.
