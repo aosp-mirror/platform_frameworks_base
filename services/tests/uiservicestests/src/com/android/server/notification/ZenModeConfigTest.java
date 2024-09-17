@@ -1274,7 +1274,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         out.setOutput(new BufferedOutputStream(os), "utf-8");
         out.startDocument(null, true);
         out.startTag(null, tag);
-        ZenModeConfig.writeRuleXml(rule, out);
+        ZenModeConfig.writeRuleXml(rule, out, /* forBackup= */ false);
         out.endTag(null, tag);
         out.endDocument();
     }

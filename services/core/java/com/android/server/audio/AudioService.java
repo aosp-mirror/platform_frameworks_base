@@ -4006,6 +4006,7 @@ public class AudioService extends IAudioService.Stub
                             && isFullVolumeDevice(device);
                     boolean tvConditions = mHdmiTvClient != null
                             && mHdmiSystemAudioSupported
+                            && isFullVolumeDevice(device)
                             && !isAbsoluteVolumeDevice(device)
                             && !isA2dpAbsoluteVolumeDevice(device);
 

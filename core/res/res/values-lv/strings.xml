@@ -1747,8 +1747,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Kāda lietotne padara atļaujas pieprasījumu nesaprotamu, tāpēc nevar verificēt jūsu atbildi."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Izvēlieties funkcijas, ko izmantot ar pieejamības pogu"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Izvēlieties funkcijas, kuras piešķirt skaļuma pogu saīsnei"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
@@ -2012,6 +2011,8 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Iestatiet ekrāna bloķēšanu"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Iestatīt ekrāna bloķēšanu"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Lai izmantotu privāto telpu, iestatiet ekrāna bloķēšanu."</string>
+    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
+    <skip />
     <string name="app_blocked_title" msgid="7353262160455028160">"Lietotne nav pieejama"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pašlaik nav pieejama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nav pieejams"</string>

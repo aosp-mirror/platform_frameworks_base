@@ -105,8 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Zu Notiz hinzufügen"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Link einschließen"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
-    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
-    <skip />
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Es dürfen keine Links aus anderen Profilen hinzugefügt werden"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Bildschirmaufzeichnung"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Bildschirmaufzeichnung…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
@@ -1290,6 +1289,8 @@
     <string name="add" msgid="81036585205287996">"Hinzufügen"</string>
     <string name="manage_users" msgid="1823875311934643849">"Nutzer verwalten"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Diese Benachrichtigung lässt sich nicht auf einen Splitscreen ziehen"</string>
+    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
+    <skip />
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"WLAN nicht verfügbar"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioritätsmodus"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Wecker gestellt"</string>
@@ -1346,6 +1347,8 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Sperrbildschirm personalisieren"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Zum Anpassen des Sperrbildschirms entsperren"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Kein WLAN verfügbar"</string>
+    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
+    <skip />
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera blockiert"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera und Mikrofon blockiert"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon blockiert"</string>
@@ -1401,7 +1404,8 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Informationen zu Touchpad-Gesten, Tastenkombinationen und mehr"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Touch-Geste „Zurück“"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Touch-Geste „Startbildschirm“"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Aktionstaste"</string>
+    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fertig"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Zurück"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Wenn du zurückgehen möchtest, wische an einer beliebigen Stelle des Touchpads mit drei Fingern nach links oder rechts.\n\nDu kannst stattdessen auch die Tastenkombination „Aktion“ + „ESC“ verwenden."</string>
@@ -1411,6 +1415,14 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Du kannst jederzeit zum Startbildschirm gehen, indem du mit drei Fingern vom unteren Displayrand nach oben wischst."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Sehr gut!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Du hast den Schritt für die „Startbildschirm“-Geste abgeschlossen."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Aktionstaste"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Wenn du auf deine Apps zugreifen möchtest, drücke auf der Tastatur die Aktionstaste."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Glückwunsch!"</string>
@@ -1434,10 +1446,14 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Wische mit 3 Fingern nach oben und halte das Touchpad gedrückt. Tippe für mehr Infos zu Touch-Gesten."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Über die Tastatur alle Apps aufrufen"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Du kannst jederzeit die Aktionstaste drücken. Tippe für mehr Infos zu Touch-Gesten."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"„Extradunkel“ jetzt auf Helligkeitsleiste verfügbar"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Du kannst das Display jetzt extradunkel machen, indem du die Helligkeit vom oberen Displayrand aus noch weiter senkst.\n\nDas funktioniert in dunklen Umgebungen am besten."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Verknüpfung für „Extradunkel“ entfernen"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Verknüpfung für „Extradunkel“ wurde entfernt. Wenn du die Helligkeit reduzieren möchtest, verwende einfach die normale Helligkeitsleiste."</string>
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
+    <skip />
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
+    <skip />
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
+    <skip />
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
+    <skip />
     <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
     <skip />
     <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->

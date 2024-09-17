@@ -57,6 +57,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -494,7 +495,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testIgnoresSimStateCallback_rebroadcast() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
 
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(), intent);
         mTestableLooper.processAllMessages();
@@ -515,7 +516,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTelephonyCapable_SimState_Absent() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE,
                 Intent.SIM_STATE_ABSENT);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
@@ -526,7 +528,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testTelephonyCapable_SimState_CardIOError() {
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE,
                 Intent.SIM_STATE_CARD_IO_ERROR);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext(),
@@ -593,7 +595,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_NOT_READY);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
@@ -608,7 +610,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_OUT_OF_SERVICE);
         state.fillInNotifierBundle(data);
-        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intent = defaultSimStateChangedIntent();
         intent.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_READY);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
@@ -649,7 +651,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ServiceState state = new ServiceState();
         state.setState(ServiceState.STATE_IN_SERVICE);
         state.fillInNotifierBundle(data);
-        Intent intentSimState = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        Intent intentSimState = defaultSimStateChangedIntent();
         intentSimState.putExtra(Intent.EXTRA_SIM_STATE
                 , Intent.SIM_STATE_LOADED);
         mKeyguardUpdateMonitor.mBroadcastReceiver.onReceive(getContext()
@@ -1313,6 +1315,33 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         mKeyguardUpdateMonitor.handleUserRemoved(user);
         assertThat(mKeyguardUpdateMonitor.isTrustUsuallyManaged(user)).isFalse();
+    }
+
+    @Test
+    public void testKeyguardMonitorStartsWhileUserIsSwitching() {
+        int userId = UserHandle.myUserId();
+        when(mUserTracker.getUserId()).thenReturn(userId);
+
+        /* First test the default behavior: handleUserSwitching() is not invoked */
+        when(mUserTracker.isUserSwitching()).thenReturn(false);
+        boolean invokeStartable = true;
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext, invokeStartable);
+        mKeyguardUpdateMonitor.registerCallback(mTestCallback);
+        mTestableLooper.processAllMessages();
+
+        verify(mTestCallback, never()).onUserSwitching(userId);
+
+        reset(mTestCallback);
+
+        /* Next test user switching is already in progress when started */
+        when(mUserTracker.isUserSwitching()).thenReturn(true);
+        invokeStartable = false;
+        mKeyguardUpdateMonitor = new TestableKeyguardUpdateMonitor(mContext, invokeStartable);
+        mKeyguardUpdateMonitor.registerCallback(mTestCallback);
+        mKeyguardUpdateMonitor.start();
+        mTestableLooper.processAllMessages();
+
+        verify(mTestCallback).onUserSwitching(userId);
     }
 
     @Test
@@ -2256,6 +2285,12 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         Assert.assertFalse(mKeyguardUpdateMonitor.forceIsDismissibleIsKeepingDeviceUnlocked());
     }
 
+    private Intent defaultSimStateChangedIntent() {
+        Intent intent = new Intent(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
+        intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
+        return intent;
+    }
+
     private void verifyFingerprintAuthenticateNeverCalled() {
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), any());
         verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
@@ -2441,6 +2476,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         AtomicInteger mCachedSimState = new AtomicInteger(-1);
 
         protected TestableKeyguardUpdateMonitor(Context context) {
+            this(context, true);
+        }
+
+        protected TestableKeyguardUpdateMonitor(Context context, boolean invokeStart) {
             super(context, mUserTracker,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mDumpManager,
@@ -2461,7 +2500,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             setAlternateBouncerVisibility(false);
             setPrimaryBouncerVisibility(false);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
-            start();
+            if (invokeStart) {
+                start();
+            }
         }
 
         public boolean hasSimStateJustChanged() {

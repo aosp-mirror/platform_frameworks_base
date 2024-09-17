@@ -69,7 +69,7 @@ public abstract class StartingData {
      * Note this isn't equal to transition playing, the period should be
      * Sync finishNow -> Start transaction apply.
      */
-    int mWaitForSyncTransactionCommitCount;
+    boolean mWaitForSyncTransactionCommit;
 
     /**
      * For Shell transition.
@@ -112,7 +112,7 @@ public abstract class StartingData {
     public String toString() {
         return getClass().getSimpleName() + "{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " mWaitForSyncTransactionCommitCount=" + mWaitForSyncTransactionCommitCount
+                + " waitForSyncTransactionCommit=" + mWaitForSyncTransactionCommit
                 + " removeAfterTransaction= " + mRemoveAfterTransaction
                 + "}";
     }

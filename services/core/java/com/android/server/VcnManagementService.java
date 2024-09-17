@@ -489,7 +489,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
             // Check subscription is active first; much cheaper/faster check, and an app (currently)
             // cannot be carrier privileged for inactive subscriptions.
-            if (subMgr.isValidSlotIndex(info.getSimSlotIndex())
+            final int simSlotIndex = info.getSimSlotIndex();
+            final boolean isValidSlotIndex =
+                    simSlotIndex >= 0 && simSlotIndex < telMgr.getActiveModemCount();
+            if (isValidSlotIndex
                     && telMgr.checkCarrierPrivilegesForPackage(pkgName)
                             == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
                 // TODO (b/173717728): Allow configuration for inactive, but manageable
