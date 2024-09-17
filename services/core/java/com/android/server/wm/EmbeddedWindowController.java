@@ -180,21 +180,29 @@ class EmbeddedWindowController {
         return true;
     }
 
-    boolean transferToHost(@NonNull InputTransferToken embeddedWindowToken,
+    boolean transferToHost(int callingUid, @NonNull InputTransferToken embeddedWindowToken,
             @NonNull WindowState transferToHostWindowState) {
         EmbeddedWindow ew = getByInputTransferToken(embeddedWindowToken);
         if (!isValidTouchGestureParams(transferToHostWindowState, ew)) {
             return false;
         }
+        if (callingUid != ew.mOwnerUid) {
+            throw new SecurityException(
+                    "Transfer request must originate from owner of transferFromToken");
+        }
         return mInputManagerService.transferTouchGesture(ew.getInputChannelToken(),
                 transferToHostWindowState.mInputChannelToken);
     }
 
-    boolean transferToEmbedded(WindowState hostWindowState,
+    boolean transferToEmbedded(int callingUid, WindowState hostWindowState,
             @NonNull InputTransferToken transferToToken) {
         final EmbeddedWindowController.EmbeddedWindow ew = getByInputTransferToken(transferToToken);
         if (!isValidTouchGestureParams(hostWindowState, ew)) {
             return false;
+        }
+        if (callingUid != hostWindowState.mOwnerUid) {
+            throw new SecurityException(
+                    "Transfer request must originate from owner of transferFromToken");
         }
         return mInputManagerService.transferTouchGesture(hostWindowState.mInputChannelToken,
                 ew.getInputChannelToken());
