@@ -30,24 +30,14 @@
       "file_patterns": ["(?i)drm|crypto"]
     },
     {
-      "name": "CtsMediaDrmFrameworkTestCases",
-      "options" : [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        }
-      ],
+      "name": "CtsMediaDrmFrameworkTestCases_Presubmit",
       "file_patterns": ["(?i)drm|crypto"]
     },
     {
       "file_patterns": [
         "[^/]*(LoudnessCodec)[^/]*\\.java"
       ],
-      "name": "LoudnessCodecApiTest",
-      "options": [
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        }
-      ]
+      "name": "LoudnessCodecApiTest_Presubmit"
     }
   ]
 }

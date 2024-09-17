@@ -1289,6 +1289,8 @@
     <string name="add" msgid="81036585205287996">"हाल्नुहोस्"</string>
     <string name="manage_users" msgid="1823875311934643849">"प्रयोगकर्ताहरूको व्यवस्थापन गर्नुहोस्"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"यो सूचना ड्र्याग गरेर स्प्लिट स्क्रिनमा लैजान मिल्दैन"</string>
+    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
+    <skip />
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi उपलब्ध छैन"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"प्राथमिकता मोड"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"अलार्म सेट गरिएको छ"</string>
@@ -1345,6 +1347,8 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"लक स्क्रिन कस्टमाइज गर्नुहोस्"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"लक स्क्रिन कस्टमाइज गर्न अनलक गर्नुहोस्"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi उपलब्ध छैन"</string>
+    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
+    <skip />
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"क्यामेरा ब्लक गरिएको छ"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"क्यामेरा र माइक्रोफोन ब्लक गरिएको छ"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"माइक्रोफोन ब्लक गरिएको छ"</string>
@@ -1400,7 +1404,8 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"टचप्याड जेस्चर, किबोर्डका सर्टकट र अन्य कुरा प्रयोग गर्न सिक्नुहोस्"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ब्याक जेस्चर"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"होम जेस्चर"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"एक्सन की"</string>
+    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"सम्पन्न भयो"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"पछाडि जानुहोस्"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"पछाडि जान तीन वटा औँलाले टचप्याडमा कतै छोएर बायाँ वा दायाँतिर स्वाइप गर्नुहोस्।\n\nतपाईं यसका लागि किबोर्डको सर्टकट \"Action + ESC\" पनि प्रयोग गर्न सक्नुहुन्छ।"</string>
@@ -1410,6 +1415,14 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"जुनसुकै बेला आफ्नो होम स्क्रिनमा जान स्क्रिनको फेदबाट तीन वटा औँलाले माथितिर स्वाइप गर्नुहोस्।"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"राम्रो!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"तपाईंले \"होम स्क्रिनमा जानुहोस्\" नामक जेस्चर प्रयोग गर्ने तरिका सिक्नुभयो।"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"एक्सन की"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"आफ्ना एपहरू एक्सेस गर्न आफ्नो किबोर्डमा भएको एक्सन की थिच्नुहोस्।"</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"बधाई छ!"</string>
@@ -1433,22 +1446,19 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"तिन वटा औँला प्रयोग गरी माथितिर स्वाइप गर्नुहोस् र होल्ड गर्नुहोस्। थप जेस्चर प्रयोग गर्ने तरिका सिक्न ट्याप गर्नुहोस्।"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"सबै एपहरू हेर्न आफ्नो किबोर्ड प्रयोग गर्नुहोस्"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"जुनसुकै बेला एक्सन की थिच्नुहोस्। थप जेस्चर प्रयोग गर्ने तरिका सिक्न ट्याप गर्नुहोस्।"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"\"अझै मधुरो\" सुविधा अब ब्राइटनेस बारमा समावेश गरिएको छ"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"तपाईं अब आफ्नो स्क्रिनको सिरानबाट चमकको स्तर घटाएर आफ्नो स्क्रिन अझै मधुरो बनाउन सक्नुहुन्छ।\n\nतपाईं अँध्यारो ठाउँमा भएका बेला यो सुविधाले अझ राम्रोसँग काम गर्छ।"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"\"अझै मधुरो\" सर्टकट हटाउनुहोस्"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"\"अझै मधुरो\" सर्टकट हटाइएको छ। स्क्रिनको चमक घटाउन \"रेगुलर ब्राइटनेस बार\" प्रयोग गर्नुहोस्।"</string>
-    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
-    <skip />
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"कनेक्टिभिटी"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"सर्वसुलभता"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"युटिलिटी"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"गोपनीयता"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"एपले उपलब्ध गराएका"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"डिस्प्ले"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"अज्ञात"</string>
 </resources>

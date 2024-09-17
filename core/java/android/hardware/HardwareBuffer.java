@@ -278,6 +278,17 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     }
 
     /**
+     * @hide
+     */
+    private static NativeAllocationRegistry getRegistry(long size) {
+        final long func = nGetNativeFinalizer();
+        final Class cls = HardwareBuffer.class;
+        return com.android.libcore.Flags.nativeMetrics()
+            ? NativeAllocationRegistry.createNonmalloced(cls, func, size)
+            : NativeAllocationRegistry.createNonmalloced(cls.getClassLoader(), func, size);
+    }
+
+    /**
      * Private use only. See {@link #create(int, int, int, int, long)}. May also be
      * called from JNI using an already allocated native <code>HardwareBuffer</code>.
      */
@@ -285,10 +296,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     private HardwareBuffer(long nativeObject) {
         mNativeObject = nativeObject;
         long bufferSize = nEstimateSize(nativeObject);
-        ClassLoader loader = HardwareBuffer.class.getClassLoader();
-        NativeAllocationRegistry registry = new NativeAllocationRegistry(
-                loader, nGetNativeFinalizer(), bufferSize);
-        mCleaner = registry.registerNativeAllocation(this, mNativeObject);
+        mCleaner = getRegistry(bufferSize).registerNativeAllocation(this, mNativeObject);
         mCloseGuard.open("HardwareBuffer.close");
     }
 

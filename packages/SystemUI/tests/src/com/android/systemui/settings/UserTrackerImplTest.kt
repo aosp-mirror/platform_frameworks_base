@@ -231,7 +231,7 @@ class UserTrackerImplTest : SysuiTestCase() {
                         "",
                         "",
                         UserInfo.FLAG_MANAGED_PROFILE,
-                        UserManager.USER_TYPE_PROFILE_MANAGED
+                        UserManager.USER_TYPE_PROFILE_MANAGED,
                     )
                 infoProfile.profileGroupId = id
                 listOf(info, infoProfile)
@@ -261,7 +261,7 @@ class UserTrackerImplTest : SysuiTestCase() {
                         "",
                         "",
                         UserInfo.FLAG_MANAGED_PROFILE or UserInfo.FLAG_QUIET_MODE,
-                        UserManager.USER_TYPE_PROFILE_MANAGED
+                        UserManager.USER_TYPE_PROFILE_MANAGED,
                     )
                 infoProfile.profileGroupId = id
                 listOf(info, infoProfile)
@@ -291,7 +291,7 @@ class UserTrackerImplTest : SysuiTestCase() {
                         "",
                         "",
                         UserInfo.FLAG_MANAGED_PROFILE,
-                        UserManager.USER_TYPE_PROFILE_MANAGED
+                        UserManager.USER_TYPE_PROFILE_MANAGED,
                     )
                 infoProfile.profileGroupId = id
                 listOf(info, infoProfile)
@@ -423,7 +423,7 @@ class UserTrackerImplTest : SysuiTestCase() {
                         "",
                         "",
                         UserInfo.FLAG_MANAGED_PROFILE,
-                        UserManager.USER_TYPE_PROFILE_MANAGED
+                        UserManager.USER_TYPE_PROFILE_MANAGED,
                     )
                 infoProfile.profileGroupId = id
                 listOf(info, infoProfile)
@@ -467,6 +467,24 @@ class UserTrackerImplTest : SysuiTestCase() {
             assertThat(callback.calledOnUserChanging).isEqualTo(0)
             assertThat(callback.calledOnUserChanged).isEqualTo(0)
             assertThat(callback.calledOnProfilesChanged).isEqualTo(0)
+        }
+
+    @Test
+    fun testisUserSwitching() =
+        testScope.runTest {
+            tracker.initialize(0)
+            val newID = 5
+            val profileID = newID + 10
+
+            val captor = ArgumentCaptor.forClass(IUserSwitchObserver::class.java)
+            verify(iActivityManager).registerUserSwitchObserver(capture(captor), anyString())
+            assertThat(tracker.isUserSwitching).isFalse()
+
+            captor.value.onUserSwitching(newID, userSwitchingReply)
+            assertThat(tracker.isUserSwitching).isTrue()
+
+            captor.value.onUserSwitchComplete(newID)
+            assertThat(tracker.isUserSwitching).isFalse()
         }
 
     private class TestCallback : UserTracker.Callback {

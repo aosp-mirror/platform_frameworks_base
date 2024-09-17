@@ -1,13 +1,7 @@
 {
     "presubmit": [
         {
-            "name": "CtsLocationFineTestCases",
-            "options": [
-                {
-                    // TODO: Wait for test to deflake - b/293934372
-                    "exclude-filter":"android.location.cts.fine.ScanningSettingsTest"
-                }
-             ]
+            "name": "CtsLocationFineTestCases_android_server_location"
         },
         {
             "name": "CtsLocationCoarseTestCases"
@@ -20,12 +14,7 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceWindow",
-            "options": [
-                {
-                    "include-filter": "android.server.wm.window.ToastWindowTest"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceWindow_window_toastwindowtest",
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
@@ -103,12 +92,7 @@
             "file_patterns": ["VcnManagementService\\.java"]
         },
         {
-            "name": "FrameworksVpnTests",
-            "options": [
-                {
-                    "exclude-annotation": "com.android.testutils.SkipPresubmit"
-                }
-            ],
+            "name": "FrameworksVpnTests_android_server_connectivity",
             "file_patterns": ["VpnManagerService\\.java"]
         },
         {
@@ -122,6 +106,15 @@
             "file_patterns": [
                 "Background.*\\.java",
                 "Activity.*\\.java"
+            ]
+        },
+        {
+            "name": "CtsOsTestCases",
+            "file_patterns": ["StorageManagerService\\.java"],
+            "options": [
+                {
+                    "include-filter": "android.os.storage.cts.StorageManagerTest"
+                }
             ]
         }
     ],
@@ -178,15 +171,6 @@
             "options": [
                 {
                     "include-filter": "com.android.server.wm.BackgroundActivityStart*"
-                }
-            ]
-        },
-        {
-            "name": "CtsOsTestCases",
-            "file_patterns": ["StorageManagerService\\.java"],
-            "options": [
-                {
-                    "include-filter": "android.os.storage.cts.StorageManagerTest"
                 }
             ]
         }

@@ -177,6 +177,10 @@ public class VcnGatewayConnection extends StateMachine {
     /** Default number of parallel SAs requested */
     static final int TUNNEL_AGGREGATION_SA_COUNT_MAX_DEFAULT = 1;
 
+    // The returned string of
+    // TelephonyManager#getNetworkTypeName(TelephonyManager.NETWORK_TYPE_UNKNOWN)
+    private static final String NETWORK_TYPE_STRING_UNKNOWN = "UNKNOWN";
+
     // Matches DataConnection.NETWORK_TYPE private constant, and magic string from
     // ConnectivityManager#getNetworkTypeName()
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -1815,9 +1819,7 @@ public class VcnGatewayConnection extends StateMachine {
                             .setLegacyType(ConnectivityManager.TYPE_MOBILE)
                             .setLegacyTypeName(NETWORK_INFO_NETWORK_TYPE_STRING)
                             .setLegacySubType(TelephonyManager.NETWORK_TYPE_UNKNOWN)
-                            .setLegacySubTypeName(
-                                    TelephonyManager.getNetworkTypeName(
-                                            TelephonyManager.NETWORK_TYPE_UNKNOWN))
+                            .setLegacySubTypeName(NETWORK_TYPE_STRING_UNKNOWN)
                             .setLegacyExtraInfo(NETWORK_INFO_EXTRA_INFO)
                             .build();
 

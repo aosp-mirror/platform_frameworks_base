@@ -241,6 +241,16 @@ flag {
   is_fixed_read_only: true
 }
 
+flag {
+    name: "caches_not_invalidated_at_start_read_only"
+    namespace: "multiuser"
+    description: "PIC need to be invalidated at start in order to work properly."
+    bug: "356167673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
 
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
