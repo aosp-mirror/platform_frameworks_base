@@ -323,6 +323,8 @@ android_ravenwood_libgroup {
     data: [
         ":framework-res",
         ":ravenwood-empty-res",
+        ":framework-platform-compat-config",
+        ":services-platform-compat-config",
     ],
     libs: [
         "100-framework-minus-apex.ravenwood",
