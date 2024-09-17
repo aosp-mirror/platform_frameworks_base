@@ -34,11 +34,15 @@ import android.view.ViewParent;
 
 import androidx.annotation.Nullable;
 
+import com.android.compose.animation.scene.ObservableTransitionState;
 import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
@@ -52,6 +56,9 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.kotlin.JavaAdapter;
+
+import dagger.Lazy;
 
 import java.util.concurrent.Executor;
 
@@ -80,6 +87,8 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private final ActionClickLogger mActionClickLogger;
     private int mDisabled2;
     protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
+    private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+    private final Lazy<SceneInteractor> mSceneInteractorLazy;
 
     /**
      */
@@ -95,7 +104,10 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
             ShadeController shadeController,
             CommandQueue commandQueue,
             ActionClickLogger clickLogger,
-            @Main Executor executor) {
+            @Main Executor executor,
+            Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
+            Lazy<SceneInteractor> sceneInteractorLazy,
+            JavaAdapter javaAdapter) {
         mContext = context;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mShadeController = shadeController;
@@ -113,6 +125,17 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mActionClickLogger = clickLogger;
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mGroupExpansionManager = groupExpansionManager;
+        mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
+        mSceneInteractorLazy = sceneInteractorLazy;
+
+        if (SceneContainerFlag.isEnabled()) {
+            javaAdapter.alwaysCollectFlow(
+                    mDeviceUnlockedInteractorLazy.get().getDeviceUnlockStatus(),
+                    deviceUnlockStatus -> onStateChanged(mStatusBarStateController.getState()));
+            javaAdapter.alwaysCollectFlow(
+                    mSceneInteractorLazy.get().getTransitionState(),
+                    deviceUnlockStatus -> onStateChanged(mStatusBarStateController.getState()));
+        }
     }
 
     @Override
@@ -318,11 +341,20 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     }
 
     /**
-     * Returns {@code true} if it is safe to retry a pending remote input.
+     * Returns {@code true} if it is safe to retry a pending remote input. The exact criteria for
+     * this vary depending whether the scene container is enabled.
      */
     private boolean canRetryPendingRemoteInput() {
-        return mKeyguardStateController.isUnlocked()
-                && !mStatusBarStateController.isKeyguardRequested();
+        if (SceneContainerFlag.isEnabled()) {
+            final boolean isUnlocked = mDeviceUnlockedInteractorLazy.get()
+                    .getDeviceUnlockStatus().getValue().isUnlocked();
+            final boolean isIdle = mSceneInteractorLazy.get()
+                    .getTransitionState().getValue() instanceof ObservableTransitionState.Idle;
+            return isUnlocked && isIdle;
+        } else {
+            return mKeyguardStateController.isUnlocked()
+                    && !mStatusBarStateController.isKeyguardRequested();
+        }
     }
 
     protected class ChallengeReceiver extends BroadcastReceiver {
