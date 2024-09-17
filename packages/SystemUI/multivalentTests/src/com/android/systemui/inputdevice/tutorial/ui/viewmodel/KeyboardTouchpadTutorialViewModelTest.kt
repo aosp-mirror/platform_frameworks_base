@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.domain.interactor.KeyboardTouchpadConnectionInteractor
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEY
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
@@ -53,6 +54,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -81,6 +83,7 @@ class KeyboardTouchpadTutorialViewModelTest : SysuiTestCase() {
                 Optional.of(kosmos.touchpadGesturesInteractor),
                 KeyboardTouchpadConnectionInteractor(keyboardRepo, touchpadRepo),
                 hasTouchpadTutorialScreens,
+                mock<InputDeviceTutorialLogger>(),
                 SavedStateHandle(mapOf(INTENT_TUTORIAL_TYPE_KEY to startingPeripheral))
             )
         lifecycle.addObserver(viewModel)
