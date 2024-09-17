@@ -70,8 +70,9 @@ namespace android {
 using ui::DisplayMode;
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
-static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimation-dark.zip";
-static const char PRODUCT_BOOTANIMATION_FILE[] = "/product/media/bootanimation.zip";
+static const char PRODUCT_BOOTANIMATION_DIR[] = "/product/media/";
+static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "bootanimation-dark.zip";
+static const char PRODUCT_BOOTANIMATION_FILE[] = "bootanimation.zip";
 static const char SYSTEM_BOOTANIMATION_FILE[] = "/system/media/bootanimation.zip";
 static const char APEX_BOOTANIMATION_FILE[] = "/apex/com.android.bootanimation/etc/bootanimation.zip";
 static const char OEM_SHUTDOWNANIMATION_FILE[] = "/oem/media/shutdownanimation.zip";
@@ -749,8 +750,11 @@ bool BootAnimation::findBootAnimationFileInternal(const std::vector<std::string>
 void BootAnimation::findBootAnimationFile() {
     ATRACE_CALL();
     const bool playDarkAnim = android::base::GetIntProperty("ro.boot.theme", 0) == 1;
+    const std::string productBootanimationFile = PRODUCT_BOOTANIMATION_DIR +
+        android::base::GetProperty("ro.product.bootanim.file", playDarkAnim ?
+        PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE);
     static const std::vector<std::string> bootFiles = {
-        APEX_BOOTANIMATION_FILE, playDarkAnim ? PRODUCT_BOOTANIMATION_DARK_FILE : PRODUCT_BOOTANIMATION_FILE,
+        APEX_BOOTANIMATION_FILE, productBootanimationFile,
         OEM_BOOTANIMATION_FILE, SYSTEM_BOOTANIMATION_FILE
     };
     static const std::vector<std::string> shutdownFiles = {
