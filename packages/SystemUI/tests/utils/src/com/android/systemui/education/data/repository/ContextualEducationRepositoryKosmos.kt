@@ -19,7 +19,7 @@ package com.android.systemui.education.data.repository
 import com.android.systemui.kosmos.Kosmos
 import java.time.Instant
 
-var Kosmos.contextualEducationRepository: ContextualEducationRepository by
+var Kosmos.contextualEducationRepository: FakeContextualEducationRepository by
     Kosmos.Fixture { FakeContextualEducationRepository() }
 
 var Kosmos.fakeEduClock: FakeEduClock by Kosmos.Fixture { FakeEduClock(Instant.MIN) }
