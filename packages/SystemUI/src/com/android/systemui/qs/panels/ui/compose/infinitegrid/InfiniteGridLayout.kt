@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.compose
+package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -26,6 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
+import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
+import com.android.systemui.qs.panels.ui.compose.rememberEditListState
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
@@ -61,7 +63,7 @@ constructor(
                 Tile(
                     tile = sizedTiles[index].tile,
                     iconOnly = iconTilesViewModel.isIconTile(sizedTiles[index].tile.spec),
-                    modifier = Modifier
+                    modifier = Modifier,
                 )
             }
         }

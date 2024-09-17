@@ -25,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.Tile
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.TileLazyGrid
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
 
 @Composable
