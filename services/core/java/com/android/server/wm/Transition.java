@@ -2929,6 +2929,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final TaskFragment taskFragment = target.asTaskFragment();
             final boolean isEmbeddedTaskFragment = taskFragment != null
                     && taskFragment.isEmbedded();
+            final IBinder taskFragmentToken =
+                    taskFragment != null ? taskFragment.getFragmentToken() : null;
+            change.setTaskFragmentToken(taskFragmentToken);
             final ActivityRecord activityRecord = target.asActivityRecord();
 
             if (task != null) {
