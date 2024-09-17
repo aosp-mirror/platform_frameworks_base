@@ -107,6 +107,7 @@ static struct {
     jclass clazz;
     jmethodID notifyInputDevicesChanged;
     jmethodID notifyTouchpadHardwareState;
+    jmethodID notifyTouchpadGestureInfo;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyNoFocusedWindowAnr;
@@ -363,6 +364,7 @@ public:
     void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
     void notifyTouchpadHardwareState(const SelfContainedHardwareState& schs,
                                      int32_t deviceId) override;
+    void notifyTouchpadGestureInfo(enum GestureType type, int32_t deviceId) override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
             const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
@@ -994,6 +996,15 @@ void NativeInputManager::notifyTouchpadHardwareState(const SelfContainedHardware
     }
 
     checkAndClearExceptionFromCallback(env, "notifyTouchpadHardwareState");
+}
+
+void NativeInputManager::notifyTouchpadGestureInfo(enum GestureType type, int32_t deviceId) {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadGestureInfo, type, deviceId);
+
+    checkAndClearExceptionFromCallback(env, "notifyTouchpadGestureInfo");
 }
 
 std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
@@ -3067,6 +3078,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyTouchpadHardwareState, clazz,
                   "notifyTouchpadHardwareState",
                   "(Lcom/android/server/input/TouchpadHardwareState;I)V")
+
+    GET_METHOD_ID(gServiceClassInfo.notifyTouchpadGestureInfo, clazz, "notifyTouchpadGestureInfo",
+                  "(II)V")
 
     GET_METHOD_ID(gServiceClassInfo.notifySwitch, clazz,
             "notifySwitch", "(JII)V");

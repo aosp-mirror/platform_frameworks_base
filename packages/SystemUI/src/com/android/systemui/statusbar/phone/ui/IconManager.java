@@ -20,7 +20,6 @@ import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_BIND
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_ICON;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_MOBILE_NEW;
 import static com.android.systemui.statusbar.phone.StatusBarIconHolder.TYPE_WIFI_NEW;
-import static com.android.systemui.statusbar.phone.ui.StatusBarIconControllerImpl.usesModeIcons;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -31,6 +30,7 @@ import android.widget.LinearLayout;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIcon.Shape;
 import com.android.systemui.demomode.DemoModeCommandReceiver;
+import com.android.systemui.modes.shared.ModesUiIcons;
 import com.android.systemui.statusbar.BaseStatusBarFrameLayout;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.StatusIconDisplayable;
@@ -233,7 +233,7 @@ public class IconManager implements DemoModeCommandReceiver {
     }
 
     protected LinearLayout.LayoutParams onCreateLayoutParams(Shape shape) {
-        int width = usesModeIcons() && shape == StatusBarIcon.Shape.FIXED_SPACE
+        int width = ModesUiIcons.isEnabled() && shape == StatusBarIcon.Shape.FIXED_SPACE
                 ? mIconSize
                 : ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -259,7 +259,7 @@ public class IconManager implements DemoModeCommandReceiver {
     /** Called once an icon has been set. */
     public void onSetIcon(int viewIndex, StatusBarIcon icon) {
         StatusBarIconView view = (StatusBarIconView) mGroup.getChildAt(viewIndex);
-        if (usesModeIcons()) {
+        if (ModesUiIcons.isEnabled()) {
             ViewGroup.LayoutParams current = view.getLayoutParams();
             ViewGroup.LayoutParams desired = onCreateLayoutParams(icon.shape);
             if (desired.width != current.width || desired.height != current.height) {

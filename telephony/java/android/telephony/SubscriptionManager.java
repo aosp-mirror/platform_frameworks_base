@@ -3785,7 +3785,7 @@ public class SubscriptionManager {
     }
 
     private boolean isSystemProcess() {
-        return Process.myUid() == Process.SYSTEM_UID;
+        return UserHandle.isSameApp(Process.myUid(), Process.SYSTEM_UID);
     }
 
     /**

@@ -80,8 +80,11 @@ class WallpaperData {
      */
     ComponentName wallpaperComponent;
 
+    // TODO(b/347235611) Remove this field
     /**
      * The component name of the wallpaper that should be set next.
+     *
+     * @deprecated
      */
     ComponentName nextWallpaperComponent;
 

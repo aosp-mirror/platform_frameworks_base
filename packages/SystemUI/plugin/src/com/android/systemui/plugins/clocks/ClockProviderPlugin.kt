@@ -69,11 +69,7 @@ interface ClockController {
     val events: ClockEvents
 
     /** Initializes various rendering parameters. If never called, provides reasonable defaults. */
-    fun initialize(
-        resources: Resources,
-        dozeFraction: Float,
-        foldFraction: Float,
-    )
+    fun initialize(resources: Resources, dozeFraction: Float, foldFraction: Float)
 
     /** Optional method for dumping debug information */
     fun dump(pw: PrintWriter)
@@ -109,11 +105,7 @@ data class ClockMessageBuffers(
     val largeClockMessageBuffer: MessageBuffer,
 )
 
-data class AodClockBurnInModel(
-    val scale: Float,
-    val translationX: Float,
-    val translationY: Float,
-)
+data class AodClockBurnInModel(val scale: Float, val translationX: Float, val translationY: Float)
 
 /** Specifies layout information for the */
 interface ClockFaceLayout {
@@ -180,7 +172,19 @@ interface ClockEvents {
 
     /** Call with zen/dnd information */
     fun onZenDataChanged(data: ZenData)
+
+    /** Update reactive axes for this clock */
+    fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>)
 }
+
+/** Axis setting value for a clock */
+data class ClockReactiveSetting(
+    /** Axis key; matches ClockReactiveAxis.key */
+    val key: String,
+
+    /** Value to set this axis to */
+    val value: Float,
+)
 
 /** Methods which trigger various clock animations */
 interface ClockAnimations {
@@ -264,9 +268,7 @@ enum class ClockTickRate(val value: Int) {
 }
 
 /** Some data about a clock design */
-data class ClockMetadata(
-    val clockId: ClockId,
-)
+data class ClockMetadata(val clockId: ClockId)
 
 data class ClockPickerConfig(
     val id: String,
@@ -283,9 +285,45 @@ data class ClockPickerConfig(
     /** True if the clock will react to tone changes in the seed color */
     val isReactiveToTone: Boolean = true,
 
-    /** True if the clock is capable of chagning style in reaction to touches */
+    /** True if the clock is capable of changing style in reaction to touches */
     val isReactiveToTouch: Boolean = false,
+
+    /** Font axes that can be modified on this clock */
+    val axes: List<ClockReactiveAxis> = listOf(),
 )
+
+/** Represents an Axis that can be modified */
+data class ClockReactiveAxis(
+    /** Axis key, not user renderable */
+    val key: String,
+
+    /** Intended mode of user interaction */
+    val type: AxisType,
+
+    /** Maximum value the axis supports */
+    val maxValue: Float,
+
+    /** Minimum value the axis supports */
+    val minValue: Float,
+
+    /** Current value the axis is set to */
+    val currentValue: Float,
+
+    /** User-renderable name of the axis */
+    val name: String,
+
+    /** Description of the axis */
+    val description: String,
+)
+
+/** Axis user interaction modes */
+enum class AxisType {
+    /** Boolean toggle. Swaps between minValue & maxValue */
+    Toggle,
+
+    /** Continuous slider between minValue & maxValue */
+    Slider,
+}
 
 /** Render configuration for the full clock. Modifies the way systemUI behaves with this clock. */
 data class ClockConfig(
@@ -300,7 +338,8 @@ data class ClockConfig(
     /** Transition to AOD should move smartspace like large clock instead of small clock */
     val useAlternateSmartspaceAODTransition: Boolean = false,
 
-    @Deprecated("TODO(b/352049256): Remove")
+    /** Use ClockPickerConfig.isReactiveToTone instead */
+    @Deprecated("TODO(b/352049256): Remove in favor of ClockPickerConfig.isReactiveToTone")
     val isReactiveToTone: Boolean = true,
 
     /** True if the clock is large frame clock, which will use weather in compose. */
@@ -331,6 +370,7 @@ data class ClockFaceConfig(
 data class ClockSettings(
     val clockId: ClockId? = null,
     val seedColor: Int? = null,
+    val axes: List<ClockReactiveSetting>? = null,
 ) {
     // Exclude metadata from equality checks
     var metadata: JSONObject = JSONObject()
@@ -345,6 +385,8 @@ data class ClockSettings(
                 return ""
             }
 
+            // TODO(b/364673977): Serialize axes
+
             return JSONObject()
                 .put(KEY_CLOCK_ID, setting.clockId)
                 .put(KEY_SEED_COLOR, setting.seedColor)
@@ -357,11 +399,13 @@ data class ClockSettings(
                 return null
             }
 
+            // TODO(b/364673977): Deserialize axes
+
             val json = JSONObject(jsonStr)
             val result =
                 ClockSettings(
                     if (!json.isNull(KEY_CLOCK_ID)) json.getString(KEY_CLOCK_ID) else null,
-                    if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null
+                    if (!json.isNull(KEY_SEED_COLOR)) json.getInt(KEY_SEED_COLOR) else null,
                 )
             if (!json.isNull(KEY_METADATA)) {
                 result.metadata = json.getJSONObject(KEY_METADATA)
