@@ -55,6 +55,11 @@ abstract class PowerStatsProcessor {
             BatteryStats.HistoryItem item) {
     }
 
+    public void setUidState(PowerComponentAggregatedPowerStats stats, int uid,
+            @AggregatedPowerStatsConfig.TrackedState int stateId, int state, long timestampMs) {
+        stats.setProcessedUidState(uid, stateId, state, timestampMs);
+    }
+
     void addPowerStats(PowerComponentAggregatedPowerStats stats, PowerStats powerStats,
             long timestampMs) {
         stats.addProcessedPowerStats(powerStats, timestampMs);

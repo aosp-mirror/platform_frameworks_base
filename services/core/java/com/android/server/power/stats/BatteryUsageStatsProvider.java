@@ -317,58 +317,54 @@ public class BatteryUsageStatsProvider {
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS) != 0);
         final double minConsumedPowerThreshold = query.getMinConsumedPowerThreshold();
 
-        final BatteryUsageStats.Builder batteryUsageStatsBuilder;
+        String[] customEnergyConsumerNames;
         long monotonicStartTime, monotonicEndTime;
         synchronized (stats) {
+            customEnergyConsumerNames = stats.getCustomEnergyConsumerNames();
             monotonicStartTime = stats.getMonotonicStartTime();
             monotonicEndTime = stats.getMonotonicEndTime();
+        }
 
-            batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
-                    stats.getCustomEnergyConsumerNames(), includePowerModels,
-                    includeProcessStateData, query.isScreenStateDataNeeded(),
-                    query.isPowerStateDataNeeded(), minConsumedPowerThreshold);
+        final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
+                customEnergyConsumerNames, includePowerModels,
+                includeProcessStateData, query.isScreenStateDataNeeded(),
+                query.isPowerStateDataNeeded(), minConsumedPowerThreshold);
 
+        synchronized (stats) {
             // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
             // of batteryUsageStats sessions to wall-clock adjustments
             batteryUsageStatsBuilder.setStatsStartTimestamp(stats.getStartClockTime());
             batteryUsageStatsBuilder.setStatsEndTimestamp(currentTimeMs);
-            SparseArray<? extends BatteryStats.Uid> uidStats = stats.getUidStats();
-            for (int i = uidStats.size() - 1; i >= 0; i--) {
-                final BatteryStats.Uid uid = uidStats.valueAt(i);
-                if (!includeVirtualUids && uid.getUid() == Process.SDK_SANDBOX_VIRTUAL_UID) {
-                    continue;
-                }
-
-                batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid)
-                        .setTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_BACKGROUND,
-                                getProcessBackgroundTimeMs(uid, realtimeUs))
-                        .setTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_FOREGROUND,
-                                getProcessForegroundTimeMs(uid, realtimeUs))
-                        .setTimeInProcessStateMs(
-                                UidBatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
-                                getProcessForegroundServiceTimeMs(uid, realtimeUs));
-            }
-
-            final int[] powerComponents = query.getPowerComponents();
             final List<PowerCalculator> powerCalculators = getPowerCalculators();
-            for (int i = 0, count = powerCalculators.size(); i < count; i++) {
-                PowerCalculator powerCalculator = powerCalculators.get(i);
-                if (powerComponents != null) {
-                    boolean include = false;
-                    for (int powerComponent : powerComponents) {
-                        if (powerCalculator.isPowerComponentSupported(powerComponent)) {
-                            include = true;
-                            break;
-                        }
-                    }
-                    if (!include) {
+            if (!powerCalculators.isEmpty()) {
+                final int[] powerComponents = query.getPowerComponents();
+                SparseArray<? extends BatteryStats.Uid> uidStats = stats.getUidStats();
+                for (int i = uidStats.size() - 1; i >= 0; i--) {
+                    final BatteryStats.Uid uid = uidStats.valueAt(i);
+                    if (!includeVirtualUids && uid.getUid() == Process.SDK_SANDBOX_VIRTUAL_UID) {
                         continue;
                     }
-                }
-                powerCalculator.calculate(batteryUsageStatsBuilder, stats, realtimeUs, uptimeUs,
-                        query);
-            }
 
+                    batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid);
+                }
+                for (int i = 0, count = powerCalculators.size(); i < count; i++) {
+                    PowerCalculator powerCalculator = powerCalculators.get(i);
+                    if (powerComponents != null) {
+                        boolean include = false;
+                        for (int powerComponent : powerComponents) {
+                            if (powerCalculator.isPowerComponentSupported(powerComponent)) {
+                                include = true;
+                                break;
+                            }
+                        }
+                        if (!include) {
+                            continue;
+                        }
+                    }
+                    powerCalculator.calculate(batteryUsageStatsBuilder, stats, realtimeUs, uptimeUs,
+                            query);
+                }
+            }
             if ((query.getFlags()
                     & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY) != 0) {
                 batteryUsageStatsBuilder.setBatteryHistory(stats.copyHistory());
@@ -421,39 +417,6 @@ public class BatteryUsageStatsProvider {
                 }
             }
         }
-    }
-
-    private long getProcessForegroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
-        final long topStateDurationUs = uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_TOP,
-                realtimeUs, BatteryStats.STATS_SINCE_CHARGED);
-        long foregroundActivityDurationUs = 0;
-        final BatteryStats.Timer foregroundActivityTimer = uid.getForegroundActivityTimer();
-        if (foregroundActivityTimer != null) {
-            foregroundActivityDurationUs = foregroundActivityTimer.getTotalTimeLocked(realtimeUs,
-                    BatteryStats.STATS_SINCE_CHARGED);
-        }
-
-        // Use the min value of STATE_TOP time and foreground activity time, since both of these
-        // times are imprecise
-        long totalForegroundDurationUs = Math.min(topStateDurationUs, foregroundActivityDurationUs);
-
-        totalForegroundDurationUs += uid.getProcessStateTime(
-                BatteryStats.Uid.PROCESS_STATE_FOREGROUND, realtimeUs,
-                BatteryStats.STATS_SINCE_CHARGED);
-
-        return totalForegroundDurationUs / 1000;
-    }
-
-    private long getProcessBackgroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
-        return uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
-                realtimeUs, BatteryStats.STATS_SINCE_CHARGED)
-                / 1000;
-    }
-
-    private long getProcessForegroundServiceTimeMs(BatteryStats.Uid uid, long realtimeUs) {
-        return uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
-                realtimeUs, BatteryStats.STATS_SINCE_CHARGED)
-                / 1000;
     }
 
     private BatteryUsageStats getAggregatedBatteryUsageStats(BatteryStatsImpl stats,

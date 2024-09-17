@@ -10910,7 +10910,6 @@ public class BatteryStatsImpl extends BatteryStats {
             // Make special note of Foreground Services
             final boolean userAwareService = ActivityManager.isForegroundService(procState);
             uidRunningState = BatteryStats.mapToInternalProcessState(procState);
-
             if (mProcessState == uidRunningState && userAwareService == mInForegroundService) {
                 return;
             }
@@ -10949,8 +10948,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 final int batteryConsumerProcessState =
                         mapUidProcessStateToBatteryConsumerProcessState(uidRunningState);
-                if (mBsi.mSystemReady && mBsi.mPowerStatsCollectorEnabled.get(
-                        BatteryConsumer.POWER_COMPONENT_CPU)) {
+                if (mBsi.mSystemReady) {
                     mBsi.mHistory.recordProcessStateChange(elapsedRealtimeMs, uptimeMs, mUid,
                             batteryConsumerProcessState);
                 }

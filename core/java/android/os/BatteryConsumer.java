@@ -69,6 +69,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_AMBIENT_DISPLAY,
             POWER_COMPONENT_IDLE,
             POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
+            POWER_COMPONENT_BASE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PowerComponent {
@@ -101,8 +102,10 @@ public abstract class BatteryConsumer {
     // The value should be negative or zero.
     public static final int POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS =
             OsProtoEnums.POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS; // 17
-
-    public static final int POWER_COMPONENT_COUNT = 18;
+    // Power component ID that is used for technical purposes of attribution of time-in-state
+    // for UIDs and other general computations not associated with specific hardware.
+    public static final int POWER_COMPONENT_BASE = 18;
+    public static final int POWER_COMPONENT_COUNT = 19;
 
     public static final int FIRST_CUSTOM_POWER_COMPONENT_ID = 1000;
     public static final int LAST_CUSTOM_POWER_COMPONENT_ID = 9999;
@@ -129,6 +132,7 @@ public abstract class BatteryConsumer {
         sPowerComponentNames[POWER_COMPONENT_AMBIENT_DISPLAY] = "ambient_display";
         sPowerComponentNames[POWER_COMPONENT_IDLE] = "idle";
         sPowerComponentNames[POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS] = "reattributed";
+        sPowerComponentNames[POWER_COMPONENT_BASE] = "";        // Top-level, no need for a name
     }
 
     /**
@@ -211,6 +215,7 @@ public abstract class BatteryConsumer {
     private static final IntArray SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE;
     static {
         int[] supportedPowerComponents = {
+                POWER_COMPONENT_BASE,
                 POWER_COMPONENT_CPU,
                 POWER_COMPONENT_MOBILE_RADIO,
                 POWER_COMPONENT_WIFI,
@@ -939,7 +944,7 @@ public abstract class BatteryConsumer {
             ));
 
             // Declare Keys for all process states, if needed
-            if (includeProcessStateData) {
+            if (includeProcessStateData || componentId == POWER_COMPONENT_BASE) {
                 boolean isSupported = SUPPORTED_POWER_COMPONENTS_PER_PROCESS_STATE
                         .binarySearch(componentId) >= 0
                         || componentId >= FIRST_CUSTOM_POWER_COMPONENT_ID;
@@ -1123,6 +1128,13 @@ public abstract class BatteryConsumer {
         @NonNull
         public T setUsageDurationMillis(Key key, long componentUsageTimeMillis) {
             mPowerComponentsBuilder.setUsageDurationMillis(key, componentUsageTimeMillis);
+            return (T) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @NonNull
+        public T addUsageDurationMillis(Key key, long componentUsageTimeMillis) {
+            mPowerComponentsBuilder.addUsageDurationMillis(key, componentUsageTimeMillis);
             return (T) this;
         }
 

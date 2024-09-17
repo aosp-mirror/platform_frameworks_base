@@ -53,7 +53,11 @@ public class PowerStatsAggregator {
         return mAggregatedPowerStatsConfig;
     }
 
-    void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
+    /**
+     * Marks the power component as enabled for PowerStats aggregation
+     */
+    @VisibleForTesting
+    public void setPowerComponentEnabled(int powerComponentId, boolean enabled) {
         synchronized (this) {
             if (mStats != null) {
                 mStats = null;

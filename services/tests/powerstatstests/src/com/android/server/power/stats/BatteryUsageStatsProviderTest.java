@@ -47,6 +47,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistoryIterator;
 import com.android.internal.os.PowerProfile;
+import com.android.server.power.stats.processor.MultiStatePowerAttributor;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -94,8 +95,12 @@ public class BatteryUsageStatsProviderTest {
     public void test_getBatteryUsageStats() {
         BatteryStatsImpl batteryStats = prepareBatteryStats();
 
+        PowerAttributor powerAttributor = new MultiStatePowerAttributor(mContext,
+                mock(PowerStatsStore.class), mStatsRule.getPowerProfile(),
+                mStatsRule.getCpuScalingPolicies(), new PowerStatsUidResolver());
+
         BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(mContext,
-                mock(PowerAttributor.class), mStatsRule.getPowerProfile(),
+                powerAttributor, mStatsRule.getPowerProfile(),
                 mStatsRule.getCpuScalingPolicies(), mock(PowerStatsStore.class), mMockClock);
 
         final BatteryUsageStats batteryUsageStats =
@@ -157,6 +162,7 @@ public class BatteryUsageStatsProviderTest {
 
     private BatteryStatsImpl prepareBatteryStats() {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        batteryStats.onSystemReady(mContext);
 
         mStatsRule.setTime(10 * MINUTE_IN_MS, 10 * MINUTE_IN_MS);
         synchronized (batteryStats) {

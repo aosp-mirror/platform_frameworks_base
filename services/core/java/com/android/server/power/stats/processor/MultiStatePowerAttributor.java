@@ -62,12 +62,23 @@ public class MultiStatePowerAttributor implements PowerAttributor {
         mPowerStatsStore.addSectionReader(
                 new AggregatedPowerStatsSection.Reader(mPowerStatsAggregator.getConfig()));
         mPowerStatsExporter = new PowerStatsExporter(mPowerStatsStore, mPowerStatsAggregator);
+        setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_BASE, true);
     }
 
     private static AggregatedPowerStatsConfig createAggregatedPowerStatsConfig(Context context,
             PowerProfile powerProfile, CpuScalingPolicies cpuScalingPolicies,
             PowerStatsUidResolver powerStatsUidResolver) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BASE)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessorSupplier(BasePowerStatsProcessor::new);
+
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,

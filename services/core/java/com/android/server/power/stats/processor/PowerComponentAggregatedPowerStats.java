@@ -163,6 +163,11 @@ class PowerComponentAggregatedPowerStats {
 
     void setUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long timestampMs) {
+        mProcessor.setUidState(this, uid, stateId, state, timestampMs);
+    }
+
+    void setProcessedUidState(int uid, @AggregatedPowerStatsConfig.TrackedState int stateId,
+            int state, long timestampMs) {
         if (!mUidStateConfig[stateId].isTracked()) {
             return;
         }
