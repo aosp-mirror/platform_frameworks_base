@@ -90,8 +90,26 @@ public class PersisterQueueTests {
         mFactory.setExpectedProcessedItemNumber(1);
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
 
-        final long dispatchTime = SystemClock.uptimeMillis();
         mTarget.addItem(mFactory.createItem(), false);
+        assertTrue("Target didn't process item enough times.",
+                mFactory.waitForAllExpectedItemsProcessed(TIMEOUT_ALLOWANCE));
+        assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
+
+        assertTrue("Target didn't call callback enough times.",
+                mListener.waitForAllExpectedCallbackDone(TIMEOUT_ALLOWANCE));
+        // Once before processing this item, once after that.
+        assertEquals(2, mListener.mProbablyDoneResults.size());
+        // The last one must be called with probably done being true.
+        assertTrue("The last probablyDone must be true.", mListener.mProbablyDoneResults.get(1));
+    }
+
+    @Test
+    public void testProcessOneWriteItem() throws Exception {
+        mFactory.setExpectedProcessedItemNumber(1);
+        mListener.setExpectedOnPreProcessItemCallbackTimes(1);
+
+        final long dispatchTime = SystemClock.uptimeMillis();
+        mTarget.addItem(mFactory.createWriteItem(), false);
         assertTrue("Target didn't process item enough times.",
                 mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
         assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
@@ -109,12 +127,12 @@ public class PersisterQueueTests {
     }
 
     @Test
-    public void testProcessOneItem_Flush() throws Exception {
+    public void testProcessOneWriteItem_Flush() throws Exception {
         mFactory.setExpectedProcessedItemNumber(1);
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
 
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(mFactory.createItem(), true);
+        mTarget.addItem(mFactory.createWriteItem(), true);
         assertTrue("Target didn't process item enough times.",
                 mFactory.waitForAllExpectedItemsProcessed(TIMEOUT_ALLOWANCE));
         assertEquals("Target didn't process item.", 1, mFactory.getTotalProcessedItemCount());
@@ -138,8 +156,8 @@ public class PersisterQueueTests {
         mListener.setExpectedOnPreProcessItemCallbackTimes(2);
 
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(mFactory.createItem(), false);
-        mTarget.addItem(mFactory.createItem(), false);
+        mTarget.addItem(mFactory.createWriteItem(), false);
+        mTarget.addItem(mFactory.createWriteItem(), false);
         assertTrue("Target didn't call callback enough times.",
                 mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS
                         + TIMEOUT_ALLOWANCE));
@@ -165,7 +183,7 @@ public class PersisterQueueTests {
         mFactory.setExpectedProcessedItemNumber(1);
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(mFactory.createItem(), false);
+        mTarget.addItem(mFactory.createWriteItem(), false);
         assertTrue("Target didn't process item enough times.",
                 mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
         long processDuration = SystemClock.uptimeMillis() - dispatchTime;
@@ -184,7 +202,7 @@ public class PersisterQueueTests {
         // Synchronize on the instance to make sure we schedule the item after it starts to wait for
         // task indefinitely.
         synchronized (mTarget) {
-            mTarget.addItem(mFactory.createItem(), false);
+            mTarget.addItem(mFactory.createWriteItem(), false);
         }
         assertTrue("Target didn't process item enough times.",
                 mFactory.waitForAllExpectedItemsProcessed(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
@@ -206,9 +224,9 @@ public class PersisterQueueTests {
     @Test
     public void testFindLastItemNotReturnDifferentType() {
         synchronized (mTarget) {
-            mTarget.addItem(mFactory.createItem(), false);
-            assertNull(mTarget.findLastItem(TestItem::shouldKeepOnFilter,
-                    FilterableTestItem.class));
+            mTarget.addItem(mFactory.createWriteItem(), false);
+            assertNull(mTarget.findLastItem(TestWriteItem::shouldKeepOnFilter,
+                    FilterableTestWriteItem.class));
         }
     }
 
@@ -216,18 +234,18 @@ public class PersisterQueueTests {
     public void testFindLastItemNotReturnMismatchItem() {
         synchronized (mTarget) {
             mTarget.addItem(mFactory.createFilterableItem(false), false);
-            assertNull(mTarget.findLastItem(TestItem::shouldKeepOnFilter,
-                    FilterableTestItem.class));
+            assertNull(mTarget.findLastItem(TestWriteItem::shouldKeepOnFilter,
+                    FilterableTestWriteItem.class));
         }
     }
 
     @Test
     public void testFindLastItemReturnMatchedItem() {
         synchronized (mTarget) {
-            final FilterableTestItem item = mFactory.createFilterableItem(true);
+            final FilterableTestWriteItem item = mFactory.createFilterableItem(true);
             mTarget.addItem(item, false);
-            assertSame(item, mTarget.findLastItem(TestItem::shouldKeepOnFilter,
-                    FilterableTestItem.class));
+            assertSame(item, mTarget.findLastItem(TestWriteItem::shouldKeepOnFilter,
+                    FilterableTestWriteItem.class));
         }
     }
 
@@ -235,8 +253,8 @@ public class PersisterQueueTests {
     public void testRemoveItemsNotRemoveDifferentType() throws Exception {
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         synchronized (mTarget) {
-            mTarget.addItem(mFactory.createItem(), false);
-            mTarget.removeItems(TestItem::shouldKeepOnFilter, FilterableTestItem.class);
+            mTarget.addItem(mFactory.createWriteItem(), false);
+            mTarget.removeItems(TestWriteItem::shouldKeepOnFilter, FilterableTestWriteItem.class);
         }
         assertTrue("Target didn't call callback enough times.",
                 mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
@@ -248,7 +266,7 @@ public class PersisterQueueTests {
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         synchronized (mTarget) {
             mTarget.addItem(mFactory.createFilterableItem(false), false);
-            mTarget.removeItems(TestItem::shouldKeepOnFilter, FilterableTestItem.class);
+            mTarget.removeItems(TestWriteItem::shouldKeepOnFilter, FilterableTestWriteItem.class);
         }
         assertTrue("Target didn't call callback enough times.",
                 mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
@@ -258,8 +276,8 @@ public class PersisterQueueTests {
     @Test
     public void testUpdateLastOrAddItemUpdatesMatchedItem() throws Exception {
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
-        final FilterableTestItem scheduledItem = mFactory.createFilterableItem(true);
-        final FilterableTestItem expected = mFactory.createFilterableItem(true);
+        final FilterableTestWriteItem scheduledItem = mFactory.createFilterableItem(true);
+        final FilterableTestWriteItem expected = mFactory.createFilterableItem(true);
         synchronized (mTarget) {
             mTarget.addItem(scheduledItem, false);
             mTarget.updateLastOrAddItem(expected, false);
@@ -274,8 +292,8 @@ public class PersisterQueueTests {
     @Test
     public void testUpdateLastOrAddItemUpdatesAddItemWhenNoMatch() throws Exception {
         mListener.setExpectedOnPreProcessItemCallbackTimes(2);
-        final FilterableTestItem scheduledItem = mFactory.createFilterableItem(false);
-        final FilterableTestItem expected = mFactory.createFilterableItem(true);
+        final FilterableTestWriteItem scheduledItem = mFactory.createFilterableItem(false);
+        final FilterableTestWriteItem expected = mFactory.createFilterableItem(true);
         synchronized (mTarget) {
             mTarget.addItem(scheduledItem, false);
             mTarget.updateLastOrAddItem(expected, false);
@@ -292,9 +310,9 @@ public class PersisterQueueTests {
     public void testRemoveItemsRemoveMatchedItem() throws Exception {
         mListener.setExpectedOnPreProcessItemCallbackTimes(1);
         synchronized (mTarget) {
-            mTarget.addItem(mFactory.createItem(), false);
+            mTarget.addItem(mFactory.createWriteItem(), false);
             mTarget.addItem(mFactory.createFilterableItem(true), false);
-            mTarget.removeItems(TestItem::shouldKeepOnFilter, FilterableTestItem.class);
+            mTarget.removeItems(TestWriteItem::shouldKeepOnFilter, FilterableTestWriteItem.class);
         }
         assertTrue("Target didn't call callback enough times.",
                 mListener.waitForAllExpectedCallbackDone(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE));
@@ -304,8 +322,8 @@ public class PersisterQueueTests {
     @Test
     public void testFlushWaitSynchronously() {
         final long dispatchTime = SystemClock.uptimeMillis();
-        mTarget.addItem(mFactory.createItem(), false);
-        mTarget.addItem(mFactory.createItem(), false);
+        mTarget.addItem(mFactory.createWriteItem(), false);
+        mTarget.addItem(mFactory.createWriteItem(), false);
         mTarget.flush();
         assertEquals("Flush should wait until all items are processed before return.",
                 2, mFactory.getTotalProcessedItemCount());
@@ -335,15 +353,18 @@ public class PersisterQueueTests {
             return new TestItem(mItemCount, mLatch);
         }
 
-        FilterableTestItem createFilterableItem(boolean shouldKeepOnFilter) {
-            return new FilterableTestItem(shouldKeepOnFilter, mItemCount, mLatch);
+        TestWriteItem createWriteItem() {
+            return new TestWriteItem(mItemCount, mLatch);
+        }
+
+        FilterableTestWriteItem createFilterableItem(boolean shouldKeepOnFilter) {
+            return new FilterableTestWriteItem(shouldKeepOnFilter, mItemCount, mLatch);
         }
     }
 
-    private static class TestItem<T extends TestItem<T>>
-            implements PersisterQueue.WriteQueueItem<T> {
-        private AtomicInteger mItemCount;
-        private CountDownLatch mLatch;
+    private static class TestItem implements PersisterQueue.QueueItem {
+        private final AtomicInteger mItemCount;
+        private final CountDownLatch mLatch;
 
         TestItem(AtomicInteger itemCount, CountDownLatch latch) {
             mItemCount = itemCount;
@@ -359,30 +380,37 @@ public class PersisterQueueTests {
                 mLatch.countDown();
             }
         }
+    }
+
+    private static class TestWriteItem<T extends TestWriteItem<T>>
+            extends TestItem implements PersisterQueue.WriteQueueItem<T> {
+        TestWriteItem(AtomicInteger itemCount, CountDownLatch latch) {
+            super(itemCount, latch);
+        }
 
         boolean shouldKeepOnFilter() {
             return true;
         }
     }
 
-    private static class FilterableTestItem extends TestItem<FilterableTestItem> {
+    private static class FilterableTestWriteItem extends TestWriteItem<FilterableTestWriteItem> {
         private boolean mShouldKeepOnFilter;
 
-        private FilterableTestItem mUpdateFromItem;
+        private FilterableTestWriteItem mUpdateFromItem;
 
-        private FilterableTestItem(boolean shouldKeepOnFilter, AtomicInteger mItemCount,
+        private FilterableTestWriteItem(boolean shouldKeepOnFilter, AtomicInteger mItemCount,
                 CountDownLatch mLatch) {
             super(mItemCount, mLatch);
             mShouldKeepOnFilter = shouldKeepOnFilter;
         }
 
         @Override
-        public boolean matches(FilterableTestItem item) {
+        public boolean matches(FilterableTestWriteItem item) {
             return item.mShouldKeepOnFilter;
         }
 
         @Override
-        public void updateFrom(FilterableTestItem item) {
+        public void updateFrom(FilterableTestWriteItem item) {
             mUpdateFromItem = item;
         }
 

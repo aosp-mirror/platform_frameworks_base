@@ -49,14 +49,16 @@ class PersisterQueue {
     /** Special value for mWriteTime to mean don't wait, just write */
     private static final long FLUSH_QUEUE = -1;
 
-    /** An {@link WriteQueueItem} that doesn't do anything. Used to trigger {@link
-     * Listener#onPreProcessItem}. */
-    static final WriteQueueItem EMPTY_ITEM = () -> { };
+    /**
+     * A {@link QueueItem} that doesn't do anything. Used to trigger
+     * {@link Listener#onPreProcessItem}.
+     */
+    static final QueueItem EMPTY_ITEM = () -> { };
 
     private final long mInterWriteDelayMs;
     private final long mPreTaskDelayMs;
     private final LazyTaskWriterThread mLazyTaskWriterThread;
-    private final ArrayList<WriteQueueItem> mWriteQueue = new ArrayList<>();
+    private final ArrayList<QueueItem> mQueue = new ArrayList<>();
 
     private final ArrayList<Listener> mListeners = new ArrayList<>();
 
@@ -105,10 +107,10 @@ class PersisterQueue {
         mLazyTaskWriterThread.join();
     }
 
-    synchronized void addItem(WriteQueueItem item, boolean flush) {
-        mWriteQueue.add(item);
+    synchronized void addItem(QueueItem item, boolean flush) {
+        mQueue.add(item);
 
-        if (flush || mWriteQueue.size() > MAX_WRITE_QUEUE_LENGTH) {
+        if (flush || mQueue.size() > MAX_WRITE_QUEUE_LENGTH) {
             mNextWriteTime = FLUSH_QUEUE;
         } else if (mNextWriteTime == 0) {
             mNextWriteTime = SystemClock.uptimeMillis() + mPreTaskDelayMs;
@@ -116,11 +118,12 @@ class PersisterQueue {
         notify();
     }
 
-    synchronized <T extends WriteQueueItem> T findLastItem(Predicate<T> predicate, Class<T> clazz) {
-        for (int i = mWriteQueue.size() - 1; i >= 0; --i) {
-            WriteQueueItem writeQueueItem = mWriteQueue.get(i);
-            if (clazz.isInstance(writeQueueItem)) {
-                T item = clazz.cast(writeQueueItem);
+    synchronized <T extends WriteQueueItem<T>> T findLastItem(Predicate<T> predicate,
+            Class<T> clazz) {
+        for (int i = mQueue.size() - 1; i >= 0; --i) {
+            QueueItem queueItem = mQueue.get(i);
+            if (clazz.isInstance(queueItem)) {
+                T item = clazz.cast(queueItem);
                 if (predicate.test(item)) {
                     return item;
                 }
@@ -134,7 +137,7 @@ class PersisterQueue {
      * Updates the last item found in the queue that matches the given item, or adds it to the end
      * of the queue if no such item is found.
      */
-    synchronized <T extends WriteQueueItem> void updateLastOrAddItem(T item, boolean flush) {
+    synchronized <T extends WriteQueueItem<T>> void updateLastOrAddItem(T item, boolean flush) {
         final T itemToUpdate = findLastItem(item::matches, (Class<T>) item.getClass());
         if (itemToUpdate == null) {
             addItem(item, flush);
@@ -148,15 +151,15 @@ class PersisterQueue {
     /**
      * Removes all items with which given predicate returns {@code true}.
      */
-    synchronized <T extends WriteQueueItem> void removeItems(Predicate<T> predicate,
+    synchronized <T extends QueueItem> void removeItems(Predicate<T> predicate,
             Class<T> clazz) {
-        for (int i = mWriteQueue.size() - 1; i >= 0; --i) {
-            WriteQueueItem writeQueueItem = mWriteQueue.get(i);
-            if (clazz.isInstance(writeQueueItem)) {
-                T item = clazz.cast(writeQueueItem);
+        for (int i = mQueue.size() - 1; i >= 0; --i) {
+            QueueItem queueItem = mQueue.get(i);
+            if (clazz.isInstance(queueItem)) {
+                T item = clazz.cast(queueItem);
                 if (predicate.test(item)) {
                     if (DEBUG) Slog.d(TAG, "Removing " + item + " from write queue.");
-                    mWriteQueue.remove(i);
+                    mQueue.remove(i);
                 }
             }
         }
@@ -201,7 +204,7 @@ class PersisterQueue {
         // See https://b.corp.google.com/issues/64438652#comment7
 
         // If mNextWriteTime, then don't delay between each call to saveToXml().
-        final WriteQueueItem item;
+        final QueueItem item;
         synchronized (this) {
             if (mNextWriteTime != FLUSH_QUEUE) {
                 // The next write we don't have to wait so long.
@@ -212,7 +215,7 @@ class PersisterQueue {
                 }
             }
 
-            while (mWriteQueue.isEmpty()) {
+            while (mQueue.isEmpty()) {
                 if (mNextWriteTime != 0) {
                     mNextWriteTime = 0; // idle.
                     notify(); // May need to wake up flush().
@@ -224,17 +227,18 @@ class PersisterQueue {
                 }
                 if (DEBUG) Slog.d(TAG, "LazyTaskWriter: waiting indefinitely.");
                 wait();
-                // Invariant: mNextWriteTime is either FLUSH_QUEUE or PRE_WRITE_DELAY_MS
+                // Invariant: mNextWriteTime is either FLUSH_QUEUE or PRE_TASK_DELAY_MS
                 // from now.
             }
-            item = mWriteQueue.remove(0);
+            item = mQueue.remove(0);
 
+            final boolean isWriteItem = item instanceof WriteQueueItem<?>;
             long now = SystemClock.uptimeMillis();
             if (DEBUG) {
                 Slog.d(TAG, "LazyTaskWriter: now=" + now + " mNextWriteTime=" + mNextWriteTime
-                        + " mWriteQueue.size=" + mWriteQueue.size());
+                        + " mWriteQueue.size=" + mQueue.size() + " isWriteItem=" + isWriteItem);
             }
-            while (now < mNextWriteTime) {
+            while (now < mNextWriteTime && isWriteItem) {
                 if (DEBUG) {
                     Slog.d(TAG, "LazyTaskWriter: waiting " + (mNextWriteTime - now));
                 }
@@ -248,9 +252,18 @@ class PersisterQueue {
         item.process();
     }
 
-    interface WriteQueueItem<T extends WriteQueueItem<T>> {
+    /**
+     * An item the {@link PersisterQueue} processes. Used for loading tasks. Subclasses of this, but
+     * not {@link WriteQueueItem}, aren't subject to waiting.
+     */
+    interface QueueItem {
         void process();
+    }
 
+    /**
+     * A write item the {@link PersisterQueue} processes. Used for persisting tasks.
+     */
+    interface WriteQueueItem<T extends WriteQueueItem<T>> extends QueueItem {
         default void updateFrom(T item) {}
 
         default boolean matches(T item) {
@@ -288,7 +301,7 @@ class PersisterQueue {
                 while (true) {
                     final boolean probablyDone;
                     synchronized (PersisterQueue.this) {
-                        probablyDone = mWriteQueue.isEmpty();
+                        probablyDone = mQueue.isEmpty();
                     }
 
                     for (int i = mListeners.size() - 1; i >= 0; --i) {
