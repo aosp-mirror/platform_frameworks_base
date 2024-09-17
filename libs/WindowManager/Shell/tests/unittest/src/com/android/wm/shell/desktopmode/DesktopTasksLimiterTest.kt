@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.os.Binder
+import android.os.Handler
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
@@ -70,6 +71,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Mock lateinit var shellTaskOrganizer: ShellTaskOrganizer
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
+    @Mock lateinit var handler: Handler
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
@@ -85,7 +87,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
         desktopTasksLimiter =
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT,
-                interactionJankMonitor, mContext)
+                interactionJankMonitor, mContext, handler)
     }
 
     @After
@@ -97,7 +99,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun createDesktopTasksLimiter_withZeroLimit_shouldThrow() {
         assertFailsWith<IllegalArgumentException> {
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, 0,
-                interactionJankMonitor, mContext)
+                interactionJankMonitor, mContext, handler)
         }
     }
 
@@ -105,7 +107,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun createDesktopTasksLimiter_withNegativeLimit_shouldThrow() {
         assertFailsWith<IllegalArgumentException> {
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, -5,
-                interactionJankMonitor, mContext)
+                interactionJankMonitor, mContext, handler)
         }
     }
 
@@ -334,7 +336,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun getTaskToMinimizeIfNeeded_tasksAboveLimit_otherLimit_returnsBackTask() {
         desktopTasksLimiter =
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT2,
-                interactionJankMonitor, mContext)
+                interactionJankMonitor, mContext, handler)
         val tasks = (1..MAX_TASK_LIMIT2 + 1).map { setUpFreeformTask() }
 
         val minimizedTask = desktopTasksLimiter.getTaskToMinimizeIfNeeded(
@@ -375,6 +377,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         verify(interactionJankMonitor).begin(
             any(),
             eq(mContext),
+            eq(handler),
             eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
 
         desktopTasksLimiter.getTransitionObserver().onTransitionFinished(
@@ -403,7 +406,9 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         verify(interactionJankMonitor).begin(
             any(),
             eq(mContext),
-            eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
+            eq(handler),
+            eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW),
+        )
 
         desktopTasksLimiter.getTransitionObserver().onTransitionFinished(
             transition,
@@ -432,6 +437,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         verify(interactionJankMonitor).begin(
             any(),
             eq(mContext),
+            eq(handler),
             eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
 
         desktopTasksLimiter.getTransitionObserver().onTransitionMerged(

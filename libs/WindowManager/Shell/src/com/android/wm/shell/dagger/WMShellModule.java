@@ -355,7 +355,8 @@ public abstract class WMShellModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellAnimationThread ShellExecutor animExecutor,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            @ShellMainThread Handler handler) {
         return new FreeformTaskTransitionHandler(
                 shellInit,
                 transitions,
@@ -365,7 +366,8 @@ public abstract class WMShellModule {
                 mainExecutor,
                 animExecutor,
                 desktopModeTaskRepository,
-                interactionJankMonitor);
+                interactionJankMonitor,
+                handler);
     }
 
     @WMSingleton
@@ -616,6 +618,7 @@ public abstract class WMShellModule {
             RecentsTransitionHandler recentsTransitionHandler,
             MultiInstanceHelper multiInstanceHelper,
             @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             Optional<RecentTasksController> recentTasksController,
             InteractionJankMonitor interactionJankMonitor) {
@@ -628,7 +631,7 @@ public abstract class WMShellModule {
                 dragToDesktopTransitionHandler, desktopModeTaskRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
-                recentTasksController.orElse(null), interactionJankMonitor);
+                recentTasksController.orElse(null), interactionJankMonitor, mainHandler);
     }
 
     @WMSingleton
@@ -638,7 +641,8 @@ public abstract class WMShellModule {
             Transitions transitions,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             ShellTaskOrganizer shellTaskOrganizer,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            @ShellMainThread Handler handler) {
         int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
                 || !ENABLE_DESKTOP_WINDOWING_TASK_LIMIT.isEnabled(context)
@@ -652,7 +656,8 @@ public abstract class WMShellModule {
                         shellTaskOrganizer,
                         maxTaskLimit,
                         interactionJankMonitor,
-                        context)
+                        context,
+                        handler)
         );
     }
 
@@ -699,9 +704,10 @@ public abstract class WMShellModule {
     static ExitDesktopTaskTransitionHandler provideExitDesktopTaskTransitionHandler(
             Transitions transitions,
             Context context,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            @ShellMainThread Handler handler) {
         return new ExitDesktopTaskTransitionHandler(
-            transitions, context, interactionJankMonitor);
+            transitions, context, interactionJankMonitor, handler);
     }
 
     @WMSingleton

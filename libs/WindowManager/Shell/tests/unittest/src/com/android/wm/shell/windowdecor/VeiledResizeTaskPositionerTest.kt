@@ -21,6 +21,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Point
 import android.graphics.Rect
+import android.os.Handler
 import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.Display
@@ -107,6 +108,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockResources: Resources
     @Mock
     private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
+    @Mock
+    private lateinit var mockHandler: Handler
 
     private lateinit var taskPositioner: VeiledResizeTaskPositioner
 
@@ -155,7 +158,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                         mockDragStartListener,
                         mockTransactionFactory,
                         mockTransitions,
-                        mockInteractionJankMonitor
+                        mockInteractionJankMonitor,
+                        mockHandler,
                 )
     }
 
