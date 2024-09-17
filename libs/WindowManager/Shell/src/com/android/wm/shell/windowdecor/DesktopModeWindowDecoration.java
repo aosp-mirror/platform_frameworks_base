@@ -752,9 +752,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
+            final Drawable badgedAppIconDrawable = pm.getUserBadgedIcon(appIconDrawable,
+                    UserHandle.of(mTaskInfo.userId));
             final BaseIconFactory headerIconFactory = createIconFactory(mContext,
                     R.dimen.desktop_mode_caption_icon_radius);
-            mAppIconBitmap = headerIconFactory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
+            mAppIconBitmap = headerIconFactory.createIconBitmap(badgedAppIconDrawable,
+                    1f /* scale */);
 
             final BaseIconFactory resizeVeilIconFactory = createIconFactory(mContext,
                     R.dimen.desktop_mode_resize_veil_icon_size);
