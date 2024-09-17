@@ -2010,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"画面ロックの設定"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"画面ロックを設定"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"プライベート スペースには画面ロックの設定が必要です"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"プライベート スペースを削除するには、このデバイスに画面ロックを設定してください"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>

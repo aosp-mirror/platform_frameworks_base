@@ -286,7 +286,7 @@ private fun CategoryItemSinglePane(
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 88.dp).padding(horizontal = 16.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(min = 88.dp).padding(horizontal = 16.dp),
             ) {
                 ShortcutCategoryIcon(modifier = Modifier.size(24.dp), source = category.icon)
                 Spacer(modifier = Modifier.width(16.dp))
@@ -717,25 +717,24 @@ private fun CategoryItemTwoPane(
     colors: NavigationDrawerItemColors =
         NavigationDrawerItemDefaults.colors(unselectedContainerColor = Color.Transparent),
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
     SelectableShortcutSurface(
         selected = selected,
         onClick = onClick,
-        modifier =
-            Modifier.semantics { role = Role.Tab }
-                .heightIn(min = 64.dp)
-                .fillMaxWidth()
-                .outlineFocusModifier(
-                    isFocused = isFocused,
-                    focusColor = MaterialTheme.colorScheme.secondary,
-                    padding = 2.dp,
-                    cornerRadius = 33.dp,
-                ),
+        modifier = Modifier.semantics { role = Role.Tab }.heightIn(min = 64.dp).fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = colors.containerColor(selected).value,
-        interactionSource = interactionSource
+        interactionsConfig =
+            InteractionsConfig(
+                hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+                hoverOverlayAlpha = 0.11f,
+                pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+                pressedOverlayAlpha = 0.15f,
+                focusOutlineColor = MaterialTheme.colorScheme.secondary,
+                focusOutlineStrokeWidth = 3.dp,
+                focusOutlinePadding = 2.dp,
+                surfaceCornerRadius = 28.dp,
+                focusOutlineCornerRadius = 33.dp,
+            ),
     ) {
         Row(Modifier.padding(horizontal = 24.dp), verticalAlignment = Alignment.CenterVertically) {
             ShortcutCategoryIcon(
@@ -843,25 +842,30 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
 @Composable
 private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
     ClickableShortcutSurface(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
-        modifier = Modifier.semantics { role = Role.Button }.fillMaxWidth(),
-        interactionSource = interactionSource
+        modifier =
+            Modifier.semantics { role = Role.Button }
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+        interactionSource = interactionSource,
+        interactionsConfig =
+            InteractionsConfig(
+                hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+                hoverOverlayAlpha = 0.11f,
+                pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+                pressedOverlayAlpha = 0.15f,
+                focusOutlineColor = MaterialTheme.colorScheme.secondary,
+                focusOutlinePadding = 8.dp,
+                focusOutlineStrokeWidth = 3.dp,
+                surfaceCornerRadius = 24.dp,
+                focusOutlineCornerRadius = 28.dp,
+                hoverPadding = 8.dp,
+            ),
     ) {
-        Row(
-            modifier =
-                Modifier.padding(horizontal = 12.dp, vertical = 16.dp)
-                    .outlineFocusModifier(
-                        isFocused = isFocused,
-                        focusColor = MaterialTheme.colorScheme.secondary,
-                        padding = 8.dp,
-                        cornerRadius = 28.dp,
-                    ),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "Keyboard Settings",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

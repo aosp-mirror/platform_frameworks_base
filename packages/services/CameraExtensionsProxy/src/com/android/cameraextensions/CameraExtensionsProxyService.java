@@ -1643,16 +1643,14 @@ public class CameraExtensionsProxyService extends Service {
             CameraExtensionsProxyService.unregisterDeathRecipient(mToken, this);
             mSessionProcessor.deInitSession();
 
-            if (Flags.surfaceLeakFix()) {
-                if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
-                    mOutputImageCaptureSurfaceImpl.mSurface.release();
-                }
-                if (mOutputPreviewSurfaceImpl.mSurface != null) {
-                    mOutputPreviewSurfaceImpl.mSurface.release();
-                }
-                if (mOutputPostviewSurfaceImpl.mSurface != null) {
-                    mOutputPostviewSurfaceImpl.mSurface.release();
-                }
+            if (mOutputImageCaptureSurfaceImpl.mSurface != null) {
+                mOutputImageCaptureSurfaceImpl.mSurface.release();
+            }
+            if (mOutputPreviewSurfaceImpl.mSurface != null) {
+                mOutputPreviewSurfaceImpl.mSurface.release();
+            }
+            if (mOutputPostviewSurfaceImpl.mSurface != null) {
+                mOutputPostviewSurfaceImpl.mSurface.release();
             }
         }
 

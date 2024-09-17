@@ -17,8 +17,12 @@ package com.android.systemui.notetask
 
 import android.app.role.RoleManager
 import android.app.role.RoleManager.ROLE_NOTES
+import android.hardware.input.InputManager
+import android.hardware.input.KeyGestureEvent
 import android.os.UserHandle
 import android.os.UserManager
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.SetFlagsRule
 import android.view.KeyEvent
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.KeyEvent.ACTION_UP
@@ -42,6 +46,7 @@ import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -57,7 +62,11 @@ import org.mockito.MockitoAnnotations.initMocks
 @RunWith(AndroidJUnit4::class)
 internal class NoteTaskInitializerTest : SysuiTestCase() {
 
+    @get:Rule
+    val setFlagsRule = SetFlagsRule()
+
     @Mock lateinit var commandQueue: CommandQueue
+    @Mock lateinit var inputManager: InputManager
     @Mock lateinit var bubbles: Bubbles
     @Mock lateinit var controller: NoteTaskController
     @Mock lateinit var roleManager: RoleManager
@@ -86,6 +95,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
             roleManager = roleManager,
             userTracker = userTracker,
             keyguardUpdateMonitor = keyguardMonitor,
+            inputManager = inputManager,
             backgroundExecutor = executor,
         )
 
@@ -168,6 +178,26 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
         callback.handleSystemKey(expectedKeyEvent)
 
+        verify(controller).showNoteTask(any())
+    }
+
+    @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
+    fun initialize_handleKeyGestureEvent() {
+        val gestureEvent = KeyGestureEvent.Builder()
+            .setKeycodes(intArrayOf(KeyEvent.KEYCODE_N))
+            .setModifierState(KeyEvent.META_META_ON or KeyEvent.META_CTRL_ON)
+            .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES)
+            .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            .build()
+        val underTest = createUnderTest(isEnabled = true, bubbles = bubbles)
+        underTest.initialize()
+        val callback =
+            withArgCaptor { verify(inputManager).registerKeyGestureEventHandler(capture()) }
+
+        assertThat(callback.handleKeyGestureEvent(gestureEvent, null)).isTrue()
+
+        executor.runAllReady()
         verify(controller).showNoteTask(any())
     }
 

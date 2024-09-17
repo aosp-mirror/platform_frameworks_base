@@ -612,9 +612,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader(),
                     Surface.class);
             if (parcelableArray != null) {
-                if (Flags.surfaceLeakFix()) {
-                    mReleaseSurfaces = true;
-                }
+                mReleaseSurfaces = true;
                 for (Parcelable p : parcelableArray) {
                     Surface s = (Surface) p;
                     mSurfaceSet.add(s);
@@ -798,7 +796,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     }
 
     @SuppressWarnings("Finalize")
-    @FlaggedApi(Flags.FLAG_SURFACE_LEAK_FIX)
     @Override
     protected void finalize() {
         if (mReleaseSurfaces) {

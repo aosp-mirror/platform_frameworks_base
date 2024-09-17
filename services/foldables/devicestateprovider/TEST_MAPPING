@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "foldable-device-state-provider-tests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "foldable-device-state-provider-tests"
     }
   ]
 }

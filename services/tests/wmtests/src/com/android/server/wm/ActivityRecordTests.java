@@ -39,6 +39,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.pm.ApplicationInfo.CATEGORY_SOCIAL;
+import static android.content.pm.ApplicationInfo.CATEGORY_GAME;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
@@ -137,6 +139,7 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.provider.DeviceConfig;
 import android.util.MutableBoolean;
 import android.view.DisplayInfo;
@@ -2655,21 +2658,43 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testSetOrientation() {
+        assertSetOrientation(Build.VERSION_CODES.VANILLA_ICE_CREAM, CATEGORY_SOCIAL, true);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT)
+    public void testSetOrientation_restrictedByTargetSdk() {
+        assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_SOCIAL, false);
+        assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_GAME, true);
+
+        // Blanket application, also ignoring Target SDK
+        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        assertSetOrientation(Build.VERSION_CODES.VANILLA_ICE_CREAM, CATEGORY_SOCIAL, false);
+    }
+
+    private void assertSetOrientation(int targetSdk, int category, boolean expectRotate) {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity.mTargetSdk = targetSdk;
+        activity.info.applicationInfo.category = category;
+
         activity.setVisible(true);
 
         // Assert orientation is unspecified to start.
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, activity.getOrientation());
 
+        // Request orientation and see if it can be applied.
         activity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, activity.getOrientation());
+        if (expectRotate) {
+            assertEquals("targetSdk=" + targetSdk + " should be able to enter landscape",
+                    SCREEN_ORIENTATION_LANDSCAPE, activity.getOrientation());
+        } else {
+            assertEquals("targetSdk=" + targetSdk + " should not be able to enter landscape",
+                    SCREEN_ORIENTATION_UNSPECIFIED, activity.getOrientation());
+        }
 
         mDisplayContent.removeAppToken(activity.token);
         // Assert orientation is unset to after container is removed.
         assertEquals(SCREEN_ORIENTATION_UNSET, activity.getOrientation());
-
-        // Reset display frozen state
-        mWm.mDisplayFrozen = false;
     }
 
     @Test

@@ -56,6 +56,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes.AttributeSystemUsage;
+import android.media.AudioDeviceInfo;
 import android.media.CallbackUtil.ListenerInfo;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener;
@@ -8157,7 +8158,7 @@ public class AudioManager {
      * @hide
      */
     public static MicrophoneInfo microphoneInfoFromAudioDeviceInfo(AudioDeviceInfo deviceInfo) {
-        int deviceType = deviceInfo.getType();
+        @AudioDeviceInfo.AudioDeviceType int deviceType = deviceInfo.getType();
         int micLocation = (deviceType == AudioDeviceInfo.TYPE_BUILTIN_MIC
                 || deviceType == AudioDeviceInfo.TYPE_TELEPHONY) ? MicrophoneInfo.LOCATION_MAINBODY
                 : deviceType == AudioDeviceInfo.TYPE_UNKNOWN ? MicrophoneInfo.LOCATION_UNKNOWN

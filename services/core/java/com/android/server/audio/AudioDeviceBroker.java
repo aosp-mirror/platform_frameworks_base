@@ -541,7 +541,8 @@ public class AudioDeviceBroker {
         return device.isSink() && isValidCommunicationDeviceType(device.getType());
     }
 
-    private static boolean isValidCommunicationDeviceType(int deviceType) {
+    private static boolean isValidCommunicationDeviceType(
+            @AudioDeviceInfo.AudioDeviceType int deviceType) {
         for (int type : VALID_COMMUNICATION_DEVICE_TYPES) {
             if (deviceType == type) {
                 return true;
@@ -740,7 +741,8 @@ public class AudioDeviceBroker {
      * @param deviceType the device type the query applies to.
      * @return true if this device type is requested for communication.
      */
-    private boolean isDeviceRequestedForCommunication(int deviceType) {
+    private boolean isDeviceRequestedForCommunication(
+            @AudioDeviceInfo.AudioDeviceType int deviceType) {
         synchronized (mDeviceStateLock) {
             AudioDeviceAttributes device = requestedCommunicationDevice();
             return device != null && device.getType() == deviceType;
@@ -754,7 +756,8 @@ public class AudioDeviceBroker {
      * @param deviceType the device type the query applies to.
      * @return true if this device type is requested for communication.
      */
-    private boolean isDeviceOnForCommunication(int deviceType) {
+    private boolean isDeviceOnForCommunication(
+            @AudioDeviceInfo.AudioDeviceType int deviceType) {
         synchronized (mDeviceStateLock) {
             AudioDeviceAttributes device = preferredCommunicationDevice();
             return device != null && device.getType() == deviceType;
@@ -768,7 +771,8 @@ public class AudioDeviceBroker {
      * @param deviceType the device type the query applies to.
      * @return true if this device type is requested for communication.
      */
-    private boolean isDeviceActiveForCommunication(int deviceType) {
+    private boolean isDeviceActiveForCommunication(
+            @AudioDeviceInfo.AudioDeviceType int deviceType) {
         return mActiveCommunicationDevice != null
                 && mActiveCommunicationDevice.getType() == deviceType
                 && mPreferredCommunicationDevice != null

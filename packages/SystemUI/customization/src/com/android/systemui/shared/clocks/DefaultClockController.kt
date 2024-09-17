@@ -34,6 +34,7 @@ import com.android.systemui.plugins.clocks.ClockFaceConfig
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockMessageBuffers
+import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
 import com.android.systemui.plugins.clocks.WeatherData
@@ -73,7 +74,7 @@ class DefaultClockController(
         ClockConfig(
             DEFAULT_CLOCK_ID,
             resources.getString(R.string.clock_default_name),
-            resources.getString(R.string.clock_default_description)
+            resources.getString(R.string.clock_default_description),
         )
     }
 
@@ -84,14 +85,14 @@ class DefaultClockController(
                 layoutInflater.inflate(R.layout.clock_default_small, parent, false)
                     as AnimatableClockView,
                 settings?.seedColor,
-                messageBuffers?.smallClockMessageBuffer
+                messageBuffers?.smallClockMessageBuffer,
             )
         largeClock =
             LargeClockFaceController(
                 layoutInflater.inflate(R.layout.clock_default_large, parent, false)
                     as AnimatableClockView,
                 settings?.seedColor,
-                messageBuffers?.largeClockMessageBuffer
+                messageBuffers?.largeClockMessageBuffer,
             )
         clocks = listOf(smallClock.view, largeClock.view)
 
@@ -272,8 +273,12 @@ class DefaultClockController(
         }
 
         override fun onWeatherDataChanged(data: WeatherData) {}
+
         override fun onAlarmDataChanged(data: AlarmData) {}
+
         override fun onZenDataChanged(data: ZenData) {}
+
+        override fun onReactiveAxesChanged(axes: List<ClockReactiveSetting>) {}
     }
 
     open inner class DefaultClockAnimations(
@@ -340,10 +345,9 @@ class DefaultClockController(
         }
     }
 
-    class AnimationState(
-        var fraction: Float,
-    ) {
+    class AnimationState(var fraction: Float) {
         var isActive: Boolean = fraction > 0.5f
+
         fun update(newFraction: Float): Pair<Boolean, Boolean> {
             if (newFraction == fraction) {
                 return Pair(isActive, false)

@@ -455,7 +455,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
-        if (!isDragResizable(mTaskInfo)) {
+        if (!isDragResizable(mTaskInfo, mContext)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
                 updateExclusionRegion();
@@ -497,12 +497,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         }
     }
 
-    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo,
+            Context context) {
+        if (DesktopModeFlags.SCALED_RESIZING.isEnabled(context)) {
+            return taskInfo.isFreeform();
+        }
         return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
-        if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
+        if (!isDragResizable(mTaskInfo, mContext) || !isMaximizeMenuActive()) {
             return;
         }
         if (!mTaskInfo.isVisible()) {
@@ -532,7 +536,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void disposeStatusBarInputLayer() {
         if (!isAppHandle(mWindowDecorViewHolder)
-                || !Flags.enableAdditionalWindowsAboveStatusBar()) {
+                || !Flags.enableHandleInputFix()) {
             return;
         }
         ((AppHandleViewHolder) mWindowDecorViewHolder).disposeStatusBarInputLayer();
@@ -544,7 +548,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     mResult.mRootView,
                     mOnCaptionTouchListener,
                     mOnCaptionButtonClickListener,
-                    mWindowManagerWrapper
+                    mWindowManagerWrapper,
+                    mHandler
             );
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
@@ -628,7 +633,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             }
             controlsElement.mAlignment = RelayoutParams.OccludingCaptionElement.Alignment.END;
             relayoutParams.mOccludingCaptionElements.add(controlsElement);
-        } else if (isAppHandle && !Flags.enableAdditionalWindowsAboveStatusBar()) {
+        } else if (isAppHandle && !Flags.enableHandleInputFix()) {
             // The focused decor (fullscreen/split) does not need to handle input because input in
             // the App Handle is handled by the InputMonitor in DesktopModeWindowDecorViewModel.
             // Note: This does not apply with the above flag enabled as the status bar input layer
@@ -1153,13 +1158,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     boolean checkTouchEventInFocusedCaptionHandle(MotionEvent ev) {
         if (isHandleMenuActive() || !isAppHandle(mWindowDecorViewHolder)
-                || Flags.enableAdditionalWindowsAboveStatusBar()) {
+                || Flags.enableHandleInputFix()) {
             return false;
         }
         // The status bar input layer can only receive input in handle coordinates to begin with,
         // so checking coordinates is unnecessary as input is always within handle bounds.
         if (isAppHandle(mWindowDecorViewHolder)
-                && Flags.enableAdditionalWindowsAboveStatusBar()
+                && Flags.enableHandleInputFix()
                 && isCaptionVisible()) {
             return true;
         }
@@ -1196,7 +1201,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the MotionEvent to compare
      */
     void checkTouchEvent(MotionEvent ev) {
-        if (mResult.mRootView == null || Flags.enableAdditionalWindowsAboveStatusBar()) return;
+        if (mResult.mRootView == null || Flags.enableHandleInputFix()) return;
         final View caption = mResult.mRootView.findViewById(R.id.desktop_mode_caption);
         final View handle = caption.findViewById(R.id.caption_handle);
         final boolean inHandle = !isHandleMenuActive()
@@ -1209,7 +1214,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             // If the whole handle menu can be touched directly, rely on FLAG_WATCH_OUTSIDE_TOUCH.
             // This is for the case that some of the handle menu is underneath the status bar.
             if (isAppHandle(mWindowDecorViewHolder)
-                    && !Flags.enableAdditionalWindowsAboveStatusBar()) {
+                    && !Flags.enableHandleInputFix()) {
                 mHandleMenu.checkMotionEvent(ev);
                 closeHandleMenuIfNeeded(ev);
             }
@@ -1223,7 +1228,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * @param ev the MotionEvent to compare against.
      */
     void updateHoverAndPressStatus(MotionEvent ev) {
-        if (mResult.mRootView == null || Flags.enableAdditionalWindowsAboveStatusBar()) return;
+        if (mResult.mRootView == null || Flags.enableHandleInputFix()) return;
         final View handle = mResult.mRootView.findViewById(R.id.caption_handle);
         final boolean inHandle = !isHandleMenuActive()
                 && checkTouchEventInFocusedCaptionHandle(ev);

@@ -1,12 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsTranslationTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsTranslationTestCases"
     }
   ]
 }
