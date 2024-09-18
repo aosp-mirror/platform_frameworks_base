@@ -29,7 +29,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.hardware.input.InputManager;
 import android.testing.TestableContext;
+import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -60,13 +62,15 @@ import org.mockito.MockitoAnnotations;
  */
 @RunWith(AndroidJUnit4.class)
 public class TouchpadDebugViewTest {
-    private static final int TOUCHPAD_DEVICE_ID = 6;
+    private static final int TOUCHPAD_DEVICE_ID = 60;
 
     private TouchpadDebugView mTouchpadDebugView;
     private WindowManager.LayoutParams mWindowLayoutParams;
 
     @Mock
     WindowManager mWindowManager;
+    @Mock
+    InputManager mInputManager;
 
     Rect mWindowBounds;
     WindowMetrics mWindowMetrics;
@@ -79,11 +83,20 @@ public class TouchpadDebugViewTest {
         mTestableContext = new TestableContext(context);
 
         mTestableContext.addMockSystemService(WindowManager.class, mWindowManager);
+        mTestableContext.addMockSystemService(InputManager.class, mInputManager);
 
         mWindowBounds = new Rect(0, 0, 2560, 1600);
         mWindowMetrics = new WindowMetrics(mWindowBounds, new WindowInsets(mWindowBounds), 1.0f);
 
         when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+
+        InputDevice inputDevice = new InputDevice.Builder()
+                .setId(TOUCHPAD_DEVICE_ID)
+                .setSources(InputDevice.SOURCE_TOUCHPAD | InputDevice.SOURCE_MOUSE)
+                .setName("Test Device " + TOUCHPAD_DEVICE_ID)
+                .build();
+
+        when(mInputManager.getInputDevice(TOUCHPAD_DEVICE_ID)).thenReturn(inputDevice);
 
         mTouchpadDebugView = new TouchpadDebugView(mTestableContext, TOUCHPAD_DEVICE_ID,
                 new TouchpadHardwareProperties.Builder(0f, 0f, 500f,
