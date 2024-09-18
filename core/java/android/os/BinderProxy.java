@@ -650,13 +650,13 @@ public final class BinderProxy implements IBinder {
      * weakly referenced by JNI so the strong references here are needed to keep the callbacks
      * around until the proxy is GC'ed.
      */
-    private List<IFrozenStateChangeCallback> mFrozenStateChangeCallbacks =
+    private List<FrozenStateChangeCallback> mFrozenStateChangeCallbacks =
             Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * See {@link IBinder#addFrozenStateChangeCallback(IFrozenStateChangeCallback)}
+     * See {@link IBinder#addFrozenStateChangeCallback(FrozenStateChangeCallback)}
      */
-    public void addFrozenStateChangeCallback(IFrozenStateChangeCallback callback)
+    public void addFrozenStateChangeCallback(FrozenStateChangeCallback callback)
             throws RemoteException {
         addFrozenStateChangeCallbackNative(callback);
         mFrozenStateChangeCallbacks.add(callback);
@@ -665,16 +665,16 @@ public final class BinderProxy implements IBinder {
     /**
      * See {@link IBinder#removeFrozenStateChangeCallback}
      */
-    public boolean removeFrozenStateChangeCallback(IFrozenStateChangeCallback callback) {
+    public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
         mFrozenStateChangeCallbacks.remove(callback);
         return removeFrozenStateChangeCallbackNative(callback);
     }
 
-    private native void addFrozenStateChangeCallbackNative(IFrozenStateChangeCallback callback)
+    private native void addFrozenStateChangeCallbackNative(FrozenStateChangeCallback callback)
             throws RemoteException;
 
     private native boolean removeFrozenStateChangeCallbackNative(
-            IFrozenStateChangeCallback callback);
+            FrozenStateChangeCallback callback);
 
     /**
      * Perform a dump on the remote object
@@ -762,10 +762,9 @@ public final class BinderProxy implements IBinder {
     }
 
     private static void invokeFrozenStateChangeCallback(
-            IFrozenStateChangeCallback callback, IBinder binderProxy, int stateIndex) {
+            FrozenStateChangeCallback callback, IBinder binderProxy, int stateIndex) {
         try {
-            callback.onFrozenStateChanged(binderProxy,
-                    IFrozenStateChangeCallback.State.values()[stateIndex]);
+            callback.onFrozenStateChanged(binderProxy, stateIndex);
         } catch (RuntimeException exc) {
             Log.w("BinderNative", "Uncaught exception from frozen state change callback",
                     exc);
