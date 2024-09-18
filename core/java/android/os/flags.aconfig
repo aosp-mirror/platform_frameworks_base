@@ -169,6 +169,14 @@ flag {
 }
 
 flag {
+    name: "binder_frozen_state_change_callback"
+    is_exported: true
+    namespace: "system_performance"
+    description: "Guards the frozen state change callback API."
+    bug: "361157077"
+}
+
+flag {
     name: "message_queue_tail_tracking"
     namespace: "system_performance"
     description: "track tail of message queue."
