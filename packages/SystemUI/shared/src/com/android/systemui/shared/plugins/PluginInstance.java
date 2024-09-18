@@ -32,8 +32,6 @@ import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginFragment;
 import com.android.systemui.plugins.PluginLifecycleManager;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginProtector;
-import com.android.systemui.plugins.ProtectedPluginListener;
 
 import dalvik.system.PathClassLoader;
 
@@ -51,8 +49,7 @@ import java.util.function.Supplier;
  *
  * @param <T> The type of plugin that this contains.
  */
-public class PluginInstance<T extends Plugin>
-        implements PluginLifecycleManager, ProtectedPluginListener {
+public class PluginInstance<T extends Plugin> implements PluginLifecycleManager {
     private static final String TAG = "PluginInstance";
 
     private final Context mAppContext;
@@ -61,7 +58,6 @@ public class PluginInstance<T extends Plugin>
     private final PluginFactory<T> mPluginFactory;
     private final String mTag;
 
-    private boolean mHasError = false;
     private BiConsumer<String, String> mLogConsumer = null;
     private Context mPluginContext;
     private T mPlugin;
@@ -91,11 +87,6 @@ public class PluginInstance<T extends Plugin>
         return mTag;
     }
 
-    /** */
-    public boolean hasError() {
-        return mHasError;
-    }
-
     public void setLogFunc(BiConsumer logConsumer) {
         mLogConsumer = logConsumer;
     }
@@ -106,21 +97,8 @@ public class PluginInstance<T extends Plugin>
         }
     }
 
-    @Override
-    public synchronized boolean onFail(String className, String methodName, LinkageError failure) {
-        mHasError = true;
-        unloadPlugin();
-        mListener.onPluginDetached(this);
-        return true;
-    }
-
     /** Alerts listener and plugin that the plugin has been created. */
     public synchronized void onCreate() {
-        if (mHasError) {
-            log("Previous LinkageError detected for plugin class");
-            return;
-        }
-
         boolean loadPlugin = mListener.onPluginAttached(this);
         if (!loadPlugin) {
             if (mPlugin != null) {
@@ -148,12 +126,6 @@ public class PluginInstance<T extends Plugin>
 
     /** Alerts listener and plugin that the plugin is being shutdown. */
     public synchronized void onDestroy() {
-        if (mHasError) {
-            // Detached in error handler
-            log("onDestroy - no-op");
-            return;
-        }
-
         log("onDestroy");
         unloadPlugin();
         mListener.onPluginDetached(this);
@@ -162,25 +134,20 @@ public class PluginInstance<T extends Plugin>
     /** Returns the current plugin instance (if it is loaded). */
     @Nullable
     public T getPlugin() {
-        return mHasError ? null : mPlugin;
+        return mPlugin;
     }
 
     /**
      * Loads and creates the plugin if it does not exist.
      */
     public synchronized void loadPlugin() {
-        if (mHasError) {
-            log("Previous LinkageError detected for plugin class");
-            return;
-        }
-
         if (mPlugin != null) {
             log("Load request when already loaded");
             return;
         }
 
         // Both of these calls take about 1 - 1.5 seconds in test runs
-        mPlugin = mPluginFactory.createPlugin(this);
+        mPlugin = mPluginFactory.createPlugin();
         mPluginContext = mPluginFactory.createPluginContext();
         if (mPlugin == null || mPluginContext == null) {
             Log.e(mTag, "Requested load, but failed");
@@ -397,16 +364,20 @@ public class PluginInstance<T extends Plugin>
         }
 
         /** Creates the related plugin object from the factory */
-        public T createPlugin(ProtectedPluginListener listener) {
+        public T createPlugin() {
             try {
                 ClassLoader loader = mClassLoaderFactory.get();
                 Class<T> instanceClass = (Class<T>) Class.forName(
                         mComponentName.getClassName(), true, loader);
                 T result = (T) mInstanceFactory.create(instanceClass);
                 Log.v(TAG, "Created plugin: " + result);
-                return PluginProtector.protectIfAble(result, listener);
-            } catch (ReflectiveOperationException ex) {
-                Log.wtf(TAG, "Failed to load plugin", ex);
+                return result;
+            } catch (ClassNotFoundException ex) {
+                Log.e(TAG, "Failed to load plugin", ex);
+            } catch (IllegalAccessException ex) {
+                Log.e(TAG, "Failed to load plugin", ex);
+            } catch (InstantiationException ex) {
+                Log.e(TAG, "Failed to load plugin", ex);
             }
             return null;
         }
@@ -426,7 +397,7 @@ public class PluginInstance<T extends Plugin>
         /** Check Version and create VersionInfo for instance */
         public VersionInfo checkVersion(T instance) {
             if (instance == null) {
-                instance = createPlugin(null);
+                instance = createPlugin();
             }
             return mVersionChecker.checkVersion(
                     (Class<T>) instance.getClass(), mPluginClass, instance);

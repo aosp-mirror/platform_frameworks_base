@@ -23,7 +23,9 @@ package {
 }
 
 java_library {
+
     name: "SystemUIPluginLib",
+
     srcs: [
         "bcsmartspace/src/**/*.java",
         "bcsmartspace/src/**/*.kt",
@@ -38,8 +40,6 @@ java_library {
         export_proguard_flags_files: true,
     },
 
-    plugins: ["PluginAnnotationProcessor"],
-
     // If you add a static lib here, you may need to also add the package to the ClassLoaderFilter
     // in PluginInstance. That will ensure that loaded plugins have access to the related classes.
     // You should also add it to proguard_common.flags so that proguard does not remove the portions
@@ -53,6 +53,7 @@ java_library {
         "SystemUILogLib",
         "androidx.annotation_annotation",
     ],
+
 }
 
 android_app {
