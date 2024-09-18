@@ -487,10 +487,11 @@ public abstract class WMShellModule {
     @Provides
     static RecentsTransitionHandler provideRecentsTransitionHandler(
             ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
             Transitions transitions,
             Optional<RecentTasksController> recentTasksController,
             HomeTransitionObserver homeTransitionObserver) {
-        return new RecentsTransitionHandler(shellInit, transitions,
+        return new RecentsTransitionHandler(shellInit, shellTaskOrganizer, transitions,
                 recentTasksController.orElse(null), homeTransitionObserver);
     }
 

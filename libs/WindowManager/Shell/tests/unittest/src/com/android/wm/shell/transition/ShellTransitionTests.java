@@ -557,7 +557,7 @@ public class ShellTransitionTests extends ShellTestCase {
         mMainExecutor.flushAll();
 
         // Takeover shouldn't happen when the flag is disabled.
-        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED);
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
@@ -572,7 +572,7 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any());
 
         // Takeover should happen when the flag is enabled.
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         info = new TransitionInfoBuilder(TRANSIT_OPEN)
@@ -1211,7 +1211,7 @@ public class ShellTransitionTests extends ShellTestCase {
                         mTransactionPool, createTestDisplayController(), mMainExecutor,
                         mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         final RecentsTransitionHandler recentsHandler =
-                new RecentsTransitionHandler(shellInit, transitions,
+                new RecentsTransitionHandler(shellInit, mock(ShellTaskOrganizer.class), transitions,
                         mock(RecentTasksController.class), mock(HomeTransitionObserver.class));
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
         shellInit.init();

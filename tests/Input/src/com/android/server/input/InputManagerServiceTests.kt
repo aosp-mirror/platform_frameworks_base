@@ -17,8 +17,10 @@
 package com.android.server.input
 
 
+import android.Manifest
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.PermissionChecker
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayViewport
 import android.hardware.display.VirtualDisplay
@@ -28,19 +30,26 @@ import android.os.InputEventInjectionSync
 import android.os.SystemClock
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
-import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import android.provider.Settings
 import android.view.View.OnKeyListener
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.WindowManager
 import android.test.mock.MockContentResolver
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.internal.util.test.FakeSettingsProvider
-import com.google.common.truth.Truth.assertThat
 import com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity
+import com.android.dx.mockito.inline.extended.ExtendedMockito
+import com.android.internal.policy.KeyInterceptionInfo
+import com.android.internal.util.test.FakeSettingsProvider
+import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.server.LocalServices
+import com.android.server.wm.WindowManagerInternal
+import com.google.common.truth.Truth.assertThat
 import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -49,15 +58,15 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
-import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when`
 import org.mockito.stubbing.OngoingStubbing
 
 /**
@@ -69,20 +78,33 @@ import org.mockito.stubbing.OngoingStubbing
 @Presubmit
 class InputManagerServiceTests {
 
-    @get:Rule
-    val mockitoRule = MockitoJUnit.rule()!!
+    companion object {
+        val ACTION_KEY_EVENTS = listOf(
+            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_META_LEFT),
+            KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_META_RIGHT),
+            KeyEvent( /* downTime= */0, /* eventTime= */0, /* action= */0, /* code= */0,
+                /* repeat= */0, KeyEvent.META_META_ON
+            )
+        )
+    }
+
+    @JvmField
+    @Rule
+    val extendedMockitoRule =
+        ExtendedMockitoRule.Builder(this).mockStatic(LocalServices::class.java)
+            .mockStatic(PermissionChecker::class.java).build()!!
 
     @get:Rule
     val fakeSettingsProviderRule = FakeSettingsProvider.rule()!!
-
-    @get:Rule
-    val checkFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()!!
 
     @Mock
     private lateinit var native: NativeInputManagerService
 
     @Mock
     private lateinit var wmCallbacks: InputManagerService.WindowManagerCallbacks
+
+    @Mock
+    private lateinit var windowManagerInternal: WindowManagerInternal
 
     @Mock
     private lateinit var uEventManager: UEventManager
@@ -118,6 +140,10 @@ class InputManagerServiceTests {
         val inputManager = InputManager(context)
         whenever(context.getSystemService(InputManager::class.java)).thenReturn(inputManager)
         whenever(context.getSystemService(Context.INPUT_SERVICE)).thenReturn(inputManager)
+
+        ExtendedMockito.doReturn(windowManagerInternal).`when` {
+            LocalServices.getService(eq(WindowManagerInternal::class.java))
+        }
 
         assertTrue("Local service must be registered", this::localService.isInitialized)
         service.setWindowManagerCallbacks(wmCallbacks)
@@ -195,7 +221,7 @@ class InputManagerServiceTests {
     }
 
     @Test
-    fun testAddAndRemoveVirtualmKeyboardLayoutAssociation() {
+    fun testAddAndRemoveVirtualKeyboardLayoutAssociation() {
         val inputPort = "input port"
         val languageTag = "language"
         val layoutType = "layoutType"
@@ -204,6 +230,48 @@ class InputManagerServiceTests {
 
         localService.removeKeyboardLayoutAssociation(inputPort)
         verify(native, times(2)).changeKeyboardLayoutAssociation()
+    }
+
+    @Test
+    fun testActionKeyEventsForwardedToFocusedWindow_whenCorrectlyRequested() {
+        service.systemRunning()
+        overrideSendActionKeyEventsToFocusedWindow(
+            /* hasPermission = */true,
+            /* hasPrivateFlag = */true
+        )
+        whenever(wmCallbacks.interceptKeyBeforeDispatching(any(), any(), anyInt())).thenReturn(-1)
+
+        for (event in ACTION_KEY_EVENTS) {
+            assertEquals(0, service.interceptKeyBeforeDispatching(null, event, 0))
+        }
+    }
+
+    @Test
+    fun testActionKeyEventsNotForwardedToFocusedWindow_whenNoPermissions() {
+        service.systemRunning()
+        overrideSendActionKeyEventsToFocusedWindow(
+            /* hasPermission = */false,
+            /* hasPrivateFlag = */true
+        )
+        whenever(wmCallbacks.interceptKeyBeforeDispatching(any(), any(), anyInt())).thenReturn(-1)
+
+        for (event in ACTION_KEY_EVENTS) {
+            assertNotEquals(0, service.interceptKeyBeforeDispatching(null, event, 0))
+        }
+    }
+
+    @Test
+    fun testActionKeyEventsNotForwardedToFocusedWindow_whenNoPrivateFlag() {
+        service.systemRunning()
+        overrideSendActionKeyEventsToFocusedWindow(
+            /* hasPermission = */true,
+            /* hasPrivateFlag = */false
+        )
+        whenever(wmCallbacks.interceptKeyBeforeDispatching(any(), any(), anyInt())).thenReturn(-1)
+
+        for (event in ACTION_KEY_EVENTS) {
+            assertNotEquals(0, service.interceptKeyBeforeDispatching(null, event, 0))
+        }
     }
 
     private fun createVirtualDisplays(count: Int): List<VirtualDisplay> {
@@ -372,6 +440,41 @@ class InputManagerServiceTests {
         // Verify that the event went to Display 2 not Display 1
         verify(mockOnKeyListener).onKey(mockSurfaceView2, KeyEvent.KEYCODE_A, upEvent)
         verify(mockOnKeyListener, never()).onKey(mockSurfaceView1, KeyEvent.KEYCODE_A, upEvent)
+    }
+
+    fun overrideSendActionKeyEventsToFocusedWindow(
+        hasPermission: Boolean,
+        hasPrivateFlag: Boolean
+    ) {
+        ExtendedMockito.doReturn(
+            if (hasPermission) {
+                PermissionChecker.PERMISSION_GRANTED
+            } else {
+                PermissionChecker.PERMISSION_HARD_DENIED
+            }
+        ).`when` {
+            PermissionChecker.checkPermissionForDataDelivery(
+                any(),
+                eq(Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW),
+                anyInt(),
+                anyInt(),
+                any(),
+                any(),
+                any()
+            )
+        }
+
+        val info = KeyInterceptionInfo(
+            /* type = */0,
+            if (hasPrivateFlag) {
+                WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS
+            } else {
+                0
+            },
+            "title",
+            /* uid = */0
+        )
+        whenever(windowManagerInternal.getKeyInterceptionInfoFromToken(any())).thenReturn(info)
     }
 }
 

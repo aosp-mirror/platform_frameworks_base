@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.colorResource
@@ -79,7 +80,6 @@ import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
-import com.android.systemui.common.ui.compose.windowinsets.LocalRawScreenHeight
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
@@ -229,17 +229,16 @@ private fun SceneScope.QuickSettingsScene(
                 }
                 .thenIf(cutoutLocation != CutoutLocation.CENTER) { Modifier.displayCutoutPadding() }
     ) {
+        val density = LocalDensity.current
         val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
         val isCustomizerShowing by
             viewModel.qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
         val customizingAnimationDuration by
             viewModel.qsSceneAdapter.customizerAnimationDuration.collectAsStateWithLifecycle()
-        val screenHeight = LocalRawScreenHeight.current
+        val screenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
 
         BackHandler(enabled = isCustomizing) { viewModel.qsSceneAdapter.requestCloseCustomizer() }
 
-        val collapsedHeaderHeight =
-            with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
         val lifecycleOwner = LocalLifecycleOwner.current
         val footerActionsViewModel =
             remember(lifecycleOwner, viewModel) {
@@ -268,7 +267,6 @@ private fun SceneScope.QuickSettingsScene(
 
         val navBarBottomHeight =
             WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        val density = LocalDensity.current
         val bottomPadding by
             animateDpAsState(
                 targetValue = if (isCustomizing) 0.dp else navBarBottomHeight,

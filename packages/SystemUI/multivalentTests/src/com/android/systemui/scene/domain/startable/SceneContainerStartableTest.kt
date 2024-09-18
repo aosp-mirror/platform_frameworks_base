@@ -27,6 +27,7 @@ import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.internal.logging.uiEventLoggerFake
 import com.android.internal.policy.IKeyguardDismissCallback
@@ -88,9 +89,11 @@ import com.android.systemui.scene.data.model.asIterable
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.domain.interactor.keyguardOcclusionInteractor
@@ -161,6 +164,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun hydrateVisibility() =
         testScope.runTest {
             val currentDesiredSceneKey by collectLastValue(sceneInteractor.currentScene)
@@ -207,6 +211,87 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(isVisible).isTrue()
             fakeSceneDataSource.unpause(expectedScene = Scenes.Gone)
             transitionStateFlow.value = ObservableTransitionState.Idle(Scenes.Gone)
+            assertThat(isVisible).isFalse()
+
+            kosmos.headsUpNotificationRepository.setNotifications(
+                buildNotificationRows(isPinned = true)
+            )
+            assertThat(isVisible).isTrue()
+
+            kosmos.headsUpNotificationRepository.setNotifications(
+                buildNotificationRows(isPinned = false)
+            )
+            assertThat(isVisible).isFalse()
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun hydrateVisibility_dualShade() =
+        testScope.runTest {
+            val currentDesiredSceneKey by collectLastValue(sceneInteractor.currentScene)
+            val currentDesiredOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            val isVisible by collectLastValue(sceneInteractor.isVisible)
+            val transitionStateFlow =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                )
+            assertThat(currentDesiredSceneKey).isEqualTo(Scenes.Gone)
+            assertThat(currentDesiredOverlays).isEmpty()
+            assertThat(isVisible).isTrue()
+
+            underTest.start()
+            assertThat(isVisible).isFalse()
+
+            // Expand the notifications shade.
+            fakeSceneDataSource.pause()
+            sceneInteractor.showOverlay(Overlays.NotificationsShade, "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition.ShowOrHideOverlay(
+                    overlay = Overlays.NotificationsShade,
+                    fromContent = Scenes.Gone,
+                    toContent = Overlays.NotificationsShade,
+                    currentScene = Scenes.Gone,
+                    currentOverlays = flowOf(emptySet()),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            assertThat(isVisible).isTrue()
+            fakeSceneDataSource.unpause(expectedScene = Scenes.Gone)
+            transitionStateFlow.value =
+                ObservableTransitionState.Idle(
+                    currentScene = Scenes.Gone,
+                    currentOverlays = setOf(Overlays.NotificationsShade),
+                )
+            assertThat(isVisible).isTrue()
+
+            // Collapse the notifications shade.
+            fakeSceneDataSource.pause()
+            sceneInteractor.hideOverlay(Overlays.NotificationsShade, "reason")
+            transitionStateFlow.value =
+                ObservableTransitionState.Transition.ShowOrHideOverlay(
+                    overlay = Overlays.NotificationsShade,
+                    fromContent = Overlays.NotificationsShade,
+                    toContent = Scenes.Gone,
+                    currentScene = Scenes.Gone,
+                    currentOverlays = flowOf(setOf(Overlays.NotificationsShade)),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            assertThat(isVisible).isTrue()
+            fakeSceneDataSource.unpause(expectedScene = Scenes.Gone)
+            transitionStateFlow.value =
+                ObservableTransitionState.Idle(
+                    currentScene = Scenes.Gone,
+                    currentOverlays = emptySet(),
+                )
             assertThat(isVisible).isFalse()
 
             kosmos.headsUpNotificationRepository.setNotifications(
@@ -1621,6 +1706,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun hydrateInteractionState_whileLocked() =
         testScope.runTest {
             val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
@@ -1707,6 +1793,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(DualShade.FLAG_NAME)
     fun hydrateInteractionState_whileUnlocked() =
         testScope.runTest {
             val transitionStateFlow =
@@ -1717,6 +1804,186 @@ class SceneContainerStartableTest : SysuiTestCase() {
                 )
             underTest.start()
             verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Bouncer,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Shade,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.QuickSettings,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun hydrateInteractionState_dualShade_whileLocked() =
+        testScope.runTest {
+            val currentDesiredOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            val transitionStateFlow = prepareState(initialSceneKey = Scenes.Lockscreen)
+            underTest.start()
+            runCurrent()
+            verify(centralSurfaces).setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true)
+            assertThat(currentDesiredOverlays).isEmpty()
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Bouncer,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces)
+                        .setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false)
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces).setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true)
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateOverlayTransition(
+                transitionStateFlow = transitionStateFlow,
+                toOverlay = Overlays.NotificationsShade,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces)
+                        .setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false)
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateSceneTransition(
+                transitionStateFlow = transitionStateFlow,
+                toScene = Scenes.Lockscreen,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces).setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true)
+                },
+            )
+
+            clearInvocations(centralSurfaces)
+            emulateOverlayTransition(
+                transitionStateFlow = transitionStateFlow,
+                toOverlay = Overlays.QuickSettingsShade,
+                verifyBeforeTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyDuringTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+                verifyAfterTransition = {
+                    verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+                },
+            )
+        }
+
+    @Test
+    @EnableFlags(DualShade.FLAG_NAME)
+    fun hydrateInteractionState_dualShade_whileUnlocked() =
+        testScope.runTest {
+            val currentDesiredOverlays by collectLastValue(sceneInteractor.currentOverlays)
+            val transitionStateFlow =
+                prepareState(
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    isDeviceUnlocked = true,
+                    initialSceneKey = Scenes.Gone,
+                )
+            underTest.start()
+            verify(centralSurfaces, never()).setInteracting(anyInt(), anyBoolean())
+            assertThat(currentDesiredOverlays).isEmpty()
 
             clearInvocations(centralSurfaces)
             emulateSceneTransition(
@@ -2131,23 +2398,98 @@ class SceneContainerStartableTest : SysuiTestCase() {
         verifyAfterTransition: (() -> Unit)? = null,
     ) {
         val fromScene = sceneInteractor.currentScene.value
+        val fromOverlays = sceneInteractor.currentOverlays.value
         sceneInteractor.changeScene(toScene, "reason")
         runCurrent()
         verifyBeforeTransition?.invoke()
 
         transitionStateFlow.value =
-            ObservableTransitionState.Transition(
-                fromScene = fromScene,
-                toScene = toScene,
-                currentScene = flowOf(fromScene),
-                progress = flowOf(0.5f),
-                isInitiatedByUserInput = true,
-                isUserInputOngoing = flowOf(true),
-            )
+            if (fromOverlays.isEmpty()) {
+                // Regular scene-to-scene transition.
+                ObservableTransitionState.Transition.ChangeScene(
+                    fromScene = fromScene,
+                    toScene = toScene,
+                    currentScene = flowOf(fromScene),
+                    currentOverlays = fromOverlays,
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            } else {
+                // An overlay is present; hide it.
+                ObservableTransitionState.Transition.ShowOrHideOverlay(
+                    overlay = fromOverlays.first(),
+                    fromContent = fromOverlays.first(),
+                    toContent = toScene,
+                    currentScene = fromScene,
+                    currentOverlays = sceneInteractor.currentOverlays,
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            }
         runCurrent()
         verifyDuringTransition?.invoke()
 
         transitionStateFlow.value = ObservableTransitionState.Idle(currentScene = toScene)
+        runCurrent()
+        verifyAfterTransition?.invoke()
+    }
+
+    private fun TestScope.emulateOverlayTransition(
+        transitionStateFlow: MutableStateFlow<ObservableTransitionState>,
+        toOverlay: OverlayKey,
+        verifyBeforeTransition: (() -> Unit)? = null,
+        verifyDuringTransition: (() -> Unit)? = null,
+        verifyAfterTransition: (() -> Unit)? = null,
+    ) {
+        val fromScene = sceneInteractor.currentScene.value
+        val fromOverlays = sceneInteractor.currentOverlays.value
+        sceneInteractor.showOverlay(toOverlay, "reason")
+        runCurrent()
+        verifyBeforeTransition?.invoke()
+
+        transitionStateFlow.value =
+            if (fromOverlays.isEmpty()) {
+                // Show a new overlay.
+                ObservableTransitionState.Transition.ShowOrHideOverlay(
+                    overlay = toOverlay,
+                    fromContent = fromScene,
+                    toContent = toOverlay,
+                    currentScene = fromScene,
+                    currentOverlays = sceneInteractor.currentOverlays,
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            } else {
+                // Overlay-to-overlay transition.
+                ObservableTransitionState.Transition.ReplaceOverlay(
+                    fromOverlay = fromOverlays.first(),
+                    toOverlay = toOverlay,
+                    currentScene = fromScene,
+                    currentOverlays = sceneInteractor.currentOverlays,
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(true),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            }
+        runCurrent()
+        verifyDuringTransition?.invoke()
+
+        transitionStateFlow.value =
+            ObservableTransitionState.Idle(
+                currentScene = fromScene,
+                currentOverlays = setOf(toOverlay),
+            )
         runCurrent()
         verifyAfterTransition?.invoke()
     }

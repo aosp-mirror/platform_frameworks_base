@@ -47,6 +47,7 @@ android_test {
         "wm-flicker-common-app-helpers",
         "wm-flicker-common-assertions",
         "wm-flicker-window-extensions",
+        "wm-shell-flicker-utils",
     ],
 }
 

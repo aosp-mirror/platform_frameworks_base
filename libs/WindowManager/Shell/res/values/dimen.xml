@@ -304,31 +304,31 @@
     <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
 
     <!-- The width of the top icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_icon_width">45dp</dimen>
+    <dimen name="letterbox_education_dialog_title_icon_width">32dp</dimen>
 
     <!-- The height of the top icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_icon_height">44dp</dimen>
+    <dimen name="letterbox_education_dialog_title_icon_height">32dp</dimen>
 
     <!-- The width of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_width">40dp</dimen>
+    <dimen name="letterbox_education_dialog_icon_width">28dp</dimen>
 
     <!-- The height of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_height">32dp</dimen>
+    <dimen name="letterbox_education_dialog_icon_height">22dp</dimen>
 
     <!-- The fixed width of the dialog if there is enough space in the parent. -->
-    <dimen name="letterbox_education_dialog_width">472dp</dimen>
+    <dimen name="letterbox_education_dialog_width">364dp</dimen>
 
     <!-- The margin between the dialog container and its parent. -->
-    <dimen name="letterbox_education_dialog_margin">16dp</dimen>
+    <dimen name="letterbox_education_dialog_margin">24dp</dimen>
 
     <!-- The width of each action container in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_action_width">140dp</dimen>
+    <dimen name="letterbox_education_dialog_action_width">124dp</dimen>
 
     <!-- The space between two actions in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
+    <dimen name="letterbox_education_dialog_space_between_actions">32dp</dimen>
 
     <!-- The corner radius of the buttons in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_button_radius">12dp</dimen>
+    <dimen name="letterbox_education_dialog_button_radius">28dp</dimen>
 
     <!-- The horizontal padding for the buttons in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_horizontal_padding">16dp</dimen>
@@ -367,7 +367,7 @@
     <dimen name="letterbox_restart_dialog_button_width">82dp</dimen>
 
     <!-- The width of the buttons in the restart dialog -->
-    <dimen name="letterbox_restart_dialog_button_height">36dp</dimen>
+    <dimen name="letterbox_restart_dialog_button_height">40dp</dimen>
 
     <!-- The corner radius of the buttons in the restart dialog -->
     <dimen name="letterbox_restart_dialog_button_radius">18dp</dimen>

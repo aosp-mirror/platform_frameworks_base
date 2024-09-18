@@ -16,6 +16,7 @@
 
 package com.android.systemui.haptics.qs
 
+import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.log.core.FakeLogBuffer
@@ -26,6 +27,7 @@ val Kosmos.qsLongPressEffect by
         QSLongPressEffect(
             vibratorHelper,
             keyguardStateController,
+            fakeFalsingManager,
             FakeLogBuffer.Factory.create(),
         )
     }

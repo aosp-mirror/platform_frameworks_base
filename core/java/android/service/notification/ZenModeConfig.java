@@ -1046,6 +1046,8 @@ public class ZenModeConfig implements Parcelable {
                             DEFAULT_SUPPRESSED_VISUAL_EFFECTS);
                 } else if (MANUAL_TAG.equals(tag)) {
                     rt.manualRule = readRuleXml(parser);
+                    // manualRule.enabled can never be false, but it was broken in some builds.
+                    rt.manualRule.enabled = true;
                     // Manual rule may be present prior to modes_ui if it were on, but in that
                     // case it would not have a set policy, so make note of the need to set
                     // it up later.

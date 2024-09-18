@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.ui.util.SpaceVectorConverter
@@ -234,8 +235,15 @@ internal class MultiPointerDraggableNode(
                     pointersDown == 0 -> {
                         startedPosition = null
 
-                        val lastPointerUp = changes.single { it.id == velocityPointerId }
-                        velocityTracker.addPointerInputChange(lastPointerUp)
+                        // In case of multiple events with 0 pointers down (not pressed) we may have
+                        // already removed the velocityPointer
+                        val lastPointerUp = changes.fastFilter { it.id == velocityPointerId }
+                        check(lastPointerUp.isEmpty() || lastPointerUp.size == 1) {
+                            "There are ${lastPointerUp.size} pointers up: $lastPointerUp"
+                        }
+                        if (lastPointerUp.size == 1) {
+                            velocityTracker.addPointerInputChange(lastPointerUp.first())
+                        }
                     }
 
                     // The first pointer down, startedPosition was not set.

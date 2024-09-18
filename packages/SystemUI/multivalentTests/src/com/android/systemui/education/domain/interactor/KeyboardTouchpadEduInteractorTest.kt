@@ -17,15 +17,13 @@
 package com.android.systemui.education.domain.interactor
 
 import android.content.pm.UserInfo
-import android.hardware.input.InputManager
-import android.hardware.input.KeyGestureEvent
-import android.view.KeyEvent
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.contextualeducation.GestureType.HOME
+import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.education.data.model.GestureEduModel
@@ -40,20 +38,21 @@ import com.android.systemui.user.data.repository.fakeUserRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(AndroidJUnit4::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
+class KeyboardTouchpadEduInteractorTest(private val gestureType: GestureType) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val contextualEduInteractor = kosmos.contextualEducationInteractor
@@ -71,21 +70,27 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
         underTest.start()
         contextualEduInteractor.start()
         userRepository.setUserInfos(USER_INFOS)
+        testScope.launch {
+            contextualEduInteractor.updateKeyboardFirstConnectionTime()
+            contextualEduInteractor.updateTouchpadFirstConnectionTime()
+        }
     }
 
     @Test
     fun newEducationInfoOnMaxSignalCountReached() =
         testScope.runTest {
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
             val model by collectLastValue(underTest.educationTriggered)
-            assertThat(model?.gestureType).isEqualTo(BACK)
+
+            assertThat(model?.gestureType).isEqualTo(gestureType)
         }
 
     @Test
     fun newEducationToastOn1stEducation() =
         testScope.runTest {
             val model by collectLastValue(underTest.educationTriggered)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
+
             assertThat(model?.educationUiType).isEqualTo(EducationUiType.Toast)
         }
 
@@ -93,12 +98,12 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     fun newEducationNotificationOn2ndEducation() =
         testScope.runTest {
             val model by collectLastValue(underTest.educationTriggered)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
             // runCurrent() to trigger 1st education
             runCurrent()
 
             eduClock.offset(minDurationForNextEdu)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
 
             assertThat(model?.educationUiType).isEqualTo(EducationUiType.Notification)
         }
@@ -106,7 +111,7 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     @Test
     fun noEducationInfoBeforeMaxSignalCountReached() =
         testScope.runTest {
-            contextualEduInteractor.incrementSignalCount(BACK)
+            contextualEduInteractor.incrementSignalCount(gestureType)
             val model by collectLastValue(underTest.educationTriggered)
             assertThat(model).isNull()
         }
@@ -115,8 +120,8 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     fun noEducationInfoWhenShortcutTriggeredPreviously() =
         testScope.runTest {
             val model by collectLastValue(underTest.educationTriggered)
-            contextualEduInteractor.updateShortcutTriggerTime(BACK)
-            triggerMaxEducationSignals(BACK)
+            contextualEduInteractor.updateShortcutTriggerTime(gestureType)
+            triggerMaxEducationSignals(gestureType)
             assertThat(model).isNull()
         }
 
@@ -124,12 +129,12 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     fun no2ndEducationBeforeMinEduIntervalReached() =
         testScope.runTest {
             val models by collectValues(underTest.educationTriggered)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
             runCurrent()
 
             // Offset a duration that is less than the required education interval
             eduClock.offset(1.seconds)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
             runCurrent()
 
             assertThat(models.filterNotNull().size).isEqualTo(1)
@@ -140,15 +145,15 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val models by collectValues(underTest.educationTriggered)
             // Trigger 2 educations
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
             runCurrent()
             eduClock.offset(minDurationForNextEdu)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
             runCurrent()
 
             // Try triggering 3rd education
             eduClock.offset(minDurationForNextEdu)
-            triggerMaxEducationSignals(BACK)
+            triggerMaxEducationSignals(gestureType)
 
             assertThat(models.filterNotNull().size).isEqualTo(2)
         }
@@ -157,18 +162,21 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     fun startNewUsageSessionWhen2ndSignalReceivedAfterSessionDeadline() =
         testScope.runTest {
             val model by
-                collectLastValue(kosmos.contextualEducationRepository.readGestureEduModelFlow(BACK))
-            contextualEduInteractor.incrementSignalCount(BACK)
+                collectLastValue(
+                    kosmos.contextualEducationRepository.readGestureEduModelFlow(gestureType)
+                )
+            contextualEduInteractor.incrementSignalCount(gestureType)
             eduClock.offset(KeyboardTouchpadEduInteractor.usageSessionDuration.plus(1.seconds))
             val secondSignalReceivedTime = eduClock.instant()
-            contextualEduInteractor.incrementSignalCount(BACK)
+            contextualEduInteractor.incrementSignalCount(gestureType)
 
             assertThat(model)
                 .isEqualTo(
                     GestureEduModel(
                         signalCount = 1,
                         usageSessionStartTime = secondSignalReceivedTime,
-                        userId = 0
+                        userId = 0,
+                        gestureType = gestureType
                     )
                 )
         }
@@ -252,22 +260,9 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
     @Test
     fun updateShortcutTimeOnKeyboardShortcutTriggered() =
         testScope.runTest {
-            // runCurrent() to trigger inputManager#registerKeyGestureEventListener in the
-            // interactor
-            runCurrent()
-            val listenerCaptor =
-                ArgumentCaptor.forClass(InputManager.KeyGestureEventListener::class.java)
-            verify(kosmos.mockEduInputManager)
-                .registerKeyGestureEventListener(any(), listenerCaptor.capture())
-
-            val allAppsKeyGestureEvent =
-                KeyGestureEvent.Builder()
-                    .setDeviceId(1)
-                    .setModifierState(KeyEvent.META_META_ON)
-                    .setKeyGestureType(KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS)
-                    .setAction(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-                    .build()
-            listenerCaptor.value.onKeyGestureEvent(allAppsKeyGestureEvent)
+            // Only All Apps needs to update the keyboard shortcut
+            assumeTrue(gestureType == ALL_APPS)
+            kosmos.contextualEducationRepository.setKeyboardShortcutTriggered(ALL_APPS)
 
             val model by
                 collectLastValue(
@@ -293,10 +288,18 @@ class KeyboardTouchpadEduInteractorTest : SysuiTestCase() {
         runCurrent()
     }
 
+    private suspend fun setUpForDeviceConnection() {
+        contextualEduInteractor.updateKeyboardFirstConnectionTime()
+        contextualEduInteractor.updateTouchpadFirstConnectionTime()
+    }
+
     companion object {
-        private val USER_INFOS =
-            listOf(
-                UserInfo(101, "Second User", 0),
-            )
+        private val USER_INFOS = listOf(UserInfo(101, "Second User", 0))
+
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getGestureTypes(): List<GestureType> {
+            return listOf(BACK, HOME, OVERVIEW, ALL_APPS)
+        }
     }
 }

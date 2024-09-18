@@ -509,7 +509,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
         return performHapticFeedbackWithEffect(uid, deviceId, opPkg, constant, reason, token,
                 hapticVibrationProvider.getVibration(constant),
-                hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
+                hapticVibrationProvider.getVibrationAttributes(
                         constant, flags, privFlags));
     }
 
@@ -534,8 +534,8 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
         return performHapticFeedbackWithEffect(uid, deviceId, opPkg, constant, reason, token,
                 hapticVibrationProvider.getVibration(constant, inputSource),
-                hapticVibrationProvider.getVibrationAttributesForHapticFeedback(
-                        constant, flags, privFlags));
+                hapticVibrationProvider.getVibrationAttributes(constant, inputSource, flags,
+                        privFlags));
     }
 
     private HalVibration performHapticFeedbackWithEffect(int uid, int deviceId, String opPkg,
