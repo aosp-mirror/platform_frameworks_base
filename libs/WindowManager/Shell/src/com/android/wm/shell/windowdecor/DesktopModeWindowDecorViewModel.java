@@ -1191,8 +1191,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                                 : SPLIT_POSITION_TOP_OR_LEFT;
                                 final RunningTaskInfo oppositeTaskInfo =
                                         mSplitScreenController.getTaskInfo(oppositePosition);
-                                mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
-                                        .disposeStatusBarInputLayer();
+                                if (oppositeTaskInfo != null) {
+                                    mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
+                                            .disposeStatusBarInputLayer();
+                                }
                             }
                         }
                         mMoveToDesktopAnimator = null;
