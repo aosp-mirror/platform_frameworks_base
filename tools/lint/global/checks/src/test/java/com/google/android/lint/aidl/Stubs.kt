@@ -86,3 +86,45 @@ val manifestStub: TestFile = java(
     }
     """.trimIndent()
 )
+
+// A service with permission annotation on the method.
+val interfaceIFoo: TestFile = java(
+    """
+        public interface IFoo extends android.os.IInterface {
+         public static abstract class Stub extends android.os.Binder implements IFoo {
+          }
+          @Override
+          @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
+          public void testMethod();
+          @Override
+          @android.annotation.RequiresNoPermission
+          public void testMethodNoPermission(int parameter1, int parameter2);
+          @Override
+          @android.annotation.PermissionManuallyEnforced
+          public void testMethodManual();
+        }
+        """
+).indented()
+
+// A service with no permission annotation.
+val interfaceIBar: TestFile = java(
+    """
+        public interface IBar extends android.os.IInterface {
+         public static abstract class Stub extends android.os.Binder implements IBar {
+          }
+          public void testMethod(int parameter1, int parameter2);
+        }
+        """
+).indented()
+
+// A service whose AIDL Interface is exempted.
+val interfaceIExempted: TestFile = java(
+    """
+        package android.accessibilityservice;
+        public interface IBrailleDisplayConnection extends android.os.IInterface {
+         public static abstract class Stub extends android.os.Binder implements IBrailleDisplayConnection {
+          }
+          public void testMethod();
+        }
+        """
+).indented()
