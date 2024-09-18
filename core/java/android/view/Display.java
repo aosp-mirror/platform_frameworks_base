@@ -2087,6 +2087,7 @@ public final class Display {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateToString(int state) {
         switch (state) {
             case STATE_UNKNOWN:
@@ -2109,6 +2110,7 @@ public final class Display {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateReasonToString(@StateReason int reason) {
         switch (reason) {
             case STATE_REASON_UNKNOWN:

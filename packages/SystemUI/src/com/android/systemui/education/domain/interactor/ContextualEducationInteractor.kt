@@ -18,7 +18,10 @@ package com.android.systemui.education.domain.interactor
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.contextualeducation.GestureType
+import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.contextualeducation.GestureType.HOME
+import com.android.systemui.contextualeducation.GestureType.OVERVIEW
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
@@ -53,6 +56,13 @@ constructor(
 ) : CoreStartable {
 
     val backGestureModelFlow = readEduModelsOnSignalCountChanged(BACK)
+    val homeGestureModelFlow = readEduModelsOnSignalCountChanged(HOME)
+    val overviewGestureModelFlow = readEduModelsOnSignalCountChanged(OVERVIEW)
+    val allAppsGestureModelFlow = readEduModelsOnSignalCountChanged(ALL_APPS)
+    val eduDeviceConnectionTimeFlow =
+        repository.readEduDeviceConnectionTime().distinctUntilChanged()
+
+    val keyboardShortcutTriggered = repository.keyboardShortcutTriggered
 
     override fun start() {
         backgroundScope.launch {

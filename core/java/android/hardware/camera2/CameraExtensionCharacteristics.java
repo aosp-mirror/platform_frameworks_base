@@ -141,12 +141,6 @@ public final class CameraExtensionCharacteristics {
     public static final int EXTENSION_NIGHT = 4;
 
     /**
-     * An extension that aims to lock and stabilize a given region or object of interest.
-     */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final int EXTENSION_EYES_FREE_VIDEOGRAPHY = 5;
-
-    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -154,8 +148,7 @@ public final class CameraExtensionCharacteristics {
                 EXTENSION_FACE_RETOUCH,
                 EXTENSION_BOKEH,
                 EXTENSION_HDR,
-                EXTENSION_NIGHT,
-                EXTENSION_EYES_FREE_VIDEOGRAPHY})
+                EXTENSION_NIGHT})
     public @interface Extension {
     }
 
@@ -634,9 +627,6 @@ public final class CameraExtensionCharacteristics {
             public ExtensionConnectionManager() {
                 IntArray extensionList = new IntArray(EXTENSION_LIST.length);
                 extensionList.addAll(EXTENSION_LIST);
-                if (Flags.concertModeApi()) {
-                    extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
-                }
 
                 for (int extensionType : extensionList.toArray()) {
                     mConnections.put(extensionType, new ExtensionConnection());
@@ -837,9 +827,6 @@ public final class CameraExtensionCharacteristics {
 
         IntArray extensionList = new IntArray(EXTENSION_LIST.length);
         extensionList.addAll(EXTENSION_LIST);
-        if (Flags.concertModeApi()) {
-            extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
-        }
 
         for (int extensionType : extensionList.toArray()) {
             try {
@@ -1598,28 +1585,4 @@ public final class CameraExtensionCharacteristics {
 
         return Collections.unmodifiableSet(ret);
     }
-
-
-    /**
-     * <p>Minimum and maximum padding zoom factors supported by this camera device for
-     * {@link android.hardware.camera2.ExtensionCaptureRequest#EFV_PADDING_ZOOM_FACTOR } used for
-     * the {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension.</p>
-     * <p>The minimum and maximum padding zoom factors supported by the device for
-     * {@link android.hardware.camera2.ExtensionCaptureRequest#EFV_PADDING_ZOOM_FACTOR } used as part of the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension feature. This extension specific camera characteristic can be queried using
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#get}.</p>
-     * <p><b>Units</b>: A pair of padding zoom factors in floating-points:
-     * (minPaddingZoomFactor, maxPaddingZoomFactor)</p>
-     * <p><b>Range of valid values:</b><br></p>
-     * <p>1.0 &lt; minPaddingZoomFactor &lt;= maxPaddingZoomFactor</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     */
-    @PublicKey
-    @NonNull
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
-            CameraCharacteristics.EFV_PADDING_ZOOM_FACTOR_RANGE;
 }

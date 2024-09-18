@@ -162,7 +162,7 @@ fun maximizeSizeGivenAspectRatio(
 fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
     val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth
     val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight
-    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed) {
+    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed || !taskInfo.canChangeAspectRatio) {
         return maxOf(appLetterboxWidth, appLetterboxHeight) /
             minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
     }

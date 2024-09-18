@@ -16,13 +16,14 @@
 
 package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
-import android.app.Flags
 import android.content.Context
 import android.os.UserHandle
 import com.android.app.tracing.coroutines.flow.map
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.modes.shared.ModesUi
+import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.qs.tiles.ModesTile
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
@@ -47,7 +48,7 @@ constructor(
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<ModesTileModel> = tileData()
 
     /**
@@ -64,20 +65,20 @@ constructor(
     suspend fun getCurrentTileModel() = buildTileData(zenModeInteractor.getActiveModes())
 
     private fun buildTileData(activeModes: ActiveZenModes): ModesTileModel {
-        if (usesModeIcons()) {
+        if (ModesUiIcons.isEnabled) {
             val tileIcon = getTileIcon(activeModes.mainMode)
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
                 icon = tileIcon.icon,
                 iconResId = tileIcon.resId,
-                activeModes = activeModes.modeNames
+                activeModes = activeModes.modeNames,
             )
         } else {
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
                 icon = context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(),
                 iconResId = ModesTile.ICON_RES_ID,
-                activeModes = activeModes.modeNames
+                activeModes = activeModes.modeNames,
             )
         }
     }
@@ -97,7 +98,5 @@ constructor(
         }
     }
 
-    override fun availability(user: UserHandle): Flow<Boolean> = flowOf(Flags.modesUi())
-
-    private fun usesModeIcons() = Flags.modesApi() && Flags.modesUi() && Flags.modesUiIcons()
+    override fun availability(user: UserHandle): Flow<Boolean> = flowOf(ModesUi.isEnabled)
 }

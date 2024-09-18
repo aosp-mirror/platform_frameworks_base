@@ -149,6 +149,16 @@ flag {
 }
 
 flag {
+   name: "modes_dialog_single_rows"
+   namespace: "systemui"
+   description: "[Experiment] Display one entry per grid row in the Modes Dialog."
+   bug: "366034002"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
@@ -538,13 +548,6 @@ flag {
 }
 
 flag {
-    name: "haptic_volume_slider"
-    namespace: "systemui"
-    description: "Adds haptic feedback to the volume slider."
-    bug: "316953430"
-}
-
-flag {
     name: "new_volume_panel"
     namespace: "systemui"
     description: "Switches to the new volume panel (without Slices)."
@@ -665,13 +668,6 @@ flag {
     namespace: "systemui"
     description: "Enables refactored logic for SysUI+WM unlock/occlusion code paths"
     bug: "278086361"
-}
-
-flag {
-   name: "compose_lockscreen"
-   namespace: "systemui"
-   description: "Enables the compose version of lockscreen that runs standalone, outside of Flexiglass."
-   bug: "301968149"
 }
 
 flag {

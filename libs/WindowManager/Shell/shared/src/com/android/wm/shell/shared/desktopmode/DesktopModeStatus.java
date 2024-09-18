@@ -94,6 +94,16 @@ public class DesktopModeStatus {
     private static final int WINDOW_DECOR_PRE_WARM_SIZE = 2;
 
     /**
+     * Sysprop declaring whether to enters desktop mode by default when the windowing mode of the
+     * display's root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM.
+     *
+     * <p>If it is not defined, then {@code R.integer.config_enterDesktopByDefaultOnFreeformDisplay}
+     * is used.
+     */
+    public static final String ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP =
+            "persist.wm.debug.enter_desktop_by_default_on_freeform_display";
+
+    /**
      * Sysprop declaring the maximum number of Tasks to show in Desktop Mode at any one time.
      *
      * <p>If it is not defined, then {@code R.integer.config_maxDesktopWindowingActiveTasks} is
@@ -221,6 +231,19 @@ public class DesktopModeStatus {
      */
     private static boolean isDeviceEligibleForDesktopMode(@NonNull Context context) {
         return !enforceDeviceRestrictions() || isDesktopModeSupported(context);
+    }
+
+    /**
+     * Return {@code true} if a display should enter desktop mode by default when the windowing mode
+     * of the display's root [TaskDisplayArea] is set to WINDOWING_MODE_FREEFORM.
+     */
+    public static boolean enterDesktopByDefaultOnFreeformDisplay(@NonNull Context context) {
+        if (!Flags.enterDesktopByDefaultOnFreeformDisplays()) {
+            return false;
+        }
+        return SystemProperties.getBoolean(ENTER_DESKTOP_BY_DEFAULT_ON_FREEFORM_DISPLAY_SYS_PROP,
+                context.getResources().getBoolean(
+                        R.bool.config_enterDesktopByDefaultOnFreeformDisplay));
     }
 
     /** Dumps DesktopModeStatus flags and configs. */

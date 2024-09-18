@@ -57,7 +57,7 @@ public final class InputRouteManager {
                 }
             };
 
-    /* package */ InputRouteManager(@NonNull Context context, @NonNull AudioManager audioManager) {
+    public InputRouteManager(@NonNull Context context, @NonNull AudioManager audioManager) {
         mContext = context;
         mAudioManager = audioManager;
         Handler handler = new Handler(context.getMainLooper());
