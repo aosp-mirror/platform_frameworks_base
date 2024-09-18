@@ -19,11 +19,13 @@ package com.android.systemui.communal
 import android.provider.Settings
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
+import com.android.internal.logging.UiEventLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.shared.log.CommunalUiEvent
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.communal.shared.model.EditModeState
@@ -84,6 +86,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Background private val bgScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    private val uiEventLogger: UiEventLogger,
 ) : CoreStartable {
     private var screenTimeout: Int = DEFAULT_SCREEN_TIMEOUT
 
@@ -184,6 +187,7 @@ constructor(
                             CommunalScenes.Blank,
                             "dream started after timeout",
                         )
+                        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)
                     }
                 }
         }
@@ -212,6 +216,7 @@ constructor(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "hub timeout",
                         )
+                        uiEventLogger.log(CommunalUiEvent.COMMUNAL_HUB_TIMEOUT)
                     }
                     timeoutJob = null
                 }
