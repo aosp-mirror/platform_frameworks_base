@@ -26,10 +26,6 @@
     <dimen name="keyguard_clock_top_margin">8dp</dimen>
     <dimen name="keyguard_smartspace_top_offset">0dp</dimen>
 
-    <!-- New keyboard shortcut helper -->
-    <dimen name="shortcut_helper_width">864dp</dimen>
-    <dimen name="shortcut_helper_height">728dp</dimen>
-
     <!-- QS-->
     <dimen name="qs_panel_padding_top">16dp</dimen>
     <dimen name="qs_panel_padding">24dp</dimen>

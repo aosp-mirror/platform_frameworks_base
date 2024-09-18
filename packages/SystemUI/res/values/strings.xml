@@ -3711,6 +3711,12 @@
          [CHAR LIMIT=NONE]
           -->
     <string name="shortcut_helper_key_combinations_or_separator">or</string>
+    <!-- Content description of the drag handle that allows to swipe to dismiss the shortcut helper.
+         The helper is a  component that shows the  user which keyboard shortcuts they can
+         use. The helper shows shortcuts in categories, which can be collapsed or expanded.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_content_description_drag_handle">Drag handle</string>
+
 
     <!-- Keyboard touchpad tutorial scheduler-->
     <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->
