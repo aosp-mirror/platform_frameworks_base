@@ -7720,6 +7720,44 @@
         <attr name="animation" />
     </declare-styleable>
 
+    <!-- ================================== -->
+    <!-- NotificationProgressDrawable class -->
+    <!-- ================================== -->
+
+    <!-- Drawable used to render a segmented bar, with segments and points. -->
+    <!-- @hide internal use only -->
+    <declare-styleable name="NotificationProgressDrawable">
+        <!-- Default color for the parts. -->
+        <attr name="segSegGap" format="dimension" />
+        <attr name="segPointGap" format="dimension" />
+    </declare-styleable>
+
+    <!-- Used to config the segments of a NotificationProgressDrawable. -->
+    <!-- @hide internal use only -->
+    <declare-styleable name="NotificationProgressDrawableSegments">
+        <!-- Width of the stroke. -->
+        <attr name="width" />
+        <!-- Default color of the stroke. -->
+        <attr name="color" />
+        <!-- Length of a dash in the stroke for the dashed segments. -->
+        <attr name="dashWidth" />
+        <!-- Gap between dashes in the stroke for the dashed segments. -->
+        <attr name="dashGap" />
+    </declare-styleable>
+
+    <!-- Used to config the points of a NotificationProgressDrawable. -->
+    <!-- @hide internal use only -->
+    <declare-styleable name="NotificationProgressDrawablePoints">
+        <!-- Radius (1/2 size) of the point rect. -->
+        <attr name="radius" />
+        <!-- Inset of the point icon or rect. -->
+        <attr name="inset" />
+        <!-- Corner radius of the point rect. -->
+        <attr name="cornerRadius" format="dimension" />
+        <!-- Default color of the point rect. -->
+        <attr name="color" />
+    </declare-styleable>
+
     <!-- ========================== -->
     <!-- Animation class attributes -->
     <!-- ========================== -->
