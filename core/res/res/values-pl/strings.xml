@@ -2012,8 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ustaw blokadę ekranu"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ustaw blokadę ekranu"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Aby korzystać z przestrzeni prywatnej, ustaw na tym urządzeniu blokadę ekranu"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Aby usunąć przestrzeń prywatną, ustaw na tym urządzeniu blokadę ekranu"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacja jest niedostępna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie niedostępna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> – brak dostępu"</string>
