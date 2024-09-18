@@ -161,9 +161,9 @@ private fun insertAfter(item: LazyGridItemInfo, offset: Offset): Boolean {
 @Composable
 fun Modifier.dragAndDropTileSource(
     sizedTile: SizedTile<EditTileViewModel>,
+    dragAndDropState: DragAndDropState,
     onTap: (TileSpec) -> Unit,
-    onDoubleTap: (TileSpec) -> Unit,
-    dragAndDropState: DragAndDropState
+    onDoubleTap: (TileSpec) -> Unit = {},
 ): Modifier {
     val state by rememberUpdatedState(dragAndDropState)
     return dragAndDropSource {
@@ -181,11 +181,11 @@ fun Modifier.dragAndDropTileSource(
                         ClipData(
                             QsDragAndDrop.CLIPDATA_LABEL,
                             arrayOf(QsDragAndDrop.TILESPEC_MIME_TYPE),
-                            ClipData.Item(sizedTile.tile.tileSpec.spec)
+                            ClipData.Item(sizedTile.tile.tileSpec.spec),
                         )
                     )
                 )
-            }
+            },
         )
     }
 }

@@ -36,7 +36,6 @@ import com.android.cts.input.inputeventmatchers.withMotionAction
 import com.android.cts.input.inputeventmatchers.withPressure
 import com.android.cts.input.inputeventmatchers.withRawCoords
 import com.android.cts.input.inputeventmatchers.withSource
-import java.io.InputStream
 import junit.framework.Assert.fail
 import org.hamcrest.Matchers.allOf
 import org.junit.Before
@@ -130,17 +129,18 @@ class UinputRecordingIntegrationTests {
                         scenario.virtualDisplay.display.uniqueId!!,
                     )
 
-                    injectUinputEvents()
+                    injectUinputEvents().use {
+                        if (DEBUG_RECEIVED_EVENTS) {
+                            printReceivedEventsToLogcat(scenario.activity)
+                            fail("Test cannot pass in debug mode!")
+                        }
 
-                    if (DEBUG_RECEIVED_EVENTS) {
-                        printReceivedEventsToLogcat(scenario.activity)
-                        fail("Test cannot pass in debug mode!")
+                        val verifier = EventVerifier(
+                            BatchedEventSplitter { scenario.activity.getInputEvent() }
+                        )
+                        verifyEvents(verifier)
+                        scenario.activity.assertNoEvents()
                     }
-
-                    val verifier =
-                        EventVerifier(BatchedEventSplitter { scenario.activity.getInputEvent() })
-                    verifyEvents(verifier)
-                    scenario.activity.assertNoEvents()
                 } finally {
                     inputManager.removeUniqueIdAssociationByPort(inputPort)
                 }
@@ -162,14 +162,32 @@ class UinputRecordingIntegrationTests {
         }
     }
 
-    private fun injectUinputEvents() {
+    /**
+     * Plays back the evemu recording associated with the current test case by injecting it via
+     * the `uinput` shell command in interactive mode. The recording playback will begin
+     * immediately, and the shell command (and the associated input device) will remain alive
+     * until the returned [AutoCloseable] is closed.
+     */
+    private fun injectUinputEvents(): AutoCloseable {
         val fds = instrumentation.uiAutomation!!.executeShellCommandRw("uinput -")
+        // We do not need to use stdout in this test.
+        fds[0].close()
 
-        ParcelFileDescriptor.AutoCloseOutputStream(fds[1]).use { stdIn ->
-            val inputStream: InputStream = instrumentation.context.resources.openRawResource(
+        return ParcelFileDescriptor.AutoCloseOutputStream(fds[1]).also { stdin ->
+            instrumentation.context.resources.openRawResource(
                 testData.uinputRecordingResource,
-            )
-            stdIn.write(inputStream.readBytes())
+            ).use { inputStream ->
+                stdin.write(inputStream.readBytes())
+
+                // TODO(b/367419268): Remove extra event injection when uinput parsing is fixed.
+                // Inject an extra sync event with an arbitrarily large timestamp, because the
+                // uinput command will not process the last event until either the next event is
+                // parsed, or fd is closed. Injecting this sync allows us complete injection of
+                // the evemu recording and extend the lifetime of the input device by keeping this
+                // fd open.
+                stdin.write("\nE: 9999.99 0 0 0\n".toByteArray())
+                stdin.flush()
+            }
         }
     }
 

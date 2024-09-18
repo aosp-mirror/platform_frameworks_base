@@ -74,6 +74,9 @@ interface NotificationScrollView {
     /** Set a consumer for current gesture in guts events */
     fun setCurrentGestureInGutsConsumer(consumer: Consumer<Boolean>?)
 
+    /** Set a consumer for current remote input notification row bottom bound events */
+    fun setRemoteInputRowBottomBoundConsumer(consumer: Consumer<Float?>?)
+
     /** Set a consumer for heads up height changed events */
     fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 

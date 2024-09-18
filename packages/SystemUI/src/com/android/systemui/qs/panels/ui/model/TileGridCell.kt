@@ -24,7 +24,7 @@ import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.shared.model.CategoryAndName
 
 /** Represents an item from a grid associated with a row and a span */
-interface GridCell {
+sealed interface GridCell {
     val row: Int
     val span: GridItemSpan
 }
@@ -38,30 +38,26 @@ data class TileGridCell(
     override val tile: EditTileViewModel,
     override val row: Int,
     override val width: Int,
-    override val span: GridItemSpan = GridItemSpan(width)
+    override val span: GridItemSpan = GridItemSpan(width),
 ) : GridCell, SizedTile<EditTileViewModel>, CategoryAndName by tile {
     val key: String = "${tile.tileSpec.spec}-$row"
 
     constructor(
         sizedTile: SizedTile<EditTileViewModel>,
-        row: Int
-    ) : this(
-        tile = sizedTile.tile,
-        row = row,
-        width = sizedTile.width,
-    )
+        row: Int,
+    ) : this(tile = sizedTile.tile, row = row, width = sizedTile.width)
 }
 
 /** Represents an empty space used to fill incomplete rows. Will always display as a 1x1 tile */
 @Immutable
 data class SpacerGridCell(
     override val row: Int,
-    override val span: GridItemSpan = GridItemSpan(1)
+    override val span: GridItemSpan = GridItemSpan(1),
 ) : GridCell
 
 fun List<SizedTile<EditTileViewModel>>.toGridCells(
     columns: Int,
-    includeSpacers: Boolean = false
+    includeSpacers: Boolean = false,
 ): List<GridCell> {
     return splitInRowsSequence(this, columns)
         .flatMapIndexed { rowIndex, sizedTiles ->

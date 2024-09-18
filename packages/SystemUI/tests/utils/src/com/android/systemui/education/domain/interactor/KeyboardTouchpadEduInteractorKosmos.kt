@@ -40,8 +40,7 @@ var Kosmos.keyboardTouchpadEduInteractor by
                     touchpadRepository,
                     userRepository
                 ),
-            clock = fakeEduClock,
-            inputManager = mockEduInputManager
+            clock = fakeEduClock
         )
     }
 
