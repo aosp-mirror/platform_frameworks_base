@@ -3214,10 +3214,10 @@ public final class ViewRootImpl implements ViewParent,
             typesToShow |= Type.navigationBars();
         }
         if (captionIsHiddenByFlags && !captionWasHiddenByFlags
-                && ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isEnabled()) {
+                && ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
             typesToHide |= Type.captionBar();
         } else if (!captionIsHiddenByFlags && captionWasHiddenByFlags
-                && ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isEnabled()) {
+                && ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
             typesToShow |= Type.captionBar();
         }
         if (typesToHide != 0) {

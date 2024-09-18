@@ -45,7 +45,7 @@ import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
+import android.window.flags.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_100
@@ -155,7 +155,7 @@ internal class AppHeaderViewHolder(
         height: Int,
         isCaptionVisible: Boolean
     ) {
-        if (DesktopModeFlags.THEMED_APP_HEADERS.isEnabled(context)) {
+        if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
             bindDataWithThemedHeaders(taskInfo)
         } else {
             bindDataLegacy(taskInfo)

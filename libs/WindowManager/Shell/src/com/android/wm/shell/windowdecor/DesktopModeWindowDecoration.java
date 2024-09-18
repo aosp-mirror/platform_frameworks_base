@@ -68,6 +68,7 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
+import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -86,7 +87,6 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.desktopmode.ManageWindowsViewContainer;
@@ -457,7 +457,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
-        if (!isDragResizable(mTaskInfo, mContext)) {
+        if (!isDragResizable(mTaskInfo)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
                 updateExclusionRegion();
@@ -492,23 +492,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mDragResizeListener.setGeometry(
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
                         new Size(mResult.mWidth, mResult.mHeight),
-                        getResizeEdgeHandleSize(mContext, res), getResizeHandleEdgeInset(res),
+                        getResizeEdgeHandleSize(res), getResizeHandleEdgeInset(res),
                         getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion();
         }
     }
 
-    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo,
-            Context context) {
-        if (DesktopModeFlags.SCALED_RESIZING.isEnabled(context)) {
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+        if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()) {
             return taskInfo.isFreeform();
         }
         return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
-        if (!isDragResizable(mTaskInfo, mContext) || !isMaximizeMenuActive()) {
+        if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
             return;
         }
         if (!mTaskInfo.isVisible()) {
@@ -606,13 +605,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 // their custom content.
                 relayoutParams.mInputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
             } else {
-                if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isEnabled()) {
+                if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
                     // Force-consume the caption bar insets when the app tries to hide the caption.
                     // This improves app compatibility of immersive apps.
                     relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING;
                 }
             }
-            if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isEnabled()) {
+            if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue()) {
                 // Always force-consume the caption bar insets for maximum app compatibility,
                 // including non-immersive apps that just don't handle caption insets properly.
                 relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
@@ -658,7 +657,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // TODO(b/301119301): consider moving the config data needed for diffs to relayout params
         // instead of using a whole Configuration as a parameter.
         final Configuration windowDecorConfig = new Configuration();
-        if (DesktopModeFlags.APP_HEADER_WITH_TASK_DENSITY.isEnabled(context) && isAppHeader) {
+        if (DesktopModeFlags.ENABLE_APP_HEADER_WITH_TASK_DENSITY.isTrue() && isAppHeader) {
             // Should match the density of the task. The task may have had its density overridden
             // to be different that SysUI's.
             windowDecorConfig.setTo(taskInfo.configuration);
