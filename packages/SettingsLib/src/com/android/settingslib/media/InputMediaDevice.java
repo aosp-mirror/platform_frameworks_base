@@ -80,6 +80,10 @@ public class InputMediaDevice extends MediaDevice {
                 context, id, audioDeviceInfoType, maxVolume, currentVolume, isVolumeFixed);
     }
 
+    public @AudioDeviceType int getAudioDeviceInfoType() {
+        return mAudioDeviceInfoType;
+    }
+
     public static boolean isSupportedInputDevice(@AudioDeviceType int audioDeviceInfoType) {
         return switch (audioDeviceInfoType) {
             case TYPE_BUILTIN_MIC,
