@@ -24,6 +24,7 @@ import static android.service.notification.NotificationListenerService.NOTIFICAT
 import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
+import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
 
 import static androidx.test.ext.truth.content.IntentSubject.assertThat;
 
@@ -1096,6 +1097,18 @@ public class BubblesTest extends SysuiTestCase {
 
         // Removes the notification
         mEntryListener.onEntryRemoved(mRow, REASON_APP_CANCEL);
+        assertFalse(mBubbleController.hasBubbles());
+    }
+
+    @Test
+    public void testNotifsBanned_entryListenerRemove() {
+        mEntryListener.onEntryAdded(mRow);
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Removes the notification
+        mEntryListener.onEntryRemoved(mRow, REASON_PACKAGE_BANNED);
         assertFalse(mBubbleController.hasBubbles());
     }
 
