@@ -16,6 +16,7 @@
 
 package com.android.server.input.debug;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 
 import static org.junit.Assert.assertEquals;
@@ -92,7 +93,7 @@ public class TouchpadDebugViewTest {
 
         InputDevice inputDevice = new InputDevice.Builder()
                 .setId(TOUCHPAD_DEVICE_ID)
-                .setSources(InputDevice.SOURCE_TOUCHPAD | InputDevice.SOURCE_MOUSE)
+                .setSources(InputDevice.SOURCE_TOUCHPAD | SOURCE_MOUSE)
                 .setName("Test Device " + TOUCHPAD_DEVICE_ID)
                 .build();
 
@@ -353,5 +354,44 @@ public class TouchpadDebugViewTest {
         gestureType = 6;
         mTouchpadDebugView.updateGestureInfo(gestureType, TOUCHPAD_DEVICE_ID);
         assertEquals(child.getText().toString(), TouchpadDebugView.getGestureText(gestureType));
+    }
+
+    @Test
+    public void testTwoFingerDrag() {
+        float offsetX = ViewConfiguration.get(mTestableContext).getScaledTouchSlop() + 10;
+        float offsetY = ViewConfiguration.get(mTestableContext).getScaledTouchSlop() + 10;
+
+        // Simulate ACTION_DOWN event (gesture starts).
+        MotionEvent actionDown = new MotionEventBuilder(MotionEvent.ACTION_DOWN, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f)
+                        .y(40f)
+                )
+                .classification(MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionDown);
+
+        // Simulate ACTION_MOVE event (dragging with two fingers, processed as one pointer).
+        MotionEvent actionMove = new MotionEventBuilder(MotionEvent.ACTION_MOVE, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f + offsetX)
+                        .y(40f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionMove);
+
+        // Simulate ACTION_UP event (gesture ends).
+        MotionEvent actionUp = new MotionEventBuilder(MotionEvent.ACTION_UP, SOURCE_MOUSE)
+                .pointer(new PointerBuilder(0, MotionEvent.TOOL_TYPE_FINGER)
+                        .x(40f + offsetX)
+                        .y(40f + offsetY)
+                )
+                .classification(MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE)
+                .build();
+        mTouchpadDebugView.dispatchTouchEvent(actionUp);
+
+        // Verify that no updateViewLayout is called (as expected for a two-finger drag gesture).
+        verify(mWindowManager, times(0)).updateViewLayout(any(), any());
     }
 }
