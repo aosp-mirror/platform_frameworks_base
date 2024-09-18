@@ -26,6 +26,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.UiModeManager;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
 import android.platform.test.annotations.EnableFlags;
@@ -78,6 +79,12 @@ public class MenuViewTest extends SysuiTestCase {
         mNightMode = mUiModeManager.getNightMode();
         mUiModeManager.setNightMode(MODE_NIGHT_YES);
 
+        // Programmatically update the resource's configuration to night mode to reduce flakiness
+        Configuration nightConfig = new Configuration(mContext.getResources().getConfiguration());
+        nightConfig.uiMode = Configuration.UI_MODE_NIGHT_YES;
+        mContext.getResources().updateConfiguration(nightConfig,
+                mContext.getResources().getDisplayMetrics(), null);
+
         mSpyContext = spy(mContext);
         doNothing().when(mSpyContext).startActivity(any());
 
@@ -101,6 +108,8 @@ public class MenuViewTest extends SysuiTestCase {
 
     @Test
     public void insetsOnDarkTheme_menuOnLeft_matchInsets() {
+        // In dark theme, the inset is not 0 to avoid weird spacing issue between the menu and
+        // the edge of the screen.
         mMenuView.onConfigurationChanged(/* newConfig= */ null);
         final InstantInsetLayerDrawable insetLayerDrawable =
                 (InstantInsetLayerDrawable) mMenuView.getBackground();
