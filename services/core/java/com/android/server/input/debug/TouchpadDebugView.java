@@ -29,7 +29,9 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,6 +51,7 @@ public class TouchpadDebugView extends LinearLayout {
     private static final float DEFAULT_RES_X = 47f;
     private static final float DEFAULT_RES_Y = 45f;
     private static final int TEXT_PADDING_DP = 12;
+    private static final int ROUNDED_CORNER_RADIUS_DP = 24;
 
     /**
      * Input device ID for the touchpad that this debug view is displaying.
@@ -149,6 +152,30 @@ public class TouchpadDebugView extends LinearLayout {
         addView(mGestureInfoView);
 
         updateViewsDimensions();
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        postDelayed(() -> {
+            final ViewRootImpl viewRootImpl = getRootView().getViewRootImpl();
+            if (viewRootImpl == null) {
+                Slog.d("TouchpadDebugView", "ViewRootImpl is null.");
+                return;
+            }
+
+            SurfaceControl surfaceControl = viewRootImpl.getSurfaceControl();
+            if (surfaceControl != null && surfaceControl.isValid()) {
+                try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
+                    transaction.setCornerRadius(surfaceControl,
+                            TypedValue.applyDimension(COMPLEX_UNIT_DIP,
+                                    ROUNDED_CORNER_RADIUS_DP,
+                                    getResources().getDisplayMetrics())).apply();
+                }
+            } else {
+                Slog.d("TouchpadDebugView", "SurfaceControl is invalid or has been released.");
+            }
+        }, 100);
     }
 
     @Override

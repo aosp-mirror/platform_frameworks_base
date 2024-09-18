@@ -42,7 +42,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Launcher information used by {@link ShortcutService}.
@@ -129,15 +128,9 @@ class ShortcutLauncher extends ShortcutPackageItem {
      */
     public void pinShortcuts(@UserIdInt int packageUserId,
             @NonNull String packageName, @NonNull List<String> ids, boolean forPinRequest) {
-        if (ShortcutService.DEBUG) {
-            Slog.v(TAG, "ShortcutLauncher#pinShortcuts: pin shortcuts from " + packageName
-                    + " with userId=" + packageUserId + " shortcutIds="
-                    + ids.stream().collect(Collectors.joining(", ", "[", "]")));
-        }
         final ShortcutPackage packageShortcuts =
                 mShortcutUser.getPackageShortcutsIfExists(packageName);
         if (packageShortcuts == null) {
-            Slog.w(TAG, "ShortcutLauncher#pinShortcuts packageShortcuts is null");
             return; // No need to instantiate.
         }
 
@@ -162,10 +155,6 @@ class ShortcutLauncher extends ShortcutPackageItem {
                 final String id = ids.get(i);
                 final ShortcutInfo si = packageShortcuts.findShortcutById(id);
                 if (si == null) {
-                    if (ShortcutService.DEBUG) {
-                        Slog.w(TAG, "ShortcutLauncher#pinShortcuts: cannot pin "
-                                + id + " because it does not exist");
-                    }
                     continue;
                 }
                 if (si.isDynamic() || si.isLongLived()
@@ -184,13 +173,6 @@ class ShortcutLauncher extends ShortcutPackageItem {
                             newSet.add(id);
                         }
                     }
-                }
-                if (ShortcutService.DEBUG) {
-                    Slog.v(TAG, "ShortcutLauncher#pinShortcuts: "
-                            + " newSet: " + newSet.stream().collect(
-                                    Collectors.joining(", ", "[", "]"))
-                            + " floatingSet: " + floatingSet.stream().collect(
-                                    Collectors.joining(", ", "[", "]")));
                 }
                 mPinnedShortcuts.put(up, newSet);
             }

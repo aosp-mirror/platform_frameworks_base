@@ -16,6 +16,9 @@
 
 package com.android.server.input;
 
+import static android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
+import static android.content.PermissionChecker.PERMISSION_GRANTED;
+import static android.content.PermissionChecker.PID_UNKNOWN;
 import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -37,6 +40,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.graphics.PixelFormat;
@@ -121,6 +125,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodSubtypeHandle;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.DisplayThread;
@@ -130,6 +135,7 @@ import com.android.server.input.InputManagerInternal.LidSwitchCallback;
 import com.android.server.input.debug.FocusEventDebugView;
 import com.android.server.input.debug.TouchpadDebugViewController;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -177,6 +183,7 @@ public class InputManagerService extends IInputManager.Stub
     private final InputManagerHandler mHandler;
     private DisplayManagerInternal mDisplayManagerInternal;
 
+    private WindowManagerInternal mWindowManagerInternal;
     private PackageManagerInternal mPackageManagerInternal;
 
     private final File mDoubleTouchGestureEnableFile;
@@ -548,6 +555,7 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
 
         mSettingsObserver.registerAndUpdate();
@@ -2471,6 +2479,11 @@ public class InputManagerService extends IInputManager.Stub
     long interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
         final long keyNotConsumed = 0;
         long value = keyNotConsumed;
+        // TODO(b/358569822) Remove below once we have nicer API for listening to shortcuts
+        if ((event.isMetaPressed() || KeyEvent.isMetaKey(event.getKeyCode()))
+                && shouldInterceptShortcuts(focus)) {
+            return keyNotConsumed;
+        }
         if (useKeyGestureEventHandler()) {
             value = mKeyGestureController.interceptKeyBeforeDispatching(focus, event, policyFlags);
         }
@@ -2479,6 +2492,16 @@ public class InputManagerService extends IInputManager.Stub
                     policyFlags);
         }
         return value;
+    }
+
+    private boolean shouldInterceptShortcuts(IBinder focusedToken) {
+        KeyInterceptionInfo info =
+                mWindowManagerInternal.getKeyInterceptionInfoFromToken(focusedToken);
+        boolean hasInterceptWindowFlag = info != null && (info.layoutParamsPrivateFlags
+                & WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS) != 0;
+        return hasInterceptWindowFlag && PermissionChecker.checkPermissionForDataDelivery(mContext,
+                OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW, PID_UNKNOWN, info.windowOwnerUid,
+                null, null, null) == PERMISSION_GRANTED;
     }
 
     // Native callback.

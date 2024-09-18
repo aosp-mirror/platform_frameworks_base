@@ -15,8 +15,6 @@
  */
 package android.platform.test.ravenwood;
 
-import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
-
 import static org.junit.Assert.fail;
 
 import android.os.Bundle;
@@ -26,10 +24,6 @@ import android.platform.test.ravenwood.RavenwoodTestStats.Result;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
-
-import com.android.internal.os.RuntimeInit;
-import com.android.platform.test.ravenwood.runtimehelper.ClassLoadHook;
-import com.android.ravenwood.common.RavenwoodCommonUtils;
 
 import org.junit.runner.Description;
 import org.junit.runners.model.TestClass;
@@ -50,46 +44,21 @@ public class RavenwoodAwareTestRunnerHook {
     }
 
     /**
+     * Called before any code starts. Internally it will only initialize the environment once.
+     */
+    public static void performGlobalInitialization() {
+        RavenwoodRuntimeEnvironmentController.globalInitOnce();
+    }
+
+    /**
      * Called when a runner starts, before the inner runner gets a chance to run.
      */
     public static void onRunnerInitializing(RavenwoodAwareTestRunner runner, TestClass testClass) {
-        // TODO: Move the initialization code to a better place.
-
-        initOnce();
-
-        // This log call also ensures the framework JNI is loaded.
         Log.i(TAG, "onRunnerInitializing: testClass=" + testClass.getJavaClass()
                 + " runner=" + runner);
 
         // This is needed to make AndroidJUnit4ClassRunner happy.
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
-    }
-
-    private static boolean sInitialized = false;
-
-    private static void initOnce() {
-        if (sInitialized) {
-            return;
-        }
-        sInitialized = true;
-
-        // We haven't initialized liblog yet, so directly write to System.out here.
-        RavenwoodCommonUtils.log(TAG, "initOnce()");
-
-        // Make sure libandroid_runtime is loaded.
-        ClassLoadHook.onClassLoaded(Log.class);
-
-        // Redirect stdout/stdin to liblog.
-        RuntimeInit.redirectLogStreams();
-
-        // This will let AndroidJUnit4 use the original runner.
-        System.setProperty("android.junit.runner",
-                "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
-        System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
-
-        // Do the basic set up for the android sysprops.
-        RavenwoodRuntimeEnvironmentController.setSystemProperties(
-                RavenwoodSystemProperties.DEFAULT_VALUES);
     }
 
     /**

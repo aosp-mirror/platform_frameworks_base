@@ -3350,12 +3350,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        // TODO(b/358569822) Remove below once we have nicer API for listening to shortcuts
-        if ((event.isMetaPressed() || KeyEvent.isMetaKey(keyCode))
-                && shouldInterceptShortcuts(focusedToken)) {
-            return keyNotConsumed;
-        }
-
         Set<Integer> consumedKeys = mConsumedKeysForDevice.get(deviceId);
         if (consumedKeys == null) {
             consumedKeys = new HashSet<>();
@@ -4062,15 +4056,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
         intent.putExtra(EXTRA_FROM_BRIGHTNESS_KEY, true);
         startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
-    }
-
-    private boolean shouldInterceptShortcuts(IBinder focusedToken) {
-        KeyInterceptionInfo info =
-                mWindowManagerInternal.getKeyInterceptionInfoFromToken(focusedToken);
-        boolean hasInterceptWindowFlag = (info.layoutParamsPrivateFlags
-                & WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS) != 0;
-        return hasInterceptWindowFlag && mButtonOverridePermissionChecker.canAppOverrideSystemKey(
-                mContext, info.windowOwnerUid);
     }
 
     /**

@@ -46,6 +46,7 @@ import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runner.notification.StoppedByUserException;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.runners.Suite;
 import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.Statement;
@@ -170,6 +171,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
     private Runner mRealRunner = null;
     private Description mDescription = null;
     private Throwable mExceptionInConstructor = null;
+    private boolean mRealRunnerTakesRunnerBuilder = false;
 
     /**
      * Stores internal states / methods associated with this runner that's only needed in
@@ -191,6 +193,8 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
      */
     public RavenwoodAwareTestRunner(Class<?> testClass) {
         try {
+            performGlobalInitialization();
+
             mTestClass = new TestClass(testClass);
 
             Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
@@ -243,7 +247,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         }
     }
 
-    private static Runner instantiateRealRunner(
+    private Runner instantiateRealRunner(
             Class<? extends Runner> realRunnerClass,
             Class<?> testClass)
             throws NoSuchMethodException, InvocationTargetException, InstantiationException,
@@ -251,10 +255,17 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         try {
             return realRunnerClass.getConstructor(Class.class).newInstance(testClass);
         } catch (NoSuchMethodException e) {
-            var runnerBuilder = new AllDefaultPossibilitiesBuilder();
-            return realRunnerClass.getConstructor(Class.class,
-                    RunnerBuilder.class).newInstance(testClass, runnerBuilder);
+            var constructor = realRunnerClass.getConstructor(Class.class, RunnerBuilder.class);
+            mRealRunnerTakesRunnerBuilder = true;
+            return constructor.newInstance(testClass, new AllDefaultPossibilitiesBuilder());
         }
+    }
+
+    private void performGlobalInitialization() {
+        if (!isOnRavenwood()) {
+            return;
+        }
+        RavenwoodAwareTestRunnerHook.performGlobalInitialization();
     }
 
     /**
@@ -265,7 +276,6 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         if (!isOnRavenwood()) {
             return;
         }
-        // DO NOT USE android.util.Log before calling onRunnerInitializing().
 
         RavenwoodAwareTestRunnerHook.onRunnerInitializing(this, mTestClass);
 
@@ -317,14 +327,20 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
             return;
         }
 
+        // TODO(b/365976974): handle nested classes better
+        final boolean skipRunnerHook =
+                mRealRunnerTakesRunnerBuilder && mRealRunner instanceof Suite;
+
         sCurrentRunner.set(this);
         try {
-            try {
-                RavenwoodAwareTestRunnerHook.onBeforeInnerRunnerStart(
-                        this, getDescription());
-            } catch (Throwable th) {
-                notifier.reportBeforeTestFailure(getDescription(), th);
-                return;
+            if (!skipRunnerHook) {
+                try {
+                    RavenwoodAwareTestRunnerHook.onBeforeInnerRunnerStart(
+                            this, getDescription());
+                } catch (Throwable th) {
+                    notifier.reportBeforeTestFailure(getDescription(), th);
+                    return;
+                }
             }
 
             // Delegate to the inner runner.
@@ -332,12 +348,13 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         } finally {
             sCurrentRunner.remove();
 
-            try {
-                RavenwoodAwareTestRunnerHook.onAfterInnerRunnerFinished(
-                        this, getDescription());
-            } catch (Throwable th) {
-                notifier.reportAfterTestFailure(th);
-                return;
+            if (!skipRunnerHook) {
+                try {
+                    RavenwoodAwareTestRunnerHook.onAfterInnerRunnerFinished(
+                            this, getDescription());
+                } catch (Throwable th) {
+                    notifier.reportAfterTestFailure(th);
+                }
             }
         }
     }

@@ -108,10 +108,14 @@ constructor(
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)
                 view.setCurrentGestureOverscrollConsumer(viewModel.currentGestureOverscrollConsumer)
                 view.setCurrentGestureInGutsConsumer(viewModel.currentGestureInGutsConsumer)
+                view.setRemoteInputRowBottomBoundConsumer(
+                    viewModel.remoteInputRowBottomBoundConsumer
+                )
                 DisposableHandle {
                     view.setSyntheticScrollConsumer(null)
                     view.setCurrentGestureOverscrollConsumer(null)
                     view.setCurrentGestureInGutsConsumer(null)
+                    view.setRemoteInputRowBottomBoundConsumer(null)
                 }
             }
         }

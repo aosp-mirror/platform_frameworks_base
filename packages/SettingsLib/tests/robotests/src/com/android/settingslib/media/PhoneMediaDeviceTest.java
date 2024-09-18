@@ -47,6 +47,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.shadows.ShadowSystemProperties;
 
 @RunWith(RobolectricTestRunner.class)
 public class PhoneMediaDeviceTest {
@@ -111,6 +112,31 @@ public class PhoneMediaDeviceTest {
 
         assertThat(mPhoneMediaDevice.getName())
                 .isEqualTo(mContext.getString(R.string.media_transfer_wired_usb_device_name));
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getName()).isEqualTo(getMediaTransferThisDeviceName(mContext));
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getName_returnCorrectName_desktop() {
+        ShadowSystemProperties.override("ro.build.characteristics", "desktop");
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_headphone_name));
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_headphone_name));
+
+        when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_usb_speaker_name));
 
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 

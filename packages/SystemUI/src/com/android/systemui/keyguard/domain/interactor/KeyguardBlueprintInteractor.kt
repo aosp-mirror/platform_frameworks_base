@@ -25,13 +25,13 @@ import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -64,7 +64,7 @@ constructor(
     /** Current BlueprintId */
     val blueprintId =
         shadeInteractor.isShadeLayoutWide.map { isShadeLayoutWide ->
-            val useSplitShade = isShadeLayoutWide && !ComposeLockscreen.isEnabled
+            val useSplitShade = isShadeLayoutWide && !SceneContainerFlag.isEnabled
             when {
                 useSplitShade -> SplitShadeKeyguardBlueprint.ID
                 else -> DefaultKeyguardBlueprint.DEFAULT

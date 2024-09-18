@@ -99,6 +99,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.FakeShadowView;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationTransitionAnimatorController;
 import com.android.systemui.statusbar.notification.NotificationUtils;
@@ -120,7 +121,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape;
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
@@ -740,6 +740,15 @@ public class NotificationStackScrollLayout
         updateFooter();
     }
 
+    void sendRemoteInputRowBottomBound(Float bottom) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        if (bottom != null) {
+            bottom += getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_content_margin);
+        }
+        mScrollViewFields.sendRemoteInputRowBottomBound(bottom);
+    }
+
     /** Setter for filtered notifs, to be removed with the FooterViewRefactor flag. */
     public void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
         FooterViewRefactor.assertInLegacyMode();
@@ -1271,6 +1280,11 @@ public class NotificationStackScrollLayout
     @Override
     public void setCurrentGestureInGutsConsumer(@Nullable Consumer<Boolean> consumer) {
         mScrollViewFields.setCurrentGestureInGutsConsumer(consumer);
+    }
+
+    @Override
+    public void setRemoteInputRowBottomBoundConsumer(@Nullable Consumer<Float> consumer) {
+        mScrollViewFields.setRemoteInputRowBottomBoundConsumer(consumer);
     }
 
     @Override

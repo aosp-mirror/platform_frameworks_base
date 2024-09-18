@@ -18,7 +18,9 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RecentTaskInfo
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.ActivityOptions
 import android.app.KeyguardManager
+import android.app.PendingIntent
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
@@ -43,6 +45,7 @@ import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.DragEvent
 import android.view.Gravity
 import android.view.SurfaceControl
 import android.view.WindowManager
@@ -107,6 +110,7 @@ import com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS
 import com.android.wm.shell.transition.Transitions.TransitionHandler
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import java.util.function.Consumer
 import java.util.Optional
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -131,8 +135,8 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.capture
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 
@@ -1666,6 +1670,36 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun handleRequest_fullscreenTask_noTasks_enforceDesktop_freeformDisplay_returnFreeformWCT() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
+    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+    tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
+
+    val fullscreenTask = createFullscreenTask()
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[fullscreenTask.token.asBinder()]?.windowingMode)
+        .isEqualTo(WINDOWING_MODE_UNDEFINED)
+    assertThat(wct.hierarchyOps).hasSize(1)
+    wct.assertReorderAt(0, fullscreenTask, toTop = true)
+  }
+
+  @Test
+  fun handleRequest_fullscreenTask_noTasks_enforceDesktop_fullscreenDisplay_returnNull() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
+    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+    tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
+
+    val fullscreenTask = createFullscreenTask()
+    val wct = controller.handleRequest(Binder(), createTransition(fullscreenTask))
+
+    assertThat(wct).isNull()
+  }
+
+  @Test
   fun handleRequest_fullscreenTask_freeformNotVisible_returnNull() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
 
@@ -2956,6 +2990,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         screenOrientation = SCREEN_ORIENTATION_LANDSCAPE
         configuration.windowConfiguration.appBounds = bounds
       }
+      appCompatTaskInfo.topActivityLetterboxAppWidth = bounds.width()
+      appCompatTaskInfo.topActivityLetterboxAppHeight = bounds.height()
       isResizeable = false
     }
 
@@ -3050,6 +3086,95 @@ class DesktopTasksControllerTest : ShellTestCase() {
     assertThat(taskRepository.removeBoundsBeforeMaximize(task.taskId)).isNull()
   }
 
+
+  @Test
+  fun onUnhandledDrag_newFreeformIntent() {
+    testOnUnhandledDrag(DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR,
+      PointF(1200f, 700f),
+      Rect(240, 700, 2160, 1900))
+  }
+
+  @Test
+  fun onUnhandledDrag_newFreeformIntentSplitLeft() {
+    testOnUnhandledDrag(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR,
+      PointF(50f, 700f),
+      Rect(0, 0, 500, 1000))
+  }
+
+  @Test
+  fun onUnhandledDrag_newFreeformIntentSplitRight() {
+    testOnUnhandledDrag(DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR,
+      PointF(2500f, 700f),
+      Rect(500, 0, 1000, 1000))
+  }
+
+  @Test
+  fun onUnhandledDrag_newFullscreenIntent() {
+    testOnUnhandledDrag(DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR,
+      PointF(1200f, 50f),
+      Rect())
+  }
+
+  /**
+   * Assert that an unhandled drag event launches a PendingIntent with the
+   * windowing mode and bounds we are expecting.
+   */
+  private fun testOnUnhandledDrag(
+    indicatorType: DesktopModeVisualIndicator.IndicatorType,
+    inputCoordinate: PointF,
+    expectedBounds: Rect
+  ) {
+    setUpLandscapeDisplay()
+    val task = setUpFreeformTask()
+    markTaskVisible(task)
+    task.isFocused = true
+    val runningTasks = ArrayList<RunningTaskInfo>()
+    runningTasks.add(task)
+    val spyController = spy(controller)
+    val mockPendingIntent = mock(PendingIntent::class.java)
+    val mockDragEvent = mock(DragEvent::class.java)
+    val mockCallback = mock(Consumer::class.java)
+    val b = SurfaceControl.Builder()
+    b.setName("test surface")
+    val dragSurface = b.build()
+    whenever(shellTaskOrganizer.runningTasks).thenReturn(runningTasks)
+    whenever(mockDragEvent.dragSurface).thenReturn(dragSurface)
+    whenever(mockDragEvent.x).thenReturn(inputCoordinate.x)
+    whenever(mockDragEvent.y).thenReturn(inputCoordinate.y)
+    whenever(multiInstanceHelper.supportsMultiInstanceSplit(anyOrNull())).thenReturn(true)
+    whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+    doReturn(indicatorType)
+      .whenever(spyController).updateVisualIndicator(
+        eq(task),
+        anyOrNull(),
+        anyOrNull(),
+        anyOrNull(),
+        eq(DesktopModeVisualIndicator.DragStartState.DRAGGED_INTENT)
+      )
+
+    spyController.onUnhandledDrag(
+      mockPendingIntent,
+      mockDragEvent,
+      mockCallback as Consumer<Boolean>
+    )
+    val arg: ArgumentCaptor<WindowContainerTransaction> =
+      ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+    var expectedWindowingMode: Int
+      if (indicatorType == DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR) {
+        expectedWindowingMode = WINDOWING_MODE_FULLSCREEN
+        // Fullscreen launches currently use default transitions
+        verify(transitions).startTransition(any(), capture(arg), anyOrNull())
+      } else {
+        expectedWindowingMode = WINDOWING_MODE_FREEFORM
+        // All other launches use a special handler.
+        verify(dragAndDropTransitionHandler).handleDropEvent(capture(arg))
+      }
+    assertThat(ActivityOptions.fromBundle(arg.value.hierarchyOps[0].launchOptions)
+      .launchWindowingMode).isEqualTo(expectedWindowingMode)
+    assertThat(ActivityOptions.fromBundle(arg.value.hierarchyOps[0].launchOptions)
+      .launchBounds).isEqualTo(expectedBounds)
+  }
+
   private val desktopWallpaperIntent: Intent
     get() = Intent(context, DesktopWallpaperActivity::class.java)
 
@@ -3114,6 +3239,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
       appCompatTaskInfo.isUserFullscreenOverrideEnabled = enableUserFullscreenOverride
       appCompatTaskInfo.isSystemFullscreenOverrideEnabled = enableSystemFullscreenOverride
 
+      if (deviceOrientation == ORIENTATION_LANDSCAPE) {
+        configuration.windowConfiguration.appBounds =
+          Rect(0, 0, DISPLAY_DIMENSION_LONG, DISPLAY_DIMENSION_SHORT)
+        appCompatTaskInfo.topActivityLetterboxAppWidth = DISPLAY_DIMENSION_LONG
+        appCompatTaskInfo.topActivityLetterboxAppHeight = DISPLAY_DIMENSION_SHORT
+      } else {
+        configuration.windowConfiguration.appBounds =
+          Rect(0, 0, DISPLAY_DIMENSION_SHORT, DISPLAY_DIMENSION_LONG)
+        appCompatTaskInfo.topActivityLetterboxAppWidth = DISPLAY_DIMENSION_SHORT
+        appCompatTaskInfo.topActivityLetterboxAppHeight = DISPLAY_DIMENSION_LONG
+      }
+
       if (shouldLetterbox) {
         appCompatTaskInfo.setHasMinAspectRatioOverride(aspectRatioOverrideApplied)
         if (deviceOrientation == ORIENTATION_LANDSCAPE &&
@@ -3129,14 +3266,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
           appCompatTaskInfo.topActivityLetterboxAppWidth = 1600
           appCompatTaskInfo.topActivityLetterboxAppHeight = 1200
         }
-      }
-
-      if (deviceOrientation == ORIENTATION_LANDSCAPE) {
-        configuration.windowConfiguration.appBounds =
-            Rect(0, 0, DISPLAY_DIMENSION_LONG, DISPLAY_DIMENSION_SHORT)
-      } else {
-        configuration.windowConfiguration.appBounds =
-            Rect(0, 0, DISPLAY_DIMENSION_SHORT, DISPLAY_DIMENSION_LONG)
       }
     }
     whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)

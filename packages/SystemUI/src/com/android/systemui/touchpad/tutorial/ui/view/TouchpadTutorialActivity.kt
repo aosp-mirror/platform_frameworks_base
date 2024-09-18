@@ -29,12 +29,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
-import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
-import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.ACTION_KEY
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.RECENT_APPS_GESTURE
@@ -59,7 +57,6 @@ constructor(
         }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
-        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
     }
 
     private fun finishTutorial() {
@@ -101,11 +98,6 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
             )
         RECENT_APPS_GESTURE ->
             RecentAppsGestureTutorialScreen(
-                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
-                onBack = { vm.goTo(TUTORIAL_SELECTION) },
-            )
-        ACTION_KEY -> // TODO(b/358105049) move action key tutorial to OOBE flow
-        ActionKeyTutorialScreen(
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )

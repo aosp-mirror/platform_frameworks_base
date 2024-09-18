@@ -27,20 +27,28 @@ import com.android.server.input.TouchpadFingerState;
 import com.android.server.input.TouchpadHardwareProperties;
 import com.android.server.input.TouchpadHardwareState;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+
 public class TouchpadVisualizationView extends View {
     private static final String TAG = "TouchpadVizMain";
     private static final boolean DEBUG = true;
     private static final float DEFAULT_RES_X = 47f;
     private static final float DEFAULT_RES_Y = 45f;
+    private static final float MAX_TRACE_HISTORY_DURATION_SECONDS = 1f;
 
     private final TouchpadHardwareProperties mTouchpadHardwareProperties;
     private float mScaleFactor;
 
-    TouchpadHardwareState mLatestHardwareState = new TouchpadHardwareState(0, 0, 0, 0,
-            new TouchpadFingerState[]{});
+    private final ArrayDeque<TouchpadHardwareState> mHardwareStateHistory =
+            new ArrayDeque<TouchpadHardwareState>();
+    private final Map<Integer, TouchpadFingerState> mTempFingerStatesByTrackingId = new HashMap<>();
 
     private final Paint mOvalStrokePaint;
     private final Paint mOvalFillPaint;
+    private final Paint mTracePaint;
+    private final Paint mCenterPointPaint;
     private final RectF mTempOvalRect = new RectF();
 
     public TouchpadVisualizationView(Context context,
@@ -55,6 +63,29 @@ public class TouchpadVisualizationView extends View {
         mOvalFillPaint = new Paint();
         mOvalFillPaint.setAntiAlias(true);
         mOvalFillPaint.setARGB(255, 0, 0, 0);
+        mTracePaint = new Paint();
+        mTracePaint.setAntiAlias(false);
+        mTracePaint.setARGB(255, 0, 0, 255);
+        mTracePaint.setStyle(Paint.Style.STROKE);
+        mTracePaint.setStrokeWidth(2);
+        mCenterPointPaint = new Paint();
+        mCenterPointPaint.setAntiAlias(true);
+        mCenterPointPaint.setARGB(255, 255, 0, 0);
+        mCenterPointPaint.setStrokeWidth(2);
+    }
+
+    private void removeOldPoints() {
+        float latestTimestamp = mHardwareStateHistory.getLast().getTimestamp();
+
+        while (!mHardwareStateHistory.isEmpty()) {
+            TouchpadHardwareState oldestPoint = mHardwareStateHistory.getFirst();
+            float onScreenTime = latestTimestamp - oldestPoint.getTimestamp();
+            if (onScreenTime >= MAX_TRACE_HISTORY_DURATION_SECONDS) {
+                mHardwareStateHistory.removeFirst();
+            } else {
+                break;
+            }
+        }
     }
 
     private void drawOval(Canvas canvas, float x, float y, float major, float minor, float angle) {
@@ -71,19 +102,22 @@ public class TouchpadVisualizationView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mHardwareStateHistory.isEmpty()) {
+            return;
+        }
+
+        TouchpadHardwareState latestHardwareState = mHardwareStateHistory.getLast();
+
         float maximumPressure = 0;
-        for (TouchpadFingerState touchpadFingerState : mLatestHardwareState.getFingerStates()) {
+        for (TouchpadFingerState touchpadFingerState : latestHardwareState.getFingerStates()) {
             maximumPressure = Math.max(maximumPressure, touchpadFingerState.getPressure());
         }
 
-        for (TouchpadFingerState touchpadFingerState : mLatestHardwareState.getFingerStates()) {
-            float newX = translateRange(mTouchpadHardwareProperties.getLeft(),
-                    mTouchpadHardwareProperties.getRight(), 0, getWidth(),
-                    touchpadFingerState.getPositionX());
+        // Visualizing fingers as ovals
+        for (TouchpadFingerState touchpadFingerState : latestHardwareState.getFingerStates()) {
+            float newX = translateX(touchpadFingerState.getPositionX());
 
-            float newY = translateRange(mTouchpadHardwareProperties.getTop(),
-                    mTouchpadHardwareProperties.getBottom(), 0, getHeight(),
-                    touchpadFingerState.getPositionY());
+            float newY = translateY(touchpadFingerState.getPositionY());
 
             float newAngle = translateRange(0, mTouchpadHardwareProperties.getOrientationMaximum(),
                     0, 90, touchpadFingerState.getOrientation());
@@ -102,6 +136,28 @@ public class TouchpadVisualizationView extends View {
 
             drawOval(canvas, newX, newY, newTouchMajor, newTouchMinor, newAngle);
         }
+
+        mTempFingerStatesByTrackingId.clear();
+
+        // Drawing the trace
+        for (TouchpadHardwareState currentHardwareState : mHardwareStateHistory) {
+            for (TouchpadFingerState currentFingerState : currentHardwareState.getFingerStates()) {
+                TouchpadFingerState prevFingerState = mTempFingerStatesByTrackingId.put(
+                        currentFingerState.getTrackingId(), currentFingerState);
+
+                if (prevFingerState == null) {
+                    continue;
+                }
+
+                float currentX = translateX(currentFingerState.getPositionX());
+                float currentY = translateY(currentFingerState.getPositionY());
+                float prevX = translateX(prevFingerState.getPositionX());
+                float prevY = translateY(prevFingerState.getPositionY());
+
+                canvas.drawLine(prevX, prevY, currentX, currentY, mTracePaint);
+                canvas.drawPoint(currentX, currentY, mCenterPointPaint);
+            }
+        }
     }
 
     /**
@@ -114,7 +170,18 @@ public class TouchpadVisualizationView extends View {
             logHardwareState(schs);
         }
 
-        mLatestHardwareState = schs;
+        if (!mHardwareStateHistory.isEmpty()
+                && mHardwareStateHistory.getLast().getFingerCount() == 0
+                && schs.getFingerCount() > 0) {
+            mHardwareStateHistory.clear();
+        }
+
+        mHardwareStateHistory.addLast(schs);
+        removeOldPoints();
+
+        if (DEBUG) {
+            logFingerTrace();
+        }
 
         invalidate();
     }
@@ -126,6 +193,16 @@ public class TouchpadVisualizationView extends View {
      */
     public void updateScaleFactor(float scaleFactor) {
         mScaleFactor = scaleFactor;
+    }
+
+    private float translateX(float x) {
+        return translateRange(mTouchpadHardwareProperties.getLeft(),
+                mTouchpadHardwareProperties.getRight(), 0, getWidth(), x);
+    }
+
+    private float translateY(float y) {
+        return translateRange(mTouchpadHardwareProperties.getTop(),
+                mTouchpadHardwareProperties.getBottom(), 0, getHeight(), y);
     }
 
     private float translateRange(float rangeBeforeMin, float rangeBeforeMax,
@@ -154,4 +231,10 @@ public class TouchpadVisualizationView extends View {
         }
     }
 
+    private void logFingerTrace() {
+        Slog.d(TAG, "Trace size= " + mHardwareStateHistory.size());
+        for (TouchpadFingerState tfs : mHardwareStateHistory.getLast().getFingerStates()) {
+            Slog.d(TAG, "ID= " + tfs.getTrackingId());
+        }
+    }
 }

@@ -57,6 +57,13 @@ class ScrollViewFields {
      * guts off of this gesture, we can notify the placeholder through here.
      */
     var currentGestureInGutsConsumer: Consumer<Boolean>? = null
+
+    /**
+     * When a notification begins remote input, its bottom Y bound is sent to the placeholder
+     * through here in order to adjust to accommodate the IME.
+     */
+    var remoteInputRowBottomBoundConsumer: Consumer<Float?>? = null
+
     /**
      * Any time the heads up height is recalculated, it should be updated here to be used by the
      * placeholder
@@ -74,6 +81,10 @@ class ScrollViewFields {
     /** send [isCurrentGestureInGuts] to the [currentGestureInGutsConsumer], if present. */
     fun sendCurrentGestureInGuts(isCurrentGestureInGuts: Boolean) =
         currentGestureInGutsConsumer?.accept(isCurrentGestureInGuts)
+
+    /** send [bottomY] to the [remoteInputRowBottomBoundConsumer], if present. */
+    fun sendRemoteInputRowBottomBound(bottomY: Float?) =
+        remoteInputRowBottomBoundConsumer?.accept(bottomY)
 
     /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
     fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)

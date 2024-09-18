@@ -52,7 +52,6 @@ import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
@@ -632,10 +631,6 @@ class TestPhoneWindowManager {
     void overrideFocusedWindowButtonOverridePermission(boolean granted) {
         doReturn(granted)
                 .when(mButtonOverridePermissionChecker).canAppOverrideSystemKey(any(), anyInt());
-    }
-
-    void overrideWindowKeyInterceptionInfo(KeyInterceptionInfo info) {
-        when(mWindowManagerInternal.getKeyInterceptionInfoFromToken(any())).thenReturn(info);
     }
 
     void overrideKeyEventPolicyFlags(int flags) {

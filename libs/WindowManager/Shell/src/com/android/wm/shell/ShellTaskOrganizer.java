@@ -46,7 +46,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizerController;
-import android.window.ScreenCapture;
 import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 import android.window.TaskAppearedInfo;
@@ -55,7 +54,6 @@ import android.window.TaskOrganizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
@@ -74,7 +72,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * Unified task organizer for all components in the shell.
@@ -560,19 +557,6 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         notifyCompatUI(info.getTaskInfo(), listener);
         mRecentTasks.ifPresent(recentTasks -> recentTasks.onTaskAdded(info.getTaskInfo()));
     }
-
-    /**
-     * Take a screenshot of a task.
-     */
-    public void screenshotTask(RunningTaskInfo taskInfo, Rect crop,
-            Consumer<ScreenCapture.ScreenshotHardwareBuffer> consumer) {
-        final TaskAppearedInfo info = mTasks.get(taskInfo.taskId);
-        if (info == null) {
-            return;
-        }
-        ScreenshotUtils.captureLayer(info.getLeash(), crop, consumer);
-    }
-
 
     @Override
     public void onTaskInfoChanged(RunningTaskInfo taskInfo) {

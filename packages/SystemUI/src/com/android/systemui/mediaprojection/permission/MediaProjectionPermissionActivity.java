@@ -53,7 +53,6 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
-import android.view.WindowManager;
 
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -309,9 +308,6 @@ public class MediaProjectionPermissionActivity extends Activity {
     private void setUpDialog(AlertDialog dialog) {
         SystemUIDialog.registerDismissListener(dialog);
         SystemUIDialog.applyFlags(dialog, /* showWhenLocked= */ false);
-
-        final Window w = dialog.getWindow();
-        w.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         SystemUIDialog.setDialogSize(dialog);
 
         dialog.setOnCancelListener(this::onDialogDismissedOrCancelled);
@@ -319,6 +315,7 @@ public class MediaProjectionPermissionActivity extends Activity {
         dialog.create();
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setFilterTouchesWhenObscured(true);
 
+        final Window w = dialog.getWindow();
         w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
     }
 
