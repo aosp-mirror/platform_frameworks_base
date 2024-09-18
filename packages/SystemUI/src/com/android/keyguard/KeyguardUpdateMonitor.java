@@ -2591,6 +2591,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * @return true if optical udfps HW is supported on this device. Can return true even if the
+     * user has not enrolled udfps. This may be false if called before
+     * onAllAuthenticatorsRegistered.
+     */
+    public boolean isOpticalUdfpsSupported() {
+        return mAuthController.isOpticalUdfpsSupported();
+    }
+
+    /**
      * @return true if there's at least one sfps enrollment for the current user.
      */
     public boolean isSfpsEnrolled() {

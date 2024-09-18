@@ -750,7 +750,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                     BiometricUnlockSource.Companion.fromBiometricSourceType(biometricSourceType)
             );
         } else if (biometricSourceType == BiometricSourceType.FINGERPRINT
-                && mUpdateMonitor.isUdfpsSupported()) {
+                && mUpdateMonitor.isOpticalUdfpsSupported()) {
             long currUptimeMillis = mSystemClock.uptimeMillis();
             if (currUptimeMillis - mLastFpFailureUptimeMillis < mConsecutiveFpFailureThreshold) {
                 mNumConsecutiveFpFailures += 1;
