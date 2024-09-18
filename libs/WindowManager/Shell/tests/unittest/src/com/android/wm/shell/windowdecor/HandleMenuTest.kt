@@ -240,7 +240,7 @@ class HandleMenuTest : ShellTestCase() {
             null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
             captionX = captionX
         )
-        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock())
+        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock())
         return handleMenu
     }
 

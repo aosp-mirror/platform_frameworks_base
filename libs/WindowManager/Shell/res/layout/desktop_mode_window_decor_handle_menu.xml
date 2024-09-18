@@ -165,17 +165,28 @@
         android:layout_height="@dimen/desktop_mode_handle_menu_open_in_browser_pill_height"
         android:layout_marginTop="@dimen/desktop_mode_handle_menu_pill_spacing_margin"
         android:layout_marginStart="1dp"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:elevation="@dimen/desktop_mode_handle_menu_pill_elevation"
         android:background="@drawable/desktop_mode_decor_handle_menu_background">
 
         <Button
             android:id="@+id/open_in_browser_button"
+            android:layout_weight="1"
             android:contentDescription="@string/open_in_browser_text"
             android:text="@string/open_in_browser_text"
             android:drawableStart="@drawable/desktop_mode_ic_handle_menu_open_in_browser"
             android:drawableTint="?androidprv:attr/materialColorOnSurface"
             style="@style/DesktopModeHandleMenuActionButton"/>
+
+        <ImageButton
+            android:id="@+id/open_by_default_button"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/open_by_default_settings_text"
+            android:src="@drawable/desktop_mode_ic_handle_menu_open_by_default_settings"
+            android:tint="?androidprv:attr/materialColorOnSurface"/>
     </LinearLayout>
 </LinearLayout>
 

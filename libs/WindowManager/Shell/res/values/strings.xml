@@ -323,4 +323,15 @@
     <string name="desktop_mode_maximize_menu_snap_left_button_text">Snap left</string>
     <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
     <string name="desktop_mode_maximize_menu_snap_right_button_text">Snap right</string>
+
+    <!-- Accessibility text for open by default settings button [CHAR LIMIT=NONE] -->
+    <string name="open_by_default_settings_text">Open by default settings</string>
+    <!-- Subheader for open by default menu string. -->
+    <string name="open_by_default_dialog_subheader_text">Choose how to open web links for this app</string>
+    <!-- Text for open by default settings dialog option. -->
+    <string name="open_by_default_dialog_in_app_text">In the app</string>
+    <!-- Text for open by default settings dialog option. -->
+    <string name="open_by_default_dialog_in_browser_text">In your browser</string>
+    <!-- Text for open by default settings dialog dismiss button. -->
+    <string name="open_by_default_dialog_dismiss_button_text">OK</string>
 </resources>
