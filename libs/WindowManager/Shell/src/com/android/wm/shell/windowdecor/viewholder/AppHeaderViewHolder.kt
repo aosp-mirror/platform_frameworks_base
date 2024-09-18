@@ -30,6 +30,7 @@ import android.graphics.drawable.shapes.RoundRectShape
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.accessibility.AccessibilityEvent
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -263,7 +264,11 @@ class AppHeaderViewHolder(
 
     override fun onHandleMenuOpened() {}
 
-    override fun onHandleMenuClosed() {}
+    override fun onHandleMenuClosed() {
+        openMenuButton.post {
+            openMenuButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
+        }
+    }
 
     fun setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition: Boolean) {
         // If animating a task resize or reposition, cancel any running hover animations
@@ -307,6 +312,12 @@ class AppHeaderViewHolder(
             /* right = */ appChipBoundsInWindow[0] + openMenuButton.width,
             /* bottom = */ appChipBoundsInWindow[1] + openMenuButton.height
         )
+    }
+
+    fun requestAccessibilityFocus() {
+        maximizeWindowButton.post {
+            maximizeWindowButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
+        }
     }
 
     private fun getHeaderStyle(header: Header): HeaderStyle {

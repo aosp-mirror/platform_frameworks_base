@@ -623,7 +623,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .postDelayed(mCloseMaxMenuRunnable.capture(), eq(CLOSE_MAXIMIZE_MENU_DELAY_MS));
 
         mCloseMaxMenuRunnable.getValue().run();
-        verify(menu).close();
+        verify(menu).close(any());
         assertFalse(decoration.isMaximizeMenuActive());
     }
 
@@ -642,7 +642,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .postDelayed(mCloseMaxMenuRunnable.capture(), eq(CLOSE_MAXIMIZE_MENU_DELAY_MS));
 
         mCloseMaxMenuRunnable.getValue().run();
-        verify(menu).close();
+        verify(menu).close(any());
         assertFalse(decoration.isMaximizeMenuActive());
     }
 
