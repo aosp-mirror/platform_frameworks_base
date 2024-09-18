@@ -195,22 +195,24 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         try {
             performGlobalInitialization();
 
+            /*
+             * If the class has @DisabledOnRavenwood, then we'll delegate to
+             * ClassSkippingTestRunner, which simply skips it.
+             *
+             * We need to do it before instantiating TestClass for b/367694651.
+             */
+            if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
+                    testClass)) {
+                mRealRunner = new ClassSkippingTestRunner(testClass);
+                mDescription = mRealRunner.getDescription();
+                return;
+            }
+
             mTestClass = new TestClass(testClass);
 
             Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
 
             onRunnerInitializing();
-
-            /*
-             * If the class has @DisabledOnRavenwood, then we'll delegate to
-             * ClassSkippingTestRunner, which simply skips it.
-             */
-            if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
-                    mTestClass.getJavaClass())) {
-                mRealRunner = new ClassSkippingTestRunner(mTestClass);
-                mDescription = mRealRunner.getDescription();
-                return;
-            }
 
             // Find the real runner.
             final Class<? extends Runner> realRunnerClass;
@@ -444,14 +446,11 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
      * filter.
      */
     private static class ClassSkippingTestRunner extends Runner implements Filterable {
-        private final TestClass mTestClass;
         private final Description mDescription;
         private boolean mFilteredOut;
 
-        ClassSkippingTestRunner(TestClass testClass) {
-            mTestClass = testClass;
-            mDescription = Description.createTestDescription(
-                    testClass.getJavaClass(), testClass.getJavaClass().getSimpleName());
+        ClassSkippingTestRunner(Class<?> testClass) {
+            mDescription = Description.createTestDescription(testClass, testClass.getSimpleName());
             mFilteredOut = false;
         }
 
