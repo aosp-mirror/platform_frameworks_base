@@ -2821,8 +2821,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
             callbackWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token, false);
             mWindowDecorViewModel.ifPresent(viewModel -> {
-                viewModel.onTaskInfoChanged(finalMainChild.getTaskInfo());
-                viewModel.onTaskInfoChanged(finalSideChild.getTaskInfo());
+                if (finalMainChild != null) {
+                    viewModel.onTaskInfoChanged(finalMainChild.getTaskInfo());
+                }
+                if (finalSideChild != null) {
+                    viewModel.onTaskInfoChanged(finalSideChild.getTaskInfo());
+                }
             });
             mPausingTasks.clear();
         });
