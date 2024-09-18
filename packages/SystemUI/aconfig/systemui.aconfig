@@ -538,6 +538,13 @@ flag {
 }
 
 flag {
+  name: "status_bar_connected_displays"
+  namespace: "systemui"
+  description: "Shows the status bar on connected displays"
+  bug: "362720336"
+}
+
+flag {
     name: "status_bar_switch_to_spn_from_data_spn"
     namespace: "systemui"
     description: "Fix usage of the SPN broadcast extras"
