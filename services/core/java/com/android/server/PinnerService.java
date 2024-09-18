@@ -22,7 +22,6 @@ import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.flags.Flags.pinGlobalQuota;
 import static com.android.server.flags.Flags.pinWebview;
-import static com.android.server.flags.Flags.skipHomeArtPins;
 
 import android.annotation.EnforcePermission;
 import android.annotation.IntDef;
@@ -872,8 +871,6 @@ public final class PinnerService extends SystemService {
 
         long apkPinSizeLimit = pinSizeLimit;
 
-        boolean shouldSkipArtPins = key == KEY_HOME && skipHomeArtPins();
-
         for (String apk: apks) {
             if (apkPinSizeLimit <= 0) {
                 Slog.w(TAG, "Reached to the pin size limit. Skipping: " + apk);
@@ -882,7 +879,7 @@ public final class PinnerService extends SystemService {
             }
 
             String pinGroup = getNameForKey(key);
-            boolean shouldPinDeps = apk.equals(appInfo.sourceDir) && !shouldSkipArtPins;
+            boolean shouldPinDeps = apk.equals(appInfo.sourceDir);
             PinnedFile pf = pinFile(apk, apkPinSizeLimit, appInfo, pinGroup, shouldPinDeps);
             if (pf == null) {
                 Slog.e(TAG, "Failed to pin " + apk);
