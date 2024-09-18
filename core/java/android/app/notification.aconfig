@@ -237,3 +237,11 @@ flag {
   description: "Guards new android.app.richongoingnotification api"
   bug: "337261753"
 }
+
+flag {
+  name: "ui_rich_ongoing"
+  is_exported: true
+  namespace: "systemui"
+  description: "Guards new android.app.richongoingnotification promotion and new uis"
+  bug: "337261753"
+}
