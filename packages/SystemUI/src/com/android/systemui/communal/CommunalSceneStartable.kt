@@ -146,7 +146,7 @@ constructor(
                 screenTimeout =
                     systemSettings.getInt(
                         Settings.System.SCREEN_OFF_TIMEOUT,
-                        DEFAULT_SCREEN_TIMEOUT
+                        DEFAULT_SCREEN_TIMEOUT,
                     )
             }
             .launchIn(bgScope)
@@ -160,7 +160,7 @@ constructor(
             combine(
                     communalSceneInteractor.currentScene,
                     // Emit a value on start so the combine starts.
-                    communalInteractor.userActivity.emitOnStart()
+                    communalInteractor.userActivity.emitOnStart(),
                 ) { scene, _ ->
                     // Only timeout if we're on the hub is open.
                     scene == CommunalScenes.Communal
@@ -219,7 +219,7 @@ constructor(
     }
 
     private suspend fun determineSceneAfterTransition(
-        lastStartedTransition: TransitionStep,
+        lastStartedTransition: TransitionStep
     ): Pair<SceneKey, TransitionKey>? {
         val to = lastStartedTransition.to
         val from = lastStartedTransition.from
@@ -251,9 +251,8 @@ constructor(
                 Pair(CommunalScenes.Blank, CommunalTransitionKeys.SimpleFade)
             }
             from == KeyguardState.DOZING && to == KeyguardState.GLANCEABLE_HUB -> {
-                // Make sure the communal hub is showing (immediately, not fading in) when
-                // transitioning from dozing to hub.
-                Pair(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
+                // Make sure the communal hub is showing when transitioning from dozing to hub.
+                Pair(CommunalScenes.Communal, CommunalTransitionKeys.SimpleFade)
             }
             else -> null
         }
