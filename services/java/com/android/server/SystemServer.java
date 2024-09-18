@@ -3005,9 +3005,13 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
-        t.traceBegin("GameManagerService");
-        mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
-        t.traceEnd();
+        if (!isWatch || !android.server.Flags.removeGameManagerServiceFromWear()) {
+            t.traceBegin("GameManagerService");
+            mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
+            t.traceEnd();
+        } else {
+            Slog.d(TAG, "Not starting GameManagerService");
+        }
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
             t.traceBegin("UwbService");
