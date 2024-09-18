@@ -32,11 +32,11 @@ import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserHandle.getCallingUserId;
-import static android.os.UserManager.isVisibleBackgroundUsersEnabled;
 import static android.provider.Settings.Secure.CONTRAST_LEVEL;
 import static android.util.TimeUtils.isTimeBetween;
 
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
+import static com.android.server.pm.UserManagerService.enforceCurrentUserIfVisibleBackgroundEnabled;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -100,7 +100,6 @@ import com.android.internal.app.DisableCarModeActivity;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.DumpUtils;
-import com.android.server.pm.UserManagerService;
 import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
@@ -850,7 +849,7 @@ final class UiModeManagerService extends SystemService {
             }
 
             final int user = UserHandle.getCallingUserId();
-            enforceValidCallingUser(user);
+            enforceCurrentUserIfVisibleBackgroundEnabled(user);
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -914,7 +913,7 @@ final class UiModeManagerService extends SystemService {
                 @AttentionModeThemeOverlayType int attentionModeThemeOverlayType) {
             setAttentionModeThemeOverlay_enforcePermission();
 
-            enforceValidCallingUser(UserHandle.getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(UserHandle.getCallingUserId());
 
             synchronized (mLock) {
                 if (mAttentionModeThemeOverlay != attentionModeThemeOverlayType) {
@@ -1005,7 +1004,7 @@ final class UiModeManagerService extends SystemService {
                 return false;
             }
             final int user = Binder.getCallingUserHandle().getIdentifier();
-            enforceValidCallingUser(user);
+            enforceCurrentUserIfVisibleBackgroundEnabled(user);
 
             if (user != mCurrentUser && getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS)
@@ -1064,7 +1063,7 @@ final class UiModeManagerService extends SystemService {
                 return;
             }
             final int user = UserHandle.getCallingUserId();
-            enforceValidCallingUser(user);
+            enforceCurrentUserIfVisibleBackgroundEnabled(user);
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -1094,7 +1093,7 @@ final class UiModeManagerService extends SystemService {
                 return;
             }
             final int user = UserHandle.getCallingUserId();
-            enforceValidCallingUser(user);
+            enforceCurrentUserIfVisibleBackgroundEnabled(user);
 
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -1116,7 +1115,7 @@ final class UiModeManagerService extends SystemService {
             assertLegit(callingPackage);
             assertSingleProjectionType(projectionType);
             enforceProjectionTypePermissions(projectionType);
-            enforceValidCallingUser(getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(getCallingUserId());
 
             synchronized (mLock) {
                 if (mProjectionHolders == null) {
@@ -1162,7 +1161,7 @@ final class UiModeManagerService extends SystemService {
             assertLegit(callingPackage);
             assertSingleProjectionType(projectionType);
             enforceProjectionTypePermissions(projectionType);
-            enforceValidCallingUser(getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(getCallingUserId());
 
             return releaseProjectionUnchecked(projectionType, callingPackage);
         }
@@ -1204,7 +1203,7 @@ final class UiModeManagerService extends SystemService {
                 return;
             }
 
-            enforceValidCallingUser(getCallingUserId());
+            enforceCurrentUserIfVisibleBackgroundEnabled(getCallingUserId());
 
             synchronized (mLock) {
                 if (mProjectionListeners == null) {
@@ -1252,32 +1251,6 @@ final class UiModeManagerService extends SystemService {
             }
         }
     };
-
-    // This method validates whether calling user is valid in visible background users
-    // feature. Valid user is the current user or the system or in the same profile group as
-    // the current user.
-    private void enforceValidCallingUser(int userId) {
-        if (!isVisibleBackgroundUsersEnabled()) {
-            return;
-        }
-        if (LOG) {
-            Slog.d(TAG, "enforceValidCallingUser: userId=" + userId
-                    + " isSystemUser=" + (userId == USER_SYSTEM) + " current user=" + mCurrentUser
-                    + " callingPid=" + Binder.getCallingPid()
-                    + " callingUid=" + mInjector.getCallingUid());
-        }
-        long ident = Binder.clearCallingIdentity();
-        try {
-            if (userId != USER_SYSTEM && userId != mCurrentUser
-                    && !UserManagerService.getInstance().isSameProfileGroup(userId, mCurrentUser)) {
-                throw new SecurityException(
-                        "Calling user is not valid for level-1 compatibility in MUMD. "
-                                + "callingUserId=" + userId + " currentUserId=" + mCurrentUser);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
 
     private void enforceProjectionTypePermissions(@UiModeManager.ProjectionType int p) {
         if ((p & PROJECTION_TYPE_AUTOMOTIVE) != 0) {
