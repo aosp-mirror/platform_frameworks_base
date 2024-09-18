@@ -1209,7 +1209,7 @@ final class HdmiCecController {
         public void onValues(int result, short addr) {
             if (result == Result.SUCCESS) {
                 synchronized (mLock) {
-                    mPhysicalAddress = new Short(addr).intValue();
+                    mPhysicalAddress = Short.toUnsignedInt(addr);
                 }
             }
         }
@@ -1607,7 +1607,7 @@ final class HdmiCecController {
         public void onValues(int result, short addr) {
             if (result == Result.SUCCESS) {
                 synchronized (mLock) {
-                    mPhysicalAddress = new Short(addr).intValue();
+                    mPhysicalAddress = Short.toUnsignedInt(addr);
                 }
             }
         }
