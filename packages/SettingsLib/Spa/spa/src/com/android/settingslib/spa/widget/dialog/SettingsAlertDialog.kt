@@ -17,11 +17,16 @@
 package com.android.settingslib.spa.widget.dialog
 
 import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,9 +37,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 
 data class AlertDialogButton(
     val text: String,
@@ -85,27 +92,41 @@ private fun AlertDialogPresenter.SettingsAlertDialog(
     AlertDialog(
         onDismissRequest = ::close,
         modifier = Modifier.width(getDialogWidth()),
-        confirmButton = { confirmButton?.let { Button(it) } },
-        dismissButton = dismissButton?.let { { Button(it) } },
-        title = title?.let { { Text(it) } },
-        text = text?.let {
-            {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-                    text()
-                }
-            }
+        confirmButton = {
+            confirmButton?.let { if (isSpaExpressiveEnabled) ConfirmButton(it) else Button(it) }
         },
+        dismissButton =
+            dismissButton?.let {
+                { if (isSpaExpressiveEnabled) DismissButton(it) else Button(it) }
+            },
+        title = title?.let { { CenterRow { Text(it) } } },
+        text =
+            text?.let {
+                { CenterRow { Column(Modifier.verticalScroll(rememberScrollState())) { text() } } }
+            },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     )
 }
 
 @Composable
+internal fun CenterRow(content: @Composable (() -> Unit)) {
+    if (isSpaExpressiveEnabled) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            content()
+        }
+    } else {
+        content()
+    }
+}
+
+@Composable
 fun getDialogWidth(): Dp {
     val configuration = LocalConfiguration.current
-    return configuration.screenWidthDp.dp * when (configuration.orientation) {
-        Configuration.ORIENTATION_LANDSCAPE -> 0.65f
-        else -> 0.85f
-    }
+    return configuration.screenWidthDp.dp *
+        when (configuration.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> 0.65f
+            else -> 0.85f
+        }
 }
 
 @Composable
@@ -119,4 +140,48 @@ private fun AlertDialogPresenter.Button(button: AlertDialogButton) {
     ) {
         Text(button.text)
     }
+}
+
+@Composable
+private fun AlertDialogPresenter.DismissButton(button: AlertDialogButton) {
+    OutlinedButton(
+        onClick = {
+            close()
+            button.onClick()
+        },
+        enabled = button.enabled,
+    ) {
+        Text(button.text)
+    }
+}
+
+@Composable
+private fun AlertDialogPresenter.ConfirmButton(button: AlertDialogButton) {
+    Button(
+        onClick = {
+            close()
+            button.onClick()
+        },
+        enabled = button.enabled,
+    ) {
+        Text(button.text)
+    }
+}
+
+@Preview
+@Composable
+private fun AlertDialogPreview() {
+    val alertDialogPresenter = remember {
+        object : AlertDialogPresenter {
+            override fun open() {}
+
+            override fun close() {}
+        }
+    }
+    alertDialogPresenter.SettingsAlertDialog(
+        confirmButton = AlertDialogButton("Ok"),
+        dismissButton = AlertDialogButton("Cancel"),
+        title = "Title",
+        text = { Text("Text") },
+    )
 }

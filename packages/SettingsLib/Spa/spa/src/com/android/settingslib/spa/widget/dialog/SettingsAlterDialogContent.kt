@@ -58,10 +58,7 @@ fun SettingsAlertDialogContent(
     dismissButton: AlertDialogButton?,
     title: String?,
     icon: @Composable (() -> Unit)? = {
-        Icon(
-            Icons.Default.WarningAmber,
-            contentDescription = null
-        )
+        Icon(Icons.Default.WarningAmber, contentDescription = null)
     },
     text: @Composable (() -> Unit)?,
 ) {
@@ -69,42 +66,22 @@ fun SettingsAlertDialogContent(
         buttons = {
             AlertDialogFlowRow(
                 mainAxisSpacing = ButtonsMainAxisSpacing,
-                crossAxisSpacing = ButtonsCrossAxisSpacing
+                crossAxisSpacing = ButtonsCrossAxisSpacing,
             ) {
-                dismissButton?.let {
-                    OutlinedButton(onClick = it.onClick) {
-                        Text(it.text)
-                    }
-                }
-                confirmButton?.let {
-                    Button(
-                        onClick = {
-                            it.onClick()
-                        },
-                    ) {
-                        Text(it.text)
-                    }
-                }
+                dismissButton?.let { OutlinedButton(onClick = it.onClick) { Text(it.text) } }
+                confirmButton?.let { Button(onClick = { it.onClick() }) { Text(it.text) } }
             }
         },
         icon = icon,
         modifier = Modifier.width(getDialogWidth()),
-        title = title?.let {
-            {
-                Text(
-                    it,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-            }
-        },
-        text = text?.let {
-            {
-                Column(Modifier.verticalScroll(rememberScrollState())) {
-                    text()
-                }
-            }
-        },
+        title =
+            title?.let {
+                { Text(it, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) }
+            },
+        text =
+            text?.let {
+                { CenterRow { Column(Modifier.verticalScroll(rememberScrollState())) { text() } } }
+            },
     )
 }
 
@@ -121,18 +98,12 @@ internal fun SettingsAlertDialogContent(
         shape = SettingsShape.CornerExtraLarge,
         color = MaterialTheme.colorScheme.surfaceContainerHigh,
     ) {
-        Column(
-            modifier = Modifier.padding(DialogPadding)
-        ) {
+        Column(modifier = Modifier.padding(DialogPadding)) {
             icon?.let {
                 CompositionLocalProvider(
-                    LocalContentColor provides AlertDialogDefaults.iconContentColor,
+                    LocalContentColor provides AlertDialogDefaults.iconContentColor
                 ) {
-                    Box(
-                        Modifier
-                            .padding(IconPadding)
-                            .align(Alignment.CenterHorizontally)
-                    ) {
+                    Box(Modifier.padding(IconPadding).align(Alignment.CenterHorizontally)) {
                         icon()
                     }
                 }
@@ -144,8 +115,7 @@ internal fun SettingsAlertDialogContent(
                 ) {
                     Box(
                         // Align the title to the center when an icon is present.
-                        Modifier
-                            .padding(TitlePadding)
+                        Modifier.padding(TitlePadding)
                             .align(
                                 if (icon == null) {
                                     Alignment.Start
@@ -161,11 +131,10 @@ internal fun SettingsAlertDialogContent(
             text?.let {
                 ProvideContentColorTextStyle(
                     contentColor = AlertDialogDefaults.textContentColor,
-                    textStyle = MaterialTheme.typography.bodyMedium
+                    textStyle = MaterialTheme.typography.bodyMedium,
                 ) {
                     Box(
-                        Modifier
-                            .weight(weight = 1f, fill = false)
+                        Modifier.weight(weight = 1f, fill = false)
                             .padding(TextPadding)
                             .align(Alignment.Start)
                     ) {
@@ -177,7 +146,7 @@ internal fun SettingsAlertDialogContent(
                 ProvideContentColorTextStyle(
                     contentColor = MaterialTheme.colorScheme.primary,
                     textStyle = MaterialTheme.typography.labelLarge,
-                    content = buttons
+                    content = buttons,
                 )
             }
         }
@@ -188,7 +157,7 @@ internal fun SettingsAlertDialogContent(
 internal fun AlertDialogFlowRow(
     mainAxisSpacing: Dp,
     crossAxisSpacing: Dp,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Layout(content) { measurables, constraints ->
         val sequences = mutableListOf<List<Placeable>>()
@@ -204,8 +173,9 @@ internal fun AlertDialogFlowRow(
 
         // Return whether the placeable can be added to the current sequence.
         fun canAddToCurrentSequence(placeable: Placeable) =
-            currentSequence.isEmpty() || currentMainAxisSize + mainAxisSpacing.roundToPx() +
-                placeable.width <= constraints.maxWidth
+            currentSequence.isEmpty() ||
+                currentMainAxisSize + mainAxisSpacing.roundToPx() + placeable.width <=
+                    constraints.maxWidth
 
         // Store current sequence information and start a new sequence.
         fun startNewSequence() {
@@ -213,8 +183,7 @@ internal fun AlertDialogFlowRow(
                 crossAxisSpace += crossAxisSpacing.roundToPx()
             }
             // Ensures that confirming actions appear above dismissive actions.
-            @Suppress("ListIterator")
-            sequences.add(0, currentSequence.toList())
+            @Suppress("ListIterator") sequences.add(0, currentSequence.toList())
             crossAxisSizes += currentCrossAxisSize
             crossAxisPositions += crossAxisSpace
 
@@ -254,23 +223,23 @@ internal fun AlertDialogFlowRow(
 
         layout(layoutWidth, layoutHeight) {
             sequences.fastForEachIndexed { i, placeables ->
-                val childrenMainAxisSizes = IntArray(placeables.size) { j ->
-                    placeables[j].width +
-                        if (j < placeables.lastIndex) mainAxisSpacing.roundToPx() else 0
-                }
+                val childrenMainAxisSizes =
+                    IntArray(placeables.size) { j ->
+                        placeables[j].width +
+                            if (j < placeables.lastIndex) mainAxisSpacing.roundToPx() else 0
+                    }
                 val arrangement = Arrangement.End
                 val mainAxisPositions = IntArray(childrenMainAxisSizes.size) { 0 }
                 with(arrangement) {
                     arrange(
-                        mainAxisLayoutSize, childrenMainAxisSizes,
-                        layoutDirection, mainAxisPositions
+                        mainAxisLayoutSize,
+                        childrenMainAxisSizes,
+                        layoutDirection,
+                        mainAxisPositions,
                     )
                 }
                 placeables.fastForEachIndexed { j, placeable ->
-                    placeable.place(
-                        x = mainAxisPositions[j],
-                        y = crossAxisPositions[i]
-                    )
+                    placeable.place(x = mainAxisPositions[j], y = crossAxisPositions[i])
                 }
             }
         }
@@ -289,8 +258,8 @@ private val ButtonsCrossAxisSpacing = 12.dp
 /**
  * ProvideContentColorTextStyle
  *
- * A convenience method to provide values to both LocalContentColor and LocalTextStyle in
- * one call. This is less expensive than nesting calls to CompositionLocalProvider.
+ * A convenience method to provide values to both LocalContentColor and LocalTextStyle in one call.
+ * This is less expensive than nesting calls to CompositionLocalProvider.
  *
  * Text styles will be merged with the current value of LocalTextStyle.
  */
@@ -298,12 +267,12 @@ private val ButtonsCrossAxisSpacing = 12.dp
 private fun ProvideContentColorTextStyle(
     contentColor: Color,
     textStyle: TextStyle,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val mergedStyle = LocalTextStyle.current.merge(textStyle)
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
         LocalTextStyle provides mergedStyle,
-        content = content
+        content = content,
     )
 }
