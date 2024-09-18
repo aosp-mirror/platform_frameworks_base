@@ -34,8 +34,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.util.ArraySet;
 import android.util.Dumpable;
+import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -44,6 +46,7 @@ import com.android.server.policy.BookStylePreferredScreenCalculator.PreferredScr
 import com.android.server.policy.BookStylePreferredScreenCalculator.HingeAngle;
 import com.android.server.policy.BookStylePreferredScreenCalculator.StateTransition;
 import com.android.server.policy.BookStyleClosedStatePredicate.ConditionSensorListener.SensorSubscription;
+import com.android.server.policy.feature.flags.FeatureFlags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -62,11 +65,18 @@ import java.util.function.Supplier;
 public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceStateProvider>,
         DisplayManager.DisplayListener, Dumpable {
 
+    private static final String TAG = "BookStyleClosedStatePredicate";
+
     private final BookStylePreferredScreenCalculator mClosedStateCalculator;
     private final Handler mHandler = new Handler();
     private final PostureEstimator mPostureEstimator;
     private final DisplayManager mDisplayManager;
+    private final PowerManager mPowerManager;
+    private final FeatureFlags mFeatureFlags;
     private final DisplayInfo mDefaultDisplayInfo = new DisplayInfo();
+
+    @PowerManager.ScreenTimeoutPolicy
+    private volatile int mScreenTimeoutPolicy;
 
     /**
      * Creates {@link BookStyleClosedStatePredicate}. It is expected that the device has a pair
@@ -92,8 +102,11 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     public BookStyleClosedStatePredicate(@NonNull Context context,
             @NonNull ClosedStateUpdatesListener updatesListener,
             @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
-            @NonNull List<StateTransition> stateTransitions) {
+            @NonNull List<StateTransition> stateTransitions,
+            @NonNull FeatureFlags featureFlags) {
+        mFeatureFlags = featureFlags;
         mDisplayManager = context.getSystemService(DisplayManager.class);
+        mPowerManager = context.getSystemService(PowerManager.class);
         mDisplayManager.registerDisplayListener(this, mHandler);
 
         mClosedStateCalculator = new BookStylePreferredScreenCalculator(stateTransitions);
@@ -108,6 +121,23 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     }
 
     /**
+     * Initialize the predicate, the predicate could subscribe to various data sources the data
+     * from which could be used later when calling {@link BookStyleClosedStatePredicate#test}.
+     */
+    public void init() {
+        if (mFeatureFlags.forceFoldablesTentModeWithScreenWakelock()) {
+            try {
+                mPowerManager.addScreenTimeoutPolicyListener(DEFAULT_DISPLAY, Runnable::run,
+                        new ScreenTimeoutPolicyListener());
+            } catch (IllegalStateException exception) {
+                // TODO: b/389613319 - remove after removing the screen timeout policy API flagging
+                Slog.e(TAG, "Error subscribing to the screen timeout policy changes");
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    /**
      * Based on the current sensor readings and current state, returns true if the device should use
      * 'CLOSED' device state and false if it should not use 'CLOSED' state (e.g. could use half-open
      * or open states).
@@ -119,11 +149,22 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
 
         mPostureEstimator.onDeviceClosedStatusChanged(hingeAngle == ANGLE_0);
 
+        final boolean isLikelyTentOrWedgeMode = mPostureEstimator.isLikelyTentOrWedgeMode()
+                || shouldForceTentOrWedgeMode();
+
         final PreferredScreen preferredScreen = mClosedStateCalculator.
-                calculatePreferredScreen(hingeAngle, mPostureEstimator.isLikelyTentOrWedgeMode(),
+                calculatePreferredScreen(hingeAngle, isLikelyTentOrWedgeMode,
                         mPostureEstimator.isLikelyReverseWedgeMode(hingeAngle));
 
         return preferredScreen == OUTER;
+    }
+
+    private boolean shouldForceTentOrWedgeMode() {
+        if (!mFeatureFlags.forceFoldablesTentModeWithScreenWakelock()) {
+            return false;
+        }
+
+        return mScreenTimeoutPolicy == PowerManager.SCREEN_TIMEOUT_KEEP_DISPLAY_ON;
     }
 
     private HingeAngle hingeAngleFromFloat(float hingeAngle) {
@@ -163,13 +204,22 @@ public class BookStyleClosedStatePredicate implements Predicate<FoldableDeviceSt
     @Override
     public void dump(@NonNull PrintWriter writer, @Nullable String[] args) {
         writer.println("  " + getDumpableName());
-
+        writer.println("  mScreenTimeoutPolicy=" + mScreenTimeoutPolicy);
         mPostureEstimator.dump(writer, args);
         mClosedStateCalculator.dump(writer, args);
     }
 
     public interface ClosedStateUpdatesListener {
         void onClosedStateUpdated();
+    }
+
+    private class ScreenTimeoutPolicyListener implements
+            PowerManager.ScreenTimeoutPolicyListener {
+        @Override
+        public void onScreenTimeoutPolicyChanged(int screenTimeoutPolicy) {
+            // called from the binder thread
+            mScreenTimeoutPolicy = screenTimeoutPolicy;
+        }
     }
 
     /**
