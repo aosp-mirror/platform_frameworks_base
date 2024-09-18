@@ -37,6 +37,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.IInputConstants.INVALID_INPUT_DEVICE_ID;
+import static android.os.UserManager.isVisibleBackgroundUsersEnabled;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
@@ -184,6 +185,7 @@ import android.service.dreams.IDreamManager;
 import android.service.vr.IPersistentVrStateCallbacks;
 import android.speech.RecognizerIntent;
 import android.telecom.TelecomManager;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.MutableBoolean;
@@ -256,6 +258,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -718,6 +721,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // Timeout for showing the keyguard after the screen is on, in case no "ready" is received.
     private int mKeyguardDrawnTimeout = 1000;
 
+    private final boolean mVisibleBackgroundUsersEnabled = isVisibleBackgroundUsersEnabled();
+
+    // Key codes that should be ignored for visible background users in MUMD environment.
+    private static final Set<Integer> KEY_CODES_IGNORED_FOR_VISIBLE_BACKGROUND_USERS =
+            new ArraySet<>(Arrays.asList(
+                    KeyEvent.KEYCODE_POWER,
+                    KeyEvent.KEYCODE_SLEEP,
+                    KeyEvent.KEYCODE_WAKEUP,
+                    KeyEvent.KEYCODE_CALL,
+                    KeyEvent.KEYCODE_ENDCALL,
+                    KeyEvent.KEYCODE_ASSIST,
+                    KeyEvent.KEYCODE_VOICE_ASSIST,
+                    KeyEvent.KEYCODE_MUTE,
+                    KeyEvent.KEYCODE_VOLUME_MUTE
+            ));
+
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
     private static final int MSG_DISPATCH_MEDIA_KEY_REPEAT_WITH_WAKE_LOCK = 4;
     private static final int MSG_KEYGUARD_DRAWN_COMPLETE = 5;
@@ -811,7 +830,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     event.recycle();
                     break;
                 case MSG_HANDLE_ALL_APPS:
-                    launchAllAppsAction();
+                    KeyEvent keyEvent = (KeyEvent) msg.obj;
+                    if (isKeyEventForCurrentUser(keyEvent.getDisplayId(), keyEvent.getKeyCode(),
+                            "launchAllAppsViaA11y")) {
+                        launchAllAppsAction();
+                    }
                     break;
                 case MSG_RINGER_TOGGLE_CHORD:
                     handleRingerChordGesture();
@@ -2082,7 +2105,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             switch (mLongPressOnHomeBehavior) {
                 case LONG_PRESS_HOME_ALL_APPS:
                     notifyKeyGestureCompleted(event, KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
-                    launchAllAppsAction();
+                    if (isKeyEventForCurrentUser(event.getDisplayId(), event.getKeyCode(),
+                            "launchAllAppsViaA11y")) {
+                        launchAllAppsAction();
+                    }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
                     notifyKeyGestureCompleted(event,
@@ -3763,7 +3789,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK);
                     } else if (mPendingMetaAction) {
                         if (!canceled) {
-                            launchAllAppsAction();
+                            if (isKeyEventForCurrentUser(event.getDisplayId(), event.getKeyCode(),
+                                    "launchAllAppsViaA11y")) {
+                                launchAllAppsAction();
+                            }
                             notifyKeyGestureCompleted(event,
                                     KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS);
                         }
@@ -4030,7 +4059,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS:
             case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS:
-                if (complete) {
+                if (complete && isKeyEventForCurrentUser(event.getDisplayId(),
+                        event.getKeycodes()[0], "launchAllAppsViaA11y")) {
                     launchAllAppsAction();
                 }
                 return true;
@@ -4858,6 +4888,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
                 || event.isWakeKey();
+
+        // There are key events that perform the operation as the current user,
+        // and these should be ignored for visible background users.
+        if (mVisibleBackgroundUsersEnabled
+                && KEY_CODES_IGNORED_FOR_VISIBLE_BACKGROUND_USERS.contains(keyCode)
+                && !isKeyEventForCurrentUser(event.getDisplayId(), keyCode, null)) {
+            return 0;
+        }
 
         if (!mSystemBooted) {
             // If we have not yet booted, don't let key events do anything.
@@ -5866,6 +5904,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private void wakeUpFromWakeKey(KeyEvent event) {
+        if (!isKeyEventForCurrentUser(
+                event.getDisplayId(), event.getKeyCode(), "wakeUpFromWakeKey")) {
+            return;
+        }
         wakeUpFromWakeKey(
                 event.getEventTime(),
                 event.getKeyCode(),
@@ -6445,6 +6487,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // TODO (b/113840485): Move this logic to DisplayPolicy when lockscreen supports multi-display.
     @Override
     public void setAllowLockscreenWhenOn(int displayId, boolean allow) {
+        // We should ignore this operation for visible background users
+        // until lockscreen supports multi-display.
+        if (mVisibleBackgroundUsersEnabled
+                && mUserManagerInternal.getUserAssignedToDisplay(displayId) != mCurrentUserId) {
+            return;
+        }
         if (allow) {
             mAllowLockscreenWhenOnDisplays.add(displayId);
         } else {
@@ -7252,5 +7300,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return mTopFocusedDisplayId;
         }
         return DEFAULT_DISPLAY;
+    }
+
+    /**
+     * This method is intended to prevent key events for visible background users
+     * from interfering with the current user's experience in MUMD environment.
+     *
+     * @param displayId the displayId of the key event.
+     * @param keyCode the key code of the event.
+     *
+     * @return false if the key event is for a visible background user.
+     */
+    private boolean isKeyEventForCurrentUser(int displayId, int keyCode, @Nullable String purpose) {
+        if (!mVisibleBackgroundUsersEnabled) {
+            return true;
+        }
+        int assignedUser = mUserManagerInternal.getUserAssignedToDisplay(displayId);
+        if (assignedUser == mCurrentUserId) {
+            return true;
+        }
+        if (DEBUG_INPUT) {
+            Slog.w(TAG, "Cannot handle " + KeyEvent.keyCodeToString(keyCode)
+                    + (purpose != null ? " to " + purpose : "")
+                    + " for visible background user(u" + assignedUser + ")");
+        }
+        return false;
     }
 }
