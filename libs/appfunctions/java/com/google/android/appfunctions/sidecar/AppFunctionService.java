@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package android.app.appfunctions;
+package com.google.android.appfunctions.sidecar;
 
 import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
-import static android.app.appfunctions.ExecuteAppFunctionResponse.getResultCode;
-import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
-import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
-import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -49,10 +44,20 @@ import java.util.function.Consumer;
  * }
  * </pre>
  *
+ * <p>This class wraps {@link android.app.appfunctions.AppFunctionService} functionalities and
+ * exposes it here as a sidecar library (avoiding direct dependency on the platform API).
+ *
  * @see AppFunctionManager
  */
-@FlaggedApi(FLAG_ENABLE_APP_FUNCTION_MANAGER)
 public abstract class AppFunctionService extends Service {
+    /**
+     * The permission to only allow system access to the functions through {@link
+     * AppFunctionManagerService}.
+     */
+    @NonNull
+    public static final String BIND_APP_FUNCTION_SERVICE =
+            "android.permission.BIND_APP_FUNCTION_SERVICE";
+
     /**
      * The {@link Intent} that must be declared as handled by the service. To be supported, the
      * service must also require the {@link BIND_APP_FUNCTION_SERVICE} permission so that other
@@ -61,53 +66,20 @@ public abstract class AppFunctionService extends Service {
     @NonNull
     public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
 
-    /**
-     * Functional interface to represent the execution logic of an app function.
-     *
-     * @hide
-     */
-    @FunctionalInterface
-    public interface OnExecuteFunction {
-        /**
-         * Performs the semantic of executing the function specified by the provided request and
-         * return the response through the provided callback.
-         */
-        void perform(
-                @NonNull ExecuteAppFunctionRequest request,
-                @NonNull Consumer<ExecuteAppFunctionResponse> callback);
-    }
-
-    /** @hide */
-    @NonNull
-    public static Binder createBinder(
-            @NonNull Context context, @NonNull OnExecuteFunction onExecuteFunction) {
-        return new IAppFunctionService.Stub() {
-            @Override
-            public void executeAppFunction(
-                    @NonNull ExecuteAppFunctionRequest request,
-                    @NonNull IExecuteAppFunctionCallback callback) {
-                if (context.checkCallingPermission(BIND_APP_FUNCTION_SERVICE)
-                        == PERMISSION_DENIED) {
-                    throw new SecurityException("Can only be called by the system server.");
-                }
-                SafeOneTimeExecuteAppFunctionCallback safeCallback =
-                        new SafeOneTimeExecuteAppFunctionCallback(callback);
-                try {
-                    onExecuteFunction.perform(request, safeCallback::onResult);
-                } catch (Exception ex) {
-                    // Apps should handle exceptions. But if they don't, report the error on
-                    // behalf of them.
-                    safeCallback.onResult(
-                            ExecuteAppFunctionResponse.newFailure(
-                                    getResultCode(ex), ex.getMessage(), /* extras= */ null));
-                }
-            }
-        };
-    }
-
-    private final Binder mBinder = createBinder(
-            AppFunctionService.this,
-            AppFunctionService.this::onExecuteFunction);
+    private final Binder mBinder =
+            android.app.appfunctions.AppFunctionService.createBinder(
+                    /* context= */ this,
+                    /* onExecuteFunction= */ (platformRequest, callback) -> {
+                        AppFunctionService.this.onExecuteFunction(
+                                SidecarConverter.getSidecarExecuteAppFunctionRequest(
+                                        platformRequest),
+                                (sidecarResponse) -> {
+                                    callback.accept(
+                                            SidecarConverter.getPlatformExecuteAppFunctionResponse(
+                                                    sidecarResponse));
+                                });
+                    }
+            );
 
     @NonNull
     @Override
