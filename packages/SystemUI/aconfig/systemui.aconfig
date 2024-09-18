@@ -1424,6 +1424,13 @@ flag {
 }
 
 flag {
+   name: "override_suppress_overlay_condition"
+   namespace: "systemui"
+   description: "Allow override the conditions to suppress the clipboard overlay"
+   bug: "358473717"
+}
+
+flag {
    name: "media_projection_dialog_behind_lockscreen"
    namespace: "systemui"
    description: "Ensure MediaProjection Dialog appears behind the lockscreen"
