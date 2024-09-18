@@ -1321,9 +1321,9 @@ public class AudioDeviceBroker {
         sendLMsgNoDelay(MSG_II_SET_LE_AUDIO_OUT_VOLUME, SENDMSG_REPLACE, info);
     }
 
-    /*package*/ void postSetModeOwner(int mode, int pid, int uid) {
-        sendLMsgNoDelay(MSG_I_SET_MODE_OWNER, SENDMSG_REPLACE,
-                new AudioModeInfo(mode, pid, uid));
+    /*package*/ void postSetModeOwner(int mode, int pid, int uid, boolean signal) {
+        sendILMsgNoDelay(MSG_IL_SET_MODE_OWNER, SENDMSG_REPLACE,
+                signal ? 1 : 0, new AudioModeInfo(mode, pid, uid));
     }
 
     /*package*/ void postBluetoothDeviceConfigChange(@NonNull BtDeviceInfo info) {
@@ -2025,7 +2025,7 @@ public class AudioDeviceBroker {
                         mBtHelper.setAvrcpAbsoluteVolumeIndex(msg.arg1);
                     }
                     break;
-                case MSG_I_SET_MODE_OWNER:
+                case MSG_IL_SET_MODE_OWNER:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
                             int btScoRequesterUid = bluetoothScoRequestOwnerUid();
@@ -2035,6 +2035,9 @@ public class AudioDeviceBroker {
                                         btScoRequesterUid, "setNewModeOwner");
                             }
                         }
+                    }
+                    if (msg.arg1 == 1 /*signal*/) {
+                        mAudioService.decrementAudioModeResetCount();
                     }
                     break;
 
@@ -2224,7 +2227,7 @@ public class AudioDeviceBroker {
     private static final int MSG_REPORT_NEW_ROUTES = 13;
     private static final int MSG_II_SET_HEARING_AID_VOLUME = 14;
     private static final int MSG_I_SET_AVRCP_ABSOLUTE_VOLUME = 15;
-    private static final int MSG_I_SET_MODE_OWNER = 16;
+    private static final int MSG_IL_SET_MODE_OWNER = 16;
 
     private static final int MSG_I_BT_SERVICE_DISCONNECTED_PROFILE = 22;
     private static final int MSG_IL_BT_SERVICE_CONNECTED_PROFILE = 23;
