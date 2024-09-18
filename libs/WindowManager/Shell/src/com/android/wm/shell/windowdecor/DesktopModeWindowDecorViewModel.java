@@ -862,6 +862,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 handleCaptionThroughStatusBar(e, decoration);
                 final boolean wasDragging = mIsDragging;
                 updateDragStatus(e.getActionMasked());
+                final boolean upOrCancel = e.getActionMasked() == ACTION_UP
+                        || e.getActionMasked() == ACTION_CANCEL;
+                if (wasDragging && upOrCancel) {
+                    // When finishing a drag the event will be consumed, which means the pressed
+                    // state of the App Handle must be manually reset to scale its drawable back to
+                    // its original shape. This is necessary for drag gestures of the Handle that
+                    // result in a cancellation (dragging back to the top).
+                    v.setPressed(false);
+                }
                 // Only prevent onClick from receiving this event if it's a drag.
                 return wasDragging;
             }
