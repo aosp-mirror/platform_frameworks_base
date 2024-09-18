@@ -1408,3 +1408,13 @@ flag {
    description: "Allow non-touchscreen devices to bypass falsing"
    bug: "319809270"
 }
+
+flag {
+   name: "media_projection_dialog_behind_lockscreen"
+   namespace: "systemui"
+   description: "Ensure MediaProjection Dialog appears behind the lockscreen"
+   bug: "351409536"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
