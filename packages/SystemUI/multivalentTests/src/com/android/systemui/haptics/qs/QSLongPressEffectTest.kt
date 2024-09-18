@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.classifier.falsingManager
 import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.core.FakeLogBuffer
@@ -68,11 +69,13 @@ class QSLongPressEffectTest : SysuiTestCase() {
         vibratorHelper.primitiveDurations[VibrationEffect.Composition.PRIMITIVE_SPIN] = spinDuration
 
         whenever(kosmos.keyguardStateController.isUnlocked).thenReturn(true)
+        kosmos.falsingManager.setFalseLongTap(false)
 
         longPressEffect =
             QSLongPressEffect(
                 vibratorHelper,
                 kosmos.keyguardStateController,
+                kosmos.falsingManager,
                 FakeLogBuffer.Factory.create(),
             )
         longPressEffect.callback = callback
@@ -180,11 +183,7 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
         // THEN the expected texture is played
         val reverseHaptics =
-            LongPressHapticBuilder.createReversedEffect(
-                progress,
-                lowTickDuration,
-                effectDuration,
-            )
+            LongPressHapticBuilder.createReversedEffect(progress, lowTickDuration, effectDuration)
         assertThat(reverseHaptics).isNotNull()
         assertThat(vibratorHelper.hasVibratedWithEffects(reverseHaptics!!)).isTrue()
     }
@@ -220,6 +219,20 @@ class QSLongPressEffectTest : SysuiTestCase() {
 
             // THEN the long-press effect ends in the idle state and the properties are reset
             assertEffectCompleted(QSLongPressEffect.State.IDLE)
+            verify(callback, times(1)).onResetProperties()
+        }
+
+    @Test
+    fun onAnimationComplete_isFalseLongClick_effectEndsInIdleWithReset() =
+        testWhileInState(QSLongPressEffect.State.RUNNING_FORWARD) {
+            // GIVEN that the long-click is false
+            kosmos.falsingManager.setFalseLongTap(true)
+
+            // GIVEN that the animation completes
+            longPressEffect.handleAnimationComplete()
+
+            // THEN the long-press effect ends in the idle state and the properties are reset
+            assertThat(longPressEffect.state).isEqualTo(QSLongPressEffect.State.IDLE)
             verify(callback, times(1)).onResetProperties()
         }
 

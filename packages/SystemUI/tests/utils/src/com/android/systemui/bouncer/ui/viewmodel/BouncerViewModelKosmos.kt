@@ -25,6 +25,8 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.domain.interactor.bouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.simBouncerInteractor
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
 import com.android.systemui.inputmethod.domain.interactor.inputMethodInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
@@ -34,9 +36,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 
 val Kosmos.bouncerUserActionsViewModel by Fixture {
-    BouncerUserActionsViewModel(
-        bouncerInteractor = bouncerInteractor,
-    )
+    BouncerUserActionsViewModel(bouncerInteractor = bouncerInteractor)
 }
 
 val Kosmos.bouncerUserActionsViewModelFactory by Fixture {
@@ -59,6 +59,7 @@ val Kosmos.bouncerSceneContentViewModel by Fixture {
         pinViewModelFactory = pinBouncerViewModelFactory,
         patternViewModelFactory = patternBouncerViewModelFactory,
         passwordViewModelFactory = passwordBouncerViewModelFactory,
+        bouncerHapticPlayer = bouncerHapticPlayer,
     )
 }
 
@@ -76,6 +77,7 @@ val Kosmos.pinBouncerViewModelFactory by Fixture {
             isInputEnabled: StateFlow<Boolean>,
             onIntentionalUserInput: () -> Unit,
             authenticationMethod: AuthenticationMethodModel,
+            bouncerHapticPlayer: BouncerHapticPlayer,
         ): PinBouncerViewModel {
             return PinBouncerViewModel(
                 applicationContext = applicationContext,
@@ -84,6 +86,7 @@ val Kosmos.pinBouncerViewModelFactory by Fixture {
                 isInputEnabled = isInputEnabled,
                 onIntentionalUserInput = onIntentionalUserInput,
                 authenticationMethod = authenticationMethod,
+                bouncerHapticPlayer = bouncerHapticPlayer,
             )
         }
     }
@@ -92,6 +95,7 @@ val Kosmos.pinBouncerViewModelFactory by Fixture {
 val Kosmos.patternBouncerViewModelFactory by Fixture {
     object : PatternBouncerViewModel.Factory {
         override fun create(
+            bouncerHapticPlayer: BouncerHapticPlayer,
             isInputEnabled: StateFlow<Boolean>,
             onIntentionalUserInput: () -> Unit,
         ): PatternBouncerViewModel {
@@ -100,6 +104,7 @@ val Kosmos.patternBouncerViewModelFactory by Fixture {
                 interactor = bouncerInteractor,
                 isInputEnabled = isInputEnabled,
                 onIntentionalUserInput = onIntentionalUserInput,
+                bouncerHapticPlayer = bouncerHapticPlayer,
             )
         }
     }

@@ -1380,7 +1380,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private List<Integer> getCecLocalDeviceTypes() {
         ArrayList<Integer> allLocalDeviceTypes = new ArrayList<>(mCecLocalDevices);
-        if (isDsmEnabled() && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+        if (!isTvDevice() && isDsmEnabled()
+                && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
                 && isArcSupported() && mSoundbarModeFeatureFlagEnabled) {
             allLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         }

@@ -8288,12 +8288,12 @@ public final class ActivityThread extends ClientTransactionHandler
             }
             Context c = null;
             ApplicationInfo ai = info.applicationInfo;
-            if (context.getPackageName().equals(ai.packageName)) {
+            if (context != null && context.getPackageName().equals(ai.packageName)) {
                 c = context;
             } else if (mInitialApplication != null &&
                     mInitialApplication.getPackageName().equals(ai.packageName)) {
                 c = mInitialApplication;
-            } else {
+            } else if (context != null) {
                 try {
                     c = context.createPackageContext(ai.packageName,
                             Context.CONTEXT_INCLUDE_CODE);

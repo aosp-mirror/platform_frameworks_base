@@ -829,6 +829,7 @@ public final class ViewRootImpl implements ViewParent,
     private final SurfaceControl mSurfaceControl = new SurfaceControl();
 
     private BLASTBufferQueue mBlastBufferQueue;
+    private IBinder mBbqApplyToken = new Binder();
 
     private final HdrRenderState mHdrRenderState = new HdrRenderState(this);
 
@@ -2743,6 +2744,10 @@ public final class ViewRootImpl implements ViewParent,
         mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl,
                 mSurfaceSize.x, mSurfaceSize.y, mWindowAttributes.format);
         mBlastBufferQueue.setTransactionHangCallback(sTransactionHangCallback);
+        // If we create and destroy BBQ without recreating the SurfaceControl, we can end up
+        // queuing buffers on multiple apply tokens causing out of order buffer submissions. We
+        // fix this by setting the same apply token on all BBQs created by this VRI.
+        mBlastBufferQueue.setApplyToken(mBbqApplyToken);
         Surface blastSurface;
         if (addSchandleToVriSurface()) {
             blastSurface = mBlastBufferQueue.createSurfaceWithHandle();

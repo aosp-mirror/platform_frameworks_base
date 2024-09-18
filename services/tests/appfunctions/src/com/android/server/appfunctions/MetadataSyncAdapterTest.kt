@@ -139,16 +139,15 @@ class MetadataSyncAdapterTest {
         runtimeSearchSession.put(putDocumentsRequest).get()
         staticSearchSession.put(putDocumentsRequest).get()
         val metadataSyncAdapter =
-            MetadataSyncAdapter(
-                testExecutor,
-                runtimeSearchSession,
+            MetadataSyncAdapter(testExecutor, packageManager, appSearchManager)
+
+        val submitSyncRequest =
+            metadataSyncAdapter.trySyncAppFunctionMetadataBlocking(
                 staticSearchSession,
-                packageManager,
+                runtimeSearchSession,
             )
 
-        val submitSyncRequest = metadataSyncAdapter.submitSyncRequest()
-
-        assertThat(submitSyncRequest.get()).isTrue()
+        assertThat(submitSyncRequest).isInstanceOf(Unit::class.java)
     }
 
     @Test
@@ -182,16 +181,15 @@ class MetadataSyncAdapterTest {
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         staticSearchSession.put(putDocumentsRequest).get()
         val metadataSyncAdapter =
-            MetadataSyncAdapter(
-                testExecutor,
-                runtimeSearchSession,
+            MetadataSyncAdapter(testExecutor, packageManager, appSearchManager)
+
+        val submitSyncRequest =
+            metadataSyncAdapter.trySyncAppFunctionMetadataBlocking(
                 staticSearchSession,
-                packageManager,
+                runtimeSearchSession,
             )
 
-        val submitSyncRequest = metadataSyncAdapter.submitSyncRequest()
-
-        assertThat(submitSyncRequest.get()).isTrue()
+        assertThat(submitSyncRequest).isInstanceOf(Unit::class.java)
     }
 
     @Test
@@ -239,16 +237,15 @@ class MetadataSyncAdapterTest {
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         runtimeSearchSession.put(putDocumentsRequest).get()
         val metadataSyncAdapter =
-            MetadataSyncAdapter(
-                testExecutor,
-                runtimeSearchSession,
+            MetadataSyncAdapter(testExecutor, packageManager, appSearchManager)
+
+        val submitSyncRequest =
+            metadataSyncAdapter.trySyncAppFunctionMetadataBlocking(
                 staticSearchSession,
-                packageManager,
+                runtimeSearchSession,
             )
 
-        val submitSyncRequest = metadataSyncAdapter.submitSyncRequest()
-
-        assertThat(submitSyncRequest.get()).isTrue()
+        assertThat(submitSyncRequest).isInstanceOf(Unit::class.java)
     }
 
     @Test
