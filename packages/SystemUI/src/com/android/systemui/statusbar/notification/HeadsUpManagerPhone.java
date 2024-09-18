@@ -105,7 +105,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private final HashSet<NotificationEntry> mEntriesToRemoveAfterExpand = new HashSet<>();
     private final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
             = new ArraySet<>();
-    private boolean mIsExpanded;
+    private boolean mIsShadeOrQsExpanded;
+    private boolean mIsQsExpanded;
     private int mStatusBarState;
     private AnimationStateHandler mAnimationStateHandler;
 
@@ -177,6 +178,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         });
         javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
+        if (SceneContainerFlag.isEnabled()) {
+            javaAdapter.alwaysCollectFlow(shadeInteractor.isQsExpanded(),
+                    this::onQsExpanded);
+        }
         if (NotificationThrottleHun.isEnabled()) {
             mVisualStabilityProvider.addPersistentReorderingBannedListener(
                     mOnReorderingBannedListener);
@@ -286,12 +291,17 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     }
 
     private void onShadeOrQsExpanded(Boolean isExpanded) {
-        if (isExpanded != mIsExpanded) {
-            mIsExpanded = isExpanded;
+        if (isExpanded != mIsShadeOrQsExpanded) {
+            mIsShadeOrQsExpanded = isExpanded;
             if (!SceneContainerFlag.isEnabled() && isExpanded) {
                 mHeadsUpAnimatingAway.setValue(false);
             }
         }
+    }
+
+    private void onQsExpanded(Boolean isQsExpanded) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        if (isQsExpanded != mIsQsExpanded) mIsQsExpanded = isQsExpanded;
     }
 
     /**
@@ -489,7 +499,10 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
 
     @Override
     protected boolean shouldHeadsUpBecomePinned(NotificationEntry entry) {
-        boolean pin = mStatusBarState == StatusBarState.SHADE && !mIsExpanded;
+        boolean pin = mStatusBarState == StatusBarState.SHADE && !mIsShadeOrQsExpanded;
+        if (SceneContainerFlag.isEnabled()) {
+            pin |= mIsQsExpanded;
+        }
         if (mBypassController.getBypassEnabled()) {
             pin |= mStatusBarState == StatusBarState.KEYGUARD;
         }

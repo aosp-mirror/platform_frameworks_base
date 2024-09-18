@@ -77,6 +77,10 @@ val SceneContainerTransitions = transitions {
     }
     from(Scenes.Lockscreen, to = Scenes.QuickSettings) { lockscreenToQuickSettingsTransition() }
     from(Scenes.Lockscreen, to = Scenes.Gone) { lockscreenToGoneTransition() }
+    from(Scenes.QuickSettings, to = Scenes.Shade) {
+        reversed { shadeToQuickSettingsTransition() }
+        sharedElement(Notifications.Elements.HeadsUpNotificationPlaceholder, enabled = false)
+    }
     from(Scenes.Shade, to = Scenes.QuickSettings) { shadeToQuickSettingsTransition() }
 
     // Overlay transitions
