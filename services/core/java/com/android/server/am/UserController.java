@@ -1925,6 +1925,7 @@ class UserController implements Handler.Callback {
                 // it should be moved outside, but for now it's not as there are many calls to
                 // external components here afterwards
                 updateProfileRelatedCaches();
+                dispatchOnBeforeUserSwitching(userId);
                 mInjector.getWindowManager().setCurrentUser(userId);
                 mInjector.reportCurWakefulnessUsageEvent();
                 // Once the internal notion of the active user has switched, we lock the device
@@ -2229,6 +2230,25 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
+    private void dispatchOnBeforeUserSwitching(@UserIdInt int newUserId) {
+        final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+        t.traceBegin("dispatchOnBeforeUserSwitching-" + newUserId);
+        final int observerCount = mUserSwitchObservers.beginBroadcast();
+        for (int i = 0; i < observerCount; i++) {
+            final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
+            t.traceBegin("onBeforeUserSwitching-" + name);
+            try {
+                mUserSwitchObservers.getBroadcastItem(i).onBeforeUserSwitching(newUserId);
+            } catch (RemoteException e) {
+                // Ignore
+            } finally {
+                t.traceEnd();
+            }
+        }
+        mUserSwitchObservers.finishBroadcast();
+        t.traceEnd();
+    }
+
     /** Called on handler thread */
     @VisibleForTesting
     void dispatchUserSwitchComplete(@UserIdInt int oldUserId, @UserIdInt int newUserId) {
@@ -2411,17 +2431,6 @@ class UserController implements Handler.Callback {
 
         final int observerCount = mUserSwitchObservers.beginBroadcast();
         if (observerCount > 0) {
-            for (int i = 0; i < observerCount; i++) {
-                final String name = "#" + i + " " + mUserSwitchObservers.getBroadcastCookie(i);
-                t.traceBegin("onBeforeUserSwitching-" + name);
-                try {
-                    mUserSwitchObservers.getBroadcastItem(i).onBeforeUserSwitching(newUserId);
-                } catch (RemoteException e) {
-                    // Ignore
-                } finally {
-                    t.traceEnd();
-                }
-            }
             final ArraySet<String> curWaitingUserSwitchCallbacks = new ArraySet<>();
             synchronized (mLock) {
                 uss.switching = true;

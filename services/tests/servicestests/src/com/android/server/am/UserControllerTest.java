@@ -418,6 +418,7 @@ public class UserControllerTest {
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -426,7 +427,6 @@ public class UserControllerTest {
         // Call dispatchUserSwitch and verify that observer was called only once
         mInjector.mHandler.clearAllRecordedMessages();
         mUserController.dispatchUserSwitch(userState, oldUserId, newUserId);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         verify(observer, times(1)).onUserSwitching(eq(TEST_USER_ID), any());
         Set<Integer> expectedCodes = Collections.singleton(CONTINUE_USER_SWITCH_MSG);
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
@@ -449,6 +449,7 @@ public class UserControllerTest {
         mUserController.registerUserSwitchObserver(observer, "mock");
         // Start user -- this will update state of mUserController
         mUserController.startUser(TEST_USER_ID, USER_START_MODE_FOREGROUND);
+        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         Message reportMsg = mInjector.mHandler.getMessageForCode(REPORT_USER_SWITCH_MSG);
         assertNotNull(reportMsg);
         UserState userState = (UserState) reportMsg.obj;
@@ -457,7 +458,6 @@ public class UserControllerTest {
         // Call dispatchUserSwitch and verify that observer was called only once
         mInjector.mHandler.clearAllRecordedMessages();
         mUserController.dispatchUserSwitch(userState, oldUserId, newUserId);
-        verify(observer, times(1)).onBeforeUserSwitching(eq(TEST_USER_ID));
         verify(observer, times(1)).onUserSwitching(eq(TEST_USER_ID), any());
         // Verify that CONTINUE_USER_SWITCH_MSG is not sent (triggers timeout)
         Set<Integer> actualCodes = mInjector.mHandler.getMessageCodes();
