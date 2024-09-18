@@ -16,7 +16,7 @@
 
 package android.window.flags;
 
-import static android.window.flags.DesktopModeFlags.DESKTOP_WINDOWING_MODE;
+import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 import static com.android.window.flags.Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS;
@@ -75,7 +75,7 @@ public class DesktopModeFlagsTest {
     public void isEnabled_devOptionFlagDisabled_overrideOff_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_OFF_SETTING);
         // In absence of dev options, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
     }
 
 
@@ -84,7 +84,7 @@ public class DesktopModeFlagsTest {
     public void isEnabled_devOptionFlagDisabled_overrideOn_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_ON_SETTING);
 
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
     }
 
     @Test
@@ -93,7 +93,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For overridableFlag, for unset overrides, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
     }
 
     @Test
@@ -103,7 +103,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For overridableFlag, for unset overrides, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
     }
 
     @Test
@@ -112,7 +112,7 @@ public class DesktopModeFlagsTest {
         setOverride(null);
 
         // For overridableFlag, in absence of overrides, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
     }
 
     @Test
@@ -122,7 +122,7 @@ public class DesktopModeFlagsTest {
         setOverride(null);
 
         // For overridableFlag, in absence of overrides, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
     }
 
     @Test
@@ -131,7 +131,7 @@ public class DesktopModeFlagsTest {
         setOverride(-2);
 
         // For overridableFlag, for unrecognized overrides, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
     }
 
     @Test
@@ -141,7 +141,7 @@ public class DesktopModeFlagsTest {
         setOverride(-2);
 
         // For overridableFlag, for unrecognizable overrides, follow flag
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
     }
 
     @Test
@@ -150,7 +150,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // For overridableFlag, follow override if they exist
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
     }
 
     @Test
@@ -160,7 +160,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // For overridableFlag, follow override if they exist
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
     }
 
     @Test
@@ -169,12 +169,12 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // For overridableFlag, follow override if they exist
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
 
         setOverride(OVERRIDE_ON_SETTING);
 
         // Keep overrides constant through the process
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isFalse();
     }
 
     @Test
@@ -184,12 +184,12 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // For overridableFlag, follow override if they exist
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
 
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Keep overrides constant through the process
-        assertThat(DESKTOP_WINDOWING_MODE.isEnabled(mContext)).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_MODE.isEnabled()).isTrue();
     }
 
     @Test
@@ -199,7 +199,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isTrue();
     }
 
     @Test
@@ -208,7 +208,7 @@ public class DesktopModeFlagsTest {
     public void isEnabled_dwFlagOn_overrideUnset_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_UNSET_SETTING);
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isFalse();
     }
 
     @Test
@@ -221,7 +221,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isTrue();
     }
 
     @Test
@@ -231,7 +231,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isFalse();
     }
 
     @Test
@@ -244,7 +244,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isTrue();
     }
 
     @Test
@@ -254,7 +254,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isFalse();
     }
 
     @Test
@@ -267,7 +267,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isTrue();
     }
 
     @Test
@@ -280,7 +280,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isFalse();
     }
 
     @Test
@@ -293,7 +293,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isTrue();
     }
 
     @Test
@@ -306,7 +306,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isFalse();
     }
 
     @Test
@@ -319,7 +319,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isTrue();
     }
 
     @Test
@@ -332,7 +332,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()).isFalse();
     }
 
     private void setOverride(Integer setting) {
