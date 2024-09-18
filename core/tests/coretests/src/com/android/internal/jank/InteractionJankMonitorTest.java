@@ -24,6 +24,7 @@ import static com.android.internal.jank.InteractionJankMonitor.Configuration.gen
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -117,6 +118,7 @@ public class InteractionJankMonitorTest {
 
         // Simulate a trace session and see if begin / end are invoked.
         assertThat(monitor.begin(mSurfaceControl, mActivity.getApplicationContext(),
+                mActivity.getMainThreadHandler(),
                 Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
         verify(tracker).begin();
         assertThat(monitor.end(Cuj.CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE)).isTrue();
@@ -186,6 +188,25 @@ public class InteractionJankMonitorTest {
         final String expectedTrimmedName = formatSimple("J<%s::%s>", cujName,
                 "ThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagThisIsTheCujTagThi...");
         assertThat(generateSessionName(cujName, tooLongTag)).isEqualTo(expectedTrimmedName);
+    }
+
+    @Test
+    public void validateConfiguration_surfaceOnlyAndNotDeferMonitor_throwsError() {
+        Configuration.Builder builder = Configuration.Builder.withSurface(1,
+                mActivity.getApplicationContext(), mSurfaceControl,
+                mActivity.getMainThreadHandler()).setDeferMonitorForAnimationStart(false);
+
+        assertThrows(IllegalStateException.class, builder::build);
+    }
+
+    @Test
+    public void validateConfiguration_surfaceOnlyAndDeferMonitor_doesNotThrowError() {
+        Configuration.Builder builder = Configuration.Builder.withSurface(1,
+                mActivity.getApplicationContext(),
+                mSurfaceControl, mActivity.getMainThreadHandler()).setDeferMonitorForAnimationStart(
+                true);
+
+        builder.build(); // no exception.
     }
 
     private InteractionJankMonitor createMockedInteractionJankMonitor() {
