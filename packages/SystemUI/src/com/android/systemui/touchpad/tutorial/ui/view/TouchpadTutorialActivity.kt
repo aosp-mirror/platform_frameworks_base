@@ -57,6 +57,7 @@ constructor(
         }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        logger.logOpenTutorial(TutorialContext.TOUCHPAD_TUTORIAL)
     }
 
     private fun finishTutorial() {

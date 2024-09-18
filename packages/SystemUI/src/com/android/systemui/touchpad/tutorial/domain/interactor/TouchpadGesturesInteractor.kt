@@ -30,12 +30,12 @@ class TouchpadGesturesInteractor(
     private val logger: InputDeviceTutorialLogger,
 ) {
     fun disableGestures() {
-        logger.log("Disabling touchpad gestures across the system")
+        logger.d("Disabling touchpad gestures across the system")
         setGesturesState(disabled = true)
     }
 
     fun enableGestures() {
-        logger.log("Enabling touchpad gestures across the system")
+        logger.d("Enabling touchpad gestures across the system")
         setGesturesState(disabled = false)
     }
 

@@ -223,17 +223,17 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                     "ServiceManager returned a null ProtoLog Configuration Service");
 
             try {
-                var args = new ProtoLogConfigurationService.RegisterClientArgs();
+                var args = new ProtoLogConfigurationServiceImpl.RegisterClientArgs();
 
                 if (viewerConfigFilePath != null) {
                     args.setViewerConfigFile(viewerConfigFilePath);
                 }
 
                 final var groupArgs = Stream.of(groups)
-                        .map(group -> new ProtoLogConfigurationService.RegisterClientArgs
+                        .map(group -> new ProtoLogConfigurationServiceImpl.RegisterClientArgs
                                 .GroupConfig(group.name(), group.isLogToLogcat()))
-                        .toArray(
-                                ProtoLogConfigurationService.RegisterClientArgs.GroupConfig[]::new);
+                        .toArray(ProtoLogConfigurationServiceImpl
+                                .RegisterClientArgs.GroupConfig[]::new);
                 args.setGroups(groupArgs);
 
                 mProtoLogConfigurationService.registerClient(this, args);

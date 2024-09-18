@@ -111,6 +111,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
@@ -154,7 +155,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final ShellTaskOrganizer mTaskOrganizer;
     private final ShellController mShellController;
     private final Context mContext;
-    private final Handler mMainHandler;
+    private final @ShellMainThread Handler mMainHandler;
     private final @ShellBackgroundThread ShellExecutor mBgExecutor;
     private final Choreographer mMainChoreographer;
     private final DisplayController mDisplayController;
@@ -214,7 +215,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     public DesktopModeWindowDecorViewModel(
             Context context,
             ShellExecutor shellExecutor,
-            Handler mainHandler,
+            @ShellMainThread Handler mainHandler,
             Choreographer mainChoreographer,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
@@ -270,7 +271,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     DesktopModeWindowDecorViewModel(
             Context context,
             ShellExecutor shellExecutor,
-            Handler mainHandler,
+            @ShellMainThread Handler mainHandler,
             Choreographer mainChoreographer,
             @ShellBackgroundThread ShellExecutor bgExecutor,
             ShellInit shellInit,
@@ -495,7 +496,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             return;
         }
         mInteractionJankMonitor.begin(
-                decoration.mTaskSurface, mContext, Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
+                decoration.mTaskSurface, mContext, mMainHandler,
+                Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW, source);
         mDesktopTasksController.toggleDesktopTaskSize(decoration.mTaskInfo);
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
@@ -512,7 +514,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Toast.makeText(mContext,
                     R.string.desktop_mode_non_resizable_snap_text, Toast.LENGTH_SHORT).show();
         } else {
-            mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
+            mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext, mMainHandler,
                     Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE, "maximize_menu_resizable");
             mDesktopTasksController.snapToHalfScreen(
                     decoration.mTaskInfo,
@@ -548,7 +550,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             return;
         }
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext,
+        mInteractionJankMonitor.begin(decoration.mTaskSurface, mContext, mMainHandler,
                 CUJ_DESKTOP_MODE_ENTER_MODE_APP_HANDLE_MENU);
         // App sometimes draws before the insets from WindowDecoration#relayout have
         // been added, so they must be added here
@@ -860,6 +862,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 handleCaptionThroughStatusBar(e, decoration);
                 final boolean wasDragging = mIsDragging;
                 updateDragStatus(e.getActionMasked());
+                final boolean upOrCancel = e.getActionMasked() == ACTION_UP
+                        || e.getActionMasked() == ACTION_CANCEL;
+                if (wasDragging && upOrCancel) {
+                    // When finishing a drag the event will be consumed, which means the pressed
+                    // state of the App Handle must be manually reset to scale its drawable back to
+                    // its original shape. This is necessary for drag gestures of the Handle that
+                    // result in a cancellation (dragging back to the top).
+                    v.setPressed(false);
+                }
                 // Only prevent onClick from receiving this event if it's a drag.
                 return wasDragging;
             }
@@ -1378,7 +1389,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 mDragStartListener,
                 mTransitions,
                 mInteractionJankMonitor,
-                mTransactionFactory);
+                mTransactionFactory,
+                mMainHandler);
         windowDecoration.setTaskDragResizer(taskPositioner);
 
         final DesktopModeTouchEventListener touchEventListener =
@@ -1602,7 +1614,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 DragPositioningCallbackUtility.DragStartListener dragStartListener,
                 Transitions transitions,
                 InteractionJankMonitor interactionJankMonitor,
-                Supplier<SurfaceControl.Transaction> transactionFactory) {
+                Supplier<SurfaceControl.Transaction> transactionFactory,
+                Handler handler) {
             final TaskPositioner taskPositioner = DesktopModeStatus.isVeiledResizeEnabled()
                     ? new VeiledResizeTaskPositioner(
                             taskOrganizer,
@@ -1610,7 +1623,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             displayController,
                             dragStartListener,
                             transitions,
-                            interactionJankMonitor)
+                            interactionJankMonitor,
+                            handler)
                     : new FluidResizeTaskPositioner(
                             taskOrganizer,
                             transitions,

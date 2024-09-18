@@ -538,6 +538,13 @@ flag {
 }
 
 flag {
+  name: "status_bar_connected_displays"
+  namespace: "systemui"
+  description: "Shows the status bar on connected displays"
+  bug: "362720336"
+}
+
+flag {
     name: "status_bar_switch_to_spn_from_data_spn"
     namespace: "systemui"
     description: "Fix usage of the SPN broadcast extras"
@@ -548,10 +555,10 @@ flag {
 }
 
 flag {
-    name: "haptic_volume_slider"
+    name: "status_bar_simple_fragment"
     namespace: "systemui"
-    description: "Adds haptic feedback to the volume slider."
-    bug: "316953430"
+    description: "Feature flag for refactoring the collapsed status bar fragment"
+    bug: "364360986"
 }
 
 flag {

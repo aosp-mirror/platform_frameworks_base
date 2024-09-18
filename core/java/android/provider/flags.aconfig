@@ -52,3 +52,14 @@ flag {
     description: "Enable the new ContactsContract Default Account APIs."
     bug: "359957527"
 }
+
+flag {
+    name: "reduce_binder_transaction_size_for_get_all_properties"
+    namespace: "core_experiments_team_internal"
+    description: "Reduce Binder transaction size in getAllProperties calls"
+    bug: "362652574"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

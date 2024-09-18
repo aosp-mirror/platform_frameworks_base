@@ -40,6 +40,7 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Binder
+import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -181,6 +182,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
   @Mock private lateinit var mockSurface: SurfaceControl
   @Mock private lateinit var taskbarDesktopTaskListener: TaskbarDesktopTaskListener
+  @Mock private lateinit var mockHandler: Handler
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -221,7 +223,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shellTaskOrganizer,
             MAX_TASK_LIMIT,
             mockInteractionJankMonitor,
-            mContext)
+            mContext,
+            mockHandler)
 
     whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
     whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
@@ -274,7 +277,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
         shellExecutor,
         Optional.of(desktopTasksLimiter),
         recentTasksController,
-        mockInteractionJankMonitor)
+        mockInteractionJankMonitor,
+        mockHandler,
+      )
   }
 
   @After

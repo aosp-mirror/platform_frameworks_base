@@ -20,8 +20,10 @@ import com.google.android.msdl.data.model.FeedbackLevel
 import com.google.android.msdl.data.model.MSDLToken
 import com.google.android.msdl.domain.InteractionProperties
 import com.google.android.msdl.domain.MSDLPlayer
+import com.google.android.msdl.logging.MSDLEvent
 
 class FakeMSDLPlayer : MSDLPlayer {
+    private val history = arrayListOf<MSDLEvent>()
     var currentFeedbackLevel = FeedbackLevel.DEFAULT
     var latestTokenPlayed: MSDLToken? = null
         private set
@@ -34,5 +36,8 @@ class FakeMSDLPlayer : MSDLPlayer {
     override fun playToken(token: MSDLToken, properties: InteractionProperties?) {
         latestTokenPlayed = token
         latestPropertiesPlayed = properties
+        history.add(MSDLEvent(token, properties))
     }
+
+    override fun getHistory(): List<MSDLEvent> = history
 }

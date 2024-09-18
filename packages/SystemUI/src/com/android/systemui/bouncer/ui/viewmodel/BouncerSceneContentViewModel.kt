@@ -30,6 +30,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationWipeModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.qualifiers.Application
@@ -61,6 +62,7 @@ constructor(
     private val pinViewModelFactory: PinBouncerViewModel.Factory,
     private val patternViewModelFactory: PatternBouncerViewModel.Factory,
     private val passwordViewModelFactory: PasswordBouncerViewModel.Factory,
+    private val bouncerHapticPlayer: BouncerHapticPlayer,
 ) : ExclusiveActivatable() {
     private val _selectedUserImage = MutableStateFlow<Bitmap?>(null)
     val selectedUserImage: StateFlow<Bitmap?> = _selectedUserImage.asStateFlow()
@@ -162,10 +164,7 @@ constructor(
             }
 
             launch {
-                combine(
-                        userSwitcher.users,
-                        userSwitcher.menu,
-                    ) { users, actions ->
+                combine(userSwitcher.users, userSwitcher.menu) { users, actions ->
                         users.map { user ->
                             UserSwitcherDropdownItemViewModel(
                                 icon = Icon.Loaded(user.image, contentDescription = null),
@@ -178,7 +177,7 @@ constructor(
                                     icon =
                                         Icon.Resource(
                                             action.iconResourceId,
-                                            contentDescription = null
+                                            contentDescription = null,
                                         ),
                                     text = Text.Resource(action.textResourceId),
                                     onClick = action.onClicked,
@@ -226,7 +225,7 @@ constructor(
     }
 
     private fun getChildViewModel(
-        authenticationMethod: AuthenticationMethodModel,
+        authenticationMethod: AuthenticationMethodModel
     ): AuthMethodBouncerViewModel? {
         // If the current child view-model matches the authentication method, reuse it instead of
         // creating a new instance.
@@ -241,12 +240,14 @@ constructor(
                     authenticationMethod = authenticationMethod,
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             is AuthenticationMethodModel.Sim ->
                 pinViewModelFactory.create(
                     authenticationMethod = authenticationMethod,
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             is AuthenticationMethodModel.Password ->
                 passwordViewModelFactory.create(
@@ -257,6 +258,7 @@ constructor(
                 patternViewModelFactory.create(
                     onIntentionalUserInput = ::onIntentionalUserInput,
                     isInputEnabled = isInputEnabled,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             else -> null
         }
@@ -317,10 +319,7 @@ constructor(
         return when {
             // The wipe dialog takes priority over the lockout dialog.
             wipeText != null ->
-                DialogViewModel(
-                    text = wipeText,
-                    onDismiss = { wipeDialogMessage.value = null },
-                )
+                DialogViewModel(text = wipeText, onDismiss = { wipeDialogMessage.value = null })
             lockoutText != null ->
                 DialogViewModel(
                     text = lockoutText,
@@ -338,7 +337,7 @@ constructor(
     fun onKeyEvent(keyEvent: KeyEvent): Boolean {
         return (authMethodViewModel.value as? PinBouncerViewModel)?.onKeyEvent(
             keyEvent.type,
-            keyEvent.nativeKeyEvent.keyCode
+            keyEvent.nativeKeyEvent.keyCode,
         ) ?: false
     }
 
