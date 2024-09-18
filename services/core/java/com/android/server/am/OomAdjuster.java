@@ -130,6 +130,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal.OomAdjReason;
 import android.app.ActivityThread;
@@ -376,6 +377,7 @@ public class OomAdjuster {
 
     final ActivityManagerService mService;
     final Injector mInjector;
+    final GlobalState mGlobalState;
     final ProcessList mProcessList;
     final ActivityManagerGlobalLock mProcLock;
 
@@ -469,13 +471,21 @@ public class OomAdjuster {
 
     }
 
+    // TODO(b/346822474): hook up global state usage.
+    interface GlobalState {
+        /** Is device's screen on. */
+        boolean isAwake();
+
+        /** What process is running a backup for a given userId. */
+        ProcessRecord getBackupTarget(@UserIdInt int userId);
+
+        /** Is memory level normal since last evaluation. */
+        boolean isLastMemoryLevelNormal();
+    }
+
     boolean isChangeEnabled(@CachedCompatChangeId int cachedCompatChangeId,
             ApplicationInfo app, boolean defaultValue) {
         return mInjector.isChangeEnabled(cachedCompatChangeId, app, defaultValue);
-    }
-
-    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids) {
-        this(service, processList, activeUids, createAdjusterThread());
     }
 
     static ServiceThread createAdjusterThread() {
@@ -488,18 +498,9 @@ public class OomAdjuster {
     }
 
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
-            ServiceThread adjusterThread) {
-        this(service, processList, activeUids, adjusterThread, new Injector());
-    }
-
-    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
-            Injector injector) {
-        this(service, processList, activeUids, createAdjusterThread(), injector);
-    }
-
-    OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
-            ServiceThread adjusterThread, Injector injector) {
+            ServiceThread adjusterThread, GlobalState globalState, Injector injector) {
         mService = service;
+        mGlobalState = globalState;
         mInjector = injector;
         mProcessList = processList;
         mProcLock = service.mProcLock;
@@ -2525,7 +2526,7 @@ public class OomAdjuster {
                     double cachedRestoreThreshold =
                             mProcessList.getCachedRestoreThresholdKb() * thresholdModifier;
 
-                    if (!mService.mAppProfiler.isLastMemoryLevelNormal()
+                    if (mService.mAppProfiler.isLastMemoryLevelNormal()
                             && lastPssOrRss >= cachedRestoreThreshold) {
                         state.setServiceHighRam(true);
                         state.setServiceB(true);

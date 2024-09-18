@@ -50,7 +50,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
@@ -169,6 +168,7 @@ public final class ServiceBindingOomAdjPolicyTest {
         realAtm.initialize(null, null, mContext.getMainLooper());
         realAms.mActivityTaskManager = spy(realAtm);
         realAms.mAtmInternal = spy(realAms.mActivityTaskManager.getAtmInternal());
+        realAms.mProcessStateController = spy(realAms.mProcessStateController);
         realAms.mOomAdjuster = spy(realAms.mOomAdjuster);
         realAms.mOomAdjuster.mCachedAppOptimizer = spy(realAms.mOomAdjuster.mCachedAppOptimizer);
         realAms.mPackageManagerInt = mPackageManagerInt;
@@ -242,14 +242,14 @@ public final class ServiceBindingOomAdjPolicyTest {
                 USER_SYSTEM              // userId
         ));
 
-        verify(mAms.mOomAdjuster, bindMode).updateOomAdjPendingTargetsLocked(anyInt());
-        clearInvocations(mAms.mOomAdjuster);
+        verify(mAms.mProcessStateController, bindMode).runPendingUpdate(anyInt());
+        clearInvocations(mAms.mProcessStateController);
 
         // Unbind the service.
         mAms.unbindService(serviceConnection);
 
-        verify(mAms.mOomAdjuster, unbindMode).updateOomAdjPendingTargetsLocked(anyInt());
-        clearInvocations(mAms.mOomAdjuster);
+        verify(mAms.mProcessStateController, unbindMode).runPendingUpdate(anyInt());
+        clearInvocations(mAms.mProcessStateController);
 
         removeProcessRecord(app);
     }
@@ -496,8 +496,8 @@ public final class ServiceBindingOomAdjPolicyTest {
                 USER_SYSTEM            // userId
         ));
 
-        verify(mAms.mOomAdjuster, bindMode).updateOomAdjPendingTargetsLocked(anyInt());
-        clearInvocations(mAms.mOomAdjuster);
+        verify(mAms.mProcessStateController, bindMode).runPendingUpdate(anyInt());
+        clearInvocations(mAms.mProcessStateController);
 
         if (clientApp.isFreezable()) {
             verify(mAms.mOomAdjuster.mCachedAppOptimizer,
@@ -509,8 +509,8 @@ public final class ServiceBindingOomAdjPolicyTest {
         // Unbind the service.
         mAms.unbindService(serviceConnection);
 
-        verify(mAms.mOomAdjuster, unbindMode).updateOomAdjPendingTargetsLocked(anyInt());
-        clearInvocations(mAms.mOomAdjuster);
+        verify(mAms.mProcessStateController, unbindMode).runPendingUpdate(anyInt());
+        clearInvocations(mAms.mProcessStateController);
 
         removeProcessRecord(clientApp);
         removeProcessRecord(serviceApp);
