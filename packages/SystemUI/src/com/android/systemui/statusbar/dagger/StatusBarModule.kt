@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.dagger
 
+import android.content.Context
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
@@ -63,12 +65,18 @@ abstract class StatusBarModule {
 
     @Binds abstract fun statusBarInitializer(impl: StatusBarInitializerImpl): StatusBarInitializer
 
-    @Binds
-    abstract fun statusBarWindowController(
-        impl: StatusBarWindowControllerImpl
-    ): StatusBarWindowController
-
     companion object {
+
+        @Provides
+        @SysUISingleton
+        fun statusBarWindowController(
+            context: Context?,
+            viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager?,
+            factory: StatusBarWindowControllerImpl.Factory,
+        ): StatusBarWindowController {
+            return factory.create(context, viewCaptureAwareWindowManager)
+        }
+
         @Provides
         @SysUISingleton
         @OngoingCallLog

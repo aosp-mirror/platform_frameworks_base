@@ -113,6 +113,7 @@ import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 
+import androidx.annotation.NonNull;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -714,6 +715,19 @@ public class FrameworkServicesModule {
         return new ViewCaptureAwareWindowManager(windowManager,
                 /* lazyViewCapture= */ toKotlinLazy(daggerLazyViewCapture),
                 /* isViewCaptureEnabled= */ enableViewCaptureTracing());
+    }
+
+    @Provides
+    @Singleton
+    static ViewCaptureAwareWindowManager.Factory viewCaptureAwareWindowManagerFactory(
+            Lazy<ViewCapture> daggerLazyViewCapture) {
+        return new ViewCaptureAwareWindowManager.Factory() {
+            @NonNull
+            @Override
+            public ViewCaptureAwareWindowManager create(@NonNull WindowManager windowManager) {
+                return provideViewCaptureAwareWindowManager(windowManager, daggerLazyViewCapture);
+            }
+        };
     }
 
     @Provides
