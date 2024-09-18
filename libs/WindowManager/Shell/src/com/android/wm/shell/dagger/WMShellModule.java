@@ -116,8 +116,6 @@ import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.viewhost.DefaultWindowDecorViewHostSupplier;
-import com.android.wm.shell.windowdecor.viewhost.PooledWindowDecorViewHostSupplier;
-import com.android.wm.shell.windowdecor.viewhost.ReusableWindowDecorViewHost;
 import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import dagger.Binds;
@@ -382,19 +380,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
-            @NonNull Context context,
-            @ShellMainThread @NonNull CoroutineScope mainScope,
-            @NonNull ShellInit shellInit) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)
-                && Flags.enableDesktopWindowingScvhCache()) {
-            final int maxPoolSize = DesktopModeStatus.getMaxTaskLimit(context);
-            final int preWarmSize = DesktopModeStatus.getWindowDecorPreWarmSize();
-            return new PooledWindowDecorViewHostSupplier(
-                    context, mainScope, shellInit,
-                    ReusableWindowDecorViewHost.DefaultFactory.INSTANCE, maxPoolSize, preWarmSize);
-        } else {
-            return new DefaultWindowDecorViewHostSupplier(mainScope);
-        }
+            @ShellMainThread @NonNull CoroutineScope mainScope) {
+        return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
 
     //
