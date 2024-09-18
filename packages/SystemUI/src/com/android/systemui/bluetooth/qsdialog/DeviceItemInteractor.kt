@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -114,6 +115,7 @@ constructor(
                 localBluetoothManager?.eventManager?.registerCallback(listener)
                 awaitClose { localBluetoothManager?.eventManager?.unregisterCallback(listener) }
             }
+            .flowOn(backgroundDispatcher)
             .shareIn(coroutineScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0))
 
     internal suspend fun updateDeviceItems(context: Context, trigger: DeviceFetchTrigger) {
