@@ -288,7 +288,6 @@ cc_library_shared_for_libandroid_runtime {
                 "libasync_safe",
                 "libbinderthreadstateutils",
                 "libdmabufinfo",
-                "libgif",
                 "libgui_window_info_static",
                 "libkernelconfigs",
                 "libseccomp_policy",
