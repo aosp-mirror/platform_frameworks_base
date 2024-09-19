@@ -45,7 +45,6 @@ import javax.inject.Inject
  * @property[vibratorHelper] The [VibratorHelper] to deliver haptic effects.
  * @property[effectDuration] The duration of the effect in ms.
  */
-// TODO(b/332902869): In addition from being injectable, we can consider making it a singleton
 class QSLongPressEffect
 @Inject
 constructor(

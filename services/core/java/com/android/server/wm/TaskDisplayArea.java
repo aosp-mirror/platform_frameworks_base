@@ -28,6 +28,7 @@ import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -57,6 +58,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
@@ -1761,10 +1763,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * @return last reparented root task, or {@code null} if the root tasks had to be destroyed.
      */
     Task remove() {
+        final TaskDisplayArea toDisplayArea = getReparentToTaskDisplayArea(getFocusedRootTask());
         mPreferredTopFocusableRootTask = null;
         // TODO(b/153090332): Allow setting content removal mode per task display area
         final boolean destroyContentOnRemoval = mDisplayContent.shouldDestroyContentOnRemove();
-        final TaskDisplayArea toDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         Task lastReparentedRootTask = null;
 
         // Root tasks could be reparented from the removed display area to other display area. After
@@ -1828,6 +1830,41 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         mRemoved = true;
 
         return lastReparentedRootTask;
+    }
+
+    /**
+     * Returns the {@link TaskDisplayArea} to which root tasks should be reparented.
+     *
+     * <p>In the automotive multi-user multi-display environment where background users have
+     * UI access on their assigned displays (a.k.a. visible background users), it's not allowed to
+     * launch an activity on an unassigned display. If an activity is attempted to launch on an
+     * unassigned display, it throws an exception.
+     * <p>This method determines the appropriate {@link TaskDisplayArea} for reparenting root tasks
+     * when a display is removed, in order to avoid the exception. If the root task is null,
+     * the visible background user is not supported or the user associated with the root task is
+     * not a visible background user, it returns the default {@link TaskDisplayArea} of the default
+     * display. Otherwise, it returns the default {@link TaskDisplayArea} of the main display
+     * assigned to the user.
+     *
+     * @param rootTask The root task whose {@link TaskDisplayArea} needs to be determined.
+     * @return The {@link TaskDisplayArea} where the root tasks should be reparented to.
+     */
+    private TaskDisplayArea getReparentToTaskDisplayArea(Task rootTask) {
+        final TaskDisplayArea defaultTaskDisplayArea =
+                mRootWindowContainer.getDefaultTaskDisplayArea();
+        if (rootTask == null) {
+            return defaultTaskDisplayArea;
+        }
+        UserManagerInternal userManagerInternal = mAtmService.mWindowManager.mUmInternal;
+        if (!userManagerInternal.isVisibleBackgroundFullUser(rootTask.mUserId)) {
+            return defaultTaskDisplayArea;
+        }
+        int toDisplayId = userManagerInternal.getMainDisplayAssignedToUser(rootTask.mUserId);
+        if (toDisplayId == INVALID_DISPLAY) {
+            return defaultTaskDisplayArea;
+        }
+        DisplayContent dc = mRootWindowContainer.getDisplayContent(toDisplayId);
+        return dc != null ? dc.getDefaultTaskDisplayArea() : defaultTaskDisplayArea;
     }
 
     /** Whether this task display area can request orientation. */

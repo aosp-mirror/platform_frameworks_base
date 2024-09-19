@@ -48,6 +48,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.view.Display;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
@@ -75,6 +76,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.split.SplitScreenConstants.PersistentSnapPosition;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SnapPosition;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
@@ -116,6 +118,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             new PathInterpolator(0.2f, 0f, 0f, 1f);
     private static final Interpolator GROW_INTERPOLATOR =
             new PathInterpolator(0.45f, 0f, 0.5f, 1f);
+    @ShellMainThread
+    private final Handler mHandler;
 
     private int mDividerWindowWidth;
     private int mDividerInsets;
@@ -166,7 +170,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
             DisplayController displayController, DisplayImeController displayImeController,
-            ShellTaskOrganizer taskOrganizer, int parallaxType) {
+            ShellTaskOrganizer taskOrganizer, int parallaxType, @ShellMainThread Handler handler) {
+        mHandler = handler;
         mContext = context.createConfigurationContext(configuration);
         mOrientation = configuration.orientation;
         mRotation = configuration.windowConfiguration.getRotation();
@@ -598,7 +603,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     }
 
     void onStartDragging() {
-        mInteractionJankMonitor.begin(getDividerLeash(), mContext, CUJ_SPLIT_SCREEN_RESIZE);
+        mInteractionJankMonitor.begin(getDividerLeash(), mContext, mHandler,
+                CUJ_SPLIT_SCREEN_RESIZE);
     }
 
     void onDraggingCancelled() {
@@ -756,7 +762,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             @Override
             public void onAnimationStart(Animator animation) {
                 mInteractionJankMonitor.begin(getDividerLeash(),
-                        mContext, CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+                        mContext, mHandler, CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
 
             @Override

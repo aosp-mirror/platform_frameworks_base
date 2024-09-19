@@ -326,6 +326,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
     public static final int ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN = 1 << 23;
     public static final int ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM = 1 << 24;
+    public static final int ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE = 1 << 25;
     public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
@@ -1293,8 +1294,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (hasResumedFreeform
                 && com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()
                 // Exclude task layer 1 because it is already the top most.
-                && minTaskLayer > 1 && minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
-            stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+                && minTaskLayer > 1) {
+            if (minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
+                stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+            } else {
+                stateFlags |= ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE;
+            }
         }
         stateFlags |= minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
         if (visible) {

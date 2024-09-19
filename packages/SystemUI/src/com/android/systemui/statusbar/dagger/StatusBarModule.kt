@@ -20,12 +20,16 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.statusbar.core.StatusBarInitializer
+import com.android.systemui.statusbar.core.StatusBarInitializerImpl
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
 import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
+import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -56,6 +60,13 @@ abstract class StatusBarModule {
     @IntoMap
     @ClassKey(StatusBarSignalPolicy::class)
     abstract fun bindStatusBarSignalPolicy(impl: StatusBarSignalPolicy): CoreStartable
+
+    @Binds abstract fun statusBarInitializer(impl: StatusBarInitializerImpl): StatusBarInitializer
+
+    @Binds
+    abstract fun statusBarWindowController(
+        impl: StatusBarWindowControllerImpl
+    ): StatusBarWindowController
 
     companion object {
         @Provides

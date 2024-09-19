@@ -46,6 +46,8 @@ import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -67,7 +69,7 @@ import javax.inject.Inject;
  * Encapsulates all logic for the status bar window state management.
  */
 @SysUISingleton
-public class StatusBarWindowController {
+public class StatusBarWindowControllerImpl implements StatusBarWindowController {
     private static final String TAG = "StatusBarWindowController";
     private static final boolean DEBUG = false;
 
@@ -89,7 +91,7 @@ public class StatusBarWindowController {
     private final Binder mInsetsSourceOwner = new Binder();
 
     @Inject
-    public StatusBarWindowController(
+    public StatusBarWindowControllerImpl(
             Context context,
             @StatusBarWindowModule.InternalWindowView StatusBarWindowView statusBarWindowView,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
@@ -117,14 +119,12 @@ public class StatusBarWindowController {
                                 /* attachedViewProvider=*/ () -> mStatusBarWindowView)));
     }
 
+    @Override
     public int getStatusBarHeight() {
         return mBarHeight;
     }
 
-    /**
-     * Rereads the status bar height and reapplys the current state if the height
-     * is different.
-     */
+    @Override
     public void refreshStatusBarHeight() {
         Trace.beginSection("StatusBarWindowController#refreshStatusBarHeight");
         try {
@@ -141,9 +141,7 @@ public class StatusBarWindowController {
         }
     }
 
-    /**
-     * Adds the status bar view to the window manager.
-     */
+    @Override
     public void attach() {
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
@@ -161,54 +159,47 @@ public class StatusBarWindowController {
         apply(mCurrentState);
     }
 
-    /** Adds the given view to the status bar window view. */
-    public void addViewToWindow(View view, ViewGroup.LayoutParams layoutParams) {
+    @Override
+    public void addViewToWindow(@NonNull View view, @NonNull ViewGroup.LayoutParams layoutParams) {
         mStatusBarWindowView.addView(view, layoutParams);
     }
 
-    /** Returns the status bar window's background view. */
+    @NonNull
+    @Override
     public View getBackgroundView() {
         return mStatusBarWindowView.findViewById(R.id.status_bar_container);
     }
 
-    /** Returns a fragment host manager for the status bar window view. */
+    @NonNull
+    @Override
     public FragmentHostManager getFragmentHostManager() {
         return mFragmentService.getFragmentHostManager(mStatusBarWindowView);
     }
 
-    /**
-     * Provides an updated animation controller if we're animating a view in the status bar.
-     *
-     * This is needed because we have to make sure that the status bar window matches the full
-     * screen during the animation and that we are expanding the view below the other status bar
-     * text.
-     *
-     * @param rootView the root view of the animation
-     * @param animationController the default animation controller to use
-     * @return If the animation is on a view in the status bar, returns an Optional containing an
-     *   updated animation controller that handles status-bar-related animation details. Returns an
-     *   empty optional if the animation is *not* on a view in the status bar.
-     */
+    @NonNull
+    @Override
     public Optional<ActivityTransitionAnimator.Controller> wrapAnimationControllerIfInStatusBar(
-            View rootView, ActivityTransitionAnimator.Controller animationController) {
+            @NonNull View rootView,
+            @NonNull ActivityTransitionAnimator.Controller animationController) {
         if (rootView != mStatusBarWindowView) {
             return Optional.empty();
         }
 
         animationController.setTransitionContainer(mLaunchAnimationContainer);
-        return Optional.of(new DelegateTransitionAnimatorController(animationController) {
-            @Override
-            public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
-                getDelegate().onTransitionAnimationStart(isExpandingFullyAbove);
-                setLaunchAnimationRunning(true);
-            }
+        return Optional.of(
+                new DelegateTransitionAnimatorController(animationController) {
+                    @Override
+                    public void onTransitionAnimationStart(boolean isExpandingFullyAbove) {
+                        getDelegate().onTransitionAnimationStart(isExpandingFullyAbove);
+                        setLaunchAnimationRunning(true);
+                    }
 
-            @Override
-            public void onTransitionAnimationEnd(boolean isExpandingFullyAbove) {
-                getDelegate().onTransitionAnimationEnd(isExpandingFullyAbove);
-                setLaunchAnimationRunning(false);
-            }
-        });
+                    @Override
+                    public void onTransitionAnimationEnd(boolean isExpandingFullyAbove) {
+                        getDelegate().onTransitionAnimationEnd(isExpandingFullyAbove);
+                        setLaunchAnimationRunning(false);
+                    }
+                });
     }
 
     private WindowManager.LayoutParams getBarLayoutParams(int rotation) {
@@ -275,22 +266,13 @@ public class StatusBarWindowController {
         }
     }
 
-    /** Set force status bar visible. */
+    @Override
     public void setForceStatusBarVisible(boolean forceStatusBarVisible) {
         mCurrentState.mForceStatusBarVisible = forceStatusBarVisible;
         apply(mCurrentState);
     }
 
-    /**
-     * Sets whether an ongoing process requires the status bar to be forced visible.
-     *
-     * This method is separate from {@link this#setForceStatusBarVisible} because the ongoing
-     * process **takes priority**. For example, if {@link this#setForceStatusBarVisible} is set to
-     * false but this method is set to true, then the status bar **will** be visible.
-     *
-     * TODO(b/195839150): We should likely merge this method and
-     * {@link this#setForceStatusBarVisible} together and use some sort of ranking system instead.
-     */
+    @Override
     public void setOngoingProcessRequiresStatusBarVisible(boolean visible) {
         mCurrentState.mOngoingProcessRequiresStatusBarVisible = visible;
         apply(mCurrentState);

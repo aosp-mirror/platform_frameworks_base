@@ -538,6 +538,13 @@ flag {
 }
 
 flag {
+  name: "status_bar_connected_displays"
+  namespace: "systemui"
+  description: "Shows the status bar on connected displays"
+  bug: "362720336"
+}
+
+flag {
     name: "status_bar_switch_to_spn_from_data_spn"
     namespace: "systemui"
     description: "Fix usage of the SPN broadcast extras"
@@ -545,6 +552,13 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "status_bar_simple_fragment"
+    namespace: "systemui"
+    description: "Feature flag for refactoring the collapsed status bar fragment"
+    bug: "364360986"
 }
 
 flag {
@@ -1400,4 +1414,14 @@ flag {
    namespace: "systemui"
    description: "Allow non-touchscreen devices to bypass falsing"
    bug: "319809270"
+}
+
+flag {
+   name: "media_projection_dialog_behind_lockscreen"
+   namespace: "systemui"
+   description: "Ensure MediaProjection Dialog appears behind the lockscreen"
+   bug: "351409536"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
 }

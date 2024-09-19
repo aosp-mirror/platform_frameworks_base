@@ -34,6 +34,7 @@ import android.annotation.RequiresPermission;
 import android.app.Activity;
 import android.app.ActivityOptions.LaunchCookie;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.app.StatusBarManager;
 import android.app.compat.CompatChanges;
 import android.content.Context;
@@ -83,6 +84,7 @@ public class MediaProjectionPermissionActivity extends Activity {
     private final StatusBarManager mStatusBarManager;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
     private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
+    private final KeyguardManager mKeyguardManager;
 
     private String mPackageName;
     private int mUid;
@@ -101,11 +103,13 @@ public class MediaProjectionPermissionActivity extends Activity {
             FeatureFlags featureFlags,
             Lazy<ScreenCaptureDevicePolicyResolver> screenCaptureDevicePolicyResolver,
             StatusBarManager statusBarManager,
+            KeyguardManager keyguardManager,
             MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
             ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate) {
         mFeatureFlags = featureFlags;
         mScreenCaptureDevicePolicyResolver = screenCaptureDevicePolicyResolver;
         mStatusBarManager = statusBarManager;
+        mKeyguardManager = keyguardManager;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
         mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
     }
@@ -208,7 +212,14 @@ public class MediaProjectionPermissionActivity extends Activity {
         }
 
         setUpDialog(mDialog);
-        mDialog.show();
+
+        boolean shouldDismissKeyguard =
+                com.android.systemui.Flags.mediaProjectionDialogBehindLockscreen();
+        if (shouldDismissKeyguard && mKeyguardManager.isDeviceLocked()) {
+            requestDeviceUnlock();
+        } else {
+            mDialog.show();
+        }
 
         if (savedInstanceState == null) {
             mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(mUid);
@@ -330,6 +341,16 @@ public class MediaProjectionPermissionActivity extends Activity {
         }
 
         return false;
+    }
+
+    private void requestDeviceUnlock() {
+        mKeyguardManager.requestDismissKeyguard(this,
+                new KeyguardManager.KeyguardDismissCallback() {
+                    @Override
+                    public void onDismissSucceeded() {
+                        mDialog.show();
+                    }
+                });
     }
 
     private void grantMediaProjectionPermission(

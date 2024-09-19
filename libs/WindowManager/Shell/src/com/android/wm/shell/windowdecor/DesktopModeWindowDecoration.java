@@ -24,6 +24,8 @@ import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
@@ -604,13 +606,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 // their custom content.
                 relayoutParams.mInputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_SPY;
             } else {
-                if (Flags.enableCaptionCompatInsetForceConsumption()) {
+                if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isEnabled()) {
                     // Force-consume the caption bar insets when the app tries to hide the caption.
                     // This improves app compatibility of immersive apps.
                     relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING;
                 }
             }
-            if (Flags.enableCaptionCompatInsetForceConsumptionAlways()) {
+            if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isEnabled()) {
                 // Always force-consume the caption bar insets for maximum app compatibility,
                 // including non-immersive apps that just don't handle caption insets properly.
                 relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
@@ -753,9 +755,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             final ActivityInfo activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */);
             final IconProvider provider = new IconProvider(mContext);
             final Drawable appIconDrawable = provider.getIcon(activityInfo);
+            final Drawable badgedAppIconDrawable = pm.getUserBadgedIcon(appIconDrawable,
+                    UserHandle.of(mTaskInfo.userId));
             final BaseIconFactory headerIconFactory = createIconFactory(mContext,
                     R.dimen.desktop_mode_caption_icon_radius);
-            mAppIconBitmap = headerIconFactory.createScaledBitmap(appIconDrawable, MODE_DEFAULT);
+            mAppIconBitmap = headerIconFactory.createIconBitmap(badgedAppIconDrawable,
+                    1f /* scale */);
 
             final BaseIconFactory resizeVeilIconFactory = createIconFactory(mContext,
                     R.dimen.desktop_mode_resize_veil_icon_size);

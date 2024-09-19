@@ -180,6 +180,10 @@ public class TouchpadDebugView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (event.getClassification() == MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE) {
+            return false;
+        }
+
         float deltaX;
         float deltaY;
         switch (event.getAction()) {

@@ -42,7 +42,7 @@ import android.util.proto.ProtoInputStream;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.protolog.ProtoLogConfigurationService.ViewerConfigFileTracer;
+import com.android.internal.protolog.ProtoLogConfigurationServiceImpl.ViewerConfigFileTracer;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
@@ -166,7 +166,8 @@ public class PerfettoProtoLogImplTest {
                 return new ProtoInputStream(sViewerConfigBuilder.build().toByteArray());
             });
         };
-        sProtoLogConfigurationService = new ProtoLogConfigurationService(dataSourceBuilder, tracer);
+        sProtoLogConfigurationService =
+                new ProtoLogConfigurationServiceImpl(dataSourceBuilder, tracer);
 
         if (android.tracing.Flags.clientSideProtoLogging()) {
             sProtoLog = new PerfettoProtoLogImpl(
