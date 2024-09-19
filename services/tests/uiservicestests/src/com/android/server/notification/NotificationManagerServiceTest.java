@@ -2815,7 +2815,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
     public void testOnlyForceGroupIfNeeded_newNotification_notAutogrouped() {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
         when(mGroupHelper.onNotificationPosted(any(), anyBoolean())).thenReturn(false);
@@ -2834,7 +2835,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
     public void testOnlyForceGroupIfNeeded_newNotification_wasAutogrouped() {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
         when(mGroupHelper.onNotificationPosted(any(), anyBoolean())).thenReturn(true);
