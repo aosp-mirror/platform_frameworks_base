@@ -17,11 +17,13 @@
 
 package com.android.systemui.keyboard.data.repository
 
-import android.hardware.input.InputManager
+import android.hardware.input.FakeInputManager
+import android.hardware.input.InputManager.InputDeviceListener
 import android.hardware.input.InputManager.KeyboardBacklightListener
 import android.hardware.input.KeyboardBacklightState
+import android.hardware.input.fakeInputManager
 import android.testing.TestableLooper
-import android.view.InputDevice
+import android.view.InputDevice.SOURCE_KEYBOARD
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -30,10 +32,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.inputdevice.data.repository.InputDeviceRepository
 import com.android.systemui.keyboard.data.model.Keyboard
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.nullable
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.testKosmos
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
@@ -50,9 +49,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
-import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -60,10 +60,9 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class KeyboardRepositoryTest : SysuiTestCase() {
 
-    @Captor
-    private lateinit var deviceListenerCaptor: ArgumentCaptor<InputManager.InputDeviceListener>
+    @Captor private lateinit var deviceListenerCaptor: ArgumentCaptor<InputDeviceListener>
     @Captor private lateinit var backlightListenerCaptor: ArgumentCaptor<KeyboardBacklightListener>
-    @Mock private lateinit var inputManager: InputManager
+    private lateinit var fakeInputManager: FakeInputManager
 
     private lateinit var underTest: KeyboardRepository
     private lateinit var dispatcher: CoroutineDispatcher
@@ -73,16 +72,14 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf())
-        whenever(inputManager.getInputDevice(any())).then { invocation ->
-            val id = invocation.arguments.first()
-            INPUT_DEVICES_MAP[id]
-        }
+        fakeInputManager = testKosmos().fakeInputManager
         dispatcher = StandardTestDispatcher()
         testScope = TestScope(dispatcher)
         val handler = FakeHandler(TestableLooper.get(this).looper)
-        inputDeviceRepo = InputDeviceRepository(handler, testScope.backgroundScope, inputManager)
-        underTest = KeyboardRepositoryImpl(dispatcher, inputManager, inputDeviceRepo)
+        inputDeviceRepo =
+            InputDeviceRepository(handler, testScope.backgroundScope, fakeInputManager.inputManager)
+        underTest =
+            KeyboardRepositoryImpl(dispatcher, fakeInputManager.inputManager, inputDeviceRepo)
     }
 
     @Test
@@ -95,7 +92,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun emitsConnected_ifKeyboardAlreadyConnectedAtTheStart() =
         testScope.runTest {
-            whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(PHYSICAL_FULL_KEYBOARD_ID))
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
             val initialValue = underTest.isAnyKeyboardConnected.first()
             assertThat(initialValue).isTrue()
         }
@@ -103,74 +100,77 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun emitsConnected_whenNewPhysicalKeyboardConnects() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
 
             assertThat(isKeyboardConnected).isTrue()
         }
 
     @Test
-    fun emitsDisconnected_whenDeviceWithIdDoesNotExist() =
+    fun emitsDisconnected_whenDeviceNotFound() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
-
-            deviceListener.onInputDeviceAdded(NULL_DEVICE_ID)
+            fakeInputManager.addDevice(NULL_DEVICE_ID, SOURCE_KEYBOARD, isNotFound = true)
             assertThat(isKeyboardConnected).isFalse()
         }
 
     @Test
     fun emitsDisconnected_whenKeyboardDisconnects() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
             assertThat(isKeyboardConnected).isTrue()
 
-            deviceListener.onInputDeviceRemoved(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.removeDevice(PHYSICAL_FULL_KEYBOARD_ID)
             assertThat(isKeyboardConnected).isFalse()
         }
 
-    private suspend fun captureDeviceListener(): InputManager.InputDeviceListener {
+    private suspend fun captureDeviceListener() {
         underTest.isAnyKeyboardConnected.first()
-        verify(inputManager).registerInputDeviceListener(deviceListenerCaptor.capture(), nullable())
-        return deviceListenerCaptor.value
+        verify(fakeInputManager.inputManager)
+            .registerInputDeviceListener(deviceListenerCaptor.capture(), anyOrNull())
+        fakeInputManager.registerInputDeviceListener(deviceListenerCaptor.value)
     }
 
     @Test
     fun emitsDisconnected_whenVirtualOrNotFullKeyboardConnects() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_NOT_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(
+                PHYSICAL_NOT_FULL_KEYBOARD_ID,
+                isFullKeyboard = false
+            )
             assertThat(isKeyboardConnected).isFalse()
 
-            deviceListener.onInputDeviceAdded(VIRTUAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addDevice(VIRTUAL_FULL_KEYBOARD_ID, SOURCE_KEYBOARD)
             assertThat(isKeyboardConnected).isFalse()
         }
 
     @Test
     fun emitsDisconnected_whenKeyboardDisconnectsAndWasAlreadyConnectedAtTheStart() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
 
-            deviceListener.onInputDeviceRemoved(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.removeDevice(PHYSICAL_FULL_KEYBOARD_ID)
             assertThat(isKeyboardConnected).isFalse()
         }
 
     @Test
     fun emitsConnected_whenAnotherDeviceDisconnects() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
-            deviceListener.onInputDeviceRemoved(VIRTUAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.removeDevice(VIRTUAL_FULL_KEYBOARD_ID)
 
             assertThat(isKeyboardConnected).isTrue()
         }
@@ -178,12 +178,12 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun emitsConnected_whenOnePhysicalKeyboardDisconnectsButAnotherRemainsConnected() =
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val isKeyboardConnected by collectLastValue(underTest.isAnyKeyboardConnected)
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
-            deviceListener.onInputDeviceAdded(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
-            deviceListener.onInputDeviceRemoved(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.removeDevice(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
 
             assertThat(isKeyboardConnected).isTrue()
         }
@@ -195,7 +195,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
             // subscribed to and listener is actually registered in inputManager
             val backlight by collectLastValueImmediately(underTest.backlight)
 
-            verify(inputManager)
+            verify(fakeInputManager.inputManager)
                 .registerKeyboardBacklightListener(any(), backlightListenerCaptor.capture())
 
             backlightListenerCaptor.value.onBacklightChanged(current = 1, max = 5)
@@ -217,7 +217,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     fun keyboardBacklightValuesNotPassed_fromBacklightListener_whenNotTriggeredByKeyPress() {
         testScope.runTest {
             val backlight by collectLastValueImmediately(underTest.backlight)
-            verify(inputManager)
+            verify(fakeInputManager.inputManager)
                 .registerKeyboardBacklightListener(any(), backlightListenerCaptor.capture())
 
             backlightListenerCaptor.value.onBacklightChanged(
@@ -233,7 +233,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     fun passesKeyboardBacklightValues_fromBacklightListener_whenTriggeredByKeyPress() {
         testScope.runTest {
             val backlight by collectLastValueImmediately(underTest.backlight)
-            verify(inputManager)
+            verify(fakeInputManager.inputManager)
                 .registerKeyboardBacklightListener(any(), backlightListenerCaptor.capture())
 
             backlightListenerCaptor.value.onBacklightChanged(
@@ -248,14 +248,11 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun passessAllKeyboards_thatWereAlreadyConnectedOnInitialization() {
         testScope.runTest {
-            whenever(inputManager.inputDeviceIds)
-                .thenReturn(
-                    intArrayOf(
-                        PHYSICAL_FULL_KEYBOARD_ID,
-                        ANOTHER_PHYSICAL_FULL_KEYBOARD_ID,
-                        VIRTUAL_FULL_KEYBOARD_ID // not a physical keyboard - that's why result is 2
-                    )
-                )
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+            // not a physical keyboard - that's why result is 2
+            fakeInputManager.addDevice(VIRTUAL_FULL_KEYBOARD_ID, SOURCE_KEYBOARD)
+
             val keyboards by collectValues(underTest.newlyConnectedKeyboard)
 
             assertThat(keyboards).hasSize(2)
@@ -265,9 +262,9 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun passesNewlyConnectedKeyboard() {
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID, VENDOR_ID, PRODUCT_ID)
 
             assertThat(underTest.newlyConnectedKeyboard.first())
                 .isEqualTo(Keyboard(VENDOR_ID, PRODUCT_ID))
@@ -277,13 +274,12 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun emitsOnlyNewlyConnectedKeyboards() {
         testScope.runTest {
-            whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(PHYSICAL_FULL_KEYBOARD_ID))
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
             underTest.newlyConnectedKeyboard.first()
-            verify(inputManager)
-                .registerInputDeviceListener(deviceListenerCaptor.capture(), nullable())
-            val deviceListener = deviceListenerCaptor.value
 
-            deviceListener.onInputDeviceAdded(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+            captureDeviceListener()
+
+            fakeInputManager.addPhysicalKeyboard(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
             val keyboards by collectValues(underTest.newlyConnectedKeyboard)
 
             assertThat(keyboards).hasSize(1)
@@ -293,14 +289,11 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun stillEmitsNewKeyboardEvenIfFlowWasSubscribedAfterOtherFlows() {
         testScope.runTest {
-            whenever(inputManager.inputDeviceIds)
-                .thenReturn(
-                    intArrayOf(
-                        PHYSICAL_FULL_KEYBOARD_ID,
-                        ANOTHER_PHYSICAL_FULL_KEYBOARD_ID,
-                        VIRTUAL_FULL_KEYBOARD_ID // not a physical keyboard - that's why result is 2
-                    )
-                )
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+            // not a physical keyboard - that's why result is 2
+            fakeInputManager.addDevice(VIRTUAL_FULL_KEYBOARD_ID, SOURCE_KEYBOARD)
+
             collectLastValueImmediately(underTest.isAnyKeyboardConnected)
 
             // let's pretend second flow is subscribed after some delay
@@ -314,12 +307,12 @@ class KeyboardRepositoryTest : SysuiTestCase() {
     @Test
     fun emitsKeyboardWhenItWasReconnected() {
         testScope.runTest {
-            val deviceListener = captureDeviceListener()
+            captureDeviceListener()
             val keyboards by collectValues(underTest.newlyConnectedKeyboard)
 
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
-            deviceListener.onInputDeviceRemoved(PHYSICAL_FULL_KEYBOARD_ID)
-            deviceListener.onInputDeviceAdded(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.removeDevice(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
 
             assertThat(keyboards).hasSize(2)
         }
@@ -339,30 +332,13 @@ class KeyboardRepositoryTest : SysuiTestCase() {
 
     private companion object {
         private const val PHYSICAL_FULL_KEYBOARD_ID = 1
-        private const val VIRTUAL_FULL_KEYBOARD_ID = 2
+        private const val VIRTUAL_FULL_KEYBOARD_ID = -2 // Virtual keyboards has id with minus value
         private const val PHYSICAL_NOT_FULL_KEYBOARD_ID = 3
         private const val ANOTHER_PHYSICAL_FULL_KEYBOARD_ID = 4
-        private const val NULL_DEVICE_ID = 5
+        private const val NULL_DEVICE_ID = -5
 
         private const val VENDOR_ID = 99
         private const val PRODUCT_ID = 101
-
-        private val INPUT_DEVICES_MAP: Map<Int, InputDevice> =
-            mapOf(
-                PHYSICAL_FULL_KEYBOARD_ID to inputDevice(virtual = false, fullKeyboard = true),
-                VIRTUAL_FULL_KEYBOARD_ID to inputDevice(virtual = true, fullKeyboard = true),
-                PHYSICAL_NOT_FULL_KEYBOARD_ID to inputDevice(virtual = false, fullKeyboard = false),
-                ANOTHER_PHYSICAL_FULL_KEYBOARD_ID to
-                    inputDevice(virtual = false, fullKeyboard = true)
-            )
-
-        private fun inputDevice(virtual: Boolean, fullKeyboard: Boolean): InputDevice =
-            mock<InputDevice>().also {
-                whenever(it.isVirtual).thenReturn(virtual)
-                whenever(it.isFullKeyboard).thenReturn(fullKeyboard)
-                whenever(it.vendorId).thenReturn(VENDOR_ID)
-                whenever(it.productId).thenReturn(PRODUCT_ID)
-            }
     }
 
     private class TestBacklightState(
