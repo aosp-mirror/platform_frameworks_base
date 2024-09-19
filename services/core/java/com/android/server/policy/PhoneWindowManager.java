@@ -3453,8 +3453,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // NOTE: Please try not to add new Shortcut combinations here and instead use KeyGestureEvents.
     // Add shortcut trigger logic in {@code KeyGestureController} and add handling logic in
     // {@link handleKeyGesture()}
-    @SuppressLint("MissingPermission")
     private boolean interceptSystemKeysAndShortcuts(IBinder focusedToken, KeyEvent event) {
+        if (useKeyGestureEventHandler()) {
+            return interceptSystemKeysAndShortcutsNew(focusedToken, event);
+        } else {
+            return interceptSystemKeysAndShortcutsOld(focusedToken, event);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private boolean interceptSystemKeysAndShortcutsOld(IBinder focusedToken, KeyEvent event) {
         final boolean keyguardOn = keyguardOn();
         final int keyCode = event.getKeyCode();
         final int repeatCount = event.getRepeatCount();
@@ -3868,6 +3876,59 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
                 }
                 return true;
+        }
+        if (isValidGlobalKey(keyCode)
+                && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
+            return true;
+        }
+
+        // Reserve all the META modifier combos for system behavior
+        return (metaState & KeyEvent.META_META_ON) != 0;
+    }
+
+    private boolean interceptSystemKeysAndShortcutsNew(IBinder focusedToken, KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        final int metaState = event.getMetaState();
+        final boolean keyguardOn = keyguardOn();
+
+        if (isUserSetupComplete() && !keyguardOn) {
+            if (mModifierShortcutManager.interceptKey(event)) {
+                dismissKeyboardShortcutsMenu();
+                return true;
+            }
+        }
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_HOME:
+                return handleHomeShortcuts(focusedToken, event);
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+                if (mUseTvRouting || mHandleVolumeKeysInWM) {
+                    // On TVs or when the configuration is enabled, volume keys never
+                    // go to the foreground app.
+                    dispatchDirectAudioEvent(event);
+                    return true;
+                }
+
+                // If the device is in VR mode and keys are "internal" (e.g. on the side of the
+                // device), then drop the volume keys and don't forward it to the
+                // application/dispatch the audio event.
+                if (mDefaultDisplayPolicy.isPersistentVrModeEnabled()) {
+                    final InputDevice d = event.getDevice();
+                    if (d != null && !d.isExternal()) {
+                        return true;
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_STEM_PRIMARY:
+                if (prepareToSendSystemKeyToApplication(focusedToken, event)) {
+                    // Send to app.
+                    return false;
+                } else {
+                    // Intercepted.
+                    sendSystemKeyToStatusBarAsync(event);
+                    return true;
+                }
         }
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
