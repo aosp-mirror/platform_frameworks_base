@@ -1207,9 +1207,11 @@ final class HdmiCecController {
 
         @Override
         public void onValues(int result, short addr) {
-            if (result == Result.SUCCESS) {
-                synchronized (mLock) {
+            synchronized (mLock) {
+                if (result == Result.SUCCESS) {
                     mPhysicalAddress = Short.toUnsignedInt(addr);
+                } else {
+                    mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
                 }
             }
         }
@@ -1605,9 +1607,11 @@ final class HdmiCecController {
 
         @Override
         public void onValues(int result, short addr) {
-            if (result == Result.SUCCESS) {
-                synchronized (mLock) {
+            synchronized (mLock) {
+                if (result == Result.SUCCESS) {
                     mPhysicalAddress = Short.toUnsignedInt(addr);
+                } else {
+                    mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
                 }
             }
         }
