@@ -85,7 +85,11 @@ package android.nfc {
     method public void onEnable(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onEnableFinished(int);
     method public void onEnableStarted();
+    method public void onGetOemAppSearchIntent(@NonNull java.util.List<java.lang.String>, @NonNull java.util.function.Consumer<android.content.Intent>);
     method public void onHceEventReceived(int);
+    method public void onLaunchHceAppChooserActivity(@NonNull String, @NonNull java.util.List<android.nfc.cardemulation.ApduServiceInfo>, @NonNull android.content.ComponentName, @NonNull String);
+    method public void onLaunchHceTapAgainDialog(@NonNull android.nfc.cardemulation.ApduServiceInfo, @NonNull String);
+    method public void onNdefMessage(@NonNull android.nfc.Tag, @NonNull android.nfc.NdefMessage, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onNdefRead(@NonNull java.util.function.Consumer<java.lang.Boolean>);
     method public void onReaderOptionChanged(boolean);
     method public void onRfDiscoveryStarted(boolean);
