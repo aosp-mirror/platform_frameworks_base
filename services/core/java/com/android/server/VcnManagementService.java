@@ -178,9 +178,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     public static final boolean VDBG = false; // STOPSHIP: if true
 
+    // The system path is copied from Environment.getDataSystemDirectory
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final String VCN_CONFIG_FILE =
-            new File(Environment.getDataSystemDirectory(), "vcn/configs.xml").getPath();
+            new File(Environment.getDataDirectory(), "system/vcn/configs.xml").getPath();
 
     // TODO(b/176956496): Directly use CarrierServiceBindHelper.UNBIND_DELAY_MILLIS
     @VisibleForTesting(visibility = Visibility.PRIVATE)

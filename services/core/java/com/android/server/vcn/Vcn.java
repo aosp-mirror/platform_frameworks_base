@@ -86,6 +86,9 @@ public class Vcn extends Handler {
     private static final int MSG_EVENT_BASE = 0;
     private static final int MSG_CMD_BASE = 100;
 
+    // Copied from Settings.Global.MOBILE_DATA
+    private static final String SETTINGS_GLOBAL_MOBILE_DATA_STRING = "mobile_data";
+
     /**
      * A carrier app updated the configuration.
      *
@@ -219,7 +222,8 @@ public class Vcn extends Handler {
         mContentResolver = mDeps.newVcnContentResolver(mVcnContext);
         mMobileDataSettingsObserver = new VcnMobileDataContentObserver(this /* handler */);
 
-        final Uri uri = Settings.Global.getUriFor(Settings.Global.MOBILE_DATA);
+        // TODO: b/364740845: Replace it with DataEnabledListener
+        final Uri uri = Settings.Global.getUriFor(SETTINGS_GLOBAL_MOBILE_DATA_STRING);
         mContentResolver.registerContentObserver(
                 uri, true /* notifyForDescendants */, mMobileDataSettingsObserver);
 
