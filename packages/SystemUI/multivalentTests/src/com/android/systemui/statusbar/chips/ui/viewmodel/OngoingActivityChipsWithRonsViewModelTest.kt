@@ -34,8 +34,10 @@ import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
+import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.notification.ui.viewmodel.NotifChipsViewModelTest.Companion.assertIsNotifChip
 import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModelTest.Companion.addDemoRonChip
 import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.demoRonChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
@@ -46,6 +48,10 @@ import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsVie
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.assertIsShareToAppChip
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
 import com.android.systemui.statusbar.commandline.commandRegistry
+import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
@@ -83,6 +89,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
     private val screenRecordState = kosmos.screenRecordRepository.screenRecordState
     private val mediaProjectionState = kosmos.fakeMediaProjectionRepository.mediaProjectionState
     private val callRepo = kosmos.ongoingCallRepository
+    private val activeNotificationListRepository = kosmos.activeNotificationListRepository
 
     private val pw = PrintWriter(StringWriter())
 
@@ -107,7 +114,7 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
         val icon =
             BitmapDrawable(
                 context.resources,
-                Bitmap.createBitmap(/* width= */ 100, /* height= */ 100, Bitmap.Config.ARGB_8888)
+                Bitmap.createBitmap(/* width= */ 100, /* height= */ 100, Bitmap.Config.ARGB_8888),
             )
         whenever(kosmos.packageManager.getApplicationIcon(any<String>())).thenReturn(icon)
     }
@@ -285,6 +292,97 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
 
             assertIsCallChip(latest!!.primary)
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+        }
+
+    @Test
+    fun chips_singleNotifChip_primaryIsNotifSecondaryIsHidden() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val icon = mock<StatusBarIconView>()
+            setNotifs(listOf(activeNotificationModel(key = "notif", statusBarChipIcon = icon)))
+
+            assertIsNotifChip(latest!!.primary, icon)
+            assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+        }
+
+    @Test
+    fun chips_twoNotifChips_primaryAndSecondaryAreNotifsInOrder() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val firstIcon = mock<StatusBarIconView>()
+            val secondIcon = mock<StatusBarIconView>()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(key = "firstNotif", statusBarChipIcon = firstIcon),
+                    activeNotificationModel(key = "secondNotif", statusBarChipIcon = secondIcon),
+                )
+            )
+
+            assertIsNotifChip(latest!!.primary, firstIcon)
+            assertIsNotifChip(latest!!.secondary, secondIcon)
+        }
+
+    @Test
+    fun chips_threeNotifChips_topTwoShown() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val firstIcon = mock<StatusBarIconView>()
+            val secondIcon = mock<StatusBarIconView>()
+            val thirdIcon = mock<StatusBarIconView>()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(key = "firstNotif", statusBarChipIcon = firstIcon),
+                    activeNotificationModel(key = "secondNotif", statusBarChipIcon = secondIcon),
+                    activeNotificationModel(key = "thirdNotif", statusBarChipIcon = thirdIcon),
+                )
+            )
+
+            assertIsNotifChip(latest!!.primary, firstIcon)
+            assertIsNotifChip(latest!!.secondary, secondIcon)
+        }
+
+    @Test
+    fun chips_callAndNotifs_primaryIsCallSecondaryIsNotif() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            val firstIcon = mock<StatusBarIconView>()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(key = "firstNotif", statusBarChipIcon = firstIcon),
+                    activeNotificationModel(
+                        key = "secondNotif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                    ),
+                )
+            )
+
+            assertIsCallChip(latest!!.primary)
+            assertIsNotifChip(latest!!.secondary, firstIcon)
+        }
+
+    @Test
+    fun chips_screenRecordAndCallAndNotifs_notifsNotShown() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            screenRecordState.value = ScreenRecordModel.Recording
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                    )
+                )
+            )
+
+            assertIsScreenRecordChip(latest!!.primary)
+            assertIsCallChip(latest!!.secondary)
         }
 
     @Test
@@ -530,5 +628,13 @@ class OngoingActivityChipsWithRonsViewModelTest : SysuiTestCase() {
         assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
         assertThat((latest as OngoingActivityChipModel.Shown).icon)
             .isInstanceOf(OngoingActivityChipModel.ChipIcon.FullColorAppIcon::class.java)
+    }
+
+    private fun setNotifs(notifs: List<ActiveNotificationModel>) {
+        activeNotificationListRepository.activeNotifications.value =
+            ActiveNotificationsStore.Builder()
+                .apply { notifs.forEach { addIndividualNotif(it) } }
+                .build()
+        testScope.runCurrent()
     }
 }

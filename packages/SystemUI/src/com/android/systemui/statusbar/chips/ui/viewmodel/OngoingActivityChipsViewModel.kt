@@ -24,19 +24,20 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.ui.viewmodel.CallChipViewModel
 import com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel.CastToOtherDeviceChipViewModel
+import com.android.systemui.statusbar.chips.notification.ui.viewmodel.NotifChipsViewModel
 import com.android.systemui.statusbar.chips.ron.demo.ui.viewmodel.DemoRonChipViewModel
 import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips
 import com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel.ScreenRecordChipViewModel
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
+import com.android.systemui.util.kotlin.combine
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -55,6 +56,7 @@ constructor(
     shareToAppChipViewModel: ShareToAppChipViewModel,
     castToOtherDeviceChipViewModel: CastToOtherDeviceChipViewModel,
     callChipViewModel: CallChipViewModel,
+    notifChipsViewModel: NotifChipsViewModel,
     demoRonChipViewModel: DemoRonChipViewModel,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) {
@@ -63,6 +65,7 @@ constructor(
         ShareToApp,
         CastToOtherDevice,
         Call,
+        Notification,
         /** A demo of a RON chip (rich ongoing notification chip), used just for testing. */
         DemoRon,
     }
@@ -85,6 +88,7 @@ constructor(
             val shareToApp: OngoingActivityChipModel.Hidden,
             val castToOtherDevice: OngoingActivityChipModel.Hidden,
             val call: OngoingActivityChipModel.Hidden,
+            val notifs: OngoingActivityChipModel.Hidden,
             val demoRon: OngoingActivityChipModel.Hidden,
         ) : InternalChipModel
     }
@@ -94,6 +98,7 @@ constructor(
         val shareToApp: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
         val castToOtherDevice: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
         val call: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
+        val notifs: List<OngoingActivityChipModel.Shown> = emptyList(),
         val demoRon: OngoingActivityChipModel = OngoingActivityChipModel.Hidden(),
     )
 
@@ -104,8 +109,9 @@ constructor(
                 shareToAppChipViewModel.chip,
                 castToOtherDeviceChipViewModel.chip,
                 callChipViewModel.chip,
+                notifChipsViewModel.chips,
                 demoRonChipViewModel.chip,
-            ) { screenRecord, shareToApp, castToOtherDevice, call, demoRon ->
+            ) { screenRecord, shareToApp, castToOtherDevice, call, notifs, demoRon ->
                 logger.log(
                     TAG,
                     LogLevel.INFO,
@@ -121,15 +127,18 @@ constructor(
                     LogLevel.INFO,
                     {
                         str1 = call.logName
-                        str2 = demoRon.logName
+                        // TODO(b/364653005): Log other information for notification chips.
+                        str2 = notifs.map { it.logName }.toString()
+                        str3 = demoRon.logName
                     },
-                    { "... > Call=$str1 > DemoRon=$str2" }
+                    { "... > Call=$str1 > Notifs=$str2 > DemoRon=$str3" },
                 )
                 ChipBundle(
                     screenRecord = screenRecord,
                     shareToApp = shareToApp,
                     castToOtherDevice = castToOtherDevice,
                     call = call,
+                    notifs = notifs,
                     demoRon = demoRon,
                 )
             }
@@ -199,11 +208,7 @@ constructor(
                         secondary = OngoingActivityChipModel.Hidden(),
                     )
                 }
-                .stateIn(
-                    scope,
-                    SharingStarted.Lazily,
-                    MultipleOngoingActivityChipsModel(),
-                )
+                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModel())
         } else {
             internalChips
                 .pairwise(initialValue = DEFAULT_MULTIPLE_INTERNAL_HIDDEN_MODEL)
@@ -212,11 +217,7 @@ constructor(
                     val correctSecondary = createOutputModel(old.secondary, new.secondary)
                     MultipleOngoingActivityChipsModel(correctPrimary, correctSecondary)
                 }
-                .stateIn(
-                    scope,
-                    SharingStarted.Lazily,
-                    MultipleOngoingActivityChipsModel(),
-                )
+                .stateIn(scope, SharingStarted.Lazily, MultipleOngoingActivityChipsModel())
         }
 
     /** A data class representing the return result of [pickMostImportantChip]. */
@@ -251,7 +252,7 @@ constructor(
                             // suppress the share-to-app chip to make sure they don't both show.
                             // See b/296461748.
                             shareToApp = OngoingActivityChipModel.Hidden(),
-                        )
+                        ),
                 )
             bundle.shareToApp is OngoingActivityChipModel.Shown ->
                 MostImportantChipResult(
@@ -274,6 +275,13 @@ constructor(
                     mostImportantChip = InternalChipModel.Shown(ChipType.Call, bundle.call),
                     remainingChips = bundle.copy(call = OngoingActivityChipModel.Hidden()),
                 )
+            bundle.notifs.isNotEmpty() ->
+                MostImportantChipResult(
+                    mostImportantChip =
+                        InternalChipModel.Shown(ChipType.Notification, bundle.notifs.first()),
+                    remainingChips =
+                        bundle.copy(notifs = bundle.notifs.subList(1, bundle.notifs.size)),
+                )
             bundle.demoRon is OngoingActivityChipModel.Shown -> {
                 StatusBarRonChips.assertInNewMode()
                 MostImportantChipResult(
@@ -287,6 +295,7 @@ constructor(
                 check(bundle.shareToApp is OngoingActivityChipModel.Hidden)
                 check(bundle.castToOtherDevice is OngoingActivityChipModel.Hidden)
                 check(bundle.call is OngoingActivityChipModel.Hidden)
+                check(bundle.notifs.isEmpty())
                 check(bundle.demoRon is OngoingActivityChipModel.Hidden)
                 MostImportantChipResult(
                     mostImportantChip =
@@ -295,6 +304,7 @@ constructor(
                             shareToApp = bundle.shareToApp,
                             castToOtherDevice = bundle.castToOtherDevice,
                             call = bundle.call,
+                            notifs = OngoingActivityChipModel.Hidden(),
                             demoRon = bundle.demoRon,
                         ),
                     // All the chips are already hidden, so no need to filter anything out of the
@@ -323,6 +333,7 @@ constructor(
                 ChipType.ShareToApp -> new.shareToApp
                 ChipType.CastToOtherDevice -> new.castToOtherDevice
                 ChipType.Call -> new.call
+                ChipType.Notification -> new.notifs
                 ChipType.DemoRon -> new.demoRon
             }
         } else if (new is InternalChipModel.Shown) {
@@ -344,6 +355,7 @@ constructor(
                 shareToApp = OngoingActivityChipModel.Hidden(),
                 castToOtherDevice = OngoingActivityChipModel.Hidden(),
                 call = OngoingActivityChipModel.Hidden(),
+                notifs = OngoingActivityChipModel.Hidden(),
                 demoRon = OngoingActivityChipModel.Hidden(),
             )
 
