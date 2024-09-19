@@ -16,4 +16,4 @@
 
 package com.android.wm.shell.shared;
 
-parcelable GroupedRecentTaskInfo;
+parcelable GroupedTaskInfo;

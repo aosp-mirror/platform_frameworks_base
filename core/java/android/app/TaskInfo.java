@@ -358,8 +358,9 @@ public class TaskInfo {
         // Do nothing
     }
 
-    private TaskInfo(Parcel source) {
-        readFromParcel(source);
+    /** @hide */
+    public TaskInfo(Parcel source) {
+        readTaskFromParcel(source);
     }
 
     /**
@@ -516,7 +517,7 @@ public class TaskInfo {
     /**
      * Reads the TaskInfo from a parcel.
      */
-    void readFromParcel(Parcel source) {
+    void readTaskFromParcel(Parcel source) {
         userId = source.readInt();
         taskId = source.readInt();
         effectiveUid = source.readInt();
@@ -568,8 +569,9 @@ public class TaskInfo {
 
     /**
      * Writes the TaskInfo to a parcel.
+     * @hide
      */
-    void writeToParcel(Parcel dest, int flags) {
+    public void writeTaskToParcel(Parcel dest, int flags) {
         dest.writeInt(userId);
         dest.writeInt(taskId);
         dest.writeInt(effectiveUid);
