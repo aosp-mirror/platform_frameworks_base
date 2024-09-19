@@ -592,12 +592,16 @@ class HandleMenu(
             floatingBtn.visibility = View.GONE
 
             fullscreenBtn.isSelected = taskInfo.isFullscreen
+            fullscreenBtn.isEnabled = !taskInfo.isFullscreen
             fullscreenBtn.imageTintList = style.windowingButtonColor
             splitscreenBtn.isSelected = taskInfo.isMultiWindow
+            splitscreenBtn.isEnabled = !taskInfo.isMultiWindow
             splitscreenBtn.imageTintList = style.windowingButtonColor
             floatingBtn.isSelected = taskInfo.isPinned
+            floatingBtn.isEnabled = !taskInfo.isPinned
             floatingBtn.imageTintList = style.windowingButtonColor
             desktopBtn.isSelected = taskInfo.isFreeform
+            desktopBtn.isEnabled = !taskInfo.isFreeform
             desktopBtn.imageTintList = style.windowingButtonColor
         }
 
