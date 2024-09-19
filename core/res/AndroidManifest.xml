@@ -8780,6 +8780,20 @@
                 android:featureFlag="com.android.art.flags.executable_method_file_offsets" />
 
     <!--
+        @SystemApi
+        @FlaggedApi(android.content.pm.Flags.FLAG_UID_BASED_PROVIDER_LOOKUP)
+        Allows an app to resolve components (e.g ContentProviders) on behalf of
+        other UIDs
+        <p>Protection level: signature|privileged
+        @hide
+   -->
+    <permission
+        android:name="android.permission.RESOLVE_COMPONENT_FOR_UID"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.content.pm.uid_based_provider_lookup" />
+    <uses-permission android:name="android.permission.RESOLVE_COMPONENT_FOR_UID" />
+
+    <!--
         @TestApi
         Signature permission reserved for testing. This should never be used to
         gate any actual functionality.

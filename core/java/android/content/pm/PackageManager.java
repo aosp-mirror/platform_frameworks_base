@@ -8349,6 +8349,25 @@ public abstract class PackageManager {
     }
 
     /**
+     * Resolve content providers with a given authority, for a specific callingUid.
+     * @param authority Authority of the content provider
+     * @param flags Additional option flags to modify the data returned.
+     * @param callingUid UID of the caller who's access to the content provider is to be checked
+
+     * @return ProviderInfo of the resolved content provider.
+     * @hide
+     */
+    @Nullable
+    @FlaggedApi(android.content.pm.Flags.FLAG_UID_BASED_PROVIDER_LOOKUP)
+    @RequiresPermission(Manifest.permission.RESOLVE_COMPONENT_FOR_UID)
+    @SystemApi
+    public ProviderInfo resolveContentProviderForUid(@NonNull String authority,
+        @NonNull ComponentInfoFlags flags, int callingUid) {
+        throw new UnsupportedOperationException(
+            "resolveContentProviderForUid not implemented in subclass");
+    }
+
+    /**
      * Retrieve content provider information.
      * <p>
      * <em>Note: unlike most other methods, an empty result set is indicated
