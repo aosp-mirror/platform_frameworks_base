@@ -379,10 +379,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         /** Gets transports that need to be marked as restricted by the VCN from CarrierConfig */
+        // TODO: b/262269892 This method was created to perform experiments before the relevant API
+        // was exposed. Now it is obsolete and should be removed.
         @VisibleForTesting(visibility = Visibility.PRIVATE)
         public Set<Integer> getRestrictedTransportsFromCarrierConfig(
                 ParcelUuid subGrp, TelephonySubscriptionSnapshot lastSnapshot) {
-            if (!Build.IS_ENG && !Build.IS_USERDEBUG) {
+            if (!Build.isDebuggable()) {
                 return RESTRICTED_TRANSPORTS_DEFAULT;
             }
 
