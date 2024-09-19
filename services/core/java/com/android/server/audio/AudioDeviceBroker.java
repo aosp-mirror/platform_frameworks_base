@@ -17,6 +17,11 @@ package com.android.server.audio;
 
 import static android.media.audio.Flags.scoManagedByAudio;
 
+import static com.android.media.audio.Flags.equalScoLeaVcIndexRange;
+import static com.android.server.audio.AudioService.BT_COMM_DEVICE_ACTIVE_BLE_HEADSET;
+import static com.android.server.audio.AudioService.BT_COMM_DEVICE_ACTIVE_BLE_SPEAKER;
+import static com.android.server.audio.AudioService.BT_COMM_DEVICE_ACTIVE_SCO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
@@ -64,6 +69,7 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.audio.AudioService.BtCommDeviceActiveType;
 import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
@@ -835,15 +841,15 @@ public class AudioDeviceBroker {
         return isDeviceOnForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
-    /*package*/ boolean isBluetoothScoActive() {
+    private boolean isBluetoothScoActive() {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
     }
 
-    /*package*/ boolean isBluetoothBleHeadsetActive() {
+    private boolean isBluetoothBleHeadsetActive() {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_HEADSET);
     }
 
-    /*package*/ boolean isBluetoothBleSpeakerActive() {
+    private boolean isBluetoothBleSpeakerActive() {
         return isDeviceActiveForCommunication(AudioDeviceInfo.TYPE_BLE_SPEAKER);
     }
 
@@ -1437,7 +1443,20 @@ public class AudioDeviceBroker {
         }
         mCurCommunicationPortId = portId;
 
-        mAudioService.postScoDeviceActive(isBluetoothScoActive());
+        @BtCommDeviceActiveType int btCommDeviceActiveType = 0;
+        if (equalScoLeaVcIndexRange()) {
+            if (isBluetoothScoActive()) {
+                btCommDeviceActiveType = BT_COMM_DEVICE_ACTIVE_SCO;
+            } else if (isBluetoothBleHeadsetActive()) {
+                btCommDeviceActiveType = BT_COMM_DEVICE_ACTIVE_BLE_HEADSET;
+            } else if (isBluetoothBleSpeakerActive()) {
+                btCommDeviceActiveType = BT_COMM_DEVICE_ACTIVE_BLE_SPEAKER;
+            }
+            mAudioService.postBtCommDeviceActive(btCommDeviceActiveType);
+        } else {
+            mAudioService.postBtCommDeviceActive(
+                    isBluetoothScoActive() ? BT_COMM_DEVICE_ACTIVE_SCO : btCommDeviceActiveType);
+        }
 
         final int nbDispatchers = mCommDevDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; i++) {
