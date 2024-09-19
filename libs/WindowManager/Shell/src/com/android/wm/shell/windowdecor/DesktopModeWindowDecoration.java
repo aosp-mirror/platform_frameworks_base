@@ -426,6 +426,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         if (!mTaskInfo.isFocused) {
             closeHandleMenu();
+            closeManageWindowsMenu();
             closeMaximizeMenu();
         }
         updateDragResizeListener(oldDecorationSurface);
@@ -1150,7 +1151,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     void closeManageWindowsMenu() {
-        mManageWindowsMenu.close();
+        if (mManageWindowsMenu != null) {
+            mManageWindowsMenu.close();
+        }
+        mManageWindowsMenu = null;
     }
 
     private void updateGenericLink() {
@@ -1180,6 +1184,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @Override
     void releaseViews(WindowContainerTransaction wct) {
         closeHandleMenu();
+        closeManageWindowsMenu();
         closeMaximizeMenu();
         super.releaseViews(wct);
     }
@@ -1343,6 +1348,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     public void close() {
         closeDragResizeListener();
         closeHandleMenu();
+        closeManageWindowsMenu();
         mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
         disposeStatusBarInputLayer();
