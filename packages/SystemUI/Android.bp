@@ -784,6 +784,7 @@ android_app {
     resource_dirs: [],
     kotlincflags: ["-Xjvm-default=all"],
     optimize: {
+        optimize: false,
         shrink_resources: false,
         optimized_shrink_resources: false,
         proguard_flags_files: ["proguard.flags"],
