@@ -380,6 +380,12 @@ package android.os {
     method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
   }
 
+  public class Handler {
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final boolean hasMessagesOrCallbacks();
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeCallbacksAndEqualMessages(@Nullable Object);
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeEqualMessages(int, @Nullable Object);
+  }
+
   public class IpcDataCache<Query, Result> {
     ctor public IpcDataCache(int, @NonNull String, @NonNull String, @NonNull String, @NonNull android.os.IpcDataCache.QueryHandler<Query,Result>);
     method public void disableForCurrentProcess();
