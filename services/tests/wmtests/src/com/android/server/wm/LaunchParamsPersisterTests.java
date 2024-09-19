@@ -293,6 +293,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTestTask, null, mResult);
 
@@ -311,6 +312,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
         target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
@@ -339,6 +341,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
 
@@ -408,6 +411,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTestTask, null, mResult);
 
@@ -425,6 +429,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTestTask, null, mResult);
 
@@ -453,6 +458,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTestTask, null, mResult);
 
@@ -470,6 +476,7 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTestTask, null, mResult);
 
@@ -488,9 +495,49 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
                 mUserFolderGetter);
         target.onSystemReady();
         target.onUnlockUser(TEST_USER_ID);
+        mPersisterQueue.flush();
 
         target.getLaunchParams(mTestTask, null, mResult);
 
+        assertTrue("Result should be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testAbortsLoadingWhenUserCleansUpBeforeLoadingFinishes() {
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+        assertEquals(1, mPersisterQueue.mQueue.size());
+        PersisterQueue.QueueItem item = mPersisterQueue.mQueue.get(0);
+
+        target.onCleanupUser(TEST_USER_ID);
+        mPersisterQueue.flush();
+
+        // Explicitly run the loading item to mimic the situation where the item already started.
+        item.process();
+
+        target.getLaunchParams(mTestTask, null, mResult);
+        assertTrue("Result should be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testGetLaunchParamsNotBlockedByAbortedLoading() {
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+        target.onCleanupUser(TEST_USER_ID);
+
+        // As long as the call in the next line returns, we know it's not waiting for the loading to
+        // finish because we run items synchronously in this test.
+        target.getLaunchParams(mTestTask, null, mResult);
         assertTrue("Result should be empty.", mResult.isEmpty());
     }
 
@@ -508,17 +555,17 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
 
     /**
      * Test double to {@link PersisterQueue}. This is not thread-safe and caller should always use
-     * {@link #flush()} to execute write items in it.
+     * {@link #flush()} to execute items in it.
      */
     static class TestPersisterQueue extends PersisterQueue {
-        private List<WriteQueueItem> mWriteQueue = new ArrayList<>();
+        private List<QueueItem> mQueue = new ArrayList<>();
         private List<Listener> mListeners = new ArrayList<>();
 
         @Override
         void flush() {
-            while (!mWriteQueue.isEmpty()) {
-                final WriteQueueItem item = mWriteQueue.remove(0);
-                final boolean queueEmpty = mWriteQueue.isEmpty();
+            while (!mQueue.isEmpty()) {
+                final QueueItem item = mQueue.remove(0);
+                final boolean queueEmpty = mQueue.isEmpty();
                 for (Listener listener : mListeners) {
                     listener.onPreProcessItem(queueEmpty);
                 }
@@ -537,18 +584,18 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         }
 
         @Override
-        void addItem(WriteQueueItem item, boolean flush) {
-            mWriteQueue.add(item);
+        synchronized void addItem(QueueItem item, boolean flush) {
+            mQueue.add(item);
             if (flush) {
                 flush();
             }
         }
 
         @Override
-        synchronized <T extends WriteQueueItem> T findLastItem(Predicate<T> predicate,
+        synchronized <T extends WriteQueueItem<T>> T findLastItem(Predicate<T> predicate,
                 Class<T> clazz) {
-            for (int i = mWriteQueue.size() - 1; i >= 0; --i) {
-                WriteQueueItem writeQueueItem = mWriteQueue.get(i);
+            for (int i = mQueue.size() - 1; i >= 0; --i) {
+                QueueItem writeQueueItem = mQueue.get(i);
                 if (clazz.isInstance(writeQueueItem)) {
                     T item = clazz.cast(writeQueueItem);
                     if (predicate.test(item)) {
@@ -561,14 +608,14 @@ public class LaunchParamsPersisterTests extends WindowTestsBase {
         }
 
         @Override
-        synchronized <T extends WriteQueueItem> void removeItems(Predicate<T> predicate,
+        synchronized <T extends QueueItem> void removeItems(Predicate<T> predicate,
                 Class<T> clazz) {
-            for (int i = mWriteQueue.size() - 1; i >= 0; --i) {
-                WriteQueueItem writeQueueItem = mWriteQueue.get(i);
+            for (int i = mQueue.size() - 1; i >= 0; --i) {
+                QueueItem writeQueueItem = mQueue.get(i);
                 if (clazz.isInstance(writeQueueItem)) {
                     T item = clazz.cast(writeQueueItem);
                     if (predicate.test(item)) {
-                        mWriteQueue.remove(i);
+                        mQueue.remove(i);
                     }
                 }
             }
