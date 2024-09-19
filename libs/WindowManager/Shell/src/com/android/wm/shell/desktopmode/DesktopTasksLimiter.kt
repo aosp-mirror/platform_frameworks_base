@@ -24,6 +24,7 @@ import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
+import android.window.flags.DesktopModeFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
@@ -161,6 +162,8 @@ class DesktopTasksLimiter (
     @VisibleForTesting
     inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
         override fun onActiveTasksChanged(displayId: Int) {
+            // If back navigation is enabled, we shouldn't remove the leftover tasks
+            if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
             val wct = WindowContainerTransaction()
             removeLeftoverMinimizedTasks(displayId, wct)
             shellTaskOrganizer.applyTransaction(wct)
