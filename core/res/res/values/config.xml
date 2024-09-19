@@ -7136,4 +7136,8 @@
     <!-- Whether to enable scaling and fading animation to scrollviews while scrolling.
          P.S this is a change only intended for wear devices. -->
     <bool name="config_enableViewGroupScalingFading">false</bool>
+    <!-- Action for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
+    <string name="identity_check_settings_action"></string>
+    <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
+    <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 </resources>
