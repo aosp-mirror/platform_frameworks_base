@@ -147,6 +147,12 @@ class InsetsSourceProvider {
         return mSource;
     }
 
+    @VisibleForTesting
+    @NonNull
+    Rect getSourceFrame() {
+        return mSourceFrame;
+    }
+
     /**
      * @return Whether the current flag configuration allows to control this source.
      */

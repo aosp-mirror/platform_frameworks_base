@@ -1378,6 +1378,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // should be updated after the new given insets are sent to window manager.
             return;
         }
+        if (!mRelayoutCalled) {
+            // The window was not laid out yet. The source frame should be updated after the window
+            // is laid out.
+            return;
+        }
         final SparseArray<InsetsSourceProvider> providers = getInsetsSourceProviders();
         for (int i = providers.size() - 1; i >= 0; i--) {
             providers.valueAt(i).updateSourceFrame(winFrame);
