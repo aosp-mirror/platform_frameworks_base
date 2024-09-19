@@ -108,7 +108,7 @@ constructor(
 
         fun dispatchTouchEvent(
             ev: MotionEvent?,
-            disallowInterceptConsumer: Consumer<Boolean>?
+            disallowInterceptConsumer: Consumer<Boolean>?,
         ): Boolean {
             disallowInterceptConsumer?.apply { consumers.add(this) }
 
@@ -252,9 +252,7 @@ constructor(
      *
      * @throws RuntimeException if the view is already initialized
      */
-    fun initView(
-        context: Context,
-    ): View {
+    fun initView(context: Context): View {
         return initView(
             ComposeView(context).apply {
                 repeatWhenAttached {
@@ -329,12 +327,7 @@ constructor(
                 val ltr = containerView.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
                 val backGestureInset =
-                    Rect(
-                        0,
-                        0,
-                        if (ltr) 0 else containerView.right,
-                        containerView.bottom,
-                    )
+                    Rect(0, 0, if (ltr) 0 else containerView.right, containerView.bottom)
 
                 containerView.systemGestureExclusionRects =
                     if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
@@ -351,11 +344,11 @@ constructor(
                                 0,
                                 topEdgeSwipeRegionWidth,
                                 containerView.right,
-                                containerView.bottom - bottomEdgeSwipeRegionWidth
+                                containerView.bottom - bottomEdgeSwipeRegionWidth,
                             ),
                             // Disable back gestures on the left side of the screen, to avoid
                             // conflicting with scene transitions.
-                            backGestureInset
+                            backGestureInset,
                         )
                     }
                 logger.d({ "Insets updated: $str1" }) {
@@ -372,7 +365,7 @@ constructor(
             containerView,
             anyOf(
                 keyguardInteractor.primaryBouncerShowing,
-                keyguardInteractor.alternateBouncerShowing
+                keyguardInteractor.alternateBouncerShowing,
             ),
             {
                 anyBouncerShowing = it
@@ -380,12 +373,12 @@ constructor(
                     logger.d({ "New value for anyBouncerShowing: $bool1" }) { bool1 = it }
                 }
                 updateTouchHandlingState()
-            }
+            },
         )
         collectFlow(
             containerView,
             keyguardTransitionInteractor.isFinishedIn(KeyguardState.LOCKSCREEN),
-            { onLockscreen = it }
+            { onLockscreen = it },
         )
         collectFlow(
             containerView,
@@ -393,7 +386,7 @@ constructor(
             {
                 hubShowing = it
                 updateTouchHandlingState()
-            }
+            },
         )
         collectFlow(
             containerView,
@@ -404,12 +397,12 @@ constructor(
                 communalInteractor.editActivityShowing,
                 keyguardTransitionInteractor.isInTransition(
                     Edge.create(KeyguardState.GONE, KeyguardState.GLANCEABLE_HUB)
-                )
+                ),
             ),
             {
                 inEditModeTransition = it
                 updateTouchHandlingState()
-            }
+            },
         )
         collectFlow(
             containerView,
@@ -417,7 +410,7 @@ constructor(
                 shadeInteractor.isAnyFullyExpanded,
                 shadeInteractor.isUserInteracting,
                 shadeInteractor.isShadeFullyCollapsed,
-                ::Triple
+                ::Triple,
             ),
             { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
                 shadeConsumingTouches = isUserInteracting
@@ -441,7 +434,7 @@ constructor(
                         }
                     }
                 updateTouchHandlingState()
-            }
+            },
         )
         collectFlow(containerView, keyguardInteractor.isDreaming, { isDreaming = it })
 
@@ -628,7 +621,7 @@ constructor(
             powerManager.userActivity(
                 SystemClock.uptimeMillis(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH,
-                0
+                0,
             )
         }
     }
