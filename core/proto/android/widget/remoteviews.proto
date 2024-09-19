@@ -299,6 +299,14 @@ message RemoteViewsProto {
             NightModeReflectionAction night_mode_reflection_action = 5;
             ReflectionAction reflection_action = 6;
             RemoveFromParentAction remove_from_parent_action = 7;
+            ResourceReflectionAction resource_reflection_action = 8;
+            SetCompoundButtonCheckedAction set_compound_button_checked_action = 9;
+            SetDrawableTintAction set_drawable_tint_action = 10;
+            SetEmptyViewAction set_empty_view_action = 11;
+            SetIntTagAction set_int_tag_action = 12;
+            SetRadioGroupCheckedAction set_radio_group_checked_action = 13;
+            SetRemoteCollectionItemListAdapterAction set_remote_collection_item_list_adapter_action = 14;
+            SetRippleDrawableColorAction set_ripple_drawable_color_action = 15;
         }
     }
 
@@ -373,6 +381,52 @@ message RemoteViewsProto {
 
     message RemoveFromParentAction {
         optional string view_id = 1;
+    }
+
+    message ResourceReflectionAction {
+        optional string view_id = 1;
+        optional string method_name = 2;
+        optional int32 resource_type = 3;
+        optional string res_id = 4;
+        optional int32 parameter_type = 5;
+    }
+
+    message SetCompoundButtonCheckedAction {
+        optional string view_id = 1;
+        optional bool checked = 2;
+    }
+
+    message SetDrawableTintAction {
+        optional string view_id = 1;
+        optional bool target_background = 2;
+        optional int32 color_filter = 3;
+        optional int32 filter_mode = 4;
+    }
+
+    message SetEmptyViewAction {
+        optional string view_id = 1;
+        optional string empty_view_id = 2;
+    }
+
+    message SetIntTagAction {
+        optional string view_id = 1;
+        optional string key = 2;
+        optional int32 tag = 3;
+    }
+
+    message SetRadioGroupCheckedAction {
+        optional string view_id = 1;
+        optional string checked_id = 2;
+    }
+
+    message SetRemoteCollectionItemListAdapterAction {
+        optional string view_id = 1;
+        optional RemoteCollectionItems items = 2;
+    }
+
+    message SetRippleDrawableColorAction {
+        optional string view_id = 1;
+        optional android.content.res.ColorStateListProto color_state_list = 2;
     }
 }
 

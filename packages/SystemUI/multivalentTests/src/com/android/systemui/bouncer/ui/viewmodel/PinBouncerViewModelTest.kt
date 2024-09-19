@@ -27,6 +27,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
@@ -35,12 +36,15 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.bouncer.data.repository.fakeSimBouncerRepository
 import com.android.systemui.classifier.fakeFalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.haptics.msdl.bouncerHapticPlayer
+import com.android.systemui.haptics.msdl.fakeMSDLPlayer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
+import com.google.android.msdl.data.model.MSDLToken
 import com.google.common.truth.Truth.assertThat
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -64,11 +68,14 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val sceneInteractor by lazy { kosmos.sceneInteractor }
     private val authenticationInteractor by lazy { kosmos.authenticationInteractor }
+    private val msdlPlayer = kosmos.fakeMSDLPlayer
+    private val bouncerHapticPlayer = kosmos.bouncerHapticPlayer
     private val underTest by lazy {
         kosmos.pinBouncerViewModelFactory.create(
             isInputEnabled = MutableStateFlow(true),
             onIntentionalUserInput = {},
             authenticationMethod = AuthenticationMethodModel.Pin,
+            bouncerHapticPlayer = bouncerHapticPlayer,
         )
     }
 
@@ -97,6 +104,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                     isInputEnabled = MutableStateFlow(true),
                     onIntentionalUserInput = {},
                     authenticationMethod = AuthenticationMethodModel.Sim,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
 
             assertThat(underTest.isSimAreaVisible).isTrue()
@@ -122,6 +130,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
                     isInputEnabled = MutableStateFlow(true),
                     onIntentionalUserInput = {},
                     authenticationMethod = AuthenticationMethodModel.Pin,
+                    bouncerHapticPlayer = bouncerHapticPlayer,
                 )
             kosmos.fakeAuthenticationRepository.setAutoConfirmFeatureEnabled(true)
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
@@ -487,10 +496,38 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             lockDeviceAndOpenPinBouncer()
 
-            underTest.onDigitButtonDown()
+            underTest.onDigitButtonDown(null)
 
             assertTrue(kosmos.fakeFalsingCollector.wasLastGestureAvoided())
         }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun onDigiButtonDown_deliversKeyStandardToken() =
+        testScope.runTest {
+            underTest.onDigitButtonDown(null)
+
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.KEYPRESS_STANDARD)
+            assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun onBackspaceButtonPressed_deliversKeyDeleteToken() {
+        underTest.onBackspaceButtonPressed(null)
+
+        assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.KEYPRESS_DELETE)
+        assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MSDL_FEEDBACK)
+    fun onBackspaceButtonLongPressed_deliversLongPressToken() {
+        underTest.onBackspaceButtonLongPressed()
+
+        assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.LONG_PRESS)
+        assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
+    }
 
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.currentScene)

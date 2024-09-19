@@ -3763,7 +3763,8 @@ public class UserManager {
     }
 
     private static final String CACHE_KEY_IS_USER_UNLOCKED_PROPERTY =
-            "cache_key.is_user_unlocked";
+        PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "is_user_unlocked");
 
     private final PropertyInvalidatedCache<Integer, Boolean> mIsUserUnlockedCache =
             new PropertyInvalidatedCache<Integer, Boolean>(
@@ -6694,7 +6695,9 @@ public class UserManager {
     }
 
     /* Cache key for anything that assumes that userIds cannot be re-used without rebooting. */
-    private static final String CACHE_KEY_STATIC_USER_PROPERTIES = "cache_key.static_user_props";
+    private static final String CACHE_KEY_STATIC_USER_PROPERTIES =
+        PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "static_user_props");
 
     private final PropertyInvalidatedCache<Integer, String> mProfileTypeCache =
             new PropertyInvalidatedCache<Integer, String>(32, CACHE_KEY_STATIC_USER_PROPERTIES) {
@@ -6721,7 +6724,9 @@ public class UserManager {
     }
 
     /* Cache key for UserProperties object. */
-    private static final String CACHE_KEY_USER_PROPERTIES = "cache_key.user_properties";
+    private static final String CACHE_KEY_USER_PROPERTIES =
+        PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "user_properties");
 
     // TODO: It would be better to somehow have this as static, so that it can work cross-context.
     private final PropertyInvalidatedCache<Integer, UserProperties> mUserPropertiesCache =
