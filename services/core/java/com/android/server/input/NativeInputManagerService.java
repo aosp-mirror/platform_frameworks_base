@@ -212,7 +212,7 @@ interface NativeInputManagerService {
 
     void setMotionClassifierEnabled(boolean enabled);
 
-    void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+    void setKeyRepeatConfiguration(int timeoutMs, int delayMs, boolean keyRepeatEnabled);
 
     InputSensorInfo[] getSensorList(int deviceId);
 
@@ -509,7 +509,8 @@ interface NativeInputManagerService {
         public native void setMotionClassifierEnabled(boolean enabled);
 
         @Override
-        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs);
+        public native void setKeyRepeatConfiguration(int timeoutMs, int delayMs,
+                boolean keyRepeatEnabled);
 
         @Override
         public native InputSensorInfo[] getSensorList(int deviceId);
