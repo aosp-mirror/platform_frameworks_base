@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.compose
+package com.android.systemui.qs.composefragment.ui
 
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
-import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
+import com.android.systemui.qs.shared.ui.ElementKeys
 
+/**
+ * This composable is used at the start of the tiles in QQS and QS to anchor the expansion and be
+ * able to have relative anchor translation of elements that appear in QS.
+ */
 @Composable
-fun SceneScope.TileGrid(
-    viewModel: TileGridViewModel,
-    modifier: Modifier = Modifier,
-    editModeStart: () -> Unit,
-) {
-    val gridLayout by viewModel.gridLayout.collectAsStateWithLifecycle()
-    val tiles by viewModel.tileViewModels.collectAsStateWithLifecycle(emptyList())
-
-    with(gridLayout) { TileGrid(tiles, modifier, editModeStart) }
+fun SceneScope.GridAnchor(modifier: Modifier = Modifier) {
+    // The size of this anchor does not matter, as the tiles don't change size on expansion.
+    Spacer(modifier.element(ElementKeys.GridAnchor))
 }
