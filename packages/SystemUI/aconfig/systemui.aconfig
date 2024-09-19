@@ -1070,6 +1070,16 @@ flag {
 }
 
 flag {
+    name: "dream_overlay_updated_font"
+    namespace: "systemui"
+    description: "Flag to enable updated font settings for dream overlay"
+    bug: "349656117"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
