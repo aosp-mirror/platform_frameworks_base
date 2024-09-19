@@ -308,35 +308,26 @@ constructor(
 
         communalContainerView = containerView
 
-        val topEdgeSwipeRegionWidth =
-            containerView.resources.getDimensionPixelSize(
-                R.dimen.communal_top_edge_swipe_region_height
-            )
-        val bottomEdgeSwipeRegionWidth =
-            containerView.resources.getDimensionPixelSize(
-                R.dimen.communal_bottom_edge_swipe_region_height
-            )
+        if (!Flags.hubmodeFullscreenVerticalSwipeFix()) {
+            val topEdgeSwipeRegionWidth =
+                containerView.resources.getDimensionPixelSize(
+                    R.dimen.communal_top_edge_swipe_region_height
+                )
+            val bottomEdgeSwipeRegionWidth =
+                containerView.resources.getDimensionPixelSize(
+                    R.dimen.communal_bottom_edge_swipe_region_height
+                )
 
-        // BouncerSwipeTouchHandler has a larger gesture area than we want, set an exclusion area so
-        // the gesture area doesn't overlap with widgets.
-        // TODO(b/323035776): adjust gesture area for portrait mode
-        containerView.repeatWhenAttached {
-            // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and not
-            // occluded.
-            lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                val ltr = containerView.layoutDirection == View.LAYOUT_DIRECTION_LTR
-
-                val backGestureInset =
-                    Rect(0, 0, if (ltr) 0 else containerView.right, containerView.bottom)
-
-                containerView.systemGestureExclusionRects =
-                    if (Flags.hubmodeFullscreenVerticalSwipeFix()) {
-                        listOf(
-                            // Disable back gestures on the left side of the screen, to avoid
-                            // conflicting with scene transitions.
-                            backGestureInset
-                        )
-                    } else {
+            // BouncerSwipeTouchHandler has a larger gesture area than we want, set an exclusion
+            // area so
+            // the gesture area doesn't overlap with widgets.
+            // TODO(b/323035776): adjust gesture area for portrait mode
+            containerView.repeatWhenAttached {
+                // Run when the touch handling lifecycle is RESUMED, meaning the hub is visible and
+                // not
+                // occluded.
+                lifecycleRegistry.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    containerView.systemGestureExclusionRects =
                         listOf(
                             // Only allow swipe up to bouncer and swipe down to shade in the very
                             // top/bottom to avoid conflicting with widgets in the hub grid.
@@ -345,14 +336,12 @@ constructor(
                                 topEdgeSwipeRegionWidth,
                                 containerView.right,
                                 containerView.bottom - bottomEdgeSwipeRegionWidth,
-                            ),
-                            // Disable back gestures on the left side of the screen, to avoid
-                            // conflicting with scene transitions.
-                            backGestureInset,
+                            )
                         )
+
+                    logger.d({ "Insets updated: $str1" }) {
+                        str1 = containerView.systemGestureExclusionRects.toString()
                     }
-                logger.d({ "Insets updated: $str1" }) {
-                    str1 = containerView.systemGestureExclusionRects.toString()
                 }
             }
         }
