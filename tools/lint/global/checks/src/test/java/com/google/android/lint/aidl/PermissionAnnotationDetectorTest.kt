@@ -17,7 +17,6 @@
 package com.google.android.lint.aidl
 
 import com.android.tools.lint.checks.infrastructure.LintDetectorTest
-import com.android.tools.lint.checks.infrastructure.TestFile
 import com.android.tools.lint.checks.infrastructure.TestLintTask
 import com.android.tools.lint.detector.api.Detector
 import com.android.tools.lint.detector.api.Issue
@@ -64,7 +63,7 @@ class PermissionAnnotationDetectorTest : LintDetectorTest() {
                     """
                         package com.android.server;
                         public class Bar extends IBar.Stub {
-                            public void testMethod() { }
+                            public void testMethod(int parameter1, int parameter2) { }
                         }
                     """
                 )
@@ -75,8 +74,8 @@ class PermissionAnnotationDetectorTest : LintDetectorTest() {
             .expect(
                 """
                 src/frameworks/base/services/java/com/android/server/Bar.java:3: Error: The method testMethod is not permission-annotated. [MissingPermissionAnnotation]
-                    public void testMethod() { }
-                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    public void testMethod(int parameter1, int parameter2) { }
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 1 errors, 0 warnings
                 """
             )
@@ -90,7 +89,7 @@ class PermissionAnnotationDetectorTest : LintDetectorTest() {
                     """
                         package com.android.server;
                         public class Bar extends IBar.Stub {
-                            public void testMethod() { }
+                            public void testMethod(int parameter1, int parameter2) { }
                         }
                     """
                 )
@@ -132,7 +131,7 @@ class PermissionAnnotationDetectorTest : LintDetectorTest() {
                     """
                         package com.android.server;
                         public abstract class Bar extends IBar.Stub {
-                            public abstract void testMethod();
+                            public abstract void testMethod(int parameter1, int parameter2);
                         }
                     """
                 )
@@ -176,50 +175,6 @@ class PermissionAnnotationDetectorTest : LintDetectorTest() {
             .run()
             .expectClean()
     }
-
-    /* Stubs */
-
-    // A service with permission annotation on the method.
-    private val interfaceIFoo: TestFile = java(
-        """
-        public interface IFoo extends android.os.IInterface {
-         public static abstract class Stub extends android.os.Binder implements IFoo {
-          }
-          @Override
-          @android.annotation.EnforcePermission(android.Manifest.permission.READ_PHONE_STATE)
-          public void testMethod();
-          @Override
-          @android.annotation.RequiresNoPermission
-          public void testMethodNoPermission();
-          @Override
-          @android.annotation.PermissionManuallyEnforced
-          public void testMethodManual();
-        }
-        """
-    ).indented()
-
-    // A service with no permission annotation.
-    private val interfaceIBar: TestFile = java(
-        """
-        public interface IBar extends android.os.IInterface {
-         public static abstract class Stub extends android.os.Binder implements IBar {
-          }
-          public void testMethod();
-        }
-        """
-    ).indented()
-
-    // A service whose AIDL Interface is exempted.
-    private val interfaceIExempted: TestFile = java(
-        """
-        package android.accessibilityservice;
-        public interface IBrailleDisplayConnection extends android.os.IInterface {
-         public static abstract class Stub extends android.os.Binder implements IBrailleDisplayConnection {
-          }
-          public void testMethod();
-        }
-        """
-    ).indented()
 
     private val stubs = arrayOf(interfaceIFoo, interfaceIBar, interfaceIExempted)
 

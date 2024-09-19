@@ -106,12 +106,12 @@ public class PhoneMediaDeviceTest {
         when(mInfo.getName()).thenReturn(deviceName);
 
         assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_wired_usb_device_name));
+                .isEqualTo(mContext.getString(R.string.media_transfer_wired_headphone_name));
 
         when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
 
         assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_wired_usb_device_name));
+                .isEqualTo(mContext.getString(R.string.media_transfer_wired_headphone_name));
 
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 

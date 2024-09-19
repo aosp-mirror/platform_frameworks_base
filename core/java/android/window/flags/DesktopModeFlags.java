@@ -17,7 +17,9 @@
 package android.window.flags;
 
 import android.annotation.Nullable;
-import android.content.Context;
+import android.app.ActivityThread;
+import android.app.Application;
+import android.content.ContentResolver;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -39,9 +41,13 @@ import java.util.function.Supplier;
  */
 public enum DesktopModeFlags {
     // All desktop mode related flags to be overridden by developer option toggle will be added here
-    DESKTOP_WINDOWING_MODE(
+    ENABLE_DESKTOP_WINDOWING_MODE(
             Flags::enableDesktopWindowingMode, /* shouldOverrideByDevOption= */ true),
-    DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, false);
+    ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, false),
+    ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION(
+            Flags::enableCaptionCompatInsetForceConsumption, true),
+    ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
+            Flags::enableCaptionCompatInsetForceConsumptionAlways, true);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.
@@ -62,14 +68,15 @@ public enum DesktopModeFlags {
      * Determines state of flag based on the actual flag and desktop mode developer option
      * overrides.
      */
-    public boolean isEnabled(Context context) {
+    public boolean isEnabled() {
+        Application application = ActivityThread.currentApplication();
         if (!Flags.showDesktopWindowingDevOption()
                 || !mShouldOverrideByDevOption
-                || context.getContentResolver() == null) {
+                || application == null) {
             return mFlagFunction.get();
         } else {
             boolean shouldToggleBeEnabledByDefault = Flags.enableDesktopWindowingMode();
-            return switch (getToggleOverride(context)) {
+            return switch (getToggleOverride(application.getContentResolver())) {
                 case OVERRIDE_UNSET -> mFlagFunction.get();
                 // When toggle override matches its default state, don't override flags. This
                 // helps users reset their feature overrides.
@@ -79,14 +86,14 @@ public enum DesktopModeFlags {
         }
     }
 
-    private ToggleOverride getToggleOverride(Context context) {
+    private ToggleOverride getToggleOverride(ContentResolver contentResolver) {
         // If cached, return it
         if (sCachedToggleOverride != null) {
             return sCachedToggleOverride;
         }
 
         // Otherwise, fetch and cache it
-        ToggleOverride override = getToggleOverrideFromSystem(context);
+        ToggleOverride override = getToggleOverrideFromSystem(contentResolver);
         sCachedToggleOverride = override;
         Log.d(TAG, "Toggle override initialized to: " + override);
         return override;
@@ -95,9 +102,9 @@ public enum DesktopModeFlags {
     /**
      *  Returns {@link ToggleOverride} from Settings.Global set by toggle.
      */
-    private ToggleOverride getToggleOverrideFromSystem(Context context) {
+    private ToggleOverride getToggleOverrideFromSystem(ContentResolver contentResolver) {
         int settingValue = Settings.Global.getInt(
-                context.getContentResolver(),
+                contentResolver,
                 Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
                 ToggleOverride.OVERRIDE_UNSET.getSetting()
         );

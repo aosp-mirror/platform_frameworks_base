@@ -35,6 +35,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import android.os.SystemProperties
 import android.util.Size
@@ -136,7 +137,8 @@ class DesktopTasksController(
     @ShellMainThread private val mainExecutor: ShellExecutor,
     private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
     private val recentTasksController: RecentTasksController?,
-    private val interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor: InteractionJankMonitor,
+    @ShellMainThread private val handler: Handler,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -387,7 +389,7 @@ class DesktopTasksController(
         taskSurface: SurfaceControl,
     ) {
         logV("startDragToDesktop taskId=%d", taskInfo.taskId)
-        interactionJankMonitor.begin(taskSurface, context,
+        interactionJankMonitor.begin(taskSurface, context, handler,
             CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
             taskInfo.taskId,
@@ -791,7 +793,7 @@ class DesktopTasksController(
         releaseVisualIndicator()
         if (!taskInfo.isResizeable && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(context)) {
             interactionJankMonitor.begin(
-                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
+                taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
             )
 
             // reposition non-resizable app back to its original position before being dragged
@@ -804,7 +806,7 @@ class DesktopTasksController(
             )
         } else {
             interactionJankMonitor.begin(
-                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
+                taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
             )
             snapToHalfScreen(taskInfo, taskSurface, currentDragBounds, position)
         }
@@ -1604,7 +1606,7 @@ class DesktopTasksController(
         when (indicatorType) {
             IndicatorType.TO_DESKTOP_INDICATOR -> {
                 // Start a new jank interaction for the drag release to desktop window animation.
-                interactionJankMonitor.begin(taskSurface, context,
+                interactionJankMonitor.begin(taskSurface, context, handler,
                     CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
                 finalizeDragToDesktop(taskInfo)
             }

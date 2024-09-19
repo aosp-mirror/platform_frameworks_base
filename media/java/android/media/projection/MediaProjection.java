@@ -90,24 +90,24 @@ public final class MediaProjection {
         mDisplayManager = displayManager;
     }
 
-  /**
-   * Register a listener to receive notifications about when the {@link MediaProjection} or captured
-   * content changes state.
-   *
-   * <p>The callback must be registered before invoking {@link #createVirtualDisplay(String, int,
-   * int, int, int, Surface, VirtualDisplay.Callback, Handler)} to ensure that any notifications on
-   * the callback are not missed. The client must implement {@link Callback#onStop()} and clean up
-   * any resources it is holding, e.g. the {@link VirtualDisplay} and {@link Surface}. This should
-   * also update any application UI indicating the MediaProjection status as MediaProjection has
-   * stopped.
-   *
-   * @param callback The callback to call.
-   * @param handler The handler on which the callback should be invoked, or null if the callback
-   *     should be invoked on the calling thread's looper.
-   * @throws NullPointerException If the given callback is null.
-   * @see #unregisterCallback
-   */
-  public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
+    /**
+     * Register a listener to receive notifications about when the {@link MediaProjection} or
+     * captured content changes state.
+     *
+     * <p>The callback must be registered before invoking {@link #createVirtualDisplay(String, int,
+     * int, int, int, Surface, VirtualDisplay.Callback, Handler)} to ensure that any notifications
+     * on the callback are not missed. The client must implement {@link Callback#onStop()} to
+     * properly handle MediaProjection clean up any resources it is holding, e.g. the {@link
+     * VirtualDisplay} and {@link Surface}. This should also update any application UI indicating
+     * the MediaProjection status as MediaProjection has stopped.
+     *
+     * @param callback The callback to call.
+     * @param handler The handler on which the callback should be invoked, or null if the callback
+     *     should be invoked on the calling thread's looper.
+     * @throws NullPointerException If the given callback is null.
+     * @see #unregisterCallback
+     */
+    public void registerCallback(@NonNull Callback callback, @Nullable Handler handler) {
         try {
             final Callback c = Objects.requireNonNull(callback);
             if (handler == null) {
@@ -313,7 +313,7 @@ public final class MediaProjection {
      */
     public abstract static class Callback {
         /**
-         * Called when the MediaProjection session is no longer valid.
+         * Called when the MediaProjection session has been stopped and is no longer valid.
          *
          * <p>Once a MediaProjection has been stopped, it's up to the application to release any
          * resources it may be holding (e.g. releasing the {@link VirtualDisplay} and {@link
@@ -321,9 +321,9 @@ public final class MediaProjection {
          * it should be updated to indicate that MediaProjection is no longer active.
          *
          * <p>MediaProjection stopping can be a result of the system stopping the ongoing
-         * MediaProjection due to various reasons, such as another MediaProjection session starting.
-         * MediaProjection may also stop due to the user explicitly stopping ongoing MediaProjection
-         * via any available system-level UI.
+         * MediaProjection due to various reasons, such as another MediaProjection session starting,
+         * a user stopping the session via UI affordances in system-level UI, or the screen being
+         * locked.
          *
          * <p>After this callback any call to {@link MediaProjection#createVirtualDisplay} will
          * fail, even if no such {@link VirtualDisplay} was ever created for this MediaProjection

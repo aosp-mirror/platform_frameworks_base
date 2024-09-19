@@ -80,16 +80,19 @@ object MediaControlViewBinder {
         mediaCard.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.player.collectLatest { playerViewModel ->
-                        playerViewModel?.let {
-                            bindMediaCard(
-                                viewHolder,
-                                viewController,
-                                it,
-                                falsingManager,
-                                backgroundDispatcher,
-                                mainDispatcher,
-                            )
+                    viewModel.player.collectLatest { player ->
+                        player?.let {
+                            if (viewModel.isNewPlayer(it)) {
+                                bindMediaCard(
+                                    viewHolder,
+                                    viewController,
+                                    it,
+                                    falsingManager,
+                                    backgroundDispatcher,
+                                    mainDispatcher,
+                                )
+                                viewModel.onMediaControlIsBound(it.artistName, it.titleName)
+                            }
                         }
                     }
                 }
@@ -143,7 +146,7 @@ object MediaControlViewBinder {
             viewHolder,
             viewModel.outputSwitcher,
             viewController,
-            falsingManager
+            falsingManager,
         )
         bindGutsViewModel(viewHolder, viewModel, viewController, falsingManager)
         bindActionButtons(viewHolder, viewModel, viewController, falsingManager)
@@ -157,7 +160,7 @@ object MediaControlViewBinder {
             viewController,
             backgroundDispatcher,
             mainDispatcher,
-            isSongUpdated
+            isSongUpdated,
         )
 
         if (viewModel.playTurbulenceNoise) {
@@ -259,12 +262,12 @@ object MediaControlViewBinder {
                 if (buttonView.id == R.id.actionPrev) {
                     viewController.setUpPrevButtonInfo(
                         buttonModel.isEnabled,
-                        buttonModel.notVisibleValue
+                        buttonModel.notVisibleValue,
                     )
                 } else if (buttonView.id == R.id.actionNext) {
                     viewController.setUpNextButtonInfo(
                         buttonModel.isEnabled,
-                        buttonModel.notVisibleValue
+                        buttonModel.notVisibleValue,
                     )
                 }
                 val animHandler = (buttonView.tag ?: AnimationBindHandler()) as AnimationBindHandler
@@ -295,7 +298,7 @@ object MediaControlViewBinder {
                         viewController.collapsedLayout,
                         visible,
                         buttonModel.notVisibleValue,
-                        buttonModel.showInCollapsed
+                        buttonModel.showInCollapsed,
                     )
                 }
             }
@@ -350,7 +353,7 @@ object MediaControlViewBinder {
                         createTouchRippleAnimation(
                             button,
                             viewController.colorSchemeTransition,
-                            multiRippleView
+                            multiRippleView,
                         )
                     )
 
@@ -382,12 +385,12 @@ object MediaControlViewBinder {
                 setVisibleAndAlpha(
                     expandedSet,
                     R.id.media_explicit_indicator,
-                    viewModel.isExplicitVisible
+                    viewModel.isExplicitVisible,
                 )
                 setVisibleAndAlpha(
                     collapsedSet,
                     R.id.media_explicit_indicator,
-                    viewModel.isExplicitVisible
+                    viewModel.isExplicitVisible,
                 )
 
                 // refreshState is required here to resize the text views (and prevent ellipsis)
@@ -398,7 +401,7 @@ object MediaControlViewBinder {
                 // something is incorrectly bound, but needs to be run if other elements were
                 // updated while the enter animation was running
                 viewController.refreshState()
-            }
+            },
         )
     }
 
@@ -427,7 +430,7 @@ object MediaControlViewBinder {
                         viewModel.backgroundCover!!,
                         viewModel.colorScheme,
                         width,
-                        height
+                        height,
                     )
                 } else {
                     ColorDrawable(Color.TRANSPARENT)
@@ -493,7 +496,7 @@ object MediaControlViewBinder {
         transitionDrawable: TransitionDrawable,
         layer: Int,
         targetWidth: Int,
-        targetHeight: Int
+        targetHeight: Int,
     ) {
         val drawable = transitionDrawable.getDrawable(layer) ?: return
         val width = drawable.intrinsicWidth
@@ -509,7 +512,7 @@ object MediaControlViewBinder {
         artworkIcon: android.graphics.drawable.Icon,
         mutableColorScheme: ColorScheme,
         width: Int,
-        height: Int
+        height: Int,
     ): LayerDrawable {
         val albumArt = MediaArtworkHelper.getScaledBackground(context, artworkIcon, width, height)
         return MediaArtworkHelper.setUpGradientColorOnDrawable(
@@ -517,7 +520,7 @@ object MediaControlViewBinder {
             context.getDrawable(R.drawable.qs_media_scrim)?.mutate() as GradientDrawable,
             mutableColorScheme,
             MEDIA_PLAYER_SCRIM_START_ALPHA,
-            MEDIA_PLAYER_SCRIM_END_ALPHA
+            MEDIA_PLAYER_SCRIM_END_ALPHA,
         )
     }
 
@@ -544,7 +547,7 @@ object MediaControlViewBinder {
     private fun createTouchRippleAnimation(
         button: ImageButton,
         colorSchemeTransition: ColorSchemeTransition,
-        multiRippleView: MultiRippleView
+        multiRippleView: MultiRippleView,
     ): RippleAnimation {
         val maxSize = (multiRippleView.width * 2).toFloat()
         return RippleAnimation(
@@ -562,7 +565,7 @@ object MediaControlViewBinder {
                 baseRingFadeParams = null,
                 sparkleRingFadeParams = null,
                 centerFillFadeParams = null,
-                shouldDistort = false
+                shouldDistort = false,
             )
         )
     }
@@ -596,7 +599,7 @@ object MediaControlViewBinder {
         set: ConstraintSet,
         resId: Int,
         visible: Boolean,
-        notVisibleValue: Int
+        notVisibleValue: Int,
     ) {
         set.setVisibility(resId, if (visible) ConstraintSet.VISIBLE else notVisibleValue)
         set.setAlpha(resId, if (visible) 1.0f else 0.0f)
@@ -618,7 +621,7 @@ object MediaControlViewBinder {
         collapsedSet: ConstraintSet,
         visible: Boolean,
         notVisibleValue: Int,
-        showInCollapsed: Boolean
+        showInCollapsed: Boolean,
     ) {
         if (notVisibleValue == ConstraintSet.INVISIBLE) {
             // Since time views should appear instead of buttons.

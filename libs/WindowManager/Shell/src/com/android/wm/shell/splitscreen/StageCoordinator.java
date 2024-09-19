@@ -1654,7 +1654,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout = new SplitLayout(TAG + "SplitDivider", mContext,
                     mRootTaskInfo.configuration, this, mParentContainerCallbacks,
                     mDisplayController, mDisplayImeController, mTaskOrganizer,
-                    PARALLAX_ALIGN_CENTER /* parallaxType */);
+                    PARALLAX_ALIGN_CENTER /* parallaxType */, mMainHandler);
             mDisplayInsetsController.addInsetsChangedListener(mDisplayId, mSplitLayout);
         }
 

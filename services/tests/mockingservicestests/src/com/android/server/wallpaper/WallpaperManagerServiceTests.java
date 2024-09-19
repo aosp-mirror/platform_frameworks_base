@@ -290,7 +290,7 @@ public class WallpaperManagerServiceTests {
 
         final WallpaperData fallbackData = mService.mFallbackWallpaper;
         assertEquals("Fallback wallpaper component should be ImageWallpaper.",
-                sImageWallpaperComponentName, fallbackData.wallpaperComponent);
+                sImageWallpaperComponentName, fallbackData.getComponent());
 
         verifyLastWallpaperData(USER_SYSTEM, sDefaultWallpaperComponent);
         verifyDisplayData();
@@ -580,7 +580,7 @@ public class WallpaperManagerServiceTests {
         final WallpaperData lastData = mService.mLastWallpaper;
         assertNotNull("Last wallpaper must not be null", lastData);
         assertEquals("Last wallpaper component must be equals.", expectedComponent,
-                lastData.wallpaperComponent);
+                lastData.getComponent());
         assertEquals("The user id in last wallpaper should be the last switched user",
                 lastUserId, lastData.userId);
         assertNotNull("Must exist user data connection on last wallpaper data",

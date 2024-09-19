@@ -456,6 +456,14 @@ public class InputManagerService extends IInputManager.Stub
         void registerLocalService(InputManagerInternal localService) {
             LocalServices.addService(InputManagerInternal.class, localService);
         }
+
+        KeyboardBacklightControllerInterface getKeyboardBacklightController(
+                NativeInputManagerService nativeService, PersistentDataStore dataStore) {
+            return InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
+                    ? new KeyboardBacklightController(mContext, nativeService, dataStore,
+                    mLooper, mUEventManager)
+                    : new KeyboardBacklightControllerInterface() {};
+        }
     }
 
     public InputManagerService(Context context) {
@@ -479,10 +487,7 @@ public class InputManagerService extends IInputManager.Stub
                         injector.getLooper(), this) : null;
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper(),
                 injector.getUEventManager());
-        mKeyboardBacklightController = InputFeatureFlagProvider.isKeyboardBacklightControlEnabled()
-                ? new KeyboardBacklightController(mContext, mNative, mDataStore,
-                        injector.getLooper(), injector.getUEventManager())
-                : new KeyboardBacklightControllerInterface() {};
+        mKeyboardBacklightController = injector.getKeyboardBacklightController(mNative, mDataStore);
         mStickyModifierStateController = new StickyModifierStateController();
         mKeyGestureController = new KeyGestureController(mContext, injector.getLooper());
         mKeyboardLedController = new KeyboardLedController(mContext, injector.getLooper(),
@@ -606,6 +611,8 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
+
+        initKeyGestures();
     }
 
     private void reloadDeviceAliases() {
@@ -2504,6 +2511,59 @@ public class InputManagerService extends IInputManager.Stub
                 null, null, null) == PERMISSION_GRANTED;
     }
 
+    private void initKeyGestures() {
+        if (!useKeyGestureEventHandler()) {
+            return;
+        }
+        InputManager im = Objects.requireNonNull(mContext.getSystemService(InputManager.class));
+        im.registerKeyGestureEventHandler(new InputManager.KeyGestureEventHandler() {
+            @Override
+            public boolean handleKeyGestureEvent(@NonNull KeyGestureEvent event,
+                    @Nullable IBinder focussedToken) {
+                int deviceId = event.getDeviceId();
+                boolean complete = event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                        && !event.isCancelled();
+                switch (event.getKeyGestureType()) {
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
+                        if (complete) {
+                            mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
+                        }
+                        return true;
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
+                        if (complete) {
+                            mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
+                        }
+                        return true;
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
+                        // TODO(b/367748270): Add functionality to turn keyboard backlight on/off.
+                        return true;
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
+                        if (complete) {
+                            mNative.toggleCapsLock(deviceId);
+                        }
+                        return true;
+                    default:
+                        return false;
+
+                }
+            }
+
+            @Override
+            public boolean isKeyGestureSupported(int gestureType) {
+                switch (gestureType) {
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK:
+                        return true;
+                    default:
+                        return false;
+
+                }
+            }
+        });
+    }
+
     // Native callback.
     @SuppressWarnings("unused")
     private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
@@ -3207,6 +3267,8 @@ public class InputManagerService extends IInputManager.Stub
             mKeyboardBacklightController.onInteractiveChanged(interactive);
         }
 
+        // TODO(b/358569822): Remove this method from InputManagerInternal after key gesture
+        //  handler refactoring complete
         @Override
         public void toggleCapsLock(int deviceId) {
             mNative.toggleCapsLock(deviceId);
@@ -3294,11 +3356,15 @@ public class InputManagerService extends IInputManager.Stub
             mKeyboardBacklightController.notifyUserActivity();
         }
 
+        // TODO(b/358569822): Remove this method from InputManagerInternal after key gesture
+        //  handler refactoring complete
         @Override
         public void incrementKeyboardBacklight(int deviceId) {
             mKeyboardBacklightController.incrementKeyboardBacklight(deviceId);
         }
 
+        // TODO(b/358569822): Remove this method from InputManagerInternal after key gesture
+        //  handler refactoring complete
         @Override
         public void decrementKeyboardBacklight(int deviceId) {
             mKeyboardBacklightController.decrementKeyboardBacklight(deviceId);
