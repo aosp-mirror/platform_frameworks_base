@@ -55,7 +55,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.chips.shared.StatusBarRonChips;
+import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableState;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
