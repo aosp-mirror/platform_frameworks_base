@@ -195,10 +195,9 @@ public final class MediaProjectionManagerService extends SystemService
                     == PackageManager.PERMISSION_GRANTED) {
                 return true;
             }
-            boolean operationActive = mAppOps.isOperationActive(AppOpsManager.OP_PROJECT_MEDIA,
-                    mProjectionGrant.uid,
-                    mProjectionGrant.packageName);
-            if (operationActive) {
+            if (AppOpsManager.MODE_ALLOWED == mAppOps.noteOpNoThrow(AppOpsManager.OP_PROJECT_MEDIA,
+                    mProjectionGrant.uid, mProjectionGrant.packageName, /* attributionTag= */ null,
+                    "recording lockscreen")) {
                 // Some tools use media projection by granting the OP_PROJECT_MEDIA app
                 // op via a shell command. Those tools can be granted keyguard capture
                 return true;
