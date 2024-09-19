@@ -212,9 +212,10 @@ class InputManagerServiceTests {
         verify(native).setMotionClassifierEnabled(anyBoolean())
         verify(native).setMaximumObscuringOpacityForTouch(anyFloat())
         verify(native).setStylusPointerIconEnabled(anyBoolean())
-        // Called twice at boot, since there are individual callbacks to update the
-        // key repeat timeout and the key repeat delay.
-        verify(native, times(2)).setKeyRepeatConfiguration(anyInt(), anyInt())
+        // Called thrice at boot, since there are individual callbacks to update the
+        // key repeat timeout, the key repeat delay and whether key repeat enabled.
+        verify(native, times(3)).setKeyRepeatConfiguration(anyInt(), anyInt(),
+            anyBoolean())
     }
 
     @Test

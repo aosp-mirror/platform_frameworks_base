@@ -401,6 +401,7 @@ message SecureSettingsProto {
     optional SettingProto long_press_timeout = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto key_press_timeout_ms = 96 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto key_press_delay_ms = 97 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto key_repeat_enabled = 102 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message ManagedProfile {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -735,5 +736,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 102;
+    // Next tag = 103;
 }

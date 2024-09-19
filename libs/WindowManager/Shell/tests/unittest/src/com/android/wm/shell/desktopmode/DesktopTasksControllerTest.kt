@@ -1764,6 +1764,37 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun handleRequest_freeformTask_relaunchTask_enforceDesktop_freeformDisplay_noWinModeChange() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
+    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+    tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
+
+    val freeformTask = setUpFreeformTask()
+    markTaskHidden(freeformTask)
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNotNull(wct, "should handle request")
+    assertFalse(wct.anyWindowingModeChange(freeformTask.token))
+  }
+
+  @Test
+  fun handleRequest_freeformTask_relaunchTask_enforceDesktop_fullscreenDisplay_becomesUndefined() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
+    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+    tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
+
+    val freeformTask = setUpFreeformTask()
+    markTaskHidden(freeformTask)
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[freeformTask.token.asBinder()]?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_UNDEFINED)
+  }
+
+  @Test
   @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
   fun handleRequest_freeformTask_desktopWallpaperDisabled_freeformNotVisible_reorderedToTop() {
     assumeTrue(ENABLE_SHELL_TRANSITIONS)
@@ -3491,6 +3522,14 @@ private fun WindowContainerTransaction?.anyDensityConfigChange(
   return this?.changes?.any { change ->
     change.key == token.asBinder() && ((change.value.configSetMask and CONFIG_DENSITY) != 0)
   } ?: false
+}
+
+private fun WindowContainerTransaction?.anyWindowingModeChange(
+  token: WindowContainerToken
+): Boolean {
+return this?.changes?.any { change ->
+  change.key == token.asBinder() && change.value.windowingMode >= 0
+} ?: false
 }
 
 private fun createTaskInfo(id: Int) =

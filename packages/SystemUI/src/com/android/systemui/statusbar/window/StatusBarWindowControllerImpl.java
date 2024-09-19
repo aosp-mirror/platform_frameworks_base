@@ -28,7 +28,6 @@ import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -52,23 +51,23 @@ import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DelegateTransitionAnimatorController;
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
+import com.android.systemui.statusbar.window.StatusBarWindowModule.InternalWindowViewInflater;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
 import com.android.systemui.unfold.util.JankMonitorTransitionProgressListener;
 
-import java.util.Optional;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
-import javax.inject.Inject;
+import java.util.Optional;
 
 /**
  * Encapsulates all logic for the status bar window state management.
  */
-@SysUISingleton
 public class StatusBarWindowControllerImpl implements StatusBarWindowController {
     private static final String TAG = "StatusBarWindowController";
     private static final boolean DEBUG = false;
@@ -90,21 +89,20 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
     private final WindowManager.LayoutParams mLpChanged;
     private final Binder mInsetsSourceOwner = new Binder();
 
-    @Inject
+    @AssistedInject
     public StatusBarWindowControllerImpl(
-            Context context,
-            @StatusBarWindowModule.InternalWindowView StatusBarWindowView statusBarWindowView,
-            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
+            @Assisted Context context,
+            @InternalWindowViewInflater StatusBarWindowViewInflater statusBarWindowViewInflater,
+            @Assisted ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             IWindowManager iWindowManager,
             StatusBarContentInsetsProvider contentInsetsProvider,
             FragmentService fragmentService,
-            @Main Resources resources,
             Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
         mContext = context;
         mWindowManager = viewCaptureAwareWindowManager;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
-        mStatusBarWindowView = statusBarWindowView;
+        mStatusBarWindowView = statusBarWindowViewInflater.inflate(context);
         mFragmentService = fragmentService;
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
                 R.id.status_bar_launch_animation_container);
@@ -354,4 +352,13 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
             mLpChanged.forciblyShownTypes &= ~WindowInsets.Type.statusBars();
         }
     }
+
+    @AssistedFactory
+    public interface Factory {
+        /** Creates a new instance. */
+        StatusBarWindowControllerImpl create(
+                Context context,
+                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager);
+    }
+
 }

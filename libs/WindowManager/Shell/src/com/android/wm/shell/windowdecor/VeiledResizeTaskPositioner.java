@@ -26,6 +26,8 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.view.Choreographer;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
@@ -124,6 +126,11 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
 
     @Override
     public Rect onDragPositioningMove(float x, float y) {
+        if (Looper.myLooper() != mHandler.getLooper()) {
+            // This method must run on the shell main thread to use the correct Choreographer
+            // instance below.
+            throw new IllegalStateException("This method must run on the shell main thread.");
+        }
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y, mRepositionStartPoint);
         if (isResizing() && DragPositioningCallbackUtility.changeBounds(mCtrlType,
                 mRepositionTaskBounds, mTaskBoundsAtDragStart, mStableBounds, delta,
@@ -141,6 +148,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             DragPositioningCallbackUtility.setPositionOnDrag(mDesktopWindowDecoration,
                     mRepositionTaskBounds, mTaskBoundsAtDragStart, mRepositionStartPoint, t, x, y);
+            t.setFrameTimeline(Choreographer.getInstance().getVsyncId());
             t.apply();
         }
         return new Rect(mRepositionTaskBounds);

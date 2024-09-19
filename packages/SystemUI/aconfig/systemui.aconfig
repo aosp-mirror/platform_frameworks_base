@@ -1063,6 +1063,13 @@ flag {
 }
 
 flag {
+  name: "communal_widget_resizing"
+  namespace: "systemui"
+  description: "Allow resizing of widgets on glanceable hub"
+  bug: "368053818"
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
@@ -1414,4 +1421,14 @@ flag {
    namespace: "systemui"
    description: "Allow non-touchscreen devices to bypass falsing"
    bug: "319809270"
+}
+
+flag {
+   name: "media_projection_dialog_behind_lockscreen"
+   namespace: "systemui"
+   description: "Ensure MediaProjection Dialog appears behind the lockscreen"
+   bug: "351409536"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
 }

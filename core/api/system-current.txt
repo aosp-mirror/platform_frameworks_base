@@ -3835,6 +3835,7 @@ package android.content {
     field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence") public static final String ON_DEVICE_INTELLIGENCE_SERVICE = "on_device_intelligence";
     field public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
     field public static final String PERMISSION_SERVICE = "permission";
+    field @FlaggedApi("com.android.ranging.flags.ranging_stack_enabled") public static final String RANGING_SERVICE = "ranging";
     field public static final String REBOOT_READINESS_SERVICE = "reboot_readiness";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String SAFETY_CENTER_SERVICE = "safety_center";

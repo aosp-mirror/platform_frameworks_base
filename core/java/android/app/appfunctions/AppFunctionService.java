@@ -26,6 +26,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -60,29 +61,53 @@ public abstract class AppFunctionService extends Service {
     @NonNull
     public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
 
-    private final Binder mBinder =
-            new IAppFunctionService.Stub() {
-                @Override
-                public void executeAppFunction(
-                        @NonNull ExecuteAppFunctionRequest request,
-                        @NonNull IExecuteAppFunctionCallback callback) {
-                    if (AppFunctionService.this.checkCallingPermission(BIND_APP_FUNCTION_SERVICE)
-                            == PERMISSION_DENIED) {
-                        throw new SecurityException("Can only be called by the system server.");
-                    }
-                    SafeOneTimeExecuteAppFunctionCallback safeCallback =
-                            new SafeOneTimeExecuteAppFunctionCallback(callback);
-                    try {
-                        AppFunctionService.this.onExecuteFunction(request, safeCallback::onResult);
-                    } catch (Exception ex) {
-                        // Apps should handle exceptions. But if they don't, report the error on
-                        // behalf of them.
-                        safeCallback.onResult(
-                                ExecuteAppFunctionResponse.newFailure(
-                                        getResultCode(ex), ex.getMessage(), /* extras= */ null));
-                    }
+    /**
+     * Functional interface to represent the execution logic of an app function.
+     *
+     * @hide
+     */
+    @FunctionalInterface
+    public interface OnExecuteFunction {
+        /**
+         * Performs the semantic of executing the function specified by the provided request and
+         * return the response through the provided callback.
+         */
+        void perform(
+                @NonNull ExecuteAppFunctionRequest request,
+                @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+    }
+
+    /** @hide */
+    @NonNull
+    public static Binder createBinder(
+            @NonNull Context context, @NonNull OnExecuteFunction onExecuteFunction) {
+        return new IAppFunctionService.Stub() {
+            @Override
+            public void executeAppFunction(
+                    @NonNull ExecuteAppFunctionRequest request,
+                    @NonNull IExecuteAppFunctionCallback callback) {
+                if (context.checkCallingPermission(BIND_APP_FUNCTION_SERVICE)
+                        == PERMISSION_DENIED) {
+                    throw new SecurityException("Can only be called by the system server.");
                 }
-            };
+                SafeOneTimeExecuteAppFunctionCallback safeCallback =
+                        new SafeOneTimeExecuteAppFunctionCallback(callback);
+                try {
+                    onExecuteFunction.perform(request, safeCallback::onResult);
+                } catch (Exception ex) {
+                    // Apps should handle exceptions. But if they don't, report the error on
+                    // behalf of them.
+                    safeCallback.onResult(
+                            ExecuteAppFunctionResponse.newFailure(
+                                    getResultCode(ex), ex.getMessage(), /* extras= */ null));
+                }
+            }
+        };
+    }
+
+    private final Binder mBinder = createBinder(
+            AppFunctionService.this,
+            AppFunctionService.this::onExecuteFunction);
 
     @NonNull
     @Override

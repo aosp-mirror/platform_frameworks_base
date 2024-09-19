@@ -43,4 +43,30 @@ data class MediaPlayerViewModel(
     val onSeek: () -> Unit,
     val onBindSeekbar: (SeekBarViewModel) -> Unit,
     val onLocationChanged: (Int) -> Unit,
-)
+) {
+    fun contentEquals(other: MediaPlayerViewModel?): Boolean {
+        return other?.let {
+            other.backgroundCover == backgroundCover &&
+                appIcon == other.appIcon &&
+                useGrayColorFilter == other.useGrayColorFilter &&
+                artistName == other.artistName &&
+                titleName == other.titleName &&
+                isExplicitVisible == other.isExplicitVisible &&
+                shouldAddGradient == other.shouldAddGradient &&
+                canShowTime == other.canShowTime &&
+                playTurbulenceNoise == other.playTurbulenceNoise &&
+                useSemanticActions == other.useSemanticActions &&
+                areActionsEqual(other.actionButtons) &&
+                outputSwitcher.contentEquals(other.outputSwitcher)
+        } ?: false
+    }
+
+    private fun areActionsEqual(other: List<MediaActionViewModel>): Boolean {
+        actionButtons.forEachIndexed { index, mediaActionViewModel ->
+            if (!mediaActionViewModel.contentEquals(other[index])) {
+                return false
+            }
+        }
+        return true
+    }
+}
