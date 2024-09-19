@@ -33,6 +33,7 @@ import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import java.util.function.Supplier
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
+import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -210,6 +211,60 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     }
 
     @Test
+    fun isHomeChange_withoutTaskInfo_returnsFalse() {
+        val change =
+            TransitionInfo.Change(mock(), homeTaskLeash).apply {
+                parent = null
+                taskInfo = null
+            }
+
+        assertFalse(defaultHandler.isHomeChange(change))
+        assertFalse(springHandler.isHomeChange(change))
+    }
+
+    @Test
+    fun isHomeChange_withStandardActivityTaskInfo_returnsFalse() {
+        val change =
+            TransitionInfo.Change(mock(), homeTaskLeash).apply {
+                parent = null
+                taskInfo =
+                    TestRunningTaskInfoBuilder().setActivityType(ACTIVITY_TYPE_STANDARD).build()
+            }
+
+        assertFalse(defaultHandler.isHomeChange(change))
+        assertFalse(springHandler.isHomeChange(change))
+    }
+
+    @Test
+    fun isHomeChange_withHomeActivityTaskInfo_returnsTrue() {
+        val change =
+            TransitionInfo.Change(mock(), homeTaskLeash).apply {
+                parent = null
+                taskInfo = TestRunningTaskInfoBuilder().setActivityType(ACTIVITY_TYPE_HOME).build()
+            }
+
+        assertTrue(defaultHandler.isHomeChange(change))
+        assertTrue(springHandler.isHomeChange(change))
+    }
+
+    @Test
+    fun isHomeChange_withSingleTranslucentHomeActivityTaskInfo_returnsFalse() {
+        val change =
+            TransitionInfo.Change(mock(), homeTaskLeash).apply {
+                parent = null
+                taskInfo =
+                    TestRunningTaskInfoBuilder()
+                        .setActivityType(ACTIVITY_TYPE_HOME)
+                        .setTopActivityTransparent(true)
+                        .setNumActivities(1)
+                        .build()
+            }
+
+        assertFalse(defaultHandler.isHomeChange(change))
+        assertFalse(springHandler.isHomeChange(change))
+    }
+
+    @Test
     fun cancelDragToDesktop_startWasReady_cancel() {
         startDrag(defaultHandler)
 
@@ -341,6 +396,8 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         // Should show dragged task layer in start and finish transaction
         verify(mergedStartTransaction).show(draggedTaskLeash)
         verify(playingFinishTransaction).show(draggedTaskLeash)
+        // Should update the dragged task layer
+        verify(mergedStartTransaction).setLayer(eq(draggedTaskLeash), anyInt())
         // Should merge animation
         verify(finishCallback).onTransitionFinished(null)
     }
@@ -371,6 +428,8 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         // Should show dragged task layer in start and finish transaction
         verify(mergedStartTransaction).show(draggedTaskLeash)
         verify(playingFinishTransaction).show(draggedTaskLeash)
+        // Should update the dragged task layer
+        verify(mergedStartTransaction).setLayer(eq(draggedTaskLeash), anyInt())
         // Should hide home task leash in finish transaction
         verify(playingFinishTransaction).hide(homeTaskLeash)
         // Should merge animation
