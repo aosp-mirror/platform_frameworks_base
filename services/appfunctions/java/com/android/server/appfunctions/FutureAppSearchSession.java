@@ -84,6 +84,9 @@ public interface FutureAppSearchSession extends Closeable {
     AndroidFuture<FutureSearchResults> search(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
+    @Override
+    void close();
+
     /** A future API wrapper of {@link android.app.appsearch.SearchResults}. */
     interface FutureSearchResults {
 
