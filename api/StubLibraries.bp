@@ -466,6 +466,32 @@ java_library {
 }
 
 java_library {
+    name: "android-non-updatable.stubs.system_server",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.system_server.from-source",
+    ],
+    product_variables: {
+        build_from_text_stub: {
+            static_libs: [
+                "android-non-updatable.stubs.system_server.from-text",
+            ],
+            exclude_static_libs: [
+                "android-non-updatable.stubs.system_server.from-source",
+            ],
+        },
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.system_server",
+    defaults: ["android-non-updatable_defaults"],
+    static_libs: [
+        "android-non-updatable.stubs.exportable.system_server.from-source",
+    ],
+}
+
+java_library {
     name: "android-non-updatable.stubs.from-source",
     defaults: [
         "android-non-updatable_defaults",
@@ -558,6 +584,30 @@ java_library {
     libs: ["all-modules-system-stubs"],
     dist: {
         dir: "apistubs/android/test",
+    },
+}
+
+java_library {
+    name: "android-non-updatable.stubs.system_server.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+    ],
+    srcs: [":services-non-updatable-stubs"],
+    libs: non_updatable_api_deps_on_modules,
+}
+
+java_library {
+    name: "android-non-updatable.stubs.exportable.system_server.from-source",
+    defaults: [
+        "android-non-updatable_defaults",
+        "android-non-updatable_from_source_defaults",
+        "android-non-updatable_exportable_from_source_defaults",
+    ],
+    srcs: [":services-non-updatable-stubs{.exportable}"],
+    libs: non_updatable_api_deps_on_modules,
+    dist: {
+        dir: "apistubs/android/system-server",
     },
 }
 
@@ -660,6 +710,25 @@ java_api_library {
     // depend on this module.
     visibility: ["//visibility:private"],
     libs: ["all-modules-system-stubs"],
+}
+
+java_api_library {
+    name: "android-non-updatable.stubs.system_server.from-text",
+    api_surface: "system_server",
+    api_contributions: [
+        "api-stubs-docs-non-updatable.api.contribution",
+        "system-api-stubs-docs-non-updatable.api.contribution",
+        "module-lib-api-stubs-docs-non-updatable.api.contribution",
+        "services-non-updatable-stubs.api.contribution",
+    ],
+    defaults: [
+        "module-classpath-java-defaults",
+        "android-non-updatable_everything_from_text_defaults",
+    ],
+
+    // Use full Android API not just the non-updatable API as the latter is incomplete
+    // and can result in incorrect behavior.
+    previous_api: ":android.api.combined.system-server.latest",
 }
 
 java_defaults {
@@ -813,9 +882,9 @@ java_library {
     defaults: [
         "android.jar_defaults",
     ],
-    srcs: [":services-non-updatable-stubs"],
     installable: false,
     static_libs: [
+        "android-non-updatable.stubs.system_server",
         "android_module_lib_stubs_current",
     ],
     visibility: ["//frameworks/base/services"],
@@ -827,9 +896,9 @@ java_library {
         "android.jar_defaults",
         "android_stubs_dists_default",
     ],
-    srcs: [":services-non-updatable-stubs{.exportable}"],
     installable: false,
     static_libs: [
+        "android-non-updatable.stubs.exportable.system_server",
         "android_module_lib_stubs_current_exportable",
     ],
     dist: {
