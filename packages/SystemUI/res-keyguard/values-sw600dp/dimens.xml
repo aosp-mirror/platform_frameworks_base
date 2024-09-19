@@ -28,8 +28,4 @@
     <!-- Overload default clock widget parameters -->
     <dimen name="widget_big_font_size">100dp</dimen>
     <dimen name="widget_label_font_size">18sp</dimen>
-
-    <!-- New keyboard shortcut helper -->
-    <dimen name="shortcut_helper_width">704dp</dimen>
-    <dimen name="shortcut_helper_height">1208dp</dimen>
 </resources>
