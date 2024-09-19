@@ -118,4 +118,7 @@ interface NotificationScrollView {
 
     /** @see addHeadsUpHeightChangedListener */
     fun removeHeadsUpHeightChangedListener(runnable: Runnable)
+
+    /** Sets whether updates to the stack are are suppressed. */
+    fun suppressHeightUpdates(suppress: Boolean)
 }

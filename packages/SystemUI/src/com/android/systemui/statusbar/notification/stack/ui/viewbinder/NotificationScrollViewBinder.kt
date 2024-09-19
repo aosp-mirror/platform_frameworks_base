@@ -103,6 +103,7 @@ constructor(
             launch {
                 viewModel.shouldCloseGuts.filter { it }.collect { view.closeGutsOnSceneTouch() }
             }
+            launch { viewModel.suppressHeightUpdates.collect { view.suppressHeightUpdates(it) } }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)

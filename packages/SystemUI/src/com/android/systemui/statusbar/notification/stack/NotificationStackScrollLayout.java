@@ -567,6 +567,7 @@ public class NotificationStackScrollLayout
     private boolean mHasFilteredOutSeenNotifications;
     @Nullable private SplitShadeStateController mSplitShadeStateController = null;
     private boolean mIsSmallLandscapeLockscreenEnabled = false;
+    private boolean mSuppressHeightUpdates;
 
     /** Pass splitShadeStateController to view and update split shade */
     public void passSplitShadeStateController(SplitShadeStateController splitShadeStateController) {
@@ -1453,9 +1454,13 @@ public class NotificationStackScrollLayout
      * 2) Swiping up on lockscreen or flinging down after swipe up
      */
     private boolean shouldSkipHeightUpdate() {
-        return mAmbientState.isOnKeyguard()
-                && (mAmbientState.isSwipingUp()
-                || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
+        if (SceneContainerFlag.isEnabled()) {
+            return mSuppressHeightUpdates;
+        } else {
+            return mAmbientState.isOnKeyguard()
+                    && (mAmbientState.isSwipingUp()
+                    || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
+        }
     }
 
     /**
@@ -5374,11 +5379,18 @@ public class NotificationStackScrollLayout
     }
 
     public void setPanelFlinging(boolean flinging) {
+        SceneContainerFlag.assertInLegacyMode();
         mAmbientState.setFlinging(flinging);
         if (!flinging) {
             // re-calculate the stack height which was frozen while flinging
             updateStackPosition();
         }
+    }
+
+    @Override
+    public void suppressHeightUpdates(boolean suppress) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mSuppressHeightUpdates = suppress;
     }
 
     public void setHeadsUpGoingAwayAnimationsAllowed(boolean headsUpGoingAwayAnimationsAllowed) {
