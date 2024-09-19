@@ -64,4 +64,10 @@ interface IHintManager {
      * Get Maximum number of graphics pipeline threads allowed per-app.
      */
     int getMaxGraphicsPipelineThreadsCount();
+
+    /**
+     * Used by the JNI to pass an interface to the SessionManager;
+     * for internal use only.
+     */
+    oneway void passSessionManagerBinder(in IBinder sessionManager);
 }
