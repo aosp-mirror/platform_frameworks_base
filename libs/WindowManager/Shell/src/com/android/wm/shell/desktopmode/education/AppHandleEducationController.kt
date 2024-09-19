@@ -31,6 +31,7 @@ import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatasto
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.EducationViewConfig
 import kotlin.time.Duration.Companion.milliseconds
@@ -68,6 +69,9 @@ class AppHandleEducationController(
     @ShellMainThread private val applicationCoroutineScope: CoroutineScope,
     @ShellBackgroundThread private val backgroundDispatcher: MainCoroutineDispatcher,
 ) {
+  private lateinit var openHandleMenuCallback: (Int) -> Unit
+  private lateinit var toDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit
+
   init {
     runIfEducationFeatureEnabled {
       applicationCoroutineScope.launch {
@@ -114,6 +118,7 @@ class AppHandleEducationController(
             arrowDirection = DesktopWindowingEducationTooltipController.TooltipArrowDirection.UP,
             onEducationClickAction = {
               launchWithExceptionHandling { showWindowingImageButtonTooltip() }
+              openHandleMenuCallback(captionState.runningTaskInfo.taskId)
             },
             onDismissAction = { launchWithExceptionHandling { showWindowingImageButtonTooltip() } },
         )
@@ -171,6 +176,9 @@ class AppHandleEducationController(
                       DesktopWindowingEducationTooltipController.TooltipArrowDirection.LEFT,
                   onEducationClickAction = {
                     launchWithExceptionHandling { showExitWindowingTooltip() }
+                    toDesktopModeCallback(
+                        captionState.runningTaskInfo.taskId,
+                        DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON)
                   },
                   onDismissAction = { launchWithExceptionHandling { showExitWindowingTooltip() } },
               )
@@ -216,13 +224,29 @@ class AppHandleEducationController(
                   arrowDirection =
                       DesktopWindowingEducationTooltipController.TooltipArrowDirection.LEFT,
                   onDismissAction = {},
-                  onEducationClickAction = {},
+                  onEducationClickAction = {
+                    openHandleMenuCallback(captionState.runningTaskInfo.taskId)
+                  },
               )
           windowingEducationViewController.showEducationTooltip(
               taskId = captionState.runningTaskInfo.taskId,
               tooltipViewConfig = exitWindowingTooltipConfig,
           )
         }
+  }
+
+  /**
+   * Setup callbacks for app handle education tooltips.
+   *
+   * @param openHandleMenuCallback callback invoked to open app handle menu or app chip menu.
+   * @param toDesktopModeCallback callback invoked to move task into desktop mode.
+   */
+  fun setAppHandleEducationTooltipCallbacks(
+      openHandleMenuCallback: (taskId: Int) -> Unit,
+      toDesktopModeCallback: (taskId: Int, DesktopModeTransitionSource) -> Unit
+  ) {
+    this.openHandleMenuCallback = openHandleMenuCallback
+    this.toDesktopModeCallback = toDesktopModeCallback
   }
 
   private inline fun <T> Flow<T>.catchTimeoutAndLog(crossinline block: () -> Unit) =

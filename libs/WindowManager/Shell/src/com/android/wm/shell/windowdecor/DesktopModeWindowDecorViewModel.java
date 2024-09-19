@@ -87,6 +87,7 @@ import android.window.WindowContainerTransaction;
 import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.Cuj;
@@ -112,6 +113,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
@@ -133,6 +135,8 @@ import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 
 import kotlin.Pair;
 import kotlin.Unit;
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -167,6 +171,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final Optional<DesktopTasksLimiter> mDesktopTasksLimiter;
+    private final AppHandleEducationController mAppHandleEducationController;
     private final AppHeaderViewHolder.Factory mAppHeaderViewHolderFactory;
     private boolean mTransitionDragActive;
 
@@ -236,6 +241,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            AppHandleEducationController appHandleEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler) {
         this(
@@ -265,6 +271,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new SparseArray<>(),
                 interactionJankMonitor,
                 desktopTasksLimiter,
+                appHandleEducationController,
                 windowDecorCaptionHandleRepository,
                 activityOrientationChangeHandler,
                 new TaskPositionerFactory());
@@ -298,6 +305,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
             InteractionJankMonitor interactionJankMonitor,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            AppHandleEducationController appHandleEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             TaskPositionerFactory taskPositionerFactory) {
@@ -329,6 +337,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 com.android.internal.R.string.config_systemUi);
         mInteractionJankMonitor = interactionJankMonitor;
         mDesktopTasksLimiter = desktopTasksLimiter;
+        mAppHandleEducationController = appHandleEducationController;
         mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
         mActivityOrientationChangeHandler = activityOrientationChangeHandler;
         mAssistContentRequester = assistContentRequester;
@@ -362,6 +371,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         shellInit.addInitCallback(this::onInit, this);
     }
 
+    @OptIn(markerClass = ExperimentalCoroutinesApi.class)
     private void onInit() {
         mShellController.addKeyguardChangeListener(mDesktopModeKeyguardChangeListener);
         mShellCommandHandler.addDumpCallback(this::dump, this);
@@ -377,6 +387,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mContext.getDisplayId());
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register window manager callbacks", e);
+        }
+        if (DesktopModeStatus.canEnterDesktopMode(mContext)
+                && Flags.enableDesktopWindowingAppHandleEducation()) {
+            mAppHandleEducationController.setAppHandleEducationTooltipCallbacks(
+                    /* appHandleTooltipClickCallback= */(taskId) -> {
+                        openHandleMenu(taskId);
+                        return Unit.INSTANCE;
+                    },
+                    /* onToDesktopClickCallback= */(taskId, desktopModeTransitionSource) -> {
+                        onToDesktop(taskId, desktopModeTransitionSource);
+                        return Unit.INSTANCE;
+                    });
         }
     }
 
@@ -493,6 +515,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         // issue CANCEL MotionEvents to touch listeners before its view host is released.
         // See b/327664694.
         mWindowDecorByTaskId.remove(taskInfo.taskId);
+    }
+
+    private void openHandleMenu(int taskId) {
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+        decoration.createHandleMenu(checkNumberOfOtherInstances(decoration.mTaskInfo)
+                >= MANAGE_WINDOWS_MINIMUM_INSTANCES);
     }
 
     private void onMaximizeOrRestore(int taskId, String source) {
@@ -720,8 +748,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else if (id == R.id.caption_handle || id == R.id.open_menu_button) {
                 if (!decoration.isHandleMenuActive()) {
                     moveTaskToFront(decoration.mTaskInfo);
-                    decoration.createHandleMenu(checkNumberOfOtherInstances(decoration.mTaskInfo)
-                                    >= MANAGE_WINDOWS_MINIMUM_INSTANCES);
+                    openHandleMenu(mTaskId);
                 }
             } else if (id == R.id.maximize_window) {
                 // TODO(b/346441962): move click detection logic into the decor's
