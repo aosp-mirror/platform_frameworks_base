@@ -20,6 +20,9 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -31,6 +34,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -38,6 +42,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -56,23 +61,34 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -82,7 +98,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastMap
+import androidx.compose.ui.zIndex
 import com.android.compose.modifiers.background
+import com.android.compose.modifiers.height
 import com.android.systemui.common.ui.compose.load
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
@@ -92,14 +110,23 @@ import com.android.systemui.qs.panels.ui.compose.dragAndDropRemoveZone
 import com.android.systemui.qs.panels.ui.compose.dragAndDropTileList
 import com.android.systemui.qs.panels.ui.compose.dragAndDropTileSource
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.InactiveCornerRadius
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.TileArrangementPadding
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.ToggleTargetSize
+import com.android.systemui.qs.panels.ui.compose.infinitegrid.EditModeTileDefaults.CurrentTilesGridPadding
+import com.android.systemui.qs.panels.ui.compose.selection.MutableSelectionState
+import com.android.systemui.qs.panels.ui.compose.selection.ResizingHandle
+import com.android.systemui.qs.panels.ui.compose.selection.TileWidths
+import com.android.systemui.qs.panels.ui.compose.selection.clearSelectionTile
+import com.android.systemui.qs.panels.ui.compose.selection.rememberSelectionState
+import com.android.systemui.qs.panels.ui.compose.selection.selectableTile
 import com.android.systemui.qs.panels.ui.model.GridCell
 import com.android.systemui.qs.panels.ui.model.SpacerGridCell
 import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.model.groupAndSort
 import com.android.systemui.res.R
+import kotlinx.coroutines.delay
 
 object TileType
 
@@ -109,14 +136,11 @@ fun DefaultEditTileGrid(
     otherTiles: List<SizedTile<EditTileViewModel>>,
     columns: Int,
     modifier: Modifier,
-    onAddTile: (TileSpec, Int) -> Unit,
     onRemoveTile: (TileSpec) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
     onResize: (TileSpec) -> Unit,
 ) {
-    val addTileToEnd: (TileSpec) -> Unit by rememberUpdatedState {
-        onAddTile(it, CurrentTilesInteractor.POSITION_AT_END)
-    }
+    val selectionState = rememberSelectionState()
 
     CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
         Column(
@@ -138,7 +162,7 @@ fun DefaultEditTileGrid(
                 }
             }
 
-            CurrentTilesGrid(currentListState, columns, onRemoveTile, onResize, onSetTiles)
+            CurrentTilesGrid(currentListState, selectionState, columns, onResize, onSetTiles)
 
             // Hide available tiles when dragging
             AnimatedVisibility(
@@ -153,7 +177,7 @@ fun DefaultEditTileGrid(
                 ) {
                     EditGridHeader { Text(text = "Hold and drag to add tiles.") }
 
-                    AvailableTileGrid(otherTiles, columns, addTileToEnd, currentListState)
+                    AvailableTileGrid(otherTiles, selectionState, columns, currentListState)
                 }
             }
 
@@ -201,61 +225,67 @@ private fun RemoveTileTarget() {
 }
 
 @Composable
-private fun CurrentTilesContainer(content: @Composable () -> Unit) {
-    Box(
-        Modifier.fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
-                shape = RoundedCornerShape(48.dp),
-            )
-            .padding(dimensionResource(R.dimen.qs_tile_margin_vertical))
-    ) {
-        content()
-    }
-}
-
-@Composable
 private fun CurrentTilesGrid(
     listState: EditTileListState,
+    selectionState: MutableSelectionState,
     columns: Int,
-    onClick: (TileSpec) -> Unit,
     onResize: (TileSpec) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
 ) {
     val currentListState by rememberUpdatedState(listState)
-    val tilePadding = CommonTileDefaults.TileArrangementPadding
+    val tileHeight = CommonTileDefaults.TileHeight
+    val totalRows = listState.tiles.lastOrNull()?.row ?: 0
+    val totalHeight by
+        animateDpAsState(
+            gridHeight(totalRows + 1, tileHeight, TileArrangementPadding, CurrentTilesGridPadding),
+            label = "QSEditCurrentTilesGridHeight",
+        )
+    val gridState = rememberLazyGridState()
+    var gridContentOffset by remember { mutableStateOf(Offset(0f, 0f)) }
+    var droppedSpec by remember { mutableStateOf<TileSpec?>(null) }
 
-    CurrentTilesContainer {
-        val tileHeight = CommonTileDefaults.TileHeight
-        val totalRows = listState.tiles.lastOrNull()?.row ?: 0
-        val totalHeight = gridHeight(totalRows + 1, tileHeight, tilePadding)
-        val gridState = rememberLazyGridState()
-        var gridContentOffset by remember { mutableStateOf(Offset(0f, 0f)) }
+    // Select the tile that was dropped. A delay is introduced to avoid clipping issues on the
+    // selected border and resizing handle, as well as letting the selection animation play.
+    LaunchedEffect(droppedSpec) {
+        droppedSpec?.let {
+            delay(200)
+            selectionState.select(it)
 
-        TileLazyGrid(
-            state = gridState,
-            modifier =
-                Modifier.height(totalHeight)
-                    .dragAndDropTileList(gridState, gridContentOffset, listState) {
-                        onSetTiles(currentListState.tileSpecs())
-                    }
-                    .onGloballyPositioned { coordinates ->
-                        gridContentOffset = coordinates.positionInRoot()
-                    }
-                    .testTag(CURRENT_TILES_GRID_TEST_TAG),
-            columns = GridCells.Fixed(columns),
-        ) {
-            EditTiles(listState.tiles, onClick, listState, onResize = onResize)
+            // Reset droppedSpec in case a tile is dropped twice in a row
+            droppedSpec = null
         }
+    }
+
+    TileLazyGrid(
+        state = gridState,
+        columns = GridCells.Fixed(columns),
+        contentPadding = PaddingValues(CurrentTilesGridPadding),
+        modifier =
+            Modifier.fillMaxWidth()
+                .height { totalHeight.roundToPx() }
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = .5f),
+                    shape = RoundedCornerShape(48.dp),
+                )
+                .dragAndDropTileList(gridState, { gridContentOffset }, listState) { spec ->
+                    onSetTiles(currentListState.tileSpecs())
+                    droppedSpec = spec
+                }
+                .onGloballyPositioned { coordinates ->
+                    gridContentOffset = coordinates.positionInRoot()
+                }
+                .testTag(CURRENT_TILES_GRID_TEST_TAG),
+    ) {
+        EditTiles(listState.tiles, listState, selectionState, onResize)
     }
 }
 
 @Composable
 private fun AvailableTileGrid(
     tiles: List<SizedTile<EditTileViewModel>>,
+    selectionState: MutableSelectionState,
     columns: Int,
-    onClick: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState,
 ) {
     // Available tiles aren't visible during drag and drop, so the row isn't needed
@@ -292,7 +322,7 @@ private fun AvailableTileGrid(
                             cell = tileGridCell,
                             index = index,
                             dragAndDropState = dragAndDropState,
-                            onClick = onClick,
+                            selectionState = selectionState,
                             modifier = Modifier.weight(1f).fillMaxHeight(),
                         )
                     }
@@ -305,8 +335,8 @@ private fun AvailableTileGrid(
     }
 }
 
-fun gridHeight(rows: Int, tileHeight: Dp, padding: Dp): Dp {
-    return ((tileHeight + padding) * rows) - padding
+fun gridHeight(rows: Int, tileHeight: Dp, tilePadding: Dp, gridPadding: Dp): Dp {
+    return ((tileHeight + tilePadding) * rows) - tilePadding + gridPadding * 2
 }
 
 private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
@@ -320,9 +350,9 @@ private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
 
 fun LazyGridScope.EditTiles(
     cells: List<GridCell>,
-    onClick: (TileSpec) -> Unit,
     dragAndDropState: DragAndDropState,
-    onResize: (TileSpec) -> Unit = {},
+    selectionState: MutableSelectionState,
+    onResize: (TileSpec) -> Unit,
 ) {
     items(
         count = cells.size,
@@ -347,7 +377,7 @@ fun LazyGridScope.EditTiles(
                         cell = cell,
                         index = index,
                         dragAndDropState = dragAndDropState,
-                        onClick = onClick,
+                        selectionState = selectionState,
                         onResize = onResize,
                     )
                 }
@@ -361,28 +391,171 @@ private fun LazyGridItemScope.TileGridCell(
     cell: TileGridCell,
     index: Int,
     dragAndDropState: DragAndDropState,
-    onClick: (TileSpec) -> Unit,
-    onResize: (TileSpec) -> Unit = {},
+    selectionState: MutableSelectionState,
+    onResize: (TileSpec) -> Unit,
 ) {
-    val onClickActionName = stringResource(id = R.string.accessibility_qs_edit_remove_tile_action)
+    val selected = selectionState.isSelected(cell.tile.tileSpec)
     val stateDescription = stringResource(id = R.string.accessibility_qs_edit_position, index + 1)
+    val selectionAlpha by
+        animateFloatAsState(
+            targetValue = if (selected) 1f else 0f,
+            label = "QSEditTileSelectionAlpha",
+        )
 
-    EditTile(
-        tileViewModel = cell.tile,
-        iconOnly = cell.isIcon,
-        modifier =
-            Modifier.animateItem()
-                .semantics(mergeDescendants = true) {
-                    onClick(onClickActionName) { false }
-                    this.stateDescription = stateDescription
+    val modifier =
+        Modifier.animateItem()
+            .semantics(mergeDescendants = true) {
+                this.stateDescription = stateDescription
+                contentDescription = cell.tile.label.text
+                customActions =
+                    listOf(
+                        // TODO(b/367748260): Add final accessibility actions
+                        CustomAccessibilityAction("Toggle size") {
+                            onResize(cell.tile.tileSpec)
+                            true
+                        }
+                    )
+            }
+            .height(CommonTileDefaults.TileHeight)
+            .fillMaxWidth()
+
+    val content =
+        @Composable {
+            EditTile(
+                tileViewModel = cell.tile,
+                iconOnly = cell.isIcon,
+                selectionAlpha = { selectionAlpha },
+                modifier =
+                    Modifier.fillMaxSize()
+                        .selectableTile(cell.tile.tileSpec, selectionState)
+                        .dragAndDropTileSource(
+                            SizedTileImpl(cell.tile, cell.width),
+                            dragAndDropState,
+                            selectionState::unSelect,
+                        ),
+            )
+        }
+
+    if (selected) {
+        SelectedTile(
+            tileSpec = cell.tile.tileSpec,
+            isIcon = cell.isIcon,
+            selectionAlpha = { selectionAlpha },
+            selectionState = selectionState,
+            onResize = onResize,
+            modifier = modifier.zIndex(2f), // 2f to display this tile over neighbors when dragged
+            content = content,
+        )
+    } else {
+        UnselectedTile(
+            selectionAlpha = { selectionAlpha },
+            selectionState = selectionState,
+            modifier = modifier,
+            content = content,
+        )
+    }
+}
+
+@Composable
+private fun SelectedTile(
+    tileSpec: TileSpec,
+    isIcon: Boolean,
+    selectionAlpha: () -> Float,
+    selectionState: MutableSelectionState,
+    onResize: (TileSpec) -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    // Current base, min and max width of this tile
+    var tileWidths: TileWidths? by remember { mutableStateOf(null) }
+
+    // Animated diff between the current width and the resized width of the tile. We can't use
+    // animateContentSize here as the tile is sometimes unbounded.
+    val remainingOffset by
+        animateIntAsState(
+            selectionState.resizingState?.let { tileWidths?.base?.minus(it.width) ?: 0 } ?: 0,
+            label = "QSEditTileWidthOffset",
+        )
+
+    val padding = with(LocalDensity.current) { TileArrangementPadding.roundToPx() }
+    Box(
+        modifier.onSizeChanged {
+            val min = if (isIcon) it.width else (it.width - padding) / 2
+            val max = if (isIcon) (it.width * 2) + padding else it.width
+            tileWidths = TileWidths(it.width, min, max)
+        }
+    ) {
+        val handle =
+            @Composable {
+                ResizingHandle(
+                    enabled = true,
+                    selectionState = selectionState,
+                    transition = selectionAlpha,
+                    tileWidths = { tileWidths },
+                ) {
+                    onResize(tileSpec)
                 }
-                .dragAndDropTileSource(
-                    SizedTileImpl(cell.tile, cell.width),
-                    dragAndDropState,
-                    onClick,
-                    onResize,
-                ),
-    )
+            }
+
+        Layout(contents = listOf(content, handle)) {
+            (contentMeasurables, handleMeasurables),
+            constraints ->
+            // Grab the width from the resizing state if a resize is in progress, otherwise fill the
+            // max width
+            val width =
+                selectionState.resizingState?.width ?: (constraints.maxWidth - remainingOffset)
+            val contentPlaceable =
+                contentMeasurables.first().measure(constraints.copy(maxWidth = width))
+            val handlePlaceable = handleMeasurables.first().measure(constraints)
+
+            // Place the dot vertically centered on the right edge
+            val handleX = contentPlaceable.width - (handlePlaceable.width / 2)
+            val handleY = (contentPlaceable.height / 2) - (handlePlaceable.height / 2)
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                contentPlaceable.place(0, 0)
+                handlePlaceable.place(handleX, handleY)
+            }
+        }
+    }
+}
+
+@Composable
+private fun UnselectedTile(
+    selectionAlpha: () -> Float,
+    selectionState: MutableSelectionState,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val handle =
+        @Composable {
+            ResizingHandle(
+                enabled = false,
+                selectionState = selectionState,
+                transition = selectionAlpha,
+            )
+        }
+
+    Box(modifier) {
+        Layout(contents = listOf(content, handle)) {
+            (contentMeasurables, handleMeasurables),
+            constraints ->
+            val contentPlaceable =
+                contentMeasurables
+                    .first()
+                    .measure(constraints.copy(maxWidth = constraints.maxWidth))
+            val handlePlaceable = handleMeasurables.first().measure(constraints)
+
+            // Place the dot vertically centered on the right edge
+            val handleX = contentPlaceable.width - (handlePlaceable.width / 2)
+            val handleY = (contentPlaceable.height / 2) - (handlePlaceable.height / 2)
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                contentPlaceable.place(0, 0)
+                handlePlaceable.place(handleX, handleY)
+            }
+        }
+    }
 }
 
 @Composable
@@ -390,8 +563,8 @@ private fun AvailableTileGridCell(
     cell: TileGridCell,
     index: Int,
     dragAndDropState: DragAndDropState,
+    selectionState: MutableSelectionState,
     modifier: Modifier = Modifier,
-    onClick: (TileSpec) -> Unit,
 ) {
     val onClickActionName = stringResource(id = R.string.accessibility_qs_edit_tile_add_action)
     val stateDescription = stringResource(id = R.string.accessibility_qs_edit_position, index + 1)
@@ -403,21 +576,27 @@ private fun AvailableTileGridCell(
         verticalArrangement = spacedBy(CommonTileDefaults.TilePadding, Alignment.Top),
         modifier = modifier,
     ) {
-        EditTile(
-            tileViewModel = cell.tile,
-            iconOnly = true,
+        EditTileContainer(
             colors = colors,
             modifier =
-                Modifier.semantics(mergeDescendants = true) {
+                Modifier.fillMaxWidth()
+                    .height(CommonTileDefaults.TileHeight)
+                    .clearSelectionTile(selectionState)
+                    .semantics(mergeDescendants = true) {
                         onClick(onClickActionName) { false }
                         this.stateDescription = stateDescription
                     }
-                    .dragAndDropTileSource(
-                        SizedTileImpl(cell.tile, cell.width),
-                        dragAndDropState,
-                        onTap = onClick,
-                    ),
-        )
+                    .dragAndDropTileSource(SizedTileImpl(cell.tile, cell.width), dragAndDropState) {
+                        selectionState.unSelect()
+                    },
+        ) {
+            // Icon
+            SmallTileContent(
+                icon = cell.tile.icon,
+                color = colors.icon,
+                modifier = Modifier.align(Alignment.Center),
+            )
+        }
         Box(Modifier.fillMaxSize()) {
             Text(
                 cell.tile.label.text,
@@ -434,7 +613,7 @@ private fun AvailableTileGridCell(
 @Composable
 private fun SpacerGridCell(modifier: Modifier = Modifier) {
     // By default, spacers are invisible and exist purely to catch drag movements
-    Box(modifier.height(CommonTileDefaults.TileHeight).fillMaxWidth().tilePadding())
+    Box(modifier.height(CommonTileDefaults.TileHeight).fillMaxWidth())
 }
 
 @Composable
@@ -443,20 +622,35 @@ fun EditTile(
     iconOnly: Boolean,
     modifier: Modifier = Modifier,
     colors: TileColors = EditModeTileDefaults.editTileColors(),
+    selectionAlpha: () -> Float = { 1f },
 ) {
-    EditTileContainer(colors = colors, modifier = modifier) {
-        if (iconOnly) {
+    // Animated horizontal alignment from center (0f) to start (-1f)
+    val alignmentValue by
+        animateFloatAsState(
+            targetValue = if (iconOnly) 0f else -1f,
+            label = "QSEditTileContentAlignment",
+        )
+    val alignment by remember {
+        derivedStateOf { BiasAlignment(horizontalBias = alignmentValue, verticalBias = 0f) }
+    }
+
+    EditTileContainer(colors = colors, selectionAlpha = selectionAlpha, modifier = modifier) {
+        // Icon
+        Box(Modifier.size(ToggleTargetSize).align(alignment)) {
             SmallTileContent(
                 icon = tileViewModel.icon,
                 color = colors.icon,
                 modifier = Modifier.align(Alignment.Center),
             )
-        } else {
-            LargeTileContent(
+        }
+
+        // Labels, positioned after the icon
+        AnimatedVisibility(visible = !iconOnly, enter = fadeIn(), exit = fadeOut()) {
+            LargeTileLabels(
                 label = tileViewModel.label.text,
                 secondaryLabel = tileViewModel.appName?.text,
-                icon = tileViewModel.icon,
                 colors = colors,
+                modifier = Modifier.padding(start = ToggleTargetSize + TileArrangementPadding),
             )
         }
     }
@@ -466,27 +660,41 @@ fun EditTile(
 private fun EditTileContainer(
     colors: TileColors,
     modifier: Modifier = Modifier,
-    content: @Composable BoxScope.() -> Unit,
+    selectionAlpha: () -> Float = { 0f },
+    selectionColor: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable BoxScope.() -> Unit = {},
 ) {
     Box(
-        modifier =
-            modifier
-                .height(CommonTileDefaults.TileHeight)
-                .fillMaxWidth()
-                .drawBehind {
-                    drawRoundRect(
-                        SolidColor(colors.background),
-                        cornerRadius = CornerRadius(InactiveCornerRadius.toPx()),
-                    )
-                }
-                .tilePadding(),
-        content = content,
-    )
+        Modifier.wrapContentSize().drawWithContent {
+            drawContent()
+            drawRoundRect(
+                SolidColor(selectionColor),
+                cornerRadius = CornerRadius(InactiveCornerRadius.toPx()),
+                style = Stroke(EditModeTileDefaults.SelectedBorderWidth.toPx()),
+                alpha = selectionAlpha(),
+            )
+        }
+    ) {
+        Box(
+            modifier =
+                modifier
+                    .drawBehind {
+                        drawRoundRect(
+                            SolidColor(colors.background),
+                            cornerRadius = CornerRadius(InactiveCornerRadius.toPx()),
+                        )
+                    }
+                    .tilePadding(),
+            content = content,
+        )
+    }
 }
 
 private object EditModeTileDefaults {
     const val PLACEHOLDER_ALPHA = .3f
     val EditGridHeaderHeight = 60.dp
+    val SelectedBorderWidth = 2.dp
+    val CurrentTilesGridPadding = 8.dp
 
     @Composable
     fun editTileColors(): TileColors =

@@ -98,7 +98,6 @@ constructor(
             otherTiles = otherTiles,
             columns = columns,
             modifier = modifier,
-            onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
             onSetTiles = onSetTiles,
             onResize = iconTilesViewModel::resize,
