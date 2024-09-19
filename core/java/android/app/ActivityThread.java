@@ -255,6 +255,7 @@ import libcore.io.ForwardingOs;
 import libcore.io.IoUtils;
 import libcore.io.Os;
 import libcore.net.event.NetworkEventDispatcher;
+import libcore.util.NativeAllocationRegistry;
 
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 
@@ -1610,6 +1611,32 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         @NeverCompile
+        private void dumpMemInfoNativeAllocations(PrintWriter pw) {
+            pw.println(" ");
+            pw.println(" Native Allocations");
+            printRow(pw, TWO_COUNT_COLUMN_HEADER, "", "Count", "", "Total(kB)");
+            printRow(pw, TWO_COUNT_COLUMN_HEADER, "", "------", "", "------");
+
+            for (NativeAllocationRegistry.Metrics m : NativeAllocationRegistry.getMetrics()) {
+                // group into 3 major categories: Bitmap, HardwareBuffer and Other
+                final String className = switch (m.getClassName()) {
+                    case "android.graphics.Bitmap" -> "Bitmap";
+                    case "android.hardware.HardwareBuffer" -> "HardwareBuffer";
+                    default -> "Other";
+                };
+
+                if (m.getMallocedCount() != 0 || m.getMallocedBytes() != 0) {
+                    printRow(pw, TWO_COUNT_COLUMNS, className + " (malloced):",
+                        m.getMallocedCount(), "", m.getMallocedBytes() / 1024);
+                }
+                if (m.getNonmallocedCount() != 0 || m.getNonmallocedBytes() != 0) {
+                    printRow(pw, TWO_COUNT_COLUMNS, className + " (nonmalloced):",
+                        m.getNonmallocedCount(), "", m.getNonmallocedBytes() / 1024);
+                }
+            }
+        }
+
+        @NeverCompile
         private void dumpMemInfo(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
                 boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
                 boolean dumpUnreachable, boolean dumpAllocatorStats) {
@@ -1706,6 +1733,10 @@ public final class ActivityThread extends ClientTransactionHandler
                     "Parcel count:", parcelCount);
             printRow(pw, TWO_COUNT_COLUMNS, "Death Recipients:", binderDeathObjectCount,
                     "WebViews:", webviewInstanceCount);
+
+            if (com.android.libcore.Flags.nativeMetrics()) {
+                dumpMemInfoNativeAllocations(pw);
+            }
 
             // SQLite mem info
             pw.println(" ");
