@@ -24,6 +24,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
+import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -121,7 +122,16 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopModeTaskRepository.ifPresent(repository -> {
-                repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
+                // TODO: b/370038902 - Handle Activity#finishAndRemoveTask.
+                if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()
+                        || repository.isClosingTask(taskInfo.taskId)) {
+                    // A task that's vanishing should be removed:
+                    // - If it's closed by the X button which means it's marked as a closing task.
+                    repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
+                } else {
+                    repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId, false);
+                    repository.minimizeTask(taskInfo.displayId, taskInfo.taskId);
+                }
             });
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);

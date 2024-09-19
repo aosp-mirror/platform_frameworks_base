@@ -43,7 +43,6 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
-import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
@@ -1307,14 +1306,11 @@ class DesktopTasksController(
             // Remove wallpaper activity when the last active task is removed
             removeWallpaperActivity(wct)
         }
-        taskRepository.addClosingTask(task.displayId, task.taskId)
-        // If a CLOSE is triggered on a desktop task, remove the task.
-        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue() &&
-            taskRepository.isVisibleTask(task.taskId) &&
-            transitionType == TRANSIT_CLOSE
-        ) {
-            wct.removeTask(task.token)
+
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
+            taskRepository.addClosingTask(task.displayId, task.taskId)
         }
+
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
                 task.displayId,
