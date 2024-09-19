@@ -159,7 +159,7 @@ class DeviceSettingRepositoryImpl(
                     title = pref.title,
                     toggles = pref.toggleInfos.map { it.toModel() },
                     isAllowedChangingState = pref.isAllowedChangingState,
-                    isActive = true,
+                    isActive = pref.isActive,
                     state = DeviceSettingStateModel.MultiTogglePreferenceState(pref.state),
                     updateState = { newState ->
                         coroutineScope.launch(backgroundCoroutineContext) {
