@@ -815,8 +815,7 @@ class ScreenRotationAnimation {
                 if (mDisplayContent.getRotationAnimation() == ScreenRotationAnimation.this) {
                     // It also invokes kill().
                     mDisplayContent.setRotationAnimation(null);
-                    mDisplayContent.mAppCompatCameraPolicy
-                            .onScreenRotationAnimationFinished();
+                    mDisplayContent.mAppCompatCameraPolicy.onScreenRotationAnimationFinished();
                 } else {
                     kill();
                 }
