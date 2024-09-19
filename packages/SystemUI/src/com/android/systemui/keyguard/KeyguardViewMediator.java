@@ -346,6 +346,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private boolean mShuttingDown;
     private boolean mDozing;
     private boolean mAnimatingScreenOff;
+    private boolean mIgnoreDismiss;
     private final Context mContext;
     private final FalsingCollector mFalsingCollector;
 
@@ -627,18 +628,20 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         public void onUserSwitching(int userId) {
             Log.d(TAG, String.format("onUserSwitching %d", userId));
             synchronized (KeyguardViewMediator.this) {
+                mIgnoreDismiss = true;
                 notifyTrustedChangedLocked(mUpdateMonitor.getUserHasTrust(userId));
                 resetKeyguardDonePendingLocked();
-                dismiss(null /* callback */, null /* message */);
+                resetStateLocked();
                 adjustStatusBarLocked();
             }
         }
 
         @Override
         public void onUserSwitchComplete(int userId) {
+            mIgnoreDismiss = false;
             Log.d(TAG, String.format("onUserSwitchComplete %d", userId));
-            // We are calling dismiss again and with a delay as there are race conditions
-            // in some scenarios caused by async layout listeners
+            // We are calling dismiss with a delay as there are race conditions in some scenarios
+            // caused by async layout listeners
             mHandler.postDelayed(() -> dismiss(null /* callback */, null /* message */), 500);
         }
 
@@ -2442,6 +2445,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
+        if (mIgnoreDismiss) {
+            android.util.Log.i(TAG, "Ignoring request to dismiss (user switch in progress?)");
+            return;
+        }
         mHandler.obtainMessage(DISMISS, new DismissMessage(callback, message)).sendToTarget();
     }
 
