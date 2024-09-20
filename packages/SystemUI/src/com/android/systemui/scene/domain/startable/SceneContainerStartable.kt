@@ -193,22 +193,16 @@ constructor(
                         // We are in a session if either Shade or QuickSettings is on the back stack
                         .map { backStack ->
                             backStack.asIterable().any {
+                                // TODO(b/356596436): Include overlays in the back stack as well.
                                 it == Scenes.Shade || it == Scenes.QuickSettings
                             }
                         }
                         .distinctUntilChanged(),
-                    sceneInteractor.transitionState
-                        .mapNotNull { state ->
-                            // We are also in a session if either Shade or QuickSettings is the
-                            // current scene
-                            when (state) {
-                                is ObservableTransitionState.Idle -> state.currentScene
-                                is ObservableTransitionState.Transition -> state.fromContent
-                            }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
-                        }
-                        .distinctUntilChanged(),
-                ) { inBackStack, isCurrentScene ->
-                    inBackStack || isCurrentScene
+                    // We are also in a session if either Notifications Shade or QuickSettings Shade
+                    // is currently shown (whether idle or animating).
+                    shadeInteractor.isAnyExpanded,
+                ) { inBackStack, isShadeShown ->
+                    inBackStack || isShadeShown
                 }
                 // Once a session has ended, clear the session storage.
                 .filter { inSession -> !inSession }
