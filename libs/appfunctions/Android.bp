@@ -29,3 +29,11 @@ java_sdk_library {
     no_dist: true,
     unsafe_ignore_missing_latest_api: true,
 }
+
+prebuilt_etc {
+    name: "appfunctions.sidecar.xml",
+    system_ext_specific: true,
+    sub_dir: "permissions",
+    src: "appfunctions.sidecar.xml",
+    filename_from_src: true,
+}
