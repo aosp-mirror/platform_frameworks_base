@@ -71,7 +71,7 @@ class InsetsSourceProvider {
     protected @Nullable WindowContainer mWindowContainer;
     protected @Nullable InsetsSourceControl mControl;
     protected @Nullable InsetsControlTarget mControlTarget;
-    protected boolean mIsLeashReadyForDispatching;
+    protected boolean mIsLeashInitialized;
 
     private final Rect mTmpRect = new Rect();
     private final InsetsSourceControl mFakeControl;
@@ -539,8 +539,8 @@ class InsetsSourceProvider {
                 ANIMATION_TYPE_INSETS_CONTROL);
 
         // The leash was just created. We cannot dispatch it until its surface transaction is
-        // applied. Otherwise, the client's operation to the leash might be overwritten by us.
-        mIsLeashReadyForDispatching = false;
+        // committed. Otherwise, the client's operation to the leash might be overwritten by us.
+        mIsLeashInitialized = false;
 
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
@@ -574,7 +574,7 @@ class InsetsSourceProvider {
      * @param id Indicates which transaction is committed so that stale callbacks can be dropped.
      */
     void onSurfaceTransactionCommitted(long id) {
-        if (mIsLeashReadyForDispatching) {
+        if (mIsLeashInitialized) {
             return;
         }
         if (mControl == null) {
@@ -583,7 +583,7 @@ class InsetsSourceProvider {
         if (id != getSurfaceTransactionId(mControl.getLeash())) {
             return;
         }
-        mIsLeashReadyForDispatching = true;
+        mIsLeashInitialized = true;
         mStateController.notifySurfaceTransactionReady(this, 0, false);
     }
 
@@ -634,9 +634,12 @@ class InsetsSourceProvider {
                 mServerVisible, mClientVisible);
     }
 
-    protected boolean isLeashReadyForDispatching(InsetsControlTarget target) {
-        // If the target is not the control target, we are ready for dispatching a null-leash to it.
-        return target != mControlTarget || mIsLeashReadyForDispatching;
+    protected boolean isLeashReadyForDispatching() {
+        return isLeashInitialized();
+    }
+
+    boolean isLeashInitialized() {
+        return mIsLeashInitialized;
     }
 
     /**
@@ -649,7 +652,7 @@ class InsetsSourceProvider {
     @Nullable
     InsetsSourceControl getControl(InsetsControlTarget target) {
         if (target == mControlTarget) {
-            if (!isLeashReadyForDispatching(target) && mControl != null) {
+            if (!isLeashReadyForDispatching() && mControl != null) {
                 // The surface transaction of preparing leash is not applied yet. We don't send it
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
@@ -674,7 +677,7 @@ class InsetsSourceProvider {
      */
     @Nullable
     protected SurfaceControl getLeash(@NonNull InsetsControlTarget target) {
-        return target == mControlTarget && mIsLeashReadyForDispatching && mControl != null
+        return target == mControlTarget && mIsLeashInitialized && mControl != null
                 ? mControl.getLeash() : null;
     }
 
@@ -723,7 +726,7 @@ class InsetsSourceProvider {
             pw.println();
         }
         pw.print(prefix);
-        pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
+        pw.print("mIsLeashInitialized="); pw.print(mIsLeashInitialized);
         pw.print(" mHasPendingPosition="); pw.print(mHasPendingPosition);
         pw.println();
         if (mWindowContainer != null) {
@@ -769,7 +772,7 @@ class InsetsSourceProvider {
         if (mAdapter != null && mAdapter.mCapturedLeash != null) {
             mAdapter.mCapturedLeash.dumpDebug(proto, CAPTURED_LEASH);
         }
-        proto.write(IS_LEASH_READY_FOR_DISPATCHING, mIsLeashReadyForDispatching);
+        proto.write(IS_LEASH_READY_FOR_DISPATCHING, isLeashReadyForDispatching());
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(SERVER_VISIBLE, mServerVisible);
         proto.write(SEAMLESS_ROTATING, mSeamlessRotating);

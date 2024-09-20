@@ -132,15 +132,15 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     }
 
     @Override
-    protected boolean isLeashReadyForDispatching(InsetsControlTarget target) {
+    protected boolean isLeashReadyForDispatching() {
         if (android.view.inputmethod.Flags.refactorInsetsController()) {
             final WindowState ws =
                     mWindowContainer != null ? mWindowContainer.asWindowState() : null;
             final boolean isDrawn = ws != null && ws.isDrawn();
-            return super.isLeashReadyForDispatching(target)
+            return super.isLeashReadyForDispatching()
                     && mServerVisible && isDrawn && mGivenInsetsReady;
         } else {
-            return super.isLeashReadyForDispatching(target);
+            return super.isLeashReadyForDispatching();
         }
     }
 
@@ -641,7 +641,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             sb.append(", leash is: ").append(hasLeash ? "non-null" : "null");
             if (!hasLeash) {
                 sb.append(", control is: ").append(mControl != null ? "non-null" : "null");
-                sb.append(", mIsLeashReadyForDispatching: ").append(mIsLeashReadyForDispatching);
+                sb.append(", mIsLeashInitialized: ").append(mIsLeashInitialized);
             }
             sb.append(", isImeLayeringTarget: ");
             sb.append(isImeLayeringTarget(mImeRequester, dcTarget));
