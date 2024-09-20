@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 
 import org.junit.Before;
@@ -35,6 +36,8 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
+
+import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class SystemFeaturesGeneratorTest {
@@ -57,6 +60,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RwNoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RwNoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RwNoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
+        assertThat(RwNoFeatures.getCompileTimeAvailableFeatures()).isEmpty();
     }
 
     @Test
@@ -68,6 +72,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoNoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RoNoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RoNoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
+        assertThat(RoNoFeatures.getCompileTimeAvailableFeatures()).isEmpty();
 
         // Also ensure we fall back to the PackageManager for feature APIs without an accompanying
         // versioned feature definition.
@@ -101,6 +106,7 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RwFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isNull();
         assertThat(RwFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
         assertThat(RwFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
+        assertThat(RwFeatures.getCompileTimeAvailableFeatures()).isEmpty();
     }
 
     @Test
@@ -156,5 +162,11 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", 100)).isNull();
         assertThat(RoFeatures.maybeHasFeature("", 0)).isNull();
+
+        Map<String, FeatureInfo> compiledFeatures = RoFeatures.getCompileTimeAvailableFeatures();
+        assertThat(compiledFeatures.keySet())
+                .containsExactly(PackageManager.FEATURE_WATCH, PackageManager.FEATURE_WIFI);
+        assertThat(compiledFeatures.get(PackageManager.FEATURE_WATCH).version).isEqualTo(1);
+        assertThat(compiledFeatures.get(PackageManager.FEATURE_WIFI).version).isEqualTo(0);
     }
 }

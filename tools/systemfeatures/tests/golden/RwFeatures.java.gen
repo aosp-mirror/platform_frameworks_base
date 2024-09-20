@@ -7,9 +7,13 @@
 //            --feature=AUTO:
 package com.android.systemfeatures;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @hide
@@ -61,5 +65,16 @@ public final class RwFeatures {
     @Nullable
     public static Boolean maybeHasFeature(String featureName, int version) {
         return null;
+    }
+
+    /**
+     * Gets features marked as available at compile-time, keyed by name.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Map<String, FeatureInfo> getCompileTimeAvailableFeatures() {
+        Map<String, FeatureInfo> features = new HashMap<>(0);
+        return features;
     }
 }
