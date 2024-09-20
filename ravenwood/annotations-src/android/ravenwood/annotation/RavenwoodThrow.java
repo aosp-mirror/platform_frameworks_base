@@ -43,4 +43,9 @@ public @interface RavenwoodThrow {
      * General free-form description of why this method throws.
      */
     String reason() default "";
+
+    /**
+     * Tracking bug number, if any.
+     */
+    long bug() default 0;
 }
