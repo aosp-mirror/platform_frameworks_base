@@ -216,7 +216,7 @@ constructor(
             )
             return
         }
-        var stateAfter: String
+        val stateAfter: String
         if (entry in nextMap) {
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
