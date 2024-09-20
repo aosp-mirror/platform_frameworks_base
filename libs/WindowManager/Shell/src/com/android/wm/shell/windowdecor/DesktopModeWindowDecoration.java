@@ -984,7 +984,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         loadAppInfoIfNeeded();
         updateGenericLink();
         final boolean supportsMultiInstance = mMultiInstanceHelper
-                .supportsMultiInstanceSplit(mTaskInfo.baseActivity);
+                .supportsMultiInstanceSplit(mTaskInfo.baseActivity)
+                && Flags.enableDesktopWindowingMultiInstanceFeatures();
         final boolean shouldShowManageWindowsButton = supportsMultiInstance
                 && mMinimumInstancesFound;
         mHandleMenu = mHandleMenuFactory.create(
