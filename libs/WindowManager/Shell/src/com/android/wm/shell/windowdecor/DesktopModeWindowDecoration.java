@@ -144,7 +144,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private Function0<Unit> mOnManageWindowsClickListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
-    private DragDetector mDragDetector;
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
@@ -335,11 +334,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mDragPositioningCallback = dragPositioningCallback;
     }
 
-    void setDragDetector(DragDetector dragDetector) {
-        mDragDetector = dragDetector;
-        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
-    }
-
     void setOpenInBrowserClickListener(Consumer<Uri> listener) {
         mOpenInBrowserClickListener = listener;
     }
@@ -504,7 +498,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
                 .getScaledTouchSlop();
-        mDragDetector.setTouchSlop(touchSlop);
 
         // If either task geometry or position have changed, update this task's
         // exclusion region listener

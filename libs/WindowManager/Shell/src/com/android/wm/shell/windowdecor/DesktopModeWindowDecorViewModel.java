@@ -79,6 +79,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.Toast;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
@@ -663,11 +664,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private class DesktopModeTouchEventListener extends GestureDetector.SimpleOnGestureListener
             implements View.OnClickListener, View.OnTouchListener, View.OnLongClickListener,
             View.OnGenericMotionListener, DragDetector.MotionEventHandler {
+        private static final long APP_HANDLE_HOLD_TO_DRAG_DURATION_MS = 100;
+        private static final long APP_HEADER_HOLD_TO_DRAG_DURATION_MS = 0;
 
         private final int mTaskId;
         private final WindowContainerToken mTaskToken;
         private final DragPositioningCallback mDragPositioningCallback;
-        private final DragDetector mDragDetector;
+        private final DragDetector mHandleDragDetector;
+        private final DragDetector mHeaderDragDetector;
         private final GestureDetector mGestureDetector;
         private final int mDisplayId;
         private final Rect mOnDragStartInitialBounds = new Rect();
@@ -689,7 +693,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragPositioningCallback = dragPositioningCallback;
-            mDragDetector = new DragDetector(this);
+            final int touchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop();
+            final long appHandleHoldToDragDuration = Flags.enableHoldToDragAppHandle()
+                    ? APP_HANDLE_HOLD_TO_DRAG_DURATION_MS : 0;
+            mHandleDragDetector = new DragDetector(this, appHandleHoldToDragDuration,
+                    touchSlop);
+            mHeaderDragDetector = new DragDetector(this, APP_HEADER_HOLD_TO_DRAG_DURATION_MS,
+                    touchSlop);
             mGestureDetector = new GestureDetector(mContext, this);
             mDisplayId = taskInfo.displayId;
         }
@@ -748,7 +758,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     && id != R.id.maximize_window && id != R.id.minimize_window) {
                 return false;
             }
-
+            final boolean isAppHandle = !getTaskInfo().isFreeform();
             final int actionMasked = e.getActionMasked();
             final boolean isDown = actionMasked == MotionEvent.ACTION_DOWN;
             final boolean isUpOrCancel = actionMasked == MotionEvent.ACTION_CANCEL
@@ -797,7 +807,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 // Gesture is finished, reset state.
                 mShouldPilferCaptionEvents = false;
             }
-            return mDragDetector.onMotionEvent(v, e);
+            if (isAppHandle) {
+                return mHandleDragDetector.onMotionEvent(v, e);
+            } else {
+                return mHeaderDragDetector.onMotionEvent(v, e);
+            }
         }
 
         @Override
@@ -863,6 +877,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             } else {
                 return handleFreeformMotionEvent(decoration, taskInfo, v, e);
             }
+        }
+
+        @NonNull
+        private RunningTaskInfo getTaskInfo() {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(mTaskId);
+            return decoration.mTaskInfo;
         }
 
         private boolean handleNonFreeformMotionEvent(DesktopModeWindowDecoration decoration,
@@ -1447,7 +1467,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 touchEventListener, touchEventListener, touchEventListener, touchEventListener);
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
         windowDecoration.setDragPositioningCallback(taskPositioner);
-        windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */);
         if (!Flags.enableHandleInputFix()) {
