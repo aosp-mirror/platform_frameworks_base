@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog;
 
+import android.os.ServiceManager;
+
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
@@ -76,7 +78,11 @@ public class ProtoLog {
                     groups = allGroups.toArray(new IProtoLogGroup[0]);
                 }
 
-                sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+                try {
+                    sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+                } catch (ServiceManager.ServiceNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
             sProtoLogInstance = new LogcatOnlyProtoLogImpl();
