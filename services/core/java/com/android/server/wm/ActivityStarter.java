@@ -1749,12 +1749,13 @@ class ActivityStarter {
         mIntent.setFlags(mLaunchFlags);
 
         boolean dreamStopping = false;
-
-        for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
-            if (stoppingActivity.getActivityType()
-                    == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
-                dreamStopping = true;
-                break;
+        if (!com.android.window.flags.Flags.removeActivityStarterDreamCallback()) {
+            for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
+                if (stoppingActivity.getActivityType()
+                        == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
+                    dreamStopping = true;
+                    break;
+                }
             }
         }
 
@@ -1878,8 +1879,21 @@ class ActivityStarter {
         if (mDoResume) {
             if (!avoidMoveToFront()) {
                 mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-                if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.isDreaming()
-                        && !dreamStopping) {
+
+                final boolean launchBehindDream;
+                if (com.android.window.flags.Flags.removeActivityStarterDreamCallback()) {
+                    final TaskDisplayArea tda = mTargetRootTask.getTaskDisplayArea();
+                    final Task top = (tda != null ? tda.getTopRootTask() : null);
+                    launchBehindDream = (top != null && top != mTargetRootTask)
+                            && top.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_DREAM
+                            && top.getTopNonFinishingActivity() != null;
+                } else {
+                    launchBehindDream = !mTargetRootTask.isTopRootTaskInDisplayArea()
+                            && mService.isDreaming()
+                            && !dreamStopping;
+                }
+
+                if (launchBehindDream) {
                     // Launching underneath dream activity (fullscreen, always-on-top). Run the
                     // launch--behind transition so the Activity gets created and starts
                     // in visible state.
