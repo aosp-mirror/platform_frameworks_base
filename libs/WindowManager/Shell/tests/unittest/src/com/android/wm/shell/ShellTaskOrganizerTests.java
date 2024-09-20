@@ -687,6 +687,25 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         verify(mRecentTasksController).onTaskRunningInfoChanged(task2);
     }
 
+    @Test
+    public void testTaskVanishedCallback() {
+        RunningTaskInfo task1 = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(task1, /* leash= */ null);
+
+        RunningTaskInfo[] vanishedTasks = new RunningTaskInfo[1];
+        ShellTaskOrganizer.TaskVanishedListener listener =
+                new ShellTaskOrganizer.TaskVanishedListener() {
+                    @Override
+                    public void onTaskVanished(RunningTaskInfo taskInfo) {
+                        vanishedTasks[0] = taskInfo;
+                    }
+                };
+        mOrganizer.addTaskVanishedListener(listener);
+        mOrganizer.onTaskVanished(task1);
+
+        assertEquals(vanishedTasks[0], task1);
+    }
+
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;

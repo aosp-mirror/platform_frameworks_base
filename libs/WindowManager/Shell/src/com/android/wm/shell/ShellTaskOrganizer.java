@@ -124,6 +124,15 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
+     * Limited scope callback to notify when a task is removed from the system.  This signal is
+     * not synchronized with anything (or any transition), and should not be used in cases where
+     * that is necessary.
+     */
+    public interface TaskVanishedListener {
+        default void onTaskVanished(RunningTaskInfo taskInfo) {}
+    }
+
+    /**
      * Callbacks for events on a task with a locus id.
      */
     public interface LocusIdListener {
@@ -166,6 +175,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     private final ArraySet<LocusIdListener> mLocusIdListeners = new ArraySet<>();
 
     private final ArraySet<FocusListener> mFocusListeners = new ArraySet<>();
+
+    // Listeners that should be notified when a task is removed
+    private final ArraySet<TaskVanishedListener> mTaskVanishedListeners = new ArraySet<>();
 
     private final Object mLock = new Object();
     private StartingWindowController mStartingWindow;
@@ -409,7 +421,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
-     * Removes listener.
+     * Removes a locus id listener.
      */
     public void removeLocusIdListener(LocusIdListener listener) {
         synchronized (mLock) {
@@ -430,11 +442,29 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     }
 
     /**
-     * Removes listener.
+     * Removes a focus listener.
      */
     public void removeFocusListener(FocusListener listener) {
         synchronized (mLock) {
             mFocusListeners.remove(listener);
+        }
+    }
+
+    /**
+     * Adds a listener to be notified when a task vanishes.
+     */
+    public void addTaskVanishedListener(TaskVanishedListener listener) {
+        synchronized (mLock) {
+            mTaskVanishedListeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a task-vanished listener.
+     */
+    public void removeTaskVanishedListener(TaskVanishedListener listener) {
+        synchronized (mLock) {
+            mTaskVanishedListeners.remove(listener);
         }
     }
 
@@ -614,6 +644,9 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
                 t.apply();
                 ProtoLog.v(WM_SHELL_TASK_ORG, "Removing overlay surface");
             }
+            for (TaskVanishedListener l : mTaskVanishedListeners) {
+                l.onTaskVanished(taskInfo);
+            }
 
             if (!ENABLE_SHELL_TRANSITIONS && (appearedInfo.getLeash() != null)) {
                 // Preemptively clean up the leash only if shell transitions are not enabled
@@ -644,6 +677,22 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
         synchronized (mLock) {
             final TaskAppearedInfo info = mTasks.get(taskId);
             return info != null ? info.getTaskInfo() : null;
+        }
+    }
+
+    /**
+     * Shows/hides the given task surface.  Not for general use as changing the task visibility may
+     * conflict with other Transitions.  This is currently ONLY used to temporarily hide a task
+     * while a drag is in session.
+     */
+    public void setTaskSurfaceVisibility(int taskId, boolean visible) {
+        synchronized (mLock) {
+            final TaskAppearedInfo info = mTasks.get(taskId);
+            if (info != null) {
+                SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+                t.setVisibility(info.getLeash(), visible);
+                t.apply();
+            }
         }
     }
 

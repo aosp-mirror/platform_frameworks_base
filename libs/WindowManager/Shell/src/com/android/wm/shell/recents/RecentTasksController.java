@@ -37,6 +37,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.IRecentsAnimationRunner;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -453,11 +454,31 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     /**
-     * Find the background task that match the given component.
+     * Returns the top running leaf task ignoring {@param ignoreTaskToken} if it is specified.
+     * NOTE: This path currently makes assumptions that ignoreTaskToken is for the top task.
+     */
+    @Nullable
+    public ActivityManager.RunningTaskInfo getTopRunningTask(
+            @Nullable WindowContainerToken ignoreTaskToken) {
+        List<ActivityManager.RunningTaskInfo> tasks = mActivityTaskManager.getTasks(2,
+                false /* filterOnlyVisibleRecents */);
+        for (int i = 0; i < tasks.size(); i++) {
+            final ActivityManager.RunningTaskInfo task = tasks.get(i);
+            if (task.token.equals(ignoreTaskToken)) {
+                continue;
+            }
+            return task;
+        }
+        return null;
+    }
+
+    /**
+     * Find the background task that match the given component.  Ignores tasks match
+     * {@param ignoreTaskToken} if it is non-null.
      */
     @Nullable
     public ActivityManager.RecentTaskInfo findTaskInBackground(ComponentName componentName,
-            int userId) {
+            int userId, @Nullable WindowContainerToken ignoreTaskToken) {
         if (componentName == null) {
             return null;
         }
@@ -467,6 +488,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
         for (int i = 0; i < tasks.size(); i++) {
             final ActivityManager.RecentTaskInfo task = tasks.get(i);
             if (task.isVisible) {
+                continue;
+            }
+            if (task.token.equals(ignoreTaskToken)) {
                 continue;
             }
             if (componentName.equals(task.baseIntent.getComponent()) && userId == task.userId) {

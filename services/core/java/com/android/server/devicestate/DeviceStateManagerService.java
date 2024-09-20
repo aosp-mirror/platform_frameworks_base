@@ -47,6 +47,7 @@ import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.devicestate.DeviceStateManagerInternal;
 import android.hardware.devicestate.IDeviceStateManager;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
+import android.hardware.devicestate.feature.flags.Flags;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -968,16 +969,16 @@ public final class DeviceStateManagerService extends SystemService {
      * @param callingPid Process ID that is requesting this state change
      * @param state state that is being requested.
      */
-    private void assertCanRequestDeviceState(int callingPid, int callingUid, int state) {
+    private void enforceRequestDeviceStatePermitted(int callingPid, int callingUid, int state) {
         final boolean isTopApp = isTopApp(callingPid);
         final boolean isForegroundApp = isForegroundApp(callingPid, callingUid);
         final boolean isStateAvailableForAppRequests = isStateAvailableForAppRequests(state);
 
-        final boolean canRequestState = isTopApp
+        final boolean isAllowedToRequestState = isTopApp
                 && isForegroundApp
                 && isStateAvailableForAppRequests;
 
-        if (!canRequestState) {
+        if (!isAllowedToRequestState) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app "
@@ -986,19 +987,29 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     /**
-     * Checks if the process can control the device state. If the calling process ID is
-     * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
+     * Checks if the process can cancel a device state request. If the calling process ID is not
+     * both the top app and foregrounded, verify that the calling process is in the foreground and
+     * that it matches the process ID and user ID that made the device state request. If neither are
+     * true, then check if this process holds the CONTROL_DEVICE_STATE permission.
      *
      * @param callingPid Process ID that is requesting this state change
      * @param callingUid UID that is requesting this state change
      */
-    private void assertCanControlDeviceState(int callingPid, int callingUid) {
+    private void enforceCancelDeviceStatePermitted(int callingPid, int callingUid) {
         final boolean isTopApp = isTopApp(callingPid);
         final boolean isForegroundApp = isForegroundApp(callingPid, callingUid);
 
-        final boolean canControlState = isTopApp && isForegroundApp;
+        boolean isAllowedToControlState = isTopApp && isForegroundApp;
 
-        if (!canControlState) {
+        if (Flags.deviceStateRequesterCancelState()) {
+            synchronized (mLock) {
+                isAllowedToControlState =
+                        isTopApp || (isForegroundApp && doCallingIdsMatchOverrideRequestIdsLocked(
+                                callingPid, callingUid));
+            }
+        }
+
+        if (!isAllowedToControlState) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app.");
@@ -1030,6 +1041,16 @@ public final class DeviceStateManagerService extends SystemService {
     private boolean isTopApp(int callingPid) {
         final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
         return topApp != null && topApp.getPid() == callingPid;
+    }
+
+    /**
+     * Returns if the provided {@code callingPid} and {@code callingUid} match the same id's that
+     * requested the current device state override.
+     */
+    @GuardedBy("mLock")
+    private boolean doCallingIdsMatchOverrideRequestIdsLocked(int callingPid, int callingUid) {
+        OverrideRequest request = mActiveOverride.orElse(null);
+        return request != null && request.getPid() == callingPid && request.getUid() == callingUid;
     }
 
     private boolean isStateAvailableForAppRequests(int state) {
@@ -1256,7 +1277,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            assertCanRequestDeviceState(callingPid, callingUid, state);
+            enforceRequestDeviceStatePermitted(callingPid, callingUid, state);
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
@@ -1281,7 +1302,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to cancel a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            assertCanControlDeviceState(callingPid, callingUid);
+            enforceCancelDeviceStatePermitted(callingPid, callingUid);
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {

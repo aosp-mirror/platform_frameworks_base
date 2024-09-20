@@ -9,3 +9,15 @@ flag {
     bug: "293636629"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "device_state_requester_cancel_state"
+    is_exported: true
+    namespace: "windowing_sdk"
+    description: "Removes foreground requirement if process attempting to cancel a state request is the requester"
+    bug: "354772125"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
