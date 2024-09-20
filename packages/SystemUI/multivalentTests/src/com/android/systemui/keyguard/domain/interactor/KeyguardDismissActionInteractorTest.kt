@@ -81,6 +81,7 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 powerInteractor = kosmos.powerInteractor,
                 alternateBouncerInteractor = kosmos.alternateBouncerInteractor,
                 shadeInteractor = { kosmos.shadeInteractor },
+                keyguardInteractor = { kosmos.keyguardInteractor },
             )
     }
 
