@@ -183,7 +183,7 @@ class DragResizeInputListener implements AutoCloseable {
 
         mTouchRegion.setEmpty();
         // Apply the geometry to the touch region.
-        geometry.union(mContext, mTouchRegion);
+        geometry.union(mTouchRegion);
         mInputEventReceiver.setGeometry(geometry);
         mInputEventReceiver.setTouchRegion(mTouchRegion);
 
@@ -358,7 +358,7 @@ class DragResizeInputListener implements AutoCloseable {
          */
         @NonNull Region getCornersRegion() {
             Region region = new Region();
-            mDragResizeWindowGeometry.union(mContext, region);
+            mDragResizeWindowGeometry.union(region);
             return region;
         }
 
@@ -409,8 +409,8 @@ class DragResizeInputListener implements AutoCloseable {
                         float y = e.getY(0);
                         float rawX = e.getRawX(0);
                         float rawY = e.getRawY(0);
-                        final int ctrlType = mDragResizeWindowGeometry.calculateCtrlType(mContext,
-                                isEventFromTouchscreen(e), isEdgeResizePermitted(mContext, e), x,
+                        final int ctrlType = mDragResizeWindowGeometry.calculateCtrlType(
+                                isEventFromTouchscreen(e), isEdgeResizePermitted(e), x,
                                 y);
                         ProtoLog.d(WM_SHELL_DESKTOP_MODE,
                                 "%s: Handling action down, update ctrlType to %d", TAG, ctrlType);
@@ -501,8 +501,8 @@ class DragResizeInputListener implements AutoCloseable {
             // Since we are handling cursor, we know that this is not a touchscreen event, and
             // that edge resizing should always be allowed.
             @DragPositioningCallback.CtrlType int ctrlType =
-                    mDragResizeWindowGeometry.calculateCtrlType(mContext, /* isTouchscreen= */
-                            false, /* isEdgeResizePermitted= */ true, x, y);
+                    mDragResizeWindowGeometry.calculateCtrlType(/* isTouchscreen= */ false,
+                            /* isEdgeResizePermitted= */ true, x, y);
 
             int cursorType = PointerIcon.TYPE_DEFAULT;
             switch (ctrlType) {

@@ -146,7 +146,7 @@ public class InsetsState implements Parcelable {
                 forceConsumingTypes |= type;
             }
 
-            if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isEnabled()
+            if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue()
                     && (flags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) != 0) {
                 forceConsumingOpaqueCaptionBar = true;
             }

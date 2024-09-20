@@ -84,6 +84,7 @@ import android.widget.Toast;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.Nullable;
 
@@ -114,7 +115,6 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
@@ -521,7 +521,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
 
         if (!decoration.mTaskInfo.isResizeable
-                && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(mContext)) {
+                && DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
             Toast.makeText(mContext,
                     R.string.desktop_mode_non_resizable_snap_text, Toast.LENGTH_SHORT).show();
         } else {
@@ -1373,7 +1373,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 && mSplitScreenController.isTaskRootOrStageRoot(taskInfo.taskId)) {
             return false;
         }
-        if (DesktopModeFlags.MODALS_POLICY.isEnabled(mContext)
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
                 && isTopActivityExemptFromDesktopWindowing(mContext, taskInfo)) {
             return false;
         }
@@ -1666,7 +1666,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             dragStartListener,
                             transactionFactory);
 
-            if (DesktopModeFlags.SCALED_RESIZING.isEnabled(windowDecoration.mContext)) {
+            if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()) {
                 return new FixedAspectRatioTaskPositionerDecorator(windowDecoration,
                         taskPositioner);
             }

@@ -1219,14 +1219,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final boolean hideCaptionBar = fullscreen
                 || (requestedVisibleTypes & WindowInsets.Type.captionBar()) == 0;
         final boolean consumingCaptionBar =
-                ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isEnabled()
+                ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()
                         && ((mLastForceConsumingTypes & WindowInsets.Type.captionBar()) != 0
                         && hideCaptionBar);
 
         final boolean isOpaqueCaptionBar = customizableWindowHeaders()
                 && (appearance & APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND) == 0;
         final boolean consumingOpaqueCaptionBar =
-                ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isEnabled()
+                ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue()
                         && mLastForceConsumingOpaqueCaptionBar
                         && isOpaqueCaptionBar;
 
