@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.function.IntFunction;
 
 /**
@@ -93,12 +92,6 @@ class LaunchParamsPersister {
             new SparseArray<>();
 
     /**
-     * A map from user ID to the active {@link LoadingQueueItem} user when we're loading the launch
-     * params for that user.
-     */
-    private final SparseArray<LoadingQueueItem> mLoadingItemMap = new SparseArray<>();
-
-    /**
      * A map from {@link android.content.pm.ActivityInfo.WindowLayout#windowLayoutAffinity} to
      * activity's component name for reverse queries from window layout affinities to activities.
      * Used to decide if we should use another activity's record with the same affinity.
@@ -124,30 +117,112 @@ class LaunchParamsPersister {
     }
 
     void onUnlockUser(int userId) {
-        if (mLoadingItemMap.contains(userId)) {
-            Slog.e(TAG, "Duplicate onUnlockUser " + userId);
-            return;
-        }
-        final LoadingQueueItem item = new LoadingQueueItem(userId);
-        mLoadingItemMap.put(userId, item);
-        mPersisterQueue.addItem(item, /* flush */ false);
+        loadLaunchParams(userId);
     }
 
     void onCleanupUser(int userId) {
-        final LoadingQueueItem item = mLoadingItemMap.removeReturnOld(userId);
-        if (item != null) {
-            item.abort();
-
-            mPersisterQueue.removeItems(
-                    queueItem -> queueItem.mUserId == userId, LoadingQueueItem.class);
-        }
         mLaunchParamsMap.remove(userId);
     }
 
-    private void waitForLoading(int userId) {
-        final LoadingQueueItem item = mLoadingItemMap.get(userId);
-        if (item != null) {
-            item.waitUntilFinish();
+    private void loadLaunchParams(int userId) {
+        final List<File> filesToDelete = new ArrayList<>();
+        final File launchParamsFolder = getLaunchParamFolder(userId);
+        if (!launchParamsFolder.isDirectory()) {
+            Slog.i(TAG, "Didn't find launch param folder for user " + userId);
+            return;
+        }
+
+        final Set<String> packages = new ArraySet<>(mPackageList.getPackageNames());
+
+        final File[] paramsFiles = launchParamsFolder.listFiles();
+        final ArrayMap<ComponentName, PersistableLaunchParams> map =
+                new ArrayMap<>(paramsFiles.length);
+        mLaunchParamsMap.put(userId, map);
+
+        for (File paramsFile : paramsFiles) {
+            if (!paramsFile.isFile()) {
+                Slog.w(TAG, paramsFile.getAbsolutePath() + " is not a file.");
+                continue;
+            }
+            if (!paramsFile.getName().endsWith(LAUNCH_PARAMS_FILE_SUFFIX)) {
+                Slog.w(TAG, "Unexpected params file name: " + paramsFile.getName());
+                filesToDelete.add(paramsFile);
+                continue;
+            }
+            String paramsFileName = paramsFile.getName();
+            // Migrate all records from old separator to new separator.
+            final int oldSeparatorIndex =
+                    paramsFileName.indexOf(OLD_ESCAPED_COMPONENT_SEPARATOR);
+            if (oldSeparatorIndex != -1) {
+                if (paramsFileName.indexOf(
+                        OLD_ESCAPED_COMPONENT_SEPARATOR, oldSeparatorIndex + 1) != -1) {
+                    // Rare case. We have more than one old escaped component separator probably
+                    // because this app uses underscore in their package name. We can't distinguish
+                    // which one is the real separator so let's skip it.
+                    filesToDelete.add(paramsFile);
+                    continue;
+                }
+                paramsFileName = paramsFileName.replace(
+                        OLD_ESCAPED_COMPONENT_SEPARATOR, ESCAPED_COMPONENT_SEPARATOR);
+                final File newFile = new File(launchParamsFolder, paramsFileName);
+                if (paramsFile.renameTo(newFile)) {
+                    paramsFile = newFile;
+                } else {
+                    // Rare case. For some reason we can't rename the file. Let's drop this record
+                    // instead.
+                    filesToDelete.add(paramsFile);
+                    continue;
+                }
+            }
+            final String componentNameString = paramsFileName.substring(
+                    0 /* beginIndex */,
+                    paramsFileName.length() - LAUNCH_PARAMS_FILE_SUFFIX.length())
+                    .replace(ESCAPED_COMPONENT_SEPARATOR, ORIGINAL_COMPONENT_SEPARATOR);
+            final ComponentName name = ComponentName.unflattenFromString(
+                    componentNameString);
+            if (name == null) {
+                Slog.w(TAG, "Unexpected file name: " + paramsFileName);
+                filesToDelete.add(paramsFile);
+                continue;
+            }
+
+            if (!packages.contains(name.getPackageName())) {
+                // Rare case. PersisterQueue doesn't have a chance to remove files for removed
+                // packages last time.
+                filesToDelete.add(paramsFile);
+                continue;
+            }
+
+            try (InputStream in = new FileInputStream(paramsFile)) {
+                final PersistableLaunchParams params = new PersistableLaunchParams();
+                final TypedXmlPullParser parser = Xml.resolvePullParser(in);
+                int event;
+                while ((event = parser.next()) != XmlPullParser.END_DOCUMENT
+                        && event != XmlPullParser.END_TAG) {
+                    if (event != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+
+                    final String tagName = parser.getName();
+                    if (!TAG_LAUNCH_PARAMS.equals(tagName)) {
+                        Slog.w(TAG, "Unexpected tag name: " + tagName);
+                        continue;
+                    }
+
+                    params.restore(paramsFile, parser);
+                }
+
+                map.put(name, params);
+                addComponentNameToLaunchParamAffinityMapIfNotNull(
+                        name, params.mWindowLayoutAffinity);
+            } catch (Exception e) {
+                Slog.w(TAG, "Failed to restore launch params for " + name, e);
+                filesToDelete.add(paramsFile);
+            }
+        }
+
+        if (!filesToDelete.isEmpty()) {
+            mPersisterQueue.addItem(new CleanUpComponentQueueItem(filesToDelete), true);
         }
     }
 
@@ -161,7 +236,6 @@ class LaunchParamsPersister {
             return;
         }
         final int userId = task.mUserId;
-        waitForLoading(userId);
         PersistableLaunchParams params;
         ArrayMap<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.get(userId);
         if (map == null) {
@@ -223,7 +297,6 @@ class LaunchParamsPersister {
     void getLaunchParams(Task task, ActivityRecord activity, LaunchParams outParams) {
         final ComponentName name = task != null ? task.realActivity : activity.mActivityComponent;
         final int userId = task != null ? task.mUserId : activity.mUserId;
-        waitForLoading(userId);
         final String windowLayoutAffinity;
         if (task != null) {
             windowLayoutAffinity = task.mWindowLayoutAffinity;
@@ -321,156 +394,6 @@ class LaunchParamsPersister {
         }
     }
 
-    /**
-     * The work item used to load launch parameters with {@link PersisterQueue} in a background
-     * thread, so that we don't block the thread {@link com.android.server.am.UserController} uses
-     * to broadcast user state changes for I/O operations. See b/365983567 for more details.
-     */
-    private class LoadingQueueItem implements PersisterQueue.QueueItem {
-        private final int mUserId;
-        private final CountDownLatch mLatch = new CountDownLatch(1);
-        private boolean mAborted = false;
-
-        private LoadingQueueItem(int userId) {
-            mUserId = userId;
-        }
-
-        @Override
-        public void process() {
-            try {
-                loadLaunchParams();
-            } finally {
-                synchronized (mSupervisor.mService.getGlobalLock()) {
-                    mLoadingItemMap.remove(mUserId);
-                    mLatch.countDown();
-                }
-            }
-        }
-
-        private void abort() {
-            mAborted = true;
-        }
-
-        private void waitUntilFinish() {
-            if (mAborted) {
-                return;
-            }
-
-            try {
-                mLatch.await();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private void loadLaunchParams() {
-            final List<File> filesToDelete = new ArrayList<>();
-            final File launchParamsFolder = getLaunchParamFolder(mUserId);
-            if (!launchParamsFolder.isDirectory()) {
-                Slog.i(TAG, "Didn't find launch param folder for user " + mUserId);
-                return;
-            }
-
-            final Set<String> packages = new ArraySet<>(mPackageList.getPackageNames());
-
-            final File[] paramsFiles = launchParamsFolder.listFiles();
-            final ArrayMap<ComponentName, PersistableLaunchParams> map =
-                    new ArrayMap<>(paramsFiles.length);
-
-            for (File paramsFile : paramsFiles) {
-                if (!paramsFile.isFile()) {
-                    Slog.w(TAG, paramsFile.getAbsolutePath() + " is not a file.");
-                    continue;
-                }
-                if (!paramsFile.getName().endsWith(LAUNCH_PARAMS_FILE_SUFFIX)) {
-                    Slog.w(TAG, "Unexpected params file name: " + paramsFile.getName());
-                    filesToDelete.add(paramsFile);
-                    continue;
-                }
-                String paramsFileName = paramsFile.getName();
-                // Migrate all records from old separator to new separator.
-                final int oldSeparatorIndex =
-                        paramsFileName.indexOf(OLD_ESCAPED_COMPONENT_SEPARATOR);
-                if (oldSeparatorIndex != -1) {
-                    if (paramsFileName.indexOf(
-                            OLD_ESCAPED_COMPONENT_SEPARATOR, oldSeparatorIndex + 1) != -1) {
-                        // Rare case. We have more than one old escaped component separator probably
-                        // because this app uses underscore in their package name. We can't
-                        // distinguish which one is the real separator so let's skip it.
-                        filesToDelete.add(paramsFile);
-                        continue;
-                    }
-                    paramsFileName = paramsFileName.replace(
-                            OLD_ESCAPED_COMPONENT_SEPARATOR, ESCAPED_COMPONENT_SEPARATOR);
-                    final File newFile = new File(launchParamsFolder, paramsFileName);
-                    if (paramsFile.renameTo(newFile)) {
-                        paramsFile = newFile;
-                    } else {
-                        // Rare case. For some reason we can't rename the file. Let's drop this
-                        // record instead.
-                        filesToDelete.add(paramsFile);
-                        continue;
-                    }
-                }
-                final String componentNameString = paramsFileName.substring(
-                                0 /* beginIndex */,
-                                paramsFileName.length() - LAUNCH_PARAMS_FILE_SUFFIX.length())
-                        .replace(ESCAPED_COMPONENT_SEPARATOR, ORIGINAL_COMPONENT_SEPARATOR);
-                final ComponentName name = ComponentName.unflattenFromString(
-                        componentNameString);
-                if (name == null) {
-                    Slog.w(TAG, "Unexpected file name: " + paramsFileName);
-                    filesToDelete.add(paramsFile);
-                    continue;
-                }
-
-                if (!packages.contains(name.getPackageName())) {
-                    // Rare case. PersisterQueue doesn't have a chance to remove files for removed
-                    // packages last time.
-                    filesToDelete.add(paramsFile);
-                    continue;
-                }
-
-                try (InputStream in = new FileInputStream(paramsFile)) {
-                    final PersistableLaunchParams params = new PersistableLaunchParams();
-                    final TypedXmlPullParser parser = Xml.resolvePullParser(in);
-                    int event;
-                    while ((event = parser.next()) != XmlPullParser.END_DOCUMENT
-                            && event != XmlPullParser.END_TAG) {
-                        if (event != XmlPullParser.START_TAG) {
-                            continue;
-                        }
-
-                        final String tagName = parser.getName();
-                        if (!TAG_LAUNCH_PARAMS.equals(tagName)) {
-                            Slog.w(TAG, "Unexpected tag name: " + tagName);
-                            continue;
-                        }
-
-                        params.restore(paramsFile, parser);
-                    }
-
-                    map.put(name, params);
-                    addComponentNameToLaunchParamAffinityMapIfNotNull(
-                            name, params.mWindowLayoutAffinity);
-                } catch (Exception e) {
-                    Slog.w(TAG, "Failed to restore launch params for " + name, e);
-                    filesToDelete.add(paramsFile);
-                }
-            }
-
-            synchronized (mSupervisor.mService.getGlobalLock()) {
-                if (!mAborted) {
-                    mLaunchParamsMap.put(mUserId, map);
-                }
-            }
-
-            if (!filesToDelete.isEmpty()) {
-                mPersisterQueue.addItem(new CleanUpComponentQueueItem(filesToDelete), true);
-            }
-        }
-    }
-
     private class LaunchParamsWriteQueueItem
             implements PersisterQueue.WriteQueueItem<LaunchParamsWriteQueueItem> {
         private final int mUserId;
@@ -543,8 +466,7 @@ class LaunchParamsPersister {
         }
     }
 
-    private static class CleanUpComponentQueueItem
-            implements PersisterQueue.WriteQueueItem<CleanUpComponentQueueItem> {
+    private class CleanUpComponentQueueItem implements PersisterQueue.WriteQueueItem {
         private final List<File> mComponentFiles;
 
         private CleanUpComponentQueueItem(List<File> componentFiles) {
@@ -561,7 +483,7 @@ class LaunchParamsPersister {
         }
     }
 
-    private static class PersistableLaunchParams {
+    private class PersistableLaunchParams {
         private static final String ATTR_WINDOWING_MODE = "windowing_mode";
         private static final String ATTR_DISPLAY_UNIQUE_ID = "display_unique_id";
         private static final String ATTR_BOUNDS = "bounds";
