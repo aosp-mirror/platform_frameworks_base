@@ -55,7 +55,10 @@ public final class MetadataSyncPerUser {
                 PackageManager perUserPackageManager = userContext.getPackageManager();
                 if (perUserAppSearchManager != null) {
                     metadataSyncAdapter =
-                            new MetadataSyncAdapter(perUserPackageManager, perUserAppSearchManager);
+                            new MetadataSyncAdapter(
+                                    AppFunctionExecutors.getPerUserSyncExecutor(user),
+                                    perUserPackageManager,
+                                    perUserAppSearchManager);
                     sPerUserMetadataSyncAdapter.put(user.getIdentifier(), metadataSyncAdapter);
                     return metadataSyncAdapter;
                 }
@@ -71,12 +74,7 @@ public final class MetadataSyncPerUser {
      */
     public static void removeUserSyncAdapter(UserHandle user) {
         synchronized (sLock) {
-            MetadataSyncAdapter metadataSyncAdapter =
-                    sPerUserMetadataSyncAdapter.get(user.getIdentifier(), null);
-            if (metadataSyncAdapter != null) {
-                metadataSyncAdapter.shutDown();
-                sPerUserMetadataSyncAdapter.remove(user.getIdentifier());
-            }
+            sPerUserMetadataSyncAdapter.remove(user.getIdentifier());
         }
     }
 }

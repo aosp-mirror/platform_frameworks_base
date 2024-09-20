@@ -42,7 +42,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.server.appfunctions.FutureAppSearchSession.FutureSearchResults;
@@ -53,12 +52,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executor;
 
 /**
  * This class implements helper methods for synchronously interacting with AppSearch while
@@ -68,14 +63,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class MetadataSyncAdapter {
     private static final String TAG = MetadataSyncAdapter.class.getSimpleName();
-
-    private final ExecutorService mExecutor;
-
+    private final Executor mSyncExecutor;
     private final AppSearchManager mAppSearchManager;
     private final PackageManager mPackageManager;
-    private final Object mLock = new Object();
-    @GuardedBy("mLock")
-    private Future<AndroidFuture<Boolean>> mCurrentSyncTask;
 
     // Hidden constants in {@link SetSchemaRequest} that restricts runtime metadata visibility
     // by permissions.
@@ -83,10 +73,12 @@ public class MetadataSyncAdapter {
     public static final int EXECUTE_APP_FUNCTIONS_TRUSTED = 10;
 
     public MetadataSyncAdapter(
-            @NonNull PackageManager packageManager, @NonNull AppSearchManager appSearchManager) {
+            @NonNull Executor syncExecutor,
+            @NonNull PackageManager packageManager,
+            @NonNull AppSearchManager appSearchManager) {
+        mSyncExecutor = Objects.requireNonNull(syncExecutor);
         mPackageManager = Objects.requireNonNull(packageManager);
         mAppSearchManager = Objects.requireNonNull(appSearchManager);
-        mExecutor = Executors.newSingleThreadExecutor();
     }
 
     /**
@@ -105,7 +97,7 @@ public class MetadataSyncAdapter {
                                 AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_METADATA_DB)
                         .build();
         AndroidFuture<Boolean> settableSyncStatus = new AndroidFuture<>();
-        Callable<AndroidFuture<Boolean>> callableTask =
+        mSyncExecutor.execute(
                 () -> {
                     try (FutureAppSearchSession staticMetadataSearchSession =
                                     new FutureAppSearchSessionImpl(
@@ -125,26 +117,8 @@ public class MetadataSyncAdapter {
                     } catch (Exception ex) {
                         settableSyncStatus.completeExceptionally(ex);
                     }
-                    return settableSyncStatus;
-                };
-
-        synchronized (mLock) {
-            if (mCurrentSyncTask != null && !mCurrentSyncTask.isDone()) {
-                boolean cancel = mCurrentSyncTask.cancel(false);
-            }
-            mCurrentSyncTask = mExecutor.submit(callableTask);
-        }
-
+                });
         return settableSyncStatus;
-    }
-
-    /** This method shuts down the {@link MetadataSyncAdapter} scheduler. */
-    public void shutDown() {
-        try {
-            var unused = mExecutor.awaitTermination(30, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Slog.e(TAG, "Error shutting down MetadataSyncAdapter scheduler", e);
-        }
     }
 
     @WorkerThread
