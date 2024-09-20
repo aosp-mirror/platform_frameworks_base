@@ -12402,6 +12402,7 @@ public final class ViewRootImpl implements ViewParent,
         transaction.setBlurRegions(surfaceControl, regionCopy);
 
         if (mBlastBufferQueue != null) {
+            transaction.onMergeWithNextTransaction(getTitle());
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
         }
     }
@@ -12428,6 +12429,9 @@ public final class ViewRootImpl implements ViewParent,
      */
     public void mergeWithNextTransaction(Transaction t, long frameNumber) {
         if (mBlastBufferQueue != null) {
+            if (t != null) {
+                t.onMergeWithNextTransaction(getTitle());
+            }
             mBlastBufferQueue.mergeWithNextTransaction(t, frameNumber);
         } else {
             t.apply();
