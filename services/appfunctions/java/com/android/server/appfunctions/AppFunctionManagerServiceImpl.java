@@ -204,9 +204,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                             serviceIntent,
                                             targetUser,
                                             safeExecuteAppFunctionCallback,
-                                            /* bindFlags= */ Context.BIND_AUTO_CREATE,
-                                            /* timeoutInMillis= */ mServiceConfig
-                                                    .getExecuteAppFunctionTimeoutMillis());
+                                            /* bindFlags= */ Context.BIND_AUTO_CREATE);
                                 })
                         .exceptionally(
                                 ex -> {
@@ -221,13 +219,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull Intent serviceIntent,
             @NonNull UserHandle targetUser,
             @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
-            int bindFlags,
-            long timeoutInMillis) {
+            int bindFlags) {
         boolean bindServiceResult =
                 mRemoteServiceCaller.runServiceCall(
                         serviceIntent,
                         bindFlags,
-                        timeoutInMillis,
                         targetUser,
                         new RunServiceCallCallback<IAppFunctionService>() {
                             @Override
@@ -266,16 +262,6 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                         ExecuteAppFunctionResponse.newFailure(
                                                 ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
                                                 "Failed to connect to AppFunctionService",
-                                                /* extras= */ null));
-                            }
-
-                            @Override
-                            public void onTimedOut() {
-                                Slog.e(TAG, "Timed out");
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_TIMED_OUT,
-                                                "Binding to AppFunctionService timed out.",
                                                 /* extras= */ null));
                             }
                         });
