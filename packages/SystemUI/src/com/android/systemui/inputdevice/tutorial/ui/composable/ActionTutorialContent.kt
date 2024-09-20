@@ -22,6 +22,7 @@ import android.graphics.PorterDuffColorFilter
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.LinearEasing
@@ -103,7 +104,9 @@ fun ActionTutorialContent(
                 modifier = Modifier.weight(1f).padding(top = 8.dp),
             )
         }
-        DoneButton(onDoneButtonClicked = onDoneButtonClicked)
+        AnimatedVisibility(visible = actionState == FINISHED, enter = fadeIn()) {
+            DoneButton(onDoneButtonClicked = onDoneButtonClicked)
+        }
     }
 }
 
