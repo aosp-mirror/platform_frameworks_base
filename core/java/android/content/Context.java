@@ -4324,6 +4324,7 @@ public abstract class Context {
             SECURITY_STATE_SERVICE,
            //@hide: ECM_ENHANCED_CONFIRMATION_SERVICE,
             CONTACT_KEYS_SERVICE,
+            RANGING_SERVICE,
 
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -6399,6 +6400,17 @@ public abstract class Context {
      */
     @SystemApi
     public static final String UWB_SERVICE = "uwb";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.ranging.RangingManager}.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @FlaggedApi(com.android.ranging.flags.Flags.FLAG_RANGING_STACK_ENABLED)
+    @SystemApi
+    public static final String RANGING_SERVICE = "ranging";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

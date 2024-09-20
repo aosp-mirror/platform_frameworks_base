@@ -1241,8 +1241,9 @@ public class BubbleController implements ConfigurationChangeListener,
             mBubbleData.dismissBubbleWithKey(
                     bubbleKey, Bubbles.DISMISS_USER_GESTURE_FROM_LAUNCHER, timestamp);
         }
-        if (selectedBubbleKey != null && !selectedBubbleKey.equals(bubbleKey)) {
-            // We did not remove the selected bubble. Expand it again
+        if (mBubbleData.hasBubbles()) {
+            // We still have bubbles, if we dragged an individual bubble to dismiss we were expanded
+            // so re-expand to whatever is selected.
             showExpandedViewForBubbleBar();
         }
     }
@@ -2007,7 +2008,7 @@ public class BubbleController implements ConfigurationChangeListener,
         @Override
         public void selectionChanged(BubbleViewProvider selectedBubble) {
             // Only need to update the layer view if we're currently expanded for selection changes.
-            if (mLayerView != null && isStackExpanded()) {
+            if (mLayerView != null && mLayerView.isExpanded()) {
                 mLayerView.showExpandedView(selectedBubble);
             }
         }

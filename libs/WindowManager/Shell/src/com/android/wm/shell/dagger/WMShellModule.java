@@ -75,6 +75,7 @@ import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator;
 import com.android.wm.shell.desktopmode.SpringDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
@@ -116,8 +117,6 @@ import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 import com.android.wm.shell.windowdecor.viewhost.DefaultWindowDecorViewHostSupplier;
-import com.android.wm.shell.windowdecor.viewhost.PooledWindowDecorViewHostSupplier;
-import com.android.wm.shell.windowdecor.viewhost.ReusableWindowDecorViewHost;
 import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import dagger.Binds;
@@ -143,7 +142,7 @@ import java.util.Optional;
         includes = {
                 WMShellBaseModule.class,
                 PipModule.class,
-                ShellBackAnimationModule.class,
+                ShellBackAnimationModule.class
         })
 public abstract class WMShellModule {
 
@@ -249,6 +248,7 @@ public abstract class WMShellModule {
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
             WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
@@ -274,6 +274,7 @@ public abstract class WMShellModule {
                     assistContentRequester,
                     multiInstanceHelper,
                     desktopTasksLimiter,
+                    windowDecorCaptionHandleRepository,
                     desktopActivityOrientationHandler,
                     windowDecorViewHostSupplier);
         }
@@ -384,19 +385,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
-            @NonNull Context context,
-            @ShellMainThread @NonNull CoroutineScope mainScope,
-            @NonNull ShellInit shellInit) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)
-                && Flags.enableDesktopWindowingScvhCache()) {
-            final int maxPoolSize = DesktopModeStatus.getMaxTaskLimit(context);
-            final int preWarmSize = DesktopModeStatus.getWindowDecorPreWarmSize();
-            return new PooledWindowDecorViewHostSupplier(
-                    context, mainScope, shellInit,
-                    ReusableWindowDecorViewHost.DefaultFactory.INSTANCE, maxPoolSize, preWarmSize);
-        } else {
-            return new DefaultWindowDecorViewHostSupplier(mainScope);
-        }
+            @ShellMainThread @NonNull CoroutineScope mainScope) {
+        return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
 
     //
@@ -789,6 +779,12 @@ public abstract class WMShellModule {
             Context context,
             AppHandleEducationDatastoreRepository appHandleEducationDatastoreRepository) {
         return new AppHandleEducationFilter(context, appHandleEducationDatastoreRepository);
+    }
+
+    @WMSingleton
+    @Provides
+    static WindowDecorCaptionHandleRepository provideAppHandleRepository() {
+        return new WindowDecorCaptionHandleRepository();
     }
 
     @WMSingleton

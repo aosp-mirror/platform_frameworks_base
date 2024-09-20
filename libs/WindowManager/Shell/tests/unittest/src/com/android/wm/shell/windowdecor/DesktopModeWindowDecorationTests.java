@@ -19,9 +19,11 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING;
 import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
+import static android.view.WindowInsets.Type.statusBars;
 import static android.view.WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -38,6 +40,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -55,6 +58,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemProperties;
@@ -68,11 +72,13 @@ import android.view.AttachedSurfaceControl;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.GestureDetector;
+import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.WindowContainerTransaction;
 
@@ -94,9 +100,12 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
+import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHost;
 import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
@@ -153,6 +162,10 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mMockSyncQueue;
     @Mock
+    private AppHeaderViewHolder.Factory mMockAppHeaderViewHolderFactory;
+    @Mock
+    private AppHeaderViewHolder mMockAppHeaderViewHolder;
+    @Mock
     private RootTaskDisplayAreaOrganizer mMockRootTaskDisplayAreaOrganizer;
     @Mock
     private Supplier<SurfaceControl.Transaction> mMockTransactionSupplier;
@@ -192,6 +205,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private HandleMenuFactory mMockHandleMenuFactory;
     @Mock
     private MultiInstanceHelper mMockMultiInstanceHelper;
+    @Mock
+    private WindowDecorCaptionHandleRepository mMockCaptionHandleRepository;
     @Captor
     private ArgumentCaptor<Function1<Boolean, Unit>> mOnMaxMenuHoverChangeListener;
     @Captor
@@ -245,6 +260,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         when(mMockWindowDecorViewHostSupplier.acquire(any(), eq(defaultDisplay)))
                 .thenReturn(mMockWindowDecorViewHost);
         when(mMockWindowDecorViewHost.getSurfaceControl()).thenReturn(mock(SurfaceControl.class));
+        when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
+                any())).thenReturn(mMockAppHeaderViewHolder);
     }
 
     @After
@@ -838,6 +855,143 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         assertFalse(decoration.isHandleMenuActive());
     }
 
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    public void notifyCaptionStateChanged_flagDisabled_doNoNotify() {
+        when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
+                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        spyWindowDecor.relayout(taskInfo);
+
+        verify(mMockCaptionHandleRepository, never()).notifyCaptionChanged(any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    public void notifyCaptionStateChanged_inFullscreenMode_notifiesAppHandleVisible() {
+        when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
+                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
+                CaptionState.class);
+
+        spyWindowDecor.relayout(taskInfo);
+
+        verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
+                captionStateArgumentCaptor.capture());
+        assertThat(captionStateArgumentCaptor.getValue()).isInstanceOf(
+                CaptionState.AppHandle.class);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    @Ignore("TODO(b/367235906): Due to MONITOR_INPUT permission error")
+    public void notifyCaptionStateChanged_inWindowingMode_notifiesAppHeaderVisible() {
+        when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
+                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
+        when(mMockAppHeaderViewHolder.getAppChipLocationInWindow()).thenReturn(
+                new Rect(/* left= */ 0, /* top= */ 1, /* right= */ 2, /* bottom= */ 3));
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        // Make non-resizable to avoid dealing with input-permissions (MONITOR_INPUT)
+        taskInfo.isResizeable = false;
+        ArgumentCaptor<Function0<Unit>> runnableArgumentCaptor = ArgumentCaptor.forClass(
+                Function0.class);
+        ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
+                CaptionState.class);
+
+        spyWindowDecor.relayout(taskInfo);
+        verify(mMockAppHeaderViewHolder, atLeastOnce()).runOnAppChipGlobalLayout(
+                runnableArgumentCaptor.capture());
+        runnableArgumentCaptor.getValue().invoke();
+
+        verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
+                captionStateArgumentCaptor.capture());
+        assertThat(captionStateArgumentCaptor.getValue()).isInstanceOf(
+                CaptionState.AppHeader.class);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    public void notifyCaptionStateChanged_taskNotVisible_notifiesNoCaptionVisible() {
+        when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ false);
+        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
+                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
+                CaptionState.class);
+
+        spyWindowDecor.relayout(taskInfo);
+
+        verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
+                captionStateArgumentCaptor.capture());
+        assertThat(captionStateArgumentCaptor.getValue()).isInstanceOf(
+                CaptionState.NoCaption.class);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    public void notifyCaptionStateChanged_captionHandleExpanded_notifiesHandleMenuExpanded() {
+        when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
+                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
+                CaptionState.class);
+
+        spyWindowDecor.relayout(taskInfo);
+        createHandleMenu(spyWindowDecor);
+
+        verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
+                captionStateArgumentCaptor.capture());
+        assertThat(captionStateArgumentCaptor.getValue()).isInstanceOf(
+                CaptionState.AppHandle.class);
+        assertThat(
+                ((CaptionState.AppHandle) captionStateArgumentCaptor.getValue())
+                        .isHandleMenuExpanded()).isEqualTo(
+                true);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    public void notifyCaptionStateChanged_captionHandleClosed_notifiesHandleMenuClosed() {
+        when(DesktopModeStatus.canEnterDesktopMode(mContext)).thenReturn(true);
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
+                .thenReturn(createInsetsState(statusBars(), /* visible= */true));
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        ArgumentCaptor<CaptionState> captionStateArgumentCaptor = ArgumentCaptor.forClass(
+                CaptionState.class);
+
+        spyWindowDecor.relayout(taskInfo);
+        createHandleMenu(spyWindowDecor);
+        spyWindowDecor.closeHandleMenu();
+
+        verify(mMockCaptionHandleRepository, atLeastOnce()).notifyCaptionChanged(
+                captionStateArgumentCaptor.capture());
+        assertThat(captionStateArgumentCaptor.getValue()).isInstanceOf(
+                CaptionState.AppHandle.class);
+        assertThat(
+                ((CaptionState.AppHandle) captionStateArgumentCaptor.getValue())
+                        .isHandleMenuExpanded()).isEqualTo(
+                false);
+
+    }
+
     private void verifyHandleMenuCreated(@Nullable Uri uri) {
         verify(mMockHandleMenuFactory).create(any(), any(), anyInt(), any(), any(),
                 any(), anyBoolean(), anyBoolean(), anyBoolean(), eq(uri), anyInt(),
@@ -906,12 +1060,13 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
                 mContext, mMockDisplayController, mMockSplitScreenController,
                 mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mMockHandler, mBgExecutor,
-                mMockChoreographer, mMockSyncQueue, mMockRootTaskDisplayAreaOrganizer,
+                mMockChoreographer, mMockSyncQueue, mMockAppHeaderViewHolderFactory,
+                mMockRootTaskDisplayAreaOrganizer,
                 mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
                 mMockWindowDecorViewHostSupplier, maximizeMenuFactory, mMockHandleMenuFactory,
-                mMockMultiInstanceHelper);
+                mMockMultiInstanceHelper, mMockCaptionHandleRepository);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);
         windowDecor.setExclusionRegionListener(mMockExclusionRegionListener);
@@ -949,6 +1104,14 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private static boolean hasNoInputChannelFeature(RelayoutParams params) {
         return (params.mInputFeatures & WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL)
                 != 0;
+    }
+
+    private InsetsState createInsetsState(@WindowInsets.Type.InsetsType int type, boolean visible) {
+        final InsetsState state = new InsetsState();
+        final InsetsSource source = new InsetsSource(/* id= */0, type);
+        source.setVisible(visible);
+        state.addSource(source);
+        return state;
     }
 
     private static class TestTouchEventListener extends GestureDetector.SimpleOnGestureListener

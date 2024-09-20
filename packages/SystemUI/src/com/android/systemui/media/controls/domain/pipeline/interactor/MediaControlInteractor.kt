@@ -125,7 +125,7 @@ constructor(
         location: Int,
     ) {
         logSmartspaceUserEvent(eventId, location)
-        if (!launchOverLockscreen(clickIntent)) {
+        if (!launchOverLockscreen(expandable, clickIntent)) {
             activityStarter.postStartActivityDismissingKeyguard(
                 clickIntent,
                 expandable.activityTransitionController(Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER),
@@ -135,7 +135,7 @@ constructor(
 
     fun startDeviceIntent(deviceIntent: PendingIntent) {
         if (deviceIntent.isActivity) {
-            if (!launchOverLockscreen(deviceIntent)) {
+            if (!launchOverLockscreen(expandable = null, deviceIntent)) {
                 activityStarter.postStartActivityDismissingKeyguard(deviceIntent)
             }
         } else {
@@ -143,7 +143,10 @@ constructor(
         }
     }
 
-    private fun launchOverLockscreen(pendingIntent: PendingIntent): Boolean {
+    private fun launchOverLockscreen(
+        expandable: Expandable?,
+        pendingIntent: PendingIntent,
+    ): Boolean {
         val showOverLockscreen =
             keyguardStateController.isShowing &&
                 activityIntentHelper.wouldPendingShowOverLockscreen(
@@ -152,11 +155,21 @@ constructor(
                 )
         if (showOverLockscreen) {
             try {
-                val options = BroadcastOptions.makeBasic()
-                options.isInteractive = true
-                options.pendingIntentBackgroundActivityStartMode =
-                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
-                pendingIntent.send(options.toBundle())
+                if (expandable != null) {
+                    activityStarter.startPendingIntentMaybeDismissingKeyguard(
+                        pendingIntent,
+                        /* intentSentUiThreadCallback = */ null,
+                        expandable.activityTransitionController(
+                            Cuj.CUJ_SHADE_APP_LAUNCH_FROM_MEDIA_PLAYER
+                        ),
+                    )
+                } else {
+                    val options = BroadcastOptions.makeBasic()
+                    options.isInteractive = true
+                    options.pendingIntentBackgroundActivityStartMode =
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
+                    pendingIntent.send(options.toBundle())
+                }
             } catch (e: PendingIntent.CanceledException) {
                 Log.e(TAG, "pending intent of $instanceId was canceled")
             }

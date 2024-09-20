@@ -116,6 +116,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         mAccessibilityMgr = accessibilityManagerWrapper;
         mUiEventLogger = uiEventLogger;
         mAvalancheController = avalancheController;
+        mAvalancheController.setBaseEntryMapStr(this::getEntryMapStr);
         Resources resources = context.getResources();
         mMinimumDisplayTime = NotificationThrottleHun.isEnabled()
                 ? 500 : resources.getInteger(R.integer.heads_up_notification_minimum_time);
@@ -589,6 +590,18 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         dumpInternal(pw, args);
     }
 
+    private String getEntryMapStr() {
+        if (mHeadsUpEntryMap.isEmpty()) {
+            return "EMPTY";
+        }
+        StringBuilder entryMapStr = new StringBuilder();
+        for (HeadsUpEntry entry: mHeadsUpEntryMap.values()) {
+            entryMapStr.append("\n\t").append(
+                    entry.mEntry == null ? "null" : entry.mEntry.getKey());
+        }
+        return entryMapStr.toString();
+    }
+
     protected void dumpInternal(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("  mTouchAcceptanceDelay="); pw.println(mTouchAcceptanceDelay);
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
@@ -992,7 +1005,6 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          * Clear any pending removal runnables.
          */
         public void cancelAutoRemovalCallbacks(@Nullable String reason) {
-            mLogger.logAutoRemoveCancelRequest(this.mEntry, reason);
             Runnable runnable = () -> {
                 final boolean removed = cancelAutoRemovalCallbackInternal();
 
@@ -1001,6 +1013,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                 }
             };
             if (mEntry != null && isHeadsUpEntry(mEntry.getKey())) {
+                mLogger.logAutoRemoveCancelRequest(this.mEntry, reason);
                 mAvalancheController.update(this, runnable, reason + " cancelAutoRemovalCallbacks");
             } else {
                 // Just removed

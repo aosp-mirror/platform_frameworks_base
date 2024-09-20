@@ -2456,6 +2456,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final StageChangeRecord record = new StageChangeRecord();
             final int transitType = info.getType();
             TransitionInfo.Change pipChange = null;
+            int closingSplitTaskId = -1;
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 if (change.getMode() == TRANSIT_CHANGE
@@ -2516,21 +2517,31 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                                 + " with " + taskInfo.taskId + " before startAnimation().");
                     }
                 }
+                if (isClosingType(change.getMode()) &&
+                        getStageOfTask(change.getTaskInfo().taskId) != STAGE_TYPE_UNDEFINED) {
+                    // If either one of the 2 stages is closing we're assuming we'll break split
+                    closingSplitTaskId = change.getTaskInfo().taskId;
+                }
             }
 
             if (pipChange != null) {
                 TransitionInfo.Change pipReplacingChange = getPipReplacingChange(info, pipChange,
                         mMainStage.mRootTaskInfo.taskId, mSideStage.mRootTaskInfo.taskId,
                         getSplitItemStage(pipChange.getLastParent()));
-                if (pipReplacingChange != null) {
+                boolean keepSplitWithPip = pipReplacingChange != null && closingSplitTaskId == -1;
+                if (keepSplitWithPip) {
                     // Set an enter transition for when startAnimation gets called again
                     mSplitTransitions.setEnterTransition(transition, /*remoteTransition*/ null,
                             TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE, /*resizeAnim*/ false);
+                } else {
+                    int finalClosingTaskId = closingSplitTaskId;
+                    mRecentTasks.ifPresent(recentTasks ->
+                            recentTasks.removeSplitPair(finalClosingTaskId));
+                    logExit(EXIT_REASON_FULLSCREEN_REQUEST);
                 }
 
                 mMixedHandler.animatePendingEnterPipFromSplit(transition, info,
-                        startTransaction, finishTransaction, finishCallback,
-                        pipReplacingChange != null);
+                        startTransaction, finishTransaction, finishCallback, keepSplitWithPip);
                 notifySplitAnimationFinished();
                 return true;
             }
@@ -2821,8 +2832,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
             callbackWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token, false);
             mWindowDecorViewModel.ifPresent(viewModel -> {
-                viewModel.onTaskInfoChanged(finalMainChild.getTaskInfo());
-                viewModel.onTaskInfoChanged(finalSideChild.getTaskInfo());
+                if (finalMainChild != null) {
+                    viewModel.onTaskInfoChanged(finalMainChild.getTaskInfo());
+                }
+                if (finalSideChild != null) {
+                    viewModel.onTaskInfoChanged(finalSideChild.getTaskInfo());
+                }
             });
             mPausingTasks.clear();
         });
