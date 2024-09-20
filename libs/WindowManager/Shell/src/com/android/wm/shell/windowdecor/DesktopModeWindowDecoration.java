@@ -1374,7 +1374,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private Region getGlobalExclusionRegion() {
         Region exclusionRegion;
-        if (mDragResizeListener != null && mTaskInfo.isResizeable) {
+        if (mDragResizeListener != null && isDragResizable(mTaskInfo)) {
             exclusionRegion = mDragResizeListener.getCornersRegion();
         } else {
             exclusionRegion = new Region();
