@@ -556,8 +556,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             snapshotStartState(ar);
             mChanges.get(ar).mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
         });
-        snapshotStartState(wc);
-        mChanges.get(wc).mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
     }
 
     /** Set a transition to be a seamless-rotation. */
@@ -1083,7 +1081,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // For config-at-end, the end-transform will be reset after the config is actually
             // applied in the client (since the transform depends on config). The other properties
             // remain here because shell might want to persistently override them.
-            if ((mTargets.get(i).mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) == 0) {
+            if (target.asActivityRecord() == null
+                    || (mTargets.get(i).mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) == 0) {
                 resetSurfaceTransform(t, target, targetLeash);
             }
         }
@@ -1564,46 +1563,33 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         if (mConfigAtEndActivities == null || mConfigAtEndActivities.isEmpty()) {
             return;
         }
-        final SurfaceControl.Transaction t =
-                mController.mAtm.mWindowManager.mTransactionFactory.get();
-        for (int i = 0; i < mTargets.size(); ++i) {
-            final WindowContainer target = mTargets.get(i).mContainer;
-            if (target.getParent() == null || (mTargets.get(i).mFlags
-                    & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) == 0) {
-                continue;
+        // Now resume the configuration dispatch, wait until the now resumed configs have been
+        // drawn, and then apply everything together. Any activities that are already in an
+        // active sync will remain on that sync instead of the new one.
+        int syncId = -1;
+        for (int i = 0; i < mConfigAtEndActivities.size(); ++i) {
+            final ActivityRecord target = mConfigAtEndActivities.get(i);
+            final SurfaceControl targetLeash = target.getSurfaceControl();
+            if (target.getSyncGroup() == null || target.getSyncGroup().isIgnoring(target)) {
+                if (syncId < 0) {
+                    final BLASTSyncEngine.SyncGroup sg = mSyncEngine.prepareSyncSet(
+                            (mSyncId, transaction) -> transaction.apply(),
+                            "ConfigAtTransitEnd");
+                    syncId = sg.mSyncId;
+                    mSyncEngine.startSyncSet(sg, BLAST_TIMEOUT_DURATION, true /* parallel */);
+                    mSyncEngine.setSyncMethod(syncId, BLASTSyncEngine.METHOD_BLAST);
+                }
+                mSyncEngine.addToSyncSet(syncId, target);
             }
-            final SurfaceControl targetLeash = getLeashSurface(target, null /* t */);
             // Reset surface state here (since it was skipped in buildFinishTransaction). Since
             // we are resuming config to the "current" state, we have to calculate the matching
             // surface state now (rather than snapshotting it at animation start).
-            resetSurfaceTransform(t, target, targetLeash);
+            resetSurfaceTransform(target.getSyncTransaction(), target, targetLeash);
+            target.resumeConfigurationDispatch();
         }
-
-        // Now we resume the configuration dispatch, wait until the now resumed configs have been
-        // drawn, and then apply everything together.
-        final BLASTSyncEngine.SyncGroup sg = mSyncEngine.prepareSyncSet(
-                new BLASTSyncEngine.TransactionReadyListener() {
-                    @Override
-                    public void onTransactionReady(int mSyncId,
-                            SurfaceControl.Transaction transaction) {
-                        t.merge(transaction);
-                        t.apply();
-                    }
-
-                    @Override
-                    public void onTransactionCommitTimeout() {
-                        t.apply();
-                    }
-                }, "ConfigAtTransitEnd");
-        final int syncId = sg.mSyncId;
-        mSyncEngine.startSyncSet(sg, BLAST_TIMEOUT_DURATION, true /* parallel */);
-        mSyncEngine.setSyncMethod(syncId, BLASTSyncEngine.METHOD_BLAST);
-        for (int i = 0; i < mConfigAtEndActivities.size(); ++i) {
-            final ActivityRecord ar = mConfigAtEndActivities.get(i);
-            mSyncEngine.addToSyncSet(syncId, ar);
-            ar.resumeConfigurationDispatch();
+        if (syncId >= 0) {
+            mSyncEngine.setReady(syncId);
         }
-        mSyncEngine.setReady(syncId);
     }
 
     @Nullable
@@ -1718,6 +1704,54 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         change.mFlags |= ChangeInfo.FLAG_CHANGE_NO_ANIMATION;
     }
 
+    void prepareConfigAtEnd(SurfaceControl.Transaction transact, ArrayList<ChangeInfo> targets) {
+        if (mConfigAtEndActivities == null) return;
+        for (int i = 0; i < mConfigAtEndActivities.size(); ++i) {
+            final ActivityRecord ar = mConfigAtEndActivities.get(i);
+            if (!ar.isVisibleRequested()) continue;
+            final SurfaceControl sc = ar.getSurfaceControl();
+            if (sc == null) continue;
+            final Task task = ar.getTask();
+            if (task == null) continue;
+            // If task isn't animating, then it means shell is animating activity directly (within
+            // task), so don't do any setup.
+            if (!containsChangeFor(task, targets)) continue;
+            final ChangeInfo change = mChanges.get(ar);
+            final Rect startBounds = change.mAbsoluteBounds;
+            Rect hintRect = null;
+            if (ar.getWindowingMode() == WINDOWING_MODE_PINNED && ar.pictureInPictureArgs != null
+                    && ar.pictureInPictureArgs.getSourceRectHint() != null) {
+                hintRect = ar.pictureInPictureArgs.getSourceRectHint();
+            }
+            if (hintRect == null) {
+                hintRect = new Rect(startBounds);
+                hintRect.offsetTo(0, 0);
+            }
+            final Rect endBounds = ar.getBounds();
+            final Rect taskEndBounds = task.getBounds();
+            // FA = final activity bounds (absolute)
+            // FT = final task bounds (absolute)
+            // SA = start activity bounds (absolute)
+            // H = source hint (relative to start activity bounds)
+            // We want to transform the activity so that when the task is at FT, H overlaps with FA
+
+            // This scales the activity such that the hint rect has the same dimensions
+            // as the final activity bounds.
+            float hintToEndScaleX = ((float) endBounds.width()) / ((float) hintRect.width());
+            float hintToEndScaleY = ((float) endBounds.height()) / ((float) hintRect.height());
+            // top-left needs to be (FA.tl - FT.tl) - H.tl * hintToEnd . H is relative to the
+            // activity; so, for example, if shrinking H to FA (hintToEnd < 1), then the tl of the
+            // shrunk SA is closer to H than expected, so we need to reduce how much we offset SA
+            // to get H.tl to match.
+            float startActPosInTaskEndX =
+                    (endBounds.left - taskEndBounds.left) - hintRect.left * hintToEndScaleX;
+            float startActPosInTaskEndY =
+                    (endBounds.top - taskEndBounds.top) - hintRect.top * hintToEndScaleY;
+            transact.setScale(sc, hintToEndScaleX, hintToEndScaleY);
+            transact.setPosition(sc, startActPosInTaskEndX, startActPosInTaskEndY);
+        }
+    }
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     static boolean containsChangeFor(WindowContainer wc, ArrayList<ChangeInfo> list) {
         for (int i = list.size() - 1; i >= 0; --i) {
@@ -1799,6 +1833,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
+        prepareConfigAtEnd(transaction, mTargets);
 
         // Check whether the participants were animated from back navigation.
         mController.mAtm.mBackNavigationController.onTransactionReady(this, mTargets,
@@ -2648,9 +2683,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             } else {
                 parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_YES_ANIMATION;
             }
-            if ((targetChange.mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) != 0) {
-                parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
-            }
         }
     }
 
@@ -2741,14 +2773,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         targetChange.mEndParent = p;
                     } else {
                         intermediates.add(parentChange);
-                    }
-                    // for config-at-end, we want to promote the flag based on the end-state even
-                    // if the activity was reparented because it operates after the animation. So,
-                    // check that here since the promote code skips reparents.
-                    if ((targetChange.mFlags & ChangeInfo.FLAG_CHANGE_CONFIG_AT_END) != 0
-                            && targetChange.mContainer.asActivityRecord() != null
-                            && targetChange.mContainer.getParent() == p) {
-                        parentChange.mFlags |= ChangeInfo.FLAG_CHANGE_CONFIG_AT_END;
                     }
                     foundParentInTargets = true;
                     break;
