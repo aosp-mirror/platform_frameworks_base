@@ -23,7 +23,7 @@ import static android.window.flags.DesktopModeFlags.ToggleOverride.OVERRIDE_UNSE
 import static android.window.flags.DesktopModeFlags.ToggleOverride.fromSetting;
 
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
-import static com.android.window.flags.Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS;
+import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS;
 import static com.android.window.flags.Flags.FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -198,145 +198,145 @@ public class DesktopModeFlagsTest {
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS})
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS})
     public void isTrue_dwFlagOn_overrideUnset_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    @DisableFlags(FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS)
     public void isTrue_dwFlagOn_overrideUnset_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_UNSET_SETTING);
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     public void isTrue_dwFlagOn_overrideOn_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_ON_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    @DisableFlags(FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS)
     public void isTrue_dwFlagOn_overrideOn_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_ON_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     public void isTrue_dwFlagOn_overrideOff_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
     @EnableFlags({FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION, FLAG_ENABLE_DESKTOP_WINDOWING_MODE})
-    @DisableFlags(FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS)
     public void isTrue_dwFlagOn_overrideOff_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void isTrue_dwFlagOff_overrideUnset_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
     @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @DisableFlags({
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     public void isTrue_dwFlagOff_overrideUnset_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void isTrue_dwFlagOff_overrideOn_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_ON_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
     @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @DisableFlags({
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     public void isTrue_dwFlagOff_overrideOn_featureFlagOff_returnFalse() {
         setOverride(OVERRIDE_ON_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
     @EnableFlags({
             FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     public void isTrue_dwFlagOff_overrideOff_featureFlagOn_returnsTrue() {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isTrue();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
     @EnableFlags(FLAG_SHOW_DESKTOP_WINDOWING_DEV_OPTION)
     @DisableFlags({
             FLAG_ENABLE_DESKTOP_WINDOWING_MODE,
-            FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
+            FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS
     })
     public void isTrue_dwFlagOff_overrideOff_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()).isFalse();
+        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test

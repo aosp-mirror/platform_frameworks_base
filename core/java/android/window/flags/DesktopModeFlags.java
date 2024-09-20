@@ -43,7 +43,7 @@ public enum DesktopModeFlags {
     // All desktop mode related flags to be overridden by developer option toggle will be added here
     ENABLE_DESKTOP_WINDOWING_MODE(
             Flags::enableDesktopWindowingMode, /* shouldOverrideByDevOption= */ true),
-    ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, false),
+    ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
     ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION(
             Flags::enableCaptionCompatInsetForceConsumption, true),
     ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
@@ -58,12 +58,13 @@ public enum DesktopModeFlags {
     ENABLE_TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
     ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
     DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE(Flags::disableNonResizableAppSnapResizing, true),
-    ENABLE_WINDOWING_SCALED_RESIZING(Flags::enableWindowingScaledResizing, false),
+    ENABLE_WINDOWING_SCALED_RESIZING(Flags::enableWindowingScaledResizing, true),
     ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
     ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
     ENABLE_WINDOWING_EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
     ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
-            Flags::enableDesktopWindowingTaskbarRunningApps, true);
+            Flags::enableDesktopWindowingTaskbarRunningApps, true),
+    ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.
