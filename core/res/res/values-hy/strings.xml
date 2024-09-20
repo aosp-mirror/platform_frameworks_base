@@ -1937,7 +1937,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Աշխատանքային օր"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Շաբաթ-կիրակի"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Միջոցառում"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնի ժամանակ"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնի ժամ"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Կառավարվում է <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի կողմից"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Միացված է"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Անջատված է"</string>
@@ -2010,8 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Կարգավորեք էկրանի կողպումը"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Կարգավորել էկրանի կողպումը"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Մասնավոր տարածքն օգտագործելու համար այս սարքում կարգավորեք էկրանի կողպումը"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Մասնավոր տարածքը ջնջելու համար սահմանեք էկրանի կողպում այս սարքում"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>

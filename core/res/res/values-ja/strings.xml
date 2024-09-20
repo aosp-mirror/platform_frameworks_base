@@ -1936,8 +1936,8 @@
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ダウンタイム"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"平日の夜"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
-    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"予定"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"睡眠中"</string>
+    <string name="zen_mode_default_events_name" msgid="2280682960128512257">"予定モード"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"おやすみモード"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> によって管理されています"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ON"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"OFF"</string>

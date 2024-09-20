@@ -2010,8 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Schermvergrendeling instellen"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Schermvergrendeling instellen"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Als je je privégedeelte wilt gebruiken, stel je een schermvergrendeling op dit apparaat in"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Als je het privégedeelte wilt verwijderen, stel je een schermvergrendeling op dit apparaat in"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"App is niet beschikbaar"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is momenteel niet beschikbaar."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> niet beschikbaar"</string>
