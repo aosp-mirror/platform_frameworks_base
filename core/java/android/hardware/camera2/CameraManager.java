@@ -818,7 +818,7 @@ public final class CameraManager {
             }
 
             boolean hasConcurrentStreams =
-                    CameraManagerGlobal.get().cameraIdHasConcurrentStreamsLocked(cameraId,
+                    CameraManagerGlobal.get().cameraIdHasConcurrentStreams(cameraId,
                             mContext.getDeviceId(), getDevicePolicyFromContext(mContext));
             metadata.setHasMandatoryConcurrentStreams(hasConcurrentStreams);
 
@@ -2629,24 +2629,26 @@ public final class CameraManager {
          * @return Whether the camera device was found in the set of combinations returned by
          *         getConcurrentCameraIds
          */
-        public boolean cameraIdHasConcurrentStreamsLocked(String cameraId, int deviceId,
+        public boolean cameraIdHasConcurrentStreams(String cameraId, int deviceId,
                 int devicePolicy) {
-            DeviceCameraInfo info = new DeviceCameraInfo(cameraId,
-                    devicePolicy == DEVICE_POLICY_DEFAULT ? DEVICE_ID_DEFAULT : deviceId);
-            if (!mDeviceStatus.containsKey(info)) {
-                // physical camera ids aren't advertised in concurrent camera id combinations.
-                if (DEBUG) {
-                    Log.v(TAG, " physical camera id " + cameraId + " is hidden." +
-                            " Available logical camera ids : " + mDeviceStatus);
+            synchronized (mLock) {
+                DeviceCameraInfo info = new DeviceCameraInfo(cameraId,
+                        devicePolicy == DEVICE_POLICY_DEFAULT ? DEVICE_ID_DEFAULT : deviceId);
+                if (!mDeviceStatus.containsKey(info)) {
+                    // physical camera ids aren't advertised in concurrent camera id combinations.
+                    if (DEBUG) {
+                        Log.v(TAG, " physical camera id " + cameraId + " is hidden."
+                                + " Available logical camera ids : " + mDeviceStatus);
+                    }
+                    return false;
+                }
+                for (Set<DeviceCameraInfo> comb : mConcurrentCameraIdCombinations) {
+                    if (comb.contains(info)) {
+                        return true;
+                    }
                 }
                 return false;
             }
-            for (Set<DeviceCameraInfo> comb : mConcurrentCameraIdCombinations) {
-                if (comb.contains(info)) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         public void setTorchMode(
