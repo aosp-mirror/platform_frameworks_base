@@ -15,7 +15,10 @@ android_library {
         "src/**/*.kt",
     ],
     resource_dirs: ["res"],
-    static_libs: ["androidx.preference_preference"],
+    static_libs: [
+        "androidx.preference_preference",
+        "com.google.android.material_material",
+    ],
     sdk_version: "system_current",
     min_sdk_version: "21",
     apex_available: [
