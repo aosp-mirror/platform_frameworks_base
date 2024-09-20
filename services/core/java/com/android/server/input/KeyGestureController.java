@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
-
 import android.hardware.input.AidlKeyGestureEvent;
 import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IKeyGestureHandler;
@@ -582,8 +581,11 @@ final class KeyGestureController {
     boolean handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int displayId,
             IBinder focusedToken, int flags) {
-        AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes,
-                modifierState, gestureType, action, displayId, flags);
+        return handleKeyGesture(createKeyGestureEvent(deviceId, keycodes,
+                modifierState, gestureType, action, displayId, flags), focusedToken);
+    }
+
+    private boolean handleKeyGesture(AidlKeyGestureEvent event, @Nullable IBinder focusedToken) {
         synchronized (mKeyGestureHandlerRecords) {
             for (KeyGestureHandlerRecord handler : mKeyGestureHandlerRecords.values()) {
                 if (handler.handleKeyGesture(event, focusedToken)) {
@@ -614,6 +616,13 @@ final class KeyGestureController {
         AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes, modifierState,
                 gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, Display.DEFAULT_DISPLAY, 0);
         mHandler.obtainMessage(MSG_NOTIFY_KEY_GESTURE_EVENT, event).sendToTarget();
+    }
+
+    public void handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
+        AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes, modifierState,
+                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, Display.DEFAULT_DISPLAY, 0);
+        handleKeyGesture(event, null /*focusedToken*/);
     }
 
     @MainThread

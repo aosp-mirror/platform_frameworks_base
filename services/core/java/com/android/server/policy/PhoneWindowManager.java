@@ -47,6 +47,7 @@ import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
 import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.KeyEvent.KEYCODE_POWER;
 import static android.view.KeyEvent.KEYCODE_STEM_PRIMARY;
+import static android.view.KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
@@ -2643,7 +2644,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onKeyUp(long eventTime, int count, int displayId) {
+        void onKeyUp(long eventTime, int count, int displayId, int deviceId, int metaState) {
             if (mShouldEarlyShortPressOnPower && count == 1) {
                 powerPress(eventTime, 1 /*pressCount*/, displayId);
             }
@@ -2763,7 +2764,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onKeyUp(long eventTime, int count, int unusedDisplayId) {
+        void onKeyUp(long eventTime, int count, int displayId, int deviceId, int metaState) {
             if (count == 1) {
                 // Save info about the most recent task on the first press of the stem key. This
                 // may be used later to switch to the most recent app using double press gesture.
@@ -2816,6 +2817,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    // TODO(b/358569822): Move to KeyGestureController.
+    private final class StylusTailButtonRule extends SingleKeyGestureDetector.SingleKeyRule {
+        StylusTailButtonRule() {
+            super(KEYCODE_STYLUS_BUTTON_TAIL);
+        }
+
+        @Override
+        int getMaxMultiPressCount() {
+            return 2;
+        }
+
+        @Override
+        void onPress(long downTime, int displayId) {
+
+        }
+
+        @Override
+        void onKeyUp(long eventTime, int pressCount, int displayId, int deviceId, int metaState) {
+            if (pressCount != 1) {
+                return;
+            }
+            // Single press on tail button triggers the open notes gesture.
+            handleKeyGestureInKeyGestureController(KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES,
+                    deviceId, KEYCODE_STYLUS_BUTTON_TAIL, metaState);
+        }
+    }
+
     private void initSingleKeyGestureRules(Looper looper) {
         mSingleKeyGestureDetector = SingleKeyGestureDetector.get(mContext, looper);
         mSingleKeyGestureDetector.addRule(new PowerKeyRule());
@@ -2825,6 +2853,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (hasStemPrimaryBehavior()) {
             mSingleKeyGestureDetector.addRule(new StemPrimaryKeyRule());
         }
+        mSingleKeyGestureDetector.addRule(new StylusTailButtonRule());
     }
 
     /**
@@ -3312,6 +3341,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mInputManagerInternal.notifyKeyGestureCompleted(event.getDeviceId(),
                 new int[]{event.getKeyCode()}, event.getMetaState(), gestureType);
+    }
+
+    private void handleKeyGestureInKeyGestureController(
+            @KeyGestureEvent.KeyGestureType int gestureType, int deviceId, int keyCode,
+            int metaState) {
+        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+            return;
+        }
+        mInputManagerInternal.handleKeyGestureInKeyGestureController(deviceId, new int[]{keyCode},
+                metaState, gestureType);
     }
 
     @Override
