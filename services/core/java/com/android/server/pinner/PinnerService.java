@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.pinner;
 
 import static android.app.ActivityManager.UID_OBSERVER_ACTIVE;
 import static android.app.ActivityManager.UID_OBSERVER_GONE;
@@ -73,13 +73,13 @@ import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
-import java.io.Closeable;
-import java.io.DataInputStream;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -111,8 +111,7 @@ public final class PinnerService extends SystemService {
     private static final String PIN_META_FILENAME = "pinlist.meta";
     private static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
     private static final int MATCH_FLAGS = PackageManager.MATCH_DEFAULT_ONLY
-            | PackageManager.MATCH_DIRECT_BOOT_AWARE
-            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+            | PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
     private static final int KEY_CAMERA = 0;
     private static final int KEY_HOME = 1;
@@ -142,7 +141,8 @@ public final class PinnerService extends SystemService {
     private final UserManager mUserManager;
 
     /** The list of the statically pinned files. */
-    @GuardedBy("this") private final ArrayMap<String, PinnedFile> mPinnedFiles = new ArrayMap<>();
+    @GuardedBy("this")
+    private final ArrayMap<String, PinnedFile> mPinnedFiles = new ArrayMap<>();
 
     /** The list of the pinned apps. This is a map from {@link AppKey} to a pinned app. */
     @GuardedBy("this")
@@ -162,8 +162,8 @@ public final class PinnerService extends SystemService {
     /**
      * A set of {@link AppKey} that are configured to be pinned.
      */
-    @GuardedBy("this")
-    private ArraySet<Integer> mPinKeys;
+    @GuardedBy("this") private
+    ArraySet<Integer> mPinKeys;
 
     // Note that we don't use the `_BOOT` namespace for anonymous pinnings, as we want
     // them to be responsive to dynamic flag changes for experimentation.
@@ -198,8 +198,8 @@ public final class PinnerService extends SystemService {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-          // If an app has updated, update pinned files accordingly.
-          if (Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())) {
+            // If an app has updated, update pinned files accordingly.
+            if (Intent.ACTION_PACKAGE_REPLACED.equals(intent.getAction())) {
                 Uri packageUri = intent.getData();
                 String packageName = packageUri.getSchemeSpecificPart();
                 ArraySet<String> updatedPackages = new ArraySet<>();
@@ -222,7 +222,7 @@ public final class PinnerService extends SystemService {
 
     /** Utility class for testing. */
     @VisibleForTesting
-    static class Injector {
+    public static class Injector {
         protected DeviceConfigInterface getDeviceConfigInterface() {
             return DeviceConfigInterface.REAL;
         }
@@ -242,7 +242,7 @@ public final class PinnerService extends SystemService {
     }
 
     @VisibleForTesting
-    PinnerService(Context context, Injector injector) {
+    public PinnerService(Context context, Injector injector) {
         super(context);
 
         mContext = context;
@@ -276,10 +276,8 @@ public final class PinnerService extends SystemService {
         registerUidListener();
         registerUserSetupCompleteListener();
 
-        mDeviceConfigInterface.addOnPropertiesChangedListener(
-                DEVICE_CONFIG_NAMESPACE_ANON_SIZE,
-                new HandlerExecutor(mPinnerHandler),
-                mDeviceConfigAnonSizeListener);
+        mDeviceConfigInterface.addOnPropertiesChangedListener(DEVICE_CONFIG_NAMESPACE_ANON_SIZE,
+                new HandlerExecutor(mPinnerHandler), mDeviceConfigAnonSizeListener);
     }
 
     @Override
@@ -377,7 +375,7 @@ public final class PinnerService extends SystemService {
     private void handlePinOnStart() {
         // Files to pin come from the overlay and can be specified per-device config
         String[] filesToPin = mContext.getResources().getStringArray(
-            com.android.internal.R.array.config_defaultPinnerServiceFiles);
+                com.android.internal.R.array.config_defaultPinnerServiceFiles);
         // Continue trying to pin each file even if we fail to pin some of them
         for (String fileToPin : filesToPin) {
             pinFile(fileToPin, Integer.MAX_VALUE, /*appInfo=*/null, /*groupName=*/SYSTEM_GROUP_NAME,
@@ -393,10 +391,9 @@ public final class PinnerService extends SystemService {
      * regular home app.
      */
     private void registerUserSetupCompleteListener() {
-        Uri userSetupCompleteUri = Settings.Secure.getUriFor(
-                Settings.Secure.USER_SETUP_COMPLETE);
-        mContext.getContentResolver().registerContentObserver(userSetupCompleteUri,
-                false, new ContentObserver(null) {
+        Uri userSetupCompleteUri = Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE);
+        mContext.getContentResolver().registerContentObserver(
+                userSetupCompleteUri, false, new ContentObserver(null) {
                     @Override
                     public void onChange(boolean selfChange, Uri uri) {
                         if (userSetupCompleteUri.equals(uri)) {
@@ -419,7 +416,7 @@ public final class PinnerService extends SystemService {
                 }
 
                 @Override
-                public void onUidActive(int uid)  {
+                public void onUidActive(int uid) {
                     mPinnerHandler.sendMessage(PooledLambda.obtainMessage(
                             PinnerService::handleUidActive, PinnerService.this, uid));
                 }
@@ -433,7 +430,6 @@ public final class PinnerService extends SystemService {
         updateActiveState(uid, false /* active */);
         int key;
         synchronized (this) {
-
             // In case we have a pending repin, repin now. See mPendingRepin for more information.
             key = mPendingRepin.getOrDefault(uid, -1);
             if (key == -1) {
@@ -501,8 +497,8 @@ public final class PinnerService extends SystemService {
 
     private ApplicationInfo getCameraInfo(int userHandle) {
         Intent cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-        ApplicationInfo info = getApplicationInfoForIntent(cameraIntent, userHandle,
-            false /* defaultToSystemApp */);
+        ApplicationInfo info = getApplicationInfoForIntent(
+                cameraIntent, userHandle, false /* defaultToSystemApp */);
 
         // If the STILL_IMAGE_CAMERA intent doesn't resolve, try the _SECURE intent.
         // We don't use _SECURE first because it will never get set on a device
@@ -511,16 +507,16 @@ public final class PinnerService extends SystemService {
         // preference using this intent.
         if (info == null) {
             cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA_SECURE);
-            info = getApplicationInfoForIntent(cameraIntent, userHandle,
-                false /* defaultToSystemApp */);
+            info = getApplicationInfoForIntent(
+                    cameraIntent, userHandle, false /* defaultToSystemApp */);
         }
 
         // If the _SECURE intent doesn't resolve, try the original intent but request
         // the system app for camera if there was more than one result.
         if (info == null) {
             cameraIntent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-            info = getApplicationInfoForIntent(cameraIntent, userHandle,
-                true /* defaultToSystemApp */);
+            info = getApplicationInfoForIntent(
+                    cameraIntent, userHandle, true /* defaultToSystemApp */);
         }
         return info;
     }
@@ -535,14 +531,14 @@ public final class PinnerService extends SystemService {
         return getApplicationInfoForIntent(intent, userHandle, true);
     }
 
-    private ApplicationInfo getApplicationInfoForIntent(Intent intent, int userHandle,
-            boolean defaultToSystemApp) {
+    private ApplicationInfo getApplicationInfoForIntent(
+            Intent intent, int userHandle, boolean defaultToSystemApp) {
         if (intent == null) {
             return null;
         }
 
-        ResolveInfo resolveInfo = mContext.getPackageManager().resolveActivityAsUser(intent,
-                MATCH_FLAGS, userHandle);
+        ResolveInfo resolveInfo =
+                mContext.getPackageManager().resolveActivityAsUser(intent, MATCH_FLAGS, userHandle);
 
         // If this intent can resolve to only one app, choose that one.
         // Otherwise, if we've requested to default to the system app, return it;
@@ -557,12 +553,11 @@ public final class PinnerService extends SystemService {
         }
 
         if (defaultToSystemApp) {
-            List<ResolveInfo> infoList = mContext.getPackageManager()
-                .queryIntentActivitiesAsUser(intent, MATCH_FLAGS, userHandle);
+            List<ResolveInfo> infoList = mContext.getPackageManager().queryIntentActivitiesAsUser(
+                    intent, MATCH_FLAGS, userHandle);
             ApplicationInfo systemAppInfo = null;
             for (ResolveInfo info : infoList) {
-                if ((info.activityInfo.applicationInfo.flags
-                      & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                if ((info.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                     if (systemAppInfo == null) {
                         systemAppInfo = info.activityInfo.applicationInfo;
                     } else {
@@ -578,13 +573,13 @@ public final class PinnerService extends SystemService {
     }
 
     private void sendPinAppsMessage(int userHandle) {
-        mPinnerHandler.sendMessage(PooledLambda.obtainMessage(PinnerService::pinApps, this,
-                userHandle));
+        mPinnerHandler.sendMessage(
+                PooledLambda.obtainMessage(PinnerService::pinApps, this, userHandle));
     }
 
     private void sendPinAppsWithUpdatedKeysMessage(int userHandle) {
-        mPinnerHandler.sendMessage(PooledLambda.obtainMessage(PinnerService::pinAppsWithUpdatedKeys,
-                this, userHandle));
+        mPinnerHandler.sendMessage(PooledLambda.obtainMessage(
+                PinnerService::pinAppsWithUpdatedKeys, this, userHandle));
     }
     private void sendUnpinAppsMessage() {
         mPinnerHandler.sendMessage(PooledLambda.obtainMessage(PinnerService::unpinApps, this));
@@ -596,8 +591,7 @@ public final class PinnerService extends SystemService {
         // phenotype property is not set.
         boolean shouldPinCamera = mConfiguredToPinCamera
                 && mDeviceConfigInterface.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
-                        "pin_camera",
-                        SystemProperties.getBoolean("pinner.pin_camera", true));
+                        "pin_camera", SystemProperties.getBoolean("pinner.pin_camera", true));
         if (shouldPinCamera) {
             pinKeys.add(KEY_CAMERA);
         } else if (DEBUG) {
@@ -636,8 +630,9 @@ public final class PinnerService extends SystemService {
             synchronized (this) {
                 // This code path demands preceding unpinApps() call.
                 if (!mPinnedApps.isEmpty()) {
-                    Slog.e(TAG, "Attempted to update a list of apps, "
-                            + "but apps were already pinned. Skipping.");
+                    Slog.e(TAG,
+                            "Attempted to update a list of apps, "
+                                    + "but apps were already pinned. Skipping.");
                     return;
                 }
 
@@ -656,8 +651,8 @@ public final class PinnerService extends SystemService {
      * @see #pinApp(int, int, boolean)
      */
     private void sendPinAppMessage(int key, int userHandle, boolean force) {
-        mPinnerHandler.sendMessage(PooledLambda.obtainMessage(PinnerService::pinApp, this,
-                key, userHandle, force));
+        mPinnerHandler.sendMessage(
+                PooledLambda.obtainMessage(PinnerService::pinApp, this, key, userHandle, force));
     }
 
     /**
@@ -692,9 +687,7 @@ public final class PinnerService extends SystemService {
     private int getUidForKey(@AppKey int key) {
         synchronized (this) {
             PinnedApp existing = mPinnedApps.get(key);
-            return existing != null && existing.active
-                    ? existing.uid
-                    : -1;
+            return existing != null && existing.active ? existing.uid : -1;
         }
     }
 
@@ -737,11 +730,8 @@ public final class PinnerService extends SystemService {
      * Handle any changes in the anon region pinner config.
      */
     private void refreshPinAnonConfig() {
-        long newPinAnonSize =
-                mDeviceConfigInterface.getLong(
-                        DEVICE_CONFIG_NAMESPACE_ANON_SIZE,
-                        DEVICE_CONFIG_KEY_ANON_SIZE,
-                        DEFAULT_ANON_SIZE);
+        long newPinAnonSize = mDeviceConfigInterface.getLong(
+                DEVICE_CONFIG_NAMESPACE_ANON_SIZE, DEVICE_CONFIG_KEY_ANON_SIZE, DEFAULT_ANON_SIZE);
         newPinAnonSize = Math.max(0, Math.min(newPinAnonSize, MAX_ANON_SIZE));
         if (newPinAnonSize != mPinAnonSize) {
             mPinAnonSize = newPinAnonSize;
@@ -775,10 +765,9 @@ public final class PinnerService extends SystemService {
         try {
             // Map as SHARED to avoid changing rss.anon for system_server (per /proc/*/status).
             // The mapping is visible in other rss metrics, and as private dirty in smaps/meminfo.
-            address = Os.mmap(0, alignedPinSize,
-                    OsConstants.PROT_READ | OsConstants.PROT_WRITE,
-                    OsConstants.MAP_SHARED | OsConstants.MAP_ANONYMOUS,
-                    new FileDescriptor(), /*offset=*/0);
+            address = Os.mmap(0, alignedPinSize, OsConstants.PROT_READ | OsConstants.PROT_WRITE,
+                    OsConstants.MAP_SHARED | OsConstants.MAP_ANONYMOUS, new FileDescriptor(),
+                    /*offset=*/0);
 
             Unsafe tempUnsafe = null;
             Class<sun.misc.Unsafe> clazz = sun.misc.Unsafe.class;
@@ -804,14 +793,14 @@ public final class PinnerService extends SystemService {
             return;
         } finally {
             if (address >= 0) {
-                safeMunmap(address, alignedPinSize);
+                PinnerUtils.safeMunmap(address, alignedPinSize);
             }
         }
     }
 
     private void unpinAnonRegion() {
         if (mPinAnonAddress != 0) {
-            safeMunmap(mPinAnonAddress, mCurrentlyPinnedAnonSize);
+            PinnerUtils.safeMunmap(mPinAnonAddress, mCurrentlyPinnedAnonSize);
         }
         mPinAnonAddress = 0;
         mCurrentlyPinnedAnonSize = 0;
@@ -857,7 +846,6 @@ public final class PinnerService extends SystemService {
             mPinnedApps.put(key, pinnedApp);
         }
 
-
         // pin APK
         final int pinSizeLimit = getSizeLimitForKey(key);
         List<String> apks = new ArrayList<>();
@@ -871,7 +859,7 @@ public final class PinnerService extends SystemService {
 
         long apkPinSizeLimit = pinSizeLimit;
 
-        for (String apk: apks) {
+        for (String apk : apks) {
             if (apkPinSizeLimit <= 0) {
                 Slog.w(TAG, "Reached to the pin size limit. Skipping: " + apk);
                 // Continue instead of break to print all skipped APK names.
@@ -915,7 +903,7 @@ public final class PinnerService extends SystemService {
             @Nullable ApplicationInfo appInfo, @Nullable String groupName,
             boolean pinOptimizedDeps) {
         PinnedFile existingPin;
-        synchronized(this) {
+        synchronized (this) {
             existingPin = mPinnedFiles.get(fileToPin);
         }
         if (existingPin != null) {
@@ -1021,7 +1009,8 @@ public final class PinnerService extends SystemService {
         return bytesPinned;
     }
 
-    /** mlock length bytes of fileToPin in memory
+    /**
+     * mlock length bytes of fileToPin in memory
      *
      * If attemptPinIntrospection is true, then treat the file to pin as a zip file and
      * look for a "pinlist.meta" file in the archive root directory. The structure of this
@@ -1083,8 +1072,8 @@ public final class PinnerService extends SystemService {
             }
             return pinnedFile;
         } finally {
-            safeClose(pinRangeStream);
-            safeClose(fileAsZip);  // Also closes any streams we've opened
+            PinnerUtils.safeClose(pinRangeStream);
+            PinnerUtils.safeClose(fileAsZip); // Also closes any streams we've opened
         }
     }
 
@@ -1097,11 +1086,8 @@ public final class PinnerService extends SystemService {
         try {
             zip = new ZipFile(fileName);
         } catch (IOException ex) {
-            Slog.w(TAG,
-                   String.format(
-                       "could not open \"%s\" as zip: pinning as blob",
-                                 fileName),
-                   ex);
+            Slog.w(TAG, String.format("could not open \"%s\" as zip: pinning as blob", fileName),
+                    ex);
         }
         return zip;
     }
@@ -1141,9 +1127,9 @@ public final class PinnerService extends SystemService {
                 pinMetaStream = zipFile.getInputStream(pinMetaEntry);
             } catch (IOException ex) {
                 Slog.w(TAG,
-                       String.format("error reading pin metadata \"%s\": pinning as blob",
-                                     fileName),
-                       ex);
+                        String.format(
+                                "error reading pin metadata \"%s\": pinning as blob", fileName),
+                        ex);
             }
         } else {
             Slog.w(TAG,
@@ -1151,57 +1137,6 @@ public final class PinnerService extends SystemService {
                             "Could not find pinlist.meta for \"%s\": pinning as blob", fileName));
         }
         return pinMetaStream;
-    }
-
-    private static abstract class PinRangeSource {
-        /** Retrive a range to pin.
-         *
-         * @param outPinRange Receives the pin region
-         * @return True if we filled in outPinRange or false if we're out of pin entries
-         */
-        abstract boolean read(PinRange outPinRange);
-    }
-
-    private static final class PinRangeSourceStatic extends PinRangeSource {
-        private final int mPinStart;
-        private final int mPinLength;
-        private boolean mDone = false;
-
-        PinRangeSourceStatic(int pinStart, int pinLength) {
-            mPinStart = pinStart;
-            mPinLength = pinLength;
-        }
-
-        @Override
-        boolean read(PinRange outPinRange) {
-            outPinRange.start = mPinStart;
-            outPinRange.length = mPinLength;
-            boolean done = mDone;
-            mDone = true;
-            return !done;
-        }
-    }
-
-    private static final class PinRangeSourceStream extends PinRangeSource {
-        private final DataInputStream mStream;
-        private boolean mDone = false;
-
-        PinRangeSourceStream(InputStream stream) {
-            mStream = new DataInputStream(stream);
-        }
-
-        @Override
-        boolean read(PinRange outPinRange) {
-            if (!mDone) {
-                try {
-                    outPinRange.start = mStream.readInt();
-                    outPinRange.length = mStream.readInt();
-                } catch (IOException ex) {
-                    mDone = true;
-                }
-            }
-            return !mDone;
-        }
     }
 
     /**
@@ -1223,10 +1158,8 @@ public final class PinnerService extends SystemService {
             int openFlags = (OsConstants.O_RDONLY | OsConstants.O_CLOEXEC);
             fd = Os.open(fileToPin, openFlags, 0);
             mapSize = (int) Math.min(Os.fstat(fd).st_size, Integer.MAX_VALUE);
-            address = Os.mmap(0, mapSize,
-                              OsConstants.PROT_READ,
-                              OsConstants.MAP_SHARED,
-                              fd, /*offset=*/0);
+            address = Os.mmap(
+                    0, mapSize, OsConstants.PROT_READ, OsConstants.MAP_SHARED, fd, /*offset=*/0);
 
             PinRange pinRange = new PinRange();
             long bytesPinned = 0;
@@ -1239,8 +1172,8 @@ public final class PinnerService extends SystemService {
             while (bytesPinned < maxBytesToPin && pinRangeSource.read(pinRange)) {
                 long pinStart = pinRange.start;
                 long pinLength = pinRange.length;
-                pinStart = clamp(0, pinStart, mapSize);
-                pinLength = clamp(0, pinLength, mapSize - pinStart);
+                pinStart = PinnerUtils.clamp(0, pinStart, mapSize);
+                pinLength = PinnerUtils.clamp(0, pinLength, mapSize - pinStart);
                 pinLength = Math.min(maxBytesToPin - bytesPinned, pinLength);
 
                 // mlock doesn't require the region to be page-aligned, but we snap the
@@ -1255,14 +1188,13 @@ public final class PinnerService extends SystemService {
                 if (pinLength % PAGE_SIZE != 0) {
                     pinLength += PAGE_SIZE - pinLength % PAGE_SIZE;
                 }
-                pinLength = clamp(0, pinLength, maxBytesToPin - bytesPinned);
+                pinLength = PinnerUtils.clamp(0, pinLength, maxBytesToPin - bytesPinned);
 
                 if (pinLength > 0) {
                     if (DEBUG) {
                         Slog.d(TAG,
-                               String.format(
-                                   "pinning at %s %s bytes of %s",
-                                   pinStart, pinLength, fileToPin));
+                                String.format("pinning at %s %s bytes of %s", pinStart, pinLength,
+                                        fileToPin));
                     }
                     Os.mlock(address + pinStart, pinLength);
                 }
@@ -1270,15 +1202,15 @@ public final class PinnerService extends SystemService {
             }
 
             PinnedFile pinnedFile = new PinnedFile(address, mapSize, fileToPin, bytesPinned);
-            address = -1;  // Ownership transferred
+            address = -1; // Ownership transferred
             return pinnedFile;
         } catch (ErrnoException ex) {
             Slog.e(TAG, "Could not pin file " + fileToPin, ex);
             return null;
         } finally {
-            safeClose(fd);
+            PinnerUtils.safeClose(fd);
             if (address >= 0) {
-                safeMunmap(address, mapSize);
+                PinnerUtils.safeMunmap(address, mapSize);
             }
         }
     }
@@ -1339,54 +1271,10 @@ public final class PinnerService extends SystemService {
         return unpinnedBytes;
     }
 
-    private static long clamp(long min, long value, long max) {
-        return Math.max(min, Math.min(value, max));
-    }
-
-    private static void safeMunmap(long address, long mapSize) {
-        try {
-            Os.munmap(address, mapSize);
-        } catch (ErrnoException ex) {
-            Slog.w(TAG, "ignoring error in unmap", ex);
-        }
-    }
-
-    /**
-     * Close FD, swallowing irrelevant errors.
-     */
-    private static void safeClose(@Nullable FileDescriptor fd) {
-        if (fd != null && fd.valid()) {
-            try {
-                Os.close(fd);
-            } catch (ErrnoException ex) {
-                // Swallow the exception: non-EBADF errors in close(2)
-                // indicate deferred paging write errors, which we
-                // don't care about here. The underlying file
-                // descriptor is always closed.
-                if (ex.errno == OsConstants.EBADF) {
-                    throw new AssertionError(ex);
-                }
-            }
-        }
-    }
-
-    /**
-     * Close closeable thing, swallowing errors.
-     */
-    private static void safeClose(@Nullable Closeable thing) {
-        if (thing != null) {
-            try {
-                thing.close();
-            } catch (IOException ex) {
-                Slog.w(TAG, "ignoring error closing resource: " + thing, ex);
-            }
-        }
-    }
-
     public List<PinnedFileStat> getPinnerStats() {
         ArrayList<PinnedFileStat> stats = new ArrayList<>();
         Collection<PinnedFile> pinnedFiles;
-        synchronized(this) {
+        synchronized (this) {
             pinnedFiles = mPinnedFiles.values();
         }
         for (PinnedFile pf : pinnedFiles) {
@@ -1394,8 +1282,8 @@ public final class PinnerService extends SystemService {
             stats.add(stat);
         }
         if (mCurrentlyPinnedAnonSize > 0) {
-            stats.add(new PinnedFileStat(ANON_REGION_STAT_NAME,
-                        mCurrentlyPinnedAnonSize, ANON_REGION_STAT_NAME));
+            stats.add(new PinnedFileStat(
+                    ANON_REGION_STAT_NAME, mCurrentlyPinnedAnonSize, ANON_REGION_STAT_NAME));
         }
         return stats;
     }
@@ -1403,7 +1291,8 @@ public final class PinnerService extends SystemService {
     public final class BinderService extends IPinnerService.Stub {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw))
+                return;
             HashSet<PinnedFile> shownPins = new HashSet<>();
             HashSet<String> shownGroups = new HashSet<>();
             HashSet<String> groupsToPrint = new HashSet<>();
@@ -1423,8 +1312,10 @@ public final class PinnerService extends SystemService {
                 for (int key : mPinnedApps.keySet()) {
                     PinnedApp app = mPinnedApps.get(key);
                     pw.print(getNameForKey(key));
-                    pw.print(" uid="); pw.print(app.uid);
-                    pw.print(" active="); pw.print(app.active);
+                    pw.print(" uid=");
+                    pw.print(app.uid);
+                    pw.print(" active=");
+                    pw.print(app.active);
 
                     if (!app.mFiles.isEmpty()) {
                         shownGroups.add(app.mFiles.getFirst().groupName);
@@ -1516,7 +1407,8 @@ public final class PinnerService extends SystemService {
                 if (!mPendingRepin.isEmpty()) {
                     pw.print("Pending repin: ");
                     for (int key : mPendingRepin.values()) {
-                        pw.print(getNameForKey(key)); pw.print(' ');
+                        pw.print(getNameForKey(key));
+                        pw.print(' ');
                     }
                     pw.println();
                 }
@@ -1550,8 +1442,9 @@ public final class PinnerService extends SystemService {
                     repin();
                     break;
                 default:
-                    printError(out, String.format(
-                            "Unknown pinner command: %s. Supported commands: repin", command));
+                    printError(out,
+                            String.format("Unknown pinner command: %s. Supported commands: repin",
+                                    command));
                     resultReceiver.send(-1, null);
                     return;
             }
@@ -1567,46 +1460,6 @@ public final class PinnerService extends SystemService {
         }
     }
 
-    @VisibleForTesting
-    public static final class PinnedFile implements AutoCloseable {
-        private long mAddress;
-        final long mapSize;
-        final String fileName;
-        public final long bytesPinned;
-
-        // Whether this file was pinned using a pinlist
-        boolean used_pinlist;
-
-        // User defined group name for pinner accounting
-        String groupName = "";
-        ArrayList<PinnedFile> pinnedDeps = new ArrayList<>();
-
-        PinnedFile(long address, long mapSize, String fileName, long bytesPinned) {
-            mAddress = address;
-            this.mapSize = mapSize;
-            this.fileName = fileName;
-            this.bytesPinned = bytesPinned;
-        }
-
-        @Override
-        public void close() {
-            if (mAddress >= 0) {
-                safeMunmap(mAddress, mapSize);
-                mAddress = -1;
-            }
-            for (PinnedFile dep : pinnedDeps) {
-                if (dep != null) {
-                    dep.close();
-                }
-            }
-        }
-
-        @Override
-        public void finalize() {
-            close();
-        }
-    }
-
     final static class PinRange {
         int start;
         int length;
@@ -1616,7 +1469,6 @@ public final class PinnerService extends SystemService {
      * Represents an app that was pinned.
      */
     private final class PinnedApp {
-
         /**
          * The uid of the package being pinned. This stays constant while the package stays
          * installed.
@@ -1645,11 +1497,9 @@ public final class PinnerService extends SystemService {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case PIN_ONSTART_MSG:
-                {
+                case PIN_ONSTART_MSG: {
                     handlePinOnStart();
-                }
-                break;
+                } break;
 
                 default:
                     super.handleMessage(msg);

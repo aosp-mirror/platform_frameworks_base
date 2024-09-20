@@ -33,7 +33,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.annotations.DisableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfigInterface;
@@ -48,6 +47,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.flags.Flags;
+import com.android.server.pinner.PinnedFile;
+import com.android.server.pinner.PinnerService;
 import com.android.server.testutils.FakeDeviceConfigInterface;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -148,10 +149,9 @@ public class PinnerServiceTest {
             }
 
             @Override
-            protected PinnerService.PinnedFile pinFileInternal(PinnerService service,
-                    String fileToPin, long maxBytesToPin, boolean attemptPinIntrospection) {
-                return new PinnerService.PinnedFile(-1,
-                        maxBytesToPin, fileToPin, maxBytesToPin);
+            protected PinnedFile pinFileInternal(PinnerService service, String fileToPin,
+                    long maxBytesToPin, boolean attemptPinIntrospection) {
+                return new PinnedFile(-1, maxBytesToPin, fileToPin, maxBytesToPin);
             }
         };
     }

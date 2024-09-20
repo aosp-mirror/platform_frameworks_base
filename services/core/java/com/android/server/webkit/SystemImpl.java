@@ -41,7 +41,8 @@ import android.webkit.WebViewZygote;
 
 import com.android.internal.util.XmlUtils;
 import com.android.server.LocalServices;
-import com.android.server.PinnerService;
+import com.android.server.pinner.PinnedFile;
+import com.android.server.pinner.PinnerService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -318,7 +319,7 @@ public class SystemImpl implements SystemInterface {
             if (webviewPinQuota <= 0) {
                 break;
             }
-            PinnerService.PinnedFile pf = pinnerService.pinFile(
+            PinnedFile pf = pinnerService.pinFile(
                     apk, webviewPinQuota, appInfo, PIN_GROUP, /*pinOptimizedDeps=*/true);
             webviewPinQuota -= pf.bytesPinned;
         }
