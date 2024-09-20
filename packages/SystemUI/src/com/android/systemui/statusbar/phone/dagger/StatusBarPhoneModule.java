@@ -16,22 +16,11 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
-import com.android.systemui.statusbar.phone.CentralSurfacesImpl;
-
-import dagger.Binds;
 import dagger.Module;
 
 /**
- * Dagger Module providing {@link CentralSurfacesImpl}.
+ * Similar in purpose to [StatusBarModule], but scoped only to phones
  */
 @Module
 public interface StatusBarPhoneModule {
-    /**
-     * Provides our instance of CentralSurfaces which is considered optional.
-     */
-    @Binds
-    @SysUISingleton
-    CentralSurfaces bindsCentralSurfaces(CentralSurfacesImpl impl);
 }

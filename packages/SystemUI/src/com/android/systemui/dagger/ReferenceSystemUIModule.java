@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.HeadsUpModule;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.phone.dagger.StatusBarPhoneModule;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentStartableModule;
 import com.android.systemui.statusbar.policy.AospPolicyModule;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -136,6 +137,7 @@ import javax.inject.Named;
         RotationLockModule.class,
         RotationLockNewModule.class,
         ScreenDecorationsModule.class,
+        StatusBarPhoneModule.class,
         SystemActionsModule.class,
         ShadeModule.class,
         StartCentralSurfacesModule.class,
