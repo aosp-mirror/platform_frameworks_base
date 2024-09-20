@@ -27,16 +27,22 @@ import java.io.File
 class ClassFilter private constructor(
     private val defaultResult: Boolean,
 ) {
+    private enum class MatchType {
+        Full,
+        Prefix,
+        Suffix,
+    }
+
     private class FilterElement(
         val allowed: Boolean,
         val internalName: String,
-        val isPrefix: Boolean,
+        val matchType: MatchType,
     ) {
         fun matches(classInternalName: String): Boolean {
-            return if (isPrefix) {
-                classInternalName.startsWith(internalName)
-            } else {
-                classInternalName == internalName
+            return when (matchType) {
+                MatchType.Full -> classInternalName == internalName
+                MatchType.Prefix -> classInternalName.startsWith(internalName)
+                MatchType.Suffix -> classInternalName.endsWith(internalName)
             }
         }
     }
@@ -114,15 +120,29 @@ class ClassFilter private constructor(
 
                 // Special case -- matches any class names.
                 if (line == "*") {
-                    ret.elements.add(FilterElement(allow, "", true))
+                    ret.elements.add(FilterElement(allow, "", MatchType.Prefix))
                     return@forEach
                 }
 
-                // Handle wildcard -- e.g. "package.name.*"
+                // Handle prefix match -- e.g. "package.name.*"
                 if (line.endsWith(".*")) {
                     ret.elements.add(
                         FilterElement(
-                            allow, line.substring(0, line.length - 2).toJvmClassName(), true
+                            allow,
+                            line.substring(0, line.length - 2).toJvmClassName() + "/",
+                            MatchType.Prefix
+                        )
+                    )
+                    return@forEach
+                }
+
+                // Handle suffix match -- e.g. "*.Flags"
+                if (line.startsWith("*.")) {
+                    ret.elements.add(
+                        FilterElement(
+                            allow,
+                            "/" + line.substring(2, line.length).toJvmClassName(),
+                            MatchType.Suffix
                         )
                     )
                     return@forEach
@@ -136,7 +156,7 @@ class ClassFilter private constructor(
                         lineNo
                     )
                 }
-                ret.elements.add(FilterElement(allow, line.toJvmClassName(), false))
+                ret.elements.add(FilterElement(allow, line.toJvmClassName(), MatchType.Suffix))
             }
 
             return ret
