@@ -29,6 +29,7 @@ import android.app.IWallpaperManagerCallback;
 import android.app.WallpaperColors;
 import android.app.WallpaperManager.ScreenOrientation;
 import android.app.WallpaperManager.SetWallpaperFlags;
+import android.app.wallpaper.WallpaperDescription;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.RemoteCallbackList;
@@ -77,6 +78,8 @@ class WallpaperData {
 
     /**
      * The component name of the currently set live wallpaper.
+     *
+     * @deprecated
      */
     private ComponentName mWallpaperComponent;
 
@@ -179,6 +182,9 @@ class WallpaperData {
      */
     int mOrientationWhenSet = ORIENTATION_UNKNOWN;
 
+    /** Description of the current wallpaper */
+    private WallpaperDescription mDescription;
+
     WallpaperData(int userId, @SetWallpaperFlags int wallpaperType) {
         this.userId = userId;
         this.mWhich = wallpaperType;
@@ -236,6 +242,14 @@ class WallpaperData {
 
     void setComponent(ComponentName componentName) {
         this.mWallpaperComponent = componentName;
+    }
+
+    WallpaperDescription getDescription() {
+        return mDescription;
+    }
+
+    void setDescription(WallpaperDescription description) {
+        this.mDescription = description;
     }
 
     @Override

@@ -22,15 +22,27 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.PersistableBundle;
+import android.util.Xml;
+
+import com.android.modules.utils.TypedXmlPullParser;
+import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RunWith(JUnit4.class)
 public class WallpaperDescriptionTest {
+    private static final String TAG = "WallpaperDescriptionTest";
+
     private final ComponentName mTestComponent = new ComponentName("fakePackage", "fakeClass");
 
     @Test
@@ -53,6 +65,63 @@ public class WallpaperDescriptionTest {
                 mTestComponent).setId(id).setTitle("fake different").build();
 
         assertThat(desc1.hashCode()).isEqualTo(desc2.hashCode());
+    }
+
+    @Test
+    public void xml_roundTripSucceeds() throws IOException, XmlPullParserException {
+        final Uri thumbnail = Uri.parse("http://www.bogus.com/thumbnail");
+        final List<CharSequence> description = List.of("line1", "line2");
+        final Uri contextUri = Uri.parse("http://www.bogus.com/contextUri");
+        final PersistableBundle content = new PersistableBundle();
+        content.putString("ckey", "cvalue");
+        WallpaperDescription source = new WallpaperDescription.Builder()
+                .setComponent(mTestComponent).setId("fakeId").setThumbnail(thumbnail)
+                .setTitle("Fake title").setDescription(description)
+                .setContextUri(contextUri).setContextDescription("Context description")
+                .setContent(content).build();
+
+        ByteArrayOutputStream ostream = new ByteArrayOutputStream();
+        TypedXmlSerializer serializer = Xml.newBinarySerializer();
+        serializer.setOutput(ostream, StandardCharsets.UTF_8.name());
+        serializer.startDocument(null, true);
+        serializer.startTag(null, "test");
+        source.saveToXml(serializer);
+        serializer.endTag(null, "test");
+        serializer.endDocument();
+        ostream.close();
+
+        WallpaperDescription destination = null;
+        ByteArrayInputStream istream = new ByteArrayInputStream(ostream.toByteArray());
+        TypedXmlPullParser parser = Xml.newBinaryPullParser();
+        parser.setInput(istream, StandardCharsets.UTF_8.name());
+        int type;
+        do {
+            type = parser.next();
+            if (type == XmlPullParser.START_TAG && "test".equals(parser.getName())) {
+                destination = WallpaperDescription.restoreFromXml(parser);
+            }
+        } while (type != XmlPullParser.END_DOCUMENT);
+
+        assertThat(destination).isNotNull();
+        assertThat(destination.getComponent()).isEqualTo(source.getComponent());
+        assertThat(destination.getId()).isEqualTo(source.getId());
+        assertThat(destination.getThumbnail()).isEqualTo(source.getThumbnail());
+        assertWithMessage("title mismatch").that(
+                CharSequence.compare(destination.getTitle(), source.getTitle())).isEqualTo(0);
+        assertThat(destination.getDescription()).hasSize(source.getDescription().size());
+        for (int i = 0; i < destination.getDescription().size(); i++) {
+            CharSequence strDest = destination.getDescription().get(i);
+            CharSequence strSrc = source.getDescription().get(i);
+            assertWithMessage("description string mismatch")
+                    .that(CharSequence.compare(strDest, strSrc)).isEqualTo(0);
+        }
+        assertThat(destination.getContextUri()).isEqualTo(source.getContextUri());
+        assertWithMessage("context description mismatch").that(
+                CharSequence.compare(destination.getContextDescription(),
+                source.getContextDescription())).isEqualTo(0);
+        assertThat(destination.getContent()).isNotNull();
+        assertThat(destination.getContent().getString("ckey")).isEqualTo(
+                source.getContent().getString("ckey"));
     }
 
     @Test
