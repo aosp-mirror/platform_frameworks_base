@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Skaļruņi un displeji"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Ieteiktās ierīces"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Pārtrauciet savu kopīgoto sesiju, lai pārvietotu multivides saturu uz citu ierīci."</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Pārtraukt"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kā darbojas apraide"</string>
@@ -1454,18 +1458,11 @@
     <skip />
     <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
-    <skip />
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Savienojamība"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Pieejamība"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Utilītprogrammas"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"Konfidencialitāte"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Nodrošina lietotnes"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Displejs"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Nezināma"</string>
 </resources>

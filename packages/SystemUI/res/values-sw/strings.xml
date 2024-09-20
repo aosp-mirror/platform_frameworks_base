@@ -440,9 +440,9 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Imewashwa"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Imewashwa • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Imezimwa"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Weka mipangilio"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Ratibu"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Dhibiti katika mipangilio"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hakuna hali za kutumika}=1{Unatumia {mode}}other{Unatumia hali #}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hakuna hali zinazotumika}=1{Unatumia {mode}}other{Unatumia hali #}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Badilisha upendavyo"</string>
@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Spika na Skrini"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Vifaa Vilivyopendekezwa"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Simamisha kipindi unachoshiriki ili uhamishie maudhui kwenye kifaa kingine"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Simamisha"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jinsi utangazaji unavyofanya kazi"</string>

@@ -440,7 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Zapnuté"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Zapnuté • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Vypnuté"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Nastavenie"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Nastaviť"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Správa v nastaveniach"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Žiadne aktívne režimy}=1{{mode} je aktívny}few{# režimy sú aktívne}many{# modes are active}other{# režimov je aktívnych}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky, pripomenutia, udalosti a volajúci, ktorých určíte. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
@@ -577,7 +577,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"Žiadne upozornenia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Žiadne nové upozornenia"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Stlmenie upozornení je zapnuté"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Keď dostanete priveľa upozornení naraz, hlasitosť vášho zariadenia a počet upozornení sa automaticky znížia až na dve minúty."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Keď dostanete priveľa upozornení naraz, až na dve minúty sa zníži hlasitosť  zariadenia a upozornenia sa obmedzia."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Vypnúť"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Odomknutím zobrazíte staršie upozornenia"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Toto zariadenie spravuje tvoj rodič"</string>
@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Reproduktory a obrazovky"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Navrhované zariadenia"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Ak chcete preniesť médiá do iného zariadenia, ukončite zdieľanú reláciu"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Ukončiť"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>

@@ -576,8 +576,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"沒有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"沒有新通知"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"調低通知強度功能已開啟"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"如果同一時間收到太多通知，裝置會在最長 2 分鐘內調低音量，並減少警示。"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"通知緩和已開啟"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"當你在短時間內收到太多通知時，裝置就會調低音量並減少通知數量最多兩分鐘。"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"關閉"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"解鎖即可查看舊通知"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"此裝置由你的家長管理"</string>
@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"停止共享工作階段以移動媒體至其他裝置"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"停止"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播運作方式"</string>

@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পিকার ও ডিসপ্লে"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"সাজেস্ট করা ডিভাইস"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"অন্য ডিভাইসে মিডিয়া সরাতে আপনার শেয়ার করা সেশন বন্ধ করুন"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"বন্ধ করুন"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
@@ -1289,8 +1293,7 @@
     <string name="add" msgid="81036585205287996">"যোগ করুন"</string>
     <string name="manage_users" msgid="1823875311934643849">"ব্যবহারকারীদের ম্যানেজ করুন"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"\'স্প্লিটস্ক্রিন\' মোডে এই বিজ্ঞপ্তি টেনে আনা যাবে না"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"লোকেশন অ্যাক্টিভ আছে"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ওয়াই-ফাই উপলভ্য নেই"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"প্রায়োরিটি মোড"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"অ্যালার্ম সেট করা হয়েছে"</string>
@@ -1347,8 +1350,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"লক স্ক্রিন কাস্টমাইজ করুন"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"লক স্ক্রিন কাস্টমাইজ করতে আনলক করুন"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ওয়াই-ফাই উপলভ্য নয়"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"লোকেশন অ্যাক্টিভ আছে"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ক্যামেরার অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ক্যামেরা এবং মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্রোফোনের অ্যাক্সেস ব্লক করা আছে"</string>
@@ -1404,8 +1406,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"টাচপ্যাড জেসচার, কীবোর্ড শর্টকাট এবং আরও অনেক কিছু সম্পর্কে জানুন"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ফিরে যাওয়ার জেসচার"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"হোমপেজে যাওয়ার জেসচার"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"সম্প্রতি ব্যবহার করা হয়েছে এমন অ্যাপ দেখুন"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"হয়ে গেছে"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ফিরে যান"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ফিরে যেতে, টাচপ্যাডে যেকোনও জায়গায় তিনটি আঙুল দিয়ে বাঁদিক বা ডানদিকে সোয়াইপ করুন।\n\nএছাড়া, এটির জন্য আপনি কীবোর্ড শর্টকাট অ্যাকশন + ESC বোতাম প্রেস করতে পারবেন।"</string>
@@ -1415,14 +1416,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"যেকোনও সময়ে আপনার হোম স্ক্রিনে যেতে, আপনার স্ক্রিনের একদম নিচের থেকে তিনটি আঙুল দিয়ে উপরের দিকে সোয়াইপ করুন।"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"সাবাস!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"জেসচার ব্যবহার করে কীভাবে হোমে ফিরে যাওয়া যায় সেই সম্পর্কে আপনি জেনেছেন।"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"সম্প্রতি ব্যবহার করা হয়েছে এমন অ্যাপ দেখুন"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"আপনার টাচপ্যাডে তিনটি আঙুল ব্যবহার করে উপরের দিকে সোয়াইপ করে ধরে রাখুন।"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"অসাধারণ!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"সম্প্রতি ব্যবহার করা হয়েছে এমন অ্যাপের জেসচার দেখা সম্পূর্ণ করেছেন।"</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"অ্যাকশন কী"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"আপনার অ্যাপ অ্যাক্সেস করতে, কীবোর্ডে অ্যাকশন কী প্রেস করুন"</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"অভিনন্দন!"</string>
@@ -1446,14 +1443,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"তিনটি আঙুল ব্যবহার করে উপরের দিকে সোয়াইপ করে ধরে রাখুন। আরও জেসচার সম্পর্কে জানতে ট্যাপ করুন।"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"সব অ্যাপ দেখতে আপনার কীবোর্ড ব্যবহার করুন"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"যেকোনও সময় অ্যাকশন কী প্রেস করুন। আরও জেসচার সম্পর্কে জানতে ট্যাপ করুন।"</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"\'অতিরিক্ত কম ব্রাইটনেস\' ফিচার এখন ব্রাইটনেস স্লাইডারের একটি অংশ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"আপনি ব্রাইটনেস লেভেল কমিয়েও, স্ক্রিন অতিরিক্ত কম ব্রাইট করতে পারবেন।\n\nএই ফিচার এখন ব্রাইটনেস স্লাইডারের অংশ, তাই \'অতিরিক্ত কম ব্রাইটনেস\' ফিচারের শর্টকাট সরানো হচ্ছে।"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"\'অতিরিক্ত কম ব্রাইটনেস\' ফিচারের শর্টকাট সরান"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"\'অতিরিক্ত কম ব্রাইটনেস\' ফিচারের শর্টকাট সরানো হয়েছে"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"কানেক্টিভিটি"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"অ্যাক্সেসিবিলিটি"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"উপযোগিতা"</string>
