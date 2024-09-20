@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog;
 
+import static android.tools.traces.Utils.executeShellCommand;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -48,6 +50,7 @@ import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
 
 import com.google.common.truth.Truth;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -57,12 +60,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mockito;
 
+import perfetto.protos.PerfettoConfig.TracingServiceState;
 import perfetto.protos.Protolog;
 import perfetto.protos.ProtologCommon;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -178,6 +183,8 @@ public class PerfettoProtoLogImplTest {
                     viewerConfigInputStreamProvider, sReader, () -> sCacheUpdater.run(),
                     TestProtoLogGroup.values(), dataSourceBuilder, sProtoLogConfigurationService);
         }
+
+        waitDataSourceIsAvailable();
     }
 
     @Before
@@ -861,6 +868,54 @@ public class PerfettoProtoLogImplTest {
                 .isEqualTo(LogLevel.ERROR);
         Truth.assertThat(protolog.messages.get(1).getMessage())
                 .isEqualTo("This message should also be logged 567");
+    }
+
+    private static void waitDataSourceIsAvailable() {
+        final int timeoutMs = 10000;
+        final int busyWaitIntervalMs = 100;
+
+        int elapsedMs = 0;
+
+        while (!isDataSourceAvailable()) {
+            SystemClock.sleep(busyWaitIntervalMs);
+            elapsedMs += busyWaitIntervalMs;
+            if (elapsedMs >= timeoutMs) {
+                throw new RuntimeException("Data source didn't become available."
+                        + " Waited for: " + timeoutMs + " ms");
+            }
+        }
+    }
+
+    private static boolean isDataSourceAvailable() {
+        byte[] proto = executeShellCommand("perfetto --query-raw");
+
+        try {
+            TracingServiceState state = TracingServiceState.parseFrom(proto);
+
+            Optional<Integer> producerId = Optional.empty();
+
+            for (TracingServiceState.Producer producer : state.getProducersList()) {
+                if (producer.getPid() == android.os.Process.myPid()) {
+                    producerId = Optional.of(producer.getId());
+                    break;
+                }
+            }
+
+            if (producerId.isEmpty()) {
+                return false;
+            }
+
+            for (TracingServiceState.DataSource ds : state.getDataSourcesList()) {
+                if (ds.getDsDescriptor().getName().equals(TEST_PROTOLOG_DATASOURCE_NAME)
+                        && ds.getProducerId() == producerId.get()) {
+                    return true;
+                }
+            }
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
     }
 
     private enum TestProtoLogGroup implements IProtoLogGroup {

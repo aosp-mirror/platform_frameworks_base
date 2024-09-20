@@ -46,6 +46,8 @@ constructor(
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
+    var baseEntryMapStr : () -> String = { "baseEntryMapStr not initialized" }
+
     var enableAtRuntime = true
         set(value) {
             if (!value) {
@@ -116,32 +118,43 @@ constructor(
         val key = getKey(entry)
 
         if (runnable == null) {
-            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Runnable NULL, stop")
+            headsUpManagerLogger.logAvalancheUpdate(
+                caller, isEnabled, key,
+                "Runnable NULL, stop. ${getStateStr()}"
+            )
             return
         }
         if (!isEnabled) {
-            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key,
-                    "NOT ENABLED, run runnable")
+            headsUpManagerLogger.logAvalancheUpdate(
+                caller, isEnabled, key,
+                "NOT ENABLED, run runnable. ${getStateStr()}"
+            )
             runnable.run()
             return
         }
         if (entry == null) {
-            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Entry NULL, stop")
+            headsUpManagerLogger.logAvalancheUpdate(
+                caller, isEnabled, key,
+                "Entry NULL, stop. ${getStateStr()}"
+            )
             return
         }
         if (debug) {
             debugRunnableLabelMap[runnable] = caller
         }
-        var outcome = ""
+        var stateAfter = ""
         if (isShowing(entry)) {
-            outcome = "update showing"
             runnable.run()
+            stateAfter = "update showing"
+
         } else if (entry in nextMap) {
-            outcome = "update next"
             nextMap[entry]?.add(runnable)
+            stateAfter = "update next"
+
         } else if (headsUpEntryShowing == null) {
-            outcome = "show now"
             showNow(entry, arrayListOf(runnable))
+            stateAfter = "show now"
+
         } else {
             // Clean up invalid state when entry is in list but not map and vice versa
             if (entry in nextMap) nextMap.remove(entry)
@@ -162,8 +175,8 @@ constructor(
                 )
             }
         }
-        outcome += getStateStr()
-        headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, outcome)
+        stateAfter += getStateStr()
+        headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled = true, key, stateAfter)
     }
 
     @VisibleForTesting
@@ -181,32 +194,40 @@ constructor(
         val key = getKey(entry)
 
         if (runnable == null) {
-            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key, "Runnable NULL, stop")
+            headsUpManagerLogger.logAvalancheDelete(
+                caller, isEnabled, key,
+                "Runnable NULL, stop. ${getStateStr()}"
+            )
             return
         }
         if (!isEnabled) {
-            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
-                    "NOT ENABLED, run runnable")
             runnable.run()
+            headsUpManagerLogger.logAvalancheDelete(
+                caller, isEnabled = false, key,
+                "NOT ENABLED, run runnable. ${getStateStr()}"
+            )
             return
         }
         if (entry == null) {
-            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
-                    "Entry NULL, run runnable")
             runnable.run()
+            headsUpManagerLogger.logAvalancheDelete(
+                caller, isEnabled = true, key,
+                "Entry NULL, run runnable. ${getStateStr()}"
+            )
             return
         }
-        var outcome = ""
+        var stateAfter: String
         if (entry in nextMap) {
-            outcome = "remove from next"
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
             uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
+            stateAfter = "remove from next. ${getStateStr()}"
+
         } else if (entry in debugDropSet) {
-            outcome = "remove from dropset"
             debugDropSet.remove(entry)
+            stateAfter = "remove from dropset. ${getStateStr()}"
+
         } else if (isShowing(entry)) {
-            outcome = "remove showing"
             previousHunKey = getKey(headsUpEntryShowing)
             // Show the next HUN before removing this one, so that we don't tell listeners
             // onHeadsUpPinnedModeChanged, which causes
@@ -214,11 +235,13 @@ constructor(
             // HUN is animating out, resulting in a flicker.
             showNext()
             runnable.run()
+            stateAfter = "remove showing. ${getStateStr()}"
+
         } else {
-            outcome = "run runnable for untracked shown"
             runnable.run()
+            stateAfter = "run runnable for untracked shown HUN. ${getStateStr()}"
         }
-        headsUpManagerLogger.logAvalancheDelete(caller, isEnabled(), getKey(entry), outcome)
+        headsUpManagerLogger.logAvalancheDelete(caller, isEnabled(), getKey(entry), stateAfter)
     }
 
     /**
@@ -400,12 +423,14 @@ constructor(
     }
 
     private fun getStateStr(): String {
-        return "\navalanche state:" +
+        return "\nAvalancheController:" +
                 "\n\tshowing: [${getKey(headsUpEntryShowing)}]" +
                 "\n\tprevious: [$previousHunKey]" +
                 "\n\tnext list: $nextListStr" +
                 "\n\tnext map: $nextMapStr" +
-                "\n\tdropped: $dropSetStr"
+                "\n\tdropped: $dropSetStr" +
+                "\nBHUM.mHeadsUpEntryMap: " +
+                baseEntryMapStr()
     }
 
     private val dropSetStr: String

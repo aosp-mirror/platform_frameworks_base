@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_UP;
@@ -1436,5 +1437,39 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         // THEN vibrate is used
         verify(mVibrator).performHapticFeedback(any(), eq(UdfpsController.LONG_PRESS));
+    }
+
+    @Test
+    public void onAcquiredCalbacks() {
+        runWithAllParams(
+                this::ultrasonicCallbackOnAcquired);
+    }
+
+    public void ultrasonicCallbackOnAcquired(TestParams testParams) throws RemoteException{
+        if (testParams.sensorProps.sensorType
+                == FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC) {
+            reset(mUdfpsView);
+
+            UdfpsController.Callback callbackMock = mock(UdfpsController.Callback.class);
+            mUdfpsController.addCallback(callbackMock);
+
+            // GIVEN UDFPS overlay is showing
+            mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                    BiometricRequestConstants.REASON_AUTH_KEYGUARD,
+                    mUdfpsOverlayControllerCallback);
+            mFgExecutor.runAllReady();
+
+            verify(mFingerprintManager).setUdfpsOverlayController(
+                    mUdfpsOverlayControllerCaptor.capture());
+            mUdfpsOverlayControllerCaptor.getValue().onAcquired(0, FINGERPRINT_ACQUIRED_START);
+            mFgExecutor.runAllReady();
+
+            verify(callbackMock).onFingerDown();
+
+            mUdfpsOverlayControllerCaptor.getValue().onAcquired(0, FINGERPRINT_ACQUIRED_GOOD);
+            mFgExecutor.runAllReady();
+
+            verify(callbackMock).onFingerUp();
+        }
     }
 }

@@ -122,3 +122,10 @@ flag {
     description: "Requires apps to opt-in to overlay pass through touches and provide APIs to opt-in"
     bug: "358129114"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "wlinfo_oncreate"
+    description: "Makes WindowLayoutInfo accessible without racing in the Activity#onCreate()"
+    bug: "337820752"
+}

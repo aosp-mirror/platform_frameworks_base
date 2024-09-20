@@ -305,13 +305,18 @@ class DesktopTasksController(
     private fun getSplitFocusedTask(task1: RunningTaskInfo, task2: RunningTaskInfo) =
         if (task1.taskId == task2.parentTaskId) task2 else task1
 
-    private fun isFreeformDisplay(displayId: Int): Boolean {
+    private fun forceEnterDesktop(displayId: Int): Boolean {
+        if (!DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)) {
+            return false
+        }
+
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
         requireNotNull(tdaInfo) {
             "This method can only be called with the ID of a display having non-null DisplayArea."
         }
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
-        return tdaWindowingMode == WINDOWING_MODE_FREEFORM
+        val isFreeformDisplay = tdaWindowingMode == WINDOWING_MODE_FREEFORM
+        return isFreeformDisplay
     }
 
     /** Moves task to desktop mode if task is running, else launches it in desktop mode. */
@@ -1191,10 +1196,11 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         if (!isDesktopModeShowing(task.displayId)) {
             logD("Bring desktop tasks to front on transition=taskId=%d", task.taskId)
-            // We are outside of desktop mode and already existing desktop task is being launched.
-            // We should make this task go to fullscreen instead of freeform. Note that this means
-            // any re-launch of a freeform window outside of desktop will be in fullscreen.
-            if (taskRepository.isActiveTask(task.taskId)) {
+            if (taskRepository.isActiveTask(task.taskId) && !forceEnterDesktop(task.displayId)) {
+                // We are outside of desktop mode and already existing desktop task is being
+                // launched. We should make this task go to fullscreen instead of freeform. Note
+                // that this means any re-launch of a freeform window outside of desktop will be in
+                // fullscreen as long as default-desktop flag is disabled.
                 addMoveToFullscreenChanges(wct, task)
                 return wct
             }
@@ -1231,9 +1237,7 @@ class DesktopTasksController(
         transition: IBinder
     ): WindowContainerTransaction? {
         logV("handleFullscreenTaskLaunch")
-        val forceEnterDesktop = DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context) &&
-                isFreeformDisplay(task.displayId)
-        if (isDesktopModeShowing(task.displayId) || forceEnterDesktop) {
+        if (isDesktopModeShowing(task.displayId) || forceEnterDesktop(task.displayId)) {
             logD("Switch fullscreen task to freeform on transition: taskId=%d", task.taskId)
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)

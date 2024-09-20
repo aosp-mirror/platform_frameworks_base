@@ -22,12 +22,14 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Rect
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
 import android.graphics.drawable.ShapeDrawable
 import android.graphics.drawable.shapes.RoundRectShape
 import android.view.View
 import android.view.View.OnLongClickListener
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -62,7 +64,7 @@ import com.android.wm.shell.windowdecor.extension.isTransparentCaptionBarAppeara
  * finer controls such as a close window button and an "app info" section to pull up additional
  * controls.
  */
-internal class AppHeaderViewHolder(
+class AppHeaderViewHolder(
         rootView: View,
         onCaptionTouchListener: View.OnTouchListener,
         onCaptionButtonClickListener: View.OnClickListener,
@@ -277,6 +279,34 @@ internal class AppHeaderViewHolder(
 
     fun onMaximizeWindowHoverEnter() {
         maximizeButtonView.startHoverAnimation()
+    }
+
+    fun runOnAppChipGlobalLayout(runnable: () -> Unit) {
+        if (openMenuButton.isAttachedToWindow) {
+            // App chip is already inflated.
+            runnable()
+            return
+        }
+        // Wait for app chip to be inflated before notifying repository.
+        openMenuButton.viewTreeObserver.addOnGlobalLayoutListener(object :
+            OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                runnable()
+                openMenuButton.viewTreeObserver.removeOnGlobalLayoutListener(this)
+            }
+        })
+    }
+
+    fun getAppChipLocationInWindow(): Rect {
+        val appChipBoundsInWindow = IntArray(2)
+        openMenuButton.getLocationInWindow(appChipBoundsInWindow)
+
+        return Rect(
+            /* left = */ appChipBoundsInWindow[0],
+            /* top = */ appChipBoundsInWindow[1],
+            /* right = */ appChipBoundsInWindow[0] + openMenuButton.width,
+            /* bottom = */ appChipBoundsInWindow[1] + openMenuButton.height
+        )
     }
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
@@ -528,5 +558,27 @@ internal class AppHeaderViewHolder(
         private const val DARK_THEME_UNFOCUSED_OPACITY = 140 // 55%
         private const val LIGHT_THEME_UNFOCUSED_OPACITY = 166 // 65%
         private const val FOCUSED_OPACITY = 255
+    }
+
+    class Factory {
+        fun create(
+            rootView: View,
+            onCaptionTouchListener: View.OnTouchListener,
+            onCaptionButtonClickListener: View.OnClickListener,
+            onLongClickListener: OnLongClickListener,
+            onCaptionGenericMotionListener: View.OnGenericMotionListener,
+            appName: CharSequence,
+            appIconBitmap: Bitmap,
+            onMaximizeHoverAnimationFinishedListener: () -> Unit,
+        ): AppHeaderViewHolder = AppHeaderViewHolder(
+            rootView,
+            onCaptionTouchListener,
+            onCaptionButtonClickListener,
+            onLongClickListener,
+            onCaptionGenericMotionListener,
+            appName,
+            appIconBitmap,
+            onMaximizeHoverAnimationFinishedListener,
+        )
     }
 }

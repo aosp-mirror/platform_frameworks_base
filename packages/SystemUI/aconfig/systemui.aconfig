@@ -1063,6 +1063,13 @@ flag {
 }
 
 flag {
+  name: "communal_widget_resizing"
+  namespace: "systemui"
+  description: "Allow resizing of widgets on glanceable hub"
+  bug: "368053818"
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"

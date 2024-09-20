@@ -56,11 +56,13 @@ import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,8 +103,7 @@ class DeviceSettingServiceConnection(
                     } else if (allStatus.all { it is ServiceConnectionStatus.Connected }) {
                         allStatus
                             .filterIsInstance<
-                                ServiceConnectionStatus.Connected<
-                                        IDeviceSettingsProviderService>
+                                ServiceConnectionStatus.Connected<IDeviceSettingsProviderService>
                             >()
                             .all { it.service.serviceStatus?.enabled == true }
                     } else {
@@ -232,7 +233,7 @@ class DeviceSettingServiceConnection(
                                 IDeviceSettingsProviderService.Stub::asInterface,
                             )
                             .stateIn(
-                                coroutineScope,
+                                coroutineScope.plus(backgroundCoroutineContext),
                                 SharingStarted.WhileSubscribed(),
                                 ServiceConnectionStatus.Connecting,
                             )
@@ -263,21 +264,30 @@ class DeviceSettingServiceConnection(
         transform: ((IBinder) -> T),
     ): Flow<ServiceConnectionStatus<T>> {
         return callbackFlow {
-            val serviceConnection =
-                object : ServiceConnection {
-                    override fun onServiceConnected(name: ComponentName, service: IBinder) {
-                        launch { send(ServiceConnectionStatus.Connected(transform(service))) }
-                    }
+                val serviceConnection =
+                    object : ServiceConnection {
+                        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                            launch { send(ServiceConnectionStatus.Connected(transform(service))) }
+                        }
 
-                    override fun onServiceDisconnected(name: ComponentName?) {
-                        launch { send(ServiceConnectionStatus.Connecting) }
+                        override fun onServiceDisconnected(name: ComponentName?) {
+                            launch { send(ServiceConnectionStatus.Connecting) }
+                        }
                     }
+                if (
+                    !context.bindService(
+                        intent,
+                        Context.BIND_AUTO_CREATE,
+                        { launch { it.run() } },
+                        serviceConnection,
+                    )
+                ) {
+                    Log.w(TAG, "Fail to bind service $intent")
+                    launch { send(ServiceConnectionStatus.Failed) }
                 }
-            if (!context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)) {
-                launch { send(ServiceConnectionStatus.Failed) }
+                awaitClose { context.unbindService(serviceConnection) }
             }
-            awaitClose { context.unbindService(serviceConnection) }
-        }
+            .flowOn(backgroundCoroutineContext)
     }
 
     private suspend fun tryGetEndpointFromMetadata(cachedDevice: CachedBluetoothDevice): EndPoint? =

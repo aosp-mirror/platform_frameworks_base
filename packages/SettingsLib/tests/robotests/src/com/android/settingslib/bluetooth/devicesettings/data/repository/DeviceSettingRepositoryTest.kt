@@ -102,9 +102,9 @@ class DeviceSettingRepositoryTest {
         `when`(settingProviderService2.queryLocalInterface(anyString()))
             .thenReturn(settingProviderService2)
 
-        `when`(context.bindService(any(), any(), anyInt())).then { input ->
+        `when`(context.bindService(any(), anyInt(), any(), any())).then { input ->
             val intent = input.getArgument<Intent?>(0)
-            val connection = input.getArgument<ServiceConnection>(1)
+            val connection = input.getArgument<ServiceConnection>(3)
 
             when (intent?.action) {
                 CONFIG_SERVICE_INTENT_ACTION ->
@@ -210,7 +210,7 @@ class DeviceSettingRepositoryTest {
     fun getDeviceSettingsConfig_bindingServiceFail_returnNull() {
         testScope.runTest {
             `when`(configService.getDeviceSettingsConfig(any())).thenReturn(DEVICE_SETTING_CONFIG)
-            doReturn(false).`when`(context).bindService(any(), any(), anyInt())
+            doReturn(false).`when`(context).bindService(any(), anyInt(), any(), any())
 
             val config = underTest.getDeviceSettingsConfig(cachedDevice)
 

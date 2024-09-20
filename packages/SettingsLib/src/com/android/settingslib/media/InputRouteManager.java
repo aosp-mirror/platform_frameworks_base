@@ -15,13 +15,20 @@
  */
 package com.android.settingslib.media;
 
+import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.MediaRecorder;
 import android.os.Handler;
+import android.util.Slog;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -35,11 +42,17 @@ public final class InputRouteManager {
 
     private static final String TAG = "InputRouteManager";
 
+    @VisibleForTesting
+    static final AudioAttributes INPUT_ATTRIBUTES =
+            new AudioAttributes.Builder().setCapturePreset(MediaRecorder.AudioSource.MIC).build();
+
     private final Context mContext;
 
     private final AudioManager mAudioManager;
 
     @VisibleForTesting final List<MediaDevice> mInputMediaDevices = new CopyOnWriteArrayList<>();
+
+    private MediaDevice mSelectedInputDevice;
 
     private final Collection<InputDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
 
@@ -76,8 +89,27 @@ public final class InputRouteManager {
         mCallbacks.remove(callback);
     }
 
+    public @Nullable MediaDevice getSelectedInputDevice() {
+        return mSelectedInputDevice;
+    }
+
     private void dispatchInputDeviceListUpdate() {
-        // TODO (b/360175574): Get selected input device.
+        // Get selected input device.
+        List<AudioDeviceAttributes> attributesOfSelectedInputDevices =
+                mAudioManager.getDevicesForAttributes(INPUT_ATTRIBUTES);
+        int selectedInputDeviceAttributesType;
+        if (attributesOfSelectedInputDevices.isEmpty()) {
+            Slog.e(TAG, "Unexpected empty list of input devices. Using built-in mic.");
+            selectedInputDeviceAttributesType = AudioDeviceInfo.TYPE_BUILTIN_MIC;
+        } else {
+            if (attributesOfSelectedInputDevices.size() > 1) {
+                Slog.w(
+                        TAG,
+                        "AudioManager.getDevicesForAttributes returned more than one element."
+                                + " Using the first one.");
+            }
+            selectedInputDeviceAttributesType = attributesOfSelectedInputDevices.get(0).getType();
+        }
 
         // Get all input devices.
         AudioDeviceInfo[] audioDeviceInfos =
@@ -93,6 +125,10 @@ public final class InputRouteManager {
                             getCurrentInputGain(),
                             isInputGainFixed());
             if (mediaDevice != null) {
+                if (info.getType() == selectedInputDeviceAttributesType) {
+                    mediaDevice.setState(STATE_SELECTED);
+                    mSelectedInputDevice = mediaDevice;
+                }
                 mInputMediaDevices.add(mediaDevice);
             }
         }

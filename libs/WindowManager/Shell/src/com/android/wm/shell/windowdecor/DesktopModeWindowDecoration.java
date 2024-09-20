@@ -28,6 +28,7 @@ import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_
 import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
+import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
@@ -85,6 +86,8 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -165,6 +168,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private ExclusionRegionListener mExclusionRegionListener;
 
+    private final AppHeaderViewHolder.Factory mAppHeaderViewHolderFactory;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final MaximizeMenuFactory mMaximizeMenuFactory;
     private final HandleMenuFactory mHandleMenuFactory;
@@ -181,6 +185,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Runnable mCloseMaximizeWindowRunnable = this::closeMaximizeMenu;
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
+    private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
 
     DesktopModeWindowDecoration(
             Context context,
@@ -194,20 +199,24 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
+            AppHeaderViewHolder.Factory appHeaderViewHolderFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         this (context, userContext, displayController, splitScreenController, taskOrganizer,
                 taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
-                rootTaskDisplayAreaOrganizer, genericLinksParser, assistContentRequester,
+                appHeaderViewHolderFactory, rootTaskDisplayAreaOrganizer, genericLinksParser,
+                assistContentRequester,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
                 WindowContainerTransaction::new, SurfaceControl::new, new WindowManagerWrapper(
                         context.getSystemService(WindowManager.class)),
                 new SurfaceControlViewHostFactory() {}, windowDecorViewHostSupplier,
                 DefaultMaximizeMenuFactory.INSTANCE,
-                DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper);
+                DefaultHandleMenuFactory.INSTANCE, multiInstanceHelper,
+                windowDecorCaptionHandleRepository);
     }
 
     DesktopModeWindowDecoration(
@@ -222,6 +231,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @ShellBackgroundThread ShellExecutor bgExecutor,
             Choreographer choreographer,
             SyncTransactionQueue syncQueue,
+            AppHeaderViewHolder.Factory appHeaderViewHolderFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
@@ -234,7 +244,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             WindowDecorViewHostSupplier windowDecorViewHostSupplier,
             MaximizeMenuFactory maximizeMenuFactory,
             HandleMenuFactory handleMenuFactory,
-            MultiInstanceHelper multiInstanceHelper) {
+            MultiInstanceHelper multiInstanceHelper,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository) {
         super(context, userContext, displayController, taskOrganizer, taskInfo, taskSurface,
                 surfaceControlBuilderSupplier, surfaceControlTransactionSupplier,
                 windowContainerTransactionSupplier, surfaceControlSupplier,
@@ -244,6 +255,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mBgExecutor = bgExecutor;
         mChoreographer = choreographer;
         mSyncQueue = syncQueue;
+        mAppHeaderViewHolderFactory = appHeaderViewHolderFactory;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mGenericLinksParser = genericLinksParser;
         mAssistContentRequester = assistContentRequester;
@@ -251,6 +263,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mHandleMenuFactory = handleMenuFactory;
         mMultiInstanceHelper = multiInstanceHelper;
         mWindowManagerWrapper = windowManagerWrapper;
+        mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
     }
 
     /**
@@ -383,6 +396,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
+            if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+                notifyNoCaptionHandle();
+            }
             disposeStatusBarInputLayer();
             Trace.endSection(); // DesktopModeWindowDecoration#relayout
             return;
@@ -398,6 +414,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             position.set(determineHandlePosition());
         }
         Trace.beginSection("DesktopModeWindowDecoration#relayout-bindData");
+        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+            notifyCaptionStateChanged();
+        }
         mWindowDecorViewHolder.bindData(mTaskInfo,
                 position,
                 mResult.mCaptionWidth,
@@ -407,6 +426,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         if (!mTaskInfo.isFocused) {
             closeHandleMenu();
+            closeManageWindowsMenu();
             closeMaximizeMenu();
         }
         updateDragResizeListener(oldDecorationSurface);
@@ -507,6 +527,67 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return taskInfo.isFreeform() && taskInfo.isResizeable;
     }
 
+    private void notifyCaptionStateChanged() {
+        // TODO: b/366159408 - Ensure bounds sent with notification account for RTL mode.
+        if (!canEnterDesktopMode(mContext) || !Flags.enableDesktopWindowingAppHandleEducation()) {
+            return;
+        }
+        if (!isCaptionVisible()) {
+            notifyNoCaptionHandle();
+        } else if (isAppHandle(mWindowDecorViewHolder)) {
+            // App handle is visible since `mWindowDecorViewHolder` is of type
+            // [AppHandleViewHolder].
+            final CaptionState captionState = new CaptionState.AppHandle(mTaskInfo,
+                    isHandleMenuActive(), getCurrentAppHandleBounds());
+            mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
+        } else {
+            // App header is visible since `mWindowDecorViewHolder` is of type
+            // [AppHeaderViewHolder].
+            ((AppHeaderViewHolder) mWindowDecorViewHolder).runOnAppChipGlobalLayout(
+                    () -> {
+                        notifyAppChipStateChanged();
+                        return Unit.INSTANCE;
+                    });
+        }
+    }
+
+    private void notifyNoCaptionHandle() {
+        if (!canEnterDesktopMode(mContext) || !Flags.enableDesktopWindowingAppHandleEducation()) {
+            return;
+        }
+        mWindowDecorCaptionHandleRepository.notifyCaptionChanged(
+                CaptionState.NoCaption.INSTANCE);
+    }
+
+    private Rect getCurrentAppHandleBounds() {
+        return new Rect(
+                mResult.mCaptionX,
+                /* top= */0,
+                mResult.mCaptionX + mResult.mCaptionWidth,
+                mResult.mCaptionHeight);
+    }
+
+    private void notifyAppChipStateChanged() {
+        final Rect appChipPositionInWindow =
+                ((AppHeaderViewHolder) mWindowDecorViewHolder).getAppChipLocationInWindow();
+        final Rect taskBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
+        final Rect appChipGlobalPosition = new Rect(
+                taskBounds.left + appChipPositionInWindow.left,
+                taskBounds.top + appChipPositionInWindow.top,
+                taskBounds.left + appChipPositionInWindow.right,
+                taskBounds.top + appChipPositionInWindow.bottom);
+        final CaptionState captionState = new CaptionState.AppHeader(
+                mTaskInfo,
+                isHandleMenuActive(),
+                appChipGlobalPosition);
+
+        mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
+    }
+
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+        return taskInfo.isFreeform() && taskInfo.isResizeable;
+    }
+
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
         if (!isDragResizable(mTaskInfo, mContext) || !isMaximizeMenuActive()) {
             return;
@@ -556,7 +637,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         } else if (mRelayoutParams.mLayoutResId
                 == R.layout.desktop_mode_app_header) {
             loadAppInfoIfNeeded();
-            return new AppHeaderViewHolder(
+            return mAppHeaderViewHolderFactory.create(
                     mResult.mRootView,
                     mOnCaptionTouchListener,
                     mOnCaptionButtonClickListener,
@@ -994,7 +1075,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 mAppIconBitmap,
                 mAppName,
                 mSplitScreenController,
-                DesktopModeStatus.canEnterDesktopMode(mContext),
+                canEnterDesktopMode(mContext),
                 supportsMultiInstance,
                 shouldShowManageWindowsButton,
                 getBrowserLink(),
@@ -1027,6 +1108,9 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     return Unit.INSTANCE;
                 }
         );
+        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+            notifyCaptionStateChanged();
+        }
         mMinimumInstancesFound = false;
     }
 
@@ -1067,7 +1151,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     void closeManageWindowsMenu() {
-        mManageWindowsMenu.close();
+        if (mManageWindowsMenu != null) {
+            mManageWindowsMenu.close();
+        }
+        mManageWindowsMenu = null;
     }
 
     private void updateGenericLink() {
@@ -1089,11 +1176,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorViewHolder.onHandleMenuClosed();
         mHandleMenu.close();
         mHandleMenu = null;
+        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+            notifyCaptionStateChanged();
+        }
     }
 
     @Override
     void releaseViews(WindowContainerTransaction wct) {
         closeHandleMenu();
+        closeManageWindowsMenu();
         closeMaximizeMenu();
         super.releaseViews(wct);
     }
@@ -1257,9 +1348,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     public void close() {
         closeDragResizeListener();
         closeHandleMenu();
+        closeManageWindowsMenu();
         mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
         disposeResizeVeil();
         disposeStatusBarInputLayer();
+        if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
+            notifyNoCaptionHandle();
+        }
+
         super.close();
     }
 
@@ -1367,10 +1463,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @ShellBackgroundThread ShellExecutor bgExecutor,
                 Choreographer choreographer,
                 SyncTransactionQueue syncQueue,
+                AppHeaderViewHolder.Factory appHeaderViewHolderFactory,
                 RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
                 AppToWebGenericLinksParser genericLinksParser,
                 AssistContentRequester assistContentRequester,
                 MultiInstanceHelper multiInstanceHelper,
+                WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
                 WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
             return new DesktopModeWindowDecoration(
                     context,
@@ -1384,10 +1482,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     bgExecutor,
                     choreographer,
                     syncQueue,
+                    appHeaderViewHolderFactory,
                     rootTaskDisplayAreaOrganizer,
                     genericLinksParser,
                     assistContentRequester,
                     multiInstanceHelper,
+                    windowDecorCaptionHandleRepository,
                     windowDecorViewHostSupplier);
         }
     }
