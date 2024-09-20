@@ -576,10 +576,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
     }
 
-    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
-        return taskInfo.isFreeform() && taskInfo.isResizeable;
-    }
-
     private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
         if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
             return;
