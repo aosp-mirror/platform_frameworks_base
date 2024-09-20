@@ -95,12 +95,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     public void onUserStopping(@NonNull TargetUser user) {
         Objects.requireNonNull(user);
 
-        try {
-            AppFunctionExecutors.shutDownAndRemoveUserExecutor(user.getUserHandle());
-            MetadataSyncPerUser.removeUserSyncAdapter(user.getUserHandle());
-        } catch (InterruptedException e) {
-            Slog.e(TAG, "Unable to remove data for: " + user.getUserHandle(), e);
-        }
+        MetadataSyncPerUser.removeUserSyncAdapter(user.getUserHandle());
     }
 
     @Override
