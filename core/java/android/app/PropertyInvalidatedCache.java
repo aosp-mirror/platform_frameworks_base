@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -283,6 +284,12 @@ public class PropertyInvalidatedCache<Query, Result> {
      */
 
     /**
+     * The well-known key prefix.
+     * @hide
+     */
+    private static final String CACHE_KEY_PREFIX = "cache_key";
+
+    /**
      * The module used for unit tests and cts tests.  It is expected that no process in
      * the system has permissions to write properties with this module.
      * @hide
@@ -366,7 +373,44 @@ public class PropertyInvalidatedCache<Query, Result> {
             }
         }
 
-        return "cache_key." + module + "." + new String(suffix);
+        return CACHE_KEY_PREFIX + "." + module + "." + new String(suffix);
+    }
+
+    /**
+     * All legal keys start with one of the following strings.
+     */
+    private static final String[] sValidKeyPrefix = {
+        CACHE_KEY_PREFIX + "." + MODULE_SYSTEM + ".",
+        CACHE_KEY_PREFIX + "." + MODULE_BLUETOOTH + ".",
+        CACHE_KEY_PREFIX + "." + MODULE_TELEPHONY + ".",
+        CACHE_KEY_PREFIX + "." + MODULE_TEST + ".",
+    };
+
+    /**
+     * Verify that the property name conforms to the standard.  Log a warning if this is not true.
+     * Note that this is done once in the cache constructor; it does not have to be very fast.
+     */
+    private void validateCacheKey(String name) {
+        if (Build.IS_USER) {
+            // Do not bother checking keys in user builds.  The keys will have been tested in
+            // eng/userdebug builds already.
+            return;
+        }
+        for (int i = 0; i < sValidKeyPrefix.length; i++) {
+            if (name.startsWith(sValidKeyPrefix[i])) return;
+        }
+        Log.w(TAG, "invalid cache name: " + name);
+    }
+
+    /**
+     * Create a cache key for the system module.  The parameter is the API name.  This reduces
+     * some of the boilerplate in system caches.  It is not needed in other modules because other
+     * modules must use the {@link IpcDataCache} interfaces.
+     * @hide
+     */
+    @NonNull
+    public static String createSystemCacheKey(@NonNull String api) {
+        return createPropertyName(MODULE_SYSTEM, api);
     }
 
     /**
@@ -561,6 +605,7 @@ public class PropertyInvalidatedCache<Query, Result> {
     public PropertyInvalidatedCache(int maxEntries, @NonNull String propertyName,
             @NonNull String cacheName) {
         mPropertyName = propertyName;
+        validateCacheKey(mPropertyName);
         mCacheName = cacheName;
         mMaxEntries = maxEntries;
         mComputer = new DefaultComputer<>(this);
@@ -584,6 +629,7 @@ public class PropertyInvalidatedCache<Query, Result> {
     public PropertyInvalidatedCache(int maxEntries, @NonNull String module, @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
         mPropertyName = createPropertyName(module, api);
+        validateCacheKey(mPropertyName);
         mCacheName = cacheName;
         mMaxEntries = maxEntries;
         mComputer = computer;

@@ -90,9 +90,6 @@ public class DesktopModeStatus {
     /** The maximum override density allowed for tasks inside the desktop. */
     private static final int DESKTOP_DENSITY_MAX = 1000;
 
-    /** The number of [WindowDecorViewHost] instances to warm up on system start. */
-    private static final int WINDOW_DECOR_PRE_WARM_SIZE = 2;
-
     /**
      * Sysprop declaring whether to enters desktop mode by default when the windowing mode of the
      * display's root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM.
@@ -113,14 +110,6 @@ public class DesktopModeStatus {
      * recording window, or Bluetooth pairing window).
      */
     private static final String MAX_TASK_LIMIT_SYS_PROP = "persist.wm.debug.desktop_max_task_limit";
-
-    /**
-     * Sysprop declaring the number of [WindowDecorViewHost] instances to warm up on system start.
-     *
-     * <p>If it is not defined, then [WINDOW_DECOR_PRE_WARM_SIZE] is used.
-     */
-    private static final String WINDOW_DECOR_PRE_WARM_SIZE_SYS_PROP =
-            "persist.wm.debug.desktop_window_decor_pre_warm_size";
 
     /**
      * Return {@code true} if veiled resizing is active. If false, fluid resizing is used.
@@ -160,12 +149,6 @@ public class DesktopModeStatus {
     public static int getMaxTaskLimit(@NonNull Context context) {
         return SystemProperties.getInt(MAX_TASK_LIMIT_SYS_PROP,
                 context.getResources().getInteger(R.integer.config_maxDesktopWindowingActiveTasks));
-    }
-
-    /** The number of [WindowDecorViewHost] instances to warm up on system start. */
-    public static int getWindowDecorPreWarmSize() {
-        return SystemProperties.getInt(WINDOW_DECOR_PRE_WARM_SIZE_SYS_PROP,
-                WINDOW_DECOR_PRE_WARM_SIZE);
     }
 
     /**

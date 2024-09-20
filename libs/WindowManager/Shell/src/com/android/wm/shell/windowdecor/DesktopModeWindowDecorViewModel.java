@@ -109,6 +109,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
 import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
+import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
@@ -164,7 +165,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final InputManager mInputManager;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final MultiInstanceHelper mMultiInstanceHelper;
+    private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final Optional<DesktopTasksLimiter> mDesktopTasksLimiter;
+    private final AppHeaderViewHolder.Factory mAppHeaderViewHolderFactory;
     private final WindowDecorViewHostSupplier mWindowDecorViewHostSupplier;
     private boolean mTransitionDragActive;
 
@@ -234,6 +237,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
         this(
@@ -259,10 +263,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
+                new AppHeaderViewHolder.Factory(),
                 rootTaskDisplayAreaOrganizer,
                 new SparseArray<>(),
                 interactionJankMonitor,
                 desktopTasksLimiter,
+                windowDecorCaptionHandleRepository,
                 activityOrientationChangeHandler,
                 new TaskPositionerFactory());
     }
@@ -291,10 +297,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
+            AppHeaderViewHolder.Factory appHeaderViewHolderFactory,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SparseArray<DesktopModeWindowDecoration> windowDecorByTaskId,
             InteractionJankMonitor interactionJankMonitor,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
             TaskPositionerFactory taskPositionerFactory) {
         mContext = context;
@@ -317,6 +325,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
+        mAppHeaderViewHolderFactory = appHeaderViewHolderFactory;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mGenericLinksParser = genericLinksParser;
         mInputManager = mContext.getSystemService(InputManager.class);
@@ -325,6 +334,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 com.android.internal.R.string.config_systemUi);
         mInteractionJankMonitor = interactionJankMonitor;
         mDesktopTasksLimiter = desktopTasksLimiter;
+        mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
         mActivityOrientationChangeHandler = activityOrientationChangeHandler;
         mAssistContentRequester = assistContentRequester;
         mOnDisplayChangingListener = (displayId, fromRotation, toRotation, displayAreaInfo, t) -> {
@@ -1191,8 +1201,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                                 : SPLIT_POSITION_TOP_OR_LEFT;
                                 final RunningTaskInfo oppositeTaskInfo =
                                         mSplitScreenController.getTaskInfo(oppositePosition);
-                                mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
-                                        .disposeStatusBarInputLayer();
+                                if (oppositeTaskInfo != null) {
+                                    mWindowDecorByTaskId.get(oppositeTaskInfo.taskId)
+                                            .disposeStatusBarInputLayer();
+                                }
                             }
                         }
                         mMoveToDesktopAnimator = null;
@@ -1375,10 +1387,12 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mBgExecutor,
                         mMainChoreographer,
                         mSyncQueue,
+                        mAppHeaderViewHolderFactory,
                         mRootTaskDisplayAreaOrganizer,
                         mGenericLinksParser,
                         mAssistContentRequester,
                         mMultiInstanceHelper,
+                        mWindowDecorCaptionHandleRepository,
                         mWindowDecorViewHostSupplier);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 

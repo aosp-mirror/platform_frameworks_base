@@ -73,6 +73,7 @@ import com.android.media.flags.Flags;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InputMediaDevice;
+import com.android.settingslib.media.InputRouteManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.SysuiTestCase;
@@ -100,6 +101,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @SmallTest
@@ -115,6 +117,10 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
     private static final String TEST_SONG = "test_song";
     private static final String TEST_SESSION_ID = "test_session_id";
     private static final String TEST_SESSION_NAME = "test_session_name";
+    private static final int MAX_VOLUME = 1;
+    private static final int CURRENT_VOLUME = 0;
+    private static final boolean VOLUME_FIXED_TRUE = true;
+
     @Mock
     private DialogTransitionAnimator mDialogTransitionAnimator;
     @Mock
@@ -181,6 +187,7 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
     private String mPackageName = null;
     private MediaSwitchingController mMediaSwitchingController;
     private LocalMediaManager mLocalMediaManager;
+    private InputRouteManager mInputRouteManager;
     private List<MediaController> mMediaControllers = new ArrayList<>();
     private List<MediaDevice> mMediaDevices = new ArrayList<>();
     private List<NearbyDevice> mNearbyDevices = new ArrayList<>();
@@ -228,6 +235,10 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
         mLocalMediaManager = spy(mMediaSwitchingController.mLocalMediaManager);
         when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(false);
         mMediaSwitchingController.mLocalMediaManager = mLocalMediaManager;
+        mMediaSwitchingController.mInputRouteManager =
+                new InputRouteManager(mContext, mAudioManager);
+        mInputRouteManager = spy(mMediaSwitchingController.mInputRouteManager);
+        mMediaSwitchingController.mInputRouteManager = mInputRouteManager;
         MediaDescription.Builder builder = new MediaDescription.Builder();
         builder.setTitle(TEST_SONG);
         builder.setSubtitle(TEST_ARTIST);
@@ -545,9 +556,6 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
         // Output devices have changed.
         mMediaSwitchingController.onDeviceListUpdate(mMediaDevices);
 
-        final int MAX_VOLUME = 1;
-        final int CURRENT_VOLUME = 0;
-        final boolean IS_VOLUME_FIXED = true;
         final MediaDevice mediaDevice3 =
                 InputMediaDevice.create(
                         mContext,
@@ -555,7 +563,7 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
                         AudioDeviceInfo.TYPE_BUILTIN_MIC,
                         MAX_VOLUME,
                         CURRENT_VOLUME,
-                        IS_VOLUME_FIXED);
+                        VOLUME_FIXED_TRUE);
         final MediaDevice mediaDevice4 =
                 InputMediaDevice.create(
                         mContext,
@@ -563,7 +571,7 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
                         AudioDeviceInfo.TYPE_WIRED_HEADSET,
                         MAX_VOLUME,
                         CURRENT_VOLUME,
-                        IS_VOLUME_FIXED);
+                        VOLUME_FIXED_TRUE);
         final List<MediaDevice> inputDevices = new ArrayList<>();
         inputDevices.add(mediaDevice3);
         inputDevices.add(mediaDevice4);
@@ -1311,5 +1319,24 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
         mMediaSwitchingController.launchBluetoothPairing(mDialogLaunchView);
 
         verify(mCallback).dismissDialog();
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void getSelectedMediaDevice() {
+        // Mock MediaDevice since none of the output media device constructor is publicly available
+        // outside of SettingsLib package.
+        final MediaDevice selectedOutputMediaDevice = mock(MediaDevice.class);
+        doReturn(Collections.singletonList(selectedOutputMediaDevice))
+                .when(mLocalMediaManager)
+                .getSelectedMediaDevice();
+
+        // Mock selected input media device.
+        final MediaDevice selectedInputMediaDevice = mock(MediaDevice.class);
+        doReturn(selectedInputMediaDevice).when(mInputRouteManager).getSelectedInputDevice();
+
+        List<MediaDevice> selectedMediaDevices = mMediaSwitchingController.getSelectedMediaDevice();
+        assertThat(selectedMediaDevices)
+                .containsExactly(selectedOutputMediaDevice, selectedInputMediaDevice);
     }
 }

@@ -52,7 +52,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         caller: String,
         isEnabled: Boolean,
         notifEntryKey: String,
-        outcome: String
+        stateAfter: String
     ) {
         buffer.log(
             TAG,
@@ -60,7 +60,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             {
                 str1 = caller
                 str2 = notifEntryKey
-                str3 = outcome
+                str3 = stateAfter
                 bool1 = isEnabled
             },
             { "$str1\n\t=> AC[isEnabled:$bool1] update: $str2\n\t=> $str3" }
@@ -71,7 +71,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
         caller: String,
         isEnabled: Boolean,
         notifEntryKey: String,
-        outcome: String
+        stateAfter: String
     ) {
         buffer.log(
             TAG,
@@ -79,7 +79,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             {
                 str1 = caller
                 str2 = notifEntryKey
-                str3 = outcome
+                str3 = stateAfter
                 bool1 = isEnabled
             },
             { "$str1\n\t=> AC[isEnabled:$bool1] delete: $str2\n\t=> $str3" }
@@ -136,7 +136,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = entry.logKey
                 str2 = reason ?: "unknown"
             },
-            { "request: cancel auto remove of $str1 reason: $str2" }
+            { "$str2 => request: cancelAutoRemovalCallbacks: $str1" }
         )
     }
 
@@ -148,7 +148,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = entry.logKey
                 str2 = reason ?: "unknown"
             },
-            { "cancel auto remove of $str1 reason: $str2" }
+            { "$str2 => cancel auto remove: $str1" }
         )
     }
 
@@ -161,7 +161,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str2 = reason
                 bool1 = isWaiting
             },
-            { "request: $str2 => remove entry $str1 isWaiting: $isWaiting" }
+            { "request: $str2 => removeEntry: $str1 isWaiting: $isWaiting" }
         )
     }
 
@@ -174,7 +174,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str2 = reason
                 bool1 = isWaiting
             },
-            { "$str2 => remove entry $str1 isWaiting: $isWaiting" }
+            { "$str2 => removeEntry: $str1 isWaiting: $isWaiting" }
         )
     }
 
@@ -216,12 +216,12 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 str1 = logKey(key)
                 str2 = reason
             },
-            { "remove notification $str1 when headsUpEntry is null, reason: $str2" }
+            { "remove notif $str1 when headsUpEntry is null, reason: $str2" }
         )
     }
 
     fun logNotificationActuallyRemoved(entry: NotificationEntry) {
-        buffer.log(TAG, INFO, { str1 = entry.logKey }, { "notification removed $str1 " })
+        buffer.log(TAG, INFO, { str1 = entry.logKey }, { "removed: $str1 " })
     }
 
     fun logUpdateNotificationRequest(key: String, alert: Boolean, hasEntry: Boolean) {
@@ -233,7 +233,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = alert
                 bool2 = hasEntry
             },
-            { "request: update notification $str1 alert: $bool1 hasEntry: $bool2" }
+            { "request: update notif $str1 alert: $bool1 hasEntry: $bool2" }
         )
     }
 
@@ -246,7 +246,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = alert
                 bool2 = hasEntry
             },
-            { "update notification $str1 alert: $bool1 hasEntry: $bool2" }
+            { "update notif $str1 alert: $bool1 hasEntry: $bool2" }
         )
     }
 
@@ -281,7 +281,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
                 bool1 = isPinned
                 str2 = reason
             },
-            { "$str2 => set entry pinned $str1 pinned: $bool1" }
+            { "$str2 => setEntryPinned[$bool1]: $str1" }
         )
     }
 
@@ -290,7 +290,7 @@ constructor(@NotificationHeadsUpLog private val buffer: LogBuffer) {
             TAG,
             INFO,
             { bool1 = hasPinnedNotification },
-            { "has pinned notification changed to $bool1" }
+            { "hasPinnedNotification[$bool1]" }
         )
     }
 

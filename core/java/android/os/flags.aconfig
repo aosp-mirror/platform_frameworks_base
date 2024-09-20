@@ -216,3 +216,11 @@ flag {
     bug: "346294653"
     is_exported: true
 }
+
+flag {
+     name: "mainline_vcn_platform_api"
+     namespace: "vcn"
+     description: "Expose platform APIs to mainline VCN"
+     is_exported: true
+     bug: "366598445"
+}

@@ -2725,12 +2725,13 @@ static void nativeSetMotionClassifierEnabled(JNIEnv* env, jobject nativeImplObj,
 }
 
 static void nativeSetKeyRepeatConfiguration(JNIEnv* env, jobject nativeImplObj, jint timeoutMs,
-                                            jint delayMs) {
+                                            jint delayMs, jboolean keyRepeatEnabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getDispatcher().setKeyRepeatConfiguration(std::chrono::milliseconds(
                                                                              timeoutMs),
                                                                      std::chrono::milliseconds(
-                                                                             delayMs));
+                                                                             delayMs),
+                                                                     keyRepeatEnabled);
 }
 
 static jobject createInputSensorInfo(JNIEnv* env, jstring name, jstring vendor, jint version,
@@ -3029,7 +3030,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setDisplayEligibilityForPointerCapture", "(IZ)V",
          (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"setMotionClassifierEnabled", "(Z)V", (void*)nativeSetMotionClassifierEnabled},
-        {"setKeyRepeatConfiguration", "(II)V", (void*)nativeSetKeyRepeatConfiguration},
+        {"setKeyRepeatConfiguration", "(IIZ)V", (void*)nativeSetKeyRepeatConfiguration},
         {"getSensorList", "(I)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},
         {"getTouchpadHardwareProperties",

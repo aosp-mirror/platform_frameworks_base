@@ -94,6 +94,16 @@ flag {
 }
 
 flag {
+    name: "use_legacy_ntp_time"
+    namespace: "location"
+    description: "Flag for switching to legacy NtpNetworkTimeHelper"
+    bug: "368034558"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "subscriptions_changed_listener_thread"
     namespace: "location"
     description: "Flag for running onSubscriptionsChangedListener on FgThread"

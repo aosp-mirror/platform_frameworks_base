@@ -210,6 +210,8 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                                 DataSourceParams
                                         .PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
                         .build();
+        // NOTE: Registering that datasource is an async operation, so there may be no data traced
+        // for some messages logged right after the construction of this class.
         mDataSource.register(params);
         this.mViewerConfigInputStreamProvider = viewerConfigInputStreamProvider;
         this.mViewerConfigReader = viewerConfigReader;
