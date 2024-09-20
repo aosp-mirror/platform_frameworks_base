@@ -873,17 +873,15 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
 
         @Override
         public void onCaptureProcessFailed(int captureSequenceId, int captureFailureReason) {
-            if (Flags.concertMode()) {
-                final long ident = Binder.clearCallingIdentity();
-                try {
-                    mClientExecutor.execute(
-                            () -> mClientCallbacks.onCaptureFailed(
-                                     CameraAdvancedExtensionSessionImpl.this, mClientRequest,
-                                    captureFailureReason
-                            ));
-                } finally {
-                    Binder.restoreCallingIdentity(ident);
-                }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mClientExecutor.execute(
+                        () -> mClientCallbacks.onCaptureFailed(
+                                 CameraAdvancedExtensionSessionImpl.this, mClientRequest,
+                                captureFailureReason
+                        ));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
 
