@@ -40,6 +40,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -67,21 +68,22 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionSta
 enum class TutorialActionState {
     NOT_STARTED,
     IN_PROGRESS,
-    FINISHED
+    FINISHED,
 }
 
 @Composable
 fun ActionTutorialContent(
     actionState: TutorialActionState,
     onDoneButtonClicked: () -> Unit,
-    config: TutorialScreenConfig
+    config: TutorialScreenConfig,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
             Modifier.fillMaxSize()
                 .background(config.colors.background)
-                .padding(start = 48.dp, top = 124.dp, end = 48.dp, bottom = 48.dp)
+                .safeDrawingPadding()
+                .padding(start = 48.dp, top = 100.dp, end = 48.dp, bottom = 8.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
             TutorialDescription(
@@ -92,13 +94,13 @@ fun ActionTutorialContent(
                 bodyTextId =
                     if (actionState == FINISHED) config.strings.bodySuccessResId
                     else config.strings.bodyResId,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Spacer(modifier = Modifier.width(76.dp))
             TutorialAnimation(
                 actionState,
                 config,
-                modifier = Modifier.weight(1f).padding(top = 8.dp)
+                modifier = Modifier.weight(1f).padding(top = 8.dp),
             )
         }
         DoneButton(onDoneButtonClicked = onDoneButtonClicked)
@@ -110,19 +112,19 @@ fun TutorialDescription(
     @StringRes titleTextId: Int,
     titleColor: Color,
     @StringRes bodyTextId: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Text(
             text = stringResource(id = titleTextId),
             style = MaterialTheme.typography.displayLarge,
-            color = titleColor
+            color = titleColor,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(id = bodyTextId),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White
+            color = Color.White,
         )
     }
 }
@@ -131,7 +133,7 @@ fun TutorialDescription(
 fun TutorialAnimation(
     actionState: TutorialActionState,
     config: TutorialScreenConfig,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         AnimatedContent(
@@ -152,18 +154,18 @@ fun TutorialAnimation(
                     // state which shares initial animation frame with both FINISHED and NOT_STARTED
                     EnterTransition.None togetherWith ExitTransition.None
                 }
-            }
+            },
         ) { state ->
             when (state) {
                 NOT_STARTED ->
                     EducationAnimation(
                         config.animations.educationResId,
-                        config.colors.animationColors
+                        config.colors.animationColors,
                     )
                 IN_PROGRESS ->
                     FrozenSuccessAnimation(
                         config.animations.successResId,
-                        config.colors.animationColors
+                        config.colors.animationColors,
                     )
                 FINISHED ->
                     SuccessAnimation(config.animations.successResId, config.colors.animationColors)
@@ -175,7 +177,7 @@ fun TutorialAnimation(
 @Composable
 private fun FrozenSuccessAnimation(
     @RawRes successAnimationId: Int,
-    animationProperties: LottieDynamicProperties
+    animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
     LottieAnimation(
@@ -188,7 +190,7 @@ private fun FrozenSuccessAnimation(
 @Composable
 private fun EducationAnimation(
     @RawRes educationAnimationId: Int,
-    animationProperties: LottieDynamicProperties
+    animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(educationAnimationId))
     val progress by
@@ -203,7 +205,7 @@ private fun EducationAnimation(
 @Composable
 private fun SuccessAnimation(
     @RawRes successAnimationId: Int,
-    animationProperties: LottieDynamicProperties
+    animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
     val progress by animateLottieCompositionAsState(composition, iterations = 1)
@@ -217,13 +219,13 @@ private fun SuccessAnimation(
 @Composable
 fun rememberColorFilterProperty(
     layerName: String,
-    color: Color
+    color: Color,
 ): LottieDynamicProperty<ColorFilter> {
     return rememberLottieDynamicProperty(
         LottieProperty.COLOR_FILTER,
         value = PorterDuffColorFilter(color.toArgb(), PorterDuff.Mode.SRC_ATOP),
         // "**" below means match zero or more layers, so ** layerName ** means find layer with that
         // name at any depth
-        keyPath = arrayOf("**", layerName, "**")
+        keyPath = arrayOf("**", layerName, "**"),
     )
 }
