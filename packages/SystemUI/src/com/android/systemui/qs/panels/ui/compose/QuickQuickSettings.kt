@@ -16,21 +16,28 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.compose.modifiers.sysuiResTag
+import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
+import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.Tile
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.TileLazyGrid
 import com.android.systemui.qs.panels.ui.viewmodel.QuickQuickSettingsViewModel
+import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
+import com.android.systemui.res.R
 
 @Composable
-fun QuickQuickSettings(viewModel: QuickQuickSettingsViewModel, modifier: Modifier = Modifier) {
+fun SceneScope.QuickQuickSettings(
+    viewModel: QuickQuickSettingsViewModel,
+    modifier: Modifier = Modifier,
+) {
     val sizedTiles by
         viewModel.tileViewModels.collectAsStateWithLifecycle(initialValue = emptyList())
     val tiles = sizedTiles.fastMap { it.tile }
@@ -41,20 +48,20 @@ fun QuickQuickSettings(viewModel: QuickQuickSettingsViewModel, modifier: Modifie
         onDispose { tiles.forEach { it.stopListening(token) } }
     }
     val columns by viewModel.columns.collectAsStateWithLifecycle()
-
-    TileLazyGrid(
-        modifier = modifier.sysuiResTag("qqs_tile_layout"),
-        columns = GridCells.Fixed(columns),
-    ) {
-        items(
-            sizedTiles.size,
-            key = { index -> sizedTiles[index].tile.spec.spec },
-            span = { index -> GridItemSpan(sizedTiles[index].width) },
-        ) { index ->
+    Box(modifier = modifier) {
+        GridAnchor()
+        VerticalSpannedGrid(
+            columns = columns,
+            columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),
+            rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),
+            spans = sizedTiles.fastMap { it.width },
+            modifier = Modifier.sysuiResTag("qqs_tile_layout"),
+        ) { spanIndex ->
+            val it = sizedTiles[spanIndex]
             Tile(
-                tile = sizedTiles[index].tile,
-                iconOnly = sizedTiles[index].isIcon,
-                modifier = Modifier,
+                tile = it.tile,
+                iconOnly = it.isIcon,
+                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
             )
         }
     }

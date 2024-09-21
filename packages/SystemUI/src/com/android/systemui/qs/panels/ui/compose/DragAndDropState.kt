@@ -17,9 +17,10 @@
 package com.android.systemui.qs.panels.ui.compose
 
 import android.content.ClipData
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.draganddrop.dragAndDropSource
 import androidx.compose.foundation.draganddrop.dragAndDropTarget
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.lazy.grid.LazyGridItemInfo
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
@@ -104,11 +105,10 @@ fun Modifier.dragAndDropRemoveZone(
 @Composable
 fun Modifier.dragAndDropTileList(
     gridState: LazyGridState,
-    contentOffset: Offset,
+    contentOffset: () -> Offset,
     dragAndDropState: DragAndDropState,
-    onDrop: () -> Unit,
+    onDrop: (TileSpec) -> Unit,
 ): Modifier {
-    val currentContentOffset by rememberUpdatedState(contentOffset)
     val target =
         remember(dragAndDropState) {
             object : DragAndDropTarget {
@@ -118,7 +118,7 @@ fun Modifier.dragAndDropTileList(
 
                 override fun onMoved(event: DragAndDropEvent) {
                     // Drag offset relative to the list's top left corner
-                    val relativeDragOffset = event.dragOffsetRelativeTo(currentContentOffset)
+                    val relativeDragOffset = event.dragOffsetRelativeTo(contentOffset())
                     val targetItem =
                         gridState.layoutInfo.visibleItemsInfo.firstOrNull { item ->
                             // Check if the drag is on this item
@@ -132,7 +132,7 @@ fun Modifier.dragAndDropTileList(
 
                 override fun onDrop(event: DragAndDropEvent): Boolean {
                     return dragAndDropState.draggedCell?.let {
-                        onDrop()
+                        onDrop(it.tile.tileSpec)
                         dragAndDropState.onDrop()
                         true
                     } ?: false
@@ -158,36 +158,39 @@ private fun insertAfter(item: LazyGridItemInfo, offset: Offset): Boolean {
     return item.span != 1 && offset.x > itemCenter.x
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Modifier.dragAndDropTileSource(
     sizedTile: SizedTile<EditTileViewModel>,
     dragAndDropState: DragAndDropState,
-    onTap: (TileSpec) -> Unit,
-    onDoubleTap: (TileSpec) -> Unit = {},
+    onDragStart: () -> Unit,
 ): Modifier {
-    val state by rememberUpdatedState(dragAndDropState)
-    return dragAndDropSource {
-        detectTapGestures(
-            onTap = { onTap(sizedTile.tile.tileSpec) },
-            onDoubleTap = { onDoubleTap(sizedTile.tile.tileSpec) },
-            onLongPress = {
-                state.onStarted(sizedTile)
+    val dragState by rememberUpdatedState(dragAndDropState)
+    @Suppress("DEPRECATION") // b/368361871
+    return dragAndDropSource(
+        block = {
+            detectDragGesturesAfterLongPress(
+                onDrag = { _, _ -> },
+                onDragStart = {
+                    dragState.onStarted(sizedTile)
+                    onDragStart()
 
-                // The tilespec from the ClipData transferred isn't actually needed as we're moving
-                // a tile within the same application. We're using a custom MIME type to limit the
-                // drag event to QS.
-                startTransfer(
-                    DragAndDropTransferData(
-                        ClipData(
-                            QsDragAndDrop.CLIPDATA_LABEL,
-                            arrayOf(QsDragAndDrop.TILESPEC_MIME_TYPE),
-                            ClipData.Item(sizedTile.tile.tileSpec.spec),
+                    // The tilespec from the ClipData transferred isn't actually needed as we're
+                    // moving a tile within the same application. We're using a custom MIME type to
+                    // limit the drag event to QS.
+                    startTransfer(
+                        DragAndDropTransferData(
+                            ClipData(
+                                QsDragAndDrop.CLIPDATA_LABEL,
+                                arrayOf(QsDragAndDrop.TILESPEC_MIME_TYPE),
+                                ClipData.Item(sizedTile.tile.tileSpec.spec),
+                            )
                         )
                     )
-                )
-            },
-        )
-    }
+                },
+            )
+        }
+    )
 }
 
 private object QsDragAndDrop {

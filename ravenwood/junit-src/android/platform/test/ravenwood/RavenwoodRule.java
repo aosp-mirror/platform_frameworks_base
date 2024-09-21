@@ -216,7 +216,7 @@ public final class RavenwoodRule implements TestRule {
      */
     @Deprecated
     public Context getContext() {
-        return Objects.requireNonNull(mConfiguration.mTestContext,
+        return Objects.requireNonNull(mConfiguration.mInstContext,
                 "Context is only available during @Test execution");
     }
 

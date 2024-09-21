@@ -55,6 +55,7 @@ import com.android.systemui.media.controls.ui.viewmodel.MediaOutputSwitcherViewM
 import com.android.systemui.media.controls.ui.viewmodel.MediaPlayerViewModel
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
@@ -65,6 +66,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+private const val TAG = "MediaControlViewBinder"
 
 object MediaControlViewBinder {
 
@@ -234,9 +237,6 @@ object MediaControlViewBinder {
                 }
             }
             setDismissible(model.isDismissEnabled)
-            setTextPrimaryColor(model.textPrimaryColor)
-            setAccentPrimaryColor(model.accentPrimaryColor)
-            setSurfaceColor(model.surfaceColor)
         }
     }
 
@@ -423,22 +423,37 @@ object MediaControlViewBinder {
         val width = viewController.widthInSceneContainerPx
         val height = viewController.heightInSceneContainerPx
         withContext(backgroundDispatcher) {
+            val wallpaperColors =
+                MediaArtworkHelper.getWallpaperColor(
+                    viewHolder.albumView.context,
+                    backgroundDispatcher,
+                    viewModel.backgroundCover,
+                    TAG,
+                )
+            val isArtworkBound = wallpaperColors != null
+            val scheme =
+                wallpaperColors?.let { ColorScheme(it, true, Style.CONTENT) }
+                    ?: let {
+                        if (viewModel.launcherIcon is Icon.Loaded) {
+                            MediaArtworkHelper.getColorScheme(viewModel.launcherIcon.drawable, TAG)
+                        } else {
+                            null
+                        }
+                    }
             val artwork =
-                if (viewModel.shouldAddGradient) {
+                wallpaperColors?.let {
                     addGradientToPlayerAlbum(
                         viewHolder.albumView.context,
                         viewModel.backgroundCover!!,
-                        viewModel.colorScheme,
+                        scheme!!,
                         width,
                         height,
                     )
-                } else {
-                    ColorDrawable(Color.TRANSPARENT)
-                }
+                } ?: ColorDrawable(Color.TRANSPARENT)
             withContext(mainDispatcher) {
                 // Transition Colors to current color scheme
                 val colorSchemeChanged =
-                    viewController.colorSchemeTransition.updateColorScheme(viewModel.colorScheme)
+                    viewController.colorSchemeTransition.updateColorScheme(scheme)
                 val albumView = viewHolder.albumView
 
                 // Set up width of album view constraint.
@@ -449,7 +464,7 @@ object MediaControlViewBinder {
                 if (
                     updateBackground ||
                         colorSchemeChanged ||
-                        (!viewController.isArtworkBound && viewModel.shouldAddGradient)
+                        (!viewController.isArtworkBound && isArtworkBound)
                 ) {
                     viewController.prevArtwork?.let {
                         // Since we throw away the last transition, this will pop if your
@@ -464,12 +479,10 @@ object MediaControlViewBinder {
                         transitionDrawable.isCrossFadeEnabled = true
 
                         albumView.setImageDrawable(transitionDrawable)
-                        transitionDrawable.startTransition(
-                            if (viewModel.shouldAddGradient) 333 else 80
-                        )
+                        transitionDrawable.startTransition(if (isArtworkBound) 333 else 80)
                     } ?: albumView.setImageDrawable(artwork)
                 }
-                viewController.isArtworkBound = viewModel.shouldAddGradient
+                viewController.isArtworkBound = isArtworkBound
                 viewController.prevArtwork = artwork
 
                 if (viewModel.useGrayColorFilter) {

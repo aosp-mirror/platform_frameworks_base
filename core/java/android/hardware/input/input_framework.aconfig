@@ -138,3 +138,10 @@ flag {
   description: "Controls whether external mouse vertical scrolling can be reversed"
   bug: "352598211"
 }
+
+flag {
+  name: "mouse_swap_primary_button"
+  namespace: "input"
+  description: "Controls whether the connected mice's primary buttons, left and right, can be swapped."
+  bug: "352598211"
+}

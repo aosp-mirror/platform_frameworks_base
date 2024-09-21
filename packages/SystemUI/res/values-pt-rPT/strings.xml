@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Altifalantes e ecrãs"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Dispositivos sugeridos"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Pare a sua sessão partilhada para mover conteúdos multimédia para outro dispositivo"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Parar"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>

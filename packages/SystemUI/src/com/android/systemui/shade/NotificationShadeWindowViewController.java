@@ -59,7 +59,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
-import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.PanelExpansionInteractor;
 import com.android.systemui.shared.animation.DisableSubpixelTextTransitionListener;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -265,20 +264,21 @@ public class NotificationShadeWindowViewController implements Dumpable {
     }
 
     private void bindBouncer(BouncerViewBinder bouncerViewBinder) {
+        mBouncerParentView = mView.findViewById(R.id.keyguard_bouncer_container);
+        bouncerViewBinder.bind(mBouncerParentView);
         if (ComposeBouncerFlags.INSTANCE.isOnlyComposeBouncerEnabled()) {
-            collectFlow(mView, mKeyguardTransitionInteractor.isFinishedIn(Scenes.Gone,
-                    KeyguardState.GONE), this::removeBouncerParentView);
             collectFlow(mView, mKeyguardTransitionInteractor.transition(
-                            new Edge.StateToState(KeyguardState.GONE, null)),
-                    this::handleGoneToAnyOtherStateTransition);
+                            new Edge.StateToState(KeyguardState.PRIMARY_BOUNCER, null)),
+                    this::onTransitionAwayFromBouncer);
+            collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                            new Edge.StateToState(null, KeyguardState.PRIMARY_BOUNCER)),
+                    this::onTransitionToBouncer);
             collectFlow(mView, mPrimaryBouncerInteractor.isShowing(),
                     (showing) -> ViewKt.setVisible(mBouncerParentView, showing));
         }
-        mBouncerParentView = mView.findViewById(R.id.keyguard_bouncer_container);
-        bouncerViewBinder.bind(mBouncerParentView);
     }
 
-    private void handleGoneToAnyOtherStateTransition(TransitionStep transitionStep) {
+    private void onTransitionToBouncer(TransitionStep transitionStep) {
         if (transitionStep.getTransitionState() == TransitionState.STARTED) {
             if (mView.indexOfChild(mBouncerParentView) != -1) {
                 mView.removeView(mBouncerParentView);
@@ -287,8 +287,8 @@ public class NotificationShadeWindowViewController implements Dumpable {
         }
     }
 
-    private void removeBouncerParentView(boolean isFinishedInGoneState) {
-        if (isFinishedInGoneState) {
+    private void onTransitionAwayFromBouncer(TransitionStep transitionStep) {
+        if (transitionStep.getTransitionState() == TransitionState.FINISHED) {
             mView.removeView(mBouncerParentView);
         }
     }

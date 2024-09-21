@@ -582,10 +582,11 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"یہ ٹیبلیٹ"</string>
+    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
+    <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <!-- no translation found for media_transfer_internal_mic (797333824290228595) -->
-    <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"مائیکروفون (داخلی)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ڈاک اسپیکر"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"بیرونی آلہ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"منسلک آلہ"</string>
@@ -686,11 +687,14 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیر فعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"وائرڈ ہیڈ فون"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7417067197803840965) -->
+    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
     <skip />
-    <!-- no translation found for media_transfer_usb_device_mic_name (9189914846215516322) -->
+    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
     <skip />
+    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
+    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"مائیک جیک"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"‏‫USB مائیک"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"آن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"آف"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"کیریئر نیٹ ورک کی تبدیلی"</string>

@@ -19,6 +19,7 @@ package com.android.wm.shell.shared.desktopmode;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
+import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -177,7 +178,7 @@ public class DesktopModeStatus {
     public static boolean canEnterDesktopMode(@NonNull Context context) {
         if (!isDeviceEligibleForDesktopMode(context)) return false;
 
-        return DesktopModeFlags.DESKTOP_WINDOWING_MODE.isEnabled(context);
+        return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue();
     }
 
     /**

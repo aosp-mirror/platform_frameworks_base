@@ -5611,4 +5611,8 @@
   <java-symbol type="string" name="fingerprint_loe_notification_msg" />
 
   <java-symbol type="bool" name="config_enableViewGroupScalingFading"/>
+
+  <!-- Identity check strings -->
+  <java-symbol type="string" name="identity_check_settings_action" />
+  <java-symbol type="string" name="identity_check_settings_package_name" />
 </resources>

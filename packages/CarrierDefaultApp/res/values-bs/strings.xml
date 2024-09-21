@@ -16,7 +16,7 @@
     <string name="ssl_error_continue" msgid="1138548463994095584">"Ipak nastavi preko preglednika"</string>
     <string name="performance_boost_notification_channel" msgid="3475440855635538592">"Pojačavanje performansi"</string>
     <string name="performance_boost_notification_title" msgid="3126203390685781861">"Opcije 5G mreže operatera"</string>
-    <string name="performance_boost_notification_detail" msgid="216569851036236346">"Posjetite web lokaciju operatera %s da vidite opcije za iskustvo u aplikaciji"</string>
+    <string name="performance_boost_notification_detail" msgid="216569851036236346">"Posjetite web lokaciju operatera %s da vidite opcije za iskustvo s aplikacijom"</string>
     <string name="performance_boost_notification_button_not_now" msgid="6459755324243683785">"Ne sada"</string>
     <string name="performance_boost_notification_button_manage" msgid="4976836444046497973">"Upravljajte"</string>
     <string name="slice_purchase_app_label" msgid="7170191659233241166">"Kupite pojačavanje performansi."</string>

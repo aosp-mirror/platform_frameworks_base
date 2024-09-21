@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পীকাৰ আৰু ডিছপ্লে’"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"পৰামৰ্শ হিচাপে পোৱা ডিভাইচ"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"মিডিয়া অন্য ডিভাইচলৈ স্থানান্তৰ কৰিবলৈ আপোনাৰ শ্বেয়াৰ কৰা ছেশ্বনটো বন্ধ কৰক"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"বন্ধ কৰক"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"সম্প্ৰচাৰ কৰাটোৱে কেনেকৈ কাম কৰে"</string>
@@ -1289,8 +1293,7 @@
     <string name="add" msgid="81036585205287996">"যোগ দিয়ক"</string>
     <string name="manage_users" msgid="1823875311934643849">"পৰিচালনা কৰক"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"এই জাননীটোৱে বিভাজিত স্ক্ৰীনলৈ টানি আনি এৰাৰ সুবিধাটো সমৰ্থন নকৰে"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"অৱস্থান সক্ৰিয় হৈ আছে"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ৱাই-ফাই উপলব্ধ নহয়"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"অগ্ৰাধিকাৰ ম’ড"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"এলাৰ্ম ছেট কৰা হ’ল"</string>
@@ -1347,8 +1350,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"লক স্ক্ৰীন কাষ্টমাইজ কৰক"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"লক স্ক্ৰীন কাষ্টমাইজ কৰিবলৈ আনলক কৰক"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ৱাই-ফাই উপলব্ধ নহয়"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"অৱস্থান সক্ৰিয় হৈ আছে"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"কেমেৰা অৱৰোধ কৰা আছে"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"কেমেৰা আৰু মাইক্ৰ’ফ’ন অৱৰোধ কৰা আছে"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্ৰ’ফ’ন অৱৰোধ কৰা আছে"</string>
@@ -1404,8 +1406,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"টাচ্চপেডৰ নিৰ্দেশ, কীব’ৰ্ডৰ শ্বৰ্টকাট আৰু অধিকৰ বিষয়ে জানক"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"উভতি যাওক নিৰ্দেশ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"গৃহ স্ক্ৰীনলৈ যোৱাৰ নিৰ্দেশ"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"শেহতীয়া এপ্‌সমূহ চাওক"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"হ’ল"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"উভতি যাওক"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"উভতি যাবলৈ, টাচ্চপেডৰ যিকোনো স্থানত তিনিটা আঙুলি ব্যৱহাৰ কৰি বাওঁ বা সোঁফালে ছোৱাইপ কৰক।\n\nইয়াৰ বাবে আপুনি কীব’ৰ্ড শ্বৰ্টকাট কাৰ্য + ESC ব্যৱহাৰ কৰিবও পাৰে।"</string>
@@ -1415,14 +1416,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"যিকোনো সময়তে আপোনাৰ গৃহ স্ক্ৰীনলৈ যাবলৈ, আপোনাৰ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ তিনিটা আঙুলিৰে ছোৱাইপ কৰক।"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"সুন্দৰ!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"আপুনি গৃহ স্ক্ৰীনলৈ উভতি যোৱাৰ নিৰ্দেশটো সম্পূৰ্ণ কৰিলে।"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"শেহতীয়া এপ্‌সমূহ চাওক"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"আপোনাৰ টাচ্চপেডত তিনিটা আঙুলি ব্যৱহাৰ কৰি ওপৰলৈ ছোৱাইপ কৰি কিছু সময় ধৰি ৰাখক।"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"বঢ়িয়া!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"আপুনি শেহতীয়া এপ্ চোৱাৰ নিৰ্দেশনাটো সম্পূৰ্ণ কৰিছে।"</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"কাৰ্য কী"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"আপোনাৰ এপ্‌সমূহ এক্সেছ কৰিবলৈ আপোনাৰ কীব’ৰ্ডৰ কাৰ্য কীটোত টিপক।"</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"অভিনন্দন!"</string>
@@ -1446,14 +1443,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"তিনিটা আঙুলি ব্যৱহাৰ কৰি ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক। অধিক নিৰ্দেশ শিকিবলৈ টিপক।"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"আটাইবোৰ এপ্‌ চাবলৈ আপোনাৰ কীব’ৰ্ড ব্যৱহাৰ কৰক"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"যিকোনো সময়তে কাৰ্য কীটোত টিপক। অধিক নিৰ্দেশ শিকিবলৈ টিপক।"</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"এক্সট্ৰা ডিম এতিয়া উজ্জ্বলতা শ্লাইডাৰৰ অংশ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"আপুনি এতিয়া উজ্জ্বলতাৰ স্তৰ আৰু অধিক হ্ৰাস কৰি স্ক্ৰীনখন এক্সট্ৰা ডিম কৰিব পাৰে।\n\nযিহেতু এতিয়া এই সুবিধাটো উজ্জ্বলতাৰ শ্লাইডাৰৰ অংশ, এক্সট্ৰা ডিমৰ শ্বৰ্টকাট আঁতৰাই থকা হৈছে।"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"এক্সট্ৰা ডিমৰ শ্বৰ্টকাট আঁতৰাওক"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"এক্সট্ৰা ডিম শ্বৰ্টকাট আঁতৰোৱা হৈছে"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"সংযোগ"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"সাধ্য সুবিধা"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"সহায়ক সঁজুলি"</string>
