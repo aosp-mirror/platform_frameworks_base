@@ -62,12 +62,11 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
     public boolean runServiceCall(
             @NonNull Intent intent,
             int bindFlags,
-            long timeoutInMillis,
             @NonNull UserHandle userHandle,
             @NonNull RunServiceCallCallback<T> callback) {
         OneOffServiceConnection serviceConnection =
                 new OneOffServiceConnection(
-                        intent, bindFlags, timeoutInMillis, userHandle, callback);
+                        intent, bindFlags, userHandle, callback);
 
         return serviceConnection.bindAndRun();
     }
@@ -76,28 +75,17 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             implements ServiceConnection, ServiceUsageCompleteListener {
         private final Intent mIntent;
         private final int mFlags;
-        private final long mTimeoutMillis;
         private final UserHandle mUserHandle;
         private final RunServiceCallCallback<T> mCallback;
-        private final Runnable mTimeoutCallback;
 
         OneOffServiceConnection(
                 @NonNull Intent intent,
                 int flags,
-                long timeoutMillis,
                 @NonNull UserHandle userHandle,
                 @NonNull RunServiceCallCallback<T> callback) {
             mIntent = intent;
             mFlags = flags;
-            mTimeoutMillis = timeoutMillis;
             mCallback = callback;
-            mTimeoutCallback =
-                    () ->
-                            mExecutor.execute(
-                                    () -> {
-                                        safeUnbind();
-                                        mCallback.onTimedOut();
-                                    });
             mUserHandle = userHandle;
         }
 
@@ -105,9 +93,7 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             boolean bindServiceResult =
                     mContext.bindServiceAsUser(mIntent, this, mFlags, mUserHandle);
 
-            if (bindServiceResult) {
-                mHandler.postDelayed(mTimeoutCallback, mTimeoutMillis);
-            } else {
+            if(!bindServiceResult) {
                 safeUnbind();
             }
 
@@ -141,7 +127,6 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
 
         private void safeUnbind() {
             try {
-                mHandler.removeCallbacks(mTimeoutCallback);
                 mContext.unbindService(this);
             } catch (Exception ex) {
                 Log.w(TAG, "Failed to unbind", ex);

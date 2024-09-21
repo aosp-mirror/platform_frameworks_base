@@ -15,6 +15,7 @@
  */
 package com.android.systemui.qs.tiles.dialog
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.util.Log
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
@@ -62,7 +63,7 @@ constructor(
             }
             return
         } else {
-            coroutineScope = CoroutineScope(bgDispatcher)
+            coroutineScope = CoroutineScope(bgDispatcher + createCoroutineTracingContext("InternetDialogScope"))
             dialog =
                 dialogFactory
                     .create(aboveStatusBar, canConfigMobileData, canConfigWifi, coroutineScope)

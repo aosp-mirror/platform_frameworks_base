@@ -16,15 +16,17 @@
 
 package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.rememberEditListState
@@ -33,6 +35,8 @@ import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
+import com.android.systemui.res.R
 import javax.inject.Inject
 
 @SysUISingleton
@@ -44,7 +48,7 @@ constructor(
 ) : PaginatableGridLayout {
 
     @Composable
-    override fun TileGrid(
+    override fun SceneScope.TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
         editModeStart: () -> Unit,
@@ -57,15 +61,18 @@ constructor(
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
         val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
 
-        TileLazyGrid(modifier = modifier, columns = GridCells.Fixed(columns)) {
-            items(sizedTiles.size, span = { index -> GridItemSpan(sizedTiles[index].width) }) {
-                index ->
-                Tile(
-                    tile = sizedTiles[index].tile,
-                    iconOnly = iconTilesViewModel.isIconTile(sizedTiles[index].tile.spec),
-                    modifier = Modifier,
-                )
-            }
+        VerticalSpannedGrid(
+            columns = columns,
+            columnSpacing = dimensionResource(R.dimen.qs_tile_margin_horizontal),
+            rowSpacing = dimensionResource(R.dimen.qs_tile_margin_vertical),
+            spans = sizedTiles.fastMap { it.width },
+        ) { spanIndex ->
+            val it = sizedTiles[spanIndex]
+            Tile(
+                tile = it.tile,
+                iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
+                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+            )
         }
     }
 
@@ -98,7 +105,6 @@ constructor(
             otherTiles = otherTiles,
             columns = columns,
             modifier = modifier,
-            onAddTile = onAddTile,
             onRemoveTile = onRemoveTile,
             onSetTiles = onSetTiles,
             onResize = iconTilesViewModel::resize,

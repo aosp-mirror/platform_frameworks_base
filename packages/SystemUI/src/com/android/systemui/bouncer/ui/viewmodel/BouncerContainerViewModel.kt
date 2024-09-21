@@ -16,17 +16,15 @@
 
 package com.android.systemui.bouncer.ui.viewmodel
 
-import androidx.compose.runtime.getValue
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.lifecycle.ExclusiveActivatable
-import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.sample
 import com.android.systemui.util.kotlin.sample
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -38,11 +36,6 @@ constructor(
     private val selectedUserInteractor: SelectedUserInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
 ) : ExclusiveActivatable() {
-
-    private val hydrator = Hydrator("BouncerContainerViewModel")
-
-    val isVisible: Boolean by
-        hydrator.hydratedStateOf(traceName = "isVisible", source = legacyInteractor.isShowing)
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
@@ -74,8 +67,7 @@ constructor(
                     legacyInteractor.hide()
                 }
             }
-
-            hydrator.activate()
+            awaitCancellation()
         }
     }
 

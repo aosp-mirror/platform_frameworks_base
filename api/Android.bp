@@ -102,6 +102,11 @@ combined_apis {
             "framework-crashrecovery",
         ],
         default: [],
+    }) + select(release_flag("RELEASE_RANGING_STACK"), {
+        true: [
+            "framework-ranging",
+        ],
+        default: [],
     }),
     system_server_classpath: [
         "service-art",

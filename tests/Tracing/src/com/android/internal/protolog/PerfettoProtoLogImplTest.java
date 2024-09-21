@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog;
 
+import static android.tools.traces.Utils.busyWaitForDataSourceRegistration;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
@@ -42,7 +44,7 @@ import android.util.proto.ProtoInputStream;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.internal.protolog.ProtoLogConfigurationService.ViewerConfigFileTracer;
+import com.android.internal.protolog.ProtoLogConfigurationServiceImpl.ViewerConfigFileTracer;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogDataType;
 import com.android.internal.protolog.common.LogLevel;
@@ -166,7 +168,8 @@ public class PerfettoProtoLogImplTest {
                 return new ProtoInputStream(sViewerConfigBuilder.build().toByteArray());
             });
         };
-        sProtoLogConfigurationService = new ProtoLogConfigurationService(dataSourceBuilder, tracer);
+        sProtoLogConfigurationService =
+                new ProtoLogConfigurationServiceImpl(dataSourceBuilder, tracer);
 
         if (android.tracing.Flags.clientSideProtoLogging()) {
             sProtoLog = new PerfettoProtoLogImpl(
@@ -177,6 +180,8 @@ public class PerfettoProtoLogImplTest {
                     viewerConfigInputStreamProvider, sReader, () -> sCacheUpdater.run(),
                     TestProtoLogGroup.values(), dataSourceBuilder, sProtoLogConfigurationService);
         }
+
+        busyWaitForDataSourceRegistration(TEST_PROTOLOG_DATASOURCE_NAME);
     }
 
     @Before

@@ -258,7 +258,7 @@ public final class NfcAdapter {
     /**
      * Mandatory String extra field in {@link #ACTION_TRANSACTION_DETECTED}
      * Indicates the Secure Element on which the transaction occurred.
-     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC, etc.
+     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC/EUICC, etc.
      */
     public static final String EXTRA_SECURE_ELEMENT_NAME = "android.nfc.extra.SECURE_ELEMENT_NAME";
 
@@ -559,6 +559,18 @@ public final class NfcAdapter {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TagIntentAppPreferenceResult {}
 
+    /**
+     * Mode Type for {@link NfcOemExtension#setControllerAlwaysOn(int)}.
+     * @hide
+     */
+    public static final int CONTROLLER_ALWAYS_ON_MODE_DEFAULT = 1;
+
+    /**
+     * Mode Type for {@link NfcOemExtension#setControllerAlwaysOn(int)}.
+     * @hide
+     */
+    public static final int CONTROLLER_ALWAYS_ON_DISABLE = 0;
+
     // Guarded by sLock
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
@@ -721,7 +733,7 @@ public final class NfcAdapter {
      *
      * @return List<String> containing secure elements on the device which supports
      *                      off host card emulation. eSE for Embedded secure element,
-     *                      SIM for UICC, eSIM for EUICC and so on.
+     *                      SIM for UICC/EUICC and so on.
      * @hide
      */
     public @NonNull List<String> getSupportedOffHostSecureElements() {
@@ -740,11 +752,6 @@ public final class NfcAdapter {
         }
         if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE)) {
             offHostSE.add("eSE");
-        }
-        if (Flags.enableCardEmulationEuicc()
-                && callServiceReturn(
-                        () -> sCardEmulationService.isEuiccSupported(), false)) {
-            offHostSE.add("eSIM");
         }
         return offHostSE;
     }
@@ -2330,7 +2337,8 @@ public final class NfcAdapter {
      * FEATURE_NFC_HOST_CARD_EMULATION, FEATURE_NFC_HOST_CARD_EMULATION_NFCF,
      * FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC and FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE
      * are unavailable
-     * @return void
+     * @return true if feature is supported by the device and operation has bee initiated,
+     * false if the feature is not supported by the device.
      * @hide
      */
     @SystemApi
@@ -2339,8 +2347,13 @@ public final class NfcAdapter {
         if (!sHasNfcFeature && !sHasCeFeature) {
             throw new UnsupportedOperationException();
         }
-        return callServiceReturn(() ->  sService.setControllerAlwaysOn(value), false);
-
+        int mode = value ? CONTROLLER_ALWAYS_ON_MODE_DEFAULT : CONTROLLER_ALWAYS_ON_DISABLE;
+        try {
+            callService(() -> sService.setControllerAlwaysOn(mode));
+        } catch (UnsupportedOperationException e) {
+            return false;
+        }
+        return true;
     }
 
     /**

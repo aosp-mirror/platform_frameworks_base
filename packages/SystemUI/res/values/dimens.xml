@@ -1005,10 +1005,6 @@
     <dimen name="ksh_app_item_minimum_height">64dp</dimen>
     <dimen name="ksh_category_separator_margin">16dp</dimen>
 
-    <!-- New keyboard shortcut helper -->
-    <dimen name="shortcut_helper_width">412dp</dimen>
-    <dimen name="shortcut_helper_height">728dp</dimen>
-
     <!-- The size of corner radius of the arrow in the onboarding toast. -->
     <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>
 

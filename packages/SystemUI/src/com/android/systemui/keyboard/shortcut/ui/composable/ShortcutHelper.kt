@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,8 +72,6 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -116,7 +115,6 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.zIndex
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
-import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
@@ -188,10 +186,7 @@ private fun ActiveShortcutHelper(
     }
 }
 
-@Composable
-private fun shouldUseSinglePane() =
-    LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Compact ||
-        LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
+@Composable private fun shouldUseSinglePane() = hasCompactWindowSize()
 
 @Composable
 private fun ShortcutHelperSinglePane(
@@ -425,7 +420,7 @@ private fun ShortcutHelperTwoPane(
     onKeyboardSettingsClicked: () -> Unit,
 ) {
     val selectedCategory = categories.fastFirstOrNull { it.type == selectedCategoryType }
-    Column(modifier = modifier.fillMaxSize().padding(start = 24.dp, end = 24.dp, top = 26.dp)) {
+    Column(modifier = modifier.fillMaxSize().padding(horizontal = 24.dp)) {
         TitleBar()
         Spacer(modifier = Modifier.height(12.dp))
         Row(Modifier.fillMaxWidth()) {
@@ -801,6 +796,8 @@ private fun TitleBar() {
                 style = MaterialTheme.typography.headlineSmall,
             )
         },
+        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp, left = 0.dp, right = 0.dp),
+        expandedHeight = 64.dp,
     )
 }
 
@@ -835,6 +832,7 @@ private fun ShortcutsSearchBar(onQueryChange: (String) -> Unit) {
         onSearch = {},
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
         placeholder = { Text(text = stringResource(R.string.shortcut_helper_search_placeholder)) },
+        windowInsets = WindowInsets(top = 0.dp, bottom = 0.dp, left = 0.dp, right = 0.dp),
         content = {},
     )
 }
@@ -847,9 +845,7 @@ private fun KeyboardSettings(horizontalPadding: Dp, verticalPadding: Dp, onClick
         shape = RoundedCornerShape(24.dp),
         color = Color.Transparent,
         modifier =
-            Modifier.semantics { role = Role.Button }
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp),
+            Modifier.semantics { role = Role.Button }.fillMaxWidth().padding(horizontal = 12.dp),
         interactionSource = interactionSource,
         interactionsConfig =
             InteractionsConfig(

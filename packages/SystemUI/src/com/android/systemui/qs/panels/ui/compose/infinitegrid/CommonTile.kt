@@ -127,13 +127,14 @@ fun LargeTileContent(
 }
 
 @Composable
-private fun LargeTileLabels(
+fun LargeTileLabels(
     label: String,
     secondaryLabel: String?,
     colors: TileColors,
+    modifier: Modifier = Modifier,
     accessibilityUiState: AccessibilityUiState? = null,
 ) {
-    Column(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxHeight()) {
+    Column(verticalArrangement = Arrangement.Center, modifier = modifier.fillMaxHeight()) {
         Text(label, color = colors.label, modifier = Modifier.tileMarquee())
         if (!TextUtils.isEmpty(secondaryLabel)) {
             Text(

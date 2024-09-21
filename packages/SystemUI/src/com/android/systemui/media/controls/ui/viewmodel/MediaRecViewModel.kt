@@ -16,21 +16,18 @@
 
 package com.android.systemui.media.controls.ui.viewmodel
 
-import android.annotation.ColorInt
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import com.android.systemui.animation.Expandable
 
 /** Models UI state for media recommendation item */
 data class MediaRecViewModel(
     val contentDescription: CharSequence,
     val title: CharSequence = "",
-    @ColorInt val titleColor: Int,
     val subtitle: CharSequence = "",
-    @ColorInt val subtitleColor: Int,
     /** track progress [0 - 100] for the recommendation album. */
     val progress: Int = 0,
-    @ColorInt val progressColor: Int,
-    val albumIcon: Drawable? = null,
-    val appIcon: Drawable? = null,
+    val albumIcon: Icon? = null,
+    val appIcon: Drawable,
     val onClicked: ((Expandable, Int) -> Unit),
 )

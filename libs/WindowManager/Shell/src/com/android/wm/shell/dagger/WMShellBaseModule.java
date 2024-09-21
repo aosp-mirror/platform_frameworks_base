@@ -444,7 +444,9 @@ public abstract class WMShellBaseModule {
             BackAnimationBackground backAnimationBackground,
             Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
-            Transitions transitions) {
+            Transitions transitions,
+            @ShellMainThread Handler handler
+    ) {
         if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
@@ -457,7 +459,8 @@ public abstract class WMShellBaseModule {
                                     backAnimationBackground,
                                     animations,
                                     shellCommandHandler,
-                                    transitions));
+                                    transitions,
+                                    handler));
         }
         return Optional.empty();
     }
@@ -1016,11 +1019,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskStackTransitionObserver provideTaskStackTransitionObserver(
-            Context context,
             Lazy<Transitions> transitions,
             ShellInit shellInit
     ) {
-        return new TaskStackTransitionObserver(context, transitions, shellInit);
+        return new TaskStackTransitionObserver(transitions, shellInit);
     }
 
     //

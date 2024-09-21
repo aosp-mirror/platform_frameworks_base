@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+  -->
+<resources>
+    <style name="SettingsLibPreference" parent="SettingsPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.Category" parent="SettingsCategoryPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.CheckBoxPreference" parent="SettingsCheckBoxPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.SwitchPreferenceCompat" parent="SettingsSwitchPreferenceCompat.SettingsLib"/>
+
+    <style name="SettingsLibPreference.SeekBarPreference" parent="SettingsSeekbarPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.PreferenceScreen" parent="SettingsPreferenceScreen.SettingsLib"/>
+
+    <style name="SettingsLibPreference.DialogPreference" parent="SettingsPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.DialogPreference.EditTextPreference" parent="SettingsEditTextPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.DropDown" parent="SettingsDropdownPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.SwitchPreference" parent="SettingsSwitchPreference.SettingsLib"/>
+
+    <style name="SettingsLibPreference.Expressive">
+        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+    </style>
+
+    <style name="SettingsLibPreference.Category.Expressive">
+    </style>
+
+    <style name="SettingsLibPreference.CheckBoxPreference.Expressive">
+        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+    </style>
+
+    <style name="SettingsLibPreference.SwitchPreferenceCompat.Expressive">
+        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+        <item name="android:widgetLayout">@layout/settingslib_expressive_preference_switch</item>
+    </style>
+
+    <style name="SettingsLibPreference.SeekBarPreference.Expressive"/>
+
+    <style name="SettingsLibPreference.PreferenceScreen.Expressive">
+        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+    </style>
+
+    <style name="SettingsLibPreference.DialogPreference.Expressive">
+    </style>
+
+    <style name="SettingsLibPreference.DialogPreference.EditTextPreference.Expressive">
+        <item name="android:layout">@layout/settingslib_expressive_preference</item>
+        <item name="android:dialogLayout">@layout/settingslib_preference_dialog_edittext</item>
+    </style>
+
+    <style name="SettingsLibPreference.DropDown.Expressive">
+    </style>
+
+    <style name="SettingsLibPreference.SwitchPreference.Expressive"/>
+</resources>

@@ -577,15 +577,16 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Тривалість"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Запитувати щоразу"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Доки не вимкнути"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Доки ви не вимкнете"</string>
     <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Без імені)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Щойно"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Цей телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Цей планшет"</string>
+    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
+    <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <!-- no translation found for media_transfer_internal_mic (797333824290228595) -->
-    <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Мікрофон (внутрішній)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Динамік док-станції"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Зовнішній пристрій"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Підключений пристрій"</string>
@@ -686,11 +687,14 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Вимкнено"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Увімкнено"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Щоб застосувати ці зміни, потрібний перезапуск. Перезапустіть пристрій або скасуйте зміни."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Дротові навушники"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7417067197803840965) -->
+    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
     <skip />
-    <!-- no translation found for media_transfer_usb_device_mic_name (9189914846215516322) -->
+    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
     <skip />
+    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
+    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Гніздо для мікрофона"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB-мікрофон"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Увімкнено"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Вимкнено"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Змінення мережі оператора"</string>

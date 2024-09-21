@@ -167,6 +167,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         return runner;
     }
 
+    private final Class<?> mTestJavaClass;
     private TestClass mTestClass = null;
     private Runner mRealRunner = null;
     private Description mDescription = null;
@@ -192,25 +193,28 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
      * Constructor.
      */
     public RavenwoodAwareTestRunner(Class<?> testClass) {
+        mTestJavaClass = testClass;
         try {
             performGlobalInitialization();
+
+            /*
+             * If the class has @DisabledOnRavenwood, then we'll delegate to
+             * ClassSkippingTestRunner, which simply skips it.
+             *
+             * We need to do it before instantiating TestClass for b/367694651.
+             */
+            if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
+                    testClass)) {
+                mRealRunner = new ClassSkippingTestRunner(testClass);
+                mDescription = mRealRunner.getDescription();
+                return;
+            }
 
             mTestClass = new TestClass(testClass);
 
             Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
 
             onRunnerInitializing();
-
-            /*
-             * If the class has @DisabledOnRavenwood, then we'll delegate to
-             * ClassSkippingTestRunner, which simply skips it.
-             */
-            if (isOnRavenwood() && !RavenwoodAwareTestRunnerHook.shouldRunClassOnRavenwood(
-                    mTestClass.getJavaClass())) {
-                mRealRunner = new ClassSkippingTestRunner(mTestClass);
-                mDescription = mRealRunner.getDescription();
-                return;
-            }
 
             // Find the real runner.
             final Class<? extends Runner> realRunnerClass;
@@ -318,7 +322,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
             return;
         }
 
-        Log.v(TAG, "Starting " + mTestClass.getJavaClass().getCanonicalName());
+        Log.v(TAG, "Starting " + mTestJavaClass.getCanonicalName());
         if (RAVENWOOD_VERBOSE_LOGGING) {
             dumpDescription(getDescription());
         }
@@ -444,14 +448,11 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
      * filter.
      */
     private static class ClassSkippingTestRunner extends Runner implements Filterable {
-        private final TestClass mTestClass;
         private final Description mDescription;
         private boolean mFilteredOut;
 
-        ClassSkippingTestRunner(TestClass testClass) {
-            mTestClass = testClass;
-            mDescription = Description.createTestDescription(
-                    testClass.getJavaClass(), testClass.getJavaClass().getSimpleName());
+        ClassSkippingTestRunner(Class<?> testClass) {
+            mDescription = Description.createTestDescription(testClass, testClass.getSimpleName());
             mFilteredOut = false;
         }
 

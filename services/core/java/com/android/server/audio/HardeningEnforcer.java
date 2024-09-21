@@ -168,6 +168,8 @@ public class HardeningEnforcer {
         }
 
         boolean blocked = true;
+        // indicates the focus request was not blocked because of the SDK version
+        boolean unblockedBySdk = false;
         if (noteOp(AppOpsManager.OP_TAKE_AUDIO_FOCUS, callingUid, packageName, attributionTag)) {
             if (DEBUG) {
                 Slog.i(TAG, "blockFocusMethod pack:" + packageName + " NOT blocking");
@@ -179,9 +181,10 @@ public class HardeningEnforcer {
                         + targetSdk);
             }
             blocked = false;
+            unblockedBySdk = true;
         }
 
-        metricsLogFocusReq(blocked, focusReqType, callingUid);
+        metricsLogFocusReq(blocked, focusReqType, callingUid, unblockedBySdk);
 
         if (!blocked) {
             return false;
@@ -195,7 +198,16 @@ public class HardeningEnforcer {
         return true;
     }
 
-    /*package*/ void metricsLogFocusReq(boolean blocked, int focusReq, int callingUid) {
+    /**
+     * Log metrics for the focus request
+     * @param blocked true if the call blocked
+     * @param focusReq the type of focus request
+     * @param callingUid the UID of the caller
+     * @param unblockedBySdk if blocked is false,
+     *                       true indicates it was unblocked thanks to an older SDK
+     */
+    /*package*/ void metricsLogFocusReq(boolean blocked, int focusReq, int callingUid,
+            boolean unblockedBySdk) {
         final String metricId = blocked ? METRIC_COUNTERS_FOCUS_DENIAL.get(focusReq)
                 : METRIC_COUNTERS_FOCUS_GRANT.get(focusReq);
         if (TextUtils.isEmpty(metricId)) {
@@ -204,6 +216,12 @@ public class HardeningEnforcer {
         }
         try {
             Counter.logIncrementWithUid(metricId, callingUid);
+            if (!blocked && unblockedBySdk) {
+                // additional metric to capture focus requests that are currently granted
+                // because the app is on an older SDK, but would have been blocked otherwise
+                Counter.logIncrementWithUid(
+                        "media_audio.value_audio_focus_grant_hardening_waived_by_sdk", callingUid);
+            }
         } catch (Exception e) {
             Slog.e(TAG, "Counter error metricId:" + metricId + " for focus req:" + focusReq
                     + " from uid:" + callingUid, e);

@@ -137,6 +137,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private Transitions mTransitions;
     @Mock
     private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    @Mock
+    private Handler mHandler;
 
     private BackAnimationController mController;
     private TestableContentResolver mContentResolver;
@@ -161,13 +163,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
         mDefaultCrossActivityBackAnimation = new DefaultCrossActivityBackAnimation(mContext,
-                mAnimationBackground, mRootTaskDisplayAreaOrganizer);
-        mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground);
+                mAnimationBackground, mRootTaskDisplayAreaOrganizer, mHandler);
+        mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground,
+                mHandler);
         mShellBackAnimationRegistry =
                 new ShellBackAnimationRegistry(mDefaultCrossActivityBackAnimation,
                         mCrossTaskBackAnimation, /* dialogCloseAnimation= */ null,
                         new CustomCrossActivityBackAnimation(mContext, mAnimationBackground,
-                                mRootTaskDisplayAreaOrganizer),
+                                mRootTaskDisplayAreaOrganizer, mHandler),
                         /* defaultBackToHomeAnimation= */ null);
         mController =
                 new BackAnimationController(
@@ -181,7 +184,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
                         mShellCommandHandler,
-                        mTransitions);
+                        mTransitions,
+                        mHandler);
         mShellInit.init();
         mShellExecutor.flushAll();
         mTouchableRegion = new Rect(0, 0, 100, 100);
@@ -344,7 +348,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
                         mShellCommandHandler,
-                        mTransitions);
+                        mTransitions,
+                        mHandler);
         shellInit.init();
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
@@ -898,7 +903,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 new BackAnimationRunner(
                         mAnimatorCallback,
                         mBackAnimationRunner,
-                        mContext));
+                        mContext,
+                        mHandler));
     }
 
     private void unregisterAnimation(int type) {

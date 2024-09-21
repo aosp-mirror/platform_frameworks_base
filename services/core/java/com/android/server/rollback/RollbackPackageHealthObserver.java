@@ -24,8 +24,11 @@ import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -78,6 +81,8 @@ import java.util.function.Consumer;
 public final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
+    private static final String ACTION_NAME = RollbackPackageHealthObserver.class.getName();
+
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
 
@@ -596,12 +601,40 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             }
         };
 
-        final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver(result -> {
-            mHandler.post(() -> onResult.accept(result));
-        });
+        if (Flags.refactorCrashrecovery()) {
+            // Define a BroadcastReceiver to handle the result
+            BroadcastReceiver rollbackReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent result) {
+                    mHandler.post(() -> onResult.accept(result));
+                }
+            };
 
-        rollbackManager.commitRollback(rollback.getRollbackId(),
-                Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
+            // Register the BroadcastReceiver
+            mContext.registerReceiver(rollbackReceiver,
+                    new IntentFilter(ACTION_NAME),
+                    Context.RECEIVER_NOT_EXPORTED);
+
+            Intent intentReceiver = new Intent(ACTION_NAME);
+            intentReceiver.putExtra("rollbackId", rollback.getRollbackId());
+            intentReceiver.setPackage(mContext.getPackageName());
+
+            PendingIntent rollbackPendingIntent = PendingIntent.getBroadcast(mContext,
+                    rollback.getRollbackId(),
+                    intentReceiver,
+                    PendingIntent.FLAG_MUTABLE);
+
+            rollbackManager.commitRollback(rollback.getRollbackId(),
+                    Collections.singletonList(failedPackage),
+                    rollbackPendingIntent.getIntentSender());
+        } else {
+            final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver(result -> {
+                mHandler.post(() -> onResult.accept(result));
+            });
+
+            rollbackManager.commitRollback(rollback.getRollbackId(),
+                    Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
+        }
     }
 
     /**

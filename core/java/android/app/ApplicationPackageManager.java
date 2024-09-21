@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
@@ -817,7 +818,7 @@ public class ApplicationPackageManager extends PackageManager {
     private final static PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>
             mHasSystemFeatureCache =
             new PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>(
-                256, "cache_key.has_system_feature") {
+                256, createSystemCacheKey("has_system_feature")) {
                 @Override
                 public Boolean recompute(HasSystemFeatureQuery query) {
                     try {
@@ -1127,7 +1128,7 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     private static final String CACHE_KEY_PACKAGES_FOR_UID_PROPERTY =
-            "cache_key.get_packages_for_uid";
+            createSystemCacheKey("get_packages_for_uid");
     private static final PropertyInvalidatedCache<Integer, GetPackagesForUidResult>
             mGetPackagesForUidCache =
             new PropertyInvalidatedCache<Integer, GetPackagesForUidResult>(

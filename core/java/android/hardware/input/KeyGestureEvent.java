@@ -22,8 +22,6 @@ import android.annotation.Nullable;
 import android.view.Display;
 import android.view.KeyCharacterMap;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
@@ -168,6 +166,14 @@ public final class KeyGestureEvent {
 
     public KeyGestureEvent(@NonNull AidlKeyGestureEvent keyGestureEvent) {
         this.mKeyGestureEvent = keyGestureEvent;
+    }
+
+    /**
+     * Tests whether this keyboard shortcut event has the given modifiers (i.e. all of the given
+     * modifiers were pressed when this shortcut was triggered).
+     */
+    public boolean hasModifiers(int modifiers) {
+        return (getModifierState() & modifiers) == modifiers;
     }
 
     /**

@@ -117,6 +117,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     private static final long MAX_ANIMATION_DURATION = 2000;
     private final LatencyTracker mLatencyTracker;
+    @ShellMainThread private final Handler mHandler;
 
     /** True when a back gesture is ongoing */
     private boolean mBackGestureStarted = false;
@@ -218,7 +219,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull BackAnimationBackground backAnimationBackground,
             ShellBackAnimationRegistry shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
-            Transitions transitions) {
+            Transitions transitions,
+            @ShellMainThread Handler handler) {
         this(
                 shellInit,
                 shellController,
@@ -230,7 +232,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 backAnimationBackground,
                 shellBackAnimationRegistry,
                 shellCommandHandler,
-                transitions);
+                transitions,
+                handler);
     }
 
     @VisibleForTesting
@@ -245,7 +248,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull BackAnimationBackground backAnimationBackground,
             ShellBackAnimationRegistry shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
-            Transitions transitions) {
+            Transitions transitions,
+            @NonNull @ShellMainThread Handler handler) {
         mShellController = shellController;
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
@@ -263,6 +267,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mTransitions = transitions;
         mBackTransitionHandler = new BackTransitionHandler();
         mTransitions.addHandler(mBackTransitionHandler);
+        mHandler = handler;
         updateTouchableArea();
     }
 
@@ -399,7 +404,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
     }
 
-    private static class IBackAnimationImpl extends IBackAnimation.Stub
+    private class IBackAnimationImpl extends IBackAnimation.Stub
             implements ExternalInterfaceBinder {
         private BackAnimationController mController;
 
@@ -417,7 +422,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                                     callback,
                                     runner,
                                     controller.mContext,
-                                    CUJ_PREDICTIVE_BACK_HOME)));
+                                    CUJ_PREDICTIVE_BACK_HOME,
+                                    mHandler)));
         }
 
         @Override

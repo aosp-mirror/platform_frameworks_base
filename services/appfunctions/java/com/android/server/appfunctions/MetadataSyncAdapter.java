@@ -145,13 +145,25 @@ public class MetadataSyncAdapter {
         ArrayMap<String, ArraySet<String>> removedFunctionsDiffMap =
                 getRemovedFunctionsDiffMap(staticPackageToFunctionMap, runtimePackageToFunctionMap);
 
-        Set<AppSearchSchema> appRuntimeMetadataSchemas =
-                getAllRuntimeMetadataSchemas(staticPackageToFunctionMap.keySet());
-        appRuntimeMetadataSchemas.add(
-                AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema());
+        if (!staticPackageToFunctionMap.keySet().equals(runtimePackageToFunctionMap.keySet())) {
+            // Drop removed packages from removedFunctionsDiffMap, as setSchema() deletes them
+            ArraySet<String> removedPackages =
+                    getRemovedPackages(
+                            staticPackageToFunctionMap.keySet(), removedFunctionsDiffMap.keySet());
+            for (String packageName : removedPackages) {
+                removedFunctionsDiffMap.remove(packageName);
+            }
+            Set<AppSearchSchema> appRuntimeMetadataSchemas =
+                    getAllRuntimeMetadataSchemas(staticPackageToFunctionMap.keySet());
+            appRuntimeMetadataSchemas.add(
+                    AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema());
+            SetSchemaRequest addSetSchemaRequest =
+                    buildSetSchemaRequestForRuntimeMetadataSchemas(
+                            mPackageManager, appRuntimeMetadataSchemas);
+            Objects.requireNonNull(
+                    runtimeMetadataSearchSession.setSchema(addSetSchemaRequest).get());
+        }
 
-        // Operation order matters here. i.e. remove -> setSchema -> add. Otherwise we would
-        // encounter an error trying to delete a document with no existing schema.
         if (!removedFunctionsDiffMap.isEmpty()) {
             RemoveByDocumentIdRequest removeByDocumentIdRequest =
                     buildRemoveRuntimeMetadataRequest(removedFunctionsDiffMap);
@@ -164,12 +176,6 @@ public class MetadataSyncAdapter {
         }
 
         if (!addedFunctionsDiffMap.isEmpty()) {
-            // TODO(b/357551503): only set schema on package diff
-            SetSchemaRequest addSetSchemaRequest =
-                    buildSetSchemaRequestForRuntimeMetadataSchemas(
-                            mPackageManager, appRuntimeMetadataSchemas);
-            Objects.requireNonNull(
-                    runtimeMetadataSearchSession.setSchema(addSetSchemaRequest).get());
             PutDocumentsRequest putDocumentsRequest =
                     buildPutRuntimeMetadataRequest(addedFunctionsDiffMap);
             AppSearchBatchResult<String, Void> putDocumentBatchResult =
@@ -273,6 +279,30 @@ public class MetadataSyncAdapter {
         }
 
         return appRuntimeMetadataSchemas;
+    }
+
+    /**
+     * This method returns a set of packages that are in the removed function packages but not in
+     * the all existing static packages.
+     *
+     * @param allExistingStaticPackages A set of all existing static metadata packages.
+     * @param removedFunctionPackages A set of all removed function packages.
+     * @return A set of packages that are in the removed function packages but not in the all
+     *     existing static packages.
+     */
+    @NonNull
+    private static ArraySet<String> getRemovedPackages(
+            @NonNull Set<String> allExistingStaticPackages,
+            @NonNull Set<String> removedFunctionPackages) {
+        ArraySet<String> removedPackages = new ArraySet<>();
+
+        for (String packageName : removedFunctionPackages) {
+            if (!allExistingStaticPackages.contains(packageName)) {
+                removedPackages.add(packageName);
+            }
+        }
+
+        return removedPackages;
     }
 
     /**

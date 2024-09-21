@@ -206,7 +206,29 @@
             ]
         },
         {
+            "name": "CtsPackageInstallerCUJDeviceAdminTestCases",
+            "options":[
+               {
+                   "exclude-annotation":"androidx.test.filters.FlakyTest"
+               },
+               {
+                   "exclude-annotation":"org.junit.Ignore"
+               }
+            ]
+        },
+        {
             "name": "CtsPackageInstallerCUJInstallationTestCases",
+            "options":[
+               {
+                   "exclude-annotation":"androidx.test.filters.FlakyTest"
+               },
+               {
+                   "exclude-annotation":"org.junit.Ignore"
+               }
+            ]
+        },
+        {
+            "name": "CtsPackageInstallerCUJMultiUsersTestCases",
             "options":[
                {
                    "exclude-annotation":"androidx.test.filters.FlakyTest"

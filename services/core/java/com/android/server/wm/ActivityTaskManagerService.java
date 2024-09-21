@@ -6218,7 +6218,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onProcessRemoved(String name, int uid) {
             synchronized (mGlobalLockWithoutBoost) {
                 final WindowProcessController proc = mProcessNames.remove(name, uid);
-                if (proc != null && !mStartingProcessActivities.isEmpty()) {
+                if (proc != null && !proc.mHasEverAttached
+                        && !mStartingProcessActivities.isEmpty()) {
                     // Use a copy in case finishIfPossible changes the list indirectly.
                     final ArrayList<ActivityRecord> activities =
                             new ArrayList<>(mStartingProcessActivities);

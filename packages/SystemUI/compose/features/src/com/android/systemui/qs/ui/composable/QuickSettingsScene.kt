@@ -392,7 +392,7 @@ private fun SceneScope.QuickSettingsScene(
                             { mediaOffset.roundToPx() },
                         )
                     }
-                    Box(modifier = Modifier.padding(horizontal = shadeHorizontalPadding)) {
+                    Column(modifier = Modifier.padding(horizontal = shadeHorizontalPadding)) {
                         if (mediaInRow) {
                             Layout(content = content, measurePolicy = landscapeQsMediaMeasurePolicy)
                         } else {
