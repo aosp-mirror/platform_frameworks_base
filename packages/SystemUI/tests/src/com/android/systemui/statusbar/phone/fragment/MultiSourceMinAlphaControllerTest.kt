@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.phone.fragment
 
+import android.platform.test.annotations.DisableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
 import junit.framework.Assert.assertEquals
@@ -36,6 +38,7 @@ private const val INITIAL_ALPHA = 1f
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
 class MultiSourceMinAlphaControllerTest : SysuiTestCase() {
 
     private val view = View(context)
@@ -60,7 +63,7 @@ class MultiSourceMinAlphaControllerTest : SysuiTestCase() {
         multiSourceMinAlphaController.animateToAlpha(
             alpha = 0.5f,
             sourceId = TEST_SOURCE_1,
-            duration = TEST_ANIMATION_DURATION
+            duration = TEST_ANIMATION_DURATION,
         )
         animatorTestRule.advanceTimeBy(TEST_ANIMATION_DURATION)
         assertEquals(0.5f, view.alpha)
@@ -71,7 +74,7 @@ class MultiSourceMinAlphaControllerTest : SysuiTestCase() {
         multiSourceMinAlphaController.animateToAlpha(
             alpha = 0.5f,
             sourceId = TEST_SOURCE_1,
-            duration = TEST_ANIMATION_DURATION
+            duration = TEST_ANIMATION_DURATION,
         )
         multiSourceMinAlphaController.setAlpha(alpha = 0.7f, sourceId = TEST_SOURCE_2)
         multiSourceMinAlphaController.reset()
@@ -94,7 +97,7 @@ class MultiSourceMinAlphaControllerTest : SysuiTestCase() {
         multiSourceMinAlphaController.animateToAlpha(
             alpha = 0f,
             sourceId = TEST_SOURCE_1,
-            duration = TEST_ANIMATION_DURATION
+            duration = TEST_ANIMATION_DURATION,
         )
         animatorTestRule.advanceTimeBy(TEST_ANIMATION_DURATION / 2)
         multiSourceMinAlphaController.setAlpha(alpha = 1f, sourceId = TEST_SOURCE_1)

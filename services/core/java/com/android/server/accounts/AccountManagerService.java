@@ -2169,6 +2169,9 @@ public class AccountManagerService
             Log.i(TAG, "callingUid=" + callingUid + ", userId=" + accounts.userId
                     + " performing rename account");
             Account resultingAccount = renameAccountInternal(accounts, accountToRename, newName);
+            if (resultingAccount == null) {
+                resultingAccount = accountToRename;
+            }
             Bundle result = new Bundle();
             result.putString(AccountManager.KEY_ACCOUNT_NAME, resultingAccount.name);
             result.putString(AccountManager.KEY_ACCOUNT_TYPE, resultingAccount.type);

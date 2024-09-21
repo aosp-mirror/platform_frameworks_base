@@ -2012,8 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Nastavte zámku obrazovky"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Nastaviť zámku obrazovky"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ak chcete používať súkromný priestor, nastavte v tomto zariadení zámku obrazovky"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ak chcete odstrániť súkromný priestor, nastavte v tomto zariadení zámku obrazovky"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>

@@ -36,7 +36,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
                 bool1 = active
                 str2 = reason
             },
-            { "add media $str1, active: $bool1, reason: $str2" }
+            { "add media $str1, active: $bool1, reason: $str2" },
         )
     }
 
@@ -48,7 +48,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
                 str1 = instanceId.toString()
                 str2 = reason
             },
-            { "removing media $str1, reason: $str2" }
+            { "removing media $str1, reason: $str2" },
         )
     }
 
@@ -61,7 +61,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
                 bool1 = isActive
                 str2 = reason
             },
-            { "add recommendation $str1, active $bool1, reason: $str2" }
+            { "add recommendation $str1, active $bool1, reason: $str2" },
         )
     }
 
@@ -74,7 +74,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
                 bool1 = immediately
                 str2 = reason
             },
-            { "removing recommendation $str1, immediate=$bool1, reason: $str2" }
+            { "removing recommendation $str1, immediate=$bool1, reason: $str2" },
         )
     }
 
@@ -83,7 +83,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
             TAG,
             LogLevel.DEBUG,
             { str1 = instanceId.toString() },
-            { "adding media card $str1 to carousel" }
+            { "adding media card $str1 to carousel" },
         )
     }
 
@@ -92,7 +92,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
             TAG,
             LogLevel.DEBUG,
             { str1 = instanceId.toString() },
-            { "removing media card $str1 from carousel" }
+            { "removing media card $str1 from carousel" },
         )
     }
 
@@ -101,7 +101,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
             TAG,
             LogLevel.DEBUG,
             { str1 = key },
-            { "adding recommendation card $str1 to carousel" }
+            { "adding recommendation card $str1 to carousel" },
         )
     }
 
@@ -110,7 +110,7 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
             TAG,
             LogLevel.DEBUG,
             { str1 = key },
-            { "removing recommendation card $str1 from carousel" }
+            { "removing recommendation card $str1 from carousel" },
         )
     }
 
@@ -119,7 +119,24 @@ class MediaLogger @Inject constructor(@MediaLog private val buffer: LogBuffer) {
             TAG,
             LogLevel.DEBUG,
             { str1 = key },
-            { "duplicate media notification $str1 posted" }
+            { "duplicate media notification $str1 posted" },
+        )
+    }
+
+    fun logMediaControlIsBound(
+        instanceId: InstanceId,
+        artistName: CharSequence,
+        title: CharSequence,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = instanceId.toString()
+                str2 = artistName.toString()
+                str3 = title.toString()
+            },
+            { "binding media control, instance id= $str1, artist= $str2, title= $str3" },
         )
     }
 

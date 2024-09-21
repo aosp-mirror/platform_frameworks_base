@@ -172,6 +172,7 @@ public class BackgroundUserSoundNotifierTest {
         mBackgroundUserSoundNotifier.muteAlarmSounds(mSpiedContext);
 
         verify(apc1.getPlayerProxy()).stop();
+        verify(mockAudioPolicy).sendFocusLossAndUpdate(afi);
         verify(apc2.getPlayerProxy(), never()).stop();
     }
 

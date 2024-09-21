@@ -35,6 +35,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.Binder
+import android.os.Handler
 import android.os.IBinder
 import android.os.SystemProperties
 import android.util.Size
@@ -83,8 +84,10 @@ import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.ShellSharedConstants
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags.WALLPAPER_ACTIVITY
+import android.window.flags.DesktopModeFlags
+import android.window.flags.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
+import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+import android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
@@ -136,7 +139,8 @@ class DesktopTasksController(
     @ShellMainThread private val mainExecutor: ShellExecutor,
     private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
     private val recentTasksController: RecentTasksController?,
-    private val interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor: InteractionJankMonitor,
+    @ShellMainThread private val handler: Handler,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -303,13 +307,18 @@ class DesktopTasksController(
     private fun getSplitFocusedTask(task1: RunningTaskInfo, task2: RunningTaskInfo) =
         if (task1.taskId == task2.parentTaskId) task2 else task1
 
-    private fun isFreeformDisplay(displayId: Int): Boolean {
+    private fun forceEnterDesktop(displayId: Int): Boolean {
+        if (!DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)) {
+            return false
+        }
+
         val tdaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
         requireNotNull(tdaInfo) {
             "This method can only be called with the ID of a display having non-null DisplayArea."
         }
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
-        return tdaWindowingMode == WINDOWING_MODE_FREEFORM
+        val isFreeformDisplay = tdaWindowingMode == WINDOWING_MODE_FREEFORM
+        return isFreeformDisplay
     }
 
     /** Moves task to desktop mode if task is running, else launches it in desktop mode. */
@@ -357,7 +366,7 @@ class DesktopTasksController(
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
     ) {
-        if (DesktopModeFlags.MODALS_POLICY.isEnabled(context)
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
             && isTopActivityExemptFromDesktopWindowing(context, task)) {
             logW("Cannot enter desktop for taskId %d, ineligible top activity found", task.taskId)
             return
@@ -387,7 +396,7 @@ class DesktopTasksController(
         taskSurface: SurfaceControl,
     ) {
         logV("startDragToDesktop taskId=%d", taskInfo.taskId)
-        interactionJankMonitor.begin(taskSurface, context,
+        interactionJankMonitor.begin(taskSurface, context, handler,
             CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
             taskInfo.taskId,
@@ -635,7 +644,7 @@ class DesktopTasksController(
             if (taskBoundsBeforeMaximize != null) {
                 destinationBounds.set(taskBoundsBeforeMaximize)
             } else {
-                if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
+                if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
                     destinationBounds.set(calculateInitialBounds(displayLayout, taskInfo))
                 } else {
                     destinationBounds.set(getDefaultDesktopTaskBounds(displayLayout))
@@ -789,9 +798,9 @@ class DesktopTasksController(
         dragStartBounds: Rect
     ) {
         releaseVisualIndicator()
-        if (!taskInfo.isResizeable && DesktopModeFlags.DISABLE_SNAP_RESIZE.isEnabled(context)) {
+        if (!taskInfo.isResizeable && DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE.isTrue()) {
             interactionJankMonitor.begin(
-                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
+                taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_non_resizable"
             )
 
             // reposition non-resizable app back to its original position before being dragged
@@ -804,7 +813,7 @@ class DesktopTasksController(
             )
         } else {
             interactionJankMonitor.begin(
-                taskSurface, context, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
+                taskSurface, context, handler, CUJ_DESKTOP_MODE_SNAP_RESIZE, "drag_resizable"
             )
             snapToHalfScreen(taskInfo, taskSurface, currentDragBounds, position)
         }
@@ -878,7 +887,8 @@ class DesktopTasksController(
         moveHomeTask(wct, toTop = true)
 
         // Currently, we only handle the desktop on the default display really.
-        if (displayId == DEFAULT_DISPLAY && WALLPAPER_ACTIVITY.isEnabled(context)) {
+        if (displayId == DEFAULT_DISPLAY
+            && ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()) {
             // Add translucent wallpaper activity to show the wallpaper underneath
             addWallpaperActivity(wct)
         }
@@ -1077,11 +1087,11 @@ class DesktopTasksController(
                 && taskRepository.isActiveTask(triggerTask.taskId))
 
     private fun isIncompatibleTask(task: TaskInfo) =
-        DesktopModeFlags.MODALS_POLICY.isEnabled(context)
+        DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
                 && isTopActivityExemptFromDesktopWindowing(context, task)
 
     private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
-        return WALLPAPER_ACTIVITY.isEnabled(context) &&
+        return ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue() &&
             TransitionUtil.isClosingType(request.type) &&
             request.triggerTask != null
     }
@@ -1189,10 +1199,11 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         if (!isDesktopModeShowing(task.displayId)) {
             logD("Bring desktop tasks to front on transition=taskId=%d", task.taskId)
-            // We are outside of desktop mode and already existing desktop task is being launched.
-            // We should make this task go to fullscreen instead of freeform. Note that this means
-            // any re-launch of a freeform window outside of desktop will be in fullscreen.
-            if (taskRepository.isActiveTask(task.taskId)) {
+            if (taskRepository.isActiveTask(task.taskId) && !forceEnterDesktop(task.displayId)) {
+                // We are outside of desktop mode and already existing desktop task is being
+                // launched. We should make this task go to fullscreen instead of freeform. Note
+                // that this means any re-launch of a freeform window outside of desktop will be in
+                // fullscreen as long as default-desktop flag is disabled.
                 addMoveToFullscreenChanges(wct, task)
                 return wct
             }
@@ -1202,7 +1213,7 @@ class DesktopTasksController(
         }
         // If task is already visible, it must have been handled already and added to desktop mode.
         // Cascade task only if it's not visible yet.
-        if (DesktopModeFlags.CASCADING_WINDOWS.isEnabled(context)
+        if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue()
                 && !taskRepository.isVisibleTask(task.taskId)) {
             val displayLayout = displayController.getDisplayLayout(task.displayId)
             if (displayLayout != null) {
@@ -1229,9 +1240,7 @@ class DesktopTasksController(
         transition: IBinder
     ): WindowContainerTransaction? {
         logV("handleFullscreenTaskLaunch")
-        val forceEnterDesktop = DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context) &&
-                isFreeformDisplay(task.displayId)
-        if (isDesktopModeShowing(task.displayId) || forceEnterDesktop) {
+        if (isDesktopModeShowing(task.displayId) || forceEnterDesktop(task.displayId)) {
             logD("Switch fullscreen task to freeform on transition: taskId=%d", task.taskId)
             return WindowContainerTransaction().also { wct ->
                 addMoveToDesktopChanges(wct, task)
@@ -1276,7 +1285,7 @@ class DesktopTasksController(
         }
         taskRepository.addClosingTask(task.displayId, task.taskId)
         // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
-        if (DesktopModeFlags.BACK_NAVIGATION.isEnabled(context) &&
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue() &&
             taskRepository.isVisibleTask(task.taskId)
         ) {
             wct.removeTask(task.token)
@@ -1305,13 +1314,13 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
-        val initialBounds = if (DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
+        val initialBounds = if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             calculateInitialBounds(displayLayout, taskInfo)
         } else {
             getDefaultDesktopTaskBounds(displayLayout)
         }
 
-        if (DesktopModeFlags.CASCADING_WINDOWS.isEnabled(context)) {
+        if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue()) {
             cascadeWindow(taskInfo, initialBounds, displayLayout)
         }
 
@@ -1604,7 +1613,7 @@ class DesktopTasksController(
         when (indicatorType) {
             IndicatorType.TO_DESKTOP_INDICATOR -> {
                 // Start a new jank interaction for the drag release to desktop window animation.
-                interactionJankMonitor.begin(taskSurface, context,
+                interactionJankMonitor.begin(taskSurface, context, handler,
                     CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE, "to_desktop")
                 finalizeDragToDesktop(taskInfo)
             }

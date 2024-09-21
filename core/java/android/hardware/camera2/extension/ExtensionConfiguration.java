@@ -43,7 +43,6 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public class ExtensionConfiguration {
     private final int mSessionType;
     private final int mSessionTemplateId;
@@ -65,7 +64,6 @@ public class ExtensionConfiguration {
      * @param sessionParams     An optional set of camera capture
      *                          session parameter values
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public ExtensionConfiguration(@CameraDevice.SessionOperatingMode int sessionType,
             @CameraDevice.RequestTemplate int sessionTemplateId,
             @NonNull List<ExtensionOutputConfiguration> outputs,
@@ -87,7 +85,6 @@ public class ExtensionConfiguration {
         mColorSpace = colorSpace;
     }
 
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     CameraSessionConfig getCameraSessionConfig() {
         if (mOutputs.isEmpty()) {
             return null;

@@ -191,6 +191,7 @@ public class BackgroundUserSoundNotifier {
     /**
      * Stop player proxy for the ongoing alarm and drop focus for its AudioFocusInfo.
      */
+    @SuppressLint("MissingPermission")
     @VisibleForTesting
     void muteAlarmSounds(Context context) {
         AudioManager audioManager = context.getSystemService(AudioManager.class);
@@ -200,6 +201,11 @@ public class BackgroundUserSoundNotifier {
                     apc.getPlayerProxy().stop();
                 }
             }
+        }
+
+        AudioFocusInfo currentAfi = getAudioFocusInfoForNotification();
+        if (currentAfi != null) {
+            mFocusControlAudioPolicy.sendFocusLossAndUpdate(currentAfi);
         }
     }
 

@@ -152,14 +152,17 @@ private fun Modifier.panelPadding(): Modifier {
 /** Creates a union of [paddingValues] by using the max padding of each edge. */
 @Composable
 private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues {
-    val layoutDirection = LocalLayoutDirection.current
-
-    return PaddingValues(
-        start = paddingValues.maxOfOrNull { it.calculateStartPadding(layoutDirection) } ?: 0.dp,
-        top = paddingValues.maxOfOrNull { it.calculateTopPadding() } ?: 0.dp,
-        end = paddingValues.maxOfOrNull { it.calculateEndPadding(layoutDirection) } ?: 0.dp,
-        bottom = paddingValues.maxOfOrNull { it.calculateBottomPadding() } ?: 0.dp,
-    )
+    return if (paddingValues.isEmpty()) {
+        PaddingValues(0.dp)
+    } else {
+        val layoutDirection = LocalLayoutDirection.current
+        PaddingValues(
+            start = paddingValues.maxOf { it.calculateStartPadding(layoutDirection) },
+            top = paddingValues.maxOf { it.calculateTopPadding() },
+            end = paddingValues.maxOf { it.calculateEndPadding(layoutDirection) },
+            bottom = paddingValues.maxOf { it.calculateBottomPadding() },
+        )
+    }
 }
 
 object OverlayShade {

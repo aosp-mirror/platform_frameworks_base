@@ -40,6 +40,7 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Binder
+import android.os.Handler
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -181,6 +182,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private lateinit var mockInteractionJankMonitor: InteractionJankMonitor
   @Mock private lateinit var mockSurface: SurfaceControl
   @Mock private lateinit var taskbarDesktopTaskListener: TaskbarDesktopTaskListener
+  @Mock private lateinit var mockHandler: Handler
 
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
@@ -221,7 +223,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
             shellTaskOrganizer,
             MAX_TASK_LIMIT,
             mockInteractionJankMonitor,
-            mContext)
+            mContext,
+            mockHandler)
 
     whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
     whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
@@ -274,7 +277,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
         shellExecutor,
         Optional.of(desktopTasksLimiter),
         recentTasksController,
-        mockInteractionJankMonitor)
+        mockInteractionJankMonitor,
+        mockHandler,
+      )
   }
 
   @After
@@ -1753,6 +1758,37 @@ class DesktopTasksControllerTest : ShellTestCase() {
       controller.handleRequest(Binder(), createTransition(freeformTask))
 
     // Should become undefined as the TDA is set to fullscreen. It will inherit from the TDA.
+    assertNotNull(wct, "should handle request")
+    assertThat(wct.changes[freeformTask.token.asBinder()]?.windowingMode)
+      .isEqualTo(WINDOWING_MODE_UNDEFINED)
+  }
+
+  @Test
+  fun handleRequest_freeformTask_relaunchTask_enforceDesktop_freeformDisplay_noWinModeChange() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
+    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+    tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
+
+    val freeformTask = setUpFreeformTask()
+    markTaskHidden(freeformTask)
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
+    assertNotNull(wct, "should handle request")
+    assertFalse(wct.anyWindowingModeChange(freeformTask.token))
+  }
+
+  @Test
+  fun handleRequest_freeformTask_relaunchTask_enforceDesktop_fullscreenDisplay_becomesUndefined() {
+    assumeTrue(ENABLE_SHELL_TRANSITIONS)
+    whenever(DesktopModeStatus.enterDesktopByDefaultOnFreeformDisplay(context)).thenReturn(true)
+    val tda = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)!!
+    tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
+
+    val freeformTask = setUpFreeformTask()
+    markTaskHidden(freeformTask)
+    val wct = controller.handleRequest(Binder(), createTransition(freeformTask))
+
     assertNotNull(wct, "should handle request")
     assertThat(wct.changes[freeformTask.token.asBinder()]?.windowingMode)
       .isEqualTo(WINDOWING_MODE_UNDEFINED)
@@ -3486,6 +3522,14 @@ private fun WindowContainerTransaction?.anyDensityConfigChange(
   return this?.changes?.any { change ->
     change.key == token.asBinder() && ((change.value.configSetMask and CONFIG_DENSITY) != 0)
   } ?: false
+}
+
+private fun WindowContainerTransaction?.anyWindowingModeChange(
+  token: WindowContainerToken
+): Boolean {
+return this?.changes?.any { change ->
+  change.key == token.asBinder() && change.value.windowingMode >= 0
+} ?: false
 }
 
 private fun createTaskInfo(id: Int) =

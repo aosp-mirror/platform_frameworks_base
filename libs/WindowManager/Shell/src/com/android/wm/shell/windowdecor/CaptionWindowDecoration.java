@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.windowdecor;
 
+import static android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING;
+
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
@@ -55,7 +57,6 @@ import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
@@ -74,7 +75,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     private View.OnTouchListener mOnCaptionTouchListener;
     private DragPositioningCallback mDragPositioningCallback;
     private DragResizeInputListener mDragResizeListener;
-    private DragDetector mDragDetector;
 
     private RelayoutParams mRelayoutParams = new RelayoutParams();
     private final RelayoutResult<WindowDecorLinearLayout> mResult =
@@ -176,12 +176,6 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         return stableBounds.bottom - requiredEmptySpace;
     }
 
-
-    void setDragDetector(DragDetector dragDetector) {
-        mDragDetector = dragDetector;
-        mDragDetector.setTouchSlop(ViewConfiguration.get(mContext).getScaledTouchSlop());
-    }
-
     @Override
     void relayout(RunningTaskInfo taskInfo) {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
@@ -241,7 +235,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition) {
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
-        final boolean isDragResizeable = DesktopModeFlags.SCALED_RESIZING.isEnabled(mContext)
+        final boolean isDragResizeable = ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
                 ? isFreeform : isFreeform && taskInfo.isResizeable;
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
@@ -288,11 +282,10 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         final int touchSlop = ViewConfiguration.get(mResult.mRootView.getContext())
                 .getScaledTouchSlop();
-        mDragDetector.setTouchSlop(touchSlop);
 
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(mContext, res),
+                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
                 getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
                 getLargeResizeCornerSize(res)), touchSlop);
     }

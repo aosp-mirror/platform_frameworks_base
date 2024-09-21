@@ -216,7 +216,7 @@ public final class CpuMonitorService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase != PHASE_BOOT_COMPLETED) {
+        if (phase != PHASE_BOOT_COMPLETED || mHandler == null) {
             return;
         }
         Slogf.i(TAG, "Stopping periodic cpuset reading on boot complete");

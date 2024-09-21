@@ -19,7 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodConfig;
 import android.platform.test.ravenwood.RavenwoodConfig.Config;
 
@@ -109,7 +108,6 @@ public class RavenwoodInstrumentationTest_self {
     }
 
     @Test
-    @DisabledOnRavenwood(reason = "b/366246777")
     public void testTargetAppResource() {
         assertThat(sTargetContext.getString(
                 com.android.ravenwood.bivalentinsttest_self_inst.R.string.test_string_in_test))
@@ -117,7 +115,6 @@ public class RavenwoodInstrumentationTest_self {
     }
 
     @Test
-    @DisabledOnRavenwood(reason = "b/366246777")
     public void testTestAppResource() {
         assertThat(sTestContext.getString(
                 com.android.ravenwood.bivalentinsttest_self_inst.R.string.test_string_in_test))

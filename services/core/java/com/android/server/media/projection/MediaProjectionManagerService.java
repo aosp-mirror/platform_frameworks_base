@@ -179,7 +179,8 @@ public final class MediaProjectionManagerService extends SystemService
     /**
      * In order to record the keyguard, the MediaProjection package must be either:
      *   - a holder of RECORD_SENSITIVE_CONTENT permission, or
-     *   - be one of the bugreport whitelisted packages
+     *   - be one of the bugreport allowlisted packages, or
+     *   - hold the OP_PROJECT_MEDIA AppOp.
      */
     private boolean canCaptureKeyguard() {
         if (!android.companion.virtualdevice.flags.Flags.mediaProjectionKeyguardRestrictions()) {
@@ -192,6 +193,14 @@ public final class MediaProjectionManagerService extends SystemService
             if (mPackageManager.checkPermission(RECORD_SENSITIVE_CONTENT,
                     mProjectionGrant.packageName)
                     == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+            boolean operationActive = mAppOps.isOperationActive(AppOpsManager.OP_PROJECT_MEDIA,
+                    mProjectionGrant.uid,
+                    mProjectionGrant.packageName);
+            if (operationActive) {
+                // Some tools use media projection by granting the OP_PROJECT_MEDIA app
+                // op via a shell command. Those tools can be granted keyguard capture
                 return true;
             }
             return SystemConfig.getInstance().getBugreportWhitelistedPackages()

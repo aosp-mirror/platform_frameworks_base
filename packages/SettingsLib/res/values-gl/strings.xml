@@ -510,7 +510,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Cargando sen fíos"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Cargando"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Non se está cargando"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Conectado, pero non cargando"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Conectado, pero sen cargar"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Cargada"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Carga completa"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Carga en pausa"</string>
@@ -564,7 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmas e recordatorios"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permite que esta aplicación defina alarmas e planifique accións que dependan da hora. Con este permiso, a aplicación pode executarse en segundo plano, o que pode provocar un maior consumo de batería.\n\nSe este permiso está desactivado, non funcionarán as alarmas que xa se definisen nin os eventos que dependan da hora planificados por esta aplicación."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"planificar, alarma, recordatorio, reloxo"</string>
-    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Modo Non molestar"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Non molestar"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Non molestar"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activar"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activar modo Non molestar"</string>
@@ -582,10 +582,11 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tableta"</string>
+    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
+    <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <!-- no translation found for media_transfer_internal_mic (797333824290228595) -->
-    <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Micrófono (interno)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altofalante da base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
@@ -686,11 +687,14 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desactivado"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activado"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necesario reiniciar o teu dispositivo para aplicar este cambio. Reiníciao agora ou cancela o cambio."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Auriculares con cable"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7417067197803840965) -->
+    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
     <skip />
-    <!-- no translation found for media_transfer_usb_device_mic_name (9189914846215516322) -->
+    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
     <skip />
+    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
+    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Conector do micrófono"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Micrófono USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Activada"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desactivada"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Cambio de rede do operador"</string>

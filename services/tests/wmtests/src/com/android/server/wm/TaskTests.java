@@ -29,6 +29,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
@@ -75,6 +77,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -97,9 +100,13 @@ import androidx.test.filters.MediumTest;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
@@ -121,6 +128,9 @@ import java.io.Reader;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class TaskTests extends WindowTestsBase {
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     private static final String TASK_TAG = "task";
 
@@ -401,6 +411,85 @@ public class TaskTests extends WindowTestsBase {
         verify(mSupervisor, never()).startSpecificActivity(eq(activity1),
                 anyBoolean() /* andResume */, anyBoolean() /* checkConfig */);
         assertTrue(activity1.isVisibleRequested());
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
+    public void testIsResizeable_nonResizeable_forceResize_overridesEnabled_Resizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_UNRESIZEABLE);
+        // Override should take effect and task should be resizeable.
+        assertTrue(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_RESIZE_APP})
+    public void testIsResizeable_nonResizeable_forceResize_overridesDisabled_nonResizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_UNRESIZEABLE);
+
+        // Disallow resize overrides.
+        task.mAllowForceResizeOverride = false;
+
+        // Override should not take effect and task should be un-resizeable.
+        assertFalse(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testIsResizeable_resizeable_forceNonResize_overridesEnabled_nonResizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_RESIZEABLE);
+
+        // Override should take effect and task should be un-resizeable.
+        assertFalse(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testIsResizeable_resizeable_forceNonResize_overridesDisabled_Resizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_RESIZEABLE);
+
+        // Disallow resize overrides.
+        task.mAllowForceResizeOverride = false;
+
+        // Override should not take effect and task should be resizeable.
+        assertTrue(task.getTaskInfo().isResizeable);
+    }
+
+    @Test
+    @CoreCompatChangeRule.EnableCompatChanges({ActivityInfo.FORCE_NON_RESIZE_APP})
+    public void testIsResizeable_systemWideForceResize_compatForceNonResize__Resizeable() {
+        final Task task = new TaskBuilder(mSupervisor)
+                .setCreateActivity(true)
+                .setComponent(
+                        ComponentName.createRelative(mContext, SizeCompatTests.class.getName()))
+                .build();
+        task.setResizeMode(RESIZE_MODE_RESIZEABLE);
+
+        // Set system-wide force resizeable override.
+        task.mAtmService.mForceResizableActivities = true;
+
+        // System wide override should tak priority over app compat override so the task should
+        // remain resizeable.
+        assertTrue(task.getTaskInfo().isResizeable);
     }
 
     @Test

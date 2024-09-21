@@ -16,6 +16,7 @@
 package com.android.hoststubgen.test.tinyframework;
 
 import android.hosttest.annotation.HostSideTestClassLoadHook;
+import android.hosttest.annotation.HostSideTestIgnore;
 import android.hosttest.annotation.HostSideTestKeep;
 import android.hosttest.annotation.HostSideTestRemove;
 import android.hosttest.annotation.HostSideTestSubstitute;
@@ -70,5 +71,10 @@ public class TinyFrameworkAnnotations {
     @HostSideTestThrow
     public String unsupportedMethod() {
         return "This value shouldn't be seen on the host side.";
+    }
+
+    @HostSideTestIgnore
+    public int toBeIgnored() {
+        throw new RuntimeException("not supported on host side");
     }
 }

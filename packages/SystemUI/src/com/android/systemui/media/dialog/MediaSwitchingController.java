@@ -157,7 +157,7 @@ public class MediaSwitchingController
     @VisibleForTesting
     boolean mNeedRefresh = false;
     private MediaController mMediaController;
-    private InputRouteManager mInputRouteManager;
+    @VisibleForTesting InputRouteManager mInputRouteManager;
     @VisibleForTesting
     Callback mCallback;
     @VisibleForTesting
@@ -927,7 +927,18 @@ public class MediaSwitchingController
     }
 
     public List<MediaDevice> getSelectedMediaDevice() {
-        return mLocalMediaManager.getSelectedMediaDevice();
+        if (!enableInputRouting()) {
+            return mLocalMediaManager.getSelectedMediaDevice();
+        }
+
+        // Add selected input device if input routing is supported.
+        List<MediaDevice> selectedDevices =
+                new ArrayList<>(mLocalMediaManager.getSelectedMediaDevice());
+        MediaDevice selectedInputDevice = mInputRouteManager.getSelectedInputDevice();
+        if (selectedInputDevice != null) {
+            selectedDevices.add(selectedInputDevice);
+        }
+        return selectedDevices;
     }
 
     List<MediaDevice> getDeselectableMediaDevice() {

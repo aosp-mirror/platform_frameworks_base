@@ -18,10 +18,6 @@ package com.android.systemui.biometrics
 
 import android.graphics.Point
 import android.hardware.biometrics.BiometricSourceType
-import android.hardware.biometrics.ComponentInfoInternal
-import android.hardware.biometrics.SensorLocationInternal
-import android.hardware.biometrics.SensorProperties
-import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.testing.TestableLooper.RunWithLooper
 import android.util.DisplayMetrics
@@ -47,7 +43,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.util.mockito.any
-import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertFalse
@@ -67,6 +62,8 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
+import javax.inject.Provider
+
 
 @ExperimentalCoroutinesApi
 @SmallTest
@@ -82,28 +79,35 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock private lateinit var authController: AuthController
     @Mock private lateinit var authRippleInteractor: AuthRippleInteractor
     @Mock private lateinit var keyguardStateController: KeyguardStateController
-    @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
-    @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
-    @Mock private lateinit var biometricUnlockController: BiometricUnlockController
-    @Mock private lateinit var udfpsControllerProvider: Provider<UdfpsController>
-    @Mock private lateinit var udfpsController: UdfpsController
-    @Mock private lateinit var statusBarStateController: StatusBarStateController
-    @Mock private lateinit var lightRevealScrim: LightRevealScrim
-    @Mock private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
+    @Mock
+    private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock
+    private lateinit var notificationShadeWindowController: NotificationShadeWindowController
+    @Mock
+    private lateinit var biometricUnlockController: BiometricUnlockController
+    @Mock
+    private lateinit var udfpsControllerProvider: Provider<UdfpsController>
+    @Mock
+    private lateinit var udfpsController: UdfpsController
+    @Mock
+    private lateinit var statusBarStateController: StatusBarStateController
+    @Mock
+    private lateinit var lightRevealScrim: LightRevealScrim
+    @Mock
+    private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
 
     private val facePropertyRepository = FakeFacePropertyRepository()
     private val displayMetrics = DisplayMetrics()
 
     @Captor
     private lateinit var biometricUnlockListener:
-        ArgumentCaptor<BiometricUnlockController.BiometricUnlockEventsListener>
+            ArgumentCaptor<BiometricUnlockController.BiometricUnlockEventsListener>
 
     @Before
     fun setUp() {
         mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         MockitoAnnotations.initMocks(this)
-        staticMockSession =
-            mockitoSession()
+        staticMockSession = mockitoSession()
                 .mockStatic(RotationUtils::class.java)
                 .strictness(Strictness.LENIENT)
                 .startMocking()
@@ -112,26 +116,25 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(authController.udfpsProps).thenReturn(listOf(fpSensorProp))
         `when`(udfpsControllerProvider.get()).thenReturn(udfpsController)
 
-        controller =
-            AuthRippleController(
-                context,
-                authController,
-                configurationController,
-                keyguardUpdateMonitor,
-                keyguardStateController,
-                wakefulnessLifecycle,
-                commandRegistry,
-                notificationShadeWindowController,
-                udfpsControllerProvider,
-                statusBarStateController,
-                displayMetrics,
-                KeyguardLogger(logcatLogBuffer(AuthRippleController.TAG)),
-                biometricUnlockController,
-                lightRevealScrim,
-                authRippleInteractor,
-                facePropertyRepository,
-                rippleView,
-            )
+        controller = AuthRippleController(
+            context,
+            authController,
+            configurationController,
+            keyguardUpdateMonitor,
+            keyguardStateController,
+            wakefulnessLifecycle,
+            commandRegistry,
+            notificationShadeWindowController,
+            udfpsControllerProvider,
+            statusBarStateController,
+            displayMetrics,
+            KeyguardLogger(logcatLogBuffer(AuthRippleController.TAG)),
+            biometricUnlockController,
+            lightRevealScrim,
+            authRippleInteractor,
+            facePropertyRepository,
+            rippleView,
+        )
         controller.init()
     }
 
@@ -147,18 +150,13 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardStateController.isShowing).thenReturn(true)
-        `when`(
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
-                    eq(BiometricSourceType.FINGERPRINT)
-                )
-            )
-            .thenReturn(true)
+        `when`(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                eq(BiometricSourceType.FINGERPRINT))).thenReturn(true)
 
         // WHEN fingerprint authenticated
         verify(biometricUnlockController).addListener(biometricUnlockListener.capture())
-        biometricUnlockListener.value.onBiometricUnlockedWithKeyguardDismissal(
-            BiometricSourceType.FINGERPRINT
-        )
+        biometricUnlockListener.value
+                .onBiometricUnlockedWithKeyguardDismissal(BiometricSourceType.FINGERPRINT)
 
         // THEN update sensor location and show ripple
         verify(rippleView).setFingerprintSensorLocation(fpsLocation, 0f)
@@ -171,12 +169,8 @@ class AuthRippleControllerTest : SysuiTestCase() {
         val fpsLocation = Point(5, 5)
         `when`(authController.udfpsLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
-        `when`(
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
-                    eq(BiometricSourceType.FINGERPRINT)
-                )
-            )
-            .thenReturn(true)
+        `when`(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                eq(BiometricSourceType.FINGERPRINT))).thenReturn(true)
 
         // WHEN keyguard is NOT showing & fingerprint authenticated
         `when`(keyguardStateController.isShowing).thenReturn(false)
@@ -185,8 +179,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
         captor.value.onBiometricAuthenticated(
             0 /* userId */,
             BiometricSourceType.FINGERPRINT /* type */,
-            false /* isStrongBiometric */
-        )
+            false /* isStrongBiometric */)
 
         // THEN no ripple
         verify(rippleView, never()).startUnlockedRipple(any())
@@ -201,19 +194,14 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(keyguardStateController.isShowing).thenReturn(true)
 
         // WHEN unlocking with fingerprint is NOT allowed & fingerprint authenticated
-        `when`(
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
-                    eq(BiometricSourceType.FINGERPRINT)
-                )
-            )
-            .thenReturn(false)
+        `when`(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                eq(BiometricSourceType.FINGERPRINT))).thenReturn(false)
         val captor = ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
         verify(keyguardUpdateMonitor).registerCallback(captor.capture())
         captor.value.onBiometricAuthenticated(
             0 /* userId */,
             BiometricSourceType.FINGERPRINT /* type */,
-            false /* isStrongBiometric */
-        )
+            false /* isStrongBiometric */)
 
         // THEN no ripple
         verify(rippleView, never()).startUnlockedRipple(any())
@@ -230,8 +218,7 @@ class AuthRippleControllerTest : SysuiTestCase() {
         captor.value.onBiometricAuthenticated(
             0 /* userId */,
             BiometricSourceType.FACE /* type */,
-            false /* isStrongBiometric */
-        )
+            false /* isStrongBiometric */)
         verify(rippleView, never()).startUnlockedRipple(any())
     }
 
@@ -246,17 +233,18 @@ class AuthRippleControllerTest : SysuiTestCase() {
         captor.value.onBiometricAuthenticated(
             0 /* userId */,
             BiometricSourceType.FINGERPRINT /* type */,
-            false /* isStrongBiometric */
-        )
+            false /* isStrongBiometric */)
         verify(rippleView, never()).startUnlockedRipple(any())
     }
 
     @Test
     fun registersAndDeregisters() {
         controller.onViewAttached()
-        val captor = ArgumentCaptor.forClass(KeyguardStateController.Callback::class.java)
+        val captor = ArgumentCaptor
+            .forClass(KeyguardStateController.Callback::class.java)
         verify(keyguardStateController).addCallback(captor.capture())
-        val captor2 = ArgumentCaptor.forClass(WakefulnessLifecycle.Observer::class.java)
+        val captor2 = ArgumentCaptor
+            .forClass(WakefulnessLifecycle.Observer::class.java)
         verify(wakefulnessLifecycle).addObserver(captor2.capture())
         controller.onViewDetached()
         verify(keyguardStateController).removeCallback(any())
@@ -271,25 +259,17 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(authController.fingerprintSensorLocation).thenReturn(fpsLocation)
         controller.onViewAttached()
         `when`(keyguardStateController.isShowing).thenReturn(true)
-        `when`(
-                keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
-                    BiometricSourceType.FINGERPRINT
-                )
-            )
-            .thenReturn(true)
+        `when`(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                BiometricSourceType.FINGERPRINT)).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
         controller.showUnlockRipple(BiometricSourceType.FINGERPRINT)
-        assertTrue(
-            "reveal didn't start on keyguardFadingAway",
-            controller.startLightRevealScrimOnKeyguardFadingAway
-        )
+        assertTrue("reveal didn't start on keyguardFadingAway",
+            controller.startLightRevealScrimOnKeyguardFadingAway)
         `when`(keyguardStateController.isKeyguardFadingAway).thenReturn(true)
         controller.onKeyguardFadingAwayChanged()
-        assertFalse(
-            "reveal triggers multiple times",
-            controller.startLightRevealScrimOnKeyguardFadingAway
-        )
+        assertFalse("reveal triggers multiple times",
+            controller.startLightRevealScrimOnKeyguardFadingAway)
     }
 
     @Test
@@ -302,27 +282,23 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(keyguardStateController.isShowing).thenReturn(true)
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
         `when`(authController.isUdfpsFingerDown).thenReturn(true)
-        `when`(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(eq(BiometricSourceType.FACE)))
-            .thenReturn(true)
+        `when`(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
+                eq(BiometricSourceType.FACE))).thenReturn(true)
 
         controller.showUnlockRipple(BiometricSourceType.FACE)
-        assertTrue(
-            "reveal didn't start on keyguardFadingAway",
-            controller.startLightRevealScrimOnKeyguardFadingAway
-        )
+        assertTrue("reveal didn't start on keyguardFadingAway",
+                controller.startLightRevealScrimOnKeyguardFadingAway)
         `when`(keyguardStateController.isKeyguardFadingAway).thenReturn(true)
         controller.onKeyguardFadingAwayChanged()
-        assertFalse(
-            "reveal triggers multiple times",
-            controller.startLightRevealScrimOnKeyguardFadingAway
-        )
+        assertFalse("reveal triggers multiple times",
+                controller.startLightRevealScrimOnKeyguardFadingAway)
     }
 
     @Test
     fun testUpdateRippleColor() {
         controller.onViewAttached()
-        val captor =
-            ArgumentCaptor.forClass(ConfigurationController.ConfigurationListener::class.java)
+        val captor = ArgumentCaptor
+            .forClass(ConfigurationController.ConfigurationListener::class.java)
         verify(configurationController).addCallback(captor.capture())
 
         reset(rippleView)
@@ -354,40 +330,6 @@ class AuthRippleControllerTest : SysuiTestCase() {
         // THEN update sensor location and show ripple
         verify(rippleView).setFingerprintSensorLocation(fpsLocation, 0f)
         verify(rippleView).startDwellRipple(false)
-    }
-
-    @Test
-    fun testUltrasonicUdfps_onFingerDown_runningForDeviceEntry_doNotShowDwellRipple() {
-        // GIVEN UDFPS is ultrasonic
-        `when`(authController.udfpsProps)
-            .thenReturn(
-                listOf(
-                    FingerprintSensorPropertiesInternal(
-                        0 /* sensorId */,
-                        SensorProperties.STRENGTH_STRONG,
-                        5 /* maxEnrollmentsPerUser */,
-                        listOf<ComponentInfoInternal>(),
-                        FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC,
-                        false /* halControlsIllumination */,
-                        true /* resetLockoutRequiresHardwareAuthToken */,
-                        listOf<SensorLocationInternal>(SensorLocationInternal.DEFAULT),
-                    )
-                )
-            )
-
-        // GIVEN fingerprint detection is running on keyguard
-        `when`(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(true)
-
-        // GIVEN view is already attached
-        controller.onViewAttached()
-        val captor = ArgumentCaptor.forClass(UdfpsController.Callback::class.java)
-        verify(udfpsController).addCallback(captor.capture())
-
-        // WHEN finger is down
-        captor.value.onFingerDown()
-
-        // THEN never show dwell ripple
-        verify(rippleView, never()).startDwellRipple(false)
     }
 
     @Test

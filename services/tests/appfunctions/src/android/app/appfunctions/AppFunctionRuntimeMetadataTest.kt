@@ -112,4 +112,28 @@ class AppFunctionRuntimeMetadataTest {
         assertThat(runtimeMetadata.appFunctionStaticMetadataQualifiedId)
             .isEqualTo("android\$apps-db/app_functions#com.pkg/funcId")
     }
+
+    @Test
+    fun setEnabled_true() {
+        val runtimeMetadata =
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(true).build()
+
+        assertThat(runtimeMetadata.enabled).isTrue()
+    }
+
+    @Test
+    fun setEnabled_false() {
+        val runtimeMetadata =
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(false).build()
+
+        assertThat(runtimeMetadata.enabled).isFalse()
+    }
+
+    @Test
+    fun setEnabled_null() {
+        val runtimeMetadata =
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(null).build()
+
+        assertThat(runtimeMetadata.enabled).isNull()
+    }
 }

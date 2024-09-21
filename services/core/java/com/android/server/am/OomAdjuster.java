@@ -3617,14 +3617,12 @@ public class OomAdjuster {
         if (changes != 0) {
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Changes in " + app + ": " + changes);
-            ActivityManagerService.ProcessChangeItem item =
-                    mProcessList.enqueueProcessChangeItemLocked(app.getPid(), app.info.uid);
-            item.changes |= changes;
-            item.foregroundActivities = state.hasRepForegroundActivities();
+            mProcessList.enqueueProcessChangeItemLocked(app.getPid(), app.info.uid,
+                    changes, state.hasRepForegroundActivities());
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
-                    "Item " + Integer.toHexString(System.identityHashCode(item))
-                            + " " + app.toShortString() + ": changes=" + item.changes
-                            + " foreground=" + item.foregroundActivities
+                    "Enqueued process change item for "
+                            + app.toShortString() + ": changes=" + changes
+                            + " foreground=" + state.hasRepForegroundActivities()
                             + " type=" + state.getAdjType() + " source=" + state.getAdjSource()
                             + " target=" + state.getAdjTarget());
         }

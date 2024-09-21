@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
+import android.os.Handler
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_TO_BACK
@@ -29,6 +30,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionObserver
 
@@ -36,7 +38,7 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  * Limits the number of tasks shown in Desktop Mode.
  *
  * This class should only be used if
- * [com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
+ * [android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
  * is enabled and [maxTasksLimit] is strictly greater than 0.
  */
 class DesktopTasksLimiter (
@@ -45,7 +47,8 @@ class DesktopTasksLimiter (
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val maxTasksLimit: Int,
         private val interactionJankMonitor: InteractionJankMonitor,
-        private val context: Context
+        private val context: Context,
+        @ShellMainThread private val handler: Handler,
 ) {
     private val minimizeTransitionObserver = MinimizeTransitionObserver()
     @VisibleForTesting
@@ -125,7 +128,7 @@ class DesktopTasksLimiter (
             if (mActiveTaskDetails != null && mActiveTaskDetails.transitionInfo != null) {
                 // Begin minimize window CUJ instrumentation.
                 interactionJankMonitor.begin(
-                    mActiveTaskDetails.transitionInfo?.rootLeash, context,
+                    mActiveTaskDetails.transitionInfo?.rootLeash, context, handler,
                     CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
                 )
             }

@@ -2012,8 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Настройте блокировку экрана"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Настроить блокировку экрана"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Чтобы использовать частное пространство, настройте блокировку экрана на этом устройстве."</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Чтобы удалить частное пространство, настройте блокировку экрана на этом устройстве."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Приложение недоступно"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" сейчас недоступно."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недоступно: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
