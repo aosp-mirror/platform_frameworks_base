@@ -33,6 +33,7 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
+import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
@@ -365,18 +366,87 @@ public class RavenwoodRunnerCallbackTest extends RavenwoodRunnerTestBase {
     @Expected("""
     testRunStarted: classes
     testSuiteStarted: classes
-    testSuiteStarted: ClassUnloadbleTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleTest)
-    testIgnored: ClassUnloadbleTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleTest)
-    testSuiteFinished: ClassUnloadbleTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleTest)
+    testSuiteStarted: ClassUnloadbleAndDisabledTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndDisabledTest)
+    testIgnored: ClassUnloadbleAndDisabledTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndDisabledTest)
+    testSuiteFinished: ClassUnloadbleAndDisabledTest(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndDisabledTest)
     testSuiteFinished: classes
     testRunFinished: 0,0,0,1
     """)
     // CHECKSTYLE:ON
-    public static class ClassUnloadbleTest {
+    public static class ClassUnloadbleAndDisabledTest {
         static {
             Assert.fail("Class unloadable!");
         }
 
+        @Test
+        public void test1() {
+        }
+
+        @Test
+        public void test2() {
+        }
+    }
+
+    /**
+     * The test class is unloadable, but has a @DisabledOnRavenwood.
+     */
+    @RunWith(AndroidJUnit4.class)
+    // CHECKSTYLE:OFF
+    @Expected("""
+    testRunStarted: classes
+    testSuiteStarted: classes
+    testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndEnabledTest
+    testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndEnabledTest
+    testStarted: test1(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndEnabledTest)
+    testFailure: Class unloadable!
+    testFinished: test1(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndEnabledTest)
+    testStarted: test2(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndEnabledTest)
+    testFailure: Class unloadable!
+    testFinished: test2(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$ClassUnloadbleAndEnabledTest)
+    testSuiteFinished: classes
+    testRunFinished: 2,2,0,0
+    """)
+    // CHECKSTYLE:ON
+    public static class ClassUnloadbleAndEnabledTest {
+        static {
+            Assert.fail("Class unloadable!");
+        }
+
+        @Test
+        public void test1() {
+        }
+
+        @Test
+        public void test2() {
+        }
+    }
+
+    public static class BrokenTestRunner extends BlockJUnit4ClassRunner {
+        public BrokenTestRunner(Class<?> testClass) throws InitializationError {
+            super(testClass);
+
+            if (true)  {
+                throw new RuntimeException("This is a broken test runner!");
+            }
+        }
+    }
+
+    /**
+     * The test runner throws an exception from the ctor.
+     */
+    @RunWith(BrokenTestRunner.class)
+    // CHECKSTYLE:OFF
+    @Expected("""
+    testRunStarted: classes
+    testSuiteStarted: classes
+    testStarted: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenRunnerTest)
+    testFailure: Exception detected in constructor
+    testFinished: Constructor(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerCallbackTest$BrokenRunnerTest)
+    testSuiteFinished: classes
+    testRunFinished: 1,1,0,0
+    """)
+    // CHECKSTYLE:ON
+    public static class BrokenRunnerTest {
         @Test
         public void test1() {
         }

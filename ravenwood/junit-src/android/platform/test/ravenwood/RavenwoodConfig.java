@@ -74,7 +74,7 @@ public final class RavenwoodConfig {
 
     final List<Class<?>> mServicesRequired = new ArrayList<>();
 
-    volatile Context mTestContext;
+    volatile Context mInstContext;
     volatile Context mTargetContext;
     volatile Instrumentation mInstrumentation;
 

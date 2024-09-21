@@ -26,7 +26,6 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,10 +37,14 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -51,11 +54,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.SceneKey
+import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.transitions
 import com.android.compose.modifiers.height
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
@@ -70,11 +80,17 @@ import com.android.systemui.media.dagger.MediaModule.QS_PANEL
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.qs.QSContainerController
+import com.android.systemui.qs.composefragment.SceneKeys.QuickQuickSettings
+import com.android.systemui.qs.composefragment.SceneKeys.QuickSettings
+import com.android.systemui.qs.composefragment.SceneKeys.toIdleSceneKey
 import com.android.systemui.qs.composefragment.ui.notificationScrimClip
+import com.android.systemui.qs.composefragment.ui.quickQuickSettingsToQuickSettings
 import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel
 import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.panels.ui.compose.QuickQuickSettings
+import com.android.systemui.qs.shared.ui.ElementKeys
+import com.android.systemui.qs.ui.composable.QuickSettingsShade
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.qs.ui.composable.ShadeBody
 import com.android.systemui.res.R
@@ -86,11 +102,13 @@ import java.io.PrintWriter
 import java.util.function.Consumer
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @SuppressLint("ValidFragment")
@@ -166,33 +184,48 @@ constructor(
             setContent {
                 PlatformTheme {
                     val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
-                    val qsState by viewModel.expansionState.collectAsStateWithLifecycle()
 
                     AnimatedVisibility(
                         visible = visible,
                         modifier =
-                            Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
-                                notificationScrimClippingParams.isEnabled
-                            ) {
-                                Modifier.notificationScrimClip(
-                                    notificationScrimClippingParams.leftInset,
-                                    notificationScrimClippingParams.top,
-                                    notificationScrimClippingParams.rightInset,
-                                    notificationScrimClippingParams.bottom,
-                                    notificationScrimClippingParams.radius,
-                                )
-                            },
+                            Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                                .thenIf(notificationScrimClippingParams.isEnabled) {
+                                    Modifier.notificationScrimClip(
+                                        notificationScrimClippingParams.leftInset,
+                                        notificationScrimClippingParams.top,
+                                        notificationScrimClippingParams.rightInset,
+                                        notificationScrimClippingParams.bottom,
+                                        notificationScrimClippingParams.radius,
+                                    )
+                                }
+                                .graphicsLayer { elevation = 4.dp.toPx() },
                     ) {
-                        AnimatedContent(targetState = qsState) {
-                            when (it) {
-                                QSFragmentComposeViewModel.QSExpansionState.QQS -> {
-                                    QuickQuickSettingsElement()
-                                }
-                                QSFragmentComposeViewModel.QSExpansionState.QS -> {
-                                    QuickSettingsElement()
-                                }
-                                else -> {}
-                            }
+                        val sceneState = remember {
+                            MutableSceneTransitionLayoutState(
+                                viewModel.expansionState.value.toIdleSceneKey(),
+                                transitions =
+                                    transitions {
+                                        from(QuickQuickSettings, QuickSettings) {
+                                            quickQuickSettingsToQuickSettings()
+                                        }
+                                    },
+                            )
+                        }
+
+                        LaunchedEffect(Unit) {
+                            synchronizeQsState(
+                                sceneState,
+                                viewModel.expansionState.map { it.progress },
+                            )
+                        }
+
+                        SceneTransitionLayout(
+                            state = sceneState,
+                            modifier = Modifier.fillMaxSize(),
+                        ) {
+                            scene(QuickSettings) { QuickSettingsElement() }
+
+                            scene(QuickQuickSettings) { QuickQuickSettingsElement() }
                         }
                     }
                 }
@@ -420,7 +453,7 @@ constructor(
     }
 
     @Composable
-    private fun QuickQuickSettingsElement() {
+    private fun SceneScope.QuickQuickSettingsElement() {
         val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
         val bottomPadding = dimensionResource(id = R.dimen.qqs_layout_padding_bottom)
         DisposableEffect(Unit) {
@@ -450,8 +483,15 @@ constructor(
                         viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel,
                         modifier =
                             Modifier.collapseExpandSemanticAction(
-                                stringResource(id = R.string.accessibility_quick_settings_expand)
-                            ),
+                                    stringResource(
+                                        id = R.string.accessibility_quick_settings_expand
+                                    )
+                                )
+                                .padding(
+                                    horizontal = {
+                                        QuickSettingsShade.Dimensions.Padding.roundToPx()
+                                    }
+                                ),
                     )
                 }
             }
@@ -460,7 +500,7 @@ constructor(
     }
 
     @Composable
-    private fun QuickSettingsElement() {
+    private fun SceneScope.QuickSettingsElement() {
         val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
         val qsExtraPadding = dimensionResource(R.dimen.qs_panel_padding_top)
         Column(
@@ -471,7 +511,10 @@ constructor(
         ) {
             val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
             if (qsEnabled) {
-                Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+                Box(
+                    modifier =
+                        Modifier.element(ElementKeys.QuickSettingsContent).fillMaxSize().weight(1f)
+                ) {
                     Column {
                         Spacer(
                             modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
@@ -483,7 +526,9 @@ constructor(
                     FooterActions(
                         viewModel = viewModel.footerActionsViewModel,
                         qsVisibilityLifecycleOwner = this@QSFragmentCompose,
-                        modifier = Modifier.sysuiResTag("qs_footer_actions"),
+                        modifier =
+                            Modifier.sysuiResTag("qs_footer_actions")
+                                .element(ElementKeys.FooterActions),
                     )
                 }
             }
@@ -590,3 +635,85 @@ private val instanceProvider =
             return currentId++
         }
     }
+
+object SceneKeys {
+    val QuickQuickSettings = SceneKey("QuickQuickSettingsScene")
+    val QuickSettings = SceneKey("QuickSettingsScene")
+
+    fun QSFragmentComposeViewModel.QSExpansionState.toIdleSceneKey(): SceneKey {
+        return when {
+            progress < 0.5f -> QuickQuickSettings
+            else -> QuickSettings
+        }
+    }
+}
+
+suspend fun synchronizeQsState(state: MutableSceneTransitionLayoutState, expansion: Flow<Float>) {
+    coroutineScope {
+        val animationScope = this
+
+        var currentTransition: ExpansionTransition? = null
+
+        fun snapTo(scene: SceneKey) {
+            state.snapToScene(scene)
+            currentTransition = null
+        }
+
+        expansion.collectLatest { progress ->
+            when (progress) {
+                0f -> snapTo(QuickQuickSettings)
+                1f -> snapTo(QuickSettings)
+                else -> {
+                    val transition = currentTransition
+                    if (transition != null) {
+                        transition.progress = progress
+                        return@collectLatest
+                    }
+
+                    val newTransition =
+                        ExpansionTransition(progress).also { currentTransition = it }
+                    state.startTransitionImmediately(
+                        animationScope = animationScope,
+                        transition = newTransition,
+                    )
+                }
+            }
+        }
+    }
+}
+
+private class ExpansionTransition(currentProgress: Float) :
+    TransitionState.Transition.ChangeScene(
+        fromScene = QuickQuickSettings,
+        toScene = QuickSettings,
+    ) {
+    override val currentScene: SceneKey
+        get() {
+            // This should return the logical scene. If the QS STLState is only driven by
+            // synchronizeQSState() then it probably does not matter which one we return, this is
+            // only used to compute the current user actions of a STL.
+            return QuickQuickSettings
+        }
+
+    override var progress: Float by mutableFloatStateOf(currentProgress)
+
+    override val progressVelocity: Float
+        get() = 0f
+
+    override val isInitiatedByUserInput: Boolean
+        get() = true
+
+    override val isUserInputOngoing: Boolean
+        get() = true
+
+    private val finishCompletable = CompletableDeferred<Unit>()
+
+    override suspend fun run() {
+        // This transition runs until it is interrupted by another one.
+        finishCompletable.await()
+    }
+
+    override fun freezeAndAnimateToCurrentState() {
+        finishCompletable.complete(Unit)
+    }
+}

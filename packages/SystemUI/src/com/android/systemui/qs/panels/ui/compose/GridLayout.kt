@@ -18,6 +18,7 @@ package com.android.systemui.qs.panels.ui.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.shared.model.TileRow
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
@@ -27,7 +28,7 @@ import com.android.systemui.qs.pipeline.shared.TileSpec
 /** A layout of tiles, indicating how they should be composed when showing in QS or in edit mode. */
 interface GridLayout {
     @Composable
-    fun TileGrid(
+    fun SceneScope.TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
         editModeStart: () -> Unit,
@@ -66,7 +67,7 @@ interface PaginatableGridLayout : GridLayout {
          */
         fun splitInRows(
             tiles: List<SizedTile<TileViewModel>>,
-            columns: Int
+            columns: Int,
         ): List<List<SizedTile<TileViewModel>>> {
             val row = TileRow<TileViewModel>(columns)
 

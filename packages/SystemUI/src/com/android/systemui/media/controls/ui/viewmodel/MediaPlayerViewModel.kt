@@ -18,7 +18,6 @@ package com.android.systemui.media.controls.ui.viewmodel
 
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.monet.ColorScheme
 
 /** Models UI state for media player. */
 data class MediaPlayerViewModel(
@@ -30,8 +29,6 @@ data class MediaPlayerViewModel(
     val artistName: CharSequence,
     val titleName: CharSequence,
     val isExplicitVisible: Boolean,
-    val shouldAddGradient: Boolean,
-    val colorScheme: ColorScheme,
     val canShowTime: Boolean,
     val playTurbulenceNoise: Boolean,
     val useSemanticActions: Boolean,
@@ -52,7 +49,6 @@ data class MediaPlayerViewModel(
                 artistName == other.artistName &&
                 titleName == other.titleName &&
                 isExplicitVisible == other.isExplicitVisible &&
-                shouldAddGradient == other.shouldAddGradient &&
                 canShowTime == other.canShowTime &&
                 playTurbulenceNoise == other.playTurbulenceNoise &&
                 useSemanticActions == other.useSemanticActions &&

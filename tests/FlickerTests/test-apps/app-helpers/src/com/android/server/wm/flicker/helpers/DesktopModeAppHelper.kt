@@ -20,6 +20,7 @@ import android.content.Context
 import android.graphics.Insets
 import android.graphics.Rect
 import android.graphics.Region
+import android.os.SystemClock
 import android.platform.uiautomator_helpers.DeviceHelpers
 import android.tools.device.apphelpers.IStandardAppHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
@@ -27,11 +28,14 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import android.tools.traces.wm.WindowingMode
 import android.view.WindowInsets
 import android.view.WindowManager
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.helpers.MotionEventHelper.InputMethod.TOUCH
+import com.android.window.flags.Flags
 import java.time.Duration
 
 /**
@@ -69,13 +73,22 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
     fun enterDesktopWithDrag(
         wmHelper: WindowManagerStateHelper,
         device: UiDevice,
+        motionEventHelper: MotionEventHelper = MotionEventHelper(getInstrumentation(), TOUCH)
     ) {
         innerHelper.launchViaIntent(wmHelper)
-        dragToDesktop(wmHelper, device)
+        dragToDesktop(
+            wmHelper = wmHelper,
+            device = device,
+            motionEventHelper = motionEventHelper
+        )
         waitForAppToMoveToDesktop(wmHelper)
     }
 
-    private fun dragToDesktop(wmHelper: WindowManagerStateHelper, device: UiDevice) {
+    private fun dragToDesktop(
+        wmHelper: WindowManagerStateHelper,
+        device: UiDevice,
+        motionEventHelper: MotionEventHelper
+    ) {
         val windowRect = wmHelper.getWindowRegion(innerHelper).bounds
         val startX = windowRect.centerX()
 
@@ -88,7 +101,17 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         val endY = displayRect.centerY() / 2
 
         // drag the window to move to desktop
-        device.drag(startX, startY, startX, endY, 100)
+        if (motionEventHelper.inputMethod == TOUCH
+            && Flags.enableHoldToDragAppHandle()) {
+            // Touch requires hold-to-drag.
+            val downTime = SystemClock.uptimeMillis()
+            motionEventHelper.actionDown(startX, startY, time = downTime)
+            SystemClock.sleep(100L) // hold for 100ns before starting the move.
+            motionEventHelper.actionMove(startX, startY, startX, endY, 100, downTime = downTime)
+            motionEventHelper.actionUp(startX, endY, downTime = downTime)
+        } else {
+            device.drag(startX, startY, startX, endY, 100)
+        }
     }
 
     private fun getMaximizeButtonForTheApp(caption: UiObject2?): UiObject2 {
@@ -220,9 +243,10 @@ open class DesktopModeAppHelper(private val innerHelper: IStandardAppHelper) :
         val endY = startY + verticalChange
         val endX = startX + horizontalChange
 
-        motionEvent.actionDown(startX, startY)
-        motionEvent.actionMove(startX, startY, endX, endY, /* steps= */100)
-        motionEvent.actionUp(endX, endY)
+        val downTime = SystemClock.uptimeMillis()
+        motionEvent.actionDown(startX, startY, time = downTime)
+        motionEvent.actionMove(startX, startY, endX, endY, /* steps= */100, downTime = downTime)
+        motionEvent.actionUp(endX, endY, downTime = downTime)
         wmHelper
             .StateSyncBuilder()
             .withAppTransitionIdle()

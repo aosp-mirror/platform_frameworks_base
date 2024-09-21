@@ -164,7 +164,13 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
      */
     @Nullable
     public Boolean getEnabled() {
-        return (Boolean) getProperty(PROPERTY_ENABLED);
+        // We can't use getPropertyBoolean here. getPropertyBoolean returns false instead of null
+        // if the value is missing.
+        boolean[] enabled = getPropertyBooleanArray(PROPERTY_ENABLED);
+        if (enabled == null || enabled.length == 0) {
+            return null;
+        }
+        return enabled[0];
     }
 
     /** Returns the qualified id linking to the static metadata of the app function. */
@@ -201,11 +207,16 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
         /**
          * Sets an indicator specifying if the function is enabled or not. This would override the
          * default enabled state in the static metadata ({@link
-         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}).
+         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to
+         * null to clear the override.
          */
         @NonNull
-        public Builder setEnabled(boolean enabled) {
-            setPropertyBoolean(PROPERTY_ENABLED, enabled);
+        public Builder setEnabled(@Nullable Boolean enabled) {
+            if (enabled == null) {
+                setPropertyBoolean(PROPERTY_ENABLED);
+            } else {
+                setPropertyBoolean(PROPERTY_ENABLED, enabled);
+            }
             return this;
         }
 

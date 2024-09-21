@@ -56,7 +56,8 @@ import com.android.systemui.statusbar.OperatorNameView;
 import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.chips.ron.shared.StatusBarRonChips;
-import com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableState;
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
+import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
@@ -366,8 +367,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mPrimaryOngoingActivityChip = mStatusBar.findViewById(R.id.ongoing_activity_chip_primary);
         mSecondaryOngoingActivityChip =
                 mStatusBar.findViewById(R.id.ongoing_activity_chip_secondary);
-        showEndSideContent(false);
-        showClock(false);
+        if (!StatusBarSimpleFragment.isEnabled()) {
+            showEndSideContent(false);
+            showClock(false);
+        }
         initOperatorName();
         initNotificationIconArea();
         mSystemEventAnimator = getSystemEventAnimator();
@@ -455,7 +458,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         super.onPause();
         mCommandQueue.removeCallback(this);
         mStatusBarStateController.removeCallback(this);
-        mOngoingCallController.removeCallback(mOngoingCallListener);
+        if (!StatusBarSimpleFragment.isEnabled()) {
+            mOngoingCallController.removeCallback(mOngoingCallListener);
+        }
         mAnimationScheduler.removeCallback(this);
         mSecureSettings.unregisterContentObserverSync(mVolumeSettingObserver);
     }
@@ -490,7 +495,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mNotificationIconAreaInner = notificationIcons;
         mNicBindingDisposable = mNicViewBinder.bindWhileAttached(notificationIcons);
 
-        updateNotificationIconAreaAndOngoingActivityChip(/* animate= */ false);
+        if (!StatusBarSimpleFragment.isEnabled()) {
+            updateNotificationIconAreaAndOngoingActivityChip(/* animate= */ false);
+        }
         Trace.endSection();
     }
 
@@ -509,11 +516,17 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             new StatusBarVisibilityChangeListener() {
                 @Override
                 public void onStatusBarVisibilityMaybeChanged() {
+                    if (StatusBarSimpleFragment.isEnabled()) {
+                        return;
+                    }
                     updateStatusBarVisibilities(/* animate= */ true);
                 }
 
                 @Override
                 public void onTransitionFromLockscreenToDreamStarted() {
+                    if (StatusBarSimpleFragment.isEnabled()) {
+                        return;
+                    }
                     mTransitionFromLockscreenToDreamStarted = true;
                 }
 
@@ -522,6 +535,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         boolean hasPrimaryOngoingActivity,
                         boolean hasSecondaryOngoingActivity,
                         boolean shouldAnimate) {
+                    if (StatusBarSimpleFragment.isEnabled()) {
+                        return;
+                    }
                     mHasPrimaryOngoingActivity = hasPrimaryOngoingActivity;
                     mHasSecondaryOngoingActivity = hasSecondaryOngoingActivity;
                     updateStatusBarVisibilities(shouldAnimate);
@@ -530,6 +546,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 @Override
                 public void onIsHomeStatusBarAllowedBySceneChanged(
                         boolean isHomeStatusBarAllowedByScene) {
+                    if (StatusBarSimpleFragment.isEnabled()) {
+                        return;
+                    }
                     mHomeStatusBarAllowedByScene = isHomeStatusBarAllowedByScene;
                     updateStatusBarVisibilities(/* animate= */ true);
                 }
@@ -537,17 +556,22 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Override
     public void disable(int displayId, int state1, int state2, boolean animate) {
+        if (StatusBarSimpleFragment.isEnabled()) {
+            return;
+        }
         if (displayId != getContext().getDisplayId()) {
             return;
         }
         mCollapsedStatusBarFragmentLogger
-                .logDisableFlagChange(new DisableState(state1, state2));
+                .logDisableFlagChange(new DisableFlagsLogger.DisableState(state1, state2));
         mLastSystemVisibility =
                 StatusBarVisibilityModel.createModelFromFlags(state1, state2);
         updateStatusBarVisibilities(animate);
     }
 
     private void updateStatusBarVisibilities(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
+
         StatusBarVisibilityModel previousModel = mLastModifiedVisibility;
         StatusBarVisibilityModel newModel = calculateInternalModel(mLastSystemVisibility);
         mCollapsedStatusBarFragmentLogger.logVisibilityModel(newModel);
@@ -587,6 +611,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     private StatusBarVisibilityModel calculateInternalModel(
             StatusBarVisibilityModel externalModel) {
+        StatusBarSimpleFragment.assertInLegacyMode();
+
         // TODO(b/328393714) use HeadsUpNotificationInteractor.showHeadsUpStatusBar instead.
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
@@ -639,6 +665,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * mLastModifiedVisibility.
      */
     private void updateNotificationIconAreaAndOngoingActivityChip(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
+
         StatusBarVisibilityModel visibilityModel = mLastModifiedVisibility;
         boolean disableNotifications = !visibilityModel.getShowNotificationIcons();
         boolean hasOngoingActivity = visibilityModel.getShowPrimaryOngoingActivityChip();
@@ -674,6 +702,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private boolean shouldHideStatusBar() {
+        StatusBarSimpleFragment.assertInLegacyMode();
+
         if (!mShadeExpansionStateManager.isClosed()
                 && mPanelExpansionInteractor.shouldHideStatusBarIconsWhenExpanded()) {
             return true;
@@ -728,6 +758,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void hideEndSideContent(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         if (!animate || !mAnimationsEnabled) {
             mEndSideAlphaController.setAlpha(/*alpha*/ 0f, SOURCE_OTHER);
         } else {
@@ -737,6 +768,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void showEndSideContent(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         if (!animate || !mAnimationsEnabled) {
             mEndSideAlphaController.setAlpha(1f, SOURCE_OTHER);
             return;
@@ -753,15 +785,18 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     private void hideClock(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateHiddenState(mClockView, clockHiddenMode(), animate);
     }
 
     private void showClock(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateShow(mClockView, animate);
     }
 
     /** Hides the primary ongoing activity chip. */
     private void hidePrimaryOngoingActivityChip(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateHiddenState(mPrimaryOngoingActivityChip, View.GONE, animate);
     }
 
@@ -773,15 +808,18 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * activities. See b/332662551.
      */
     private void showPrimaryOngoingActivityChip(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateShow(mPrimaryOngoingActivityChip, animate);
     }
 
     private void hideSecondaryOngoingActivityChip(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateHiddenState(mSecondaryOngoingActivityChip, View.GONE, animate);
     }
 
     private void showSecondaryOngoingActivityChip(boolean animate) {
         StatusBarRonChips.assertInNewMode();
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateShow(mSecondaryOngoingActivityChip, animate);
     }
 
@@ -790,6 +828,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * don't set the clock GONE otherwise it'll mess up the animation.
      */
     private int clockHiddenMode() {
+        StatusBarSimpleFragment.assertInLegacyMode();
         if (!mShadeExpansionStateManager.isClosed() && !mKeyguardStateController.isShowing()
                 && !mStatusBarStateController.isDozing()) {
             return View.INVISIBLE;
@@ -798,20 +837,24 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     }
 
     public void hideNotificationIconArea(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateHide(mNotificationIconAreaInner, animate);
     }
 
     public void showNotificationIconArea(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateShow(mNotificationIconAreaInner, animate);
     }
 
     public void hideOperatorName(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         if (mOperatorNameViewController != null) {
             animateHide(mOperatorNameViewController.getView(), animate);
         }
     }
 
     public void showOperatorName(boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         if (mOperatorNameViewController != null) {
             animateShow(mOperatorNameViewController.getView(), animate);
         }
@@ -821,6 +864,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * Animate a view to INVISIBLE or GONE
      */
     private void animateHiddenState(final View v, int state, boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         v.animate().cancel();
         if (!animate || !mAnimationsEnabled) {
             v.setAlpha(0f);
@@ -840,6 +884,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * Hides a view.
      */
     private void animateHide(final View v, boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         animateHiddenState(v, View.INVISIBLE, animate);
     }
 
@@ -847,6 +892,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      * Shows a view, and synchronizes the animation with Keyguard exit animations, if applicable.
      */
     private void animateShow(View v, boolean animate) {
+        StatusBarSimpleFragment.assertInLegacyMode();
         v.animate().cancel();
         v.setVisibility(View.VISIBLE);
         if (!animate || !mAnimationsEnabled) {
@@ -883,13 +929,17 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             mOperatorNameViewController.init();
             // This view should not be visible on lock-screen
             if (mKeyguardStateController.isShowing()) {
-                hideOperatorName(false);
+                if (!StatusBarSimpleFragment.isEnabled()) {
+                    hideOperatorName(false);
+                }
             }
         }
     }
 
     private void initOngoingCallChip() {
-        mOngoingCallController.addCallback(mOngoingCallListener);
+        if (!StatusBarSimpleFragment.isEnabled()) {
+            mOngoingCallController.addCallback(mOngoingCallListener);
+        }
         // TODO(b/364653005): Do we also need to set the secondary activity chip?
         mOngoingCallController.setChipView(mPrimaryOngoingActivityChip);
     }
@@ -899,6 +949,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Override
     public void onDozingChanged(boolean isDozing) {
+        if (StatusBarSimpleFragment.isEnabled()) {
+            return;
+        }
         updateStatusBarVisibilities(/* animate= */ false);
     }
 

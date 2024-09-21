@@ -1358,7 +1358,8 @@ public class ZenModeHelper {
             if (isNew) {
                 // Newly created rule with no provided policy; fill in with the default.
                 zenRule.zenPolicy =
-                        Flags.modesUi() ? mDefaultConfig.getZenPolicy() : mConfig.getZenPolicy();
+                        (Flags.modesUi() ? mDefaultConfig.getZenPolicy() : mConfig.getZenPolicy())
+                                .copy();
                 return true;
             }
             // Otherwise, a null policy means no policy changes, so we can stop here.
@@ -1773,7 +1774,7 @@ public class ZenModeHelper {
                 // definition cannot have a rule with TYPE_BEDTIME (or any other type).
                 config.automaticRules = new ArrayMap<>();
                 for (ZenRule rule : mDefaultConfig.automaticRules.values()) {
-                    config.automaticRules.put(rule.id, rule);
+                    config.automaticRules.put(rule.id, rule.copy());
                 }
                 reason += ", reset to default rules";
             }

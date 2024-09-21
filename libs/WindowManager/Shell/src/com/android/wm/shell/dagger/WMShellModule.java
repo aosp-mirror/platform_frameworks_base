@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.dagger;
 
-import static com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
+import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -636,7 +636,7 @@ public abstract class WMShellModule {
             @ShellMainThread Handler handler) {
         int maxTaskLimit = DesktopModeStatus.getMaxTaskLimit(context);
         if (!DesktopModeStatus.canEnterDesktopMode(context)
-                || !ENABLE_DESKTOP_WINDOWING_TASK_LIMIT.isEnabled(context)
+                || !ENABLE_DESKTOP_WINDOWING_TASK_LIMIT.isTrue()
                 || maxTaskLimit <= 0) {
             return Optional.empty();
         }

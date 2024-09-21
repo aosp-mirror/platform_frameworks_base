@@ -36,7 +36,7 @@ public final class DesktopModeHelper {
 
     /** Whether desktop mode is enabled. */
     static boolean isDesktopModeEnabled() {
-        return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isEnabled();
+        return DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE.isTrue();
     }
 
     /**
