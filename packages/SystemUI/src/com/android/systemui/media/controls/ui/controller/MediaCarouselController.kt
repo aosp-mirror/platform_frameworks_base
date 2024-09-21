@@ -110,6 +110,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -726,6 +727,13 @@ constructor(
                     )
                 DiffUtil.calculateDiff(diffUtilCallback).dispatchUpdatesTo(listUpdateCallback)
                 setNewViewModelsList(it)
+
+                // Update host visibility when media changes.
+                merge(
+                        mediaCarouselViewModel.hasAnyMediaOrRecommendations,
+                        mediaCarouselViewModel.hasActiveMediaOrRecommendations,
+                    )
+                    .collect { updateHostVisibility() }
             }
         }
     }

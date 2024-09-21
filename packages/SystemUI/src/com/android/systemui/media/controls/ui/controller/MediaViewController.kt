@@ -91,7 +91,7 @@ constructor(
      */
     enum class TYPE {
         PLAYER,
-        RECOMMENDATION
+        RECOMMENDATION,
     }
 
     companion object {
@@ -294,14 +294,14 @@ constructor(
         object : MediaHostStatesManager.Callback {
             override fun onHostStateChanged(
                 @MediaLocation location: Int,
-                mediaHostState: MediaHostState
+                mediaHostState: MediaHostState,
             ) {
                 if (location == currentEndLocation || location == currentStartLocation) {
                     setCurrentState(
                         currentStartLocation,
                         currentEndLocation,
                         currentTransitionProgress,
-                        applyImmediately = false
+                        applyImmediately = false,
                     )
                 }
             }
@@ -442,7 +442,7 @@ constructor(
     /** Apply squishFraction to a copy of viewState such that the cached version is untouched. */
     internal fun squishViewState(
         viewState: TransitionViewState,
-        squishFraction: Float
+        squishFraction: Float,
     ): TransitionViewState {
         val squishedViewState = viewState.copy()
         val squishedHeight = (squishedViewState.measureHeight * squishFraction).toInt()
@@ -458,13 +458,13 @@ constructor(
             MediaViewHolder.expandedBottomActionIds,
             squishedViewState.measureHeight.toFloat(),
             squishedViewState,
-            squishFraction
+            squishFraction,
         )
         calculateWidgetGroupAlphaForSquishiness(
             MediaViewHolder.detailIds,
             squishedViewState.measureHeight.toFloat(),
             squishedViewState,
-            squishFraction
+            squishFraction,
         )
         // recommendation card
         val titlesTop =
@@ -472,13 +472,13 @@ constructor(
                 RecommendationViewHolder.mediaTitlesAndSubtitlesIds,
                 squishedViewState.measureHeight.toFloat(),
                 squishedViewState,
-                squishFraction
+                squishFraction,
             )
         calculateWidgetGroupAlphaForSquishiness(
             RecommendationViewHolder.mediaContainersIds,
             titlesTop,
             squishedViewState,
-            squishFraction
+            squishFraction,
         )
         return squishedViewState
     }
@@ -517,7 +517,7 @@ constructor(
         widgetGroupIds: Set<Int>,
         groupEndPosition: Float,
         squishedViewState: TransitionViewState,
-        squishFraction: Float
+        squishFraction: Float,
     ): Float {
         val nonsquishedHeight = squishedViewState.measureHeight
         var groupTop = squishedViewState.measureHeight.toFloat()
@@ -547,7 +547,7 @@ constructor(
                         calculateAlpha(
                             squishFraction,
                             startPosition / nonsquishedHeight,
-                            endPosition / nonsquishedHeight
+                            endPosition / nonsquishedHeight,
                         )
                 }
             }
@@ -562,10 +562,10 @@ constructor(
     @VisibleForTesting
     fun obtainViewState(
         state: MediaHostState?,
-        isGutsAnimation: Boolean = false
+        isGutsAnimation: Boolean = false,
     ): TransitionViewState? {
         if (SceneContainerFlag.isEnabled) {
-            return obtainSceneContainerViewState()
+            return obtainSceneContainerViewState(state)
         }
 
         if (state == null || state.measurementInput == null) {
@@ -606,7 +606,7 @@ constructor(
                 transitionLayout!!.calculateViewState(
                     state.measurementInput!!,
                     constraintSetForExpansion(state.expansion),
-                    TransitionViewState()
+                    TransitionViewState(),
                 )
 
             setGutsViewState(result)
@@ -661,7 +661,7 @@ constructor(
                 startLocation = currentStartLocation,
                 endLocation = currentEndLocation,
                 transitionProgress = currentTransitionProgress,
-                applyImmediately = true
+                applyImmediately = true,
             )
         }
 
@@ -695,7 +695,7 @@ constructor(
                 Interpolators.EMPHASIZED_DECELERATE,
                 titleText,
                 artistText,
-                explicitIndicator
+                explicitIndicator,
             )
         val exit =
             loadAnimator(
@@ -704,7 +704,7 @@ constructor(
                 Interpolators.EMPHASIZED_ACCELERATE,
                 titleText,
                 artistText,
-                explicitIndicator
+                explicitIndicator,
             )
         metadataAnimationHandler = MetadataAnimationHandler(exit, enter)
 
@@ -713,7 +713,7 @@ constructor(
                 mediaCard.context,
                 mediaViewHolder,
                 multiRippleController,
-                turbulenceNoiseController
+                turbulenceNoiseController,
             )
 
         // For Turbulence noise.
@@ -728,7 +728,7 @@ constructor(
             object : LoadingEffect.AnimationStateChangedCallback {
                 override fun onStateChanged(
                     oldState: LoadingEffect.AnimationState,
-                    newState: LoadingEffect.AnimationState
+                    newState: LoadingEffect.AnimationState,
                 ) {
                     if (newState === LoadingEffect.AnimationState.NOT_PLAYING) {
                         loadingEffectView.visibility = View.INVISIBLE
@@ -755,12 +755,12 @@ constructor(
                 MediaControlViewBinder.setVisibleAndAlpha(
                     expandedLayout,
                     it.scrubbingTotalTimeView.id,
-                    isTimeVisible
+                    isTimeVisible,
                 )
                 MediaControlViewBinder.setVisibleAndAlpha(
                     expandedLayout,
                     it.scrubbingElapsedTimeView.id,
-                    isTimeVisible
+                    isTimeVisible,
                 )
             }
 
@@ -788,7 +788,7 @@ constructor(
                         collapsedLayout,
                         isButtonVisible,
                         notVisibleValue,
-                        showInCollapsed = true
+                        showInCollapsed = true,
                     )
                 }
             }
@@ -822,7 +822,7 @@ constructor(
                     createTurbulenceNoiseConfig(
                         it.loadingEffectView,
                         it.turbulenceNoiseView,
-                        colorSchemeTransition
+                        colorSchemeTransition,
                     )
             }
             if (Flags.shaderlibLoadingEffectRefactor()) {
@@ -832,23 +832,23 @@ constructor(
                             TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE,
                             turbulenceNoiseAnimationConfig,
                             noiseDrawCallback,
-                            stateChangedCallback
+                            stateChangedCallback,
                         )
                 }
                 colorSchemeTransition.loadingEffect = loadingEffect
                 loadingEffect.play()
                 mainExecutor.executeDelayed(
                     loadingEffect::finish,
-                    MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION
+                    MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION,
                 )
             } else {
                 turbulenceNoiseController.play(
                     TurbulenceNoiseShader.Companion.Type.SIMPLEX_NOISE,
-                    turbulenceNoiseAnimationConfig
+                    turbulenceNoiseAnimationConfig,
                 )
                 mainExecutor.executeDelayed(
                     turbulenceNoiseController::finish,
-                    MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION
+                    MediaControlViewModel.TURBULENCE_NOISE_PLAY_MS_DURATION,
                 )
             }
         }
@@ -920,7 +920,7 @@ constructor(
                             startViewState,
                             startHostState.disappearParameters,
                             transitionProgress,
-                            tmpState
+                            tmpState,
                         )
                 }
             } else if (startHostState != null && !startHostState.visible) {
@@ -931,7 +931,7 @@ constructor(
                         endViewState,
                         endHostState.disappearParameters,
                         1.0f - transitionProgress,
-                        tmpState
+                        tmpState,
                     )
             } else if (transitionProgress == 1.0f || startViewState == null) {
                 // We're at the end. Let's use that state
@@ -945,13 +945,13 @@ constructor(
                         startViewState,
                         endViewState,
                         transitionProgress,
-                        tmpState
+                        tmpState,
                     )
             }
             logger.logMediaSize(
                 "setCurrentState (progress $transitionProgress)",
                 result.width,
-                result.height
+                result.height,
             )
             layoutController.setState(
                 result,
@@ -966,7 +966,7 @@ constructor(
     private fun updateViewStateSize(
         viewState: TransitionViewState?,
         location: Int,
-        outState: TransitionViewState
+        outState: TransitionViewState,
     ): TransitionViewState? {
         var result = viewState?.copy(outState) ?: return null
         val state = mediaHostStatesManager.mediaHostStates[location]
@@ -1020,15 +1020,19 @@ constructor(
     }
 
     /** Get a view state based on the width and height set by the scene */
-    private fun obtainSceneContainerViewState(): TransitionViewState? {
+    private fun obtainSceneContainerViewState(state: MediaHostState?): TransitionViewState? {
         logger.logMediaSize("scene container", widthInSceneContainerPx, heightInSceneContainerPx)
+
+        if (state?.measurementInput == null) {
+            return null
+        }
 
         // Similar to obtainViewState: Let's create a new measurement
         val result =
             transitionLayout?.calculateViewState(
                 MeasurementInput(widthInSceneContainerPx, heightInSceneContainerPx),
-                expandedLayout,
-                TransitionViewState()
+                if (state.expansion > 0) expandedLayout else collapsedLayout,
+                TransitionViewState(),
             )
         result?.let {
             // And then ensure the guts visibility is set correctly
@@ -1049,7 +1053,7 @@ constructor(
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
         val mediaHostState = mediaHostStatesManager.mediaHostStates[location] ?: return null
         if (SceneContainerFlag.isEnabled) {
-            return obtainSceneContainerViewState()
+            return obtainSceneContainerViewState(mediaHostState)
         }
 
         val viewState = obtainViewState(mediaHostState)
@@ -1080,9 +1084,10 @@ constructor(
     fun refreshState() =
         traceSection("MediaViewController#refreshState") {
             if (SceneContainerFlag.isEnabled) {
+                val hostState = mediaHostStatesManager.mediaHostStates[currentEndLocation]
                 // We don't need to recreate measurements for scene container, since it's a known
                 // size. Just get the view state and update the layout controller
-                obtainSceneContainerViewState()?.let {
+                obtainSceneContainerViewState(hostState)?.let {
                     // Get scene container state, then setCurrentState
                     layoutController.setState(
                         state = it,
@@ -1106,7 +1111,7 @@ constructor(
                 currentStartLocation,
                 currentEndLocation,
                 currentTransitionProgress,
-                applyImmediately = true
+                applyImmediately = true,
             )
         }
 
@@ -1115,7 +1120,7 @@ constructor(
         context: Context,
         animId: Int,
         motionInterpolator: Interpolator?,
-        vararg targets: View?
+        vararg targets: View?,
     ): AnimatorSet {
         val animators = ArrayList<Animator>()
         for (target in targets) {
@@ -1132,7 +1137,7 @@ constructor(
     private fun createTurbulenceNoiseConfig(
         loadingEffectView: LoadingEffectView,
         turbulenceNoiseView: TurbulenceNoiseView,
-        colorSchemeTransition: ColorSchemeTransition
+        colorSchemeTransition: ColorSchemeTransition,
     ): TurbulenceNoiseAnimationConfig {
         val targetView: View =
             if (Flags.shaderlibLoadingEffectRefactor()) {
@@ -1163,7 +1168,7 @@ constructor(
             targetView.context.resources.displayMetrics.density,
             lumaMatteBlendFactor = 0.26f,
             lumaMatteOverallBrightness = 0.09f,
-            shouldInverseNoiseLuminosity = false
+            shouldInverseNoiseLuminosity = false,
         )
     }
 
@@ -1185,5 +1190,5 @@ private data class CacheKey(
     var widthMeasureSpec: Int = -1,
     var heightMeasureSpec: Int = -1,
     var expansion: Float = 0.0f,
-    var gutsVisible: Boolean = false
+    var gutsVisible: Boolean = false,
 )
