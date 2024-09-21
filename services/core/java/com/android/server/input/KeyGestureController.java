@@ -16,10 +16,14 @@
 
 package com.android.server.input;
 
+import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
+
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.input.AidlKeyGestureEvent;
 import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IKeyGestureHandler;
@@ -31,6 +35,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -38,10 +44,14 @@ import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -56,11 +66,35 @@ final class KeyGestureController {
     // 'adb shell setprop log.tag.KeyGestureController DEBUG' (requires restart)
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    // Maximum key gesture events that are tracked and will be available in input dump.
+    private static final int MAX_TRACKED_EVENTS = 10;
+
     private static final int MSG_NOTIFY_KEY_GESTURE_EVENT = 1;
+
+    // must match: config_settingsKeyBehavior in config.xml
+    private static final int SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY = 0;
+    private static final int SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL = 1;
+    private static final int SETTINGS_KEY_BEHAVIOR_NOTHING = 2;
+    private static final int LAST_SETTINGS_KEY_BEHAVIOR = SETTINGS_KEY_BEHAVIOR_NOTHING;
+
+    // Must match: config_searchKeyBehavior in config.xml
+    private static final int SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH = 0;
+    private static final int SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY = 1;
+    private static final int LAST_SEARCH_KEY_BEHAVIOR = SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY;
 
     private final Context mContext;
     private final Handler mHandler;
     private final int mSystemPid;
+
+    // Pending actions
+    private boolean mPendingMetaAction;
+    private boolean mPendingCapsLockToggle;
+    private boolean mPendingHideRecentSwitcher;
+
+    // Key behaviors
+    private boolean mEnableBugReportKeyboardShortcut;
+    private int mSearchKeyBehavior;
+    private int mSettingsKeyBehavior;
 
     // List of currently registered key gesture event listeners keyed by process pid
     @GuardedBy("mKeyGestureEventListenerRecords")
@@ -72,6 +106,11 @@ final class KeyGestureController {
     // over external handlers..
     @GuardedBy("mKeyGestureHandlerRecords")
     private final TreeMap<Integer, KeyGestureHandlerRecord> mKeyGestureHandlerRecords;
+
+    private final ArrayDeque<KeyGestureEvent> mLastHandledEvents = new ArrayDeque<>();
+
+    /** Currently fully consumed key codes per device */
+    private final SparseArray<Set<Integer>> mConsumedKeysForDevice = new SparseArray<>();
 
     KeyGestureController(Context context, Looper looper) {
         mContext = context;
@@ -89,20 +128,464 @@ final class KeyGestureController {
                 return Integer.compare(p1, p2);
             }
         });
+        initBehaviors();
     }
 
-    public int interceptKeyBeforeDispatching(IBinder focus, KeyEvent event, int policyFlags) {
+    private void initBehaviors() {
+        mEnableBugReportKeyboardShortcut = "1".equals(SystemProperties.get("ro.debuggable"));
+
+        Resources res = mContext.getResources();
+        mSearchKeyBehavior = res.getInteger(R.integer.config_searchKeyBehavior);
+        if (mSearchKeyBehavior < SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH
+                || mSearchKeyBehavior > LAST_SEARCH_KEY_BEHAVIOR) {
+            mSearchKeyBehavior = SEARCH_KEY_BEHAVIOR_DEFAULT_SEARCH;
+        }
+        mSettingsKeyBehavior = res.getInteger(R.integer.config_settingsKeyBehavior);
+        if (mSettingsKeyBehavior < SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY
+                || mSettingsKeyBehavior > LAST_SETTINGS_KEY_BEHAVIOR) {
+            mSettingsKeyBehavior = SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY;
+        }
+    }
+
+    public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
+            int policyFlags) {
         // TODO(b/358569822): Handle shortcuts trigger logic here and pass it to appropriate
         //  KeyGestureHandler (PWM is one of the handlers)
-        return 0;
+        final int keyCode = event.getKeyCode();
+        final int deviceId = event.getDeviceId();
+        final long keyConsumed = -1;
+        final long keyNotConsumed = 0;
+
+        Set<Integer> consumedKeys = mConsumedKeysForDevice.get(deviceId);
+        if (consumedKeys == null) {
+            consumedKeys = new HashSet<>();
+            mConsumedKeysForDevice.put(deviceId, consumedKeys);
+        }
+
+        if (interceptSystemKeysAndShortcuts(focusedToken, event)
+                && event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            consumedKeys.add(keyCode);
+            return keyConsumed;
+        }
+
+        boolean needToConsumeKey = consumedKeys.contains(keyCode);
+        if (event.getAction() == KeyEvent.ACTION_UP || event.isCanceled()) {
+            consumedKeys.remove(keyCode);
+            if (consumedKeys.isEmpty()) {
+                mConsumedKeysForDevice.remove(deviceId);
+            }
+        }
+
+        return needToConsumeKey ? keyConsumed : keyNotConsumed;
+    }
+
+    @SuppressLint("MissingPermission")
+    private boolean interceptSystemKeysAndShortcuts(IBinder focusedToken, KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        final int repeatCount = event.getRepeatCount();
+        final int metaState = event.getMetaState();
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        final boolean canceled = event.isCanceled();
+        final int displayId = event.getDisplayId();
+        final int deviceId = event.getDeviceId();
+        final boolean firstDown = down && repeatCount == 0;
+
+        // Cancel any pending meta actions if we see any other keys being pressed between the
+        // down of the meta key and its corresponding up.
+        if (mPendingMetaAction && !KeyEvent.isMetaKey(keyCode)) {
+            mPendingMetaAction = false;
+        }
+        // Any key that is not Alt or Meta cancels Caps Lock combo tracking.
+        if (mPendingCapsLockToggle && !KeyEvent.isMetaKey(keyCode) && !KeyEvent.isAltKey(keyCode)) {
+            mPendingCapsLockToggle = false;
+        }
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_A:
+                if (firstDown && event.isMetaPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_RECENT_APPS:
+                if (firstDown) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_APP_SWITCH:
+                if (firstDown) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH,
+                            KeyGestureEvent.ACTION_GESTURE_START, displayId,
+                            focusedToken, /* flags = */0);
+                } else if (!down) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, canceled ? KeyGestureEvent.FLAG_CANCELLED : 0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_H:
+            case KeyEvent.KEYCODE_ENTER:
+                if (firstDown && event.isMetaPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_HOME,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_I:
+                if (firstDown && event.isMetaPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_L:
+                if (firstDown && event.isMetaPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_N:
+                if (firstDown && event.isMetaPressed()) {
+                    if (event.isCtrlPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    } else {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_S:
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode},
+                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_DEL:
+                if (newBugreportKeyboardShortcut()) {
+                    if (firstDown && mEnableBugReportKeyboardShortcut && event.isMetaPressed()
+                            && event.isCtrlPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                // fall through
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (firstDown && event.isMetaPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode},
+                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if (firstDown && event.isMetaPressed() && event.isCtrlPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode},
+                            KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if (firstDown && event.isMetaPressed()) {
+                    if (event.isCtrlPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    } else if (event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    } else {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_BACK,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                if (firstDown && event.isMetaPressed()) {
+                    if (event.isCtrlPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    } else if (event.isAltPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_SLASH:
+                if (firstDown && event.isMetaPressed()) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_BRIGHTNESS_UP:
+            case KeyEvent.KEYCODE_BRIGHTNESS_DOWN:
+                if (down) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            keyCode == KeyEvent.KEYCODE_BRIGHTNESS_UP
+                                    ? KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_UP
+                                    : KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_DOWN:
+                if (down) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_UP:
+                if (down) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE:
+                // TODO: Add logic
+                if (!down) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_ALL_APPS:
+                if (firstDown) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_NOTIFICATION:
+                if (!down) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_SEARCH:
+                if (firstDown && mSearchKeyBehavior == SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+
+                }
+                break;
+            case KeyEvent.KEYCODE_SETTINGS:
+                if (firstDown) {
+                    if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY) {
+                        handleKeyGesture(deviceId,
+                                new int[]{keyCode}, /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    } else if (mSettingsKeyBehavior == SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL) {
+                        handleKeyGesture(deviceId,
+                                new int[]{keyCode}, /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                return true;
+            case KeyEvent.KEYCODE_LANGUAGE_SWITCH:
+                if (firstDown) {
+                    handleKeyGesture(deviceId, new int[]{keyCode},
+                            event.isShiftPressed() ? KeyEvent.META_SHIFT_ON : 0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_CAPS_LOCK:
+                // Just logging/notifying purposes
+                // Caps lock is already handled in inputflinger native
+                if (!down) {
+                    AidlKeyGestureEvent eventToNotify = createKeyGestureEvent(deviceId,
+                            new int[]{keyCode}, metaState,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId, /* flags = */0);
+                    Message msg = Message.obtain(mHandler, MSG_NOTIFY_KEY_GESTURE_EVENT,
+                            eventToNotify);
+                    mHandler.sendMessage(msg);
+                }
+                break;
+            case KeyEvent.KEYCODE_SCREENSHOT:
+                if (firstDown) {
+                    handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                return true;
+            case KeyEvent.KEYCODE_META_LEFT:
+            case KeyEvent.KEYCODE_META_RIGHT:
+                if (down) {
+                    if (event.isAltPressed()) {
+                        mPendingCapsLockToggle = true;
+                        mPendingMetaAction = false;
+                    } else {
+                        mPendingCapsLockToggle = false;
+                        mPendingMetaAction = true;
+                    }
+                } else {
+                    // Toggle Caps Lock on META-ALT.
+                    if (mPendingCapsLockToggle) {
+                        mPendingCapsLockToggle = false;
+                        handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_META_LEFT,
+                                        KeyEvent.KEYCODE_ALT_LEFT}, /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+
+                    } else if (mPendingMetaAction) {
+                        mPendingMetaAction = false;
+                        if (!canceled) {
+                            handleKeyGesture(deviceId, new int[]{keyCode},
+                                    /* modifierState = */0,
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
+                                    KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                    focusedToken, /* flags = */0);
+                        }
+                    }
+                }
+                return true;
+            case KeyEvent.KEYCODE_TAB:
+                if (firstDown) {
+                    if (event.isMetaPressed()) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode}, KeyEvent.META_META_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    } else if (!mPendingHideRecentSwitcher) {
+                        final int shiftlessModifiers =
+                                event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
+                        if (KeyEvent.metaStateHasModifiers(
+                                shiftlessModifiers, KeyEvent.META_ALT_ON)) {
+                            mPendingHideRecentSwitcher = true;
+                            return handleKeyGesture(deviceId, new int[]{keyCode},
+                                    KeyEvent.META_ALT_ON,
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER,
+                                    KeyGestureEvent.ACTION_GESTURE_START, displayId,
+                                    focusedToken, /* flags = */0);
+                        }
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_ALT_LEFT:
+            case KeyEvent.KEYCODE_ALT_RIGHT:
+                if (down) {
+                    if (event.isMetaPressed()) {
+                        mPendingCapsLockToggle = true;
+                        mPendingMetaAction = false;
+                    } else {
+                        mPendingCapsLockToggle = false;
+                    }
+                } else {
+                    if (mPendingHideRecentSwitcher) {
+                        mPendingHideRecentSwitcher = false;
+                        return handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_TAB},
+                                KeyEvent.META_ALT_ON,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+
+                    // Toggle Caps Lock on META-ALT.
+                    if (mPendingCapsLockToggle) {
+                        mPendingCapsLockToggle = false;
+                        return handleKeyGesture(deviceId, new int[]{KeyEvent.KEYCODE_META_LEFT,
+                                        KeyEvent.KEYCODE_ALT_LEFT}, /* modifierState = */0,
+                                KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_ASSIST:
+                Slog.wtf(TAG, "KEYCODE_ASSIST should be handled in interceptKeyBeforeQueueing");
+                return true;
+            case KeyEvent.KEYCODE_VOICE_ASSIST:
+                Slog.wtf(TAG, "KEYCODE_VOICE_ASSIST should be handled in"
+                        + " interceptKeyBeforeQueueing");
+                return true;
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_PRIMARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL:
+                Slog.wtf(TAG, "KEYCODE_STYLUS_BUTTON_* should be handled in"
+                        + " interceptKeyBeforeQueueing");
+                return true;
+        }
+        return false;
     }
 
     @VisibleForTesting
     boolean handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int displayId,
             IBinder focusedToken, int flags) {
-        AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes,
-                modifierState, gestureType, action, displayId, flags);
+        return handleKeyGesture(createKeyGestureEvent(deviceId, keycodes,
+                modifierState, gestureType, action, displayId, flags), focusedToken);
+    }
+
+    private boolean handleKeyGesture(AidlKeyGestureEvent event, @Nullable IBinder focusedToken) {
         synchronized (mKeyGestureHandlerRecords) {
             for (KeyGestureHandlerRecord handler : mKeyGestureHandlerRecords.values()) {
                 if (handler.handleKeyGesture(event, focusedToken)) {
@@ -135,6 +618,13 @@ final class KeyGestureController {
         mHandler.obtainMessage(MSG_NOTIFY_KEY_GESTURE_EVENT, event).sendToTarget();
     }
 
+    public void handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
+            @KeyGestureEvent.KeyGestureType int gestureType) {
+        AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes, modifierState,
+                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, Display.DEFAULT_DISPLAY, 0);
+        handleKeyGesture(event, null /*focusedToken*/);
+    }
+
     @MainThread
     private void notifyKeyGestureEvent(AidlKeyGestureEvent event) {
         InputDevice device = getInputDevice(event.deviceId);
@@ -147,6 +637,10 @@ final class KeyGestureController {
                     KeyGestureEvent.keyGestureTypeToLogEvent(event.gestureType));
         }
         notifyAllListeners(event);
+        while (mLastHandledEvents.size() >= MAX_TRACKED_EVENTS) {
+            mLastHandledEvents.removeFirst();
+        }
+        mLastHandledEvents.addLast(new KeyGestureEvent(event));
     }
 
     @MainThread
@@ -346,5 +840,46 @@ final class KeyGestureController {
         event.displayId = displayId;
         event.flags = flags;
         return event;
+    }
+
+    public void dump(IndentingPrintWriter ipw) {
+        ipw.println("KeyGestureController:");
+        ipw.increaseIndent();
+        ipw.println("mSystemPid = " + mSystemPid);
+        ipw.println("mPendingMetaAction = " + mPendingMetaAction);
+        ipw.println("mPendingCapsLockToggle = " + mPendingCapsLockToggle);
+        ipw.println("mPendingHideRecentSwitcher = " + mPendingHideRecentSwitcher);
+        ipw.println("mSearchKeyBehavior = " + mSearchKeyBehavior);
+        ipw.println("mSettingsKeyBehavior = " + mSettingsKeyBehavior);
+        ipw.print("mKeyGestureEventListenerRecords = {");
+        synchronized (mKeyGestureEventListenerRecords) {
+            int size = mKeyGestureEventListenerRecords.size();
+            for (int i = 0; i < size; i++) {
+                ipw.print(mKeyGestureEventListenerRecords.keyAt(i));
+                if (i < size - 1) {
+                    ipw.print(", ");
+                }
+            }
+        }
+        ipw.println("}");
+        ipw.print("mKeyGestureHandlerRecords = {");
+        synchronized (mKeyGestureHandlerRecords) {
+            int i = mKeyGestureHandlerRecords.size() - 1;
+            for (int processId : mKeyGestureHandlerRecords.keySet()) {
+                ipw.print(processId);
+                if (i > 0) {
+                    ipw.print(", ");
+                }
+                i--;
+            }
+        }
+        ipw.println("}");
+        ipw.decreaseIndent();
+        ipw.println("Last handled KeyGestureEvents: ");
+        ipw.increaseIndent();
+        for (KeyGestureEvent ev : mLastHandledEvents) {
+            ipw.println(ev);
+        }
+        ipw.decreaseIndent();
     }
 }

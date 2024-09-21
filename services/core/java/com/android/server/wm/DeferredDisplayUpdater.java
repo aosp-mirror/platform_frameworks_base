@@ -422,6 +422,7 @@ class DeferredDisplayUpdater {
                 || first.brightnessMaximum != second.brightnessMaximum
                 || first.brightnessDefault != second.brightnessDefault
                 || first.installOrientation != second.installOrientation
+                || first.isForceSdr != second.isForceSdr
                 || !Objects.equals(first.layoutLimitedRefreshRate, second.layoutLimitedRefreshRate)
                 || !BrightnessSynchronizer.floatEquals(first.hdrSdrRatio, second.hdrSdrRatio)
                 || !first.thermalRefreshRateThrottling.contentEquals(

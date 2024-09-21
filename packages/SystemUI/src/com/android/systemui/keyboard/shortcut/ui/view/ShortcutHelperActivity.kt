@@ -18,31 +18,43 @@ package com.android.systemui.keyboard.shortcut.ui.view
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.graphics.Insets
+import android.content.res.Configuration
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
-import android.view.WindowInsets
-import androidx.activity.BackEventCompat
 import androidx.activity.ComponentActivity
-import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.view.updatePadding
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelper
+import com.android.systemui.keyboard.shortcut.ui.composable.hasCompactWindowSize
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.dpToPx
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
-import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
@@ -55,52 +67,58 @@ class ShortcutHelperActivity
 constructor(private val userTracker: UserTracker, private val viewModel: ShortcutHelperViewModel) :
     ComponentActivity() {
 
-    private val bottomSheetContainer
-        get() = requireViewById<View>(R.id.shortcut_helper_sheet_container)
-
-    private val bottomSheet
-        get() = requireViewById<View>(R.id.shortcut_helper_sheet)
-
-    private val bottomSheetBehavior
-        get() = BottomSheetBehavior.from(bottomSheet)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         setupEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_keyboard_shortcut_helper)
-        setUpWidth()
-        expandBottomSheet()
-        setUpInsets()
-        setUpPredictiveBack()
-        setUpSheetDismissListener()
-        setUpDismissOnTouchOutside()
-        setUpComposeView()
+        setContent { Content() }
         observeFinishRequired()
         viewModel.onViewOpened()
     }
 
-    private fun setUpWidth() {
-        // we override this because when maxWidth isn't specified, material imposes a max width
-        // constraint on bottom sheets on larger screens which is smaller than our desired width.
-        bottomSheetBehavior.maxWidth =
-            resources.getDimension(R.dimen.shortcut_helper_width).dpToPx(resources).toInt()
+    @Composable
+    private fun Content() {
+        CompositionLocalProvider(LocalContext provides userTracker.userContext) {
+            PlatformTheme { BottomSheet { finish() } }
+        }
     }
 
-    private fun setUpComposeView() {
-        requireViewById<ComposeView>(R.id.shortcut_helper_compose_container).apply {
-            setContent {
-                CompositionLocalProvider(LocalContext provides userTracker.userContext) {
-                    PlatformTheme {
-                        val shortcutsUiState by
-                            viewModel.shortcutsUiState.collectAsStateWithLifecycle()
-                        ShortcutHelper(
-                            shortcutsUiState = shortcutsUiState,
-                            onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
-                            onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
-                        )
-                    }
-                }
-            }
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun BottomSheet(onDismiss: () -> Unit) {
+        ModalBottomSheet(
+            onDismissRequest = { onDismiss() },
+            modifier =
+                Modifier.width(getWidth()).padding(top = getTopPadding()).onKeyEvent {
+                    if (it.key == Key.Escape) {
+                        onDismiss()
+                        true
+                    } else false
+                },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            dragHandle = { DragHandle() },
+        ) {
+            val shortcutsUiState by viewModel.shortcutsUiState.collectAsStateWithLifecycle()
+            ShortcutHelper(
+                shortcutsUiState = shortcutsUiState,
+                onKeyboardSettingsClicked = ::onKeyboardSettingsClicked,
+                onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
+            )
+        }
+    }
+
+    @Composable
+    fun DragHandle() {
+        val dragHandleContentDescription =
+            stringResource(id = R.string.shortcut_helper_content_description_drag_handle)
+        Surface(
+            modifier =
+                Modifier.padding(top = 16.dp, bottom = 6.dp).semantics {
+                    contentDescription = dragHandleContentDescription
+                },
+            color = MaterialTheme.colorScheme.outlineVariant,
+            shape = MaterialTheme.shapes.extraLarge,
+        ) {
+            Box(Modifier.size(width = 32.dp, height = 4.dp))
         }
     }
 
@@ -139,81 +157,27 @@ constructor(private val userTracker: UserTracker, private val viewModel: Shortcu
         window.setDecorFitsSystemWindows(false)
     }
 
-    private fun setUpInsets() {
-        bottomSheetContainer.setOnApplyWindowInsetsListener { _, insets ->
-            val safeDrawingInsets = insets.safeDrawing
-            // Make sure the bottom sheet is not covered by the status bar.
-            bottomSheetBehavior.maxHeight =
-                windowManager.maximumWindowMetrics.bounds.height() - safeDrawingInsets.top
-            // Make sure the contents inside of the bottom sheet are not hidden by system bars, or
-            // cutouts.
-            bottomSheet.updatePadding(
-                left = safeDrawingInsets.left,
-                right = safeDrawingInsets.right,
-                bottom = safeDrawingInsets.bottom,
-            )
-            // The bottom sheet has to be expanded only after setting up insets, otherwise there is
-            // a bug and it will not use full height.
-            expandBottomSheet()
-
-            // Return CONSUMED if you don't want want the window insets to keep passing
-            // down to descendant views.
-            WindowInsets.CONSUMED
-        }
+    @Composable
+    private fun getTopPadding(): Dp {
+        return if (hasCompactWindowSize()) DefaultTopPadding else LargeScreenTopPadding
     }
 
-    private fun expandBottomSheet() {
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-        bottomSheetBehavior.skipCollapsed = true
-    }
-
-    private fun setUpPredictiveBack() {
-        val onBackPressedCallback =
-            object : OnBackPressedCallback(/* enabled= */ true) {
-                override fun handleOnBackStarted(backEvent: BackEventCompat) {
-                    bottomSheetBehavior.startBackProgress(backEvent)
-                }
-
-                override fun handleOnBackProgressed(backEvent: BackEventCompat) {
-                    bottomSheetBehavior.updateBackProgress(backEvent)
-                }
-
-                override fun handleOnBackPressed() {
-                    bottomSheetBehavior.handleBackInvoked()
-                }
-
-                override fun handleOnBackCancelled() {
-                    bottomSheetBehavior.cancelBackProgress()
-                }
+    @Composable
+    private fun getWidth(): Dp {
+        return if (hasCompactWindowSize()) {
+            DefaultWidth
+        } else
+            when (LocalConfiguration.current.orientation) {
+                Configuration.ORIENTATION_LANDSCAPE -> LargeScreenWidthLandscape
+                else -> LargeScreenWidthPortrait
             }
-        onBackPressedDispatcher.addCallback(
-            owner = this,
-            onBackPressedCallback = onBackPressedCallback,
-        )
     }
 
-    private fun setUpSheetDismissListener() {
-        bottomSheetBehavior.addBottomSheetCallback(
-            object : BottomSheetCallback() {
-                override fun onStateChanged(bottomSheet: View, newState: Int) {
-                    if (newState == STATE_HIDDEN) {
-                        finish()
-                    }
-                }
-
-                override fun onSlide(bottomSheet: View, slideOffset: Float) {}
-            }
-        )
-    }
-
-    private fun setUpDismissOnTouchOutside() {
-        bottomSheetContainer.setOnClickListener { finish() }
+    companion object {
+        private val DefaultTopPadding = 64.dp
+        private val LargeScreenTopPadding = 72.dp
+        private val DefaultWidth = 412.dp
+        private val LargeScreenWidthPortrait = 704.dp
+        private val LargeScreenWidthLandscape = 864.dp
     }
 }
-
-private val WindowInsets.safeDrawing
-    get() =
-        getInsets(WindowInsets.Type.systemBars())
-            .union(getInsets(WindowInsets.Type.displayCutout()))
-
-private fun Insets.union(insets: Insets): Insets = Insets.max(this, insets)

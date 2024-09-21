@@ -451,7 +451,7 @@ public class LocationManager {
     private static final long MAX_SINGLE_LOCATION_TIMEOUT_MS = 30 * 1000;
 
     private static final String CACHE_KEY_LOCATION_ENABLED_PROPERTY =
-            "cache_key.location_enabled";
+            PropertyInvalidatedCache.createSystemCacheKey("location_enabled");
 
     static ILocationManager getService() throws RemoteException {
         try {

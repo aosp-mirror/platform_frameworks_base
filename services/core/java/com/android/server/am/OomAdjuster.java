@@ -73,6 +73,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE;
 import static android.media.audio.Flags.roForegroundAudioControl;
 import static android.os.Process.THREAD_GROUP_BACKGROUND;
 import static android.os.Process.THREAD_GROUP_DEFAULT;
+import static android.os.Process.THREAD_GROUP_FOREGROUND_WINDOW;
 import static android.os.Process.THREAD_GROUP_RESTRICTED;
 import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
@@ -116,6 +117,7 @@ import static com.android.server.am.ProcessList.PERSISTENT_SERVICE_ADJ;
 import static com.android.server.am.ProcessList.PREVIOUS_APP_ADJ;
 import static com.android.server.am.ProcessList.SCHED_GROUP_BACKGROUND;
 import static com.android.server.am.ProcessList.SCHED_GROUP_DEFAULT;
+import static com.android.server.am.ProcessList.SCHED_GROUP_FOREGROUND_WINDOW;
 import static com.android.server.am.ProcessList.SCHED_GROUP_RESTRICTED;
 import static com.android.server.am.ProcessList.SCHED_GROUP_TOP_APP;
 import static com.android.server.am.ProcessList.SCHED_GROUP_TOP_APP_BOUND;
@@ -1731,6 +1733,11 @@ public class OomAdjuster {
                 // The recently used non-top visible freeform app.
                 schedGroup = SCHED_GROUP_TOP_APP;
                 mAdjType = "perceptible-freeform-activity";
+            } else if ((flags
+                    & WindowProcessController.ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE) != 0) {
+                // Currently the only case is from freeform apps which are not close to top.
+                schedGroup = SCHED_GROUP_FOREGROUND_WINDOW;
+                mAdjType = "vis-multi-window-activity";
             }
             foregroundActivities = true;
             mHasVisibleActivities = true;
@@ -3438,6 +3445,9 @@ public class OomAdjuster {
                 case SCHED_GROUP_RESTRICTED:
                     processGroup = THREAD_GROUP_RESTRICTED;
                     break;
+                case SCHED_GROUP_FOREGROUND_WINDOW:
+                    processGroup = THREAD_GROUP_FOREGROUND_WINDOW;
+                    break;
                 default:
                     processGroup = THREAD_GROUP_DEFAULT;
                     break;
@@ -3607,14 +3617,12 @@ public class OomAdjuster {
         if (changes != 0) {
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
                     "Changes in " + app + ": " + changes);
-            ActivityManagerService.ProcessChangeItem item =
-                    mProcessList.enqueueProcessChangeItemLocked(app.getPid(), app.info.uid);
-            item.changes |= changes;
-            item.foregroundActivities = state.hasRepForegroundActivities();
+            mProcessList.enqueueProcessChangeItemLocked(app.getPid(), app.info.uid,
+                    changes, state.hasRepForegroundActivities());
             if (DEBUG_PROCESS_OBSERVERS) Slog.i(TAG_PROCESS_OBSERVERS,
-                    "Item " + Integer.toHexString(System.identityHashCode(item))
-                            + " " + app.toShortString() + ": changes=" + item.changes
-                            + " foreground=" + item.foregroundActivities
+                    "Enqueued process change item for "
+                            + app.toShortString() + ": changes=" + changes
+                            + " foreground=" + state.hasRepForegroundActivities()
                             + " type=" + state.getAdjType() + " source=" + state.getAdjSource()
                             + " target=" + state.getAdjTarget());
         }

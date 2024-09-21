@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static android.media.tv.flags.Flags.hdmiControlEnhancedBehavior;
+
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.EARC_FEATURE_DISABLED;
@@ -1378,7 +1380,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private List<Integer> getCecLocalDeviceTypes() {
         ArrayList<Integer> allLocalDeviceTypes = new ArrayList<>(mCecLocalDevices);
-        if (isDsmEnabled() && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+        if (!isTvDevice() && isDsmEnabled()
+                && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
                 && isArcSupported() && mSoundbarModeFeatureFlagEnabled) {
             allLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         }
@@ -1685,7 +1688,11 @@ public class HdmiControlService extends SystemService {
     private void sendCecCommandWithRetries(HdmiCecMessage command,
             @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        HdmiCecLocalDevice localDevice = getAllCecLocalDevices().get(0);
+        List<HdmiCecLocalDevice> devices = getAllCecLocalDevices();
+        if (devices.isEmpty()) {
+            return;
+        }
+        HdmiCecLocalDevice localDevice = devices.get(0);
         if (localDevice != null) {
             sendCecCommandWithoutRetries(command, new SendMessageCallback() {
                 @Override
@@ -5136,5 +5143,9 @@ public class HdmiControlService extends SystemService {
         } else {
             tv().startArcAction(enabled, callback);
         }
+    }
+
+    protected boolean isHdmiControlEnhancedBehaviorFlagEnabled() {
+        return hdmiControlEnhancedBehavior();
     }
 }

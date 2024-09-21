@@ -1,12 +1,7 @@
 {
     "presubmit": [
         {
-            "name": "CtsAppOpsTestCases",
-            "options": [
-                {
-                  "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
+            "name": "CtsAppOpsTestCases"
         },
         {
             "name": "CtsAppOps2TestCases"
@@ -21,12 +16,7 @@
             "name": "CtsPermissionTestCases_Platform"
         },
         {
-            "name": "CtsAppTestCases",
-            "options": [
-                {
-                    "include-filter": "android.app.cts.ActivityManagerApi29Test"
-                }
-            ]
+            "name": "CtsAppTestCases_cts_activitymanagerapi29test"
         },
         {
             "name": "CtsStatsdAtomHostTestCases",

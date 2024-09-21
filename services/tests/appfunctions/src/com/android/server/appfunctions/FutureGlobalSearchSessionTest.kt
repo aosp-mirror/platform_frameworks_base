@@ -94,8 +94,7 @@ class FutureGlobalSearchSessionTest {
             val schema = session.setSchema(setSchemaRequest)
             assertThat(schema.get()).isNotNull()
             val appFunctionRuntimeMetadata =
-                AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, TEST_FUNCTION_ID, "")
-                    .build()
+                AppFunctionRuntimeMetadata.Builder(TEST_TARGET_PKG_NAME, TEST_FUNCTION_ID).build()
             val putDocumentsRequest: PutDocumentsRequest =
                 PutDocumentsRequest.Builder()
                     .addGenericDocuments(appFunctionRuntimeMetadata)

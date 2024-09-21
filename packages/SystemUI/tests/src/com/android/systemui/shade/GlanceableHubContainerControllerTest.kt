@@ -118,7 +118,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 override fun create(
                     lifecycleOwner: LifecycleOwner,
                     touchHandlers: Set<TouchHandler>,
-                    loggingName: String
+                    loggingName: String,
                 ): AmbientTouchComponent =
                     object : AmbientTouchComponent {
                         override fun getTouchMonitor(): TouchMonitor = touchMonitor
@@ -141,7 +141,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
                     kosmos.lockscreenSmartspaceController,
-                    logcatLogBuffer("GlanceableHubContainerControllerTest")
+                    logcatLogBuffer("GlanceableHubContainerControllerTest"),
                 )
         }
         testableLooper = TestableLooper.get(this)
@@ -150,7 +150,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         overrideResource(R.dimen.communal_top_edge_swipe_region_height, TOP_SWIPE_REGION_WIDTH)
         overrideResource(
             R.dimen.communal_bottom_edge_swipe_region_height,
-            BOTTOM_SWIPE_REGION_WIDTH
+            BOTTOM_SWIPE_REGION_WIDTH,
         )
 
         // Make communal available so that communalInteractor.desiredScene accurately reflects
@@ -188,7 +188,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         kosmos.notificationStackScrollLayoutController,
                         kosmos.keyguardMediaController,
                         kosmos.lockscreenSmartspaceController,
-                        logcatLogBuffer("GlanceableHubContainerControllerTest")
+                        logcatLogBuffer("GlanceableHubContainerControllerTest"),
                     )
 
                 // First call succeeds.
@@ -217,7 +217,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
                     kosmos.lockscreenSmartspaceController,
-                    logcatLogBuffer("GlanceableHubContainerControllerTest")
+                    logcatLogBuffer("GlanceableHubContainerControllerTest"),
                 )
 
             assertThat(underTest.lifecycle.currentState).isEqualTo(Lifecycle.State.INITIALIZED)
@@ -241,7 +241,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                     kosmos.notificationStackScrollLayoutController,
                     kosmos.keyguardMediaController,
                     kosmos.lockscreenSmartspaceController,
-                    logcatLogBuffer("GlanceableHubContainerControllerTest")
+                    logcatLogBuffer("GlanceableHubContainerControllerTest"),
                 )
 
             // Only initView without attaching a view as we don't want the flows to start collecting
@@ -342,7 +342,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         from = KeyguardState.GONE,
                         to = KeyguardState.GLANCEABLE_HUB,
                         value = 1.0f,
-                        transitionState = TransitionState.RUNNING
+                        transitionState = TransitionState.RUNNING,
                     )
                 )
                 testableLooper.processAllMessages()
@@ -449,7 +449,6 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     fun gestureExclusionZone_setAfterInit() =
         with(kosmos) {
             testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
                 goToScene(CommunalScenes.Communal)
 
                 assertThat(containerView.systemGestureExclusionRects)
@@ -458,13 +457,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                             /* left= */ 0,
                             /* top= */ TOP_SWIPE_REGION_WIDTH,
                             /* right= */ CONTAINER_WIDTH,
-                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
-                        ),
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ 0,
-                            /* right= */ 0,
-                            /* bottom= */ CONTAINER_HEIGHT
+                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH,
                         )
                     )
             }
@@ -475,67 +468,14 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
     fun gestureExclusionZone_setAfterInit_fullSwipe() =
         with(kosmos) {
             testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_LTR)
                 goToScene(CommunalScenes.Communal)
 
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ 0,
-                            /* right= */ 0,
-                            /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
+                assertThat(containerView.systemGestureExclusionRects).isEmpty()
             }
         }
 
     @Test
     @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun gestureExclusionZone_setAfterInit_rtl() =
-        with(kosmos) {
-            testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
-                goToScene(CommunalScenes.Communal)
-
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ TOP_SWIPE_REGION_WIDTH,
-                            /* right= */ CONTAINER_WIDTH,
-                            /* bottom= */ CONTAINER_HEIGHT - BOTTOM_SWIPE_REGION_WIDTH
-                        ),
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ 0,
-                            /* right= */ CONTAINER_WIDTH,
-                            /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
-            }
-        }
-
-    @EnableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
-    fun gestureExclusionZone_setAfterInit_rtl_fullSwipe() =
-        with(kosmos) {
-            testScope.runTest {
-                whenever(containerView.layoutDirection).thenReturn(View.LAYOUT_DIRECTION_RTL)
-                goToScene(CommunalScenes.Communal)
-
-                assertThat(containerView.systemGestureExclusionRects)
-                    .containsExactly(
-                        Rect(
-                            /* left= */ 0,
-                            /* top= */ 0,
-                            /* right= */ CONTAINER_WIDTH,
-                            /* bottom= */ CONTAINER_HEIGHT
-                        )
-                    )
-            }
-        }
-
-    @Test
     fun gestureExclusionZone_unsetWhenShadeOpen() =
         with(kosmos) {
             testScope.runTest {
@@ -554,6 +494,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_unsetWhenBouncerOpen() =
         with(kosmos) {
             testScope.runTest {
@@ -572,6 +513,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX)
     fun gestureExclusionZone_unsetWhenHubClosed() =
         with(kosmos) {
             testScope.runTest {
@@ -597,7 +539,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 whenever(
                         notificationStackScrollLayoutController.isBelowLastNotification(
                             any(),
-                            any()
+                            any(),
                         )
                     )
                     .thenReturn(false)
@@ -675,7 +617,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                         from = KeyguardState.GONE,
                         to = KeyguardState.GLANCEABLE_HUB,
                         value = 1.0f,
-                        transitionState = TransitionState.RUNNING
+                        transitionState = TransitionState.RUNNING,
                     )
                 )
                 testableLooper.processAllMessages()
@@ -696,7 +638,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 whenever(
                         notificationStackScrollLayoutController.isBelowLastNotification(
                             any(),
-                            any()
+                            any(),
                         )
                     )
                     .thenReturn(true)
@@ -728,7 +670,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 whenever(
                         notificationStackScrollLayoutController.isBelowLastNotification(
                             any(),
-                            any()
+                            any(),
                         )
                     )
                     .thenReturn(true)
@@ -752,7 +694,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 whenever(
                         notificationStackScrollLayoutController.isBelowLastNotification(
                             any(),
-                            any()
+                            any(),
                         )
                     )
                     .thenReturn(true)
@@ -805,13 +747,13 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.GLANCEABLE_HUB,
-                kosmos.testScope
+                kosmos.testScope,
             )
         } else {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GLANCEABLE_HUB,
                 to = KeyguardState.LOCKSCREEN,
-                kosmos.testScope
+                kosmos.testScope,
             )
         }
         testableLooper.processAllMessages()
@@ -836,7 +778,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 MotionEvent.ACTION_DOWN,
                 CONTAINER_WIDTH.toFloat() / 2,
                 CONTAINER_HEIGHT.toFloat() / 2,
-                0
+                0,
             )
 
         private val CANCEL_EVENT =
@@ -846,7 +788,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 MotionEvent.ACTION_CANCEL,
                 CONTAINER_WIDTH.toFloat() / 2,
                 CONTAINER_HEIGHT.toFloat() / 2,
-                0
+                0,
             )
 
         private val MOVE_EVENT =
@@ -856,7 +798,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 MotionEvent.ACTION_MOVE,
                 CONTAINER_WIDTH.toFloat() / 2,
                 CONTAINER_HEIGHT.toFloat() / 2,
-                0
+                0,
             )
 
         private val UP_EVENT =
@@ -866,7 +808,7 @@ class GlanceableHubContainerControllerTest : SysuiTestCase() {
                 MotionEvent.ACTION_UP,
                 CONTAINER_WIDTH.toFloat() / 2,
                 CONTAINER_HEIGHT.toFloat() / 2,
-                0
+                0,
             )
     }
 }

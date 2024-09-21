@@ -1216,7 +1216,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ផ្កាយមួយ​ក្នុងចំណោមផ្កាយ {max}}other{ផ្កាយ # ក្នុងចំណោមផ្កាយ {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"កំពុងដំណើរការ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %%1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
@@ -2010,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"កំណត់​ការចាក់​សោអេក្រង់"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"កំណត់​ការចាក់​សោ​អេក្រង់"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"ដើម្បីប្រើលំហឯកជនរបស់អ្នក សូមកំណត់ការចាក់សោអេក្រង់នៅលើឧបករណ៍នេះ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"ដើម្បីលុបលំហឯកជនរបស់អ្នក សូមកំណត់ការចាក់សោអេក្រង់នៅលើឧបករណ៍នេះ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"មិនអាច​ប្រើ​កម្មវិធី​នេះបានទេ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>

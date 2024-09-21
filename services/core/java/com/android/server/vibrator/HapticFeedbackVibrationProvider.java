@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static android.os.vibrator.Flags.hapticFeedbackInputSourceCustomizationEnabled;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.Resources;
@@ -121,7 +123,6 @@ public final class HapticFeedbackVibrationProvider {
         return getVibrationForHapticFeedback(effectId);
     }
 
-    // TODO(b/354049335): handle input source customized VibrationAttributes.
     /**
      * Provides the {@link VibrationAttributes} that should be used for a haptic feedback.
      *
@@ -131,7 +132,7 @@ public final class HapticFeedbackVibrationProvider {
      * @param privFlags Additional private flags as per {@link HapticFeedbackConstants}.
      * @return the {@link VibrationAttributes} that should be used for the provided haptic feedback.
      */
-    public VibrationAttributes getVibrationAttributesForHapticFeedback(int effectId,
+    public VibrationAttributes getVibrationAttributes(int effectId,
             @HapticFeedbackConstants.Flags int flags,
             @HapticFeedbackConstants.PrivateFlags int privFlags) {
         VibrationAttributes attrs;
@@ -142,10 +143,13 @@ public final class HapticFeedbackVibrationProvider {
                 break;
             case HapticFeedbackConstants.ASSISTANT_BUTTON:
             case HapticFeedbackConstants.LONG_PRESS_POWER_BUTTON:
+                attrs = HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
+                break;
             case HapticFeedbackConstants.SCROLL_TICK:
             case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
             case HapticFeedbackConstants.SCROLL_LIMIT:
-                attrs = HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
+                attrs = hapticFeedbackInputSourceCustomizationEnabled() ? TOUCH_VIBRATION_ATTRIBUTES
+                        : HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
                 break;
             case HapticFeedbackConstants.KEYBOARD_TAP:
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
@@ -158,19 +162,32 @@ public final class HapticFeedbackVibrationProvider {
             default:
                 attrs = TOUCH_VIBRATION_ATTRIBUTES;
         }
+        return getVibrationAttributesWithFlags(attrs, effectId, flags);
+    }
 
-        int vibFlags = 0;
-        boolean bypassVibrationIntensitySetting =
-                (flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0;
-        if (bypassVibrationIntensitySetting) {
-            vibFlags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+    /**
+     * Similar to {@link #getVibrationAttributes(int, int, int)} but also handles
+     * input source customization.
+     *
+     * @param inputSource the {@link InputDevice.Source} that customizes the
+     *                    {@link VibrationAttributes}.
+     */
+    public VibrationAttributes getVibrationAttributes(int effectId,
+            int inputSource,
+            @HapticFeedbackConstants.Flags int flags,
+            @HapticFeedbackConstants.PrivateFlags int privFlags) {
+        if (hapticFeedbackInputSourceCustomizationEnabled()
+                && inputSource == InputDevice.SOURCE_ROTARY_ENCODER) {
+            switch (effectId) {
+                case HapticFeedbackConstants.SCROLL_TICK,
+                        HapticFeedbackConstants.SCROLL_ITEM_FOCUS,
+                        HapticFeedbackConstants.SCROLL_LIMIT -> {
+                    return getVibrationAttributesWithFlags(HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES,
+                            effectId, flags);
+                }
+            }
         }
-        if (shouldBypassInterruptionPolicy(effectId)) {
-            vibFlags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
-        }
-
-        return vibFlags == 0 ? attrs : new VibrationAttributes.Builder(attrs)
-                .setFlags(vibFlags).build();
+        return getVibrationAttributes(effectId, flags, privFlags);
     }
 
     /**
@@ -342,6 +359,20 @@ public final class HapticFeedbackVibrationProvider {
             return TOUCH_VIBRATION_ATTRIBUTES;
         }
         return IME_FEEDBACK_VIBRATION_ATTRIBUTES;
+    }
+
+    private VibrationAttributes getVibrationAttributesWithFlags(VibrationAttributes attrs,
+            int effectId, int flags) {
+        int vibFlags = 0;
+        if ((flags & HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING) != 0) {
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF;
+        }
+        if (shouldBypassInterruptionPolicy(effectId)) {
+            vibFlags |= VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY;
+        }
+
+        return vibFlags == 0 ? attrs : new VibrationAttributes.Builder(attrs)
+                .setFlags(vibFlags).build();
     }
 
     private static boolean shouldBypassInterruptionPolicy(int effectId) {

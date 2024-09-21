@@ -22,6 +22,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
@@ -41,6 +43,7 @@ import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.TileGrid
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
@@ -79,16 +82,11 @@ constructor(
     }
 
     @Composable
-    override fun ContentScope.Content(
-        modifier: Modifier,
-    ) {
+    override fun ContentScope.Content(modifier: Modifier) {
         val viewModel =
             rememberViewModel("QuickSettingsShadeOverlay") { contentViewModelFactory.create() }
 
-        OverlayShade(
-            modifier = modifier,
-            onScrimClicked = viewModel::onScrimClicked,
-        ) {
+        OverlayShade(modifier = modifier, onScrimClicked = viewModel::onScrimClicked) {
             Column {
                 ExpandedShadeHeader(
                     viewModelFactory = viewModel.shadeHeaderViewModelFactory,
@@ -98,40 +96,36 @@ constructor(
                     modifier = Modifier.padding(QuickSettingsShade.Dimensions.Padding),
                 )
 
-                ShadeBody(
-                    viewModel = viewModel.quickSettingsContainerViewModel,
-                )
+                ShadeBody(viewModel = viewModel.quickSettingsContainerViewModel)
             }
         }
     }
 }
 
 @Composable
-fun ShadeBody(
-    viewModel: QuickSettingsContainerViewModel,
-) {
+fun SceneScope.ShadeBody(viewModel: QuickSettingsContainerViewModel) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
 
     AnimatedContent(
         targetState = isEditing,
-        transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) }
+        transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
     ) { editing ->
         if (editing) {
             EditMode(
                 viewModel = viewModel.editModeViewModel,
-                modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding)
+                modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding),
             )
         } else {
             QuickSettingsLayout(
                 viewModel = viewModel,
-                modifier = Modifier.sysuiResTag("quick_settings_panel")
+                modifier = Modifier.sysuiResTag("quick_settings_panel"),
             )
         }
     }
 }
 
 @Composable
-private fun QuickSettingsLayout(
+private fun SceneScope.QuickSettingsLayout(
     viewModel: QuickSettingsContainerViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -143,15 +137,18 @@ private fun QuickSettingsLayout(
         BrightnessSliderContainer(
             viewModel = viewModel.brightnessSliderViewModel,
             modifier =
-                Modifier.fillMaxWidth()
-                    .height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
+                Modifier.fillMaxWidth().height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
         )
-        TileGrid(
-            viewModel = viewModel.tileGridViewModel,
-            modifier =
-                Modifier.fillMaxWidth().heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
-            viewModel.editModeViewModel::startEditing,
-        )
+        Box {
+            GridAnchor()
+            TileGrid(
+                viewModel = viewModel.tileGridViewModel,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
+                viewModel.editModeViewModel::startEditing,
+            )
+        }
     }
 }
 

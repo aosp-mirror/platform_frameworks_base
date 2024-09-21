@@ -147,7 +147,7 @@ constructor(
             .stateIn(
                 lifecycleScope,
                 SharingStarted.WhileSubscribed(),
-                disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled()
+                disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled(),
             )
 
     private val _showCollapsedOnKeyguard = MutableStateFlow(false)
@@ -213,19 +213,11 @@ constructor(
         }
 
     val expansionState: StateFlow<QSExpansionState> =
-        combine(
-                _stackScrollerOverscrolling,
-                _qsExpanded,
-                _qsExpansion,
-            ) { args: Array<Any> ->
+        combine(_stackScrollerOverscrolling, _qsExpanded, _qsExpansion) { args: Array<Any> ->
                 val expansion = args[2] as Float
-                if (expansion > 0.5f) {
-                    QSExpansionState.QS
-                } else {
-                    QSExpansionState.QQS
-                }
+                QSExpansionState(expansion.coerceIn(0f, 1f))
             }
-            .stateIn(lifecycleScope, SharingStarted.WhileSubscribed(), QSExpansionState.QQS)
+            .stateIn(lifecycleScope, SharingStarted.WhileSubscribed(), QSExpansionState(0f))
 
     /**
      * Accessibility action for collapsing/expanding QS. The provided runnable is responsible for
@@ -262,13 +254,6 @@ constructor(
         fun create(lifecycleScope: LifecycleCoroutineScope): QSFragmentComposeViewModel
     }
 
-    sealed interface QSExpansionState {
-        data object QQS : QSExpansionState
-
-        data object QS : QSExpansionState
-
-        @JvmInline value class Expanding(val progress: Float) : QSExpansionState
-
-        @JvmInline value class Collapsing(val progress: Float) : QSExpansionState
-    }
+    // In the future, this will have other relevant elements like squishiness.
+    data class QSExpansionState(@FloatRange(0.0, 1.0) val progress: Float)
 }

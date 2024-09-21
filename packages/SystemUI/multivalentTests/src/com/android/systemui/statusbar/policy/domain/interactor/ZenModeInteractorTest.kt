@@ -17,7 +17,9 @@
 package com.android.systemui.statusbar.policy.domain.interactor
 
 import android.app.AutomaticZenRule
+import android.app.Flags
 import android.app.NotificationManager.Policy
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
@@ -32,6 +34,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
+import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -50,8 +53,29 @@ class ZenModeInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val zenModeRepository = kosmos.fakeZenModeRepository
     private val settingsRepository = kosmos.secureSettingsRepository
+    private val deviceProvisioningRepository = kosmos.fakeDeviceProvisioningRepository
 
     private val underTest = kosmos.zenModeInteractor
+
+    @Test
+    fun isZenAvailable_off() =
+        testScope.runTest {
+            val isZenAvailable by collectLastValue(underTest.isZenAvailable)
+            deviceProvisioningRepository.setDeviceProvisioned(false)
+            runCurrent()
+
+            assertThat(isZenAvailable).isFalse()
+        }
+
+    @Test
+    fun isZenAvailable_on() =
+        testScope.runTest {
+            val isZenAvailable by collectLastValue(underTest.isZenAvailable)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
+            runCurrent()
+
+            assertThat(isZenAvailable).isTrue()
+        }
 
     @Test
     fun isZenModeEnabled_off() =
@@ -336,5 +360,23 @@ class ZenModeInteractorTest : SysuiTestCase() {
             zenModeRepository.deactivateMode("Bedtime")
             runCurrent()
             assertThat(mainActiveMode).isNull()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    fun dndMode_flows() =
+        testScope.runTest {
+            val dndMode by collectLastValue(underTest.dndMode)
+
+            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
+            runCurrent()
+
+            assertThat(dndMode!!.isActive).isFalse()
+
+            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
+            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            runCurrent()
+
+            assertThat(dndMode!!.isActive).isTrue()
         }
 }

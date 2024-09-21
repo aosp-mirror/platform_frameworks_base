@@ -18,9 +18,11 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import android.util.TypedValue
+import android.view.View
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.res.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -35,7 +37,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the pattern bouncer UI. */
@@ -44,6 +45,7 @@ class PatternBouncerViewModel
 constructor(
     private val applicationContext: Context,
     interactor: BouncerInteractor,
+    @Assisted bouncerHapticPlayer: BouncerHapticPlayer,
     @Assisted isInputEnabled: StateFlow<Boolean>,
     @Assisted private val onIntentionalUserInput: () -> Unit,
 ) :
@@ -51,6 +53,7 @@ constructor(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
         traceName = "PatternBouncerViewModel",
+        bouncerHapticPlayer = bouncerHapticPlayer,
     ) {
 
     /** The number of columns in the dot grid. */
@@ -190,14 +193,7 @@ constructor(
     private fun defaultDots(): List<PatternDotViewModel> {
         return buildList {
             (0 until columnCount).forEach { x ->
-                (0 until rowCount).forEach { y ->
-                    add(
-                        PatternDotViewModel(
-                            x = x,
-                            y = y,
-                        )
-                    )
-                }
+                (0 until rowCount).forEach { y -> add(PatternDotViewModel(x = x, y = y)) }
             }
         }
     }
@@ -207,14 +203,17 @@ constructor(
         applicationContext.resources.getValue(
             com.android.internal.R.dimen.lock_pattern_dot_hit_factor,
             outValue,
-            true
+            true,
         )
         max(min(outValue.float, 1f), MIN_DOT_HIT_FACTOR)
     }
 
+    fun performDotFeedback(view: View?) = bouncerHapticPlayer?.playPatternDotFeedback(view)
+
     @AssistedFactory
     interface Factory {
         fun create(
+            bouncerHapticPlayer: BouncerHapticPlayer,
             isInputEnabled: StateFlow<Boolean>,
             onIntentionalUserInput: () -> Unit,
         ): PatternBouncerViewModel
@@ -231,7 +230,7 @@ constructor(
  */
 private fun PatternDotViewModel.isOnLineSegment(
     first: PatternDotViewModel,
-    second: PatternDotViewModel
+    second: PatternDotViewModel,
 ): Boolean {
     val anotherPoint = this
     // No need to consider any points outside the bounds of two end points
@@ -253,14 +252,8 @@ private fun Int.isBetween(a: Int, b: Int): Boolean {
     return (this in a..b) || (this in b..a)
 }
 
-data class PatternDotViewModel(
-    val x: Int,
-    val y: Int,
-) {
+data class PatternDotViewModel(val x: Int, val y: Int) {
     fun toCoordinate(): AuthenticationPatternCoordinate {
-        return AuthenticationPatternCoordinate(
-            x = x,
-            y = y,
-        )
+        return AuthenticationPatternCoordinate(x = x, y = y)
     }
 }

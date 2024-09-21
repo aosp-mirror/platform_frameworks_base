@@ -331,6 +331,7 @@ public class RootWindowContainerTests extends WindowTestsBase {
         final WindowProcessController proc = mSystemServicesTestRule.addProcess(
                 activity.packageName, activity.processName,
                 6789 /* pid */, activity.info.applicationInfo.uid);
+        assertFalse(proc.mHasEverAttached);
         try {
             mRootWindowContainer.attachApplication(proc);
             verify(mSupervisor).realStartActivityLocked(eq(topActivity), eq(proc),
@@ -338,6 +339,15 @@ public class RootWindowContainerTests extends WindowTestsBase {
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
+
+        // Verify that onProcessRemoved won't clear the launching activities if an attached process
+        // is died. Because in real case, it should be handled from WindowProcessController's
+        // and ActivityRecord's handleAppDied to decide whether to remove the activities.
+        assertTrue(proc.mHasEverAttached);
+        assertTrue(mAtm.mStartingProcessActivities.isEmpty());
+        mAtm.mStartingProcessActivities.add(activity);
+        mAtm.mInternal.onProcessRemoved(proc.mName, proc.mUid);
+        assertFalse(mAtm.mStartingProcessActivities.isEmpty());
     }
 
     /**

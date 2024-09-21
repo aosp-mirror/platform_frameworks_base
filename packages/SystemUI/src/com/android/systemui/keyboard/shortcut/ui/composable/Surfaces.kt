@@ -17,10 +17,16 @@
 package com.android.systemui.keyboard.shortcut.ui.composable
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.FocusInteraction
+import androidx.compose.foundation.interaction.HoverInteraction
+import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.ColorScheme
@@ -35,17 +41,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.node.DelegatableNode
+import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.android.compose.modifiers.thenIf
+import kotlinx.coroutines.launch
 
 /**
  * A selectable surface with no default focus/hover indications.
@@ -67,15 +83,17 @@ fun SelectableShortcutSurface(
     shadowElevation: Dp = 0.dp,
     border: BorderStroke? = null,
     interactionSource: MutableInteractionSource? = null,
-    content: @Composable () -> Unit
+    interactionsConfig: InteractionsConfig = InteractionsConfig(),
+    content: @Composable () -> Unit,
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val absoluteElevation = LocalAbsoluteTonalElevation.current + tonalElevation
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
-        LocalAbsoluteTonalElevation provides absoluteElevation
+        LocalAbsoluteTonalElevation provides absoluteElevation,
     ) {
+        val isFocused = interactionSource.collectIsFocusedAsState()
         Box(
             modifier =
                 modifier
@@ -85,16 +103,18 @@ fun SelectableShortcutSurface(
                         backgroundColor =
                             surfaceColorAtElevation(color = color, elevation = absoluteElevation),
                         border = border,
-                        shadowElevation = with(LocalDensity.current) { shadowElevation.toPx() }
+                        shadowElevation = with(LocalDensity.current) { shadowElevation.toPx() },
                     )
                     .selectable(
                         selected = selected,
                         interactionSource = interactionSource,
-                        indication = null,
+                        indication =
+                            ShortcutHelperIndication(interactionSource, interactionsConfig),
                         enabled = enabled,
-                        onClick = onClick
-                    ),
-            propagateMinConstraints = true
+                        onClick = onClick,
+                    )
+                    .thenIf(isFocused.value) { Modifier.zIndex(1f) },
+            propagateMinConstraints = true,
         ) {
             content()
         }
@@ -120,14 +140,15 @@ fun ClickableShortcutSurface(
     shadowElevation: Dp = 0.dp,
     border: BorderStroke? = null,
     interactionSource: MutableInteractionSource? = null,
-    content: @Composable () -> Unit
+    interactionsConfig: InteractionsConfig = InteractionsConfig(),
+    content: @Composable () -> Unit,
 ) {
     @Suppress("NAME_SHADOWING")
     val interactionSource = interactionSource ?: remember { MutableInteractionSource() }
     val absoluteElevation = LocalAbsoluteTonalElevation.current + tonalElevation
     CompositionLocalProvider(
         LocalContentColor provides contentColor,
-        LocalAbsoluteTonalElevation provides absoluteElevation
+        LocalAbsoluteTonalElevation provides absoluteElevation,
     ) {
         Box(
             modifier =
@@ -138,15 +159,16 @@ fun ClickableShortcutSurface(
                         backgroundColor =
                             surfaceColorAtElevation(color = color, elevation = absoluteElevation),
                         border = border,
-                        shadowElevation = with(LocalDensity.current) { shadowElevation.toPx() }
+                        shadowElevation = with(LocalDensity.current) { shadowElevation.toPx() },
                     )
                     .clickable(
                         interactionSource = interactionSource,
-                        indication = null,
+                        indication =
+                            ShortcutHelperIndication(interactionSource, interactionsConfig),
                         enabled = enabled,
-                        onClick = onClick
+                        onClick = onClick,
                     ),
-            propagateMinConstraints = true
+            propagateMinConstraints = true,
         ) {
             content()
         }
@@ -195,5 +217,105 @@ private fun Modifier.surface(
         }
         .thenIf(border != null) { Modifier.border(border!!, shape) }
         .background(color = backgroundColor, shape = shape)
-        .clip(shape)
 }
+
+private class ShortcutHelperInteractionsNode(
+    private val interactionSource: InteractionSource,
+    private val interactionsConfig: InteractionsConfig,
+) : Modifier.Node(), DrawModifierNode {
+
+    var isFocused = mutableStateOf(false)
+    var isHovered = mutableStateOf(false)
+    var isPressed = mutableStateOf(false)
+
+    override fun onAttach() {
+        coroutineScope.launch {
+            val hoverInteractions = mutableListOf<HoverInteraction.Enter>()
+            val focusInteractions = mutableListOf<FocusInteraction.Focus>()
+            val pressInteractions = mutableListOf<PressInteraction.Press>()
+
+            interactionSource.interactions.collect { interaction ->
+                when (interaction) {
+                    is FocusInteraction.Focus -> focusInteractions.add(interaction)
+                    is FocusInteraction.Unfocus -> focusInteractions.remove(interaction.focus)
+                    is HoverInteraction.Enter -> hoverInteractions.add(interaction)
+                    is HoverInteraction.Exit -> hoverInteractions.remove(interaction.enter)
+                    is PressInteraction.Press -> pressInteractions.add(interaction)
+                    is PressInteraction.Release -> pressInteractions.remove(interaction.press)
+                    is PressInteraction.Cancel -> pressInteractions.add(interaction.press)
+                }
+                isHovered.value = hoverInteractions.isNotEmpty()
+                isPressed.value = pressInteractions.isNotEmpty()
+                isFocused.value = focusInteractions.isNotEmpty()
+            }
+        }
+    }
+
+    override fun ContentDrawScope.draw() {
+
+        fun getRectangleWithPadding(padding: Dp, size: Size): Rect {
+            return Rect(Offset.Zero, size).let {
+                if (interactionsConfig.focusOutlinePadding > 0.dp) {
+                    it.inflate(padding.toPx())
+                } else {
+                    it.deflate(padding.unaryMinus().toPx())
+                }
+            }
+        }
+
+        drawContent()
+        if (isHovered.value) {
+            val hoverRect = getRectangleWithPadding(interactionsConfig.pressedPadding, size)
+            drawRoundRect(
+                color = interactionsConfig.hoverOverlayColor,
+                alpha = interactionsConfig.hoverOverlayAlpha,
+                cornerRadius = CornerRadius(interactionsConfig.surfaceCornerRadius.toPx()),
+                topLeft = hoverRect.topLeft,
+                size = hoverRect.size,
+            )
+        }
+        if (isPressed.value) {
+            val pressedRect = getRectangleWithPadding(interactionsConfig.pressedPadding, size)
+            drawRoundRect(
+                color = interactionsConfig.pressedOverlayColor,
+                alpha = interactionsConfig.pressedOverlayAlpha,
+                cornerRadius = CornerRadius(interactionsConfig.surfaceCornerRadius.toPx()),
+                topLeft = pressedRect.topLeft,
+                size = pressedRect.size,
+            )
+        }
+        if (isFocused.value) {
+            val focusOutline = getRectangleWithPadding(interactionsConfig.focusOutlinePadding, size)
+            drawRoundRect(
+                color = interactionsConfig.focusOutlineColor,
+                style = Stroke(width = interactionsConfig.focusOutlineStrokeWidth.toPx()),
+                topLeft = focusOutline.topLeft,
+                size = focusOutline.size,
+                cornerRadius = CornerRadius(interactionsConfig.focusOutlineCornerRadius.toPx()),
+            )
+        }
+    }
+}
+
+data class ShortcutHelperIndication(
+    private val interactionSource: InteractionSource,
+    private val interactionsConfig: InteractionsConfig,
+) : IndicationNodeFactory {
+    override fun create(interactionSource: InteractionSource): DelegatableNode {
+        return ShortcutHelperInteractionsNode(interactionSource, interactionsConfig)
+    }
+}
+
+data class InteractionsConfig(
+    val hoverOverlayColor: Color = Color.Transparent,
+    val hoverOverlayAlpha: Float = 0.0f,
+    val pressedOverlayColor: Color = Color.Transparent,
+    val pressedOverlayAlpha: Float = 0.0f,
+    val focusOutlineColor: Color = Color.Transparent,
+    val focusOutlineStrokeWidth: Dp = 0.dp,
+    val focusOutlinePadding: Dp = 0.dp,
+    val surfaceCornerRadius: Dp = 0.dp,
+    val focusOutlineCornerRadius: Dp = 0.dp,
+    val hoverPadding: Dp = 0.dp,
+    val pressedPadding: Dp = hoverPadding,
+)

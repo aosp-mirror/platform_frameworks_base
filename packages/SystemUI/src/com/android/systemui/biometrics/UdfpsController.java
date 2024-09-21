@@ -19,6 +19,7 @@ package com.android.systemui.biometrics;
 import static android.app.StatusBarManager.SESSION_BIOMETRIC_PROMPT;
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_GOOD;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_START;
 import static android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_BP;
 import static android.hardware.biometrics.BiometricRequestConstants.REASON_AUTH_KEYGUARD;
 import static android.hardware.biometrics.BiometricRequestConstants.REASON_ENROLL_ENROLLING;
@@ -329,6 +330,22 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 int sensorId,
                 @BiometricFingerprintConstants.FingerprintAcquired int acquiredInfo
         ) {
+            if (isUltrasonic()) {
+                if (acquiredInfo == FINGERPRINT_ACQUIRED_START) {
+                    mFgExecutor.execute(() -> {
+                        for (Callback cb : mCallbacks) {
+                            cb.onFingerDown();
+                        }
+                    });
+                } else {
+                    mFgExecutor.execute(() -> {
+                        for (Callback cb : mCallbacks) {
+                            cb.onFingerUp();
+                        }
+                    });
+                }
+            }
+
             if (BiometricFingerprintConstants.shouldDisableUdfpsDisplayMode(acquiredInfo)) {
                 boolean acquiredGood = acquiredInfo == FINGERPRINT_ACQUIRED_GOOD;
                 mFgExecutor.execute(() -> {
@@ -1024,6 +1041,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         return mSensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
     }
 
+    private boolean isUltrasonic() {
+        return mSensorProps.sensorType == FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC;
+    }
+
     public boolean isFingerDown() {
         return mOnFingerDown;
     }
@@ -1105,8 +1126,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             }
         }
 
-        for (Callback cb : mCallbacks) {
-            cb.onFingerDown();
+        if (isOptical()) {
+            for (Callback cb : mCallbacks) {
+                cb.onFingerDown();
+            }
         }
     }
 
@@ -1143,8 +1166,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (mOnFingerDown) {
             mFingerprintManager.onPointerUp(requestId, mSensorProps.sensorId, pointerId, x,
                     y, minor, major, orientation, time, gestureStart, isAod);
-            for (Callback cb : mCallbacks) {
-                cb.onFingerUp();
+            if (isOptical()) {
+                for (Callback cb : mCallbacks) {
+                    cb.onFingerUp();
+                }
             }
         }
         mOnFingerDown = false;

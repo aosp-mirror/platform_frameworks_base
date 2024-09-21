@@ -47,6 +47,7 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
+import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -247,32 +248,35 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
 
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testShowNotification_reorderNotAllowed_notPulsing_seenInShadeTrue() {
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
-        val hmp = createHeadsUpManagerPhone()
-
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val row = mock<ExpandableNotificationRow>()
-        whenever(row.showingPulsing()).thenReturn(false)
-        notifEntry.row = row
-
-        hmp.showNotification(notifEntry)
-        Assert.assertTrue(notifEntry.isSeenInShade)
-    }
-
-    @Test
-    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testShowNotification_reorderAllowed_notPulsing_seenInShadeFalse() {
+    fun testShowNotification_removeWhenReorderingAllowedTrue() {
         whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
         val hmp = createHeadsUpManagerPhone()
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val row = mock<ExpandableNotificationRow>()
-        whenever(row.showingPulsing()).thenReturn(false)
-        notifEntry.row = row
-
         hmp.showNotification(notifEntry)
-        Assert.assertFalse(notifEntry.isSeenInShade)
+        assertThat(hmp.mEntriesToRemoveWhenReorderingAllowed.contains(notifEntry)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testShowNotification_reorderNotAllowed_seenInShadeTrue() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        hmp.showNotification(notifEntry)
+        assertThat(notifEntry.isSeenInShade).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testShowNotification_reorderAllowed_seenInShadeFalse() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        hmp.showNotification(notifEntry)
+        assertThat(notifEntry.isSeenInShade).isFalse();
     }
 
     @Test

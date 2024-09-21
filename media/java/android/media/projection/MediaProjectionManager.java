@@ -60,13 +60,14 @@ import java.util.Map;
  *   <li>Register a {@link MediaProjection.Callback} by calling {@link
  *       MediaProjection#registerCallback(MediaProjection.Callback, Handler)}. This is required to
  *       receive notifications about when the {@link MediaProjection} or captured content changes
- *       state. When receiving an `onStop()` callback, the client must clean up any resources it is
- *       holding, e.g. the {@link VirtualDisplay} and {@link Surface}. The MediaProjection may
- *       further no longer create any new {@link VirtualDisplay}s via {@link
- *       MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
- *       VirtualDisplay.Callback, Handler)}. Note that the `onStop()` callback can be a result of
- *       the system stopping MediaProjection due to various reasons or the user stopping the
- *       MediaProjection via UI affordances in system-level UI.
+ *       state. When receiving an `onStop()` callback the {@link MediaProjection} session has been
+ *       finished and the client must clean up any resources it is holding, e.g. the {@link
+ *       VirtualDisplay} and {@link Surface}. The MediaProjection may further no longer create any
+ *       new {@link VirtualDisplay}s via {@link MediaProjection#createVirtualDisplay(String, int,
+ *       int, int, int, Surface, VirtualDisplay.Callback, Handler)}. Note that the `onStop()`
+ *       callback can be a result of the system stopping MediaProjection due to various reasons.
+ *       This includes the user stopping the MediaProjection via UI affordances in system-level UI,
+ *       the screen being locked, or another {@link MediaProjection} session starting.
  *   <li>Start the screen capture session for media projection by calling {@link
  *       MediaProjection#createVirtualDisplay(String, int, int, int, int, Surface,
  *       android.hardware.display.VirtualDisplay.Callback, Handler)}.

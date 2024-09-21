@@ -16,8 +16,10 @@
 
 package com.android.wm.shell.windowdecor
 
+import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.PointF
 import android.graphics.Rect
+import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
@@ -51,8 +53,7 @@ class FixedAspectRatioTaskPositionerDecorator (
             return super.onDragPositioningStart(originalCtrlType, x, y)
         }
 
-        lastRepositionedBounds.set(
-            windowDecoration.mTaskInfo.configuration.windowConfiguration.bounds)
+        lastRepositionedBounds.set(getBounds(windowDecoration.mTaskInfo))
         startingPoint.set(x, y)
         lastValidPoint.set(x, y)
         val startingBoundWidth = lastRepositionedBounds.width()
@@ -254,5 +255,10 @@ class FixedAspectRatioTaskPositionerDecorator (
      */
     private fun requiresFixedAspectRatio(): Boolean {
         return originalCtrlType.isResizing() && !windowDecoration.mTaskInfo.isResizeable
+    }
+
+    @VisibleForTesting
+    fun getBounds(taskInfo: RunningTaskInfo): Rect {
+        return taskInfo.configuration.windowConfiguration.bounds
     }
 }

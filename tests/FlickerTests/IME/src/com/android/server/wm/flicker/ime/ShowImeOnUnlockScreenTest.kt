@@ -54,7 +54,7 @@ class ShowImeOnUnlockScreenTest(flicker: LegacyFlickerTest) : BaseTest(flicker) 
         }
         transitions {
             device.sleep()
-            wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
+            wmHelper.StateSyncBuilder().withKeyguardShowing().waitForAndVerify()
             UnlockScreenRule.unlockScreen(device)
             wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
         }

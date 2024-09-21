@@ -2641,7 +2641,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
         // Only do transfer after transaction has done when starting window exist.
-        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommitCount > 0) {
+        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommit) {
             mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_COPY_TO_CLIENT;
             return true;
         }
@@ -2804,11 +2804,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void waitForSyncTransactionCommit(ArraySet<WindowContainer> wcAwaitingCommit) {
-        // Only add once per transition.
-        final boolean added = wcAwaitingCommit.contains(this);
         super.waitForSyncTransactionCommit(wcAwaitingCommit);
-        if (!added && mStartingData != null) {
-            mStartingData.mWaitForSyncTransactionCommitCount++;
+        if (mStartingData != null) {
+            mStartingData.mWaitForSyncTransactionCommit = true;
         }
     }
 
@@ -2819,7 +2817,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final StartingData lastData = mStartingData;
-        lastData.mWaitForSyncTransactionCommitCount--;
+        lastData.mWaitForSyncTransactionCommit = false;
         if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_REMOVE_DIRECTLY) {
             removeStartingWindowAnimation(lastData.mPrepareRemoveAnimation);
         } else if (lastData.mRemoveAfterTransaction == AFTER_TRANSACTION_COPY_TO_CLIENT) {
@@ -2849,7 +2847,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean animate;
         final boolean hasImeSurface;
         if (mStartingData != null) {
-            if (mStartingData.mWaitForSyncTransactionCommitCount > 0
+            if (mStartingData.mWaitForSyncTransactionCommit
                     || mSyncState != SYNC_STATE_NONE) {
                 mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;
@@ -8152,13 +8150,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * into account orientation per-app overrides applied by the device manufacturers.
      */
     @Override
+    @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
-        if (mWmService.mConstants.mIgnoreActivityOrientationRequest
-                && info.applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
-            return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        final int candidateOrientation;
+        if (!mWmService.mConstants.mIgnoreActivityOrientationRequest
+                || info.applicationInfo.category == ApplicationInfo.CATEGORY_GAME) {
+            candidateOrientation = super.getOverrideOrientation();
+        } else {
+            candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()
-                .overrideOrientationIfNeeded(super.getOverrideOrientation());
+                .overrideOrientationIfNeeded(candidateOrientation);
     }
 
     /**

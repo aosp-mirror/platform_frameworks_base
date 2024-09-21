@@ -22,8 +22,6 @@ import android.annotation.Nullable;
 import android.view.Display;
 import android.view.KeyCharacterMap;
 
-import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
@@ -65,31 +63,34 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS = 23;
     public static final int KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK = 24;
     public static final int KEY_GESTURE_TYPE_SYSTEM_MUTE = 25;
-    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION = 26;
-    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS = 27;
-    public static final int KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT = 28;
-    public static final int KEY_GESTURE_TYPE_LOCK_SCREEN = 29;
-    public static final int KEY_GESTURE_TYPE_OPEN_NOTES = 30;
-    public static final int KEY_GESTURE_TYPE_TOGGLE_POWER = 31;
-    public static final int KEY_GESTURE_TYPE_SYSTEM_NAVIGATION = 32;
-    public static final int KEY_GESTURE_TYPE_SLEEP = 33;
-    public static final int KEY_GESTURE_TYPE_WAKEUP = 34;
-    public static final int KEY_GESTURE_TYPE_MEDIA_KEY = 35;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER = 36;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL = 37;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS = 38;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR = 39;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR = 40;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC = 41;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS = 42;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING = 43;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY = 44;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES = 45;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER = 46;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS = 47;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME = 48;
-    public static final int KEY_GESTURE_TYPE_DESKTOP_MODE = 49;
-    public static final int KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION = 50;
+    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT = 26;
+    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT = 27;
+    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT = 28;
+    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT = 29;
+    public static final int KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT = 30;
+    public static final int KEY_GESTURE_TYPE_LOCK_SCREEN = 31;
+    public static final int KEY_GESTURE_TYPE_OPEN_NOTES = 32;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_POWER = 33;
+    public static final int KEY_GESTURE_TYPE_SYSTEM_NAVIGATION = 34;
+    public static final int KEY_GESTURE_TYPE_SLEEP = 35;
+    public static final int KEY_GESTURE_TYPE_WAKEUP = 36;
+    public static final int KEY_GESTURE_TYPE_MEDIA_KEY = 37;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER = 38;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL = 39;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS = 40;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR = 41;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR = 42;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC = 43;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS = 44;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING = 45;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY = 46;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES = 47;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER = 48;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS = 49;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME = 50;
+    public static final int KEY_GESTURE_TYPE_DESKTOP_MODE = 51;
+    public static final int KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION = 52;
+    public static final int KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER = 53;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -130,8 +131,10 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS,
             KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK,
             KEY_GESTURE_TYPE_SYSTEM_MUTE,
-            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION,
-            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS,
+            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT,
+            KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT,
+            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT,
+            KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT,
             KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT,
             KEY_GESTURE_TYPE_LOCK_SCREEN,
             KEY_GESTURE_TYPE_OPEN_NOTES,
@@ -155,6 +158,7 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME,
             KEY_GESTURE_TYPE_DESKTOP_MODE,
             KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
+            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -162,6 +166,14 @@ public final class KeyGestureEvent {
 
     public KeyGestureEvent(@NonNull AidlKeyGestureEvent keyGestureEvent) {
         this.mKeyGestureEvent = keyGestureEvent;
+    }
+
+    /**
+     * Tests whether this keyboard shortcut event has the given modifiers (i.e. all of the given
+     * modifiers were pressed when this shortcut was triggered).
+     */
+    public boolean hasModifiers(int modifiers) {
+        return (getModifierState() & modifiers) == modifiers;
     }
 
     /**
@@ -331,6 +343,7 @@ public final class KeyGestureEvent {
             case KEY_GESTURE_TYPE_HOME:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__HOME;
             case KEY_GESTURE_TYPE_RECENT_APPS:
+            case KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RECENT_APPS;
             case KEY_GESTURE_TYPE_BACK:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__BACK;
@@ -378,9 +391,11 @@ public final class KeyGestureEvent {
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TOGGLE_CAPS_LOCK;
             case KEY_GESTURE_TYPE_SYSTEM_MUTE:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SYSTEM_MUTE;
-            case KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION:
+            case KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT:
+            case KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SPLIT_SCREEN_NAVIGATION;
-            case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS:
+            case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
+            case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__CHANGE_SPLITSCREEN_FOCUS;
             case KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TRIGGER_BUG_REPORT;
@@ -487,10 +502,14 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK";
             case KEY_GESTURE_TYPE_SYSTEM_MUTE:
                 return "KEY_GESTURE_TYPE_SYSTEM_MUTE";
-            case KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION:
-                return "KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION";
-            case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS:
-                return "KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS";
+            case KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT:
+                return "KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT";
+            case KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT:
+                return "KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT";
+            case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
+                return "KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT";
+            case KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
+                return "KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT";
             case KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT:
                 return "KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT";
             case KEY_GESTURE_TYPE_LOCK_SCREEN:
@@ -537,6 +556,8 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_DESKTOP_MODE";
             case KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION:
                 return "KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION";
+            case KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER:
+                return "KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER";
             default:
                 return Integer.toHexString(value);
         }

@@ -20,13 +20,24 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.data.repository.RemoteInputRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapNotNull
 
 /**
  * Interactor used for business logic pertaining to the notification remote input (e.g. when the
  * user presses "reply" on a notification and the keyboard opens).
  */
 @SysUISingleton
-class RemoteInputInteractor @Inject constructor(remoteInputRepository: RemoteInputRepository) {
+class RemoteInputInteractor
+@Inject
+constructor(private val remoteInputRepository: RemoteInputRepository) {
     /** Is remote input currently active for a notification? */
     val isRemoteInputActive: Flow<Boolean> = remoteInputRepository.isRemoteInputActive
+
+    /** The bottom bound of the currently focused remote input notification row. */
+    val remoteInputRowBottomBound: Flow<Float> =
+        remoteInputRepository.remoteInputRowBottomBound.mapNotNull { it }
+
+    fun setRemoteInputRowBottomBound(bottom: Float?) {
+        remoteInputRepository.setRemoteInputRowBottomBound(bottom)
+    }
 }

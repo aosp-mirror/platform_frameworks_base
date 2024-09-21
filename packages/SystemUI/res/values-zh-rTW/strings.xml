@@ -105,8 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"新增至記事本"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"包含連結"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
-    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
-    <skip />
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"無法新增其他設定檔中的連結"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"螢幕錄影器"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"處理螢幕錄影內容"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"持續顯示螢幕畫面錄製工作階段通知"</string>
@@ -1180,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"停止共用的工作階段，即可將媒體移至其他裝置"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"停止"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播功能的運作方式"</string>
@@ -1290,6 +1293,8 @@
     <string name="add" msgid="81036585205287996">"新增"</string>
     <string name="manage_users" msgid="1823875311934643849">"管理使用者"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"這項通知無法拖曳到分割畫面中。"</string>
+    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
+    <skip />
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi 已關閉"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"優先模式"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"鬧鐘設定成功"</string>
@@ -1346,6 +1351,8 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"自訂螢幕鎖定畫面"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"解鎖後即可自訂螢幕鎖定畫面"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"無法連上 Wi-Fi"</string>
+    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
+    <skip />
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"已封鎖攝影機"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"已封鎖攝影機和麥克風"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"已封鎖麥克風"</string>
@@ -1401,7 +1408,8 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"學習觸控板手勢、鍵盤快速鍵等"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"返回手勢"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"主畫面手勢"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"快捷操作鍵"</string>
+    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完成"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"返回"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"如要返回，請在觸控板的任何位置上用三指向左或向右滑動。\n\n使用快捷操作鍵 + ESC 鍵 (鍵盤快速鍵) 也可以返回。"</string>
@@ -1411,6 +1419,14 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"用 3 指從螢幕底部向上滑動，就能隨時返回主畫面。"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"太棒了！"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"你已完成「返回主畫面」手勢的教學課程。"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"快捷操作鍵"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"如要存取應用程式，請按下鍵盤上的快捷操作鍵。"</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"恭喜！"</string>
@@ -1434,22 +1450,19 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"用三指向上滑動並按住。輕觸即可進一步瞭解手勢。"</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"使用鍵盤查看所有應用程式"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"你隨時可以按下快捷操作鍵。輕觸即可進一步瞭解手勢。"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"「超暗」已移到亮度列"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"現在只要在螢幕頂端將亮度設定調得更低，就能讓螢幕變得更暗。\n\n這項設定最適合在昏暗環境下使用。"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"移除「超暗」捷徑"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"「超暗」捷徑已移除。如要調低亮度，請使用一般的亮度列。"</string>
-    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
-    <skip />
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"連線"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"無障礙"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"公用程式"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"隱私權"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"由應用程式提供"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"螢幕"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"不明"</string>
 </resources>

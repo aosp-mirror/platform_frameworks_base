@@ -102,4 +102,11 @@ public class TinyFrameworkClassWideAnnotationsTest {
         assertThat(new TinyFrameworkNestedClasses.StaticNestedClass.Double$NestedClass().value)
                 .isEqualTo(8);
     }
+
+    @Test
+    public void testIgnoreAnnotation() {
+        // The actual method will throw, but because of @Ignore, it'll return 0.
+        assertThat(new TinyFrameworkAnnotations().toBeIgnored())
+                .isEqualTo(0);
+    }
 }
