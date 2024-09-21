@@ -345,6 +345,10 @@ public class QuickStepContract {
                 || (sysuiStateFlags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
             return false;
         }
+        // Disable back gesture on the hub, but not when the shade is showing.
+        if ((sysuiStateFlags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
+            return (sysuiStateFlags & SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE) == 0;
+        }
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
         }

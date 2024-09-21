@@ -38,7 +38,7 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  * Limits the number of tasks shown in Desktop Mode.
  *
  * This class should only be used if
- * [com.android.wm.shell.shared.desktopmode.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
+ * [android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
  * is enabled and [maxTasksLimit] is strictly greater than 0.
  */
 class DesktopTasksLimiter (

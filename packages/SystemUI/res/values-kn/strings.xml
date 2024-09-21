@@ -577,7 +577,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ಯಾವುದೇ ಹೊಸ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"ನೋಟಿಫಿಕೇಶನ್ ಕೂಲ್‌ಡೌನ್ ಆನ್ ಆಗಿದೆ"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ನೀವು ಏಕಕಾಲದಲ್ಲಿ ತೀರಾ ಹೆಚ್ಚು ನೋಟಿಫಿಕೇಶನ್‌ಗಳನ್ನು ಪಡೆದಾಗ 2 ನಿಮಿಷಗಳವರೆಗೆ ನಿಮ್ಮ ಸಾಧನದ ವಾಲ್ಯೂಮ್ ಮತ್ತು ಅಲರ್ಟ್‌ಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಡಿಮೆ ಮಾಡಲಾಗುತ್ತದೆ."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ನೀವು ಏಕಕಾಲದಲ್ಲಿ ತೀರಾ ಹೆಚ್ಚು ನೋಟಿಫಿಕೇಶನ್‌‍‍ಗಳನ್ನು ಪಡೆದಾಗ 2 ನಿಮಿಷಗಳವರೆಗೆ ನಿಮ್ಮ ಸಾಧನದ ವಾಲ್ಯೂಮ್ ಮತ್ತು ಅಲರ್ಟ್‌‍‍ಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕಡಿಮೆ ಮಾಡಲಾಗುತ್ತದೆ."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ಹಳೆಯ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"ಈ ಸಾಧನವನ್ನು ನಿಮ್ಮ ಪೋಷಕರು ನಿರ್ವಹಿಸುತ್ತಿದ್ದಾರೆ"</string>
@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ಸ್ಪೀಕರ್‌ಗಳು ಮತ್ತು ಡಿಸ್‌ಪ್ಲೇಗಳು"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ಸೂಚಿಸಿದ ಸಾಧನಗಳು"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"ಮೀಡಿಯಾವನ್ನು ಮತ್ತೊಂದು ಸಾಧನಕ್ಕೆ ಸರಿಸಲು ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸೆಶನ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ಪ್ರಸಾರವು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ"</string>
@@ -1289,8 +1293,7 @@
     <string name="add" msgid="81036585205287996">"ಸೇರಿಸಿ"</string>
     <string name="manage_users" msgid="1823875311934643849">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"ಸ್ಪ್ಲಿಟ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಡ್ರ್ಯಾಗ್ ಮಾಡುವುದನ್ನು ಈ ನೋಟಿಫಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"ಸ್ಥಳ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"ವೈ-ಫೈ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"ಆದ್ಯತೆ ಮೋಡ್"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"ಅಲಾರಾಂ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
@@ -1347,8 +1350,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ಲಾಕ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಲು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"ವೈ-ಫೈ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"ಸ್ಥಳ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ಕ್ಯಾಮರಾವನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ಕ್ಯಾಮರಾ ಮತ್ತು ಮೈಕ್ರೊಫೋನ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"ಮೈಕ್ರೋಫೋನ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
@@ -1404,8 +1406,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ಟಚ್‌ಪ್ಯಾಡ್ ಗೆಸ್ಚರ್‌ಗಳು, ಕೀಬೋರ್ಡ್‌ಗಳ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು ಮತ್ತು ಹೆಚ್ಚಿನದನ್ನು ತಿಳಿಯಿರಿ"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ಹಿಂಬದಿ ಗೆಸ್ಚರ್"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ಹೋಮ್ ಗೆಸ್ಚರ್"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ಮುಗಿದಿದೆ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ಹಿಂತಿರುಗಿ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ಹಿಂತಿರುಗಲು, ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಎಲ್ಲಿಯಾದರೂ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಎಡ ಅಥವಾ ಬಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ.\n\nಇದಕ್ಕಾಗಿ ನೀವು ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್ Action + ESC ಅನ್ನು ಸಹ ಬಳಸಬಹುದು."</string>
@@ -1415,14 +1416,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ಯಾವುದೇ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ಗೆ ಹೋಗಲು, ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಕೆಳಗಿನಿಂದ ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ಭೇಷ್!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ನೀವು ಗೋ ಹೋಮ್ ಗೆಸ್ಚರ್ ಅನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್‌ನಲ್ಲಿ ಮೂರು ಬೆರಳುಗಳನ್ನು ಬಳಸಿ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ಭೇಷ್‌!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ನೀವು ಇತ್ತೀಚಿನ ಆ್ಯಪ್‌ಗಳ ಗೆಸ್ಚರ್‌ ವೀಕ್ಷಣೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"ಆ್ಯಕ್ಷನ್‌ ಕೀ"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ನಿಮ್ಮ ಆ್ಯಪ್‌ಗಳನ್ನು ಆ್ಯಕ್ಸೆಸ್ ಮಾಡಲು, ನಿಮ್ಮ ಕೀಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ಅಭಿನಂದನೆಗಳು!"</string>
@@ -1446,14 +1443,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"ಮೂರು ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ಹೋಲ್ಡ್ ಮಾಡಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಅನ್ನು ಬಳಸಿ"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ಯಾವಾಗ ಬೇಕಾದರೂ ಆ್ಯಕ್ಷನ್‌ ಕೀಯನ್ನು ಒತ್ತಿರಿ. ಇನ್ನಷ್ಟು ಗೆಸ್ಚರ್‌ಗಳನ್ನು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"ಇನ್ನಷ್ಟು ಮಬ್ಬು ಈಗ ಬ್ರೈಟ್‌ನೆಸ್‌ ಸ್ಲೈಡರ್‌ನ ಭಾಗವಾಗಿದೆ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"ನೀವು ಈಗ ಬ್ರೈಟ್‌ನೆಸ್‌ನ ಮಟ್ಟವನ್ನು ಇನ್ನಷ್ಟು ಕಡಿಮೆ ಮಾಡುವ ಮೂಲಕ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಇನ್ನಷ್ಟು ಮಬ್ಬುಗೊಳಿಸಬಹುದು.\n\n ಈ ಫೀಚರ್‌ ಈಗ ಬ್ರೈಟ್‌ನೆಸ್ ಸ್ಲೈಡರ್‌ನ ಭಾಗವಾಗಿರುವುದರಿಂದ, ಇನ್ನಷ್ಟು ಮಬ್ಬಾದ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"ಇನ್ನಷ್ಟು ಮಬ್ಬು ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"ಇನ್ನಷ್ಟು ಮಬ್ಬು ಶಾರ್ಟ್‌ಕಟ್‌ ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"ಕನೆಕ್ಟಿವಿಟಿ"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"ಯುಟಿಲಿಟಿಗಳು"</string>

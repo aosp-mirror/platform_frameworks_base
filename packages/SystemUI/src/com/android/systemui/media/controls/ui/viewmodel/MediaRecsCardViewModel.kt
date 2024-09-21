@@ -16,14 +16,11 @@
 
 package com.android.systemui.media.controls.ui.viewmodel
 
-import android.annotation.ColorInt
 import com.android.systemui.animation.Expandable
 
 /** Models UI state for media recommendations card. */
 data class MediaRecsCardViewModel(
     val contentDescription: (Boolean) -> CharSequence,
-    @ColorInt val cardColor: Int,
-    @ColorInt val cardTitleColor: Int,
     val onClicked: (Expandable) -> Unit,
     val onLongClicked: () -> Unit,
     val mediaRecs: List<MediaRecViewModel>,

@@ -16,23 +16,29 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -80,8 +86,17 @@ interface CollapsedStatusBarViewModel {
     /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
      * the current scene should never show the home status bar.
+     *
+     * TODO(b/364360986): Once the is<SomeChildView>Visible flows are fully enabled, we shouldn't
+     *   need this flow anymore.
      */
     val isHomeStatusBarAllowedByScene: StateFlow<Boolean>
+
+    val isClockVisible: Flow<VisibilityModel>
+    val isNotificationIconContainerVisible: Flow<VisibilityModel>
+    val isSystemInfoVisible: Flow<VisibilityModel>
+
+    // TODO(b/364360986): Add isOngoingActivityChipVisible: Flow<VisibilityModel>
 
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
@@ -93,17 +108,26 @@ interface CollapsedStatusBarViewModel {
      * [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE].
      */
     fun areNotificationsLightsOut(displayId: Int): Flow<Boolean>
+
+    /** Models the current visibility for a specific child view of status bar. */
+    data class VisibilityModel(
+        @View.Visibility val visibility: Int,
+        /** True if a visibility change should be animated. */
+        val shouldAnimateChange: Boolean,
+    )
 }
 
 @SysUISingleton
 class CollapsedStatusBarViewModelImpl
 @Inject
 constructor(
+    collapsedStatusBarInteractor: CollapsedStatusBarInteractor,
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     sceneInteractor: SceneInteractor,
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
+    shadeInteractor: ShadeInteractor,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
     @Application coroutineScope: CoroutineScope,
 ) : CollapsedStatusBarViewModel {
@@ -148,4 +172,59 @@ constructor(
                 }
                 .distinctUntilChanged()
         }
+
+    /**
+     * True if the current SysUI state can show the home status bar (aka this status bar), and false
+     * if we shouldn't be showing any part of the home status bar.
+     */
+    private val isHomeScreenStatusBarAllowedLegacy: Flow<Boolean> =
+        combine(
+            keyguardTransitionInteractor.currentKeyguardState,
+            shadeInteractor.isAnyFullyExpanded,
+        ) { currentKeyguardState, isShadeExpanded ->
+            (currentKeyguardState == GONE || currentKeyguardState == OCCLUDED) && !isShadeExpanded
+            // TODO(b/364360986): Add edge cases, like secure camera launch.
+        }
+
+    private val isHomeScreenStatusBarAllowed: Flow<Boolean> =
+        if (SceneContainerFlag.isEnabled) {
+            isHomeStatusBarAllowedByScene
+        } else {
+            isHomeScreenStatusBarAllowedLegacy
+        }
+
+    override val isClockVisible: Flow<VisibilityModel> =
+        combine(
+            isHomeScreenStatusBarAllowed,
+            collapsedStatusBarInteractor.visibilityViaDisableFlags,
+        ) { isStatusBarAllowed, visibilityViaDisableFlags ->
+            val showClock = isStatusBarAllowed && visibilityViaDisableFlags.isClockAllowed
+            // TODO(b/364360986): Take CollapsedStatusBarFragment.clockHiddenMode into account.
+            VisibilityModel(showClock.toVisibilityInt(), visibilityViaDisableFlags.animate)
+        }
+    override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
+        combine(
+            isHomeScreenStatusBarAllowed,
+            collapsedStatusBarInteractor.visibilityViaDisableFlags,
+        ) { isStatusBarAllowed, visibilityViaDisableFlags ->
+            val showNotificationIconContainer =
+                isStatusBarAllowed && visibilityViaDisableFlags.areNotificationIconsAllowed
+            VisibilityModel(
+                showNotificationIconContainer.toVisibilityInt(),
+                visibilityViaDisableFlags.animate
+            )
+        }
+    override val isSystemInfoVisible: Flow<VisibilityModel> =
+        combine(
+            isHomeScreenStatusBarAllowed,
+            collapsedStatusBarInteractor.visibilityViaDisableFlags,
+        ) { isStatusBarAllowed, visibilityViaDisableFlags ->
+            val showSystemInfo = isStatusBarAllowed && visibilityViaDisableFlags.isSystemInfoAllowed
+            VisibilityModel(showSystemInfo.toVisibilityInt(), visibilityViaDisableFlags.animate)
+        }
+
+    @View.Visibility
+    private fun Boolean.toVisibilityInt(): Int {
+        return if (this) View.VISIBLE else View.GONE
+    }
 }

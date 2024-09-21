@@ -3408,6 +3408,12 @@ public class InputManagerService extends IInputManager.Stub
             mKeyGestureController.notifyKeyGestureCompleted(deviceId, keycodes, modifierState,
                     gestureType);
         }
+
+        @Override
+        public void handleKeyGestureInKeyGestureController(int deviceId, int[] keycodes,
+                int modifierState, @KeyGestureEvent.KeyGestureType int gestureType) {
+            mKeyGestureController.handleKeyGesture(deviceId, keycodes, modifierState, gestureType);
+        }
     }
 
     @Override

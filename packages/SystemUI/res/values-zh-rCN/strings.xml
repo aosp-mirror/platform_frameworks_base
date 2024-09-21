@@ -442,7 +442,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"已关闭"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"设置"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"在设置中管理"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{未启用任何模式}=1{{mode}已启用}other{# 个模式已启用}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{未启用任何模式}=1{已启用“{mode}”模式}other{已启用 # 个模式}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"您将不会受到声音和振动的打扰（闹钟、提醒、活动和所指定来电者的相关提示音除外）。您依然可以听到您选择播放的任何内容（包括音乐、视频和游戏）的相关音效。"</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"您将不会受到声音和振动的打扰（闹钟提示音除外）。您依然可以听到您选择播放的任何内容（包括音乐、视频和游戏）的相关音效。"</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"自定义"</string>
@@ -576,8 +576,8 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即开始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"没有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"没有新通知"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"“通知音量渐降”设置已开启"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"当您一次收到过多通知时，设备音量会自动降低，提醒次数也会自动减少，这种状况最长可持续 2 分钟。"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"已触发“通知音量渐降”"</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"如果您在短时间内收到很多通知，设备音量和提醒次数会自动降低，最长持续 2 分钟。"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"关闭"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"解锁即可查看旧通知"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"此设备由您的家长管理"</string>
@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"音箱和显示屏"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建议的设备"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"停止共享的会话，即可将媒体移到其他设备"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"停止"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"广播的运作方式"</string>

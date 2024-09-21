@@ -19,6 +19,7 @@ package com.android.settingslib.spa.widget.banner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -55,6 +56,7 @@ import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarge
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraSmall
 import com.android.settingslib.spa.framework.theme.SettingsTheme
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
 
@@ -62,15 +64,13 @@ import com.android.settingslib.spa.widget.ui.SettingsTitle
 fun SettingsBanner(content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = CornerExtraLarge,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent,
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                horizontal = SettingsDimension.itemPaddingEnd,
-                vertical = SettingsDimension.itemPaddingAround,
-            ),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        modifier =
+            Modifier.fillMaxWidth()
+                .padding(
+                    horizontal = SettingsDimension.itemPaddingEnd,
+                    vertical = SettingsDimension.itemPaddingAround,
+                ),
         content = content,
     )
 }
@@ -81,40 +81,64 @@ fun SettingsBannerContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        shape = CornerExtraSmall,
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor.takeOrElse { MaterialTheme.colorScheme.surface },
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 1.dp),
+        shape = if (isSpaExpressiveEnabled) CornerExtraLarge else CornerExtraSmall,
+        colors =
+            CardDefaults.cardColors(
+                containerColor = containerColor.takeOrElse { MaterialTheme.colorScheme.surface }
+            ),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 1.dp),
         content = content,
     )
 }
 
 @Composable
 fun SettingsBanner(model: BannerModel) {
-    SettingsBanner {
-        SettingsBannerImpl(model)
-    }
+    SettingsBanner { SettingsBannerImpl(model) }
 }
 
 @Composable
 internal fun SettingsBannerImpl(model: BannerModel) {
     AnimatedVisibility(visible = model.isVisible()) {
         SettingsBannerContent(containerColor = model.containerColor) {
-            Column(
-                modifier = (model.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier)
-                    .padding(
-                        horizontal = SettingsDimension.dialogItemPaddingHorizontal,
-                        vertical = SettingsDimension.itemPaddingAround,
-                    ),
-                verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
-            ) {
-                BannerHeader(model.imageVector, model.tintColor, model.onDismiss)
-                SettingsTitle(model.title)
-                SettingsBody(model.text)
-                Buttons(model.buttons, model.tintColor)
+            if (isSpaExpressiveEnabled) {
+                Column(
+                    modifier =
+                        (model.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier)
+                            .padding(
+                                start = SettingsDimension.paddingLarge,
+                                end = SettingsDimension.paddingLarge,
+                                top = SettingsDimension.paddingLarge,
+                                bottom = SettingsDimension.paddingSmall,
+                            )
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        BannerIcon(model.imageVector, model.tintColor)
+                        Column(
+                            modifier = Modifier.padding(start = SettingsDimension.paddingLarge),
+                            verticalArrangement =
+                                Arrangement.spacedBy(SettingsDimension.itemPaddingAround),
+                        ) {
+                            BannerTitleHeader(model.title, model.onDismiss)
+                            SettingsBody(model.text)
+                        }
+                    }
+                    Buttons(model.buttons, model.tintColor)
+                }
+            } else {
+                Column(
+                    modifier =
+                        (model.onClick?.let { Modifier.clickable(onClick = it) } ?: Modifier)
+                            .padding(
+                                horizontal = SettingsDimension.dialogItemPaddingHorizontal,
+                                vertical = SettingsDimension.itemPaddingAround,
+                            ),
+                    verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround),
+                ) {
+                    BannerHeader(model.imageVector, model.tintColor, model.onDismiss)
+                    SettingsTitle(model.title)
+                    SettingsBody(model.text)
+                    Buttons(model.buttons, model.tintColor)
+                }
             }
         }
     }
@@ -128,6 +152,15 @@ fun BannerHeader(imageVector: ImageVector?, iconColor: Color, onDismiss: (() -> 
     Row(Modifier.fillMaxWidth()) {
         BannerIcon(imageVector, iconColor)
         Spacer(modifier = Modifier.weight(1f))
+        DismissButton(onDismiss)
+    }
+}
+
+@Composable
+fun BannerTitleHeader(title: String, onDismiss: (() -> Unit)? = null) {
+    Row(Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.weight(1f)) { SettingsTitle(title) }
+        Spacer(modifier = Modifier.padding(SettingsDimension.paddingSmall))
         DismissButton(onDismiss)
     }
 }
@@ -147,19 +180,12 @@ private fun BannerIcon(imageVector: ImageVector?, color: Color) {
 @Composable
 private fun DismissButton(onDismiss: (() -> Unit)?) {
     if (onDismiss == null) return
-    Surface(
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.secondaryContainer,
-    ) {
-        IconButton(
-            onClick = onDismiss,
-            modifier = Modifier.size(SettingsDimension.itemIconSize)
-        ) {
+    Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+        IconButton(onClick = onDismiss, modifier = Modifier.size(SettingsDimension.itemIconSize)) {
             Icon(
                 imageVector = Icons.Outlined.Close,
-                contentDescription = stringResource(
-                    androidx.compose.material3.R.string.m3c_snackbar_dismiss
-                ),
+                contentDescription =
+                    stringResource(androidx.compose.material3.R.string.m3c_snackbar_dismiss),
                 modifier = Modifier.padding(SettingsDimension.paddingSmall),
             )
         }
@@ -172,10 +198,11 @@ private fun Buttons(buttons: List<BannerButton>, color: Color) {
     if (buttons.isNotEmpty()) {
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(
-                space = SettingsDimension.itemPaddingEnd,
-                alignment = Alignment.End,
-            ),
+            horizontalArrangement =
+                Arrangement.spacedBy(
+                    space = SettingsDimension.itemPaddingEnd,
+                    alignment = Alignment.End,
+                ),
         ) {
             for (button in buttons) {
                 Button(button, color)
@@ -205,9 +232,7 @@ private fun SettingsBannerPreview() {
                 title = "Lorem ipsum",
                 text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                 imageVector = Icons.Outlined.WarningAmber,
-                buttons = listOf(
-                    BannerButton(text = "Action") {},
-                )
+                buttons = listOf(BannerButton(text = "Action") {}),
             )
         )
     }

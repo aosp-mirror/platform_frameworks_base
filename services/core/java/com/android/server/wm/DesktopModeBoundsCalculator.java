@@ -103,7 +103,7 @@ public final class DesktopModeBoundsCalculator {
         final TaskDisplayArea displayArea = task.getDisplayArea();
         final Rect screenBounds = displayArea.getBounds();
         final Size idealSize = calculateIdealSize(screenBounds, DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
-        if (!DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isEnabled()) {
+        if (!DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             return centerInScreen(idealSize, screenBounds);
         }
         if (activity.mAppCompatController.getAppCompatAspectRatioOverrides()

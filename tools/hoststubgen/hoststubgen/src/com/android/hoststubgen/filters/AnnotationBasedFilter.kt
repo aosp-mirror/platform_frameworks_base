@@ -48,6 +48,7 @@ class AnnotationBasedFilter(
     keepClassAnnotations_: Set<String>,
     throwAnnotations_: Set<String>,
     removeAnnotations_: Set<String>,
+    ignoreAnnotations_: Set<String>,
     substituteAnnotations_: Set<String>,
     redirectAnnotations_: Set<String>,
     redirectionClassAnnotations_: Set<String>,
@@ -60,6 +61,7 @@ class AnnotationBasedFilter(
     private val keepClassAnnotations = convertToInternalNames(keepClassAnnotations_)
     private val throwAnnotations = convertToInternalNames(throwAnnotations_)
     private val removeAnnotations = convertToInternalNames(removeAnnotations_)
+    private val ignoreAnnotations = convertToInternalNames(ignoreAnnotations_)
     private val redirectAnnotations = convertToInternalNames(redirectAnnotations_)
     private val substituteAnnotations = convertToInternalNames(substituteAnnotations_)
     private val redirectionClassAnnotations =
@@ -73,6 +75,7 @@ class AnnotationBasedFilter(
             keepClassAnnotations +
             throwAnnotations +
             removeAnnotations +
+            ignoreAnnotations +
             redirectAnnotations +
             substituteAnnotations
 
@@ -107,6 +110,7 @@ class AnnotationBasedFilter(
             in substituteAnnotations -> FilterPolicy.Substitute.withReason(REASON_ANNOTATION)
             in throwAnnotations -> FilterPolicy.Throw.withReason(REASON_ANNOTATION)
             in removeAnnotations -> FilterPolicy.Remove.withReason(REASON_ANNOTATION)
+            in ignoreAnnotations -> FilterPolicy.Ignore.withReason(REASON_ANNOTATION)
             in redirectAnnotations -> FilterPolicy.Redirect.withReason(REASON_ANNOTATION)
             else -> null
         }

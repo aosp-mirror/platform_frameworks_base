@@ -1938,7 +1938,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Dias da semana à noite"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fim de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"A dormir"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Dormir"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gerido por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Ativada"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desativada"</string>

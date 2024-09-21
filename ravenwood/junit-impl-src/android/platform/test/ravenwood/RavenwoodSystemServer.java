@@ -67,7 +67,7 @@ public class RavenwoodSystemServer {
 
         sStartedServices = new ArraySet<>();
         sTimings = new TimingsTraceAndSlog();
-        sServiceManager = new SystemServiceManager(config.mTestContext);
+        sServiceManager = new SystemServiceManager(config.mInstContext);
         sServiceManager.setStartInfo(false,
                 SystemClock.elapsedRealtime(),
                 SystemClock.uptimeMillis());
