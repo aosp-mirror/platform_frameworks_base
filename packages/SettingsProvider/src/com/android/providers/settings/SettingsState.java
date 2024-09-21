@@ -517,6 +517,7 @@ final class SettingsState {
         }
 
         String namespace = name.substring(0, slashIdx);
+        namespace = namespace.intern();  // Many configs have the same namespace.
         String fullFlagName = name.substring(slashIdx + 1);
         boolean isLocal = false;
 
