@@ -2011,8 +2011,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Iestatiet ekrāna bloķēšanu"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Iestatīt ekrāna bloķēšanu"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Lai izmantotu privāto telpu, iestatiet ekrāna bloķēšanu."</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Lai dzēstu privāto telpu, iestatiet ekrāna bloķēšanu šajā ierīcē."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Lietotne nav pieejama"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> pašlaik nav pieejama."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nav pieejams"</string>

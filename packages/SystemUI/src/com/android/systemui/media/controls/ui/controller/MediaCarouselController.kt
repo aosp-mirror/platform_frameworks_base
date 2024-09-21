@@ -768,6 +768,8 @@ constructor(
                     commonViewModel.recsViewModel,
                     viewController,
                     falsingManager,
+                    backgroundDispatcher,
+                    mainDispatcher,
                 )
                 mediaContent.addView(viewHolder.recommendations, position)
                 controllerById[commonViewModel.key] = viewController

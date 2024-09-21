@@ -191,7 +191,7 @@
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4562226280528716090">"Pokušali ste izbrisati previše sadržaja iz kategorije <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="5557552311566179924">"Pohrana tableta je puna. Izbrišite fajlove kako biste oslobodili prostor."</string>
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Prostor za gledanje je pun. Izbrišite neke fajlove da oslobodite prostor."</string>
-    <string name="low_memory" product="tv" msgid="6663680413790323318">"Pohrana Android TV uređaja je puna. Izbrišite neke fajlove da oslobodite prostor."</string>
+    <string name="low_memory" product="tv" msgid="6663680413790323318">"Pohrana na uređaju Android TV je puna. Izbrišite neke fajlove da oslobodite prostor."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Pohrana telefona je puna. Izbrišite fajlove kako biste oslobodili prostor."</string>
     <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{CA certifikat je instaliran}one{CA certifikati su instalirani}few{CA certifikati su instalirani}other{CA certifikati su instalirani}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Od nepoznate treće strane"</string>
@@ -2011,8 +2011,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Postavite zaključavanje ekrana"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Postavite zaključavanje ekrana"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Za upotrebu privatnog prostora postavite zaključavanje ekrana na uređaju"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Da izbrišete privatni prostor, postavite zaključavanje ekrana na uređaju"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacija nije dostupna"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> trenutno nije dostupna."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Nedostupno: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2066,7 +2065,7 @@
     <string name="app_category_maps" msgid="6395725487922533156">"Mape i navigacija"</string>
     <string name="app_category_productivity" msgid="1844422703029557883">"Produktivnost"</string>
     <string name="app_category_accessibility" msgid="6643521607848547683">"Pristupačnost"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Memorija uređaja"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"Pohrana na uređaju"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"Otklanjanje grešaka putem USB-a"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"sat"</string>
     <string name="time_picker_minute_label" msgid="8307452311269824553">"minuta"</string>

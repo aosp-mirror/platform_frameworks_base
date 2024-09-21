@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -82,6 +83,7 @@ fun TileLazyGrid(
     columns: GridCells,
     modifier: Modifier = Modifier,
     state: LazyGridState = rememberLazyGridState(),
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     content: LazyGridScope.() -> Unit,
 ) {
     LazyVerticalGrid(
@@ -89,6 +91,7 @@ fun TileLazyGrid(
         columns = columns,
         verticalArrangement = spacedBy(CommonTileDefaults.TileArrangementPadding),
         horizontalArrangement = spacedBy(CommonTileDefaults.TileArrangementPadding),
+        contentPadding = contentPadding,
         modifier = modifier,
         content = content,
     )

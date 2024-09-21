@@ -404,12 +404,18 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     }
 }
 
+inline bool RenderNode::isForceInvertDark(TreeInfo& info) {
+    return CC_UNLIKELY(
+             info.forceDarkType == android::uirenderer::ForceDarkType::FORCE_INVERT_COLOR_DARK);
+}
+
 inline bool RenderNode::shouldEnableForceDark(TreeInfo* info) {
     return CC_UNLIKELY(
             info &&
-            (!info->disableForceDark ||
-             info->forceDarkType == android::uirenderer::ForceDarkType::FORCE_INVERT_COLOR_DARK));
+            (!info->disableForceDark || isForceInvertDark(*info)));
 }
+
+
 
 void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
     if (!shouldEnableForceDark(info)) {
@@ -421,7 +427,7 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         children.push_back(node);
     });
     if (mDisplayList.hasText()) {
-        if (mDisplayList.hasFill()) {
+        if (isForceInvertDark(*info) && mDisplayList.hasFill()) {
             // Handle a special case for custom views that draw both text and background in the
             // same RenderNode, which would otherwise be altered to white-on-white text.
             usage = UsageHint::Container;

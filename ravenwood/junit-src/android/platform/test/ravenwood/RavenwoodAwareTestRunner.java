@@ -167,6 +167,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
         return runner;
     }
 
+    private final Class<?> mTestJavaClass;
     private TestClass mTestClass = null;
     private Runner mRealRunner = null;
     private Description mDescription = null;
@@ -192,6 +193,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
      * Constructor.
      */
     public RavenwoodAwareTestRunner(Class<?> testClass) {
+        mTestJavaClass = testClass;
         try {
             performGlobalInitialization();
 
@@ -320,7 +322,7 @@ public final class RavenwoodAwareTestRunner extends Runner implements Filterable
             return;
         }
 
-        Log.v(TAG, "Starting " + mTestClass.getJavaClass().getCanonicalName());
+        Log.v(TAG, "Starting " + mTestJavaClass.getCanonicalName());
         if (RAVENWOOD_VERBOSE_LOGGING) {
             dumpDescription(getDescription());
         }

@@ -132,8 +132,7 @@ public class InputMediaDevice extends MediaDevice {
 
     @VisibleForTesting
     int getDrawableResId() {
-        // TODO(b/357122624): check with UX to obtain the icon for desktop devices.
-        return R.drawable.ic_media_tablet;
+        return R.drawable.ic_media_microphone;
     }
 
     @Override

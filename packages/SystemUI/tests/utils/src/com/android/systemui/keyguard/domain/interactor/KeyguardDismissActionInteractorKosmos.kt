@@ -39,5 +39,6 @@ val Kosmos.keyguardDismissActionInteractor by
             powerInteractor = powerInteractor,
             alternateBouncerInteractor = alternateBouncerInteractor,
             shadeInteractor = { shadeInteractor },
+            keyguardInteractor = { keyguardInteractor },
         )
     }

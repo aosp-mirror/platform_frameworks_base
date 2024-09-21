@@ -27,12 +27,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
+import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 /**
@@ -145,7 +145,7 @@ public class DragPositioningCallbackUtility {
         // If the application is unresizeable and any bounds have been set back to their old
         // location or to a stable bound edge, reset all the bounds to maintain the applications
         // aspect ratio.
-        if (DesktopModeFlags.SCALED_RESIZING.isEnabled(windowDecoration.mDecorWindowContext)
+        if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
                 && !isAspectRatioMaintained && !windowDecoration.mTaskInfo.isResizeable) {
             repositionTaskBounds.top = oldTop;
             repositionTaskBounds.bottom = oldBottom;
@@ -275,7 +275,7 @@ public class DragPositioningCallbackUtility {
 
     private static boolean isSizeConstraintForDesktopModeEnabled(Context context) {
         return DesktopModeStatus.canEnterDesktopMode(context)
-                && DesktopModeFlags.SIZE_CONSTRAINTS.isEnabled(context);
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS.isTrue();
     }
 
     interface DragStartListener {
