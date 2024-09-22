@@ -86,6 +86,9 @@ sealed class AuthMethodBouncerViewModel(
 
             _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
             clearInput()
+            if (authenticationResult == AuthenticationResult.SUCCEEDED) {
+                onSuccessfulAuthentication()
+            }
         }
         awaitCancellation()
     }
@@ -115,6 +118,9 @@ sealed class AuthMethodBouncerViewModel(
 
     /** Returns the input entered so far. */
     protected abstract fun getInput(): List<Any>
+
+    /** Invoked after a successful authentication. */
+    protected open fun onSuccessfulAuthentication() = Unit
 
     /** Perform authentication result haptics */
     private fun performAuthenticationHapticFeedback(result: AuthenticationResult) {

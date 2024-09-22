@@ -35,6 +35,8 @@ import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
+import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
+import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_LANDSCAPE_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRAIT_ONLY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
@@ -49,6 +51,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
@@ -133,6 +136,7 @@ import android.app.IActivityController;
 import android.app.PictureInPictureParams;
 import android.app.TaskInfo;
 import android.app.WindowConfiguration;
+import android.app.compat.CompatChanges;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -503,6 +507,12 @@ class Task extends TaskFragment {
     int mOffsetXForInsets;
     int mOffsetYForInsets;
 
+    /**
+     * Whether the compatibility overrides that change the resizability of the app should be allowed
+     * for the specific app.
+     */
+    boolean mAllowForceResizeOverride = true;
+
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
 
@@ -666,6 +676,7 @@ class Task extends TaskFragment {
             intent = _intent;
             mMinWidth = minWidth;
             mMinHeight = minHeight;
+            updateAllowForceResizeOverride();
         }
         mAtmService.getTaskChangeNotificationController().notifyTaskCreated(_taskId, realActivity);
         mHandler = new ActivityTaskHandler(mTaskSupervisor.mLooper);
@@ -1028,6 +1039,7 @@ class Task extends TaskFragment {
             mTaskSupervisor.mRecentTasks.remove(this);
             mTaskSupervisor.mRecentTasks.add(this);
         }
+        updateAllowForceResizeOverride();
     }
 
     /** Sets the original minimal width and height. */
@@ -1821,6 +1833,17 @@ class Task extends TaskFragment {
     boolean canBeLaunchedOnDisplay(int displayId) {
         return mTaskSupervisor.canPlaceEntityOnDisplay(displayId,
                 -1 /* don't check PID */, -1 /* don't check UID */, this);
+    }
+
+    private void updateAllowForceResizeOverride() {
+        try {
+            mAllowForceResizeOverride = mAtmService.mContext.getPackageManager().getProperty(
+                    PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES,
+                    getBasePackageName()).getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            // Package not found or property not defined, reset to default value.
+            mAllowForceResizeOverride = true;
+        }
     }
 
     /**
@@ -2812,7 +2835,18 @@ class Task extends TaskFragment {
     boolean isResizeable(boolean checkPictureInPictureSupport) {
         final boolean forceResizable = mAtmService.mForceResizableActivities
                 && getActivityType() == ACTIVITY_TYPE_STANDARD;
-        return forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
+        if (forceResizable) return true;
+
+        final UserHandle userHandle = UserHandle.getUserHandleForUid(mUserId);
+        final boolean forceResizableOverride = mAllowForceResizeOverride
+                && CompatChanges.isChangeEnabled(
+                        FORCE_RESIZE_APP, getBasePackageName(), userHandle);
+        final boolean forceNonResizableOverride = mAllowForceResizeOverride
+                && CompatChanges.isChangeEnabled(
+                        FORCE_NON_RESIZE_APP, getBasePackageName(), userHandle);
+
+        if (forceNonResizableOverride) return false;
+        return forceResizableOverride || ActivityInfo.isResizeableMode(mResizeMode)
                 || (mSupportsPictureInPicture && checkPictureInPictureSupport);
     }
 

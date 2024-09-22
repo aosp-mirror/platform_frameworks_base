@@ -18,6 +18,7 @@ package com.android.server.input.debug;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.Slog;
@@ -58,11 +59,9 @@ public class TouchpadVisualizationView extends View {
         mScaleFactor = 1;
         mOvalStrokePaint = new Paint();
         mOvalStrokePaint.setAntiAlias(true);
-        mOvalStrokePaint.setARGB(255, 0, 0, 0);
         mOvalStrokePaint.setStyle(Paint.Style.STROKE);
         mOvalFillPaint = new Paint();
         mOvalFillPaint.setAntiAlias(true);
-        mOvalFillPaint.setARGB(255, 0, 0, 0);
         mTracePaint = new Paint();
         mTracePaint.setAntiAlias(false);
         mTracePaint.setARGB(255, 0, 0, 255);
@@ -193,6 +192,24 @@ public class TouchpadVisualizationView extends View {
      */
     public void updateScaleFactor(float scaleFactor) {
         mScaleFactor = scaleFactor;
+    }
+
+    /**
+     * Change the colors of the objects inside the view to light mode theme.
+     */
+    public void setLightModeTheme() {
+        this.setBackgroundColor(Color.rgb(20, 20, 20));
+        mOvalFillPaint.setARGB(255, 255, 255, 255);
+        mOvalStrokePaint.setARGB(255, 255, 255, 255);
+    }
+
+    /**
+     * Change the colors of the objects inside the view to night mode theme.
+     */
+    public void setNightModeTheme() {
+        this.setBackgroundColor(Color.rgb(240, 240, 240));
+        mOvalFillPaint.setARGB(255, 0, 0, 0);
+        mOvalStrokePaint.setARGB(255, 0, 0, 0);
     }
 
     private float translateX(float x) {
