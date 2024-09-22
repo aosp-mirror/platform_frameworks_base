@@ -38,6 +38,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -55,7 +56,6 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -146,7 +146,7 @@ public class InsetsState implements Parcelable {
                 forceConsumingTypes |= type;
             }
 
-            if (Flags.enableCaptionCompatInsetForceConsumptionAlways()
+            if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue()
                     && (flags & FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR) != 0) {
                 forceConsumingOpaqueCaptionBar = true;
             }

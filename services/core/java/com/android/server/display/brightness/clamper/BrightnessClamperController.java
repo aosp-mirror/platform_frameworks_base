@@ -218,9 +218,7 @@ public class BrightnessClamperController {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
         } else if (mClamperType == Type.POWER) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_POWER_IC;
-        } else if (mClamperType == Type.WEAR_BEDTIME_MODE) {
-            return BrightnessInfo.BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE;
-        } else {
+        }  else {
             Slog.wtf(TAG, "BrightnessMaxReason not mapped for type=" + mClamperType);
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
         }
@@ -350,10 +348,6 @@ public class BrightnessClamperController {
                             data, currentBrightness));
                 }
             }
-            if (flags.isBrightnessWearBedtimeModeClamperEnabled()) {
-                clampers.add(new BrightnessWearBedtimeModeClamper(handler, context,
-                        clamperChangeListener, data));
-            }
             return clampers;
         }
 
@@ -362,6 +356,10 @@ public class BrightnessClamperController {
                 DisplayDeviceData data) {
             List<BrightnessStateModifier> modifiers = new ArrayList<>();
             modifiers.add(new BrightnessThermalModifier(handler, listener, data));
+            if (flags.isBrightnessWearBedtimeModeClamperEnabled()) {
+                modifiers.add(new BrightnessWearBedtimeModeModifier(handler, context,
+                        listener, data));
+            }
 
             modifiers.add(new DisplayDimModifier(context));
             modifiers.add(new BrightnessLowPowerModeModifier());
@@ -395,7 +393,7 @@ public class BrightnessClamperController {
      */
     public static class DisplayDeviceData implements BrightnessThermalModifier.ThermalData,
             BrightnessPowerClamper.PowerData,
-            BrightnessWearBedtimeModeClamper.WearBedtimeModeData {
+            BrightnessWearBedtimeModeModifier.WearBedtimeModeData {
         @NonNull
         private final String mUniqueDisplayId;
         @NonNull

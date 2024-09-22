@@ -505,8 +505,8 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
             return;
         }
         // delay starting scroll capture to make sure scrim is up before the app moves
-        mViewProxy.prepareScrollingTransition(response, mScreenBitmap, newScreenshot,
-                mScreenshotTakenInPortrait, () -> executeBatchScrollCapture(response, owner));
+        mViewProxy.prepareScrollingTransition(response, newScreenshot, mScreenshotTakenInPortrait,
+                () -> executeBatchScrollCapture(response, owner));
     }
 
     private void executeBatchScrollCapture(ScrollCaptureResponse response, UserHandle owner) {

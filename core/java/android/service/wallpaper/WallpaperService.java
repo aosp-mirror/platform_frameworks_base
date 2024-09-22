@@ -70,6 +70,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -370,6 +371,7 @@ public abstract class WallpaperService extends Service {
         private float mDefaultDimAmount = 0.05f;
         SurfaceControl mBbqSurfaceControl;
         BLASTBufferQueue mBlastBufferQueue;
+        IBinder mBbqApplyToken = new Binder();
         private SurfaceControl mScreenshotSurfaceControl;
         private Point mScreenshotSize = new Point();
 
@@ -2390,6 +2392,7 @@ public abstract class WallpaperService extends Service {
             if (mBlastBufferQueue == null) {
                 mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mBbqSurfaceControl,
                         width, height, format);
+                mBlastBufferQueue.setApplyToken(mBbqApplyToken);
                 // We only return the Surface the first time, as otherwise
                 // it hasn't changed and there is no need to update.
                 ret = mBlastBufferQueue.createSurface();

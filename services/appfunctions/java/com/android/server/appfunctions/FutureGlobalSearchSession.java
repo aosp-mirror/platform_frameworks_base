@@ -23,12 +23,10 @@ import android.app.appsearch.GlobalSearchSession;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.observer.ObserverCallback;
 import android.app.appsearch.observer.ObserverSpec;
-import android.util.Slog;
 
 import com.android.internal.infra.AndroidFuture;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 /** A wrapper around {@link GlobalSearchSession} that provides a future-based API. */
@@ -84,11 +82,13 @@ public class FutureGlobalSearchSession implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        try {
-            getSessionAsync().get().close();
-        } catch (Exception ex) {
-            Slog.e(TAG, "Failed to close global search session", ex);
-        }
+    public void close() {
+        getSessionAsync()
+                .whenComplete(
+                        (appSearchSession, throwable) -> {
+                            if (appSearchSession != null) {
+                                appSearchSession.close();
+                            }
+                        });
     }
 }

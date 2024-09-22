@@ -616,6 +616,71 @@ class DeviceFoldStateProviderTest : SysuiTestCase() {
     }
 
     @Test
+    fun angleDecreaseAfterCancelAnimation_emitsStartClosingEvent() {
+        setFoldState(folded = true)
+        sendHingeAngleEvent(0)
+        foldUpdates.clear()
+
+        setFoldState(folded = false)
+        rotationListener.value.onRotationChanged(1)
+        sendHingeAngleEvent(180)
+        screenOnStatusProvider.notifyScreenTurningOn()
+        screenOnStatusProvider.notifyScreenTurnedOn()
+
+        // Start folding
+        (180 downTo 60).forEach {
+            sendHingeAngleEvent(it)
+        }
+        // Stopped folding and simulate timeout in this posture
+        simulateTimeout()
+
+        assertThat(foldUpdates)
+            .containsExactly(
+                FOLD_UPDATE_START_OPENING, // unfolded
+                FOLD_UPDATE_FINISH_HALF_OPEN, // force-finished the animation because of rotation
+                FOLD_UPDATE_START_CLOSING, // start closing the device
+                FOLD_UPDATE_FINISH_HALF_OPEN, // finished closing and timed-out in this state
+            )
+
+    }
+
+    @Test
+    fun angleIncreaseDecreaseAfterHalfUnfold_emitsStartClosingEvent() {
+        setFoldState(folded = true)
+        sendHingeAngleEvent(0)
+        foldUpdates.clear()
+
+        setFoldState(folded = false)
+        sendHingeAngleEvent(90)
+        screenOnStatusProvider.notifyScreenTurningOn()
+        screenOnStatusProvider.notifyScreenTurnedOn()
+
+        // Stopped folding and simulate timeout in this posture
+        simulateTimeout()
+
+        // Unfold further
+        (90 until 180).forEach {
+            sendHingeAngleEvent(it)
+        }
+        // Start folding
+        (180 downTo 90).forEach {
+            sendHingeAngleEvent(it)
+        }
+
+        // Stopped folding and simulate timeout in this posture
+        simulateTimeout()
+
+        assertThat(foldUpdates)
+            .containsExactly(
+                FOLD_UPDATE_START_OPENING, // unfolded
+                FOLD_UPDATE_FINISH_HALF_OPEN, // force-finished the animation because of rotation
+                FOLD_UPDATE_START_CLOSING, // start closing the device
+                FOLD_UPDATE_FINISH_HALF_OPEN, // finished closing and timed-out in this state
+            )
+
+    }
+
+    @Test
     fun onUnfold_onSmallScreen_emitsStartOpening() {
         // the new display state might arrive later, so it shouldn't be used to decide to send the
         // start opening event, but only for the closing.

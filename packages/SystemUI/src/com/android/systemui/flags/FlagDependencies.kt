@@ -31,9 +31,7 @@ import com.android.systemui.Flags.statusBarCallChipNotificationIcon
 import com.android.systemui.Flags.statusBarScreenSharingChips
 import com.android.systemui.Flags.statusBarUseReposForCallChip
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
@@ -61,10 +59,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
 
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
-
-        // ComposeLockscreen dependencies
-        ComposeLockscreen.token dependsOn KeyguardBottomAreaRefactor.token
-        ComposeLockscreen.token dependsOn MigrateClocksToBlueprint.token
 
         // CommunalHub dependencies
         communalHub dependsOn MigrateClocksToBlueprint.token
@@ -99,7 +93,7 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         get() =
             FlagToken(
                 FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON,
-                statusBarCallChipNotificationIcon()
+                statusBarCallChipNotificationIcon(),
             )
 
     private inline val statusBarScreenSharingChipsToken

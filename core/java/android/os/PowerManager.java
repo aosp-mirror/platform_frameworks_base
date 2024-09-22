@@ -1144,9 +1144,10 @@ public final class PowerManager {
     }
 
     private static final String CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY =
-            "cache_key.is_power_save_mode";
+            PropertyInvalidatedCache.createSystemCacheKey("is_power_save_mode");
 
-    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY = "cache_key.is_interactive";
+    private static final String CACHE_KEY_IS_INTERACTIVE_PROPERTY =
+            PropertyInvalidatedCache.createSystemCacheKey("is_interactive");
 
     private static final int MAX_CACHE_ENTRIES = 1;
 

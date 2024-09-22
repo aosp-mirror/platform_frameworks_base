@@ -40,6 +40,7 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -115,6 +116,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private PipParamsChangedForwarder mMockPipParamsChangedForwarder;
     @Mock private DisplayInsetsController mMockDisplayInsetsController;
     @Mock private TabletopModeController mMockTabletopModeController;
+    @Mock private Handler mMockHandler;
 
     @Mock private DisplayLayout mMockDisplayLayout1;
     @Mock private DisplayLayout mMockDisplayLayout2;
@@ -138,7 +140,7 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mMockPipParamsChangedForwarder,
                 mMockDisplayInsetsController, mMockTabletopModeController,
-                mMockOneHandedController, mMockExecutor);
+                mMockOneHandedController, mMockExecutor, mMockHandler);
         mShellInit.init();
         when(mMockPipBoundsAlgorithm.getSnapAlgorithm()).thenReturn(mMockPipSnapAlgorithm);
         when(mMockPipTouchHandler.getMotionHelper()).thenReturn(mMockPipMotionHelper);
@@ -230,7 +232,7 @@ public class PipControllerTest extends ShellTestCase {
                 mMockPipTransitionController, mMockWindowManagerShellWrapper,
                 mMockTaskStackListener, mMockPipParamsChangedForwarder,
                 mMockDisplayInsetsController, mMockTabletopModeController,
-                mMockOneHandedController, mMockExecutor));
+                mMockOneHandedController, mMockExecutor, mMockHandler));
     }
 
     @Test

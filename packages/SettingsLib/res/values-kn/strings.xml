@@ -582,10 +582,11 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ಇದೀಗ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ಈ ಫೋನ್"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ಈ ಟ್ಯಾಬ್ಲೆಟ್"</string>
+    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
+    <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <!-- no translation found for media_transfer_internal_mic (797333824290228595) -->
-    <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"ಮೈಕ್ರೊಫೋನ್‌ (ಆಂತರಿಕ)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ಡಾಕ್ ಸ್ಪೀಕರ್"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ಬಾಹ್ಯ ಸಾಧನ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ಕನೆಕ್ಟ್ ಮಾಡಿರುವ ಸಾಧನ"</string>
@@ -686,11 +687,14 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ಈ ಬದಲಾವಣೆ ಅನ್ವಯವಾಗಲು ನಿಮ್ಮ ಸಾಧನವನ್ನು ರೀಬೂಟ್ ಮಾಡಬೇಕು. ಇದೀಗ ರೀಬೂಟ್ ಮಾಡಿ ಅಥವಾ ರದ್ದುಗೊಳಿಸಿ."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"ವೈಯರ್ ಹೊಂದಿರುವ ಹೆಡ್‌ಫೋನ್"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7417067197803840965) -->
+    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
     <skip />
-    <!-- no translation found for media_transfer_usb_device_mic_name (9189914846215516322) -->
+    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
     <skip />
+    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
+    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ಮೈಕ್‌ ಜ್ಯಾಕ್‌"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB ಮೈಕ್‌"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ಆನ್ ಆಗಿದೆ"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ಆಫ್"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"ವಾಹಕ ನೆಟ್‌ವರ್ಕ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>

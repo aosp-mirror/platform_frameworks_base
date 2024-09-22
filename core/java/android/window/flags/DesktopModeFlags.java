@@ -17,7 +17,9 @@
 package android.window.flags;
 
 import android.annotation.Nullable;
-import android.content.Context;
+import android.app.ActivityThread;
+import android.app.Application;
+import android.content.ContentResolver;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -39,9 +41,30 @@ import java.util.function.Supplier;
  */
 public enum DesktopModeFlags {
     // All desktop mode related flags to be overridden by developer option toggle will be added here
-    DESKTOP_WINDOWING_MODE(
+    ENABLE_DESKTOP_WINDOWING_MODE(
             Flags::enableDesktopWindowingMode, /* shouldOverrideByDevOption= */ true),
-    DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, false);
+    ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS(Flags::enableWindowingDynamicInitialBounds, true),
+    ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION(
+            Flags::enableCaptionCompatInsetForceConsumption, true),
+    ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS(
+            Flags::enableCaptionCompatInsetForceConsumptionAlways, true),
+    ENABLE_CASCADING_WINDOWS(Flags::enableCascadingWindows, true),
+    ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY(
+            Flags::enableDesktopWindowingWallpaperActivity, true),
+    ENABLE_DESKTOP_WINDOWING_MODALS_POLICY(Flags::enableDesktopWindowingModalsPolicy, true),
+    ENABLE_THEMED_APP_HEADERS(Flags::enableThemedAppHeaders, true),
+    ENABLE_DESKTOP_WINDOWING_QUICK_SWITCH(Flags::enableDesktopWindowingQuickSwitch, true),
+    ENABLE_APP_HEADER_WITH_TASK_DENSITY(Flags::enableAppHeaderWithTaskDensity, true),
+    ENABLE_TASK_STACK_OBSERVER_IN_SHELL(Flags::enableTaskStackObserverInShell, true),
+    ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS(Flags::enableDesktopWindowingSizeConstraints, true),
+    DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE(Flags::disableNonResizableAppSnapResizing, true),
+    ENABLE_WINDOWING_SCALED_RESIZING(Flags::enableWindowingScaledResizing, true),
+    ENABLE_DESKTOP_WINDOWING_TASK_LIMIT(Flags::enableDesktopWindowingTaskLimit, true),
+    ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION(Flags::enableDesktopWindowingBackNavigation, true),
+    ENABLE_WINDOWING_EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
+    ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
+            Flags::enableDesktopWindowingTaskbarRunningApps, true),
+    ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.
@@ -62,14 +85,15 @@ public enum DesktopModeFlags {
      * Determines state of flag based on the actual flag and desktop mode developer option
      * overrides.
      */
-    public boolean isEnabled(Context context) {
+    public boolean isTrue() {
+        Application application = ActivityThread.currentApplication();
         if (!Flags.showDesktopWindowingDevOption()
                 || !mShouldOverrideByDevOption
-                || context.getContentResolver() == null) {
+                || application == null) {
             return mFlagFunction.get();
         } else {
             boolean shouldToggleBeEnabledByDefault = Flags.enableDesktopWindowingMode();
-            return switch (getToggleOverride(context)) {
+            return switch (getToggleOverride(application.getContentResolver())) {
                 case OVERRIDE_UNSET -> mFlagFunction.get();
                 // When toggle override matches its default state, don't override flags. This
                 // helps users reset their feature overrides.
@@ -79,14 +103,14 @@ public enum DesktopModeFlags {
         }
     }
 
-    private ToggleOverride getToggleOverride(Context context) {
+    private ToggleOverride getToggleOverride(ContentResolver contentResolver) {
         // If cached, return it
         if (sCachedToggleOverride != null) {
             return sCachedToggleOverride;
         }
 
         // Otherwise, fetch and cache it
-        ToggleOverride override = getToggleOverrideFromSystem(context);
+        ToggleOverride override = getToggleOverrideFromSystem(contentResolver);
         sCachedToggleOverride = override;
         Log.d(TAG, "Toggle override initialized to: " + override);
         return override;
@@ -95,9 +119,9 @@ public enum DesktopModeFlags {
     /**
      *  Returns {@link ToggleOverride} from Settings.Global set by toggle.
      */
-    private ToggleOverride getToggleOverrideFromSystem(Context context) {
+    private ToggleOverride getToggleOverrideFromSystem(ContentResolver contentResolver) {
         int settingValue = Settings.Global.getInt(
-                context.getContentResolver(),
+                contentResolver,
                 Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
                 ToggleOverride.OVERRIDE_UNSET.getSetting()
         );
@@ -105,12 +129,13 @@ public enum DesktopModeFlags {
     }
 
     /** Override state of desktop mode developer option toggle. */
-    private enum ToggleOverride {
+    public enum ToggleOverride {
         OVERRIDE_UNSET,
         OVERRIDE_OFF,
         OVERRIDE_ON;
 
-        int getSetting() {
+        /** Returns the integer representation of this {@code ToggleOverride}. */
+        public int getSetting() {
             return switch (this) {
                 case OVERRIDE_ON -> 1;
                 case OVERRIDE_OFF -> 0;
@@ -118,7 +143,8 @@ public enum DesktopModeFlags {
             };
         }
 
-        static ToggleOverride fromSetting(int setting, @Nullable ToggleOverride fallback) {
+        /** Returns the {@code ToggleOverride} corresponding to a given integer setting. */
+        public static ToggleOverride fromSetting(int setting, @Nullable ToggleOverride fallback) {
             return switch (setting) {
                 case 1 -> OVERRIDE_ON;
                 case 0 -> OVERRIDE_OFF;

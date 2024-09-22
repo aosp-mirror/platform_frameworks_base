@@ -20,6 +20,7 @@ import static android.app.appfunctions.AppFunctionStaticMetadataHelper.APP_FUNCT
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_NAMESPACE;
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.STATIC_PROPERTY_RESTRICT_CALLERS_WITH_EXECUTE_APP_FUNCTIONS;
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.getDocumentIdForAppFunction;
+
 import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_EXECUTOR;
 
 import android.Manifest;
@@ -41,6 +42,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.internal.infra.AndroidFuture;
+
 import java.util.Objects;
 
 /* Validates that caller has the correct privilege to call an AppFunctionManager Api. */
@@ -82,7 +84,6 @@ class CallerValidatorImpl implements CallerValidator {
     }
 
     @Override
-    @BinderThread
     @RequiresPermission(
             anyOf = {
                 Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
@@ -90,6 +91,8 @@ class CallerValidatorImpl implements CallerValidator {
             },
             conditional = true)
     public AndroidFuture<Boolean> verifyCallerCanExecuteAppFunction(
+            int callingUid,
+            int callingPid,
             @NonNull String callerPackageName,
             @NonNull String targetPackageName,
             @NonNull String functionId) {
@@ -97,11 +100,11 @@ class CallerValidatorImpl implements CallerValidator {
             return AndroidFuture.completedFuture(true);
         }
 
-        int pid = Binder.getCallingPid();
-        int uid = Binder.getCallingUid();
         boolean hasTrustedExecutionPermission =
                 mContext.checkPermission(
-                                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED, pid, uid)
+                                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                                callingPid,
+                                callingUid)
                         == PackageManager.PERMISSION_GRANTED;
 
         if (hasTrustedExecutionPermission) {
@@ -109,40 +112,34 @@ class CallerValidatorImpl implements CallerValidator {
         }
 
         boolean hasExecutionPermission =
-                mContext.checkPermission(Manifest.permission.EXECUTE_APP_FUNCTIONS, pid, uid)
+                mContext.checkPermission(
+                                Manifest.permission.EXECUTE_APP_FUNCTIONS, callingPid, callingUid)
                         == PackageManager.PERMISSION_GRANTED;
 
         if (!hasExecutionPermission) {
             return AndroidFuture.completedFuture(false);
         }
 
-        final long token = Binder.clearCallingIdentity();
-        try {
-            FutureAppSearchSession futureAppSearchSession =
-                    new FutureAppSearchSessionImpl(
-                            mContext.getSystemService(AppSearchManager.class),
-                            THREAD_POOL_EXECUTOR,
-                            new SearchContext.Builder(APP_FUNCTION_STATIC_METADATA_DB).build());
+        FutureAppSearchSession futureAppSearchSession =
+                new FutureAppSearchSessionImpl(
+                        mContext.getSystemService(AppSearchManager.class),
+                        THREAD_POOL_EXECUTOR,
+                        new SearchContext.Builder(APP_FUNCTION_STATIC_METADATA_DB).build());
 
-            String documentId = getDocumentIdForAppFunction(targetPackageName, functionId);
+        String documentId = getDocumentIdForAppFunction(targetPackageName, functionId);
 
-            return futureAppSearchSession
-                    .getByDocumentId(
-                            new GetByDocumentIdRequest.Builder(APP_FUNCTION_STATIC_NAMESPACE)
-                                    .addIds(documentId)
-                                    .build())
-                    .thenApply(
-                            batchResult ->
-                                    getGenericDocumentFromBatchResult(batchResult, documentId))
-                    .thenApply(
-                            CallerValidatorImpl::getRestrictCallersWithExecuteAppFunctionsProperty)
-                    .thenApply(
-                            restrictCallersWithExecuteAppFunctions ->
-                                    !restrictCallersWithExecuteAppFunctions
-                                            && hasExecutionPermission);
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
+        return futureAppSearchSession
+                .getByDocumentId(
+                        new GetByDocumentIdRequest.Builder(APP_FUNCTION_STATIC_NAMESPACE)
+                                .addIds(documentId)
+                                .build())
+                .thenApply(
+                        batchResult -> getGenericDocumentFromBatchResult(batchResult, documentId))
+                .thenApply(document -> !getRestrictCallersWithExecuteAppFunctionsProperty(document))
+                .whenComplete(
+                        (result, throwable) -> {
+                            futureAppSearchSession.close();
+                        });
     }
 
     private static GenericDocument getGenericDocumentFromBatchResult(
@@ -167,19 +164,13 @@ class CallerValidatorImpl implements CallerValidator {
     }
 
     @Override
-    @BinderThread
     public boolean isUserOrganizationManaged(@NonNull UserHandle targetUser) {
-        final long callingIdentityToken = Binder.clearCallingIdentity();
-        try {
-            if (Objects.requireNonNull(mContext.getSystemService(DevicePolicyManager.class))
-                    .isDeviceManaged()) {
-                return true;
-            }
-            return Objects.requireNonNull(mContext.getSystemService(UserManager.class))
-                    .isManagedProfile(targetUser.getIdentifier());
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentityToken);
+        if (Objects.requireNonNull(mContext.getSystemService(DevicePolicyManager.class))
+                .isDeviceManaged()) {
+            return true;
         }
+        return Objects.requireNonNull(mContext.getSystemService(UserManager.class))
+                .isManagedProfile(targetUser.getIdentifier());
     }
 
     /**

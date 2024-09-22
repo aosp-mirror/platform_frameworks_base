@@ -48,7 +48,7 @@ protected:
         nsecs_t nextWakeup = mQueue.nextWakeup(lock);
         std::chrono::nanoseconds duration = std::chrono::nanoseconds::max();
         if (nextWakeup < std::numeric_limits<nsecs_t>::max()) {
-            int timeout = nextWakeup - WorkQueue::clock::now();
+            nsecs_t timeout = nextWakeup - WorkQueue::clock::now();
             if (timeout < 0) timeout = 0;
             duration = std::chrono::nanoseconds(timeout);
         }

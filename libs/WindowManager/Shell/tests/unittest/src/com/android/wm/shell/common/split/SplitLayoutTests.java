@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
@@ -65,6 +66,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Mock DisplayImeController mDisplayImeController;
     @Mock ShellTaskOrganizer mTaskOrganizer;
     @Mock WindowContainerTransaction mWct;
+    @Mock Handler mHandler;
     @Captor ArgumentCaptor<Runnable> mRunnableCaptor;
     private SplitLayout mSplitLayout;
 
@@ -80,7 +82,8 @@ public class SplitLayoutTests extends ShellTestCase {
                 mDisplayController,
                 mDisplayImeController,
                 mTaskOrganizer,
-                SplitLayout.PARALLAX_NONE));
+                SplitLayout.PARALLAX_NONE,
+                mHandler));
     }
 
     @Test

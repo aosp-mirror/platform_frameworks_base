@@ -582,10 +582,11 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"អម្បាញ់មិញ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ទូរសព្ទនេះ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ថេប្លេតនេះ"</string>
+    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
+    <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <!-- no translation found for media_transfer_internal_mic (797333824290228595) -->
-    <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"មីក្រូហ្វូន (ខាងក្នុង)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ឧបាល័រជើងទម្រ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ឧបករណ៍ខាងក្រៅ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"​ឧបករណ៍ដែលបាន​ភ្ជាប់"</string>
@@ -686,11 +687,14 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"បានបិទ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ដើម្បីឱ្យ​ការផ្លាស់ប្ដូរ​នេះ​មានប្រសិទ្ធភាព។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"កាស​មានខ្សែ"</string>
-    <!-- no translation found for media_transfer_wired_device_mic_name (7417067197803840965) -->
+    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
     <skip />
-    <!-- no translation found for media_transfer_usb_device_mic_name (9189914846215516322) -->
+    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
     <skip />
+    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
+    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ឌុយ​មីក្រូហ្វូន"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"មីក្រូហ្វូន USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"បើក"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"បិទ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"បណ្តាញ​ក្រុមហ៊ុនសេវាទូរសព្ទ​កំពុងផ្លាស់ប្តូរ"</string>

@@ -137,7 +137,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
-import com.android.systemui.keyguard.shared.ComposeLockscreen;
 import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -186,6 +185,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.ConversationNotificationManager;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
@@ -207,7 +207,6 @@ import com.android.systemui.statusbar.phone.BounceInterpolator;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -2221,6 +2220,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     @VisibleForTesting
     void onFlingEnd(boolean cancelled) {
         mIsFlinging = false;
+        mExpectingSynthesizedDown = false;
         // No overshoot when the animation ends
         setOverExpansionInternal(0, false /* isFromGesture */);
         setAnimator(null);
@@ -2353,7 +2353,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             return;
         }
         if (mExpectingSynthesizedDown) {
-            mExpectingSynthesizedDown = false;
             // Window never will receive touch events that typically trigger haptic on open.
             maybeVibrateOnOpening(false /* openingWithTouch */);
             fling(velocity > 1f ? 1000f * velocity : 0  /* expand */);
@@ -2509,11 +2508,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         SceneContainerFlag.assertInLegacyMode();
         if (!isKeyguardShowing()) {
             return 0;
-        }
-
-        if (ComposeLockscreen.isEnabled()) {
-            return (int) mKeyguardInteractor.getNotificationContainerBounds()
-                    .getValue().getTop();
         }
 
         if (!mKeyguardBypassController.getBypassEnabled()) {
@@ -4000,6 +3994,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
             mExpandedFraction = Math.min(1f,
                     maxPanelHeight == 0 ? 0 : mExpandedHeight / maxPanelHeight);
+            if (mExpandedFraction > 0f && mExpectingSynthesizedDown) {
+                mExpectingSynthesizedDown = false;
+            }
             mShadeRepository.setLegacyShadeExpansion(mExpandedFraction);
             mQsController.setShadeExpansion(mExpandedHeight, mExpandedFraction);
             mExpansionDragDownAmountPx = h;

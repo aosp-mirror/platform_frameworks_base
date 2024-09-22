@@ -55,6 +55,7 @@ import com.android.systemui.media.controls.ui.viewmodel.MediaOutputSwitcherViewM
 import com.android.systemui.media.controls.ui.viewmodel.MediaPlayerViewModel
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.surfaceeffects.ripple.MultiRippleView
@@ -65,6 +66,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+private const val TAG = "MediaControlViewBinder"
 
 object MediaControlViewBinder {
 
@@ -80,16 +83,19 @@ object MediaControlViewBinder {
         mediaCard.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.player.collectLatest { playerViewModel ->
-                        playerViewModel?.let {
-                            bindMediaCard(
-                                viewHolder,
-                                viewController,
-                                it,
-                                falsingManager,
-                                backgroundDispatcher,
-                                mainDispatcher,
-                            )
+                    viewModel.player.collectLatest { player ->
+                        player?.let {
+                            if (viewModel.isNewPlayer(it)) {
+                                bindMediaCard(
+                                    viewHolder,
+                                    viewController,
+                                    it,
+                                    falsingManager,
+                                    backgroundDispatcher,
+                                    mainDispatcher,
+                                )
+                                viewModel.onMediaControlIsBound(it.artistName, it.titleName)
+                            }
                         }
                     }
                 }
@@ -143,7 +149,7 @@ object MediaControlViewBinder {
             viewHolder,
             viewModel.outputSwitcher,
             viewController,
-            falsingManager
+            falsingManager,
         )
         bindGutsViewModel(viewHolder, viewModel, viewController, falsingManager)
         bindActionButtons(viewHolder, viewModel, viewController, falsingManager)
@@ -157,7 +163,7 @@ object MediaControlViewBinder {
             viewController,
             backgroundDispatcher,
             mainDispatcher,
-            isSongUpdated
+            isSongUpdated,
         )
 
         if (viewModel.playTurbulenceNoise) {
@@ -231,9 +237,6 @@ object MediaControlViewBinder {
                 }
             }
             setDismissible(model.isDismissEnabled)
-            setTextPrimaryColor(model.textPrimaryColor)
-            setAccentPrimaryColor(model.accentPrimaryColor)
-            setSurfaceColor(model.surfaceColor)
         }
     }
 
@@ -259,12 +262,12 @@ object MediaControlViewBinder {
                 if (buttonView.id == R.id.actionPrev) {
                     viewController.setUpPrevButtonInfo(
                         buttonModel.isEnabled,
-                        buttonModel.notVisibleValue
+                        buttonModel.notVisibleValue,
                     )
                 } else if (buttonView.id == R.id.actionNext) {
                     viewController.setUpNextButtonInfo(
                         buttonModel.isEnabled,
-                        buttonModel.notVisibleValue
+                        buttonModel.notVisibleValue,
                     )
                 }
                 val animHandler = (buttonView.tag ?: AnimationBindHandler()) as AnimationBindHandler
@@ -295,7 +298,7 @@ object MediaControlViewBinder {
                         viewController.collapsedLayout,
                         visible,
                         buttonModel.notVisibleValue,
-                        buttonModel.showInCollapsed
+                        buttonModel.showInCollapsed,
                     )
                 }
             }
@@ -350,7 +353,7 @@ object MediaControlViewBinder {
                         createTouchRippleAnimation(
                             button,
                             viewController.colorSchemeTransition,
-                            multiRippleView
+                            multiRippleView,
                         )
                     )
 
@@ -382,12 +385,12 @@ object MediaControlViewBinder {
                 setVisibleAndAlpha(
                     expandedSet,
                     R.id.media_explicit_indicator,
-                    viewModel.isExplicitVisible
+                    viewModel.isExplicitVisible,
                 )
                 setVisibleAndAlpha(
                     collapsedSet,
                     R.id.media_explicit_indicator,
-                    viewModel.isExplicitVisible
+                    viewModel.isExplicitVisible,
                 )
 
                 // refreshState is required here to resize the text views (and prevent ellipsis)
@@ -398,7 +401,7 @@ object MediaControlViewBinder {
                 // something is incorrectly bound, but needs to be run if other elements were
                 // updated while the enter animation was running
                 viewController.refreshState()
-            }
+            },
         )
     }
 
@@ -420,22 +423,37 @@ object MediaControlViewBinder {
         val width = viewController.widthInSceneContainerPx
         val height = viewController.heightInSceneContainerPx
         withContext(backgroundDispatcher) {
+            val wallpaperColors =
+                MediaArtworkHelper.getWallpaperColor(
+                    viewHolder.albumView.context,
+                    backgroundDispatcher,
+                    viewModel.backgroundCover,
+                    TAG,
+                )
+            val isArtworkBound = wallpaperColors != null
+            val scheme =
+                wallpaperColors?.let { ColorScheme(it, true, Style.CONTENT) }
+                    ?: let {
+                        if (viewModel.launcherIcon is Icon.Loaded) {
+                            MediaArtworkHelper.getColorScheme(viewModel.launcherIcon.drawable, TAG)
+                        } else {
+                            null
+                        }
+                    }
             val artwork =
-                if (viewModel.shouldAddGradient) {
+                wallpaperColors?.let {
                     addGradientToPlayerAlbum(
                         viewHolder.albumView.context,
                         viewModel.backgroundCover!!,
-                        viewModel.colorScheme,
+                        scheme!!,
                         width,
-                        height
+                        height,
                     )
-                } else {
-                    ColorDrawable(Color.TRANSPARENT)
-                }
+                } ?: ColorDrawable(Color.TRANSPARENT)
             withContext(mainDispatcher) {
                 // Transition Colors to current color scheme
                 val colorSchemeChanged =
-                    viewController.colorSchemeTransition.updateColorScheme(viewModel.colorScheme)
+                    viewController.colorSchemeTransition.updateColorScheme(scheme)
                 val albumView = viewHolder.albumView
 
                 // Set up width of album view constraint.
@@ -446,7 +464,7 @@ object MediaControlViewBinder {
                 if (
                     updateBackground ||
                         colorSchemeChanged ||
-                        (!viewController.isArtworkBound && viewModel.shouldAddGradient)
+                        (!viewController.isArtworkBound && isArtworkBound)
                 ) {
                     viewController.prevArtwork?.let {
                         // Since we throw away the last transition, this will pop if your
@@ -461,12 +479,10 @@ object MediaControlViewBinder {
                         transitionDrawable.isCrossFadeEnabled = true
 
                         albumView.setImageDrawable(transitionDrawable)
-                        transitionDrawable.startTransition(
-                            if (viewModel.shouldAddGradient) 333 else 80
-                        )
+                        transitionDrawable.startTransition(if (isArtworkBound) 333 else 80)
                     } ?: albumView.setImageDrawable(artwork)
                 }
-                viewController.isArtworkBound = viewModel.shouldAddGradient
+                viewController.isArtworkBound = isArtworkBound
                 viewController.prevArtwork = artwork
 
                 if (viewModel.useGrayColorFilter) {
@@ -493,7 +509,7 @@ object MediaControlViewBinder {
         transitionDrawable: TransitionDrawable,
         layer: Int,
         targetWidth: Int,
-        targetHeight: Int
+        targetHeight: Int,
     ) {
         val drawable = transitionDrawable.getDrawable(layer) ?: return
         val width = drawable.intrinsicWidth
@@ -509,7 +525,7 @@ object MediaControlViewBinder {
         artworkIcon: android.graphics.drawable.Icon,
         mutableColorScheme: ColorScheme,
         width: Int,
-        height: Int
+        height: Int,
     ): LayerDrawable {
         val albumArt = MediaArtworkHelper.getScaledBackground(context, artworkIcon, width, height)
         return MediaArtworkHelper.setUpGradientColorOnDrawable(
@@ -517,7 +533,7 @@ object MediaControlViewBinder {
             context.getDrawable(R.drawable.qs_media_scrim)?.mutate() as GradientDrawable,
             mutableColorScheme,
             MEDIA_PLAYER_SCRIM_START_ALPHA,
-            MEDIA_PLAYER_SCRIM_END_ALPHA
+            MEDIA_PLAYER_SCRIM_END_ALPHA,
         )
     }
 
@@ -544,7 +560,7 @@ object MediaControlViewBinder {
     private fun createTouchRippleAnimation(
         button: ImageButton,
         colorSchemeTransition: ColorSchemeTransition,
-        multiRippleView: MultiRippleView
+        multiRippleView: MultiRippleView,
     ): RippleAnimation {
         val maxSize = (multiRippleView.width * 2).toFloat()
         return RippleAnimation(
@@ -562,7 +578,7 @@ object MediaControlViewBinder {
                 baseRingFadeParams = null,
                 sparkleRingFadeParams = null,
                 centerFillFadeParams = null,
-                shouldDistort = false
+                shouldDistort = false,
             )
         )
     }
@@ -596,7 +612,7 @@ object MediaControlViewBinder {
         set: ConstraintSet,
         resId: Int,
         visible: Boolean,
-        notVisibleValue: Int
+        notVisibleValue: Int,
     ) {
         set.setVisibility(resId, if (visible) ConstraintSet.VISIBLE else notVisibleValue)
         set.setAlpha(resId, if (visible) 1.0f else 0.0f)
@@ -618,7 +634,7 @@ object MediaControlViewBinder {
         collapsedSet: ConstraintSet,
         visible: Boolean,
         notVisibleValue: Int,
-        showInCollapsed: Boolean
+        showInCollapsed: Boolean,
     ) {
         if (notVisibleValue == ConstraintSet.INVISIBLE) {
             // Since time views should appear instead of buttons.

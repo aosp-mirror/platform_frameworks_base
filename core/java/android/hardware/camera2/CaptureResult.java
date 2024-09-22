@@ -5293,7 +5293,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @PublicKey
     @NonNull
     @SyntheticKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<android.hardware.camera2.params.LensIntrinsicsSample[]> STATISTICS_LENS_INTRINSICS_SAMPLES =
             new Key<android.hardware.camera2.params.LensIntrinsicsSample[]>("android.statistics.lensIntrinsicsSamples", android.hardware.camera2.params.LensIntrinsicsSample[].class);
 
@@ -5307,7 +5306,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureResult#SENSOR_TIMESTAMP
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<long[]> STATISTICS_LENS_INTRINSIC_TIMESTAMPS =
             new Key<long[]>("android.statistics.lensIntrinsicTimestamps", long[].class);
 
@@ -5323,7 +5321,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      * @hide
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<float[]> STATISTICS_LENS_INTRINSIC_SAMPLES =
             new Key<float[]>("android.statistics.lensIntrinsicSamples", float[].class);
 
@@ -5814,7 +5811,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public static final Key<android.graphics.Rect> LOGICAL_MULTI_CAMERA_ACTIVE_PHYSICAL_SENSOR_CROP_REGION =
             new Key<android.graphics.Rect>("android.logicalMultiCamera.activePhysicalSensorCropRegion", android.graphics.Rect.class);
 

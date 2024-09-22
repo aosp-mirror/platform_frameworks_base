@@ -545,6 +545,10 @@ public class SettingsProvider extends ContentProvider {
                 reportDeviceConfigAccess(prefix);
                 return result;
             }
+            case Settings.CALL_METHOD_LIST_NAMESPACES_CONFIG -> {
+                Bundle result = packageNamespacesForCallResult(getAllConfigFlagNamespaces());
+                return result;
+            }
             case Settings.CALL_METHOD_REGISTER_MONITOR_CALLBACK_CONFIG -> {
                 RemoteCallback callback = args.getParcelable(
                         Settings.CALL_METHOD_MONITOR_CALLBACK_KEY);
@@ -1337,6 +1341,23 @@ public class SettingsProvider extends ContentProvider {
     }
 
     @NonNull
+    private HashSet<String> getAllConfigFlagNamespaces() {
+        Set<String> flagNames = getAllConfigFlags(null).keySet();
+        HashSet<String> namespaces = new HashSet();
+        for (String name : flagNames) {
+            int slashIndex = name.indexOf("/");
+            boolean validSlashIndex = slashIndex != -1
+                        && slashIndex != 0
+                        && slashIndex != name.length();
+            if (validSlashIndex) {
+                String namespace = name.substring(0, slashIndex);
+                namespaces.add(namespace);
+            }
+        }
+        return namespaces;
+    }
+
+    @NonNull
     private HashMap<String, String> getAllConfigFlags(@Nullable String prefix) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "getAllConfigFlags() for " + prefix);
@@ -1995,8 +2016,6 @@ public class SettingsProvider extends ContentProvider {
             if (!isValidMediaUri(name, value)) {
                 return false;
             }
-            // Invalidate any relevant cache files
-            cacheFile.delete();
         }
 
         final boolean success;
@@ -2032,6 +2051,11 @@ public class SettingsProvider extends ContentProvider {
 
         if (!success) {
             return false;
+        }
+
+        if (cacheFile != null) {
+            // Invalidate any relevant cache files
+            cacheFile.delete();
         }
 
         if ((operation == MUTATION_OPERATION_INSERT || operation == MUTATION_OPERATION_UPDATE)
@@ -2558,6 +2582,12 @@ public class SettingsProvider extends ContentProvider {
                         prefix);
             }
         }
+        return result;
+    }
+
+    private Bundle packageNamespacesForCallResult(@NonNull HashSet<String> namespaces) {
+        Bundle result = new Bundle();
+        result.putSerializable(Settings.NameValueTable.VALUE, namespaces);
         return result;
     }
 

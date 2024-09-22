@@ -7096,6 +7096,10 @@
     <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
     <integer name="config_maxDesktopWindowingActiveTasks">0</integer>
 
+    <!-- Whether a display enters desktop mode by default when the windowing mode of the display's
+         root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM. -->
+    <bool name="config_enterDesktopByDefaultOnFreeformDisplay">false</bool>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7132,4 +7136,8 @@
     <!-- Whether to enable scaling and fading animation to scrollviews while scrolling.
          P.S this is a change only intended for wear devices. -->
     <bool name="config_enableViewGroupScalingFading">false</bool>
+    <!-- Action for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
+    <string name="identity_check_settings_action"></string>
+    <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
+    <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 </resources>

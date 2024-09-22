@@ -1380,7 +1380,8 @@ public class HdmiControlService extends SystemService {
     @ServiceThreadOnly
     private List<Integer> getCecLocalDeviceTypes() {
         ArrayList<Integer> allLocalDeviceTypes = new ArrayList<>(mCecLocalDevices);
-        if (isDsmEnabled() && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
+        if (!isTvDevice() && isDsmEnabled()
+                && !allLocalDeviceTypes.contains(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM)
                 && isArcSupported() && mSoundbarModeFeatureFlagEnabled) {
             allLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         }
@@ -1687,7 +1688,11 @@ public class HdmiControlService extends SystemService {
     private void sendCecCommandWithRetries(HdmiCecMessage command,
             @Nullable SendMessageCallback callback) {
         assertRunOnServiceThread();
-        HdmiCecLocalDevice localDevice = getAllCecLocalDevices().get(0);
+        List<HdmiCecLocalDevice> devices = getAllCecLocalDevices();
+        if (devices.isEmpty()) {
+            return;
+        }
+        HdmiCecLocalDevice localDevice = devices.get(0);
         if (localDevice != null) {
             sendCecCommandWithoutRetries(command, new SendMessageCallback() {
                 @Override

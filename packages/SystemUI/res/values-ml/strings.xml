@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"സ്‌പീക്കറുകളും ഡിസ്പ്ലേകളും"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"നിർദ്ദേശിച്ച ഉപകരണങ്ങൾ"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"മീഡിയയെ മറ്റൊരു ഉപകരണത്തിലേക്ക് നീക്കുന്നതിന് നിങ്ങളുടെ പങ്കിട്ട സെഷൻ നിർത്തുക"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"നിർത്തുക"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
@@ -1289,8 +1293,7 @@
     <string name="add" msgid="81036585205287996">"ചേർക്കുക"</string>
     <string name="manage_users" msgid="1823875311934643849">"ഉപയോക്താക്കളെ മാനേജ് ചെയ്യുക"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"സ്പ്ലിറ്റ് സ്ക്രീനിലേക്ക് വലിച്ചിടുന്നതിനെ ഈ അറിയിപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"ലൊക്കേഷൻ സജീവമാണ്"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"വൈഫൈ ലഭ്യമല്ല"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"മുൻഗണനാ മോഡ്"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"അലാറം സജ്ജീകരിച്ചു"</string>
@@ -1347,8 +1350,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"ലോക്ക് സ്‌ക്രീൻ ഇഷ്ടാനുസൃതമാക്കൂ"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ലോക്ക് സ്ക്രീൻ ഇഷ്ടാനുസൃതമാക്കാൻ അൺലോക്ക് ചെയ്യുക"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"വൈഫൈ ലഭ്യമല്ല"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"ലൊക്കേഷൻ സജീവമാണ്"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"ക്യാമറ ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"ക്യാമറയും മൈക്രോഫോണും ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"മൈക്രോഫോൺ ബ്ലോക്ക് ചെയ്തിരിക്കുന്നു"</string>
@@ -1404,8 +1406,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ടച്ച്‌പാഡ് ജെസ്ച്ചറുകൾ, കീബോർഡ് കുറുക്കുവഴികൾ എന്നിവയും മറ്റും മനസ്സിലാക്കുക"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"\'മടങ്ങുക\' ജെസ്ച്ചർ"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ഹോം ജെസ്‌ച്ചർ"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"പൂർത്തിയായി"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"മടങ്ങുക"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"തിരികെ പോകാൻ, ടച്ച്പാഡിൽ എവിടെയെങ്കിലും മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് ഇടത്തേക്കോ വലത്തേക്കോ സ്വൈപ്പ് ചെയ്യുക.\n\nഇതിന് Action + ESC കീബോഡ് കുറുക്കുവഴികളും നിങ്ങൾക്ക് ഉപയോഗിക്കാം."</string>
@@ -1415,14 +1416,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ഏതുസമയത്തും ഹോം സ്ക്രീനിലേക്ക് പോകാൻ, മൂന്ന് വിരലുകൾ ഉപയോഗിച്ച് സ്ക്രീനിന്റെ താഴെ നിന്ന് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്യൂ."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"കൊള്ളാം!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ഹോമിലേക്ക് പോകുക ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"നിങ്ങളുടെ ടച്ച്പാഡിൽ മൂന്ന് വിരലുകൾ കൊണ്ട് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"കൊള്ളാം!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"അടുത്തിടെയുള്ള ആപ്പുകൾ കാണുക എന്ന ജെസ്ച്ചർ നിങ്ങൾ പൂർത്തിയാക്കി."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Action കീ"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"നിങ്ങളുടെ ആപ്പുകൾ ആക്‌സസ് ചെയ്യാൻ, നിങ്ങളുടെ കീബോർഡിലെ Action കീ അമർത്തുക."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"അഭിനന്ദനങ്ങൾ!"</string>
@@ -1446,14 +1443,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"മൂന്ന് വിരലുകൾ കൊണ്ട് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക. കൂടുതൽ ജെസ്ച്ചറുകളറിയാൻ ടാപ്പ് ചെയ്യൂ."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"എല്ലാ ആപ്പുകളും കാണാൻ നിങ്ങളുടെ കീബോർഡ് ഉപയോഗിക്കുക"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ഏതുസമയത്തും ആക്ഷൻ കീ അമർത്തുക. കൂടുതൽ ജെസ്ച്ചറുകൾ മനസ്സിലാക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"കൂടുതൽ ഡിം ചെയ്യൽ, ഇപ്പോൾ തെളിച്ച സ്ലൈഡറിന്റെ ഭാഗമാണ്"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"തെളിച്ചം വളരെ കുറയ്ക്കുന്നതിലൂടെ നിങ്ങൾക്കിപ്പോൾ സ്ക്രീൻ കൂടുതൽ ഡിം ചെയ്യാനാകും.\n\nഈ ഫീച്ചർ ഇപ്പോൾ തെളിച്ച സ്ലൈഡറിന്റെ ഭാഗമായതിനാൽ, കൂടുതൽ ഡിം ചെയ്യൽ കുറുക്കുവഴികൾ നീക്കം ചെയ്യുകയാണ്."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"കൂടുതൽ ഡിം ചെയ്യൽ കുറുക്കുവഴികൾ നീക്കം ചെയ്യുക"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"കൂടുതൽ ഡിം ചെയ്യൽ കുറുക്കുവഴികൾ നീക്കം ചെയ്തു"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"കണക്റ്റിവിറ്റി"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"ഉപയോഗസഹായി"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"യൂട്ടിലിറ്റികൾ"</string>

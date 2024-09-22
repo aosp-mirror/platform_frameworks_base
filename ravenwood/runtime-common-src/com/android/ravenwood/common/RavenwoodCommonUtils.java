@@ -63,6 +63,8 @@ public class RavenwoodCommonUtils {
     public static final String RAVENWOOD_SYSPROP = "ro.is_on_ravenwood";
 
     public static final String RAVENWOOD_RESOURCE_APK = "ravenwood-res-apks/ravenwood-res.apk";
+    public static final String RAVENWOOD_INST_RESOURCE_APK =
+            "ravenwood-res-apks/ravenwood-inst-res.apk";
 
     public static final String RAVENWOOD_EMPTY_RESOURCES_APK =
             RAVENWOOD_RUNTIME_PATH + "ravenwood-data/ravenwood-empty-res.apk";

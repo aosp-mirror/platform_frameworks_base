@@ -117,6 +117,13 @@ flag {
 }
 
 flag {
+    name: "enable_tile_resizing"
+    namespace: "lse_desktop_experience"
+    description: "Enables drawing a divider bar upon tiling tasks left and right in desktop mode for simultaneous resizing"
+    bug: "351769839"
+}
+
+flag {
     name: "respect_orientation_change_for_unresizeable"
     namespace: "lse_desktop_experience"
     description: "Whether to resize task to respect requested orientation change of unresizeable activity"

@@ -432,7 +432,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 6, attributes: 3
+  interfaces: 0, fields: 1, methods: 7, attributes: 3
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -554,6 +554,22 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestThrow
+
+  public int toBeIgnored();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: iconst_0
+         x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsIgnore
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsKeep
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestIgnore
 }
 SourceFile: "TinyFrameworkAnnotations.java"
 RuntimeVisibleAnnotations:

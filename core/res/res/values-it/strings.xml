@@ -2011,8 +2011,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Imposta un blocco schermo"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Imposta il blocco schermo"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Per utilizzare il tuo spazio privato, imposta un blocco schermo sul dispositivo"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Per eliminare lo spazio privato, imposta un blocco schermo sul dispositivo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> non è al momento disponibile."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non disponibile"</string>

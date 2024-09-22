@@ -78,8 +78,6 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
         Dispatchers.resetMain()
     }
 
-    // For now the state changes at 0.5f expansion. This will change once we implement animation
-    // (and this test will fail)
     @Test
     fun qsExpansionValueChanges_correctExpansionState() =
         with(kosmos) {
@@ -87,18 +85,27 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
                 val expansionState by collectLastValue(underTest.expansionState)
 
                 underTest.qsExpansionValue = 0f
-                assertThat(expansionState)
-                    .isEqualTo(QSFragmentComposeViewModel.QSExpansionState.QQS)
+                assertThat(expansionState!!.progress).isEqualTo(0f)
 
                 underTest.qsExpansionValue = 0.3f
-                assertThat(expansionState)
-                    .isEqualTo(QSFragmentComposeViewModel.QSExpansionState.QQS)
-
-                underTest.qsExpansionValue = 0.7f
-                assertThat(expansionState).isEqualTo(QSFragmentComposeViewModel.QSExpansionState.QS)
+                assertThat(expansionState!!.progress).isEqualTo(0.3f)
 
                 underTest.qsExpansionValue = 1f
-                assertThat(expansionState).isEqualTo(QSFragmentComposeViewModel.QSExpansionState.QS)
+                assertThat(expansionState!!.progress).isEqualTo(1f)
+            }
+        }
+
+    @Test
+    fun qsExpansionValueChanges_clamped() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val expansionState by collectLastValue(underTest.expansionState)
+
+                underTest.qsExpansionValue = -1f
+                assertThat(expansionState!!.progress).isEqualTo(0f)
+
+                underTest.qsExpansionValue = 2f
+                assertThat(expansionState!!.progress).isEqualTo(1f)
             }
         }
 
@@ -110,7 +117,7 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
 
                 testableContext.orCreateTestableResources.addOverride(
                     R.bool.config_use_large_screen_shade_header,
-                    true
+                    true,
                 )
                 fakeConfigurationRepository.onConfigurationChange()
 
@@ -126,7 +133,7 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
 
                 testableContext.orCreateTestableResources.addOverride(
                     R.bool.config_use_large_screen_shade_header,
-                    false
+                    false,
                 )
                 fakeConfigurationRepository.onConfigurationChange()
 

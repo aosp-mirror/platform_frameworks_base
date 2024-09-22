@@ -577,7 +577,7 @@
     <string name="empty_shade_text" msgid="8935967157319717412">"Geen meldingen"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Geen nieuwe meldingen"</string>
     <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Afkoelperiode van meldingen staat aan"</string>
-    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Je apparaatvolume en meldingen worden automatisch maximaal 2 minuten beperkt als je te veel meldingen tegelijk krijgt."</string>
+    <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Als je te veel meldingen tegelijk krijgt, worden het volume op je apparaat en meldingen automatisch maximaal 2 minuten beperkt."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Uitzetten"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Ontgrendel om oudere meldingen te zien"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"Dit apparaat wordt beheerd door je ouder"</string>
@@ -1179,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers en schermen"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Voorgestelde apparaten"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Stop je gedeelde sessie om media naar een ander apparaat te verplaatsen"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Stoppen"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Hoe uitzenden werkt"</string>

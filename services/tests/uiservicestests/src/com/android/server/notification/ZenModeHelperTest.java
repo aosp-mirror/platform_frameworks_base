@@ -6992,6 +6992,22 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(zenRule.condition).isNotNull();
     }
 
+    @Test
+    @EnableFlags(FLAG_MODES_API)
+    public void addAutomaticZenRule_withoutPolicy_getsItsOwnInstanceOfDefaultPolicy() {
+        // Add a rule without policy -> uses default config
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, azr, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+
+        ZenRule zenRule = checkNotNull(mZenModeHelper.mConfig.automaticRules.get(ruleId));
+
+        assertThat(zenRule.zenPolicy).isEqualTo(mZenModeHelper.getDefaultZenPolicy());
+        assertThat(zenRule.zenPolicy).isNotSameInstanceAs(mZenModeHelper.getDefaultZenPolicy());
+    }
+
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
             @Nullable ZenPolicy zenPolicy) {
         ZenRule rule = new ZenRule();

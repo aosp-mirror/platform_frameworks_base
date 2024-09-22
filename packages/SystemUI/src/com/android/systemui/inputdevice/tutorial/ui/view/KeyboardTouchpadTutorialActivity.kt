@@ -28,6 +28,8 @@ import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
 import com.android.systemui.inputdevice.tutorial.TouchpadTutorialScreensProvider
 import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel
@@ -48,6 +50,7 @@ class KeyboardTouchpadTutorialActivity
 constructor(
     private val viewModelFactoryAssistedProvider: ViewModelFactoryAssistedProvider,
     private val touchpadTutorialScreensProvider: Optional<TouchpadTutorialScreensProvider>,
+    private val logger: InputDeviceTutorialLogger,
 ) : ComponentActivity() {
 
     companion object {
@@ -74,12 +77,16 @@ constructor(
         lifecycleScope.launch {
             vm.closeActivity.collect { finish ->
                 if (finish) {
+                    logger.logCloseTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
                     finish()
                 }
             }
         }
         setContent {
             PlatformTheme { KeyboardTouchpadTutorialContainer(vm, touchpadTutorialScreensProvider) }
+        }
+        if (savedInstanceState == null) {
+            logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
         }
     }
 }

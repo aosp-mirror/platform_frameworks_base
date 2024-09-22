@@ -1937,7 +1937,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Noite da semana"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Durmindo"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Mentres durmo"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Xestionada por <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activada"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desactivada"</string>
@@ -2010,8 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Define un bloqueo de pantalla"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Define un bloqueo de pantalla"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Para usar o espazo privado, define un bloqueo de pantalla"</string>
-    <!-- no translation found for private_space_set_up_screen_lock_for_reset (7817091386408432097) -->
-    <skip />
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Para eliminar o espazo privado, define un bloqueo de pantalla neste dispositivo"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"A aplicación non está dispoñible"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"A aplicación <xliff:g id="APP_NAME">%1$s</xliff:g> non está dispoñible neste momento."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> non está dispoñible"</string>

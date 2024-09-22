@@ -123,6 +123,8 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Zrzut ekranu"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Otwórz w przeglądarce"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nowe okno"</string>
+    <!-- no translation found for manage_windows_text (5567366688493093920) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"Zamknij"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Zamknij menu"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Otwórz menu"</string>

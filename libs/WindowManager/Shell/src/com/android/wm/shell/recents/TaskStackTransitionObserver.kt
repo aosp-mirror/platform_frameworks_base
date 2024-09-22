@@ -18,14 +18,13 @@ package com.android.wm.shell.recents
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
-import android.content.Context
 import android.os.IBinder
 import android.util.ArrayMap
 import android.view.SurfaceControl
 import android.view.WindowManager
 import android.window.TransitionInfo
 import com.android.wm.shell.shared.TransitionUtil
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
+import android.window.flags.DesktopModeFlags
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import dagger.Lazy
@@ -38,7 +37,6 @@ import java.util.concurrent.Executor
  * TODO(346588978) Move split/pip signals here as well so that launcher don't need to handle it
  */
 class TaskStackTransitionObserver(
-    private val context: Context,
     private val transitions: Lazy<Transitions>,
     shellInit: ShellInit
 ) : Transitions.TransitionObserver {
@@ -64,7 +62,7 @@ class TaskStackTransitionObserver(
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction
     ) {
-        if (DesktopModeFlags.TASK_STACK_OBSERVER_IN_SHELL.isEnabled(context)) {
+        if (DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue) {
             val taskInfoList = mutableListOf<RunningTaskInfo>()
             val transitionTypeList = mutableListOf<Int>()
 
