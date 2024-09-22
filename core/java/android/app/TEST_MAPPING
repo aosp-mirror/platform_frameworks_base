@@ -16,12 +16,7 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsAppOpsTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
+            "name": "CtsAppOpsTestCases"
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
@@ -54,12 +49,7 @@
             "file_patterns": ["INotificationManager\\.aidl"]
         },
         {
-            "name": "CtsWindowManagerDeviceWindow",
-            "options": [
-                {
-                    "include-filter": "android.server.wm.window.ToastWindowTest"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceWindow_window_toastwindowtest",
             "file_patterns": ["INotificationManager\\.aidl"]
         },
         {
@@ -67,42 +57,15 @@
             "file_patterns": ["(/|^)InstantAppResolve[^/]*"]
         },
         {
-            "name": "CtsAutoFillServiceTestCases",
-            "options": [
-                {
-                    "include-filter": "android.autofillservice.cts.saveui.AutofillSaveDialogTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ],
+            "name": "CtsAutoFillServiceTestCases_saveui_autofillsavedialogtest",
             "file_patterns": ["(/|^)Activity.java"]
         },
         {
-            "name": "CtsAutoFillServiceTestCases",
-            "options": [
-                {
-                    "include-filter": "android.autofillservice.cts.saveui.PreSimpleSaveActivityTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ],
+            "name": "CtsAutoFillServiceTestCases_saveui_presimplesaveactivitytest",
             "file_patterns": ["(/|^)Activity.java"]
         },
         {
-            "name": "CtsAutoFillServiceTestCases",
-            "options": [
-                {
-                    "include-filter": "android.autofillservice.cts.saveui.SimpleSaveActivityTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "android.platform.test.annotations.AppModeFull"
-                }
-            ],
+            "name": "CtsAutoFillServiceTestCases_saveui_simplesaveactivitytest",
             "file_patterns": ["(/|^)Activity.java"]
         },
         {
@@ -119,32 +82,10 @@
         },
         {
             "name": "CtsLocalVoiceInteraction",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ],
             "file_patterns": ["(/|^)VoiceInteract[^/]*"]
         },
         {
-            "name": "CtsOsTestCases",
-            "options": [
-                {
-                    "include-annotation": "android.platform.test.annotations.Presubmit"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.LargeTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.os.cts.StrictModeTest"
-                }
-            ],
+            "name": "CtsOsTestCases_cts_strictmodetest_Presubmit",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
@@ -153,12 +94,7 @@
         },
         {
             "file_patterns": ["(/|^)LocaleManager.java"],
-            "name": "CtsLocaleManagerTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
+            "name": "CtsLocaleManagerTestCases"
         },
         {
             "name": "FrameworksCoreTests_keyguard_manager",
@@ -173,172 +109,51 @@
             ]
         },
         {
-            "name": "FrameworksCoreGameManagerTests",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.app"
-                }
-            ],
+            "name": "FrameworksCoreGameManagerTests_android_app",
             "file_patterns": [
                 "(/|^)GameManager[^/]*", "(/|^)GameMode[^/]*"
             ]
         },
         {
-            "name": "HdmiCecTests",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.hardware.hdmi"
-                }
-            ],
+            "name": "HdmiCecTests_hardware_hdmi",
             "file_patterns": [
                 "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
             ]
         },
         {
-            "name": "CtsWindowManagerDeviceActivity",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceActivity_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceAm",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceAm_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceBackNavigation",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceBackNavigation_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceDisplay",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceDisplay_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceKeyguard",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceKeyguard_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceInsets",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceInsets_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceTaskFragment",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceTaskFragment_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceWindow",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceWindow_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
-            "name": "CtsWindowManagerDeviceOther",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "exclude-annotation": "org.junit.Ignore"
-                },
-                {
-                    "include-filter": "android.content.wm.cts"
-                }
-            ],
+            "name": "CtsWindowManagerDeviceOther_wm_cts",
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {

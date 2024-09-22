@@ -1,0 +1,65 @@
+// This file is auto-generated. DO NOT MODIFY.
+// Args: com.android.systemfeatures.RwFeatures \
+//            --readonly=false \
+//            --feature=WATCH:1 \
+//            --feature=WIFI:0 \
+//            --feature=VULKAN:-1 \
+//            --feature=AUTO:
+package com.android.systemfeatures;
+
+import android.annotation.Nullable;
+import android.content.Context;
+import android.content.pm.PackageManager;
+
+/**
+ * @hide
+ */
+public final class RwFeatures {
+    /**
+     * Check for FEATURE_WATCH.
+     *
+     * @hide
+     */
+    public static boolean hasFeatureWatch(Context context) {
+        return hasFeatureFallback(context, PackageManager.FEATURE_WATCH);
+    }
+
+    /**
+     * Check for FEATURE_WIFI.
+     *
+     * @hide
+     */
+    public static boolean hasFeatureWifi(Context context) {
+        return hasFeatureFallback(context, PackageManager.FEATURE_WIFI);
+    }
+
+    /**
+     * Check for FEATURE_VULKAN.
+     *
+     * @hide
+     */
+    public static boolean hasFeatureVulkan(Context context) {
+        return hasFeatureFallback(context, PackageManager.FEATURE_VULKAN);
+    }
+
+    /**
+     * Check for FEATURE_AUTO.
+     *
+     * @hide
+     */
+    public static boolean hasFeatureAuto(Context context) {
+        return hasFeatureFallback(context, PackageManager.FEATURE_AUTO);
+    }
+
+    private static boolean hasFeatureFallback(Context context, String featureName) {
+        return context.getPackageManager().hasSystemFeature(featureName, 0);
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public static Boolean maybeHasFeature(String featureName, int version) {
+        return null;
+    }
+}
