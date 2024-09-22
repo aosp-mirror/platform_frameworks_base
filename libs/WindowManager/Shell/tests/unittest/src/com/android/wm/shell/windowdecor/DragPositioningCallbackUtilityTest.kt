@@ -39,6 +39,7 @@ import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
@@ -105,6 +106,7 @@ class DragPositioningCallbackUtilityTest {
         initializeTaskInfo()
         mockWindowDecoration.mDisplay = mockDisplay
         mockWindowDecoration.mDecorWindowContext = mockContext
+        mockWindowDecoration.mTaskInfo.isResizeable = true
         whenever(mockContext.getResources()).thenReturn(mockResources)
         whenever(mockWindowDecoration.mDecorWindowContext.resources).thenReturn(mockResources)
         whenever(mockResources.getDimensionPixelSize(R.dimen.desktop_mode_minimum_window_width))
@@ -162,6 +164,60 @@ class DragPositioningCallbackUtilityTest {
         assertThat(repositionTaskBounds.right).isEqualTo(STARTING_BOUNDS.right)
         assertThat(repositionTaskBounds.bottom).isEqualTo(STARTING_BOUNDS.bottom)
     }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_SCALED_RESIZING)
+    fun testChangeBounds_unresizeableApp_heightLessThanMin_resetToStartingBounds() {
+        mockWindowDecoration.mTaskInfo.isResizeable = false
+        val startingPoint = PointF(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.top.toFloat())
+        val repositionTaskBounds = Rect(STARTING_BOUNDS)
+
+        // Resize to width of 95px and height of 5px with min width of 10px
+        val newX = STARTING_BOUNDS.right.toFloat() - 5
+        val newY = STARTING_BOUNDS.top.toFloat() + 95
+        val delta = DragPositioningCallbackUtility.calculateDelta(newX, newY, startingPoint)
+
+        assertFalse(
+            DragPositioningCallbackUtility.changeBounds(
+                CTRL_TYPE_RIGHT or CTRL_TYPE_TOP,
+                repositionTaskBounds, STARTING_BOUNDS, STABLE_BOUNDS, delta, mockDisplayController,
+                mockWindowDecoration
+            )
+        )
+
+        assertThat(repositionTaskBounds.left).isEqualTo(STARTING_BOUNDS.left)
+        assertThat(repositionTaskBounds.top).isEqualTo(STARTING_BOUNDS.top)
+        assertThat(repositionTaskBounds.right).isEqualTo(STARTING_BOUNDS.right)
+        assertThat(repositionTaskBounds.bottom).isEqualTo(STARTING_BOUNDS.bottom)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_SCALED_RESIZING)
+    fun testChangeBounds_unresizeableApp_widthLessThanMin_resetToStartingBounds() {
+        mockWindowDecoration.mTaskInfo.isResizeable = false
+        val startingPoint = PointF(STARTING_BOUNDS.right.toFloat(), STARTING_BOUNDS.top.toFloat())
+        val repositionTaskBounds = Rect(STARTING_BOUNDS)
+
+        // Resize to height of 95px and width of 5px with min width of 10px
+        val newX = STARTING_BOUNDS.right.toFloat() - 95
+        val newY = STARTING_BOUNDS.top.toFloat() + 5
+        val delta = DragPositioningCallbackUtility.calculateDelta(newX, newY, startingPoint)
+
+        assertFalse(
+            DragPositioningCallbackUtility.changeBounds(
+                CTRL_TYPE_RIGHT or CTRL_TYPE_TOP,
+                repositionTaskBounds, STARTING_BOUNDS, STABLE_BOUNDS, delta, mockDisplayController,
+                mockWindowDecoration
+            )
+        )
+
+
+        assertThat(repositionTaskBounds.left).isEqualTo(STARTING_BOUNDS.left)
+        assertThat(repositionTaskBounds.top).isEqualTo(STARTING_BOUNDS.top)
+        assertThat(repositionTaskBounds.right).isEqualTo(STARTING_BOUNDS.right)
+        assertThat(repositionTaskBounds.bottom).isEqualTo(STARTING_BOUNDS.bottom)
+    }
+
 
     @Test
     fun testChangeBoundsDoesNotChangeHeightWhenNegative() {
@@ -314,6 +370,34 @@ class DragPositioningCallbackUtilityTest {
         assertThat(repositionTaskBounds.top).isEqualTo(STARTING_BOUNDS.top)
         assertThat(repositionTaskBounds.right).isEqualTo(STABLE_BOUNDS.right)
         assertThat(repositionTaskBounds.bottom).isEqualTo(STABLE_BOUNDS.bottom)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_SCALED_RESIZING)
+    fun testChangeBounds_unresizeableApp_beyondStableBounds_resetToStartingBounds() {
+        mockWindowDecoration.mTaskInfo.isResizeable = false
+        val startingPoint = PointF(
+            STARTING_BOUNDS.right.toFloat(),
+            STARTING_BOUNDS.bottom.toFloat()
+        )
+        val repositionTaskBounds = Rect(STARTING_BOUNDS)
+
+        // Resize to beyond stable bounds.
+        val newX = STARTING_BOUNDS.right.toFloat() + STABLE_BOUNDS.width()
+        val newY = STARTING_BOUNDS.bottom.toFloat() + STABLE_BOUNDS.height()
+
+        val delta = DragPositioningCallbackUtility.calculateDelta(newX, newY, startingPoint)
+        assertFalse(
+            DragPositioningCallbackUtility.changeBounds(
+                CTRL_TYPE_RIGHT or CTRL_TYPE_BOTTOM,
+                repositionTaskBounds, STARTING_BOUNDS, STABLE_BOUNDS, delta, mockDisplayController,
+                mockWindowDecoration
+            )
+        )
+        assertThat(repositionTaskBounds.left).isEqualTo(STARTING_BOUNDS.left)
+        assertThat(repositionTaskBounds.top).isEqualTo(STARTING_BOUNDS.top)
+        assertThat(repositionTaskBounds.right).isEqualTo(STARTING_BOUNDS.right)
+        assertThat(repositionTaskBounds.bottom).isEqualTo(STARTING_BOUNDS.bottom)
     }
 
     @Test

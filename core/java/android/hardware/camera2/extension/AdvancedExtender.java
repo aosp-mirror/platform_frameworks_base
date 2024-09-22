@@ -53,7 +53,6 @@ import java.util.Map;
  * @hide
  */
 @SystemApi
-@FlaggedApi(Flags.FLAG_CONCERT_MODE)
 public abstract class AdvancedExtender {
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
     private final CameraManager mCameraManager;
@@ -66,7 +65,6 @@ public abstract class AdvancedExtender {
      *
      * @param cameraManager the system camera manager
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public AdvancedExtender(@NonNull CameraManager cameraManager) {
         mCameraManager = cameraManager;
         try {
@@ -101,7 +99,6 @@ public abstract class AdvancedExtender {
      * @param cameraId           The camera2 id string of the camera.
      * @return the camera metadata vendor Id associated with the given camera
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public long getMetadataVendorId(@NonNull String cameraId) {
         long vendorId = mMetadataVendorIdMap.containsKey(cameraId) ?
                 mMetadataVendorIdMap.get(cameraId) : Long.MAX_VALUE;
@@ -123,7 +120,6 @@ public abstract class AdvancedExtender {
      *                           CameraCharacteristics.
      * @return true if the extension is supported, otherwise false
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract boolean isExtensionAvailable(@NonNull String cameraId,
             @NonNull CharacteristicsMap charsMap);
 
@@ -144,7 +140,6 @@ public abstract class AdvancedExtender {
      *                           physical camera ids and their
      *                           CameraCharacteristics.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     public abstract void initialize(@NonNull String cameraId, @NonNull CharacteristicsMap map);
 
     /**
@@ -159,7 +154,6 @@ public abstract class AdvancedExtender {
      * be identical to the supported preview output format returned here.
      * @param cameraId           The camera2 id string of the camera.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract Map<Integer, List<Size>> getSupportedPreviewOutputResolutions(
             @NonNull String cameraId);
@@ -179,7 +173,6 @@ public abstract class AdvancedExtender {
      * writes the output to the output surface.
      * @param cameraId           The camera2 id string of the camera.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract Map<Integer, List<Size>> getSupportedCaptureOutputResolutions(
             @NonNull String cameraId);
@@ -189,7 +182,6 @@ public abstract class AdvancedExtender {
      * implements all the interactions required for starting an extension
      * and cleanup.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract SessionProcessor getSessionProcessor();
 
@@ -227,7 +219,6 @@ public abstract class AdvancedExtender {
      * @return The list of supported orthogonal capture keys, or empty
      * list if no capture settings are not supported.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract List<CaptureRequest.Key> getAvailableCaptureRequestKeys(
             @NonNull String cameraId);
@@ -245,7 +236,6 @@ public abstract class AdvancedExtender {
      * @return The list of supported capture result keys, or
      * empty list if capture results are not supported.
      */
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
     @NonNull
     public abstract List<CaptureResult.Key> getAvailableCaptureResultKeys(
             @NonNull String cameraId);
@@ -270,7 +260,6 @@ public abstract class AdvancedExtender {
      * {@link CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP} and
      *  {@link CameraCharacteristics#REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP}.
      */
-    @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
     @NonNull
     public abstract List<Pair<CameraCharacteristics.Key, Object>>
             getAvailableCharacteristicsKeyValues();
@@ -377,7 +366,6 @@ public abstract class AdvancedExtender {
             return false;
         }
 
-        @FlaggedApi(Flags.FLAG_CAMERA_EXTENSIONS_CHARACTERISTICS_GET)
         @Override
         public CameraMetadataNative getAvailableCharacteristicsKeyValues(String cameraId) {
             List<Pair<CameraCharacteristics.Key, Object>> entries =

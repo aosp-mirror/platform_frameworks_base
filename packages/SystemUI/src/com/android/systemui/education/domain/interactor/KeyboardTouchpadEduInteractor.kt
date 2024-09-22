@@ -16,15 +16,8 @@
 
 package com.android.systemui.education.domain.interactor
 
-import android.hardware.input.InputManager
-import android.hardware.input.InputManager.KeyGestureEventListener
-import android.hardware.input.KeyGestureEvent
 import android.os.SystemProperties
 import com.android.systemui.CoreStartable
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.contextualeducation.GestureType
-import com.android.systemui.contextualeducation.GestureType.ALL_APPS
-import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.education.dagger.ContextualEducationModule.EduClock
@@ -32,19 +25,19 @@ import com.android.systemui.education.data.model.GestureEduModel
 import com.android.systemui.education.shared.model.EducationInfo
 import com.android.systemui.education.shared.model.EducationUiType
 import com.android.systemui.inputdevice.data.repository.UserInputDeviceRepository
-import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.time.Clock
-import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /** Allow listening to new contextual education triggered */
@@ -55,7 +48,6 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     private val contextualEducationInteractor: ContextualEducationInteractor,
     private val userInputDeviceRepository: UserInputDeviceRepository,
-    private val inputManager: InputManager,
     @EduClock private val clock: Clock,
 ) : CoreStartable {
 
@@ -82,34 +74,32 @@ constructor(
     private val _educationTriggered = MutableStateFlow<EducationInfo?>(null)
     val educationTriggered = _educationTriggered.asStateFlow()
 
-    private val keyboardShortcutTriggered: Flow<GestureType> = conflatedCallbackFlow {
-        val listener = KeyGestureEventListener { event ->
-            // Only store keyboard shortcut time for gestures providing keyboard education
-            val shortcutType =
-                when (event.keyGestureType) {
-                    KeyGestureEvent.KEY_GESTURE_TYPE_ALL_APPS -> ALL_APPS
-                    else -> null
-                }
-
-            if (shortcutType != null) {
-                trySendWithFailureLogging(shortcutType, TAG)
-            }
-        }
-
-        inputManager.registerKeyGestureEventListener(Executor(Runnable::run), listener)
-        awaitClose { inputManager.unregisterKeyGestureEventListener(listener) }
-    }
-
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun start() {
         backgroundScope.launch {
-            contextualEducationInteractor.backGestureModelFlow.collect {
-                if (isUsageSessionExpired(it)) {
-                    contextualEducationInteractor.startNewUsageSession(BACK)
-                } else if (isEducationNeeded(it)) {
-                    _educationTriggered.value = EducationInfo(BACK, getEduType(it), it.userId)
-                    contextualEducationInteractor.updateOnEduTriggered(BACK)
+            contextualEducationInteractor.eduDeviceConnectionTimeFlow
+                .flatMapLatest {
+                    val gestureFlows = mutableListOf<Flow<GestureEduModel>>()
+                    if (it.touchpadFirstConnectionTime != null) {
+                        gestureFlows.add(contextualEducationInteractor.backGestureModelFlow)
+                        gestureFlows.add(contextualEducationInteractor.homeGestureModelFlow)
+                        gestureFlows.add(contextualEducationInteractor.overviewGestureModelFlow)
+                    }
+
+                    if (it.keyboardFirstConnectionTime != null) {
+                        gestureFlows.add(contextualEducationInteractor.allAppsGestureModelFlow)
+                    }
+                    gestureFlows.merge()
                 }
-            }
+                .collect {
+                    if (isUsageSessionExpired(it)) {
+                        contextualEducationInteractor.startNewUsageSession(it.gestureType)
+                    } else if (isEducationNeeded(it)) {
+                        _educationTriggered.value =
+                            EducationInfo(it.gestureType, getEduType(it), it.userId)
+                        contextualEducationInteractor.updateOnEduTriggered(it.gestureType)
+                    }
+                }
         }
 
         backgroundScope.launch {
@@ -139,7 +129,7 @@ constructor(
         }
 
         backgroundScope.launch {
-            keyboardShortcutTriggered.collect {
+            contextualEducationInteractor.keyboardShortcutTriggered.collect {
                 contextualEducationInteractor.updateShortcutTriggerTime(it)
             }
         }

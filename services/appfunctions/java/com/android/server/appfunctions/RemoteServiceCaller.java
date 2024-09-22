@@ -43,7 +43,6 @@ public interface RemoteServiceCaller<T> {
      * @param intent An Intent object that describes the service that should be bound.
      * @param bindFlags Flags used to control the binding process See {@link
      *     android.content.Context#bindService}.
-     * @param timeoutInMillis The maximum time in milliseconds to wait for the service connection.
      * @param userHandle The UserHandle of the user for which the service should be bound.
      * @param callback A callback to be invoked for various events. See {@link
      *     RunServiceCallCallback}.
@@ -51,7 +50,6 @@ public interface RemoteServiceCaller<T> {
     boolean runServiceCall(
             @NonNull Intent intent,
             int bindFlags,
-            long timeoutInMillis,
             @NonNull UserHandle userHandle,
             @NonNull RunServiceCallCallback<T> callback);
 
@@ -75,11 +73,5 @@ public interface RemoteServiceCaller<T> {
 
         /** Called when the service connection was failed to establish. */
         void onFailedToConnect();
-
-        /**
-         * Called when the whole operation(i.e. binding and the service call) takes longer than
-         * allowed.
-         */
-        void onTimedOut();
     }
 }

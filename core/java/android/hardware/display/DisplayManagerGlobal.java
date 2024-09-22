@@ -1445,7 +1445,7 @@ public final class DisplayManagerGlobal {
      * system's display configuration.
      */
     public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
-            "cache_key.display_info";
+            PropertyInvalidatedCache.createSystemCacheKey("display_info");
 
     /**
      * Invalidates the contents of the display info cache for all applications. Can only

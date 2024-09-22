@@ -16,6 +16,9 @@
 
 #include <Gainmap.h>
 
+#include "SkColorType.h"
+#include "SkGainmapInfo.h"
+
 #ifdef __ANDROID__
 #include <binder/Parcel.h>
 #endif
@@ -34,6 +37,28 @@ using namespace uirenderer;
 
 static Gainmap* fromJava(jlong gainmap) {
     return reinterpret_cast<Gainmap*>(gainmap);
+}
+
+static SkGainmapInfo::BaseImageType baseImageTypeFromJava(jint direction) {
+    switch (direction) {
+        case 0:
+            return SkGainmapInfo::BaseImageType::kSDR;
+        case 1:
+            return SkGainmapInfo::BaseImageType::kHDR;
+        default:
+            LOG_ALWAYS_FATAL("Unrecognized Gainmap direction: %d", direction);
+    }
+}
+
+static jint baseImageTypeToJava(SkGainmapInfo::BaseImageType type) {
+    switch (type) {
+        case SkGainmapInfo::BaseImageType::kSDR:
+            return 0;
+        case SkGainmapInfo::BaseImageType::kHDR:
+            return 1;
+        default:
+            LOG_ALWAYS_FATAL("Unrecognized base image: %d", type);
+    }
 }
 
 static int getCreateFlags(const sk_sp<Bitmap>& bitmap) {
@@ -169,6 +194,36 @@ static jfloat Gainmap_getDisplayRatioSdr(JNIEnv*, jobject, jlong gainmapPtr) {
     return fromJava(gainmapPtr)->info.fDisplayRatioSdr;
 }
 
+static void Gainmap_setAlternativeColorSpace(JNIEnv*, jobject, jlong gainmapPtr,
+                                             jlong colorSpacePtr) {
+    auto colorSpace = GraphicsJNI::getNativeColorSpace(colorSpacePtr);
+    fromJava(gainmapPtr)->info.fGainmapMathColorSpace = colorSpace;
+}
+
+static jobject Gainmap_getAlternativeColorSpace(JNIEnv* env, jobject, jlong gainmapPtr) {
+    const auto javaGainmap = fromJava(gainmapPtr);
+    auto colorSpace = javaGainmap->info.fGainmapMathColorSpace.get();
+    if (colorSpace == nullptr) {
+        return nullptr;
+    }
+
+    auto colorType = javaGainmap->bitmap->colorType();
+    // A8 bitmaps don't support colorspaces, but an alternative colorspace is
+    // still valid for configuring the gainmap math, so use RGBA8888 instead.
+    if (colorType == kAlpha_8_SkColorType) {
+        colorType = kRGBA_8888_SkColorType;
+    }
+    return GraphicsJNI::getColorSpace(env, colorSpace, colorType);
+}
+
+static void Gainmap_setDirection(JNIEnv*, jobject, jlong gainmapPtr, jint direction) {
+    fromJava(gainmapPtr)->info.fBaseImageType = baseImageTypeFromJava(direction);
+}
+
+static jint Gainmap_getDirection(JNIEnv* env, jobject, jlong gainmapPtr) {
+    return baseImageTypeToJava(fromJava(gainmapPtr)->info.fBaseImageType);
+}
+
 // ----------------------------------------------------------------------------
 // Serialization
 // ----------------------------------------------------------------------------
@@ -260,6 +315,11 @@ static const JNINativeMethod gGainmapMethods[] = {
         {"nGetDisplayRatioHdr", "(J)F", (void*)Gainmap_getDisplayRatioHdr},
         {"nSetDisplayRatioSdr", "(JF)V", (void*)Gainmap_setDisplayRatioSdr},
         {"nGetDisplayRatioSdr", "(J)F", (void*)Gainmap_getDisplayRatioSdr},
+        {"nSetAlternativeColorSpace", "(JJ)V", (void*)Gainmap_setAlternativeColorSpace},
+        {"nGetAlternativeColorSpace", "(J)Landroid/graphics/ColorSpace;",
+         (void*)Gainmap_getAlternativeColorSpace},
+        {"nSetDirection", "(JI)V", (void*)Gainmap_setDirection},
+        {"nGetDirection", "(J)I", (void*)Gainmap_getDirection},
         {"nWriteGainmapToParcel", "(JLandroid/os/Parcel;)V", (void*)Gainmap_writeToParcel},
         {"nReadGainmapFromParcel", "(JLandroid/os/Parcel;)V", (void*)Gainmap_readFromParcel},
 };

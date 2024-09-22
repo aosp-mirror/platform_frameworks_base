@@ -509,8 +509,12 @@ public class ApplicationStartInfoTest {
 
         mAppStartInfoTracker.handleProcessBroadcastStart(3, app, buildIntent(COMPONENT),
                 false /* isAlarm */);
+        // Add a brief delay between timestamps to make sure the clock, which is in milliseconds has
+        // actually incremented.
+        sleep(1);
         mAppStartInfoTracker.handleProcessBroadcastStart(2, app, buildIntent(COMPONENT),
                 false /* isAlarm */);
+        sleep(1);
         mAppStartInfoTracker.handleProcessBroadcastStart(1, app, buildIntent(COMPONENT),
                 false /* isAlarm */);
 
@@ -557,9 +561,10 @@ public class ApplicationStartInfoTest {
         // Now load from disk.
         mAppStartInfoTracker.loadExistingProcessStartInfo();
 
-        // Confirm clock has been set and that its current time is greater than the previous one.
+        // Confirm clock has been set and that its current time is greater than or equal to the
+        // previous one, thereby ensuring it was loaded from disk.
         assertNotNull(mAppStartInfoTracker.mMonotonicClock);
-        assertTrue(mAppStartInfoTracker.mMonotonicClock.monotonicTime() > originalMonotonicTime);
+        assertTrue(mAppStartInfoTracker.mMonotonicClock.monotonicTime() >= originalMonotonicTime);
     }
 
     private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {

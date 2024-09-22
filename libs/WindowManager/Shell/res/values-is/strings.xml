@@ -123,6 +123,8 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Skjámynd"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Opna í vafra"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nýr gluggi"</string>
+    <!-- no translation found for manage_windows_text (5567366688493093920) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"Loka"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Loka valmynd"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Opna valmynd"</string>

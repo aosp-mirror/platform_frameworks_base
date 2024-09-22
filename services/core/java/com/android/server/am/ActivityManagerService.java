@@ -714,12 +714,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Map userId to its companion app uids.
      */
+    @GuardedBy("mCompanionAppUidsMap")
     private final Map<Integer, Set<Integer>> mCompanionAppUidsMap = new ArrayMap<>();
 
     /**
      * The profile owner UIDs.
      */
-    private ArraySet<Integer> mProfileOwnerUids = null;
+    @GuardedBy("mProfileOwnerUids")
+    private final ArraySet<Integer> mProfileOwnerUids = new ArraySet<>();
 
     final UserController mUserController;
     @VisibleForTesting
@@ -4772,7 +4774,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
             }
-            maybeSendBootCompletedLocked(app);
+            maybeSendBootCompletedLocked(app, isRestrictedBackupMode);
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
             Slog.wtf(TAG, "Exception thrown during bind of " + app, e);
@@ -5017,7 +5019,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Send LOCKED_BOOT_COMPLETED and BOOT_COMPLETED to the package explicitly when unstopped,
      * or when the package first starts in private space
      */
-    private void maybeSendBootCompletedLocked(ProcessRecord app) {
+    private void maybeSendBootCompletedLocked(ProcessRecord app, boolean isRestrictedBackupMode) {
         boolean sendBroadcast = false;
         if (android.os.Flags.allowPrivateProfile()
                 && android.multiuser.Flags.enablePrivateSpaceFeatures()) {
@@ -5042,6 +5044,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     RESTRICTION_LEVEL_FORCE_STOPPED, false,
                     RESTRICTION_REASON_USAGE, "unknown", RESTRICTION_SOURCE_USER, 0L);
         }
+
+        // Don't send BOOT_COMPLETED if currently in restricted backup mode
+        if (isRestrictedBackupMode) return;
 
         if (!sendBroadcast) {
             if (!android.content.pm.Flags.stayStopped()) return;
@@ -15299,10 +15304,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             psr.setReportedForegroundServiceTypes(fgServiceTypes);
-            ProcessChangeItem item = mProcessList.enqueueProcessChangeItemLocked(
-                    proc.getPid(), proc.info.uid);
-            item.changes |= ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
-            item.foregroundServiceTypes = fgServiceTypes;
+            mProcessList.enqueueProcessChangeItemLocked(proc.getPid(), proc.info.uid,
+                    ProcessChangeItem.CHANGE_FOREGROUND_SERVICES, fgServiceTypes);
         }
         if (oomAdj) {
             updateOomAdjLocked(proc, OOM_ADJ_REASON_UI_VISIBILITY);
@@ -17532,32 +17535,35 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids) {
-            synchronized (ActivityManagerService.this) {
-                mProfileOwnerUids = profileOwnerUids;
+            synchronized (mProfileOwnerUids) {
+                mProfileOwnerUids.clear();
+                mProfileOwnerUids.addAll(profileOwnerUids);
             }
         }
 
         @Override
         public boolean isProfileOwner(int uid) {
-            synchronized (ActivityManagerService.this) {
-                return mProfileOwnerUids != null && mProfileOwnerUids.indexOf(uid) >= 0;
+            synchronized (mProfileOwnerUids) {
+                return mProfileOwnerUids.indexOf(uid) >= 0;
             }
         }
 
         @Override
         public void setCompanionAppUids(int userId, Set<Integer> companionAppUids) {
-            synchronized (ActivityManagerService.this) {
+            synchronized (mCompanionAppUidsMap) {
                 mCompanionAppUidsMap.put(userId, companionAppUids);
             }
         }
 
         @Override
         public boolean isAssociatedCompanionApp(int userId, int uid) {
-            final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
-            if (allUids == null) {
-                return false;
+            synchronized (mCompanionAppUidsMap) {
+                final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
+                if (allUids == null) {
+                    return false;
+                }
+                return allUids.contains(uid);
             }
-            return allUids.contains(uid);
         }
 
         @Override

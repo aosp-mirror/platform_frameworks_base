@@ -42,7 +42,6 @@ import android.service.notification.StatusBarNotification
 import android.support.v4.media.MediaMetadataCompat
 import android.text.TextUtils
 import android.util.Log
-import android.util.Pair
 import androidx.media.utils.MediaConstants
 import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.dagger.SysUISingleton
@@ -70,6 +69,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 
 /** Loads media information from media style [StatusBarNotification] classes. */
@@ -85,7 +85,7 @@ constructor(
     private val imageLoader: ImageLoader,
     private val statusBarManager: StatusBarManager,
 ) {
-    private val mediaProcessingJobs = ConcurrentHashMap<JobKey, Job>()
+    private val mediaProcessingJobs = ConcurrentHashMap<String, Job>()
 
     private val artworkWidth: Int =
         context.resources.getDimensionPixelSize(
@@ -97,7 +97,7 @@ constructor(
     private val themeText =
         com.android.settingslib.Utils.getColorAttr(
                 context,
-                com.android.internal.R.attr.textColorPrimary
+                com.android.internal.R.attr.textColorPrimary,
             )
             .defaultColor
 
@@ -112,11 +112,14 @@ constructor(
      * load will be cancelled.
      */
     suspend fun loadMediaData(key: String, sbn: StatusBarNotification): MediaDataLoaderResult? {
-        logD(TAG) { "Loading media data for $key..." }
-        val jobKey = JobKey(key, sbn)
         val loadMediaJob = backgroundScope.async { loadMediaDataInBackground(key, sbn) }
-        loadMediaJob.invokeOnCompletion { mediaProcessingJobs.remove(jobKey) }
-        val existingJob = mediaProcessingJobs.put(jobKey, loadMediaJob)
+        loadMediaJob.invokeOnCompletion {
+            // We need to make sure we're removing THIS job after cancellation, not
+            // a job that we created later.
+            mediaProcessingJobs.remove(key, loadMediaJob)
+        }
+        val existingJob = mediaProcessingJobs.put(key, loadMediaJob)
+        logD(TAG) { "Loading media data for $key... / existing job: $existingJob" }
         existingJob?.cancel("New processing job incoming.")
         return loadMediaJob.await()
     }
@@ -128,10 +131,15 @@ constructor(
         sbn: StatusBarNotification,
     ): MediaDataLoaderResult? =
         traceCoroutine("MediaDataLoader#loadMediaData") {
+            // We have apps spamming us with quick notification updates which can cause
+            // us to spend significant CPU time loading duplicate data. This debounces
+            // those requests at the cost of a bit of latency.
+            delay(DEBOUNCE_DELAY_MS)
+
             val token =
                 sbn.notification.extras.getParcelable(
                     Notification.EXTRA_MEDIA_SESSION,
-                    MediaSession.Token::class.java
+                    MediaSession.Token::class.java,
                 )
             if (token == null) {
                 Log.i(TAG, "Token was null, not loading media info")
@@ -144,7 +152,7 @@ constructor(
             val appInfo =
                 notification.extras.getParcelable(
                     Notification.EXTRA_BUILDER_APPLICATION_INFO,
-                    ApplicationInfo::class.java
+                    ApplicationInfo::class.java,
                 ) ?: getAppInfoFromPackage(sbn.packageName)
 
             // App name
@@ -240,7 +248,7 @@ constructor(
                 playbackLocation = playbackLocation,
                 isPlaying = isPlaying,
                 appUid = appUid,
-                isExplicit = isExplicit
+                isExplicit = isExplicit,
             )
         }
 
@@ -258,7 +266,7 @@ constructor(
         token: MediaSession.Token,
         appName: String,
         appIntent: PendingIntent,
-        packageName: String
+        packageName: String,
     ): MediaDataLoaderResult? {
         val mediaData =
             backgroundScope.async {
@@ -270,7 +278,7 @@ constructor(
                     token,
                     appName,
                     appIntent,
-                    packageName
+                    packageName,
                 )
             }
         return mediaData.await()
@@ -286,7 +294,7 @@ constructor(
         token: MediaSession.Token,
         appName: String,
         appIntent: PendingIntent,
-        packageName: String
+        packageName: String,
     ): MediaDataLoaderResult? =
         traceCoroutine("MediaDataLoader#loadMediaDataForResumption") {
             if (desc.title.isNullOrBlank()) {
@@ -338,14 +346,14 @@ constructor(
                 appUid = appUid,
                 isExplicit = isExplicit,
                 resumeAction = resumeAction,
-                resumeProgress = progress
+                resumeProgress = progress,
             )
         }
 
     private fun createActionsFromState(
         packageName: String,
         controller: MediaController,
-        user: UserHandle
+        user: UserHandle,
     ): MediaButton? {
         if (!mediaFlags.areMediaSessionActionsEnabled(packageName, user)) {
             return null
@@ -368,7 +376,7 @@ constructor(
      */
     private fun getDeviceInfoForRemoteCast(
         key: String,
-        sbn: StatusBarNotification
+        sbn: StatusBarNotification,
     ): MediaDeviceData? {
         val extras = sbn.notification.extras
         val deviceName = extras.getCharSequence(Notification.EXTRA_MEDIA_REMOTE_DEVICE, null)
@@ -388,7 +396,7 @@ constructor(
                 deviceDrawable,
                 deviceName,
                 deviceIntent,
-                showBroadcastButton = false
+                showBroadcastButton = false,
             )
         }
         return null
@@ -439,7 +447,7 @@ constructor(
                 listOf(
                     ContentResolver.SCHEME_CONTENT,
                     ContentResolver.SCHEME_ANDROID_RESOURCE,
-                    ContentResolver.SCHEME_FILE
+                    ContentResolver.SCHEME_FILE,
                 )
         ) {
             Log.w(TAG, "Invalid album art uri $uri")
@@ -451,7 +459,7 @@ constructor(
             source,
             artworkWidth,
             artworkHeight,
-            allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            allocator = ImageDecoder.ALLOCATOR_SOFTWARE,
         )
     }
 
@@ -459,7 +467,7 @@ constructor(
         uri: Uri,
         userId: Int,
         appUid: Int,
-        packageName: String
+        packageName: String,
     ): Bitmap? {
         try {
             val ugm = UriGrantsManager.getService()
@@ -468,7 +476,7 @@ constructor(
                 packageName,
                 ContentProvider.getUriWithoutUserId(uri),
                 Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                ContentProvider.getUserIdFromUri(uri, userId)
+                ContentProvider.getUserIdFromUri(uri, userId),
             )
             return loadBitmapFromUri(uri)
         } catch (e: SecurityException) {
@@ -488,12 +496,9 @@ constructor(
                 .loadDrawable(context),
             action,
             context.getString(R.string.controls_media_resume),
-            context.getDrawable(R.drawable.ic_media_play_container)
+            context.getDrawable(R.drawable.ic_media_play_container),
         )
     }
-
-    private data class JobKey(val key: String, val sbn: StatusBarNotification) :
-        Pair<String, StatusBarNotification>(key, sbn)
 
     companion object {
         private const val TAG = "MediaDataLoader"
@@ -501,8 +506,10 @@ constructor(
             arrayOf(
                 MediaMetadata.METADATA_KEY_ALBUM_ART_URI,
                 MediaMetadata.METADATA_KEY_ART_URI,
-                MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI
+                MediaMetadata.METADATA_KEY_DISPLAY_ICON_URI,
             )
+
+        private const val DEBOUNCE_DELAY_MS = 200L
     }
 
     /** Returned data from loader. */
@@ -523,6 +530,6 @@ constructor(
         val appUid: Int,
         val isExplicit: Boolean,
         val resumeAction: Runnable? = null,
-        val resumeProgress: Double? = null
+        val resumeProgress: Double? = null,
     )
 }

@@ -73,8 +73,7 @@
     <string name="bubble_accessibility_announce_collapse" msgid="3178806224494537097">"comprimi <xliff:g id="BUBBLE_TITLE">%1$s</xliff:g>"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Impostazioni <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ignora bolla"</string>
-    <!-- no translation found for bubble_fullscreen_text (1006758103218086231) -->
-    <skip />
+    <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Passa a schermo intero"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Non mettere la conversazione nella bolla"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Chatta utilizzando le bolle"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Le nuove conversazioni vengono mostrate come icone mobili o bolle. Tocca per aprire la bolla. Trascinala per spostarla."</string>
@@ -124,6 +123,8 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Screenshot"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Apri nel browser"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nuova finestra"</string>
+    <!-- no translation found for manage_windows_text (5567366688493093920) -->
+    <skip />
     <string name="close_text" msgid="4986518933445178928">"Chiudi"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Chiudi il menu"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Apri menu"</string>

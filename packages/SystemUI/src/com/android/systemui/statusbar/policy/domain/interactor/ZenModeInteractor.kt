@@ -27,7 +27,10 @@ import com.android.settingslib.notification.modes.ZenIcon
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
 import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import java.time.Duration
@@ -51,7 +54,17 @@ constructor(
     private val notificationSettingsRepository: NotificationSettingsRepository,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val iconLoader: ZenIconLoader,
+    private val deviceProvisioningRepository: DeviceProvisioningRepository,
+    private val userSetupRepository: UserSetupRepository,
 ) {
+    val isZenAvailable: Flow<Boolean> =
+        combine(
+            deviceProvisioningRepository.isDeviceProvisioned,
+            userSetupRepository.isUserSetUp,
+        ) { isDeviceProvisioned, isUserSetUp ->
+            isDeviceProvisioned && isUserSetUp
+        }
+
     val isZenModeEnabled: Flow<Boolean> =
         zenModeRepository.globalZenMode
             .map {
@@ -79,6 +92,18 @@ constructor(
             .distinctUntilChanged()
 
     val modes: Flow<List<ZenMode>> = zenModeRepository.modes
+
+    /**
+     * Returns the special "manual DND" mode.
+     *
+     * This is only meant as a temporary solution for "legacy" UI pieces that handle DND
+     * specifically; any new or migrated features should use modes more generally, through [modes]
+     * or [activeModes].
+     */
+    val dndMode: Flow<ZenMode?> by lazy {
+        ModesUi.assertInNewMode()
+        zenModeRepository.modes.map { modes -> modes.singleOrNull { it.isManualDnd } }
+    }
 
     /** Flow returning the currently active mode(s), if any. */
     val activeModes: Flow<ActiveZenModes> =
@@ -113,10 +138,11 @@ constructor(
                         Log.e(
                             TAG,
                             "Interactor cannot handle showing the zen duration prompt. " +
-                                "Please use EnableZenModeDialog when this setting is active."
+                                "Please use EnableZenModeDialog when this setting is active.",
                         )
                         null
                     }
+
                     ZEN_DURATION_FOREVER -> null
                     else -> Duration.ofMinutes(zenDuration.toLong())
                 }

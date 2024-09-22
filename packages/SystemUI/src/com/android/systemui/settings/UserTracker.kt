@@ -16,11 +16,10 @@
 
 package com.android.systemui.settings
 
-import com.android.systemui.util.annotations.WeaklyReferencedCallback
-
 import android.content.Context
 import android.content.pm.UserInfo
 import android.os.UserHandle
+import com.android.systemui.util.annotations.WeaklyReferencedCallback
 import java.util.concurrent.Executor
 
 /**
@@ -31,19 +30,13 @@ import java.util.concurrent.Executor
  */
 interface UserTracker : UserContentResolverProvider, UserContextProvider {
 
-    /**
-     * Current user's id.
-     */
+    /** Current user's id. */
     val userId: Int
 
-    /**
-     * [UserHandle] for current user
-     */
+    /** [UserHandle] for current user */
     val userHandle: UserHandle
 
-    /**
-     * [UserInfo] for current user
-     */
+    /** [UserInfo] for current user */
     val userInfo: UserInfo
 
     /**
@@ -56,39 +49,33 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
      */
     val userProfiles: List<UserInfo>
 
-    /**
-     * Add a [Callback] to be notified of chances, on a particular [Executor]
-     */
+    /** Is the system in the process of switching users? */
+    val isUserSwitching: Boolean
+
+    /** Add a [Callback] to be notified of chances, on a particular [Executor] */
     fun addCallback(callback: Callback, executor: Executor)
 
-    /**
-     * Remove a [Callback] previously added.
-     */
+    /** Remove a [Callback] previously added. */
     fun removeCallback(callback: Callback)
 
-    /**
-     * Callback for notifying of changes.
-     */
+    /** Callback for notifying of changes. */
     @WeaklyReferencedCallback
     interface Callback {
-        /**
-         * Notifies that the current user will be changed.
-         */
+        /** Notifies that the current user will be changed. */
         fun onBeforeUserSwitching(newUser: Int) {}
 
         /**
-         * Same as {@link onUserChanging(Int, Context, Runnable)} but the callback will be
-         * called automatically after the completion of this method.
+         * Same as {@link onUserChanging(Int, Context, Runnable)} but the callback will be called
+         * automatically after the completion of this method.
          */
         fun onUserChanging(newUser: Int, userContext: Context) {}
 
         /**
-         * Notifies that the current user is being changed.
-         * Override this method to run things while the screen is frozen for the user switch.
-         * Please use {@link #onUserChanged} if the task doesn't need to push the unfreezing of the
-         * screen further. Please be aware that code executed in this callback will lengthen the
-         * user switch duration. When overriding this method, resultCallback#run() MUST be called
-         * once the  execution is complete.
+         * Notifies that the current user is being changed. Override this method to run things while
+         * the screen is frozen for the user switch. Please use {@link #onUserChanged} if the task
+         * doesn't need to push the unfreezing of the screen further. Please be aware that code
+         * executed in this callback will lengthen the user switch duration. When overriding this
+         * method, resultCallback#run() MUST be called once the execution is complete.
          */
         fun onUserChanging(newUser: Int, userContext: Context, resultCallback: Runnable) {
             onUserChanging(newUser, userContext)
@@ -96,15 +83,13 @@ interface UserTracker : UserContentResolverProvider, UserContextProvider {
         }
 
         /**
-         * Notifies that the current user has changed.
-         * Override this method to run things after the screen is unfrozen for the user switch.
-         * Please see {@link #onUserChanging} if you need to hide jank.
+         * Notifies that the current user has changed. Override this method to run things after the
+         * screen is unfrozen for the user switch. Please see {@link #onUserChanging} if you need to
+         * hide jank.
          */
         fun onUserChanged(newUser: Int, userContext: Context) {}
 
-        /**
-         * Notifies that the current user's profiles have changed.
-         */
+        /** Notifies that the current user's profiles have changed. */
         fun onProfilesChanged(profiles: List<@JvmSuppressWildcards UserInfo>) {}
     }
 }

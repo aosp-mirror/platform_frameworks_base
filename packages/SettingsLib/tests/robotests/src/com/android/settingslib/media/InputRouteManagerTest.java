@@ -16,6 +16,8 @@
 
 package com.android.settingslib.media;
 
+import static com.android.settingslib.media.InputRouteManager.INPUT_ATTRIBUTES;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 
@@ -35,6 +38,10 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @RunWith(RobolectricTestRunner.class)
 @Config(shadows = {ShadowRouter2Manager.class})
@@ -121,6 +128,97 @@ public class InputRouteManagerTest {
         inputRouteManager.mAudioDeviceCallback.onAudioDevicesRemoved(new AudioDeviceInfo[] {info});
 
         assertThat(inputRouteManager.mInputMediaDevices).isEmpty();
+    }
+
+    @Test
+    public void getSelectedInputDevice_returnOneFromAudioManager() {
+        final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
+        when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+
+        final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
+        when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
+        when(info2.getId()).thenReturn(BUILTIN_MIC_ID);
+
+        final AudioManager audioManager = mock(AudioManager.class);
+        AudioDeviceInfo[] devices = {info1, info2};
+        when(audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)).thenReturn(devices);
+
+        // Mock audioManager.getDevicesForAttributes returns exactly one audioDeviceAttributes.
+        AudioDeviceAttributes audioDeviceAttributes = new AudioDeviceAttributes(info1);
+        when(audioManager.getDevicesForAttributes(INPUT_ATTRIBUTES))
+                .thenReturn(Collections.singletonList(audioDeviceAttributes));
+
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // The selected input device has the same type as the one returned from AudioManager.
+        InputMediaDevice selectedInputDevice =
+                (InputMediaDevice) inputRouteManager.getSelectedInputDevice();
+        assertThat(selectedInputDevice.getAudioDeviceInfoType())
+                .isEqualTo(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+    }
+
+    @Test
+    public void getSelectedInputDevice_returnMoreThanOneFromAudioManager() {
+        final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
+        when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+
+        final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
+        when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
+        when(info2.getId()).thenReturn(BUILTIN_MIC_ID);
+
+        final AudioManager audioManager = mock(AudioManager.class);
+        AudioDeviceInfo[] devices = {info1, info2};
+        when(audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)).thenReturn(devices);
+
+        // Mock audioManager.getDevicesForAttributes returns more than one audioDeviceAttributes.
+        AudioDeviceAttributes audioDeviceAttributes1 = new AudioDeviceAttributes(info1);
+        AudioDeviceAttributes audioDeviceAttributes2 = new AudioDeviceAttributes(info2);
+        List<AudioDeviceAttributes> attributesOfSelectedInputDevices = new ArrayList<>();
+        attributesOfSelectedInputDevices.add(audioDeviceAttributes1);
+        attributesOfSelectedInputDevices.add(audioDeviceAttributes2);
+        when(audioManager.getDevicesForAttributes(INPUT_ATTRIBUTES))
+                .thenReturn(attributesOfSelectedInputDevices);
+
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // The selected input device has the same type as the first one returned from AudioManager.
+        InputMediaDevice selectedInputDevice =
+                (InputMediaDevice) inputRouteManager.getSelectedInputDevice();
+        assertThat(selectedInputDevice.getAudioDeviceInfoType())
+                .isEqualTo(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+    }
+
+    @Test
+    public void getSelectedInputDevice_returnEmptyFromAudioManager() {
+        final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
+        when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+
+        final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
+        when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
+        when(info2.getId()).thenReturn(BUILTIN_MIC_ID);
+
+        final AudioManager audioManager = mock(AudioManager.class);
+        AudioDeviceInfo[] devices = {info1, info2};
+        when(audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)).thenReturn(devices);
+
+        // Mock audioManager.getDevicesForAttributes returns empty list of audioDeviceAttributes.
+        List<AudioDeviceAttributes> attributesOfSelectedInputDevices = new ArrayList<>();
+        when(audioManager.getDevicesForAttributes(INPUT_ATTRIBUTES))
+                .thenReturn(attributesOfSelectedInputDevices);
+
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // The selected input device has default type AudioDeviceInfo.TYPE_BUILTIN_MIC.
+        InputMediaDevice selectedInputDevice =
+                (InputMediaDevice) inputRouteManager.getSelectedInputDevice();
+        assertThat(selectedInputDevice.getAudioDeviceInfoType())
+                .isEqualTo(AudioDeviceInfo.TYPE_BUILTIN_MIC);
     }
 
     @Test

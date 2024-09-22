@@ -16,21 +16,14 @@
 
 package android.text;
 
-import com.android.text.flags.Flags;
-
 /**
  * An aconfig feature flags that can be accessible from application process without
  * ContentProvider IPCs.
  *
  * When you add new flags, you have to add flag string to {@link TextFlags#TEXT_ACONFIGS_FLAGS}.
  *
+ * TODO(nona): Remove this class.
  * @hide
  */
 public class ClientFlags {
-    /**
-     * @see Flags#fixMisalignedContextMenu()
-     */
-    public static boolean fixMisalignedContextMenu() {
-        return TextFlags.isFeatureEnabled(Flags.FLAG_FIX_MISALIGNED_CONTEXT_MENU);
-    }
 }

@@ -26,7 +26,10 @@
             <solid
                 android:color="@color/settingslib_materialColorSurfaceContainer" />
             <corners
-                android:radius="@dimen/settingslib_preference_corner_radius_selected" />
+                android:topLeftRadius="4dp"
+                android:bottomLeftRadius="@dimen/settingslib_preference_corner_radius"
+                android:topRightRadius="4dp"
+                android:bottomRightRadius="@dimen/settingslib_preference_corner_radius" />
             <padding
                 android:bottom="16dp"/>
         </shape>

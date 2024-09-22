@@ -1,16 +1,24 @@
 # Applications & Processes
-yamasani@google.com
-jsharkey@google.com
-hackbod@google.com
-omakoto@google.com
-ctate@google.com
-huiyu@google.com
-mwachens@google.com
-sudheersai@google.com
-suprabh@google.com
-varunshah@google.com
-bookatz@google.com
-jji@google.com
+per-file ActivityManager* = file:/ACTIVITY_MANAGER_OWNERS
+per-file ActiveServices.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProcessList.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ActivityThread.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProcessRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file SystemServer.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ServiceRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file AppProfiler.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProcessStateRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProcessServiceRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ForegroundServiceTypeLoggerModule.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file AppRestrictionController.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProcessErrorStateRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ProcessProfileRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file ConnectionRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file UidRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file IntentBindRecord.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file AppFGSTracker.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file FgsTempAllowList.java = file:/ACTIVITY_MANAGER_OWNERS
+per-file HostingRecord.java = file:/ACTIVITY_MANAGER_OWNERS
 
 # Windows & Activities
 ogunwale@google.com
@@ -20,24 +28,19 @@ patb@google.com
 per-file AccessCheckDelegateHelper.java = file:/core/java/android/permission/OWNERS
 
 # Battery Stats
-joeo@google.com
+per-file AppBatteryTracker.java = file:/BATTERY_STATS_OWNERS
 per-file BatteryStats* = file:/BATTERY_STATS_OWNERS
 per-file BatteryExternalStats* = file:/BATTERY_STATS_OWNERS
-
-# Londoners
-michaelwr@google.com
-narayan@google.com
 
 # Voice Interaction
 per-file *Assist* = file:/core/java/android/service/voice/OWNERS
 per-file *Voice* = file:/core/java/android/service/voice/OWNERS
 
-per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com
+# Content Provider
+per-file ContentProvider* = varunshah@google.com, yamasani@google.com
 
-per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNERS
-
-per-file ContentProviderHelper.java = varunshah@google.com, omakoto@google.com, jsharkey@google.com, yamasani@google.com
-
+# Cached App Freezer
+per-file ProcessCachedOptimizerRecord.java = file:/PERFORMANCE_OWNERS
 per-file CachedAppOptimizer.java = file:/PERFORMANCE_OWNERS
 per-file Freezer.java = file:/PERFORMANCE_OWNERS
 
@@ -46,3 +49,23 @@ per-file User* = file:/MULTIUSER_OWNERS
 
 # Broadcasts
 per-file Broadcast* = file:/BROADCASTS_OWNERS
+
+# Permissions & Packages
+per-file *Permission* = patb@google.com
+per-file *Package* = patb@google.com
+
+# OOM Adjuster
+per-file *Oom* = file:/OOM_ADJUSTER_OWNERS
+
+# Miscellaneous
+per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com
+per-file CarUserSwitchingDialog.java = file:platform/packages/services/Car:/OWNERS
+
+# Londoners
+michaelwr@google.com #{LAST_RESORT_SUGGESTION}
+narayan@google.com #{LAST_RESORT_SUGGESTION}
+
+# Default
+hackbod@google.com #{LAST_RESORT_SUGGESTION}
+omakoto@google.com #{LAST_RESORT_SUGGESTION}
+yamasani@google.com #{LAST_RESORT_SUGGESTION}

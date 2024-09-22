@@ -19,28 +19,35 @@ package com.android.server.appfunctions;
 import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_EXECUTOR;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.WorkerThread;
+import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.ExecuteAppFunctionResponse;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
+import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.observer.DocumentChangeInfo;
+import android.app.appsearch.observer.ObserverCallback;
+import android.app.appsearch.observer.ObserverSpec;
+import android.app.appsearch.observer.SchemaChangeInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.app.appsearch.AppSearchResult;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
 import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
 
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletionException;
 
 /** Implementation of the AppFunctionManagerService. */
 public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
@@ -50,9 +57,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private final CallerValidator mCallerValidator;
     private final ServiceHelper mInternalServiceHelper;
     private final ServiceConfig mServiceConfig;
+    private final Context mContext;
 
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(
+                context,
                 new RemoteServiceCallerImpl<>(
                         context, IAppFunctionService.Stub::asInterface, THREAD_POOL_EXECUTOR),
                 new CallerValidatorImpl(context),
@@ -62,14 +71,36 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
     @VisibleForTesting
     AppFunctionManagerServiceImpl(
+            Context context,
             RemoteServiceCaller<IAppFunctionService> remoteServiceCaller,
             CallerValidator callerValidator,
             ServiceHelper appFunctionInternalServiceHelper,
             ServiceConfig serviceConfig) {
+        mContext = Objects.requireNonNull(context);
         mRemoteServiceCaller = Objects.requireNonNull(remoteServiceCaller);
         mCallerValidator = Objects.requireNonNull(callerValidator);
         mInternalServiceHelper = Objects.requireNonNull(appFunctionInternalServiceHelper);
         mServiceConfig = serviceConfig;
+    }
+
+    /** Called when the user is unlocked. */
+    public void onUserUnlocked(TargetUser user) {
+        Objects.requireNonNull(user);
+
+        registerAppSearchObserver(user);
+        trySyncRuntimeMetadata(user);
+    }
+
+    /** Called when the user is stopping. */
+    public void onUserStopping(@NonNull TargetUser user) {
+        Objects.requireNonNull(user);
+
+        try {
+            AppFunctionExecutors.shutDownAndRemoveUserExecutor(user.getUserHandle());
+            MetadataSyncPerUser.removeUserSyncAdapter(user.getUserHandle());
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Unable to remove data for: " + user.getUserHandle(), e);
+        }
     }
 
     @Override
@@ -82,25 +113,12 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         final SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback =
                 new SafeOneTimeExecuteAppFunctionCallback(executeAppFunctionCallback);
 
-        try {
-            executeAppFunctionInternal(requestInternal, safeExecuteAppFunctionCallback);
-        } catch (Exception e) {
-            safeExecuteAppFunctionCallback.onResult(mapExceptionToExecuteAppFunctionResponse(e));
-        }
-    }
-
-    private void executeAppFunctionInternal(
-            ExecuteAppFunctionAidlRequest requestInternal,
-            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
-
         String validatedCallingPackage;
-        UserHandle targetUser;
         try {
             validatedCallingPackage =
                     mCallerValidator.validateCallingPackage(requestInternal.getCallingPackage());
-            targetUser =
-                    mCallerValidator.verifyTargetUserHandle(
-                            requestInternal.getUserHandle(), validatedCallingPackage);
+            mCallerValidator.verifyTargetUserHandle(
+                    requestInternal.getUserHandle(), validatedCallingPackage);
         } catch (SecurityException exception) {
             safeExecuteAppFunctionCallback.onResult(
                     ExecuteAppFunctionResponse.newFailure(
@@ -110,6 +128,30 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             return;
         }
 
+        int callingUid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingUid();
+        THREAD_POOL_EXECUTOR.execute(
+                () -> {
+                    try {
+                        executeAppFunctionInternal(
+                                requestInternal,
+                                callingUid,
+                                callingPid,
+                                safeExecuteAppFunctionCallback);
+                    } catch (Exception e) {
+                        safeExecuteAppFunctionCallback.onResult(
+                                mapExceptionToExecuteAppFunctionResponse(e));
+                    }
+                });
+    }
+
+    @WorkerThread
+    private void executeAppFunctionInternal(
+            ExecuteAppFunctionAidlRequest requestInternal,
+            int callingUid,
+            int callingPid,
+            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
+        UserHandle targetUser = requestInternal.getUserHandle();
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
             safeExecuteAppFunctionCallback.onResult(
@@ -131,53 +173,50 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             return;
         }
 
-        var unused = mCallerValidator
-                .verifyCallerCanExecuteAppFunction(
-                        validatedCallingPackage,
-                        targetPackageName,
-                        requestInternal.getClientRequest().getFunctionIdentifier())
-                .thenAccept(
-                        canExecute -> {
-                            if (!canExecute) {
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_DENIED,
-                                                "Caller does not have permission to execute the"
-                                                        + " appfunction",
-                                                /* extras= */ null));
-                                return;
-                            }
-                            Intent serviceIntent =
-                                    mInternalServiceHelper.resolveAppFunctionService(
-                                            targetPackageName, targetUser);
-                            if (serviceIntent == null) {
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                                                "Cannot find the target service.",
-                                                /* extras= */ null));
-                                return;
-                            }
-                            final long token = Binder.clearCallingIdentity();
-                            try {
-                                bindAppFunctionServiceUnchecked(
-                                        requestInternal,
-                                        serviceIntent,
-                                        targetUser,
-                                        safeExecuteAppFunctionCallback,
-                                        /* bindFlags= */ Context.BIND_AUTO_CREATE,
-                                        /* timeoutInMillis= */ mServiceConfig
-                                                .getExecuteAppFunctionTimeoutMillis());
-                            } finally {
-                                Binder.restoreCallingIdentity(token);
-                            }
-                        })
-                .exceptionally(
-                        ex -> {
-                            safeExecuteAppFunctionCallback.onResult(
-                                    mapExceptionToExecuteAppFunctionResponse(ex));
-                            return null;
-                        });
+        var unused =
+                mCallerValidator
+                        .verifyCallerCanExecuteAppFunction(
+                                callingUid,
+                                callingPid,
+                                requestInternal.getCallingPackage(),
+                                targetPackageName,
+                                requestInternal.getClientRequest().getFunctionIdentifier())
+                        .thenAccept(
+                                canExecute -> {
+                                    if (!canExecute) {
+                                        safeExecuteAppFunctionCallback.onResult(
+                                                ExecuteAppFunctionResponse.newFailure(
+                                                        ExecuteAppFunctionResponse.RESULT_DENIED,
+                                                        "Caller does not have permission to execute"
+                                                                + " the appfunction",
+                                                        /* extras= */ null));
+                                        return;
+                                    }
+                                    Intent serviceIntent =
+                                            mInternalServiceHelper.resolveAppFunctionService(
+                                                    targetPackageName, targetUser);
+                                    if (serviceIntent == null) {
+                                        safeExecuteAppFunctionCallback.onResult(
+                                                ExecuteAppFunctionResponse.newFailure(
+                                                        ExecuteAppFunctionResponse
+                                                                .RESULT_INTERNAL_ERROR,
+                                                        "Cannot find the target service.",
+                                                        /* extras= */ null));
+                                        return;
+                                    }
+                                    bindAppFunctionServiceUnchecked(
+                                            requestInternal,
+                                            serviceIntent,
+                                            targetUser,
+                                            safeExecuteAppFunctionCallback,
+                                            /* bindFlags= */ Context.BIND_AUTO_CREATE);
+                                })
+                        .exceptionally(
+                                ex -> {
+                                    safeExecuteAppFunctionCallback.onResult(
+                                            mapExceptionToExecuteAppFunctionResponse(ex));
+                                    return null;
+                                });
     }
 
     private void bindAppFunctionServiceUnchecked(
@@ -185,13 +224,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull Intent serviceIntent,
             @NonNull UserHandle targetUser,
             @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
-            int bindFlags,
-            long timeoutInMillis) {
+            int bindFlags) {
         boolean bindServiceResult =
                 mRemoteServiceCaller.runServiceCall(
                         serviceIntent,
                         bindFlags,
-                        timeoutInMillis,
                         targetUser,
                         new RunServiceCallCallback<IAppFunctionService>() {
                             @Override
@@ -232,16 +269,6 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                                 "Failed to connect to AppFunctionService",
                                                 /* extras= */ null));
                             }
-
-                            @Override
-                            public void onTimedOut() {
-                                Slog.e(TAG, "Timed out");
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_TIMED_OUT,
-                                                "Binding to AppFunctionService timed out.",
-                                                /* extras= */ null));
-                            }
                         });
 
         if (!bindServiceResult) {
@@ -255,6 +282,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     }
 
     private ExecuteAppFunctionResponse mapExceptionToExecuteAppFunctionResponse(Throwable e) {
+        if (e instanceof CompletionException) {
+            e = e.getCause();
+        }
+
         if (e instanceof AppSearchException) {
             AppSearchException appSearchException = (AppSearchException) e;
             return ExecuteAppFunctionResponse.newFailure(
@@ -285,5 +316,101 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                 // fall-through
         }
         return ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR;
+    }
+
+    private void registerAppSearchObserver(@NonNull TargetUser user) {
+        AppSearchManager perUserAppSearchManager =
+                mContext.createContextAsUser(user.getUserHandle(), /* flags= */ 0)
+                        .getSystemService(AppSearchManager.class);
+        if (perUserAppSearchManager == null) {
+            Slog.d(TAG, "AppSearch Manager not found for user: " + user.getUserIdentifier());
+            return;
+        }
+        FutureGlobalSearchSession futureGlobalSearchSession =
+                new FutureGlobalSearchSession(
+                        perUserAppSearchManager, AppFunctionExecutors.THREAD_POOL_EXECUTOR);
+        AppFunctionMetadataObserver appFunctionMetadataObserver =
+                new AppFunctionMetadataObserver(
+                        user.getUserHandle(),
+                        mContext.createContextAsUser(user.getUserHandle(), /* flags= */ 0));
+        var unused =
+                futureGlobalSearchSession
+                        .registerObserverCallbackAsync(
+                                "android",
+                                new ObserverSpec.Builder().build(),
+                                THREAD_POOL_EXECUTOR,
+                                appFunctionMetadataObserver)
+                        .whenComplete(
+                                (voidResult, ex) -> {
+                                    if (ex != null) {
+                                        Slog.e(TAG, "Failed to register observer: ", ex);
+                                    }
+                                    futureGlobalSearchSession.close();
+                                });
+    }
+
+    private void trySyncRuntimeMetadata(@NonNull TargetUser user) {
+        MetadataSyncAdapter metadataSyncAdapter =
+                MetadataSyncPerUser.getPerUserMetadataSyncAdapter(
+                        user.getUserHandle(),
+                        mContext.createContextAsUser(user.getUserHandle(), /* flags= */ 0));
+        if (metadataSyncAdapter != null) {
+            var unused =
+                    metadataSyncAdapter
+                            .submitSyncRequest()
+                            .whenComplete(
+                                    (isSuccess, ex) -> {
+                                        if (ex != null || !isSuccess) {
+                                            Slog.e(TAG, "Sync was not successful");
+                                        }
+                                    });
+        }
+    }
+
+    private static class AppFunctionMetadataObserver implements ObserverCallback {
+        @Nullable private final MetadataSyncAdapter mPerUserMetadataSyncAdapter;
+
+        AppFunctionMetadataObserver(@NonNull UserHandle userHandle, @NonNull Context userContext) {
+            mPerUserMetadataSyncAdapter =
+                    MetadataSyncPerUser.getPerUserMetadataSyncAdapter(userHandle, userContext);
+        }
+
+        @Override
+        public void onDocumentChanged(@NonNull DocumentChangeInfo documentChangeInfo) {
+            if (mPerUserMetadataSyncAdapter == null) {
+                return;
+            }
+            if (documentChangeInfo
+                            .getDatabaseName()
+                            .equals(AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_METADATA_DB)
+                    && documentChangeInfo
+                            .getNamespace()
+                            .equals(
+                                    AppFunctionStaticMetadataHelper
+                                            .APP_FUNCTION_STATIC_NAMESPACE)) {
+                var unused = mPerUserMetadataSyncAdapter.submitSyncRequest();
+            }
+        }
+
+        @Override
+        public void onSchemaChanged(@NonNull SchemaChangeInfo schemaChangeInfo) {
+            if (mPerUserMetadataSyncAdapter == null) {
+                return;
+            }
+            if (schemaChangeInfo
+                    .getDatabaseName()
+                    .equals(AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_METADATA_DB)) {
+                boolean shouldInitiateSync = false;
+                for (String schemaName : schemaChangeInfo.getChangedSchemaNames()) {
+                    if (schemaName.startsWith(AppFunctionStaticMetadataHelper.STATIC_SCHEMA_TYPE)) {
+                        shouldInitiateSync = true;
+                        break;
+                    }
+                }
+                if (shouldInitiateSync) {
+                    var unused = mPerUserMetadataSyncAdapter.submitSyncRequest();
+                }
+            }
+        }
     }
 }

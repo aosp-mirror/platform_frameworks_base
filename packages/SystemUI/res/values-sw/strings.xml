@@ -105,8 +105,7 @@
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ongeza kwenye dokezo"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Jumuisha kiungo"</string>
     <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g> <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for backlinks_cross_profile_error (1355798585727802282) -->
-    <skip />
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Huruhusiwi kuweka viungo kutoka kwenye wasifu mwingine"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Kinasa Skrini"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
@@ -441,9 +440,9 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Imewashwa"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Imewashwa • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Imezimwa"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Weka mipangilio"</string>
+    <string name="zen_mode_set_up" msgid="7457957033034460064">"Ratibu"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Dhibiti katika mipangilio"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hakuna hali za kutumika}=1{Unatumia {mode}}other{Unatumia hali #}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Hakuna hali zinazotumika}=1{Unatumia {mode}}other{Unatumia hali #}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele, vikumbusho, matukio na simu zinazopigwa na watu uliobainisha. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Hutasumbuliwa na sauti na mitetemo, isipokuwa kengele. Bado utasikia chochote utakachochagua kucheza, ikiwa ni pamoja na muziki, video na michezo."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Badilisha upendavyo"</string>
@@ -1180,6 +1179,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Spika na Skrini"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Vifaa Vilivyopendekezwa"</string>
+    <!-- no translation found for media_input_group_title (2057057473860783021) -->
+    <skip />
+    <!-- no translation found for media_output_group_title (6789001895863332576) -->
+    <skip />
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Simamisha kipindi unachoshiriki ili uhamishie maudhui kwenye kifaa kingine"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Simamisha"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jinsi utangazaji unavyofanya kazi"</string>
@@ -1290,6 +1293,8 @@
     <string name="add" msgid="81036585205287996">"Weka"</string>
     <string name="manage_users" msgid="1823875311934643849">"Dhibiti watumiaji"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Arifa hii haitumii utaratibu wa kuburuta ili kugawa skrini"</string>
+    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
+    <skip />
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi-Fi haipatikani"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Hali ya kipaumbele"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Kengele imewekwa"</string>
@@ -1346,6 +1351,8 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Wekea mapendeleo skrini iliyofungwa"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Fungua ili uweke mapendeleo ya skrini iliyofungwa"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi haipatikani"</string>
+    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
+    <skip />
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera imezuiwa"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera na maikrofoni zimezuiwa"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Maikrofoni imezuiwa"</string>
@@ -1401,7 +1408,8 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Jifunze kuhusu miguso ya padi ya kugusa, mikato ya kibodi na mengineyo"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Ishara ya kurudi nyuma"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Mguso wa kurudi kwenye skrini ya kwanza"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Kitufe cha vitendo"</string>
+    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Nimemaliza"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Rudi nyuma"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Telezesha vidole vitatu kushoto au kulia mahali popote kwenye padi ya kugusa ili urudi nyuma.\n\nUnaweza pia kutumia mikato ya kibodi ya Kitendo pamoja na ESC kutekeleza kitendo hiki."</string>
@@ -1411,6 +1419,14 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Ili uende kwenye skrini ya kwanza wakati wowote, telezesha vidole vitatu juu kutoka sehemu ya chini ya skrini yako."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Safi!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Umeweka ishara ya kwenda kwenye skrini ya kwanza."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
+    <skip />
+    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Kitufe cha vitendo"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Bonyeza kitufe cha vitendo kwenye kibodi yako ili ufikie programu zako."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Hongera!"</string>
@@ -1434,22 +1450,19 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Telezesha vidole vitatu juu na ushikilie. Gusa ili upate maelezo kuhusu miguso zaidi."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Kutumia kibodi yako kuangalia programu zote"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Bonyeza kitufe cha vitendo wakati wowote. Gusa ili upate maelezo kuhusu miguso zaidi."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Kipunguza mwangaza zaidi sasa ni sehemu ya upau wa mwangaza"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Sasa unaweza kupunguza mwangaza zaidi kwa kupunguza kabisa kiwango cha mwangaza katika sehemu ya juu ya skrini yako.\n\nMipangilio hii hufanya kazi vyema zaidi ukiwa katika mazingira yenye giza."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Ondoa njia ya mkato ya kipunguza mwangaza zaidi"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Njia ya mkato ya kipunguza mwangaza zaidi imeondolewa. Tumia upau wa kawaida wa mwangaza ili upunguze mwangaza wako."</string>
-    <!-- no translation found for qs_edit_mode_category_connectivity (4559726936546032672) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_accessibility (7969091385071475922) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_utilities (8123080090108420095) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_privacy (6577774443194551775) -->
+    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
     <skip />
-    <!-- no translation found for qs_edit_mode_category_providedByApps (8346112074897919019) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_display (4749511439121053942) -->
-    <skip />
-    <!-- no translation found for qs_edit_mode_category_unknown (509314252124053550) -->
-    <skip />
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Muunganisho"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Ufikivu"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Vipengee"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"Faragha"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Vinavyotolewa na programu"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Maonyesho"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Visivyojulikana"</string>
 </resources>

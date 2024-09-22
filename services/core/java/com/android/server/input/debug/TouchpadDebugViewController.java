@@ -155,4 +155,13 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
             mTouchpadDebugView.updateHardwareState(touchpadHardwareState, deviceId);
         }
     }
+
+    /**
+     * Notify the TouchpadDebugView of a new touchpad gesture.
+     */
+    public void updateTouchpadGestureInfo(int gestureType, int deviceId) {
+        if (mTouchpadDebugView != null) {
+            mTouchpadDebugView.updateGestureInfo(gestureType, deviceId);
+        }
+    }
 }

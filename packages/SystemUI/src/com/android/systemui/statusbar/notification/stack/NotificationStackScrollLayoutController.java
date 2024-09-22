@@ -98,6 +98,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.HeadsUpNotificationViewControllerEmptyImpl;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNotificationViewController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -129,9 +132,6 @@ import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.shared.GroupHunAnimationFix;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.notification.HeadsUpNotificationViewControllerEmptyImpl;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNotificationViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -1605,6 +1605,9 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return new RemoteInputController.Delegate() {
             public void setRemoteInputActive(NotificationEntry entry,
                     boolean remoteInputActive) {
+                if (SceneContainerFlag.isEnabled()) {
+                    sendRemoteInputRowBottomBound(entry, remoteInputActive);
+                }
                 mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
                 entry.notifyHeightChanged(true /* needsAnimation */);
                 if (!FooterViewRefactor.isEnabled()) {
@@ -1619,6 +1622,15 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             public void requestDisallowLongPressAndDismiss() {
                 mView.requestDisallowLongPress();
                 mView.requestDisallowDismiss();
+            }
+
+            private void sendRemoteInputRowBottomBound(NotificationEntry entry,
+                    boolean remoteInputActive) {
+                ExpandableNotificationRow row = entry.getRow();
+                float top = row.getTranslationY();
+                int height = row.getActualHeight();
+                float bottom = top + height + row.getRemoteInputActionsContainerExpandedOffset();
+                mView.sendRemoteInputRowBottomBound(remoteInputActive ? bottom : null);
             }
         };
     }

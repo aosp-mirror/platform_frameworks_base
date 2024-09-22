@@ -38,6 +38,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.window.WindowContainerToken;
+import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -53,11 +54,9 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.recents.IRecentsAnimationRunner;
 import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.split.SplitBounds;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -356,7 +355,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
 
     private void notifyTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
         if (mListener == null
-                || !DesktopModeFlags.TASK_STACK_OBSERVER_IN_SHELL.isEnabled(mContext)
+                || !DesktopModeFlags.ENABLE_TASK_STACK_OBSERVER_IN_SHELL.isTrue()
                 || taskInfo.realActivity == null) {
             return;
         }
@@ -370,7 +369,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private boolean shouldEnableRunningTasksForDesktopMode() {
         return mPcFeatureEnabled
                 || (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && DesktopModeFlags.TASKBAR_RUNNING_APPS.isEnabled(mContext));
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS.isTrue());
     }
 
     @VisibleForTesting

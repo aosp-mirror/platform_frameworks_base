@@ -1705,9 +1705,10 @@
   <java-symbol type="style" name="VectorPointer" />
   <java-symbol type="style" name="PointerIconVectorStyleFillBlack" />
   <java-symbol type="style" name="PointerIconVectorStyleFillGreen" />
-  <java-symbol type="style" name="PointerIconVectorStyleFillYellow" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillRed" />
   <java-symbol type="style" name="PointerIconVectorStyleFillPink" />
   <java-symbol type="style" name="PointerIconVectorStyleFillBlue" />
+  <java-symbol type="style" name="PointerIconVectorStyleFillPurple" />
   <java-symbol type="attr" name="pointerIconVectorFill" />
   <java-symbol type="style" name="PointerIconVectorStyleStrokeWhite" />
   <java-symbol type="style" name="PointerIconVectorStyleStrokeBlack" />
@@ -4504,6 +4505,7 @@
   <!-- For contacts provider. -->
   <java-symbol type="string" name="config_rawContactsLocalAccountName" />
   <java-symbol type="string" name="config_rawContactsLocalAccountType" />
+  <java-symbol type="array" name="config_rawContactsEligibleDefaultAccountTypes" />
 
   <!-- For App Standby -->
   <java-symbol type="string" name="as_app_forced_to_restricted_bucket" />
@@ -5541,6 +5543,10 @@
   <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
   <java-symbol type="integer" name="config_maxDesktopWindowingActiveTasks"/>
 
+  <!-- Whether a display enters desktop mode by default when the windowing mode of the display's
+       root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM. -->
+  <java-symbol type="bool" name="config_enterDesktopByDefaultOnFreeformDisplay" />
+
   <!-- Frame rate compatibility value for Wallpaper -->
   <java-symbol type="integer" name="config_wallpaperFrameRateCompatibility" />
 
@@ -5605,4 +5611,8 @@
   <java-symbol type="string" name="fingerprint_loe_notification_msg" />
 
   <java-symbol type="bool" name="config_enableViewGroupScalingFading"/>
+
+  <!-- Identity check strings -->
+  <java-symbol type="string" name="identity_check_settings_action" />
+  <java-symbol type="string" name="identity_check_settings_package_name" />
 </resources>

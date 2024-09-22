@@ -26,6 +26,7 @@ import static android.view.MotionEvent.ACTION_MOVE;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
 
+import android.annotation.NonNull;
 import android.graphics.PointF;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,12 +49,18 @@ class DragDetector {
     private int mTouchSlop;
     private boolean mIsDragEvent;
     private int mDragPointerId = -1;
+    private final long mHoldToDragMinDurationMs;
+    private boolean mDidStrayBeforeFullHold;
+    private boolean mDidHoldForMinDuration;
 
     private boolean mResultOfDownAction;
 
-    DragDetector(MotionEventHandler eventHandler) {
+    DragDetector(@NonNull MotionEventHandler eventHandler, long holdToDragMinDurationMs,
+            int touchSlop) {
         resetState();
         mEventHandler = eventHandler;
+        mHoldToDragMinDurationMs = holdToDragMinDurationMs;
+        mTouchSlop = touchSlop;
     }
 
     /**
@@ -101,9 +108,26 @@ class DragDetector {
                 if (!mIsDragEvent) {
                     float dx = ev.getRawX(dragPointerIndex) - mInputDownPoint.x;
                     float dy = ev.getRawY(dragPointerIndex) - mInputDownPoint.y;
+                    final float dt = ev.getEventTime() - ev.getDownTime();
+                    final boolean pastTouchSlop = Math.hypot(dx, dy) > mTouchSlop;
+                    final boolean withinHoldRegion = !pastTouchSlop;
+
+                    if (mHoldToDragMinDurationMs <= 0) {
+                        mDidHoldForMinDuration = true;
+                    } else {
+                        if (!withinHoldRegion && dt < mHoldToDragMinDurationMs) {
+                            // Mark as having strayed so that in case the (x,y) ends up in the
+                            // original position we know it's not actually valid.
+                            mDidStrayBeforeFullHold = true;
+                        }
+                        if (!mDidStrayBeforeFullHold && dt >= mHoldToDragMinDurationMs) {
+                            mDidHoldForMinDuration = true;
+                        }
+                    }
+
                     // Touches generate noisy moves, so only once the move is past the touch
                     // slop threshold should it be considered a drag.
-                    mIsDragEvent = Math.hypot(dx, dy) > mTouchSlop;
+                    mIsDragEvent = mDidHoldForMinDuration && pastTouchSlop;
                 }
                 // The event handler should only be notified about 'move' events if a drag has been
                 // detected.
@@ -162,6 +186,8 @@ class DragDetector {
         mInputDownPoint.set(0, 0);
         mDragPointerId = -1;
         mResultOfDownAction = false;
+        mDidStrayBeforeFullHold = false;
+        mDidHoldForMinDuration = false;
     }
 
     interface MotionEventHandler {

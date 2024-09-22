@@ -18,9 +18,6 @@ package com.android.settingslib.media;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import android.content.Context;
 import android.media.AudioDeviceInfo;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -64,7 +61,7 @@ public class InputMediaDeviceTest {
                         CURRENT_VOLUME,
                         IS_VOLUME_FIXED);
         assertThat(builtinMediaDevice).isNotNull();
-        assertThat(builtinMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_tablet);
+        assertThat(builtinMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_microphone);
     }
 
     @Test

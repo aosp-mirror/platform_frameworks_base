@@ -107,6 +107,7 @@ static struct {
     jclass clazz;
     jmethodID notifyInputDevicesChanged;
     jmethodID notifyTouchpadHardwareState;
+    jmethodID notifyTouchpadGestureInfo;
     jmethodID notifySwitch;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyNoFocusedWindowAnr;
@@ -356,6 +357,7 @@ public:
     FloatPoint getMouseCursorPosition(ui::LogicalDisplayId displayId);
     void setStylusPointerIconEnabled(bool enabled);
     void setInputMethodConnectionIsActive(bool isActive);
+    void setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -363,6 +365,7 @@ public:
     void notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) override;
     void notifyTouchpadHardwareState(const SelfContainedHardwareState& schs,
                                      int32_t deviceId) override;
+    void notifyTouchpadGestureInfo(enum GestureType type, int32_t deviceId) override;
     std::shared_ptr<KeyCharacterMap> getKeyboardLayoutOverlay(
             const InputDeviceIdentifier& identifier,
             const std::optional<KeyboardLayoutInfo> keyboardLayoutInfo) override;
@@ -502,6 +505,9 @@ private:
 
         // True if there is an active input method connection.
         bool isInputMethodConnectionActive{false};
+
+        // Keycodes to be remapped.
+        std::map<int32_t /* fromKeyCode */, int32_t /* toKeyCode */> keyRemapping{};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -759,6 +765,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->stylusButtonMotionEventsEnabled = mLocked.stylusButtonMotionEventsEnabled;
 
         outConfig->stylusPointerIconEnabled = mLocked.stylusPointerIconEnabled;
+
+        outConfig->keyRemapping = mLocked.keyRemapping;
     } // release lock
 }
 
@@ -994,6 +1002,15 @@ void NativeInputManager::notifyTouchpadHardwareState(const SelfContainedHardware
     }
 
     checkAndClearExceptionFromCallback(env, "notifyTouchpadHardwareState");
+}
+
+void NativeInputManager::notifyTouchpadGestureInfo(enum GestureType type, int32_t deviceId) {
+    ATRACE_CALL();
+    JNIEnv* env = jniEnv();
+
+    env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyTouchpadGestureInfo, type, deviceId);
+
+    checkAndClearExceptionFromCallback(env, "notifyTouchpadGestureInfo");
 }
 
 std::shared_ptr<KeyCharacterMap> NativeInputManager::getKeyboardLayoutOverlay(
@@ -1797,9 +1814,30 @@ void NativeInputManager::loadAdditionalMouseResources(
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
 
-    for (int32_t iconId = static_cast<int32_t>(PointerIconStyle::TYPE_CONTEXT_MENU);
-         iconId <= static_cast<int32_t>(PointerIconStyle::TYPE_HANDWRITING); ++iconId) {
-        const PointerIconStyle pointerIconStyle = static_cast<PointerIconStyle>(iconId);
+    constexpr static std::array ADDITIONAL_STYLES{PointerIconStyle::TYPE_CONTEXT_MENU,
+                                                  PointerIconStyle::TYPE_HAND,
+                                                  PointerIconStyle::TYPE_HELP,
+                                                  PointerIconStyle::TYPE_WAIT,
+                                                  PointerIconStyle::TYPE_CELL,
+                                                  PointerIconStyle::TYPE_CROSSHAIR,
+                                                  PointerIconStyle::TYPE_TEXT,
+                                                  PointerIconStyle::TYPE_VERTICAL_TEXT,
+                                                  PointerIconStyle::TYPE_ALIAS,
+                                                  PointerIconStyle::TYPE_COPY,
+                                                  PointerIconStyle::TYPE_NO_DROP,
+                                                  PointerIconStyle::TYPE_ALL_SCROLL,
+                                                  PointerIconStyle::TYPE_HORIZONTAL_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_VERTICAL_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_TOP_RIGHT_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_TOP_LEFT_DOUBLE_ARROW,
+                                                  PointerIconStyle::TYPE_ZOOM_IN,
+                                                  PointerIconStyle::TYPE_ZOOM_OUT,
+                                                  PointerIconStyle::TYPE_GRAB,
+                                                  PointerIconStyle::TYPE_GRABBING,
+                                                  PointerIconStyle::TYPE_HANDWRITING,
+                                                  PointerIconStyle::TYPE_SPOT_HOVER};
+
+    for (const auto pointerIconStyle : ADDITIONAL_STYLES) {
         PointerIcon pointerIcon = loadPointerIcon(env, displayId, pointerIconStyle);
         (*outResources)[pointerIconStyle] = toSpriteIcon(pointerIcon);
         if (!pointerIcon.bitmapFrames.empty()) {
@@ -1878,6 +1916,16 @@ void NativeInputManager::setInputMethodConnectionIsActive(bool isActive) {
     mInputManager->getDispatcher().setInputMethodConnectionIsActive(isActive);
 }
 
+void NativeInputManager::setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+        mLocked.keyRemapping = keyRemapping;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::KEY_REMAPPING);
+}
+
 // ----------------------------------------------------------------------------
 
 static NativeInputManager* getNativeInputManager(JNIEnv* env, jobject clazz) {
@@ -1951,10 +1999,19 @@ static std::vector<int32_t> getIntArray(JNIEnv* env, jintArray arr) {
     return vec;
 }
 
-static void nativeAddKeyRemapping(JNIEnv* env, jobject nativeImplObj, jint deviceId,
-                                  jint fromKeyCode, jint toKeyCode) {
+static void nativeSetKeyRemapping(JNIEnv* env, jobject nativeImplObj, jintArray fromKeyCodesArr,
+                                  jintArray toKeyCodesArr) {
+    const std::vector<int32_t> fromKeycodes = getIntArray(env, fromKeyCodesArr);
+    const std::vector<int32_t> toKeycodes = getIntArray(env, toKeyCodesArr);
+    if (fromKeycodes.size() != toKeycodes.size()) {
+        jniThrowRuntimeException(env, "FromKeycodes and toKeycodes cannot match.");
+    }
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    im->getInputManager()->getReader().addKeyRemapping(deviceId, fromKeyCode, toKeyCode);
+    std::map<int32_t, int32_t> keyRemapping;
+    for (int i = 0; i < fromKeycodes.size(); i++) {
+        keyRemapping.insert_or_assign(fromKeycodes[i], toKeycodes[i]);
+    }
+    im->setKeyRemapping(keyRemapping);
 }
 
 static jboolean nativeHasKeys(JNIEnv* env, jobject nativeImplObj, jint deviceId, jint sourceMask,
@@ -2459,7 +2516,7 @@ static jobject nativeGetLights(JNIEnv* env, jobject nativeImplObj, jint deviceId
             jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
                                              gLightClassInfo.lightTypeKeyboardMicMute);
         } else {
-            ALOGW("Unknown light type %d", lightInfo.type);
+            ALOGW("Unknown light type %s", ftl::enum_string(lightInfo.type).c_str());
             continue;
         }
 
@@ -2693,12 +2750,13 @@ static void nativeSetMotionClassifierEnabled(JNIEnv* env, jobject nativeImplObj,
 }
 
 static void nativeSetKeyRepeatConfiguration(JNIEnv* env, jobject nativeImplObj, jint timeoutMs,
-                                            jint delayMs) {
+                                            jint delayMs, jboolean keyRepeatEnabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getDispatcher().setKeyRepeatConfiguration(std::chrono::milliseconds(
                                                                              timeoutMs),
                                                                      std::chrono::milliseconds(
-                                                                             delayMs));
+                                                                             delayMs),
+                                                                     keyRepeatEnabled);
 }
 
 static jobject createInputSensorInfo(JNIEnv* env, jstring name, jstring vendor, jint version,
@@ -2922,7 +2980,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"getScanCodeState", "(III)I", (void*)nativeGetScanCodeState},
         {"getKeyCodeState", "(III)I", (void*)nativeGetKeyCodeState},
         {"getSwitchState", "(III)I", (void*)nativeGetSwitchState},
-        {"addKeyRemapping", "(III)V", (void*)nativeAddKeyRemapping},
+        {"setKeyRemapping", "([I[I)V", (void*)nativeSetKeyRemapping},
         {"hasKeys", "(II[I[Z)Z", (void*)nativeHasKeys},
         {"getKeyCodeForKeyLocation", "(II)I", (void*)nativeGetKeyCodeForKeyLocation},
         {"createInputChannel", "(Ljava/lang/String;)Landroid/view/InputChannel;",
@@ -2997,7 +3055,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"setDisplayEligibilityForPointerCapture", "(IZ)V",
          (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"setMotionClassifierEnabled", "(Z)V", (void*)nativeSetMotionClassifierEnabled},
-        {"setKeyRepeatConfiguration", "(II)V", (void*)nativeSetKeyRepeatConfiguration},
+        {"setKeyRepeatConfiguration", "(IIZ)V", (void*)nativeSetKeyRepeatConfiguration},
         {"getSensorList", "(I)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},
         {"getTouchpadHardwareProperties",
@@ -3067,6 +3125,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyTouchpadHardwareState, clazz,
                   "notifyTouchpadHardwareState",
                   "(Lcom/android/server/input/TouchpadHardwareState;I)V")
+
+    GET_METHOD_ID(gServiceClassInfo.notifyTouchpadGestureInfo, clazz, "notifyTouchpadGestureInfo",
+                  "(II)V")
 
     GET_METHOD_ID(gServiceClassInfo.notifySwitch, clazz,
             "notifySwitch", "(JII)V");

@@ -21,6 +21,26 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Retention(
       value=Ljava/lang/annotation/RetentionPolicy;.CLASS
     )
+## Class: android/hosttest/annotation/HostSideTestIgnore.class
+  Compiled from "HostSideTestIgnore.java"
+public interface android.hosttest.annotation.HostSideTestIgnore extends java.lang.annotation.Annotation
+  minor version: 0
+  major version: 61
+  flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
+  this_class: #x                          // android/hosttest/annotation/HostSideTestIgnore
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+}
+SourceFile: "HostSideTestIgnore.java"
+RuntimeVisibleAnnotations:
+  x: #x(#x=[e#x.#x,e#x.#x])
+    java.lang.annotation.Target(
+      value=[Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
+    )
+  x: #x(#x=e#x.#x)
+    java.lang.annotation.Retention(
+      value=Ljava/lang/annotation/RetentionPolicy;.CLASS
+    )
 ## Class: android/hosttest/annotation/HostSideTestKeep.class
   Compiled from "HostSideTestKeep.java"
 public interface android.hosttest.annotation.HostSideTestKeep extends java.lang.annotation.Annotation
@@ -382,7 +402,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 2, methods: 8, attributes: 2
+  interfaces: 0, fields: 2, methods: 9, attributes: 2
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
@@ -522,6 +542,24 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestThrow
+
+  public int toBeIgnored();
+    descriptor: ()I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String not supported on host side
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkAnnotations;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestIgnore
 }
 SourceFile: "TinyFrameworkAnnotations.java"
 RuntimeInvisibleAnnotations:

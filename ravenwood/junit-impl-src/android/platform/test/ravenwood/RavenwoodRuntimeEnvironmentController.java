@@ -16,10 +16,10 @@
 
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_INST_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOURCE_APK;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
-
-import static org.junit.Assert.fail;
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
 
 import android.app.ActivityManager;
 import android.app.Instrumentation;
@@ -31,10 +31,14 @@ import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.os.RuntimeInit;
+import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
 import com.android.server.LocalServices;
@@ -114,6 +118,43 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static RavenwoodConfig sConfig;
+    private static boolean sInitialized = false;
+
+    /**
+     * Initialize the global environment.
+     */
+    public static void globalInitOnce() {
+        if (sInitialized) {
+            return;
+        }
+        sInitialized = true;
+
+        // We haven't initialized liblog yet, so directly write to System.out here.
+        RavenwoodCommonUtils.log(TAG, "globalInit()");
+
+        // Do the basic set up for the android sysprops.
+        setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
+
+        // Make sure libandroid_runtime is loaded.
+        RavenwoodNativeLoader.loadFrameworkNativeCode();
+
+        // Redirect stdout/stdin to liblog.
+        RuntimeInit.redirectLogStreams();
+
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            RavenwoodCommonUtils.log(TAG, "Force enabling verbose logging");
+            try {
+                Os.setenv("ANDROID_LOG_TAGS", "*:v", true);
+            } catch (ErrnoException e) {
+                // Shouldn't happen.
+            }
+        }
+
+        System.setProperty(RAVENWOOD_VERSION_JAVA_SYSPROP, "1");
+        // This will let AndroidJUnit4 use the original runner.
+        System.setProperty("android.junit.runner",
+                "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
+    }
 
     /**
      * Initialize the environment.
@@ -169,23 +210,21 @@ public class RavenwoodRuntimeEnvironmentController {
             var file = new File(RAVENWOOD_RESOURCE_APK);
             return config.mState.loadResources(file.exists() ? file : null);
         };
-        // Set up test context's resources.
+
+        // Set up test context's (== instrumentation context's) resources.
         // If the target package name == test package name, then we use the main resources.
-        // Otherwise, we don't simulate loading resources from the test APK yet.
-        // (we need to add `test_resource_apk` to `android_ravenwood_test`)
-        final Supplier<Resources> testResourcesLoader;
+        final Supplier<Resources> instResourcesLoader;
         if (isSelfInstrumenting) {
-            testResourcesLoader = targetResourcesLoader;
+            instResourcesLoader = targetResourcesLoader;
         } else {
-            testResourcesLoader = () -> {
-                fail("Cannot load resources from the test context (yet)."
-                        + " Use target context's resources instead.");
-                return null; // unreachable.
+            instResourcesLoader = () -> {
+                var file = new File(RAVENWOOD_INST_RESOURCE_APK);
+                return config.mState.loadResources(file.exists() ? file : null);
             };
         }
 
-        var testContext = new RavenwoodContext(
-                config.mTestPackageName, main, testResourcesLoader);
+        var instContext = new RavenwoodContext(
+                config.mTestPackageName, main, instResourcesLoader);
         var targetContext = new RavenwoodContext(
                 config.mTargetPackageName, main, targetResourcesLoader);
 
@@ -194,18 +233,18 @@ public class RavenwoodRuntimeEnvironmentController {
                 config.mTargetPackageName, main, targetResourcesLoader);
         appContext.setApplicationContext(appContext);
         if (isSelfInstrumenting) {
-            testContext.setApplicationContext(appContext);
+            instContext.setApplicationContext(appContext);
             targetContext.setApplicationContext(appContext);
         } else {
             // When instrumenting into another APK, the test context doesn't have an app context.
             targetContext.setApplicationContext(appContext);
         }
-        config.mTestContext = testContext;
+        config.mInstContext = instContext;
         config.mTargetContext = targetContext;
 
         // Prepare other fields.
         config.mInstrumentation = new Instrumentation();
-        config.mInstrumentation.basicInit(config.mTestContext, config.mTargetContext);
+        config.mInstrumentation.basicInit(config.mInstContext, config.mTargetContext);
         InstrumentationRegistry.registerInstance(config.mInstrumentation, Bundle.EMPTY);
 
         RavenwoodSystemServer.init(config);
@@ -242,13 +281,13 @@ public class RavenwoodRuntimeEnvironmentController {
 
         InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
         config.mInstrumentation = null;
-        if (config.mTestContext != null) {
-            ((RavenwoodContext) config.mTestContext).cleanUp();
+        if (config.mInstContext != null) {
+            ((RavenwoodContext) config.mInstContext).cleanUp();
         }
         if (config.mTargetContext != null) {
             ((RavenwoodContext) config.mTargetContext).cleanUp();
         }
-        config.mTestContext = null;
+        config.mInstContext = null;
         config.mTargetContext = null;
 
         if (config.mProvideMainThread) {

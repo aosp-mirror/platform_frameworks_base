@@ -14,22 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Copyright (C) 2024 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.android.systemui.keyguard.domain.interactor
 
 import android.os.PowerManager
@@ -47,7 +31,6 @@ import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -129,7 +112,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             transitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.DOZING,
-                testScope
+                testScope,
             )
             kosmos.fakeKeyguardRepository.setBiometricUnlockState(BiometricUnlockMode.NONE)
             reset(transitionRepository)
@@ -145,10 +128,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.LOCKSCREEN)
         }
 
     @Test
@@ -166,10 +146,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             // If dreaming is possible and communal is available, then we should transition to
             // GLANCEABLE_HUB when waking up due to power button press.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.GLANCEABLE_HUB)
         }
 
     @Test
@@ -186,8 +163,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
             // If dreaming is possible and communal is available, then we should transition to
             // GLANCEABLE_HUB when waking up due to power button press.
-            verify(kosmos.fakeCommunalSceneRepository)
-                .changeScene(CommunalScenes.Communal, CommunalTransitionKeys.Immediately)
+            verify(kosmos.fakeCommunalSceneRepository).snapToScene(CommunalScenes.Communal)
         }
 
     @Test
@@ -204,10 +180,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             // If dreaming is NOT possible but communal is available, then we should transition to
             // LOCKSCREEN when waking up due to power button press.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.LOCKSCREEN)
         }
 
     @Test
@@ -224,10 +197,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             // If dreaming is possible but communal is NOT available, then we should transition to
             // LOCKSCREEN when waking up due to power button press.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.LOCKSCREEN,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.LOCKSCREEN)
         }
 
     @Test
@@ -245,10 +215,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.GLANCEABLE_HUB)
         }
 
     @Test
@@ -261,10 +228,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
             // Waking with a SHOW_WHEN_LOCKED activity on top should transition to OCCLUDED.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.OCCLUDED,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.OCCLUDED)
         }
 
     @Test
@@ -282,10 +246,7 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
 
             // Waking with a SHOW_WHEN_LOCKED activity on top should transition to OCCLUDED.
             assertThat(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.DOZING,
-                    to = KeyguardState.OCCLUDED,
-                )
+                .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.OCCLUDED)
         }
 
     @Test
