@@ -123,6 +123,7 @@
     <string name="screenshot_text" msgid="1477704010087786671">"Snímek obrazovky"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Otevřít v prohlížeči"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nové okno"</string>
+    <string name="manage_windows_text" msgid="5567366688493093920">"Spravovat okna"</string>
     <string name="close_text" msgid="4986518933445178928">"Zavřít"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Zavřít nabídku"</string>
     <string name="expand_menu_text" msgid="3847736164494181168">"Otevřít nabídku"</string>

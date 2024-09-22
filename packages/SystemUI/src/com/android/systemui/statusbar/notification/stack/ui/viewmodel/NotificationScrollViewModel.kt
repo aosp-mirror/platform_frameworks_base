@@ -31,6 +31,7 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
@@ -56,6 +57,7 @@ constructor(
     dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
+    private val remoteInputInteractor: RemoteInputInteractor,
     private val sceneInteractor: SceneInteractor,
     // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
     // while the flag is off, creating this object too early results in a crash
@@ -239,6 +241,10 @@ constructor(
     /** Receives whether the current touch gesture is inside any open guts. */
     val currentGestureInGutsConsumer: (Boolean) -> Unit =
         stackAppearanceInteractor::setCurrentGestureInGuts
+
+    /** Receives the bottom bound of the currently focused remote input notification row. */
+    val remoteInputRowBottomBoundConsumer: (Float?) -> Unit =
+        remoteInputInteractor::setRemoteInputRowBottomBound
 
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =

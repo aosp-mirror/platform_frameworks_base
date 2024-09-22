@@ -6923,6 +6923,91 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(eventsRule.triggerDescription).isNotEmpty();
     }
 
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_withManualActivation_activeOnReboot()
+            throws Exception {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "manual-on", STATE_TRUE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(ruleId)).isEqualTo(STATE_TRUE);
+        ZenRule zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_ACTIVATE);
+        assertThat(zenRule.condition).isNull();
+
+        ByteArrayOutputStream xmlBytes = writeXmlAndPurge(ZenModeConfig.XML_VERSION_MODES_UI);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule).isNull();
+
+        // Now simulate a reboot -> reload the configuration after purging.
+        TypedXmlPullParser parser = getParserForByteStream(xmlBytes);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        if (Flags.modesUi()) {
+            assertThat(mZenModeHelper.getAutomaticZenRuleState(ruleId)).isEqualTo(STATE_TRUE);
+            zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+            assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_ACTIVATE);
+            assertThat(zenRule.condition).isNull();
+        } else {
+            assertThat(mZenModeHelper.getAutomaticZenRuleState(ruleId)).isEqualTo(STATE_FALSE);
+        }
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void setAutomaticZenRuleState_withManualDeactivation_clearedOnReboot()
+            throws Exception {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, rule, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "auto-on", STATE_TRUE, SOURCE_CONTEXT),
+                ORIGIN_APP, CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId,
+                new Condition(rule.getConditionId(), "snooze", STATE_FALSE, SOURCE_USER_ACTION),
+                ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(ruleId)).isEqualTo(STATE_FALSE);
+        ZenRule zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_DEACTIVATE);
+        assertThat(zenRule.condition).isNotNull();
+
+        ByteArrayOutputStream xmlBytes = writeXmlAndPurge(ZenModeConfig.XML_VERSION_MODES_UI);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule).isNull();
+
+        // Now simulate a reboot -> reload the configuration after purging.
+        TypedXmlPullParser parser = getParserForByteStream(xmlBytes);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(ruleId)).isEqualTo(STATE_TRUE);
+        zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
+        assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
+        assertThat(zenRule.condition).isNotNull();
+    }
+
+    @Test
+    @EnableFlags(FLAG_MODES_API)
+    public void addAutomaticZenRule_withoutPolicy_getsItsOwnInstanceOfDefaultPolicy() {
+        // Add a rule without policy -> uses default config
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mPkg, azr, ORIGIN_APP, "adding",
+                CUSTOM_PKG_UID);
+
+        ZenRule zenRule = checkNotNull(mZenModeHelper.mConfig.automaticRules.get(ruleId));
+
+        assertThat(zenRule.zenPolicy).isEqualTo(mZenModeHelper.getDefaultZenPolicy());
+        assertThat(zenRule.zenPolicy).isNotSameInstanceAs(mZenModeHelper.getDefaultZenPolicy());
+    }
+
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
             @Nullable ZenPolicy zenPolicy) {
         ZenRule rule = new ZenRule();

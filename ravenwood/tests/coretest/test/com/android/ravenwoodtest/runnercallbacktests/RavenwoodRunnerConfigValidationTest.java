@@ -146,7 +146,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunStarted: classes
     testSuiteStarted: classes
     testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$DuplicateConfigTest)
-    testFailure: Class com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.DuplicateConfigTest has multiple fields with @RavenwoodConfiguration.Config
+    testFailure: Class com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.DuplicateConfigTest has multiple fields with @RavenwoodConfig.Config
     testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$DuplicateConfigTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
@@ -220,7 +220,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     }
 
     /**
-     * @Config's must be of type RavenwoodConfiguration.
+     * @Config's must be of type RavenwoodConfig.
      */
     @RunWith(AndroidJUnit4.class)
     // CHECKSTYLE:OFF
@@ -228,7 +228,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunStarted: classes
     testSuiteStarted: classes
     testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeConfigTest)
-    testFailure: Field com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.WrongTypeConfigTest.sConfig has @RavenwoodConfiguration.Config but type is not RavenwoodConfiguration
+    testFailure: Field com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest.WrongTypeConfigTest.sConfig has @RavenwoodConfig.Config but type is not RavenwoodConfig
     testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeConfigTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
@@ -237,8 +237,36 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     public static class WrongTypeConfigTest {
 
         @RavenwoodConfig.Config
-        public Object sConfig =
+        public static Object sConfig =
                 new RavenwoodConfig.Builder().build();
+
+        @Test
+        public void testConfig() {
+        }
+
+    }
+
+    /**
+     * @Rule must be of type RavenwoodRule.
+     */
+    @RunWith(AndroidJUnit4.class)
+    // CHECKSTYLE:OFF
+    @Expected("""
+    testRunStarted: classes
+    testSuiteStarted: classes
+    testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest
+    testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest)
+    testFailure: If you have a RavenwoodRule in your test, make sure the field type is RavenwoodRule so Ravenwood can detect it.
+    testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest)
+    testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WrongTypeRuleTest
+    testSuiteFinished: classes
+    testRunFinished: 1,1,0,0
+    """)
+    // CHECKSTYLE:ON
+    public static class WrongTypeRuleTest {
+
+        @Rule
+        public TestRule mRule = new RavenwoodRule.Builder().build();
 
         @Test
         public void testConfig() {
@@ -255,7 +283,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunStarted: classes
     testSuiteStarted: classes
     testStarted: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithInstanceRuleTest)
-    testFailure: RavenwoodConfiguration and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfiguration.
+    testFailure: RavenwoodConfig and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfig.
     testFinished: testConfig(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$WithInstanceRuleTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
@@ -373,7 +401,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testRunStarted: classes
     testSuiteStarted: classes
     testStarted: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleInBaseClassTest)
-    testFailure: RavenwoodConfiguration and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfiguration.
+    testFailure: RavenwoodConfig and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfig.
     testFinished: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleInBaseClassTest)
     testSuiteFinished: classes
     testRunFinished: 1,1,0,0
@@ -408,10 +436,11 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testSuiteStarted: classes
     testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest
     testStarted: testRuleInBaseClass(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest)
+    testFailure: If you have a RavenwoodRule in your test, make sure the field type is RavenwoodRule so Ravenwood can detect it.
     testFinished: testRuleInBaseClass(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest)
     testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$RuleWithDifferentTypeInBaseClassSuccessTest
     testSuiteFinished: classes
-    testRunFinished: 1,0,0,0
+    testRunFinished: 1,1,0,0
     """)
     // CHECKSTYLE:ON
     public static class RuleWithDifferentTypeInBaseClassSuccessTest extends RuleWithDifferentTypeInBaseClass {
@@ -434,7 +463,7 @@ public class RavenwoodRunnerConfigValidationTest extends RavenwoodRunnerTestBase
     testSuiteStarted: classes
     testSuiteStarted: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest
     testStarted: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest)
-    testFailure: RavenwoodConfiguration and RavenwoodRule cannot be used in the same class. Suggest migrating to RavenwoodConfiguration.
+    testFailure: If you have a RavenwoodRule in your test, make sure the field type is RavenwoodRule so Ravenwood can detect it.
     testFinished: test(com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest)
     testSuiteFinished: com.android.ravenwoodtest.runnercallbacktests.RavenwoodRunnerConfigValidationTest$ConfigWithRuleWithDifferentTypeInBaseClassTest
     testSuiteFinished: classes

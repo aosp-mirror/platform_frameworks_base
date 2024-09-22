@@ -24,7 +24,6 @@ import com.android.systemui.Flags.communalSceneKtfRefactor
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
-import com.android.systemui.communal.shared.model.CommunalTransitionKeys
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -95,10 +94,7 @@ constructor(
         scope.launch {
             powerInteractor.isAwake
                 .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
-                .sample(
-                    keyguardInteractor.biometricUnlockState,
-                    ::Pair,
-                )
+                .sample(keyguardInteractor.biometricUnlockState, ::Pair)
                 .collect {
                     (
                         _,
@@ -203,21 +199,21 @@ constructor(
                             if (!SceneContainerFlag.isEnabled) {
                                 startTransitionTo(
                                     KeyguardState.GONE,
-                                    ownerReason = "waking from dozing"
+                                    ownerReason = "waking from dozing",
                                 )
                             }
                         } else if (primaryBouncerShowing) {
                             if (!SceneContainerFlag.isEnabled) {
                                 startTransitionTo(
                                     KeyguardState.PRIMARY_BOUNCER,
-                                    ownerReason = "waking from dozing"
+                                    ownerReason = "waking from dozing",
                                 )
                             }
                         } else if (isIdleOnCommunal && !communalSceneKtfRefactor()) {
                             if (!SceneContainerFlag.isEnabled) {
                                 startTransitionTo(
                                     KeyguardState.GLANCEABLE_HUB,
-                                    ownerReason = "waking from dozing"
+                                    ownerReason = "waking from dozing",
                                 )
                             }
                         } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
@@ -227,7 +223,7 @@ constructor(
                         } else {
                             startTransitionTo(
                                 KeyguardState.LOCKSCREEN,
-                                ownerReason = "waking from dozing"
+                                ownerReason = "waking from dozing",
                             )
                         }
                     }
@@ -237,11 +233,9 @@ constructor(
 
     private suspend fun transitionToGlanceableHub() {
         if (communalSceneKtfRefactor()) {
-            communalSceneInteractor.changeScene(
+            communalSceneInteractor.snapToScene(
                 newScene = CommunalScenes.Communal,
                 loggingReason = "from dozing to hub",
-                // Immediately show the hub when transitioning from dozing to hub.
-                transitionKey = CommunalTransitionKeys.Immediately,
             )
         } else {
             startTransitionTo(KeyguardState.GLANCEABLE_HUB)

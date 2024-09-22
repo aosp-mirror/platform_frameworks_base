@@ -61,6 +61,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.session.shared.SessionStorage
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.logger.SceneLogger
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
@@ -192,22 +193,16 @@ constructor(
                         // We are in a session if either Shade or QuickSettings is on the back stack
                         .map { backStack ->
                             backStack.asIterable().any {
+                                // TODO(b/356596436): Include overlays in the back stack as well.
                                 it == Scenes.Shade || it == Scenes.QuickSettings
                             }
                         }
                         .distinctUntilChanged(),
-                    sceneInteractor.transitionState
-                        .mapNotNull { state ->
-                            // We are also in a session if either Shade or QuickSettings is the
-                            // current scene
-                            when (state) {
-                                is ObservableTransitionState.Idle -> state.currentScene
-                                is ObservableTransitionState.Transition -> state.fromContent
-                            }.let { it == Scenes.Shade || it == Scenes.QuickSettings }
-                        }
-                        .distinctUntilChanged(),
-                ) { inBackStack, isCurrentScene ->
-                    inBackStack || isCurrentScene
+                    // We are also in a session if either Notifications Shade or QuickSettings Shade
+                    // is currently shown (whether idle or animating).
+                    shadeInteractor.isAnyExpanded,
+                ) { inBackStack, isShadeShown ->
+                    inBackStack || isShadeShown
                 }
                 // Once a session has ended, clear the session storage.
                 .filter { inSession -> !inSession }
@@ -228,8 +223,10 @@ constructor(
                                         is ObservableTransitionState.Idle -> {
                                             if (state.currentScene != Scenes.Gone) {
                                                 true to "scene is not Gone"
+                                            } else if (state.currentOverlays.isNotEmpty()) {
+                                                true to "overlay is shown"
                                             } else {
-                                                false to "scene is Gone"
+                                                false to "scene is Gone and no overlays are shown"
                                             }
                                         }
                                         is ObservableTransitionState.Transition -> {
@@ -712,19 +709,21 @@ constructor(
                     if (isDeviceLocked) {
                         sceneInteractor.transitionState
                             .mapNotNull { it as? ObservableTransitionState.Idle }
-                            .map { it.currentScene }
+                            .map { it.currentScene to it.currentOverlays }
                             .distinctUntilChanged()
-                            .map { sceneKey ->
-                                when (sceneKey) {
+                            .map { (sceneKey, currentOverlays) ->
+                                when {
                                     // When locked, showing the lockscreen scene should be reported
                                     // as "interacting" while showing other scenes should report as
                                     // "not interacting".
                                     //
                                     // This is done here in order to match the legacy
                                     // implementation. The real reason why is lost to lore and myth.
-                                    Scenes.Lockscreen -> true
-                                    Scenes.Bouncer -> false
-                                    Scenes.Shade -> false
+                                    Overlays.NotificationsShade in currentOverlays -> false
+                                    Overlays.QuickSettingsShade in currentOverlays -> null
+                                    sceneKey == Scenes.Lockscreen -> true
+                                    sceneKey == Scenes.Bouncer -> false
+                                    sceneKey == Scenes.Shade -> false
                                     else -> null
                                 }
                             }

@@ -22,6 +22,7 @@
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <inttypes.h>
 #include <log/log.h>
+#include <stats_annotations.h>
 #include <stats_event.h>
 #include <statslog_hwui.h>
 #include <sys/mman.h>
@@ -45,9 +46,9 @@ static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong"
 constexpr int sHistogramSize = ProfileData::HistogramSize();
 constexpr int sGPUHistogramSize = ProfileData::GPUHistogramSize();
 
-static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::string& package,
-                                      int64_t versionCode, int64_t startTime, int64_t endTime,
-                                      const ProfileData* data);
+static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, uid_t uid,
+                                      const std::string& package, int64_t versionCode,
+                                      int64_t startTime, int64_t endTime, const ProfileData* data);
 static void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
@@ -159,15 +160,16 @@ bool GraphicsStatsService::parseFromFile(const std::string& path,
     return success;
 }
 
-bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::string& package,
-                               int64_t versionCode, int64_t startTime, int64_t endTime,
-                               const ProfileData* data) {
+bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, uid_t uid,
+                               const std::string& package, int64_t versionCode, int64_t startTime,
+                               int64_t endTime, const ProfileData* data) {
     if (proto->stats_start() == 0 || proto->stats_start() > startTime) {
         proto->set_stats_start(startTime);
     }
     if (proto->stats_end() == 0 || proto->stats_end() < endTime) {
         proto->set_stats_end(endTime);
     }
+    proto->set_uid(static_cast<int32_t>(uid));
     proto->set_package_name(package);
     proto->set_version_code(versionCode);
     proto->set_pipeline(data->pipelineType() == RenderPipelineType::SkiaGL ?
@@ -286,6 +288,7 @@ void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int fd) {
               proto->package_name().c_str(), proto->has_summary());
         return;
     }
+    dprintf(fd, "\nUID: %d", proto->uid());
     dprintf(fd, "\nPackage: %s", proto->package_name().c_str());
     dprintf(fd, "\nVersion: %" PRId64, proto->version_code());
     dprintf(fd, "\nStats since: %" PRId64 "ns", proto->stats_start());
@@ -319,14 +322,15 @@ void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int fd) {
     dprintf(fd, "\n");
 }
 
-void GraphicsStatsService::saveBuffer(const std::string& path, const std::string& package,
-                                      int64_t versionCode, int64_t startTime, int64_t endTime,
-                                      const ProfileData* data) {
+void GraphicsStatsService::saveBuffer(const std::string& path, uid_t uid,
+                                      const std::string& package, int64_t versionCode,
+                                      int64_t startTime, int64_t endTime, const ProfileData* data) {
     protos::GraphicsStatsProto statsProto;
     if (!parseFromFile(path, &statsProto)) {
         statsProto.Clear();
     }
-    if (!mergeProfileDataIntoProto(&statsProto, package, versionCode, startTime, endTime, data)) {
+    if (!mergeProfileDataIntoProto(&statsProto, uid, package, versionCode, startTime, endTime,
+                                   data)) {
         return;
     }
     // Although we might not have read any data from the file, merging the existing data
@@ -383,7 +387,7 @@ public:
 
 private:
     // use package name and app version for a key
-    typedef std::pair<std::string, int64_t> DumpKey;
+    typedef std::tuple<uid_t, std::string, int64_t> DumpKey;
 
     std::map<DumpKey, protos::GraphicsStatsProto> mStats;
     int mFd;
@@ -392,7 +396,8 @@ private:
 };
 
 void GraphicsStatsService::Dump::mergeStat(const protos::GraphicsStatsProto& stat) {
-    auto dumpKey = std::make_pair(stat.package_name(), stat.version_code());
+    auto dumpKey = std::make_tuple(static_cast<uid_t>(stat.uid()), stat.package_name(),
+                                   stat.version_code());
     auto findIt = mStats.find(dumpKey);
     if (findIt == mStats.end()) {
         mStats[dumpKey] = stat;
@@ -437,15 +442,15 @@ GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType
     return new Dump(outFd, type);
 }
 
-void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
+void GraphicsStatsService::addToDump(Dump* dump, const std::string& path, uid_t uid,
                                      const std::string& package, int64_t versionCode,
                                      int64_t startTime, int64_t endTime, const ProfileData* data) {
     protos::GraphicsStatsProto statsProto;
     if (!path.empty() && !parseFromFile(path, &statsProto)) {
         statsProto.Clear();
     }
-    if (data &&
-        !mergeProfileDataIntoProto(&statsProto, package, versionCode, startTime, endTime, data)) {
+    if (data && !mergeProfileDataIntoProto(&statsProto, uid, package, versionCode, startTime,
+                                           endTime, data)) {
         return;
     }
     if (!statsProto.IsInitialized()) {
@@ -556,6 +561,8 @@ void GraphicsStatsService::finishDumpInMemory(Dump* dump, AStatsEventList* data,
         // TODO: fill in UI mainline module version, when the feature is available.
         AStatsEvent_writeInt64(event, (int64_t)0);
         AStatsEvent_writeBool(event, !lastFullDay);
+        AStatsEvent_writeInt32(event, stat.uid());
+        AStatsEvent_addBoolAnnotation(event, ASTATSLOG_ANNOTATION_ID_IS_UID, true);
         AStatsEvent_build(event);
     }
     delete dump;

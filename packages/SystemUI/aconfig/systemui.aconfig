@@ -149,6 +149,16 @@ flag {
 }
 
 flag {
+   name: "modes_dialog_single_rows"
+   namespace: "systemui"
+   description: "[Experiment] Display one entry per grid row in the Modes Dialog."
+   bug: "366034002"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
@@ -528,6 +538,13 @@ flag {
 }
 
 flag {
+  name: "status_bar_connected_displays"
+  namespace: "systemui"
+  description: "Shows the status bar on connected displays"
+  bug: "362720336"
+}
+
+flag {
     name: "status_bar_switch_to_spn_from_data_spn"
     namespace: "systemui"
     description: "Fix usage of the SPN broadcast extras"
@@ -538,10 +555,10 @@ flag {
 }
 
 flag {
-    name: "haptic_volume_slider"
+    name: "status_bar_simple_fragment"
     namespace: "systemui"
-    description: "Adds haptic feedback to the volume slider."
-    bug: "316953430"
+    description: "Feature flag for refactoring the collapsed status bar fragment"
+    bug: "364360986"
 }
 
 flag {
@@ -665,13 +682,6 @@ flag {
     namespace: "systemui"
     description: "Enables refactored logic for SysUI+WM unlock/occlusion code paths"
     bug: "278086361"
-}
-
-flag {
-   name: "compose_lockscreen"
-   namespace: "systemui"
-   description: "Enables the compose version of lockscreen that runs standalone, outside of Flexiglass."
-   bug: "301968149"
 }
 
 flag {
@@ -1053,6 +1063,13 @@ flag {
 }
 
 flag {
+  name: "communal_widget_resizing"
+  namespace: "systemui"
+  description: "Allow resizing of widgets on glanceable hub"
+  bug: "368053818"
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
@@ -1313,6 +1330,16 @@ flag {
 }
 
 flag {
+   name: "sim_pin_bouncer_reset"
+   namespace: "systemui"
+   description: "The SIM PIN bouncer does not close after unlocking"
+   bug: "297461589"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "use_transitions_for_keyguard_occluded"
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"
@@ -1394,4 +1421,14 @@ flag {
    namespace: "systemui"
    description: "Allow non-touchscreen devices to bypass falsing"
    bug: "319809270"
+}
+
+flag {
+   name: "media_projection_dialog_behind_lockscreen"
+   namespace: "systemui"
+   description: "Ensure MediaProjection Dialog appears behind the lockscreen"
+   bug: "351409536"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
 }

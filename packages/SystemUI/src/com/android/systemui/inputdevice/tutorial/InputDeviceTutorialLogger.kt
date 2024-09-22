@@ -16,27 +16,27 @@
 
 package com.android.systemui.inputdevice.tutorial
 
+import com.android.systemui.inputdevice.tutorial.domain.interactor.ConnectionState
+import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen as KeyboardTouchpadTutorialScreen
+import com.android.systemui.log.ConstantStringsLogger
+import com.android.systemui.log.ConstantStringsLoggerImpl
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
+import com.android.systemui.log.core.MessageInitializer
+import com.android.systemui.log.core.MessagePrinter
 import com.android.systemui.log.dagger.InputDeviceTutorialLog
-import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen
-import com.google.errorprone.annotations.CompileTimeConstant
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen as TouchpadTutorialScreen
 import javax.inject.Inject
 
 private const val TAG = "InputDeviceTutorial"
 
 class InputDeviceTutorialLogger
 @Inject
-constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) {
+constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) :
+    ConstantStringsLogger by ConstantStringsLoggerImpl(buffer, TAG) {
 
-    fun log(@CompileTimeConstant s: String) {
-        buffer.log(TAG, LogLevel.INFO, message = s)
-    }
-
-    fun logGoingToScreen(screen: Screen, context: TutorialContext) {
-        buffer.log(
-            TAG,
-            LogLevel.INFO,
+    fun logGoingToScreen(screen: TouchpadTutorialScreen, context: TutorialContext) {
+        logInfo(
             {
                 str1 = screen.toString()
                 str2 = context.string
@@ -46,7 +46,58 @@ constructor(@InputDeviceTutorialLog private val buffer: LogBuffer) {
     }
 
     fun logCloseTutorial(context: TutorialContext) {
-        buffer.log(TAG, LogLevel.INFO, { str1 = context.string }, { "Closing $str1" })
+        logInfo({ str1 = context.string }, { "Closing $str1" })
+    }
+
+    fun logOpenTutorial(context: TutorialContext) {
+        logInfo({ str1 = context.string }, { "Opening $str1" })
+    }
+
+    fun logNextScreenMissingHardware(nextScreen: KeyboardTouchpadTutorialScreen) {
+        buffer.log(
+            TAG,
+            LogLevel.WARNING,
+            { str1 = nextScreen.toString() },
+            { "next screen should be $str1 but required hardware is missing" }
+        )
+    }
+
+    fun logNextScreen(nextScreen: KeyboardTouchpadTutorialScreen) {
+        logInfo({ str1 = nextScreen.toString() }, { "going to $str1 screen" })
+    }
+
+    fun logNewConnectionState(connectionState: ConnectionState) {
+        logInfo(
+            {
+                bool1 = connectionState.touchpadConnected
+                bool2 = connectionState.keyboardConnected
+            },
+            { "Received connection state: touchpad connected: $bool1 keyboard connected: $bool2" }
+        )
+    }
+
+    fun logMovingBetweenScreens(
+        previousScreen: KeyboardTouchpadTutorialScreen?,
+        currentScreen: KeyboardTouchpadTutorialScreen
+    ) {
+        logInfo(
+            {
+                str1 = previousScreen?.toString() ?: "NO_SCREEN"
+                str2 = currentScreen.toString()
+            },
+            { "Moving from $str1 screen to $str2 screen" }
+        )
+    }
+
+    fun logGoingBack(previousScreen: KeyboardTouchpadTutorialScreen) {
+        logInfo({ str1 = previousScreen.toString() }, { "Going back to $str1 screen" })
+    }
+
+    private inline fun logInfo(
+        messageInitializer: MessageInitializer,
+        noinline messagePrinter: MessagePrinter
+    ) {
+        buffer.log(TAG, LogLevel.INFO, messageInitializer, messagePrinter)
     }
 
     enum class TutorialContext(val string: String) {

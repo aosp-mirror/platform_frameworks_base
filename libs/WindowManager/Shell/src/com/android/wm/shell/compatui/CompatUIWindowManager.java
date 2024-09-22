@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.window.flags.Flags;
@@ -37,7 +38,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import com.android.wm.shell.compatui.api.CompatUIEvent;
 import com.android.wm.shell.compatui.impl.CompatUIEvents.SizeCompatRestartButtonAppeared;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 import java.util.function.Consumer;
@@ -83,7 +83,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         mCallback = callback;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
         if (DesktopModeStatus.canEnterDesktopMode(context)
-                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(context)) {
+                && DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }
@@ -139,7 +139,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         mHasSizeCompat = taskInfo.appCompatTaskInfo.isTopActivityInSizeCompat();
         if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                && DesktopModeFlags.DYNAMIC_INITIAL_BOUNDS.isEnabled(mContext)) {
+                && DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             // Don't show the SCM button for freeform tasks
             mHasSizeCompat &= !taskInfo.isFreeform();
         }

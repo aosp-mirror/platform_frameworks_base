@@ -35,7 +35,6 @@ import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.res.R
 import com.android.systemui.util.animation.MeasurementInput
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 object MediaCarousel {
     object Elements {
@@ -47,7 +46,6 @@ object MediaCarousel {
     }
 }
 
-@ExperimentalCoroutinesApi
 @Composable
 fun SceneScope.MediaCarousel(
     isVisible: Boolean,
@@ -79,7 +77,7 @@ fun SceneScope.MediaCarousel(
                                         offsetProvider?.invoke() ?: IntOffset.Zero
                                     )
                                 }
-                            }
+                            },
                         )
                         .layout { measurable, constraints ->
                             val placeable = measurable.measure(constraints)
@@ -89,7 +87,7 @@ fun SceneScope.MediaCarousel(
                                 MeasurementInput(placeable.width, placeable.height)
                             carouselController.setSceneContainerSize(
                                 placeable.width,
-                                placeable.height
+                                placeable.height,
                             )
 
                             layout(placeable.width, placeable.height) {
@@ -106,7 +104,7 @@ fun SceneScope.MediaCarousel(
                     }
                 },
                 update = { it.setView(carouselController.mediaFrame) },
-                onRelease = { it.removeAllViews() }
+                onRelease = { it.removeAllViews() },
             )
         }
     }

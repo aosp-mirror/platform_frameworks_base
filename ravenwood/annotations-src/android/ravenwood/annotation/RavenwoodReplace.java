@@ -42,4 +42,9 @@ public @interface RavenwoodReplace {
      * General free-form description of why this method is being replaced.
      */
     String reason() default "";
+
+    /**
+     * Tracking bug number, if any.
+     */
+    long bug() default 0;
 }

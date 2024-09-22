@@ -18,6 +18,7 @@
 
 package com.android.systemui.shade.ui.composable
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -39,17 +40,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.systemui.scene.shared.model.Scenes
 
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
@@ -58,6 +62,13 @@ fun SceneScope.OverlayShade(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    val view = LocalView.current
+    LaunchedEffect(Unit) {
+        if (layoutState.currentTransition?.fromContent == Scenes.Gone) {
+            view.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+        }
+    }
+
     Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 
@@ -141,14 +152,17 @@ private fun Modifier.panelPadding(): Modifier {
 /** Creates a union of [paddingValues] by using the max padding of each edge. */
 @Composable
 private fun combinePaddings(vararg paddingValues: PaddingValues): PaddingValues {
-    val layoutDirection = LocalLayoutDirection.current
-
-    return PaddingValues(
-        start = paddingValues.maxOfOrNull { it.calculateStartPadding(layoutDirection) } ?: 0.dp,
-        top = paddingValues.maxOfOrNull { it.calculateTopPadding() } ?: 0.dp,
-        end = paddingValues.maxOfOrNull { it.calculateEndPadding(layoutDirection) } ?: 0.dp,
-        bottom = paddingValues.maxOfOrNull { it.calculateBottomPadding() } ?: 0.dp,
-    )
+    return if (paddingValues.isEmpty()) {
+        PaddingValues(0.dp)
+    } else {
+        val layoutDirection = LocalLayoutDirection.current
+        PaddingValues(
+            start = paddingValues.maxOf { it.calculateStartPadding(layoutDirection) },
+            top = paddingValues.maxOf { it.calculateTopPadding() },
+            end = paddingValues.maxOf { it.calculateEndPadding(layoutDirection) },
+            bottom = paddingValues.maxOf { it.calculateBottomPadding() },
+        )
+    }
 }
 
 object OverlayShade {

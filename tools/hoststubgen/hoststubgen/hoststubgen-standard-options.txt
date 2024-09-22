@@ -24,6 +24,9 @@
 --remove-annotation
     android.hosttest.annotation.HostSideTestRemove
 
+--ignore-annotation
+    android.hosttest.annotation.HostSideTestIgnore
+
 --substitute-annotation
     android.hosttest.annotation.HostSideTestSubstitute
 

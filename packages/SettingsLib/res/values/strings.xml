@@ -1409,6 +1409,8 @@
     <string name="media_transfer_this_device_name">This phone</string>
     <!-- Name of the tablet device. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_tablet">This tablet</string>
+    <!-- Name of the internal speaker. [CHAR LIMIT=30] -->
+    <string name="media_transfer_this_device_name_desktop">This computer (internal)</string>
     <!-- Name of the default media output of the TV. [CHAR LIMIT=30] -->
     <string name="media_transfer_this_device_name_tv">@string/tv_media_transfer_default</string>
     <!-- Name of the internal mic. [CHAR LIMIT=30] -->
@@ -1637,7 +1639,13 @@
     <string name="cached_apps_freezer_reboot_dialog_text">Your device must be rebooted for this change to apply. Reboot now or cancel.</string>
 
     <!-- Name of the 3.5mm and usb audio device. [CHAR LIMIT=50] -->
-    <string name="media_transfer_wired_usb_device_name">Wired headphone</string>
+    <string name="media_transfer_wired_headphone_name">Wired headphone</string>
+
+    <!-- Name of the 3.5mm headphone, used in desktop devices. [CHAR LIMIT=50] -->
+    <string name="media_transfer_headphone_name">Headphone</string>
+
+    <!-- Name of the usb audio device speaker, used in desktop devices. [CHAR LIMIT=50] -->
+    <string name="media_transfer_usb_speaker_name">USB speaker</string>
 
     <!-- Name of the 3.5mm audio device mic. [CHAR LIMIT=50] -->
     <string name="media_transfer_wired_device_mic_name">Mic jack</string>

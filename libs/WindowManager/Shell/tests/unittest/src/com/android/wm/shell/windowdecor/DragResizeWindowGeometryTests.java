@@ -128,7 +128,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
     @Test
     public void testRegionUnionContainsEdges() {
         Region region = new Region();
-        GEOMETRY.union(mContext, region);
+        GEOMETRY.union(region);
         assertThat(region.isComplex()).isTrue();
         // Region excludes task area. Note that coordinates start from top left.
         assertThat(region.contains(TASK_SIZE.getWidth() / 2, TASK_SIZE.getHeight() / 2)).isFalse();
@@ -168,7 +168,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testRegionUnion_edgeDragResizeEnabled_containsLargeCorners() {
         Region region = new Region();
-        GEOMETRY.union(mContext, region);
+        GEOMETRY.union(region);
         final int cornerRadius = LARGE_CORNER_SIZE / 2;
 
         new TestPoints(mContext, TASK_SIZE, cornerRadius).validateRegion(region);
@@ -182,7 +182,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
     @DisableFlags(Flags.FLAG_ENABLE_WINDOWING_EDGE_DRAG_RESIZE)
     public void testRegionUnion_edgeDragResizeDisabled_containsFineCorners() {
         Region region = new Region();
-        GEOMETRY.union(mContext, region);
+        GEOMETRY.union(region);
         final int cornerRadius = FINE_CORNER_SIZE / 2;
 
         new TestPoints(mContext, TASK_SIZE, cornerRadius).validateRegion(region);
@@ -215,7 +215,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
                 CTRL_TYPE_BOTTOM);
 
         for (int i = 0; i < points.size(); i++) {
-            assertThat(GEOMETRY.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(GEOMETRY.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     points.get(i).x, points.get(i).y)).isEqualTo(
                     isEdgeResizePermitted ? expectedCtrlType.get(i) : CTRL_TYPE_UNDEFINED);
         }
@@ -366,17 +366,17 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
         public void validateCtrlTypeForInnerPoints(@NonNull DragResizeWindowGeometry geometry,
                 boolean isTouchscreen, boolean isEdgeResizePermitted,
                 boolean expectedWithinGeometry) {
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mTopLeftPoint.x, mTopLeftPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mTopRightPoint.x, mTopRightPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mBottomLeftPoint.x, mBottomLeftPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mBottomRightPoint.x, mBottomRightPoint.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);
@@ -389,17 +389,17 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
         public void validateCtrlTypeForOutsidePoints(@NonNull DragResizeWindowGeometry geometry,
                 boolean isTouchscreen, boolean isEdgeResizePermitted,
                 boolean expectedWithinGeometry) {
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mTopLeftPointOutside.x, mTopLeftPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mTopRightPointOutside.x, mTopRightPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_TOP : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mBottomLeftPointOutside.x, mBottomLeftPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);
-            assertThat(geometry.calculateCtrlType(mContext, isTouchscreen, isEdgeResizePermitted,
+            assertThat(geometry.calculateCtrlType(isTouchscreen, isEdgeResizePermitted,
                     mBottomRightPointOutside.x, mBottomRightPointOutside.y)).isEqualTo(
                     expectedWithinGeometry ? CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM
                             : CTRL_TYPE_UNDEFINED);

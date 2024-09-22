@@ -62,7 +62,7 @@ private fun BackAction(contentDescription: String, onClick: () -> Unit) {
             modifier = if (isSpaExpressiveEnabled) Modifier
                 .size(SettingsDimension.actionIconWidth, SettingsDimension.actionIconHeight)
                 .clip(SettingsShape.CornerExtraLarge)
-                .background(MaterialTheme.colorScheme.onSurfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .padding(SettingsDimension.actionIconPadding) else Modifier
         )
     }

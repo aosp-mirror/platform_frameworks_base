@@ -81,50 +81,59 @@ constructor(
     val selectedUserId: StateFlow<Int> = _selectedUserId.asStateFlow()
 
     private val requests = Channel<Request>(Channel.BUFFERED)
+    private var wasSuccessfullyAuthenticated = false
 
     override suspend fun onActivated(): Nothing {
-        coroutineScope {
-            launch { super.onActivated() }
-            launch {
-                requests.receiveAsFlow().collect { request ->
-                    when (request) {
-                        is OnImeSwitcherButtonClicked -> {
-                            inputMethodInteractor.showInputMethodPicker(
-                                displayId = request.displayId,
-                                showAuxiliarySubtypes = false,
-                            )
-                        }
-                        is OnImeDismissed -> {
-                            interactor.onImeHiddenByUser()
+        try {
+            coroutineScope {
+                launch { super.onActivated() }
+                launch {
+                    requests.receiveAsFlow().collect { request ->
+                        when (request) {
+                            is OnImeSwitcherButtonClicked -> {
+                                inputMethodInteractor.showInputMethodPicker(
+                                    displayId = request.displayId,
+                                    showAuxiliarySubtypes = false,
+                                )
+                            }
+                            is OnImeDismissed -> {
+                                interactor.onImeHiddenByUser()
+                            }
                         }
                     }
                 }
+                launch {
+                    combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus ->
+                            hasInput && !hasFocus && !wasSuccessfullyAuthenticated
+                        }
+                        .collect { _isTextFieldFocusRequested.value = it }
+                }
+                launch {
+                    selectedUserInteractor.selectedUser.collect { _selectedUserId.value = it }
+                }
+                launch {
+                    // Re-fetch the currently-enabled IMEs whenever the selected user changes, and
+                    // whenever
+                    // the UI subscribes to the `isImeSwitcherButtonVisible` flow.
+                    combine(
+                            // InputMethodManagerService sometimes takes
+                            // some time to update its internal state when the
+                            // selected user changes.
+                            // As a workaround, delay fetching the IME info.
+                            selectedUserInteractor.selectedUser.onEach {
+                                delay(DELAY_TO_FETCH_IMES)
+                            },
+                            _isImeSwitcherButtonVisible.onSubscriberAdded(),
+                        ) { selectedUserId, _ ->
+                            inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(selectedUserId)
+                        }
+                        .collect { _isImeSwitcherButtonVisible.value = it }
+                }
+                awaitCancellation()
             }
-            launch {
-                combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus ->
-                        hasInput && !hasFocus
-                    }
-                    .collect { _isTextFieldFocusRequested.value = it }
-            }
-            launch { selectedUserInteractor.selectedUser.collect { _selectedUserId.value = it } }
-            launch {
-                // Re-fetch the currently-enabled IMEs whenever the selected user changes, and
-                // whenever
-                // the UI subscribes to the `isImeSwitcherButtonVisible` flow.
-                combine(
-                        // InputMethodManagerService sometimes takes some time to update its
-                        // internal
-                        // state when the selected user changes. As a workaround, delay fetching the
-                        // IME
-                        // info.
-                        selectedUserInteractor.selectedUser.onEach { delay(DELAY_TO_FETCH_IMES) },
-                        _isImeSwitcherButtonVisible.onSubscriberAdded()
-                    ) { selectedUserId, _ ->
-                        inputMethodInteractor.hasMultipleEnabledImesOrSubtypes(selectedUserId)
-                    }
-                    .collect { _isImeSwitcherButtonVisible.value = it }
-            }
-            awaitCancellation()
+        } finally {
+            // reset whenever the view model is "deactivated"
+            wasSuccessfullyAuthenticated = false
         }
     }
 
@@ -139,6 +148,10 @@ constructor(
 
     override fun getInput(): List<Any> {
         return _password.value.toCharArray().toList()
+    }
+
+    override fun onSuccessfulAuthentication() {
+        wasSuccessfullyAuthenticated = true
     }
 
     /** Notifies that the user has changed the password input. */

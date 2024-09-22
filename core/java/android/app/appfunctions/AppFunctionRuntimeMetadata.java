@@ -164,7 +164,13 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
      */
     @Nullable
     public Boolean getEnabled() {
-        return (Boolean) getProperty(PROPERTY_ENABLED);
+        // We can't use getPropertyBoolean here. getPropertyBoolean returns false instead of null
+        // if the value is missing.
+        boolean[] enabled = getPropertyBooleanArray(PROPERTY_ENABLED);
+        if (enabled == null || enabled.length == 0) {
+            return null;
+        }
+        return enabled[0];
     }
 
     /** Returns the qualified id linking to the static metadata of the app function. */
@@ -180,13 +186,8 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
          *
          * @param packageName the name of the package that owns the function.
          * @param functionId the id of the function.
-         * @param staticMetadataQualifiedId the qualified static metadata id that this runtime
-         *     metadata refers to.
          */
-        public Builder(
-                @NonNull String packageName,
-                @NonNull String functionId,
-                @NonNull String staticMetadataQualifiedId) {
+        public Builder(@NonNull String packageName, @NonNull String functionId) {
             super(
                     APP_FUNCTION_RUNTIME_NAMESPACE,
                     getDocumentIdForAppFunction(
@@ -198,17 +199,24 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
 
             // Set qualified id automatically
             setPropertyString(
-                    PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID, staticMetadataQualifiedId);
+                    PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID,
+                    AppFunctionStaticMetadataHelper.getStaticMetadataQualifiedId(
+                            packageName, functionId));
         }
 
         /**
          * Sets an indicator specifying if the function is enabled or not. This would override the
          * default enabled state in the static metadata ({@link
-         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}).
+         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to
+         * null to clear the override.
          */
         @NonNull
-        public Builder setEnabled(boolean enabled) {
-            setPropertyBoolean(PROPERTY_ENABLED, enabled);
+        public Builder setEnabled(@Nullable Boolean enabled) {
+            if (enabled == null) {
+                setPropertyBoolean(PROPERTY_ENABLED);
+            } else {
+                setPropertyBoolean(PROPERTY_ENABLED, enabled);
+            }
             return this;
         }
 

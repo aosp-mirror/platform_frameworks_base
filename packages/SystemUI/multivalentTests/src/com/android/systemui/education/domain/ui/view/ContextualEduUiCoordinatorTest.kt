@@ -37,6 +37,7 @@ import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -69,6 +70,11 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        testScope.launch {
+            interactor.updateKeyboardFirstConnectionTime()
+            interactor.updateTouchpadFirstConnectionTime()
+        }
+
         val viewModel =
             ContextualEduViewModel(
                 kosmos.applicationContext.resources,

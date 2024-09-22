@@ -166,6 +166,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             options.keepClassAnnotations,
             options.throwAnnotations,
             options.removeAnnotations,
+            options.ignoreAnnotations,
             options.substituteAnnotations,
             options.redirectAnnotations,
             options.redirectionClassAnnotations,

@@ -27,8 +27,7 @@ android_ravenwood_test {
         "junit",
         "truth",
     ],
-    // TODO(b/366246777) uncomment it and the test.
-    // resource_apk: "RavenwoodBivalentInstTest_self_inst_device",
+    resource_apk: "RavenwoodBivalentInstTest_self_inst_device",
     auto_gen_config: true,
 }
 
@@ -53,8 +52,8 @@ android_ravenwood_test {
         "junit",
         "truth",
     ],
-    // TODO(b/366246777) uncomment it and the test.
-    // resource_apk: "RavenwoodBivalentInstTestTarget",
+    resource_apk: "RavenwoodBivalentInstTestTarget",
+    inst_resource_apk: "RavenwoodBivalentInstTest_nonself_inst_device",
     auto_gen_config: true,
 }
 

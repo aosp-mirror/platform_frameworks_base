@@ -62,6 +62,7 @@ import static com.android.server.am.ProcessList.PERSISTENT_SERVICE_ADJ;
 import static com.android.server.am.ProcessList.PREVIOUS_APP_ADJ;
 import static com.android.server.am.ProcessList.SCHED_GROUP_BACKGROUND;
 import static com.android.server.am.ProcessList.SCHED_GROUP_DEFAULT;
+import static com.android.server.am.ProcessList.SCHED_GROUP_FOREGROUND_WINDOW;
 import static com.android.server.am.ProcessList.SCHED_GROUP_RESTRICTED;
 import static com.android.server.am.ProcessList.SCHED_GROUP_TOP_APP;
 import static com.android.server.am.ProcessList.SCHED_GROUP_TOP_APP_BOUND;
@@ -228,8 +229,10 @@ public class MockingOomAdjusterTests {
         doCallRealMethod().when(mService).enqueueOomAdjTargetLocked(any(ProcessRecord.class));
         doCallRealMethod().when(mService).updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_ACTIVITY);
         setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
-        doReturn(new ActivityManagerService.ProcessChangeItem()).when(pr)
-                .enqueueProcessChangeItemLocked(anyInt(), anyInt());
+        doNothing().when(pr).enqueueProcessChangeItemLocked(anyInt(), anyInt(), anyInt(),
+                anyInt());
+        doNothing().when(pr).enqueueProcessChangeItemLocked(anyInt(), anyInt(), anyInt(),
+                anyBoolean());
         mService.mOomAdjuster = mService.mConstants.ENABLE_NEW_OOMADJ
                 ? new OomAdjusterModernImpl(mService, mService.mProcessList,
                         new ActiveUids(mService, false), mInjector)
@@ -534,6 +537,14 @@ public class MockingOomAdjusterTests {
         updateOomAdj(app);
         assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
         assertEquals("perceptible-freeform-activity", app.mState.getAdjType());
+
+        doReturn(WindowProcessController.ACTIVITY_STATE_FLAG_IS_VISIBLE
+                | WindowProcessController.ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE)
+                .when(wpc).getActivityStateFlags();
+        updateOomAdj(app);
+        assertProcStates(app, PROCESS_STATE_TOP, VISIBLE_APP_ADJ,
+                SCHED_GROUP_FOREGROUND_WINDOW);
+        assertEquals("vis-multi-window-activity", app.mState.getAdjType());
     }
 
     @SuppressWarnings("GuardedBy")

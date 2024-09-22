@@ -48,6 +48,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         tapl.workspace.switchToOverview().dismissAllTasks()
 
+        tapl.setExpectedRotationCheckEnabled(false)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
 

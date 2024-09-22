@@ -2465,6 +2465,7 @@ public class GroupHelperTest extends UiServiceTestCase {
         final String pkg = "package";
         final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
             AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        String expectedTriggeringKey = null;
         // Post singleton groups, above forced group limit
         for (int i = 0; i < AUTOGROUP_SINGLETONS_AT_COUNT; i++) {
             NotificationRecord summary = getNotificationRecord(pkg, i,
@@ -2473,15 +2474,67 @@ public class GroupHelperTest extends UiServiceTestCase {
             NotificationRecord child = getNotificationRecord(pkg, i + 42,
                 String.valueOf(i + 42), UserHandle.SYSTEM, "testGrp "+i, false);
             notificationList.add(child);
+            expectedTriggeringKey = child.getKey();
             summaryByGroup.put(summary.getGroupKey(), summary);
             mGroupHelper.onNotificationPostedWithDelay(child, notificationList, summaryByGroup);
             summary.isCanceled = true;  // simulate removing the app summary
             mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
-
         }
         // Check that notifications are forced grouped
-        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
-                eq(expectedGroupKey), anyInt(), eq(getNotificationAttributes(BASE_FLAGS)));
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg),
+                eq(expectedTriggeringKey), eq(expectedGroupKey), anyInt(),
+                eq(getNotificationAttributes(BASE_FLAGS)));
+        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+        verify(mCallback, never()).removeAutoGroup(anyString());
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, never()).updateAutogroupSummary(anyInt(), anyString(), anyString(),
+                any());
+
+        // Check that summaries are canceled
+        verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).removeAppProvidedSummary(
+                anyString());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING,
+            Flags.FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS})
+    public void testAddAggregateSummary_summaryTriggers_singletonGroups() {
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        final String pkg = "package";
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        final int firstChildIdx = 1;
+        // Post singleton groups, below forced group limit
+        for (int i = 0; i < AUTOGROUP_SINGLETONS_AT_COUNT - 1; i++) {
+            NotificationRecord summary = getNotificationRecord(pkg, i,
+                    String.valueOf(i), UserHandle.SYSTEM, "testGrp " + i, true);
+            notificationList.add(summary);
+            NotificationRecord child = getNotificationRecord(pkg, i + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, "testGrp " + i, false);
+            notificationList.add(child);
+            summaryByGroup.put(summary.getGroupKey(), summary);
+            mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+            mGroupHelper.onNotificationPostedWithDelay(child, notificationList, summaryByGroup);
+        }
+
+        // Post triggering group summary
+        final String expectedTriggeringKey = notificationList.get(firstChildIdx).getKey();
+        final int triggerIdx = AUTOGROUP_SINGLETONS_AT_COUNT - 1;
+        NotificationRecord summary = getNotificationRecord(pkg, triggerIdx,
+                String.valueOf(triggerIdx), UserHandle.SYSTEM, "testGrp " + triggerIdx, true);
+        notificationList.add(summary);
+        NotificationRecord child = getNotificationRecord(pkg, triggerIdx + 42,
+                String.valueOf(triggerIdx + 42), UserHandle.SYSTEM, "testGrp " + triggerIdx, false);
+        notificationList.add(child);
+        summaryByGroup.put(summary.getGroupKey(), summary);
+        mGroupHelper.onNotificationPostedWithDelay(summary, notificationList, summaryByGroup);
+
+        // Check that notifications are forced grouped
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg),
+                eq(expectedTriggeringKey), eq(expectedGroupKey), anyInt(),
+                eq(getNotificationAttributes(BASE_FLAGS)));
         verify(mCallback, times(AUTOGROUP_SINGLETONS_AT_COUNT)).addAutoGroup(anyString(),
                 eq(expectedGroupKey), eq(true));
         verify(mCallback, never()).removeAutoGroup(anyString());

@@ -17,7 +17,6 @@
 package com.android.systemui.flags
 
 import android.platform.test.annotations.EnableFlags
-import com.android.systemui.Flags.FLAG_COMPOSE_LOCKSCREEN
 import com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
@@ -31,7 +30,6 @@ import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
  * that feature. It is also picked up by [SceneContainerRule] to set non-aconfig prerequisites.
  */
 @EnableFlags(
-    FLAG_COMPOSE_LOCKSCREEN,
     FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
     FLAG_KEYGUARD_WM_STATE_REFACTOR,
     FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT,

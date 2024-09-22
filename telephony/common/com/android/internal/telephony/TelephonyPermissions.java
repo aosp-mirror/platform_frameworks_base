@@ -816,7 +816,8 @@ public final class TelephonyPermissions {
      * @param callingUid pass Binder.callingUid().
      */
     public static void enforceShellOnly(int callingUid, String message) {
-        if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
+        if (UserHandle.isSameApp(callingUid, Process.SHELL_UID)
+                || UserHandle.isSameApp(callingUid, Process.ROOT_UID)) {
             return; // okay
         }
 

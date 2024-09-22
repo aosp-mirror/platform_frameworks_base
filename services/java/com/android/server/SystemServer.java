@@ -107,7 +107,7 @@ import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogConfigurationService;
+import com.android.internal.protolog.ProtoLogConfigurationServiceImpl;
 import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
@@ -435,6 +435,10 @@ public final class SystemServer implements Dumpable {
             "android.os.profiling.ProfilingService$Lifecycle";
     private static final String PROFILING_SERVICE_JAR_PATH =
             "/apex/com.android.profiling/javalib/service-profiling.jar";
+
+    private static final String RANGING_APEX_SERVICE_JAR_PATH =
+            "/apex/com.android.uwb/javalib/service-ranging.jar";
+    private static final String RANGING_SERVICE_CLASS = "com.android.server.ranging.RangingService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -1097,7 +1101,7 @@ public final class SystemServer implements Dumpable {
         if (android.tracing.Flags.clientSideProtoLogging()) {
             t.traceBegin("StartProtoLogConfigurationService");
             ServiceManager.addService(
-                    Context.PROTOLOG_CONFIGURATION_SERVICE, new ProtoLogConfigurationService());
+                    Context.PROTOLOG_CONFIGURATION_SERVICE, new ProtoLogConfigurationServiceImpl());
             t.traceEnd();
         }
 
@@ -3013,6 +3017,17 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("UwbService");
             mSystemServiceManager.startServiceFromJar(UWB_SERVICE_CLASS, UWB_APEX_SERVICE_JAR_PATH);
             t.traceEnd();
+        }
+
+        if (com.android.ranging.flags.Flags.rangingStackEnabled()) {
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)
+                    || context.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WIFI_RTT)) {
+                t.traceBegin("RangingService");
+                mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
+                        RANGING_APEX_SERVICE_JAR_PATH);
+                t.traceEnd();
+            }
         }
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");

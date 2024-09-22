@@ -22,6 +22,8 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.shared.notifications.data.repository.notificationSettingsRepository
+import com.android.systemui.statusbar.policy.data.repository.deviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.userSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 
 val Kosmos.zenModeInteractor by Fixture {
@@ -31,5 +33,7 @@ val Kosmos.zenModeInteractor by Fixture {
         notificationSettingsRepository = notificationSettingsRepository,
         bgDispatcher = testDispatcher,
         iconLoader = zenIconLoader,
+        deviceProvisioningRepository = deviceProvisioningRepository,
+        userSetupRepository = userSetupRepository,
     )
 }
