@@ -62,7 +62,6 @@ import java.util.StringJoiner;
  *
  * NOTE: This class has to be created and poked only from the main thread.
  */
-@SuppressWarnings("MissingPermissionAnnotation")
 class AccessibilityInputFilter extends InputFilter implements EventStreamTransformation {
 
     private static final String TAG = AccessibilityInputFilter.class.getSimpleName();

@@ -205,6 +205,7 @@ package android.nfc.cardemulation {
     method public int getSelectionModeForCategory(String);
     method public boolean isDefaultServiceForAid(android.content.ComponentName, String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, String);
+    method @FlaggedApi("android.nfc.enable_card_emulation_euicc") public boolean isEuiccSupported();
     method public boolean registerAidsForService(android.content.ComponentName, String, java.util.List<java.lang.String>);
     method @FlaggedApi("android.nfc.nfc_read_polling_loop") public boolean registerPollingLoopFilterForService(@NonNull android.content.ComponentName, @NonNull String, boolean);
     method @FlaggedApi("android.nfc.nfc_read_polling_loop") public boolean registerPollingLoopPatternFilterForService(@NonNull android.content.ComponentName, @NonNull String, boolean);

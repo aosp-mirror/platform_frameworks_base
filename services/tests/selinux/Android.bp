@@ -42,9 +42,9 @@ android_test {
         "mockito_extended",
     ],
     libs: [
-        "android.test.base",
-        "android.test.mock",
-        "android.test.runner",
+        "android.test.base.stubs.system",
+        "android.test.mock.stubs.system",
+        "android.test.runner.stubs.system",
         "servicestests-core-utils",
     ],
     static_libs: [
