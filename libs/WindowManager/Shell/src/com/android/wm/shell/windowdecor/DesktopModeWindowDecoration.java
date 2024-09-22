@@ -35,6 +35,7 @@ import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineR
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeHandleEdgeInset;
+import static com.android.wm.shell.windowdecor.DragPositioningCallbackUtility.DragEventListener;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -316,6 +317,24 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Registers a listener to be called when the decoration's to-split action is triggered. */
     void setOnToSplitScreenClickListener(Function0<Unit> listener) {
         mOnToSplitscreenClickListener = listener;
+    }
+
+    /**
+     * Adds a drag resize observer that gets notified on the task being drag resized.
+     *
+     * @param dragResizeListener The observing object to be added.
+     */
+    public void addDragResizeListener(DragEventListener dragResizeListener) {
+        mTaskDragResizer.addDragEventListener(dragResizeListener);
+    }
+
+    /**
+     * Removes an already existing drag resize observer.
+     *
+     * @param dragResizeListener observer to be removed.
+     */
+    public void removeDragResizeListener(DragEventListener dragResizeListener) {
+        mTaskDragResizer.removeDragEventListener(dragResizeListener);
     }
 
     /** Registers a listener to be called when the decoration's new window action is triggered. */

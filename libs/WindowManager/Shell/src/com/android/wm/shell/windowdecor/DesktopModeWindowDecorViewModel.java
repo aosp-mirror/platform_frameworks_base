@@ -185,7 +185,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             new ExclusionRegionListenerImpl();
 
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId;
-    private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
+    private final DragEventListenerImpl mDragEventListener = new DragEventListenerImpl();
     private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
@@ -1515,7 +1515,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 mTaskOrganizer,
                 windowDecoration,
                 mDisplayController,
-                mDragStartListener,
+                mDragEventListener,
                 mTransitions,
                 mInteractionJankMonitor,
                 mTransactionFactory,
@@ -1641,12 +1641,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         }
     }
 
-    private class DragStartListenerImpl
-            implements DragPositioningCallbackUtility.DragStartListener {
+    private class DragEventListenerImpl
+            implements DragPositioningCallbackUtility.DragEventListener {
         @Override
         public void onDragStart(int taskId) {
             final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
             decoration.closeHandleMenu();
+        }
+
+        @Override
+        public void onDragMove(int taskId) {
+
         }
     }
 
@@ -1741,7 +1746,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 ShellTaskOrganizer taskOrganizer,
                 DesktopModeWindowDecoration windowDecoration,
                 DisplayController displayController,
-                DragPositioningCallbackUtility.DragStartListener dragStartListener,
+                DragPositioningCallbackUtility.DragEventListener dragEventListener,
                 Transitions transitions,
                 InteractionJankMonitor interactionJankMonitor,
                 Supplier<SurfaceControl.Transaction> transactionFactory,
@@ -1751,7 +1756,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             taskOrganizer,
                             windowDecoration,
                             displayController,
-                            dragStartListener,
+                            dragEventListener,
                             transitions,
                             interactionJankMonitor,
                             handler)
@@ -1760,7 +1765,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             transitions,
                             windowDecoration,
                             displayController,
-                            dragStartListener,
+                            dragEventListener,
                             transactionFactory);
 
             if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()) {

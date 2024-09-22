@@ -284,12 +284,19 @@ public class DragPositioningCallbackUtility {
                 && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS.isTrue();
     }
 
-    interface DragStartListener {
+    public interface DragEventListener {
         /**
          * Inform the implementing class that a drag resize has started
          *
          * @param taskId id of this positioner's {@link WindowDecoration}
          */
         void onDragStart(int taskId);
+
+        /**
+         * Inform the implementing class that a drag move has started.
+         *
+         * @param taskId id of this positioner's {@link WindowDecoration}
+         */
+        void onDragMove(int taskId);
     }
 }
