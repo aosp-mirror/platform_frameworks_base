@@ -1090,6 +1090,19 @@ public class UserManagerService extends IUserManager.Stub {
         mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
         mPrivateSpaceAutoLockSettingsObserver = new SettingsObserver(mHandler);
         emulateSystemUserModeIfNeeded();
+        initPropertyInvalidatedCaches();
+    }
+
+    /**
+     * This method is used to invalidate the caches at server statup,
+     * so that caches can start working.
+     */
+    private static final void initPropertyInvalidatedCaches() {
+        if (android.multiuser.Flags.cachesNotInvalidatedAtStartReadOnly()) {
+            UserManager.invalidateIsUserUnlockedCache();
+            UserManager.invalidateQuietModeEnabledCache();
+            UserManager.invalidateUserSerialNumberCache();
+        }
     }
 
     private boolean doesDeviceHardwareSupportPrivateSpace() {
@@ -2632,11 +2645,15 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public int getMainDisplayIdAssignedToUser() {
-        // Not checking for any permission as it returns info about calling user
-        int userId = UserHandle.getUserId(Binder.getCallingUid());
-        int displayId = mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
-        return displayId;
+    public int getMainDisplayIdAssignedToUser(int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to get the main display for (" + userId
+                    + ")");
+        }
+        return mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
     }
 
     @Override

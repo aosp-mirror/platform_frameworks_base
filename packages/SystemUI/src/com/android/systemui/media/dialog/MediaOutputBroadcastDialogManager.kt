@@ -29,7 +29,7 @@ constructor(
     private val context: Context,
     private val broadcastSender: BroadcastSender,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val mediaOutputControllerFactory: MediaOutputController.Factory
+    private val mediaSwitchingControllerFactory: MediaSwitchingController.Factory
 ) {
     var mediaOutputBroadcastDialog: MediaOutputBroadcastDialog? = null
 
@@ -41,7 +41,7 @@ constructor(
         // TODO: b/321969740 - Populate the userHandle parameter. The user handle is necessary to
         //  disambiguate the same package running on different users.
         val controller =
-            mediaOutputControllerFactory.create(
+            mediaSwitchingControllerFactory.create(
                 packageName,
                 /* userHandle= */ null,
                 /* token */ null,

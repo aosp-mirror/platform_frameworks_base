@@ -30,6 +30,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Build;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -37,6 +38,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.user.utils.UserScopedService;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -67,13 +69,13 @@ public class ClipboardListener implements
     public ClipboardListener(Context context,
             Provider<ClipboardOverlayController> clipboardOverlayControllerProvider,
             ClipboardToast clipboardToast,
-            ClipboardManager clipboardManager,
+            UserScopedService<ClipboardManager> clipboardManager,
             KeyguardManager keyguardManager,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mOverlayProvider = clipboardOverlayControllerProvider;
         mClipboardToast = clipboardToast;
-        mClipboardManager = clipboardManager;
+        mClipboardManager = clipboardManager.forUser(UserHandle.CURRENT);
         mKeyguardManager = keyguardManager;
         mUiEventLogger = uiEventLogger;
     }

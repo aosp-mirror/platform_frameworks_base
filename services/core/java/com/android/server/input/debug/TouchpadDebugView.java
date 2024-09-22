@@ -29,11 +29,14 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
+import android.view.SurfaceControl;
 import android.view.ViewConfiguration;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.input.TouchpadFingerState;
 import com.android.server.input.TouchpadHardwareProperties;
 import com.android.server.input.TouchpadHardwareState;
@@ -47,11 +50,16 @@ public class TouchpadDebugView extends LinearLayout {
     private static final float TEXT_SIZE_SP = 16.0f;
     private static final float DEFAULT_RES_X = 47f;
     private static final float DEFAULT_RES_Y = 45f;
+    private static final int TEXT_PADDING_DP = 12;
+    private static final int ROUNDED_CORNER_RADIUS_DP = 24;
+    private static final int BUTTON_PRESSED_BACKGROUND_COLOR = Color.rgb(118, 151, 99);
+    private static final int BUTTON_RELEASED_BACKGROUND_COLOR = Color.rgb(84, 85, 169);
 
     /**
      * Input device ID for the touchpad that this debug view is displaying.
      */
     private final int mTouchpadId;
+    private static final String TAG = "TouchpadDebugView";
 
     @NonNull
     private final WindowManager mWindowManager;
@@ -67,6 +75,10 @@ public class TouchpadDebugView extends LinearLayout {
     private int mScreenHeight;
     private int mWindowLocationBeforeDragX;
     private int mWindowLocationBeforeDragY;
+    private int mLatestGestureType = 0;
+    private TextView mGestureInfoView;
+    private TextView mNameView;
+
     @NonNull
     private TouchpadHardwareState mLastTouchpadState =
             new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
@@ -75,7 +87,7 @@ public class TouchpadDebugView extends LinearLayout {
     private final TouchpadHardwareProperties mTouchpadHardwareProperties;
 
     public TouchpadDebugView(Context context, int touchpadId,
-            TouchpadHardwareProperties touchpadHardwareProperties) {
+                             TouchpadHardwareProperties touchpadHardwareProperties) {
         super(context);
         mTouchpadId = touchpadId;
         mWindowManager =
@@ -111,40 +123,70 @@ public class TouchpadDebugView extends LinearLayout {
                 LayoutParams.WRAP_CONTENT));
         setBackgroundColor(Color.TRANSPARENT);
 
-        TextView nameView = new TextView(context);
-        nameView.setBackgroundColor(Color.RED);
-        nameView.setTextSize(TEXT_SIZE_SP);
-        nameView.setText(Objects.requireNonNull(Objects.requireNonNull(
+        mNameView = new TextView(context);
+        mNameView.setBackgroundColor(BUTTON_RELEASED_BACKGROUND_COLOR);
+        mNameView.setTextSize(TEXT_SIZE_SP);
+        mNameView.setText(Objects.requireNonNull(Objects.requireNonNull(
                         mContext.getSystemService(InputManager.class))
                 .getInputDevice(touchpadId)).getName());
-        nameView.setGravity(Gravity.CENTER);
-        nameView.setTextColor(Color.WHITE);
-        nameView.setLayoutParams(
+        mNameView.setGravity(Gravity.CENTER);
+        mNameView.setTextColor(Color.WHITE);
+        int paddingInDP = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, TEXT_PADDING_DP,
+                getResources().getDisplayMetrics());
+        mNameView.setPadding(paddingInDP, paddingInDP, paddingInDP, paddingInDP);
+        mNameView.setLayoutParams(
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
         mTouchpadVisualizationView = new TouchpadVisualizationView(context,
                 mTouchpadHardwareProperties);
-        mTouchpadVisualizationView.setBackgroundColor(Color.WHITE);
 
-        //TODO(b/365562952): Add a display for recognized gesture info here
-        TextView gestureInfoView = new TextView(context);
-        gestureInfoView.setBackgroundColor(Color.GRAY);
-        gestureInfoView.setTextSize(TEXT_SIZE_SP);
-        gestureInfoView.setText("Touchpad Debug View 3");
-        gestureInfoView.setGravity(Gravity.CENTER);
-        gestureInfoView.setTextColor(Color.BLACK);
-        gestureInfoView.setLayoutParams(
+        mGestureInfoView = new TextView(context);
+        mGestureInfoView.setTextSize(TEXT_SIZE_SP);
+        mGestureInfoView.setText("Latest Gesture: ");
+        mGestureInfoView.setGravity(Gravity.CENTER);
+        mGestureInfoView.setPadding(paddingInDP, paddingInDP, paddingInDP, paddingInDP);
+        mGestureInfoView.setLayoutParams(
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        addView(nameView);
+        updateTheme(getResources().getConfiguration().uiMode);
+
+        addView(mNameView);
         addView(mTouchpadVisualizationView);
-        addView(gestureInfoView);
+        addView(mGestureInfoView);
 
         updateViewsDimensions();
     }
 
     @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        postDelayed(() -> {
+            final ViewRootImpl viewRootImpl = getRootView().getViewRootImpl();
+            if (viewRootImpl == null) {
+                Slog.d("TouchpadDebugView", "ViewRootImpl is null.");
+                return;
+            }
+
+            SurfaceControl surfaceControl = viewRootImpl.getSurfaceControl();
+            if (surfaceControl != null && surfaceControl.isValid()) {
+                try (SurfaceControl.Transaction transaction = new SurfaceControl.Transaction()) {
+                    transaction.setCornerRadius(surfaceControl,
+                            TypedValue.applyDimension(COMPLEX_UNIT_DIP,
+                                    ROUNDED_CORNER_RADIUS_DP,
+                                    getResources().getDisplayMetrics())).apply();
+                }
+            } else {
+                Slog.d("TouchpadDebugView", "SurfaceControl is invalid or has been released.");
+            }
+        }, 100);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (event.getClassification() == MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE) {
+            return false;
+        }
+
         float deltaX;
         float deltaY;
         switch (event.getAction()) {
@@ -193,13 +235,15 @@ public class TouchpadDebugView extends LinearLayout {
     @Override
     public boolean performClick() {
         super.performClick();
-        Slog.d("TouchpadDebugView", "You tapped the window!");
+        Slog.d(TAG, "You tapped the window!");
         return true;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        updateTheme(newConfig.uiMode);
         updateScreenDimensions();
         updateViewsDimensions();
 
@@ -209,6 +253,27 @@ public class TouchpadDebugView extends LinearLayout {
         mWindowLayoutParams.y =
                 Math.max(0, Math.min(mWindowLayoutParams.y, mScreenHeight - getHeight()));
         mWindowManager.updateViewLayout(this, mWindowLayoutParams);
+    }
+
+    private void updateTheme(int uiMode) {
+        int currentNightMode = uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+            setNightModeTheme();
+        } else {
+            setLightModeTheme();
+        }
+    }
+
+    private void setLightModeTheme() {
+        mTouchpadVisualizationView.setLightModeTheme();
+        mGestureInfoView.setBackgroundColor(Color.WHITE);
+        mGestureInfoView.setTextColor(Color.BLACK);
+    }
+
+    private void setNightModeTheme() {
+        mTouchpadVisualizationView.setNightModeTheme();
+        mGestureInfoView.setBackgroundColor(Color.BLACK);
+        mGestureInfoView.setTextColor(Color.WHITE);
     }
 
     private boolean isSlopExceeded(float deltaX, float deltaY) {
@@ -265,12 +330,14 @@ public class TouchpadDebugView extends LinearLayout {
         return mWindowLayoutParams;
     }
 
+    @VisibleForTesting
+    TextView getGestureInfoView() {
+        return mGestureInfoView;
+    }
+
     /**
-     * Notify the view of a change in the hardware state of a touchpad. The view should
-     * update its content to reflect the new state.
-     *
-     * @param touchpadHardwareState the hardware state of a touchpad
-     * @param deviceId              the deviceId of the touchpad that is sending the hardware state
+     * Notify the view of a change in TouchpadHardwareState and changing the
+     * color of the view based on the status of the button click.
      */
     public void updateHardwareState(TouchpadHardwareState touchpadHardwareState, int deviceId) {
         if (deviceId != mTouchpadId) {
@@ -291,12 +358,43 @@ public class TouchpadDebugView extends LinearLayout {
     }
 
     private void onTouchpadButtonPress() {
-        Slog.d("TouchpadDebugView", "You clicked me!");
-        getChildAt(0).setBackgroundColor(Color.BLUE);
+        Slog.d(TAG, "You clicked me!");
+        mNameView.setBackgroundColor(BUTTON_PRESSED_BACKGROUND_COLOR);
     }
 
     private void onTouchpadButtonRelease() {
-        Slog.d("TouchpadDebugView", "You released the click");
-        getChildAt(0).setBackgroundColor(Color.RED);
+        Slog.d(TAG, "You released the click");
+        mNameView.setBackgroundColor(BUTTON_RELEASED_BACKGROUND_COLOR);
+    }
+
+    /**
+     * Notify the view of any new gesture on the touchpad and displaying its name
+     */
+    public void updateGestureInfo(int newGestureType, int deviceId) {
+        if (deviceId == mTouchpadId && mLatestGestureType != newGestureType) {
+            mGestureInfoView.setText(getGestureText(newGestureType));
+            mLatestGestureType = newGestureType;
+        }
+    }
+
+    @NonNull
+    static String getGestureText(int gestureType) {
+        // These values are a representation of the GestureType enum in the
+        // external/libchrome-gestures/include/gestures.h library in the C++ code
+        String mGestureName = switch (gestureType) {
+            case 1 -> "Move, 1 Finger";
+            case 2 -> "Scroll, 2 Fingers";
+            case 3 -> "Buttons Change, 1 Fingers";
+            case 4 -> "Fling";
+            case 5 -> "Swipe, 3 Fingers";
+            case 6 -> "Pinch, 2 Fingers";
+            case 7 -> "Swipe Lift, 3 Fingers";
+            case 8 -> "Metrics";
+            case 9 -> "Four Finger Swipe, 4 Fingers";
+            case 10 -> "Four Finger Swipe Lift, 4 Fingers";
+            case 11 -> "Mouse Wheel";
+            default -> "Unknown Gesture";
+        };
+        return "Latest Gesture: " + mGestureName;
     }
 }

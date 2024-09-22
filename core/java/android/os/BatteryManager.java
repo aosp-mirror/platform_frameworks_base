@@ -141,6 +141,7 @@ public class BatteryManager {
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
      * integer containing the charge counter present in the battery.
+     * It shows the available battery power in µAh
      * {@hide}
      */
      @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -164,6 +165,76 @@ public class BatteryManager {
      * Int value representing the battery charging status.
      */
     public static final String EXTRA_CHARGING_STATUS = "android.os.extra.CHARGING_STATUS";
+
+    /**
+     * Extra for {@link android.content.Intent#ACTION_BATTERY_CHANGED}:
+     * Int value representing the battery's capacity level. These constants are key indicators of
+     * battery status and system capabilities, guiding power management decisions for both the
+     * system and apps:
+     * {@link #BATTERY_CAPACITY_LEVEL_UNSUPPORTED}: Feature not supported on this device.
+     * {@link #BATTERY_CAPACITY_LEVEL_UNKNOWN}: Battery status is unavailable or uninitialized.
+     * {@link #BATTERY_CAPACITY_LEVEL_CRITICAL}: Battery is critically low and the Android
+     * framework has been notified to schedule a shutdown by this value
+     * {@link #BATTERY_CAPACITY_LEVEL_LOW}: Android framework must limit background jobs to
+     * avoid impacting charging speed
+     * {@link #BATTERY_CAPACITY_LEVEL_NORMAL}: Battery level and charging rates are normal,
+     * battery temperature is within normal range and adapter power is enough to charge the
+     * battery at an acceptable rate. Android framework can run light background tasks without
+     * affecting charging performance severely.
+     * {@link #BATTERY_CAPACITY_LEVEL_HIGH}: Battery level is high, battery temperature is
+     * within normal range and adapter power is enough to charge the battery at an acceptable
+     * rate while running background loads. Android framework can run background tasks without
+     * affecting charging or battery performance.
+     * {@link #BATTERY_CAPACITY_LEVEL_FULL}: The battery is full, battery temperature is
+     * within normal range and adapter power is enough to sustain running background loads.
+     * Android framework can run background tasks without affecting the battery level or
+     * battery performance.
+     */
+
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final String EXTRA_CAPACITY_LEVEL = "android.os.extra.CAPACITY_LEVEL";
+
+    /**
+     * Battery capacity level is unsupported. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_UNSUPPORTED = -1;
+
+    /**
+     * Battery capacity level is unknown. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_UNKNOWN = 0;
+
+    /**
+     * Battery capacity level is critical. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_CRITICAL = 1;
+
+    /**
+     * Battery capacity level is low. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_LOW = 2;
+
+    /**
+     * Battery capacity level is normal. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_NORMAL = 3;
+
+    /**
+     * Battery capacity level is high. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_HIGH = 4;
+
+    /**
+     * Battery capacity level is full. @see EXTRA_CAPACITY_LEVEL
+     */
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_CAPACITY_LEVEL_FULL = 5;
 
     /**
      * Extra for {@link android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED}:

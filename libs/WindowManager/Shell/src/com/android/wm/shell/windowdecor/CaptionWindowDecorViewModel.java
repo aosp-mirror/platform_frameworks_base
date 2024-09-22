@@ -44,6 +44,7 @@ import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -310,7 +311,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragPositioningCallback(taskPositioner);
-        windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.setTaskDragResizer(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* setTaskCropAndPosition */);
@@ -334,7 +334,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragPositioningCallback = dragPositioningCallback;
-            mDragDetector = new DragDetector(this);
+            mDragDetector = new DragDetector(this, 0 /* holdToDragMinDurationMs */,
+                    ViewConfiguration.get(mContext).getScaledTouchSlop());
             mDisplayId = taskInfo.displayId;
         }
 

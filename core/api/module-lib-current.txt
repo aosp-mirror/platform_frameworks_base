@@ -321,7 +321,10 @@ package android.net.netstats {
 package android.net.wifi {
 
   public final class WifiMigration {
-    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static void migrateLegacyKeystoreToWifiBlobstore();
+    method @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static int migrateLegacyKeystoreToWifiBlobstore();
+    field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION = 2; // 0x2
+    field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE = 0; // 0x0
+    field @FlaggedApi("android.net.wifi.flags.legacy_keystore_to_wifi_blobstore_migration_read_only") public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED = 1; // 0x1
   }
 
 }
@@ -384,8 +387,10 @@ package android.os {
     field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
-  public class Environment {
-    method @FlaggedApi("android.crashrecovery.flags.enable_crashrecovery") @NonNull public static java.io.File getDataSystemDeDirectory();
+  public class Handler {
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final boolean hasMessagesOrCallbacks();
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeCallbacksAndEqualMessages(@Nullable Object);
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeEqualMessages(int, @Nullable Object);
   }
 
   public class IpcDataCache<Query, Result> {

@@ -4006,6 +4006,7 @@ public class AudioService extends IAudioService.Stub
                             && isFullVolumeDevice(device);
                     boolean tvConditions = mHdmiTvClient != null
                             && mHdmiSystemAudioSupported
+                            && isFullVolumeDevice(device)
                             && !isAbsoluteVolumeDevice(device)
                             && !isA2dpAbsoluteVolumeDevice(device);
 
@@ -10808,7 +10809,8 @@ public class AudioService extends IAudioService.Stub
             //TODO move inside HardeningEnforcer after refactor that moves permission checks
             //     in the blockFocusMethod
             if (permissionOverridesCheck) {
-                mHardeningEnforcer.metricsLogFocusReq(/*blocked*/false, focusReqType, uid);
+                mHardeningEnforcer.metricsLogFocusReq(/*blocked*/ false, focusReqType, uid,
+                        /*unblockedBySdk*/ false);
             }
             if (!permissionOverridesCheck && mHardeningEnforcer.blockFocusMethod(uid,
                     HardeningEnforcer.METHOD_AUDIO_MANAGER_REQUEST_AUDIO_FOCUS,
@@ -13382,19 +13384,39 @@ public class AudioService extends IAudioService.Stub
     }
 
     @android.annotation.EnforcePermission(MODIFY_AUDIO_ROUTING)
-    /** @see AudioPolicy#getFocusStack() */
+    /* @see AudioPolicy#getFocusStack() */
     public List<AudioFocusInfo> getFocusStack() {
         super.getFocusStack_enforcePermission();
 
         return mMediaFocusControl.getFocusStack();
     }
 
-    /** @see AudioPolicy#sendFocusLoss */
+    /**
+     * @param focusLoser non-null entry that may be in the stack
+     * @see AudioPolicy#sendFocusLossAndUpdate(AudioFocusInfo)
+     */
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_ROUTING)
+    public void sendFocusLossAndUpdate(@NonNull AudioFocusInfo focusLoser,
+            @NonNull IAudioPolicyCallback apcb) {
+        super.sendFocusLossAndUpdate_enforcePermission();
+        Objects.requireNonNull(apcb);
+        if (!mAudioPolicies.containsKey(apcb.asBinder())) {
+            throw new IllegalStateException("Only registered AudioPolicy can change focus");
+        }
+        if (!mAudioPolicies.get(apcb.asBinder()).mHasFocusListener) {
+            throw new IllegalStateException("AudioPolicy must have focus listener to change focus");
+        }
+
+        mMediaFocusControl.sendFocusLossAndUpdate(Objects.requireNonNull(focusLoser));
+    }
+
+    /* @see AudioPolicy#sendFocusLoss(AudioFocusInfo)  */
+    @android.annotation.EnforcePermission(MODIFY_AUDIO_ROUTING)
     public boolean sendFocusLoss(@NonNull AudioFocusInfo focusLoser,
             @NonNull IAudioPolicyCallback apcb) {
+        super.sendFocusLoss_enforcePermission();
         Objects.requireNonNull(focusLoser);
         Objects.requireNonNull(apcb);
-        enforceModifyAudioRoutingPermission();
         if (!mAudioPolicies.containsKey(apcb.asBinder())) {
             throw new IllegalStateException("Only registered AudioPolicy can change focus");
         }

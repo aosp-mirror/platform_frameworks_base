@@ -24,6 +24,8 @@ import android.annotation.WorkerThread;
 import android.app.appfunctions.AppFunctionRuntimeMetadata;
 import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appsearch.AppSearchBatchResult;
+import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.PackageIdentifier;
@@ -61,9 +63,8 @@ import java.util.concurrent.Executor;
  */
 public class MetadataSyncAdapter {
     private static final String TAG = MetadataSyncAdapter.class.getSimpleName();
-    private final FutureAppSearchSession mRuntimeMetadataSearchSession;
-    private final FutureAppSearchSession mStaticMetadataSearchSession;
     private final Executor mSyncExecutor;
+    private final AppSearchManager mAppSearchManager;
     private final PackageManager mPackageManager;
 
     // Hidden constants in {@link SetSchemaRequest} that restricts runtime metadata visibility
@@ -73,13 +74,11 @@ public class MetadataSyncAdapter {
 
     public MetadataSyncAdapter(
             @NonNull Executor syncExecutor,
-            @NonNull FutureAppSearchSession runtimeMetadataSearchSession,
-            @NonNull FutureAppSearchSession staticMetadataSearchSession,
-            @NonNull PackageManager packageManager) {
+            @NonNull PackageManager packageManager,
+            @NonNull AppSearchManager appSearchManager) {
         mSyncExecutor = Objects.requireNonNull(syncExecutor);
-        mRuntimeMetadataSearchSession = Objects.requireNonNull(runtimeMetadataSearchSession);
-        mStaticMetadataSearchSession = Objects.requireNonNull(staticMetadataSearchSession);
         mPackageManager = Objects.requireNonNull(packageManager);
+        mAppSearchManager = Objects.requireNonNull(appSearchManager);
     }
 
     /**
@@ -89,31 +88,54 @@ public class MetadataSyncAdapter {
      *     synchronization was successful.
      */
     public AndroidFuture<Boolean> submitSyncRequest() {
+        SearchContext staticMetadataSearchContext =
+                new SearchContext.Builder(
+                                AppFunctionStaticMetadataHelper.APP_FUNCTION_STATIC_METADATA_DB)
+                        .build();
+        SearchContext runtimeMetadataSearchContext =
+                new SearchContext.Builder(
+                                AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_METADATA_DB)
+                        .build();
         AndroidFuture<Boolean> settableSyncStatus = new AndroidFuture<>();
         mSyncExecutor.execute(
                 () -> {
-                    try {
-                        trySyncAppFunctionMetadataBlocking();
+                    try (FutureAppSearchSession staticMetadataSearchSession =
+                                    new FutureAppSearchSessionImpl(
+                                            mAppSearchManager,
+                                            AppFunctionExecutors.THREAD_POOL_EXECUTOR,
+                                            staticMetadataSearchContext);
+                            FutureAppSearchSession runtimeMetadataSearchSession =
+                                    new FutureAppSearchSessionImpl(
+                                            mAppSearchManager,
+                                            AppFunctionExecutors.THREAD_POOL_EXECUTOR,
+                                            runtimeMetadataSearchContext)) {
+
+                        trySyncAppFunctionMetadataBlocking(
+                                staticMetadataSearchSession, runtimeMetadataSearchSession);
                         settableSyncStatus.complete(true);
-                    } catch (Exception e) {
-                        settableSyncStatus.completeExceptionally(e);
+
+                    } catch (Exception ex) {
+                        settableSyncStatus.completeExceptionally(ex);
                     }
                 });
         return settableSyncStatus;
     }
 
     @WorkerThread
-    private void trySyncAppFunctionMetadataBlocking()
+    @VisibleForTesting
+    void trySyncAppFunctionMetadataBlocking(
+            @NonNull FutureAppSearchSession staticMetadataSearchSession,
+            @NonNull FutureAppSearchSession runtimeMetadataSearchSession)
             throws ExecutionException, InterruptedException {
         ArrayMap<String, ArraySet<String>> staticPackageToFunctionMap =
                 getPackageToFunctionIdMap(
-                        mStaticMetadataSearchSession,
+                        staticMetadataSearchSession,
                         AppFunctionStaticMetadataHelper.STATIC_SCHEMA_TYPE,
                         AppFunctionStaticMetadataHelper.PROPERTY_FUNCTION_ID,
                         AppFunctionStaticMetadataHelper.PROPERTY_PACKAGE_NAME);
         ArrayMap<String, ArraySet<String>> runtimePackageToFunctionMap =
                 getPackageToFunctionIdMap(
-                        mRuntimeMetadataSearchSession,
+                        runtimeMetadataSearchSession,
                         RUNTIME_SCHEMA_TYPE,
                         AppFunctionRuntimeMetadata.PROPERTY_FUNCTION_ID,
                         AppFunctionRuntimeMetadata.PROPERTY_PACKAGE_NAME);
@@ -123,18 +145,30 @@ public class MetadataSyncAdapter {
         ArrayMap<String, ArraySet<String>> removedFunctionsDiffMap =
                 getRemovedFunctionsDiffMap(staticPackageToFunctionMap, runtimePackageToFunctionMap);
 
-        Set<AppSearchSchema> appRuntimeMetadataSchemas =
-                getAllRuntimeMetadataSchemas(staticPackageToFunctionMap.keySet());
-        appRuntimeMetadataSchemas.add(
-                AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema());
+        if (!staticPackageToFunctionMap.keySet().equals(runtimePackageToFunctionMap.keySet())) {
+            // Drop removed packages from removedFunctionsDiffMap, as setSchema() deletes them
+            ArraySet<String> removedPackages =
+                    getRemovedPackages(
+                            staticPackageToFunctionMap.keySet(), removedFunctionsDiffMap.keySet());
+            for (String packageName : removedPackages) {
+                removedFunctionsDiffMap.remove(packageName);
+            }
+            Set<AppSearchSchema> appRuntimeMetadataSchemas =
+                    getAllRuntimeMetadataSchemas(staticPackageToFunctionMap.keySet());
+            appRuntimeMetadataSchemas.add(
+                    AppFunctionRuntimeMetadata.createParentAppFunctionRuntimeSchema());
+            SetSchemaRequest addSetSchemaRequest =
+                    buildSetSchemaRequestForRuntimeMetadataSchemas(
+                            mPackageManager, appRuntimeMetadataSchemas);
+            Objects.requireNonNull(
+                    runtimeMetadataSearchSession.setSchema(addSetSchemaRequest).get());
+        }
 
-        // Operation order matters here. i.e. remove -> setSchema -> add. Otherwise we would
-        // encounter an error trying to delete a document with no existing schema.
         if (!removedFunctionsDiffMap.isEmpty()) {
             RemoveByDocumentIdRequest removeByDocumentIdRequest =
                     buildRemoveRuntimeMetadataRequest(removedFunctionsDiffMap);
             AppSearchBatchResult<String, Void> removeDocumentBatchResult =
-                    mRuntimeMetadataSearchSession.remove(removeByDocumentIdRequest).get();
+                    runtimeMetadataSearchSession.remove(removeByDocumentIdRequest).get();
             if (!removeDocumentBatchResult.isSuccess()) {
                 throw convertFailedAppSearchResultToException(
                         removeDocumentBatchResult.getFailures().values());
@@ -142,15 +176,10 @@ public class MetadataSyncAdapter {
         }
 
         if (!addedFunctionsDiffMap.isEmpty()) {
-            // TODO(b/357551503): only set schema on package diff
-            SetSchemaRequest addSetSchemaRequest =
-                    buildSetSchemaRequestForRuntimeMetadataSchemas(appRuntimeMetadataSchemas);
-            Objects.requireNonNull(
-                    mRuntimeMetadataSearchSession.setSchema(addSetSchemaRequest).get());
             PutDocumentsRequest putDocumentsRequest =
                     buildPutRuntimeMetadataRequest(addedFunctionsDiffMap);
             AppSearchBatchResult<String, Void> putDocumentBatchResult =
-                    mRuntimeMetadataSearchSession.put(putDocumentsRequest).get();
+                    runtimeMetadataSearchSession.put(putDocumentsRequest).get();
             if (!putDocumentBatchResult.isSuccess()) {
                 throw convertFailedAppSearchResultToException(
                         putDocumentBatchResult.getFailures().values());
@@ -180,11 +209,7 @@ public class MetadataSyncAdapter {
             ArraySet<String> addedFunctionIds = addedFunctionsDiffMap.valueAt(i);
             for (String addedFunctionId : addedFunctionIds) {
                 putDocumentRequestBuilder.addGenericDocuments(
-                        new AppFunctionRuntimeMetadata.Builder(
-                                        packageName,
-                                        addedFunctionId,
-                                        AppFunctionRuntimeMetadata
-                                                .PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID)
+                        new AppFunctionRuntimeMetadata.Builder(packageName, addedFunctionId)
                                 .build());
             }
         }
@@ -215,6 +240,7 @@ public class MetadataSyncAdapter {
 
     @NonNull
     private SetSchemaRequest buildSetSchemaRequestForRuntimeMetadataSchemas(
+            @NonNull PackageManager packageManager,
             @NonNull Set<AppSearchSchema> metadataSchemaSet) {
         Objects.requireNonNull(metadataSchemaSet);
         SetSchemaRequest.Builder setSchemaRequestBuilder =
@@ -224,7 +250,7 @@ public class MetadataSyncAdapter {
             String packageName =
                     AppFunctionRuntimeMetadata.getPackageNameFromSchema(
                             runtimeMetadataSchema.getSchemaType());
-            byte[] packageCert = getCertificate(packageName);
+            byte[] packageCert = getCertificate(packageManager, packageName);
             if (packageCert == null) {
                 continue;
             }
@@ -232,12 +258,11 @@ public class MetadataSyncAdapter {
                     runtimeMetadataSchema.getSchemaType(),
                     true,
                     new PackageIdentifier(packageName, packageCert));
+            setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
+                    runtimeMetadataSchema.getSchemaType(), Set.of(EXECUTE_APP_FUNCTIONS));
+            setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
+                    runtimeMetadataSchema.getSchemaType(), Set.of(EXECUTE_APP_FUNCTIONS_TRUSTED));
         }
-
-        setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
-                RUNTIME_SCHEMA_TYPE, Set.of(EXECUTE_APP_FUNCTIONS));
-        setSchemaRequestBuilder.addRequiredPermissionsForSchemaTypeVisibility(
-                RUNTIME_SCHEMA_TYPE, Set.of(EXECUTE_APP_FUNCTIONS_TRUSTED));
         return setSchemaRequestBuilder.build();
     }
 
@@ -254,6 +279,30 @@ public class MetadataSyncAdapter {
         }
 
         return appRuntimeMetadataSchemas;
+    }
+
+    /**
+     * This method returns a set of packages that are in the removed function packages but not in
+     * the all existing static packages.
+     *
+     * @param allExistingStaticPackages A set of all existing static metadata packages.
+     * @param removedFunctionPackages A set of all removed function packages.
+     * @return A set of packages that are in the removed function packages but not in the all
+     *     existing static packages.
+     */
+    @NonNull
+    private static ArraySet<String> getRemovedPackages(
+            @NonNull Set<String> allExistingStaticPackages,
+            @NonNull Set<String> removedFunctionPackages) {
+        ArraySet<String> removedPackages = new ArraySet<>();
+
+        for (String packageName : removedFunctionPackages) {
+            if (!allExistingStaticPackages.contains(packageName)) {
+                removedPackages.add(packageName);
+            }
+        }
+
+        return removedPackages;
     }
 
     /**
@@ -404,13 +453,15 @@ public class MetadataSyncAdapter {
 
     /** Gets the SHA-256 certificate from a {@link PackageManager}, or null if it is not found. */
     @Nullable
-    private byte[] getCertificate(@NonNull String packageName) {
+    private byte[] getCertificate(
+            @NonNull PackageManager packageManager, @NonNull String packageName) {
+        Objects.requireNonNull(packageManager);
         Objects.requireNonNull(packageName);
         PackageInfo packageInfo;
         try {
             packageInfo =
                     Objects.requireNonNull(
-                            mPackageManager.getPackageInfo(
+                            packageManager.getPackageInfo(
                                     packageName,
                                     PackageManager.GET_META_DATA
                                             | PackageManager.GET_SIGNING_CERTIFICATES));

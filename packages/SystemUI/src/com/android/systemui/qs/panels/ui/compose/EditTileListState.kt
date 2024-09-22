@@ -42,10 +42,8 @@ fun rememberEditListState(
 }
 
 /** Holds the temporary state of the tile list during a drag movement where we move tiles around. */
-class EditTileListState(
-    tiles: List<SizedTile<EditTileViewModel>>,
-    private val columns: Int,
-) : DragAndDropState {
+class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val columns: Int) :
+    DragAndDropState {
     private val _draggedCell = mutableStateOf<SizedTile<EditTileViewModel>?>(null)
     override val draggedCell
         get() = _draggedCell.value
@@ -91,7 +89,8 @@ class EditTileListState(
             regenerateGrid(includeSpacers = true)
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), cell)
         } else {
-            // Add the tile with a temporary row which will get reassigned when regenerating spacers
+            // Add the tile with a temporary row which will get reassigned when
+            // regenerating spacers
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0))
         }
 

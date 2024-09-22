@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Rakendus varjab loataotlust, nii et teie vastust ei saa kinnitada."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Puudutage funktsiooni, et selle kasutamist alustada."</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Valige funktsioonid, mida juurdepääsetavuse nupuga kasutada"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Valige helitugevuse nuppude otsetee funktsioonid"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> on välja lülitatud"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muuda otseteid"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Valmis"</string>
@@ -2011,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Seadistage ekraanilukk"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Seadistage ekraanilukk"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Seadistage oma privaatse ruumi jaoks seadmele ekraanilukk"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Privaatse ruumi kustutamiseks määrake selles seadmes ekraanilukk"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Rakendus ei ole saadaval"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole praegu saadaval."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei ole saadaval"</string>

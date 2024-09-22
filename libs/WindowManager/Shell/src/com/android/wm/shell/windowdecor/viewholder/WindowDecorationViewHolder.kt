@@ -24,7 +24,7 @@ import android.view.View
  * Encapsulates the root [View] of a window decoration and its children to facilitate looking up
  * children (via findViewById) and updating to the latest data from [RunningTaskInfo].
  */
-internal abstract class WindowDecorationViewHolder(rootView: View) {
+abstract class WindowDecorationViewHolder(rootView: View) {
   val context: Context = rootView.context
 
   /**

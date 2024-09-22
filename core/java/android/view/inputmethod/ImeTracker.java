@@ -920,7 +920,8 @@ public interface ImeTracker {
             final Configuration.Builder builder = Configuration.Builder.withSurface(
                             cujType,
                             jankContext.getDisplayContext(),
-                            jankContext.getTargetSurfaceControl())
+                            jankContext.getTargetSurfaceControl(),
+                            jankContext.getDisplayContext().getMainThreadHandler())
                     .setTag(String.format(Locale.US, "%d@%d@%s", animType,
                             useSeparatedThread ? 0 : 1, jankContext.getHostPackageName()));
             InteractionJankMonitor.getInstance().begin(builder);

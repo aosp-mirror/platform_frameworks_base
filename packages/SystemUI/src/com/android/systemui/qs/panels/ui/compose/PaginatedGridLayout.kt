@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.dagger.PaginatedBaseLayoutType
 import com.android.systemui.qs.panels.ui.compose.PaginatedGridLayout.Dimensions.FooterHeight
@@ -55,7 +56,7 @@ constructor(
     @PaginatedBaseLayoutType private val delegateGridLayout: PaginatableGridLayout,
 ) : GridLayout by delegateGridLayout {
     @Composable
-    override fun TileGrid(
+    override fun SceneScope.TileGrid(
         tiles: List<TileViewModel>,
         modifier: Modifier,
         editModeStart: () -> Unit,
@@ -85,16 +86,16 @@ constructor(
             ) {
                 val page = pages[it]
 
-                delegateGridLayout.TileGrid(tiles = page, modifier = Modifier, editModeStart = {})
+                with(delegateGridLayout) {
+                    TileGrid(tiles = page, modifier = Modifier, editModeStart = {})
+                }
             }
-            Box(
-                modifier = Modifier.height(FooterHeight).fillMaxWidth(),
-            ) {
+            Box(modifier = Modifier.height(FooterHeight).fillMaxWidth()) {
                 PagerDots(
                     pagerState = pagerState,
                     activeColor = MaterialTheme.colorScheme.primary,
                     nonActiveColor = MaterialTheme.colorScheme.surfaceVariant,
-                    modifier = Modifier.align(Alignment.Center)
+                    modifier = Modifier.align(Alignment.Center),
                 )
                 CompositionLocalProvider(value = LocalContentColor provides Color.White) {
                     IconButton(
@@ -103,7 +104,7 @@ constructor(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = stringResource(id = R.string.qs_edit)
+                            contentDescription = stringResource(id = R.string.qs_edit),
                         )
                     }
                 }

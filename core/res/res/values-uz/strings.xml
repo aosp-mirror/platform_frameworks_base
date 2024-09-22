@@ -1746,8 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Ilova ruxsat olish talabini berkitmoqda, shu sababdan javobingizni tasdiqlash imkonsiz."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Kerakli funksiyani tanlang"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Qulayliklar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2245540598834891500) -->
-    <skip />
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Tovush tugmasi bilan ishga tushiriladigan funksiyalarni tanlang"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
@@ -2011,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ekran qulfini sozlash"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ekran qulfini sozlash"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Maxfiy makon ishlatish uchun bu qurilma ekran qulfini sozlang"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Maxfiy makon ishlatish uchun bu qurilma ekran qulfini sozlang"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Ilova ishlamayapti"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Ayni vaqtda <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi ishlamayapti."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> kanali ish faoliyatida emas"</string>

@@ -1797,57 +1797,49 @@ public class CameraMetadataNative implements Parcelable {
             return false;
         }
 
-        if (Flags.concertMode()) {
-            long[] tsArray = new long[samples.length];
-            float[] intrinsicsArray = new float[samples.length * 5];
-            for (int i = 0; i < samples.length; i++) {
-                tsArray[i] = samples[i].getTimestampNanos();
-                System.arraycopy(samples[i].getLensIntrinsics(), 0, intrinsicsArray, 5 * i, 5);
+        long[] tsArray = new long[samples.length];
+        float[] intrinsicsArray = new float[samples.length * 5];
+        for (int i = 0; i < samples.length; i++) {
+            tsArray[i] = samples[i].getTimestampNanos();
+            System.arraycopy(samples[i].getLensIntrinsics(), 0, intrinsicsArray, 5 * i, 5);
 
-            }
-            setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES, intrinsicsArray);
-            setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS, tsArray);
-
-            return true;
-        } else {
-            return false;
         }
+        setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES, intrinsicsArray);
+        setBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS, tsArray);
+
+        return true;
     }
 
     private LensIntrinsicsSample[] getLensIntrinsicSamples() {
-        if (Flags.concertMode()) {
-            long[] timestamps = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS);
-            float[] intrinsics = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES);
+        long[] timestamps = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_TIMESTAMPS);
+        float[] intrinsics = getBase(CaptureResult.STATISTICS_LENS_INTRINSIC_SAMPLES);
 
-            if (timestamps == null) {
-                if (intrinsics != null) {
-                    throw new AssertionError("timestamps is null but intrinsics is not");
-                }
-
-                return null;
+        if (timestamps == null) {
+            if (intrinsics != null) {
+                throw new AssertionError("timestamps is null but intrinsics is not");
             }
 
-            if (intrinsics == null) {
-                throw new AssertionError("timestamps is not null but intrinsics is");
-            } else if ((intrinsics.length % 5) != 0) {
-                throw new AssertionError("intrinsics are not multiple of 5");
-            }
-
-            if ((intrinsics.length / 5) != timestamps.length) {
-                throw new AssertionError(String.format(
-                        "timestamps has %d entries but intrinsics has %d", timestamps.length,
-                        intrinsics.length / 5));
-            }
-
-            LensIntrinsicsSample[] samples = new LensIntrinsicsSample[timestamps.length];
-            for (int i = 0; i < timestamps.length; i++) {
-                float[] currentIntrinsic = Arrays.copyOfRange(intrinsics, 5 * i, 5 * i + 5);
-                samples[i] = new LensIntrinsicsSample(timestamps[i], currentIntrinsic);
-            }
-            return samples;
-        } else {
             return null;
         }
+
+        if (intrinsics == null) {
+            throw new AssertionError("timestamps is not null but intrinsics is");
+        } else if ((intrinsics.length % 5) != 0) {
+            throw new AssertionError("intrinsics are not multiple of 5");
+        }
+
+        if ((intrinsics.length / 5) != timestamps.length) {
+            throw new AssertionError(String.format(
+                    "timestamps has %d entries but intrinsics has %d", timestamps.length,
+                    intrinsics.length / 5));
+        }
+
+        LensIntrinsicsSample[] samples = new LensIntrinsicsSample[timestamps.length];
+        for (int i = 0; i < timestamps.length; i++) {
+            float[] currentIntrinsic = Arrays.copyOfRange(intrinsics, 5 * i, 5 * i + 5);
+            samples[i] = new LensIntrinsicsSample(timestamps[i], currentIntrinsic);
+        }
+        return samples;
     }
 
     private Capability[] getExtendedSceneModeCapabilities() {

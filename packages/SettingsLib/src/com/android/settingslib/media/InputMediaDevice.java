@@ -80,6 +80,10 @@ public class InputMediaDevice extends MediaDevice {
                 context, id, audioDeviceInfoType, maxVolume, currentVolume, isVolumeFixed);
     }
 
+    public @AudioDeviceType int getAudioDeviceInfoType() {
+        return mAudioDeviceInfoType;
+    }
+
     public static boolean isSupportedInputDevice(@AudioDeviceType int audioDeviceInfoType) {
         return switch (audioDeviceInfoType) {
             case TYPE_BUILTIN_MIC,
@@ -128,8 +132,7 @@ public class InputMediaDevice extends MediaDevice {
 
     @VisibleForTesting
     int getDrawableResId() {
-        // TODO(b/357122624): check with UX to obtain the icon for desktop devices.
-        return R.drawable.ic_media_tablet;
+        return R.drawable.ic_media_microphone;
     }
 
     @Override

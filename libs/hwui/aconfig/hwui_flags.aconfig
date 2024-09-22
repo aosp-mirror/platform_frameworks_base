@@ -121,3 +121,11 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "iso_gainmap_apis"
+  is_exported: true
+  namespace: "core_graphics"
+  description: "APIs that expose gainmap metadata corresponding to those defined in ISO 21496-1"
+  bug: "349357636"
+}

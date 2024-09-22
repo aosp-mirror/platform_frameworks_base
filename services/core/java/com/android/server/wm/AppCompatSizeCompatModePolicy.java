@@ -145,11 +145,13 @@ class AppCompatSizeCompatModePolicy {
         }
     }
 
-    void updateSizeCompatScale(@NonNull Rect resolvedAppBounds, @NonNull Rect containerAppBounds) {
+    void updateSizeCompatScale(@NonNull Rect resolvedAppBounds, @NonNull Rect containerAppBounds,
+            @NonNull Configuration newParentConfig) {
         mSizeCompatScale = mActivityRecord.mAppCompatController.getTransparentPolicy()
                 .findOpaqueNotFinishingActivityBelow()
                 .map(activityRecord -> mSizeCompatScale)
-                .orElseGet(() -> calculateSizeCompatScale(resolvedAppBounds, containerAppBounds));
+                .orElseGet(() -> calculateSizeCompatScale(
+                        resolvedAppBounds, containerAppBounds, newParentConfig));
     }
 
     void clearSizeCompatModeAttributes() {
@@ -290,7 +292,7 @@ class AppCompatSizeCompatModePolicy {
         // Calculates the scale the size compatibility bounds into the region which is available
         // to application.
         final float lastSizeCompatScale = mSizeCompatScale;
-        updateSizeCompatScale(resolvedAppBounds, containerAppBounds);
+        updateSizeCompatScale(resolvedAppBounds, containerAppBounds, newParentConfiguration);
 
         final int containerTopInset = containerAppBounds.top - containerBounds.top;
         final boolean topNotAligned =
@@ -423,7 +425,7 @@ class AppCompatSizeCompatModePolicy {
     }
 
     private float calculateSizeCompatScale(@NonNull Rect resolvedAppBounds,
-            @NonNull Rect containerAppBounds) {
+            @NonNull Rect containerAppBounds, @NonNull Configuration newParentConfig) {
         final int contentW = resolvedAppBounds.width();
         final int contentH = resolvedAppBounds.height();
         final int viewportW = containerAppBounds.width();
@@ -432,7 +434,8 @@ class AppCompatSizeCompatModePolicy {
         // original container or if it's a freeform window in desktop mode.
         boolean shouldAllowUpscaling = !(contentW <= viewportW && contentH <= viewportH)
                 || (canEnterDesktopMode(mActivityRecord.mAtmService.mContext)
-                    && mActivityRecord.getWindowingMode() == WINDOWING_MODE_FREEFORM);
+                && newParentConfig.windowConfiguration.getWindowingMode()
+                    == WINDOWING_MODE_FREEFORM);
         return shouldAllowUpscaling ? Math.min(
                 (float) viewportW / contentW, (float) viewportH / contentH) : 1f;
     }

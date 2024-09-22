@@ -331,7 +331,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         void forEachNewNode(int slot, @NonNull Consumer<OomAdjusterArgs> callback) {
             ProcessRecordNode node = mLastNode[slot].mNext;
             final ProcessRecordNode tail = mProcessRecordNodes[slot].TAIL;
-            while (node != tail) {
+            while (node != null && node != tail) {
                 mTmpOomAdjusterArgs.mApp = node.mApp;
                 if (node.mApp == null) {
                     // TODO(b/336178916) - Temporary logging for root causing b/336178916.
@@ -365,7 +365,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
                 }
                 // Save the next before calling callback, since that may change the node.mNext.
                 final ProcessRecordNode next = node.mNext;
-                callback.accept(mTmpOomAdjusterArgs);
+                if (mTmpOomAdjusterArgs.mApp != null) {
+                    callback.accept(mTmpOomAdjusterArgs);
+                }
                 // There are couple of cases:
                 // a) The current node is moved to another slot
                 //    - for this case, we'd need to keep using the "next" node.

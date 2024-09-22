@@ -65,6 +65,7 @@ constructor(
     powerInteractor: PowerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
     shadeInteractor: Lazy<ShadeInteractor>,
+    keyguardInteractor: Lazy<KeyguardInteractor>,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -111,9 +112,9 @@ constructor(
         } else if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
             combine(
                 shadeInteractor.get().isAnyExpanded,
-                deviceUnlockedInteractor.get().deviceUnlockStatus,
-            ) { isAnyExpanded, deviceUnlockStatus ->
-                isAnyExpanded && deviceUnlockStatus.isUnlocked
+                keyguardInteractor.get().isKeyguardDismissible,
+            ) { isAnyExpanded, keyguardDismissible ->
+                isAnyExpanded && keyguardDismissible
             }
         } else {
             flow {

@@ -968,6 +968,15 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             constraintSet.constrainWidth(mViewFlipper.getId(), MATCH_CONSTRAINT);
             constraintSet.applyTo(mView);
         }
+
+        @Override
+        public void onDestroy() {
+            if (mView == null) return;
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(mView);
+            constraintSet.clear(mViewFlipper.getId());
+            constraintSet.applyTo(mView);
+        }
     }
 
     /**
@@ -1043,12 +1052,20 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         @Override
         public void onDensityOrFontScaleChanged() {
             mView.removeView(mUserSwitcherViewGroup);
+            mView.removeView(mUserSwitcher);
             inflateUserSwitcher();
         }
 
         @Override
         public void onDestroy() {
-            mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(mView);
+            constraintSet.clear(mUserSwitcherViewGroup.getId());
+            constraintSet.clear(mViewFlipper.getId());
+            constraintSet.applyTo(mView);
+
+            mView.removeView(mUserSwitcherViewGroup);
+            mView.removeView(mUserSwitcher);
         }
 
         private Drawable findLargeUserIcon(int userId) {
@@ -1342,6 +1359,14 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             constraintSet.connect(mViewFlipper.getId(), TOP, PARENT_ID, TOP);
             constraintSet.connect(mViewFlipper.getId(), BOTTOM, PARENT_ID, BOTTOM);
             constraintSet.constrainPercentWidth(mViewFlipper.getId(), 0.5f);
+            constraintSet.applyTo(mView);
+        }
+
+        @Override
+        public void onDestroy() {
+            ConstraintSet constraintSet = new ConstraintSet();
+            constraintSet.clone(mView);
+            constraintSet.clear(mViewFlipper.getId());
             constraintSet.applyTo(mView);
         }
     }

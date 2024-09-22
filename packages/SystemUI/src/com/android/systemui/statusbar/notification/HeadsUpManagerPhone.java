@@ -103,7 +103,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private boolean mTrackingHeadsUp;
     private final HashSet<String> mSwipedOutKeys = new HashSet<>();
     private final HashSet<NotificationEntry> mEntriesToRemoveAfterExpand = new HashSet<>();
-    private final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
+    @VisibleForTesting
+    public final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
             = new ArraySet<>();
     private boolean mIsExpanded;
     private int mStatusBarState;
@@ -417,7 +418,7 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
         for (NotificationEntry entry : mEntriesToRemoveWhenReorderingAllowed) {
             if (isHeadsUpEntry(entry.getKey())) {
                 // Maybe the heads-up was removed already
-                removeEntry(entry.getKey(), "mOnReorderingAllowedListener");
+                removeEntry(entry.getKey(), "allowReorder");
             }
         }
         mEntriesToRemoveWhenReorderingAllowed.clear();
@@ -617,11 +618,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             super.setEntry(entry, removeRunnable);
 
             if (NotificationThrottleHun.isEnabled()) {
-                if (!mVisualStabilityProvider.isReorderingAllowed()
-                        // We don't want to allow reordering while pulsing, but headsup need to
-                        // time out anyway
-                        && !entry.showingPulsing()) {
-                    mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                if (!mVisualStabilityProvider.isReorderingAllowed()) {
                     entry.setSeenInShade(true);
                 }
             }

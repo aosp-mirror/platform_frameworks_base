@@ -312,6 +312,7 @@ public class FalsingDataProviderTest extends ClassifierTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_NON_TOUCHSCREEN_DEVICES_BYPASS_FALSING)
     public void test_IsFromTrackpad() {
         MotionEvent motionEventOrigin = appendTrackpadDownEvent(0, 0);
 

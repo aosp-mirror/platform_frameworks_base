@@ -332,6 +332,35 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testTransitionFilterTaskFragmentToken() {
+        final IBinder taskFragmentToken = new Binder();
+
+        TransitionFilter filter = new TransitionFilter();
+        filter.mRequirements =
+                new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
+        filter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+        filter.mRequirements[0].mTaskFragmentToken = taskFragmentToken;
+
+        // Transition with the same token should match.
+        final TransitionInfo infoHasTaskFragmentToken = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, taskFragmentToken).build();
+        assertTrue(filter.matches(infoHasTaskFragmentToken));
+
+        // Transition with a different token should not match.
+        final IBinder differentTaskFragmentToken = new Binder();
+        final TransitionInfo infoDifferentTaskFragmentToken =
+                new TransitionInfoBuilder(TRANSIT_OPEN)
+                        .addChange(TRANSIT_OPEN, differentTaskFragmentToken).build();
+        assertFalse(filter.matches(infoDifferentTaskFragmentToken));
+
+        // Transition without a token should not match.
+        final TransitionInfo infoNoTaskFragmentToken = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN, createTaskInfo(
+                        1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD)).build();
+        assertFalse(filter.matches(infoNoTaskFragmentToken));
+    }
+
+    @Test
     public void testTransitionFilterMultiRequirement() {
         // filter that requires at-least one opening and one closing app
         TransitionFilter filter = new TransitionFilter();
@@ -557,7 +586,7 @@ public class ShellTransitionTests extends ShellTestCase {
         mMainExecutor.flushAll();
 
         // Takeover shouldn't happen when the flag is disabled.
-        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        setFlagsRule.disableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED);
         IBinder transitToken = new Binder();
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
@@ -572,7 +601,7 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(mOrganizer, times(1)).finishTransition(eq(transitToken), any());
 
         // Takeover should happen when the flag is enabled.
-        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY);
+        setFlagsRule.enableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED);
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         info = new TransitionInfoBuilder(TRANSIT_OPEN)
@@ -1211,7 +1240,7 @@ public class ShellTransitionTests extends ShellTestCase {
                         mTransactionPool, createTestDisplayController(), mMainExecutor,
                         mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
         final RecentsTransitionHandler recentsHandler =
-                new RecentsTransitionHandler(shellInit, transitions,
+                new RecentsTransitionHandler(shellInit, mock(ShellTaskOrganizer.class), transitions,
                         mock(RecentTasksController.class), mock(HomeTransitionObserver.class));
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
         shellInit.init();

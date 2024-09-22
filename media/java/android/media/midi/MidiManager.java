@@ -393,6 +393,16 @@ public final class MidiManager {
 
     /**
      * Opens a Bluetooth MIDI device for reading and writing.
+     * Bluetooth MIDI devices are only available after openBluetoothDevice() is called.
+     * Once that happens anywhere in the system, then the BLE-MIDI device will appear as just
+     * another MidiDevice to other apps.
+     *
+     * If the device opened using openBluetoothDevice()  is closed, then it will no longer be
+     * available. To other apps, it will appear as if the BLE MidiDevice had been unplugged.
+     * If a MidiDevice is garbage collected then it will be closed automatically.
+     * If you want the BLE-MIDI device to remain available you should keep the object alive.
+     *
+     * You may close the device with MidiDevice.close().
      *
      * @param bluetoothDevice a {@link android.bluetooth.BluetoothDevice} to open as a MIDI device
      * @param listener a {@link MidiManager.OnDeviceOpenedListener} to be called to receive the

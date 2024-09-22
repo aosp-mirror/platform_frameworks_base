@@ -1216,10 +1216,10 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{{max} मा एक तारा}other{{max} मा # तारा}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"जारी छ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"प्रयोग गरेर कारबाही पुरा गर्नुहोस्"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"निम्न एपको प्रयोग गरी कारबाही पुरा गर्नुहोस्: %1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"%1$s प्रयोग गरी यो कार्य पूरा गर्नुहोस्"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"पूर्ण कारबाही"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"निम्नबाट खोल्नुहोस्"</string>
-    <string name="whichViewApplicationNamed" msgid="415164730629690105">"निम्न एपमा खोल्नुहोस्: %1$s"</string>
+    <string name="whichViewApplicationNamed" msgid="415164730629690105">"%1$s मार्फत खोल्नुहोस्"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"खोल्नुहोस्"</string>
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"निम्नमार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"निम्नमार्फत लिंकहरू खोल्नुहोस्"</string>
@@ -1227,7 +1227,7 @@
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="APPLICATION">%2$s</xliff:g> मार्फत <xliff:g id="HOST">%1$s</xliff:g> का लिंकहरू खोल्नुहोस्"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"पहुँच दिनुहोस्"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"सँग सम्पादन गर्नुहोस्"</string>
-    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s सँग सम्पादन गर्नुहोस्"</string>
+    <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s प्रयोग गरी सम्पादन गर्नुहोस्"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"सम्पादन गर्नुहोस्"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"सेयर गर्नुहोस्"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$s सँग सेयर गर्नुहोस्"</string>
@@ -1937,7 +1937,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हरेक हप्तादिनको राति"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिवार"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"कार्यक्रम"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"निदाएका बेला"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"शयन"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ले व्यवस्थापन गरेको"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"अन छ"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"अफ छ"</string>
@@ -2010,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"स्क्रिन लक सेटअप गर्नुहोस्"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"स्क्रिन लक सेटअप गर्नुहोस्"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"निजी स्पेस प्रयोग गर्न यो डिभाइसमा स्क्रिन लक सेटअप गर्नुहोस्"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"निजी स्पेस मेटाउन यो डिभाइसमा स्क्रिन लक सेटअप गर्नुहोस्"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"एप उपलब्ध छैन"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> अहिले उपलब्ध छैन।"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> उपलब्ध छैन"</string>

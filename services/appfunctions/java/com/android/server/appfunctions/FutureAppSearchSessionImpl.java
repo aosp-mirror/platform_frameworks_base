@@ -38,7 +38,6 @@ import android.app.appsearch.SetSchemaResponse;
 
 import com.android.internal.infra.AndroidFuture;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -183,7 +182,15 @@ public class FutureAppSearchSessionImpl implements FutureAppSearchSession {
     }
 
     @Override
-    public void close() throws IOException {}
+    public void close() {
+        getSessionAsync()
+                .whenComplete(
+                        (appSearchSession, throwable) -> {
+                            if (appSearchSession != null) {
+                                appSearchSession.close();
+                            }
+                        });
+    }
 
     private static final class FutureSearchResultsImpl implements FutureSearchResults {
         private final SearchResults mSearchResults;

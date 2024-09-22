@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+    <style name="SettingsLibTextAppearance" parent="@android:style/TextAppearance.DeviceDefault">
+        <!--item name="android:fontFamily"></item-->
+        <item name="android:hyphenationFrequency">normalFast</item>
+        <item name="android:lineBreakWordStyle">phrase</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Primary">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+
+    <style name="SettingsLibTextAppearance.Primary.Display">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Display.Large">
+        <item name="android:textSize">57sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Display.Medium">
+        <item name="android:textSize">45sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Display.Small">
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Primary.Headline">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Headline.Large">
+        <item name="android:textSize">32sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Headline.Medium">
+        <item name="android:textSize">28sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Headline.Small">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Primary.Title">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Title.Large">
+        <item name="android:textSize">22sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Title.Medium">
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Title.Small">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Primary.Label">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Label.Large">
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Label.Medium">
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Label.Small">
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Primary.Body">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Body.Large">
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Body.Medium">
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Primary.Body.Small">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Emphasized">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+
+    <style name="SettingsLibTextAppearance.Emphasized.Display">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Display.Large">
+        <item name="android:textSize">57sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Display.Medium">
+        <item name="android:textSize">45sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Display.Small">
+        <item name="android:textSize">36sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Emphasized.Headline">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Headline.Large">
+        <item name="android:textSize">32sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Headline.Medium">
+        <item name="android:textSize">28sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Headline.Small">
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Emphasized.Title">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Title.Large">
+        <item name="android:textSize">22sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Title.Medium">
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Title.Small">
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Emphasized.Label">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Label.Large">
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Label.Medium">
+        <item name="android:textSize">12sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Label.Small">
+        <item name="android:textSize">11sp</item>
+    </style>
+
+    <style name="SettingsLibTextAppearance.Emphasized.Body">
+        <!--item name="android:fontFamily"></item-->
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Body.Large">
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Body.Medium">
+        <item name="android:textSize">14sp</item>
+    </style>
+    <style name="SettingsLibTextAppearance.Emphasized.Body.Small">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="SettingslibSwitchStyle.Expressive" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="android:background">@null</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="thumbIcon">@drawable/settingslib_expressive_switch_thumb_icon</item>
+    </style>
+</resources>
