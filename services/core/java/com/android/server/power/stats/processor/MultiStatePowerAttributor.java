@@ -79,7 +79,7 @@ public class MultiStatePowerAttributor implements PowerAttributor {
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
                 .setProcessorSupplier(BasePowerStatsProcessor::new);
 
-        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WAKELOCK)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN)
@@ -87,6 +87,11 @@ public class MultiStatePowerAttributor implements PowerAttributor {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessorSupplier(
+                        () -> new WakelockPowerStatsProcessor(powerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU,
+                        BatteryConsumer.POWER_COMPONENT_WAKELOCK)
                 .setProcessorSupplier(
                         () -> new CpuPowerStatsProcessor(powerProfile, cpuScalingPolicies));
 

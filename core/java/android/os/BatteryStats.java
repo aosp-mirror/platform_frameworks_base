@@ -1950,7 +1950,8 @@ public abstract class BatteryStats {
 
         // STATES bits that are used for Power Stats tracking
         public static final int IMPORTANT_FOR_POWER_STATS_STATES =
-                STATE_GPS_ON_FLAG | STATE_SENSOR_ON_FLAG | STATE_AUDIO_ON_FLAG;
+                STATE_GPS_ON_FLAG | STATE_SENSOR_ON_FLAG | STATE_AUDIO_ON_FLAG
+                        | STATE_WAKE_LOCK_FLAG;
 
         @UnsupportedAppUsage
         public int states;

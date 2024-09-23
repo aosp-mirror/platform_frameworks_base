@@ -81,7 +81,10 @@ public class BatteryUsageStatsProvider {
                             new CpuPowerCalculator(mCpuScalingPolicies, mPowerProfile));
                 }
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
+                if (!mPowerAttributor.isPowerComponentSupported(
+                        BatteryConsumer.POWER_COMPONENT_WAKELOCK)) {
+                    mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
+                }
                 if (!BatteryStats.checkWifiOnly(mContext)) {
                     if (!mPowerAttributor.isPowerComponentSupported(
                             BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO)) {

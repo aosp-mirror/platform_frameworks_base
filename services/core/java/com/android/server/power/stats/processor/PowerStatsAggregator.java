@@ -85,9 +85,7 @@ public class PowerStatsAggregator {
                 mStats = new AggregatedPowerStats(mAggregatedPowerStatsConfig, mEnabledComponents);
             }
 
-            mStats.start(startTimeMs);
-
-            boolean clockUpdateAdded = false;
+            boolean startedSession = false;
             long baseTime = startTimeMs > 0 ? startTimeMs : UNINITIALIZED;
             long lastTime = 0;
             int lastStates = 0xFFFFFFFF;
@@ -96,12 +94,13 @@ public class PowerStatsAggregator {
                 while (iterator.hasNext()) {
                     BatteryStats.HistoryItem item = iterator.next();
 
-                    if (!clockUpdateAdded) {
+                    if (!startedSession) {
+                        mStats.start(item.time);
                         mStats.addClockUpdate(item.time, item.currentTime);
                         if (baseTime == UNINITIALIZED) {
                             baseTime = item.time;
                         }
-                        clockUpdateAdded = true;
+                        startedSession = true;
                     } else if (item.cmd == BatteryStats.HistoryItem.CMD_CURRENT_TIME
                                || item.cmd == BatteryStats.HistoryItem.CMD_RESET) {
                         mStats.addClockUpdate(item.time, item.currentTime);
