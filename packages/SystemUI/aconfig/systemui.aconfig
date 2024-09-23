@@ -149,16 +149,6 @@ flag {
 }
 
 flag {
-   name: "modes_dialog_single_rows"
-   namespace: "systemui"
-   description: "[Experiment] Display one entry per grid row in the Modes Dialog."
-   bug: "366034002"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
-
-flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
