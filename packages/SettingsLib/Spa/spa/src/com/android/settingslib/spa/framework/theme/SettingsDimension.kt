@@ -22,7 +22,8 @@ import androidx.compose.ui.unit.dp
 object SettingsDimension {
     val paddingTiny = 2.dp
     val paddingExtraSmall = 4.dp
-    val paddingSmall = 4.dp
+    val paddingSmall = if (isSpaExpressiveEnabled) 8.dp else 4.dp
+    val paddingExtraSmall5 = 10.dp
     val paddingLarge = 16.dp
     val paddingExtraLarge = 24.dp
 
