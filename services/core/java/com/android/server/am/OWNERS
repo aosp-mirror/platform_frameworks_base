@@ -19,12 +19,12 @@ per-file IntentBindRecord.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file AppFGSTracker.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file FgsTempAllowList.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file HostingRecord.java = file:/ACTIVITY_MANAGER_OWNERS
-
-# Windows & Activities
-ogunwale@google.com
+per-file App*ExitInfo* = file:/ACTIVITY_MANAGER_OWNERS
+per-file appexitinfo.proto = file:/ACTIVITY_MANAGER_OWNERS
+per-file App*StartInfo* = file:/PERFORMANCE_OWNERS
+per-file appstartinfo.proto = file:/PERFORMANCE_OWNERS
 
 # Permissions & Packages
-patb@google.com
 per-file AccessCheckDelegateHelper.java = file:/core/java/android/permission/OWNERS
 
 # Battery Stats
@@ -66,6 +66,6 @@ michaelwr@google.com #{LAST_RESORT_SUGGESTION}
 narayan@google.com #{LAST_RESORT_SUGGESTION}
 
 # Default
+yamasani@google.com
 hackbod@google.com #{LAST_RESORT_SUGGESTION}
 omakoto@google.com #{LAST_RESORT_SUGGESTION}
-yamasani@google.com #{LAST_RESORT_SUGGESTION}
