@@ -211,6 +211,17 @@ flag {
 }
 
 flag {
+    name: "cache_user_properties_correctly_read_only"
+    namespace: "multiuser"
+    description: "UserProperties cache needs to take into account who the callingUid is."
+    bug: "369198539"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
     name: "cache_user_serial_number"
     namespace: "multiuser"
     description: "Optimise user serial number retrieval"
