@@ -64,7 +64,6 @@ constructor(
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
     private val state: IssueRecordingState,
-    private val traceurConnection: TraceurConnection,
     @Assisted private val onStarted: Runnable,
 ) : SystemUIDialog.Delegate {
 
@@ -86,10 +85,6 @@ constructor(
             setIcon(R.drawable.qs_record_issue_icon_off)
             setNegativeButton(R.string.cancel) { _, _ -> }
             setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
-        }
-        bgExecutor.execute {
-            traceurConnection.onBound.add { traceurConnection.getTags(state) }
-            traceurConnection.doBind()
         }
     }
 

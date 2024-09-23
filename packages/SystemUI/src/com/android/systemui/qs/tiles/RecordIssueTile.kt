@@ -45,6 +45,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.recordissue.IssueRecordingService.Companion.getStartIntent
 import com.android.systemui.recordissue.IssueRecordingService.Companion.getStopIntent
+import com.android.systemui.recordissue.IssueRecordingServiceConnection
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
@@ -66,7 +67,7 @@ class RecordIssueTile
 constructor(
     host: QSHost,
     uiEventLogger: QsEventLogger,
-    @Background backgroundLooper: Looper,
+    @Background private val backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
     metricsLogger: MetricsLogger,
@@ -78,7 +79,8 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
-    private val traceurConnection: TraceurConnection,
+    irsConnProvider: IssueRecordingServiceConnection.Provider,
+    traceurConnProvider: TraceurConnection.Provider,
     @Background private val bgExecutor: Executor,
     private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
@@ -98,6 +100,15 @@ constructor(
 
     private val onRecordingChangeListener = Runnable { refreshState() }
 
+    private val irsConnection: IssueRecordingServiceConnection = irsConnProvider.create()
+    private val traceurConnection =
+        traceurConnProvider.create().apply {
+            onBound.add {
+                getTags(issueRecordingState)
+                doUnBind()
+            }
+        }
+
     override fun handleSetListening(listening: Boolean) {
         super.handleSetListening(listening)
         if (listening) {
@@ -109,7 +120,7 @@ constructor(
 
     override fun handleDestroy() {
         super.handleDestroy()
-        bgExecutor.execute { traceurConnection.doUnBind() }
+        bgExecutor.execute { irsConnection.doUnBind() }
     }
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
@@ -158,6 +169,15 @@ constructor(
         )
 
     private fun showPrompt(expandable: Expandable?) {
+        bgExecutor.execute {
+            // We only want to get the tags once per session, as this is not likely to change, if at
+            // all on a month to month basis. Using onBound's size is a way to verify if the tag
+            // retrieval has already happened or not.
+            if (traceurConnection.onBound.isNotEmpty()) {
+                traceurConnection.doBind()
+            }
+            irsConnection.doBind()
+        }
         val dialog: AlertDialog =
             delegateFactory
                 .create {

@@ -41,14 +41,22 @@ import javax.inject.Inject
 
 private const val TAG = "TraceurConnection"
 
-@SysUISingleton
 class TraceurConnection
-@Inject
-constructor(userContextProvider: UserContextProvider, @Background private val bgLooper: Looper) :
+private constructor(userContextProvider: UserContextProvider, private val bgLooper: Looper) :
     UserAwareConnection(
         userContextProvider,
         Intent().setClassName(TRACING_APP_PACKAGE_NAME, TRACING_APP_ACTIVITY),
     ) {
+
+    @SysUISingleton
+    class Provider
+    @Inject
+    constructor(
+        private val userContextProvider: UserContextProvider,
+        @Background private val bgLooper: Looper,
+    ) {
+        fun create() = TraceurConnection(userContextProvider, bgLooper)
+    }
 
     val onBound: MutableList<Runnable> = CopyOnWriteArrayList(mutableListOf())
 
@@ -119,10 +127,7 @@ private class ShareFilesHandler(
         val fileSharingIntent =
             FileSender.buildSendIntent(userContextProvider.userContext, uris)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
-        userContextProvider.userContext.startActivityAsUser(
-            fileSharingIntent,
-            userContextProvider.userContext.user,
-        )
+        userContextProvider.userContext.startActivity(fileSharingIntent)
     }
 }
 

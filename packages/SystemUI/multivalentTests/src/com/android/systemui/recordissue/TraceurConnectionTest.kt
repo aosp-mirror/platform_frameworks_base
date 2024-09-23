@@ -50,7 +50,7 @@ class TraceurConnectionTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         whenever(userContextProvider.userContext).thenReturn(mContext)
-        underTest = TraceurConnection(userContextProvider, Looper.getMainLooper())
+        underTest = TraceurConnection.Provider(userContextProvider, Looper.getMainLooper()).create()
     }
 
     @Test
