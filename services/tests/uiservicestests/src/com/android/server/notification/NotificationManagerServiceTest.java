@@ -16611,7 +16611,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
         mService.addEnqueuedNotification(r1);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         waitForIdle();
 
@@ -16651,9 +16651,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.addNotification(r);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         waitForIdle();
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         waitForIdle();
 
         ArgumentCaptor<NotificationRecord> captor =
@@ -16668,7 +16668,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // start from true state
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
@@ -16709,7 +16709,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
         mService.addEnqueuedNotification(r1);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, false);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
 
         waitForIdle();
 
@@ -16733,7 +16733,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // start from true state
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
@@ -16751,9 +16751,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.addNotification(r);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, false);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
         waitForIdle();
-        mBinderService.setCanBePromoted(mPkg, mUid, false);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
         waitForIdle();
 
         ArgumentCaptor<NotificationRecord> captor =
@@ -16765,7 +16765,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification() throws Exception {
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isTrue();
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16823,7 +16823,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Test
     @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_unimportantNotification() throws Exception {
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         Notification n = new Notification.Builder(mContext, mMinChannel.getId())
