@@ -140,12 +140,6 @@ constructor(
         _notificationPlaceholderBounds.value = position
     }
 
-    /**
-     * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
-     * all.
-     */
-    val dozeAmount: Flow<Float> = repository.linearDozeAmount
-
     /** Whether the system is in doze mode. */
     val isDozing: StateFlow<Boolean> = repository.isDozing
 
@@ -154,6 +148,23 @@ constructor(
 
     /** Whether Always-on Display mode is available. */
     val isAodAvailable: StateFlow<Boolean> = repository.isAodAvailable
+
+    /**
+     * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
+     * all.
+     */
+    val dozeAmount: Flow<Float> =
+        if (SceneContainerFlag.isEnabled) {
+            isAodAvailable.flatMapLatest { isAodAvailable ->
+                if (isAodAvailable) {
+                    keyguardTransitionInteractor.transitionValue(AOD)
+                } else {
+                    keyguardTransitionInteractor.transitionValue(DOZING)
+                }
+            }
+        } else {
+            repository.linearDozeAmount
+        }
 
     /** Doze transition information. */
     val dozeTransitionModel: Flow<DozeTransitionModel> = repository.dozeTransitionModel
