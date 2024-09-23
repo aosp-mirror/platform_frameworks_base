@@ -26,8 +26,10 @@ import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
 import com.android.systemui.Flags.FLAG_COMMUNAL_SCENE_KTF_REFACTOR
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
+import com.android.systemui.communal.data.repository.communalSceneRepository
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.domain.interactor.setCommunalAvailable
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -50,10 +52,12 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
+import com.google.common.truth.Truth
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -216,6 +220,28 @@ class FromDozingTransitionInteractorTest(flags: FlagsParameterization?) : SysuiT
             // Under default conditions, we should transition to LOCKSCREEN when waking up.
             assertThat(transitionRepository)
                 .startedTransition(from = KeyguardState.DOZING, to = KeyguardState.GLANCEABLE_HUB)
+        }
+
+    @Test
+    @DisableFlags(FLAG_KEYGUARD_WM_STATE_REFACTOR, FLAG_SCENE_CONTAINER)
+    @EnableFlags(FLAG_COMMUNAL_SCENE_KTF_REFACTOR)
+    fun testTransitionToGlanceableHub_onWakeup_ifAvailable() =
+        testScope.runTest {
+            // Hub is available.
+            whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
+            kosmos.setCommunalAvailable(true)
+            runCurrent()
+
+            // Device turns on.
+            powerInteractor.setAwakeForTest()
+            advanceTimeBy(50L)
+            runCurrent()
+
+            // We transition to the hub when waking up.
+            Truth.assertThat(kosmos.communalSceneRepository.currentScene.value)
+                .isEqualTo(CommunalScenes.Communal)
+            // No transitions are directly started by this interactor.
+            assertThat(transitionRepository).noTransitionsStarted()
         }
 
     @Test

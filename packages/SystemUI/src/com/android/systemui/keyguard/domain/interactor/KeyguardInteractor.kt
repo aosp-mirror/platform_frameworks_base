@@ -175,8 +175,8 @@ constructor(
     val isDreamingWithOverlay: Flow<Boolean> = repository.isDreamingWithOverlay
 
     /**
-     * Whether the system is dreaming. [isDreaming] will be always be true when [isDozing] is true,
-     * but not vice-versa. Also accounts for [isDreamingWithOverlay]
+     * Whether the system is dreaming. [KeyguardRepository.isDreaming] will be always be true when
+     * [isDozing] is true, but not vice-versa. Also accounts for [isDreamingWithOverlay].
      */
     val isDreaming: StateFlow<Boolean> =
         merge(repository.isDreaming, repository.isDreamingWithOverlay)
@@ -185,6 +185,9 @@ constructor(
                 started = SharingStarted.Eagerly,
                 initialValue = false,
             )
+
+    /** Whether any dreaming is running, including the doze dream. */
+    val isDreamingAny: Flow<Boolean> = repository.isDreaming
 
     /** Whether the system is dreaming and the active dream is hosted in lockscreen */
     val isActiveDreamLockscreenHosted: StateFlow<Boolean> = repository.isActiveDreamLockscreenHosted
