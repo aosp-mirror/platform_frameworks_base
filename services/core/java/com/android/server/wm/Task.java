@@ -3410,6 +3410,36 @@ class Task extends TaskFragment {
         info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
                 ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
+        info.topActivityMainWindowFrame = calculateTopActivityMainWindowFrameForTaskInfo(top);
+    }
+
+    /**
+     * Returns the top activity's main window frame if it doesn't match
+     * {@link ActivityRecord#getBounds() the top activity bounds}, or {@code null}, otherwise.
+     *
+     * @param top The top running activity of the task
+     */
+    @Nullable
+    private static Rect calculateTopActivityMainWindowFrameForTaskInfo(
+            @Nullable ActivityRecord top) {
+        if (!Flags.betterSupportNonMatchParentActivity()) {
+            return null;
+        }
+        if (top == null) {
+            return null;
+        }
+        final WindowState mainWindow = top.findMainWindow();
+        if (mainWindow == null) {
+            return null;
+        }
+        if (!mainWindow.mHaveFrame) {
+            return null;
+        }
+        final Rect windowFrame = mainWindow.getFrame();
+        if (top.getBounds().equals(windowFrame)) {
+            return null;
+        }
+        return windowFrame;
     }
 
     /**
