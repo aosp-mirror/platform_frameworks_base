@@ -61,7 +61,6 @@ class MouseKeysInterceptorTest {
     companion object {
         const val DISPLAY_ID = 1
         const val DEVICE_ID = 123
-        const val MOUSE_POINTER_MOVEMENT_STEP = 1.8f
         // This delay is required for key events to be sent and handled correctly.
         // The handler only performs a move/scroll event if it receives the key event
         // at INTERVAL_MILLIS (which happens in practice). Hence, we need this delay in the tests.
@@ -159,8 +158,8 @@ class MouseKeysInterceptorTest {
         testLooper.dispatchAll()
 
         // Verify the sendRelativeEvent method is called once and capture the arguments
-        verifyRelativeEvents(arrayOf(-MOUSE_POINTER_MOVEMENT_STEP / sqrt(2.0f)),
-            arrayOf(MOUSE_POINTER_MOVEMENT_STEP / sqrt(2.0f)))
+        verifyRelativeEvents(arrayOf(-MouseKeysInterceptor.MOUSE_POINTER_MOVEMENT_STEP / sqrt(2.0f)),
+            arrayOf(MouseKeysInterceptor.MOUSE_POINTER_MOVEMENT_STEP / sqrt(2.0f)))
     }
 
     @Test
@@ -232,7 +231,8 @@ class MouseKeysInterceptorTest {
         testLooper.dispatchAll()
 
         // Verify the sendScrollEvent method is called once and capture the arguments
-        verifyScrollEvents(arrayOf<Float>(0f), arrayOf<Float>(1.0f))
+        verifyScrollEvents(arrayOf<Float>(0f),
+	    arrayOf<Float>(MouseKeysInterceptor.MOUSE_SCROLL_STEP))
     }
 
     @Test
@@ -247,7 +247,8 @@ class MouseKeysInterceptorTest {
         testLooper.dispatchAll()
 
         // Verify the sendRelativeEvent method is called once and capture the arguments
-        verifyRelativeEvents(arrayOf<Float>(0f), arrayOf<Float>(-MOUSE_POINTER_MOVEMENT_STEP))
+        verifyRelativeEvents(arrayOf<Float>(0f),
+	    arrayOf<Float>(-MouseKeysInterceptor.MOUSE_POINTER_MOVEMENT_STEP))
     }
 
     private fun verifyRelativeEvents(expectedX: Array<Float>, expectedY: Array<Float>) {
