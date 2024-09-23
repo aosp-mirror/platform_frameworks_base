@@ -44,7 +44,6 @@ import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToOccludedTransitionViewModel
-import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.DozingToGlanceableHubTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DozingToOccludedTransitionViewModel
@@ -536,20 +535,18 @@ constructor(
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be
      * translated as the keyguard fades out.
      */
-    fun translationY(params: BurnInParameters): Flow<Float> {
-        // with SceneContainer, x translation is handled by views, y is handled by compose
-        SceneContainerFlag.assertInLegacyMode()
-        return combine(
-                aodBurnInViewModel
-                    .movement(params)
-                    .map { it.translationY.toFloat() }
-                    .onStart { emit(0f) },
+    val translationY: Flow<Float> =
+        combine(
+                aodBurnInViewModel.movement.map { it.translationY.toFloat() }.onStart { emit(0f) },
                 isOnLockscreenWithoutShade,
                 merge(
                     keyguardInteractor.keyguardTranslationY,
                     occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
                 ),
             ) { burnInY, isOnLockscreenWithoutShade, translationY ->
+                // with SceneContainer, x translation is handled by views, y is handled by compose
+                SceneContainerFlag.assertInLegacyMode()
+
                 if (isOnLockscreenWithoutShade) {
                     burnInY + translationY
                 } else {
@@ -557,7 +554,6 @@ constructor(
                 }
             }
             .dumpWhileCollecting("translationY")
-    }
 
     /** Horizontal translation to apply to the container. */
     val translationX: Flow<Float> =
