@@ -589,6 +589,16 @@ flag {
 }
 
 flag {
+    name: "clipboard_use_description_mimetype"
+    namespace: "systemui"
+    description: "Read item mimetype from description rather than checking URI"
+    bug: "357197236"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "screenshot_action_dismiss_system_windows"
     namespace: "systemui"
     description: "Dismiss existing system windows when starting action from screenshot UI"
