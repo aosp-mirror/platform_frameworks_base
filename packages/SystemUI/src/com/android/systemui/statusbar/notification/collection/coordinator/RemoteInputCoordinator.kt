@@ -117,18 +117,12 @@ constructor(
                             (entry.getSbn().getNotification().flags and
                                 FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0
                         ) {
+                            // If we've received an update from the system and the entry is marked
+                            // as lifetime extended, that means system server has received a
+                            // cancelation in response to a direct reply, and sent an update to
+                            // let system ui know that it should rebuild the notification with
+                            // that direct reply.
                             if (
-                                mNotificationRemoteInputManager.shouldKeepForRemoteInputHistory(
-                                    entry
-                                )
-                            ) {
-                                val newSbn = mRebuilder.rebuildForRemoteInputReply(entry)
-                                entry.onRemoteInputInserted()
-                                mNotifUpdater.onInternalNotificationUpdate(
-                                    newSbn,
-                                    "Extending lifetime of notification with remote input",
-                                )
-                            } else if (
                                 mNotificationRemoteInputManager.shouldKeepForSmartReplyHistory(
                                     entry
                                 )
@@ -140,16 +134,11 @@ constructor(
                                     "Extending lifetime of notification with smart reply",
                                 )
                             } else {
-                                // The app may have re-cancelled a notification after it had already
-                                // been lifetime extended.
-                                // Rebuild the notification with the replies it already had to
-                                // ensure
-                                // those replies continue to be displayed.
-                                val newSbn = mRebuilder.rebuildWithExistingReplies(entry)
+                                val newSbn = mRebuilder.rebuildForRemoteInputReply(entry)
+                                entry.onRemoteInputInserted()
                                 mNotifUpdater.onInternalNotificationUpdate(
                                     newSbn,
-                                    "Extending lifetime of notification that has already been " +
-                                        "lifetime extended.",
+                                    "Extending lifetime of notification with remote input",
                                 )
                             }
                         } else {
