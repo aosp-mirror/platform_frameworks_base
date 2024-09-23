@@ -57,6 +57,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Consumer;
+
 /**
  * Build/Install/Run:
  * atest TouchpadDebugViewTest
@@ -99,10 +101,12 @@ public class TouchpadDebugViewTest {
 
         when(mInputManager.getInputDevice(TOUCHPAD_DEVICE_ID)).thenReturn(inputDevice);
 
+        Consumer<Integer> touchpadSwitchHandler = id -> {};
+
         mTouchpadDebugView = new TouchpadDebugView(mTestableContext, TOUCHPAD_DEVICE_ID,
                 new TouchpadHardwareProperties.Builder(0f, 0f, 500f,
                         500f, 45f, 47f, -4f, 5f, (short) 10, true,
-                        true).build());
+                        true).build(), touchpadSwitchHandler);
 
         mTouchpadDebugView.measure(
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
@@ -321,26 +325,30 @@ public class TouchpadDebugViewTest {
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.rgb(118, 151, 99));
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#769763"));
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.rgb(84, 85, 169));
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#5455A9"));
 
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 1 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.rgb(118, 151, 99));
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#769763"));
 
         // Color should not change because hardware state of a different touchpad
         mTouchpadDebugView.updateHardwareState(
                 new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
                         new TouchpadFingerState[0]), TOUCHPAD_DEVICE_ID + 1);
 
-        assertEquals(((ColorDrawable) child.getBackground()).getColor(), Color.rgb(118, 151, 99));
+        assertEquals(((ColorDrawable) child.getBackground()).getColor(),
+                Color.parseColor("#769763"));
     }
 
     @Test

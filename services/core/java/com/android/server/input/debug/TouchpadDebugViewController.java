@@ -45,8 +45,8 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
     private boolean mTouchpadVisualizerEnabled = false;
 
     public TouchpadDebugViewController(Context context, Looper looper,
-            InputManagerService inputManagerService) {
-        //TODO(b/363979581): Handle multi-display scenarios
+                                       InputManagerService inputManagerService) {
+        //TODO(b/369059937): Handle multi-display scenarios
         mContext = context;
         mHandler = new Handler(looper);
         mInputManagerService = inputManagerService;
@@ -75,6 +75,14 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
                 onInputDeviceAdded(id);
             }
         }
+    }
+
+    /**
+     * Switch to showing the touchpad with the given device ID
+     */
+    public void switchVisualisationToTouchpadId(int newDeviceId) {
+        if (mTouchpadDebugView != null) hideDebugView(mTouchpadDebugView.getTouchpadId());
+        showDebugView(newDeviceId);
     }
 
     @Override
@@ -117,7 +125,7 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
                         touchpadId);
 
         mTouchpadDebugView = new TouchpadDebugView(mContext, touchpadId,
-                touchpadHardwareProperties);
+                touchpadHardwareProperties, this::switchVisualisationToTouchpadId);
         final WindowManager.LayoutParams mWindowLayoutParams =
                 mTouchpadDebugView.getWindowLayoutParams();
 
@@ -150,7 +158,7 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
      * @param deviceId              the deviceId of the touchpad that is sending the hardware state
      */
     public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState,
-            int deviceId) {
+                                            int deviceId) {
         if (mTouchpadDebugView != null) {
             mTouchpadDebugView.updateHardwareState(touchpadHardwareState, deviceId);
         }
