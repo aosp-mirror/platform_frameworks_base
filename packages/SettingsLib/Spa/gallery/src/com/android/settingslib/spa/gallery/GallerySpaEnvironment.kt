@@ -42,6 +42,7 @@ import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.scaffold.NonScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.preference.IntroPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ListPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
@@ -109,6 +110,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 SuwScaffoldPageProvider,
                 BannerPageProvider,
                 CopyablePageProvider,
+                IntroPreferencePageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),
