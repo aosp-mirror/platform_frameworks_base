@@ -8,3 +8,10 @@ flag {
   description: "Add media metrics for transcoding/editing events."
   bug: "297487694"
 }
+
+flag {
+  name: "stagefrightrecorder_enable_b_frames"
+  namespace: "media_solutions"
+  description: "Enable B frames for Stagefright recorder."
+  bug: "341121900"
+}
