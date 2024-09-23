@@ -97,12 +97,13 @@ internal constructor(
     private val window: ScreenshotWindow
     private val actionExecutor: ActionExecutor
     private val copyBroadcastReceiver: BroadcastReceiver
+    private val currentRequestCallbacks: MutableList<TakeScreenshotService.RequestCallback> =
+        mutableListOf()
 
     private var screenshotSoundController: ScreenshotSoundController? = null
     private var screenBitmap: Bitmap? = null
     private var screenshotTakenInPortrait = false
     private var screenshotAnimation: Animator? = null
-    private var currentRequestCallback: TakeScreenshotService.RequestCallback? = null
     private var packageName = ""
 
     /** Tracks config changes that require re-creating UI */
@@ -170,7 +171,6 @@ internal constructor(
     ) {
         Assert.isMainThread()
 
-        currentRequestCallback = requestCallback
         if (screenshot.type == TAKE_SCREENSHOT_FULLSCREEN && screenshot.bitmap == null) {
             val bounds = fullScreenRect
             screenshot.bitmap = imageCapture.captureDisplay(display.displayId, bounds)
@@ -181,7 +181,7 @@ internal constructor(
         if (currentBitmap == null) {
             Log.e(TAG, "handleScreenshot: Screenshot bitmap was null")
             notificationController.notifyScreenshotError(R.string.screenshot_failed_to_capture_text)
-            currentRequestCallback?.reportError()
+            requestCallback.reportError()
             return
         }
 
@@ -194,8 +194,10 @@ internal constructor(
             // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
             // and sharing shouldn't be exposed to the user.
             saveScreenshotAndToast(screenshot, finisher)
+            requestCallback.onFinish()
             return
         }
+        currentRequestCallbacks.add(requestCallback)
 
         broadcastSender.sendBroadcast(
             Intent(ClipboardOverlayController.SCREENSHOT_ACTION),
@@ -499,8 +501,8 @@ internal constructor(
         Log.d(TAG, "finishDismiss")
         actionsController.endScreenshotSession()
         scrollCaptureExecutor.close()
-        currentRequestCallback?.onFinish()
-        currentRequestCallback = null
+        currentRequestCallbacks.forEach { it.onFinish() }
+        currentRequestCallbacks.clear()
         viewProxy.reset()
         removeWindow()
         screenshotHandler.cancelTimeout()
