@@ -3,7 +3,7 @@
 //            --readonly=false \
 //            --feature=WATCH:1 \
 //            --feature=WIFI:0 \
-//            --feature=VULKAN:-1 \
+//            --feature=VULKAN:UNAVAILABLE \
 //            --feature=AUTO:
 package com.android.systemfeatures;
 
