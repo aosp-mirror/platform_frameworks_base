@@ -147,3 +147,14 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "use_sticky_bcast_cache"
+     description: "Use cache for sticky broadcast intents"
+     is_fixed_read_only: true
+     bug: "356148006"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
