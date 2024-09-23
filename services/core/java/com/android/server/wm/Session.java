@@ -699,8 +699,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final WindowState win = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (win != null) {
-                ImeTracker.forLogging().onProgress(imeStatsToken,
-                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                    ImeTracker.forLogging().onProgress(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                }
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
