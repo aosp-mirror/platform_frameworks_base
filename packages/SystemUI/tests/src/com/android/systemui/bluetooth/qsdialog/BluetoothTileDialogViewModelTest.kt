@@ -31,6 +31,8 @@ import com.android.settingslib.flags.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.testKosmos
@@ -43,12 +45,12 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -65,6 +67,7 @@ import org.mockito.junit.MockitoRule
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(Flags.FLAG_BLUETOOTH_QS_TILE_DIALOG_AUTO_ON_TOGGLE)
 class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
@@ -111,15 +114,13 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     private val sharedPreferences = FakeSharedPreferences()
 
-    private lateinit var scheduler: TestCoroutineScheduler
     private lateinit var dispatcher: CoroutineDispatcher
     private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
-        scheduler = TestCoroutineScheduler()
-        dispatcher = UnconfinedTestDispatcher(scheduler)
-        testScope = TestScope(dispatcher)
+        dispatcher = kosmos.testDispatcher
+        testScope = kosmos.testScope
         // TODO(b/364515243): use real object instead of mock
         whenever(kosmos.deviceItemInteractor.deviceItemUpdate).thenReturn(MutableSharedFlow())
         bluetoothTileDialogViewModel =
@@ -141,6 +142,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
                         dispatcher
                     )
                 ),
+                kosmos.audioSharingInteractor,
                 kosmos.audioSharingButtonViewModelFactory,
                 bluetoothDeviceMetadataInteractor,
                 mDialogTransitionAnimator,
@@ -175,6 +177,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testShowDialog_noAnimation() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(null)
+            runCurrent()
 
             verify(mDialogTransitionAnimator, never()).show(any(), any(), any())
         }
@@ -184,6 +187,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testShowDialog_animated() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(expandable)
+            runCurrent()
 
             verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
         }
@@ -194,6 +198,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             backgroundExecutor.execute {
                 bluetoothTileDialogViewModel.showDialog(expandable)
+                runCurrent()
 
                 verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
             }
@@ -204,6 +209,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
     fun testShowDialog_fetchDeviceItem() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(null)
+            runCurrent()
 
             verify(deviceItemInteractor).deviceItemUpdate
         }
@@ -214,6 +220,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             whenever(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
             bluetoothTileDialogViewModel.showDialog(null)
+            runCurrent()
 
             val clickedView = View(context)
             bluetoothTileDialogViewModel.onPairNewDeviceClicked(clickedView)

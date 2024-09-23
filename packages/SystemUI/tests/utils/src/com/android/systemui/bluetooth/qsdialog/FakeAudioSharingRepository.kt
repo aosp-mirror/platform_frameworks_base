@@ -17,10 +17,30 @@
 package com.android.systemui.bluetooth.qsdialog
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 class FakeAudioSharingRepository : AudioSharingRepository {
+    var sourceAdded: Boolean = false
+        private set
+
+    private var profile: LocalBluetoothLeBroadcast? = null
+
+    override val leAudioBroadcastProfile: LocalBluetoothLeBroadcast?
+        get() = profile
+
+    override val audioSourceStateUpdate: Flow<Unit> = emptyFlow()
+
+    override suspend fun addSource() {
+        sourceAdded = true
+    }
 
     override suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
 
     override suspend fun startAudioSharing() {}
+
+    fun setLeAudioBroadcastProfile(leAudioBroadcastProfile: LocalBluetoothLeBroadcast?) {
+        profile = leAudioBroadcastProfile
+    }
 }

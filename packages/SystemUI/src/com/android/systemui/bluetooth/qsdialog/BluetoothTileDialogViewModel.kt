@@ -30,6 +30,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
+import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -51,6 +52,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
@@ -67,6 +69,7 @@ constructor(
     private val deviceItemActionInteractor: DeviceItemActionInteractor,
     private val bluetoothStateInteractor: BluetoothStateInteractor,
     private val bluetoothAutoOnInteractor: BluetoothAutoOnInteractor,
+    private val audioSharingInteractor: AudioSharingInteractor,
     private val audioSharingButtonViewModelFactory: AudioSharingButtonViewModel.Factory,
     private val bluetoothDeviceMetadataInteractor: BluetoothDeviceMetadataInteractor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
@@ -140,7 +143,15 @@ constructor(
                 // the device item list and animate the progress bar.
                 merge(
                         deviceItemInteractor.deviceItemUpdateRequest,
-                        bluetoothDeviceMetadataInteractor.metadataUpdate
+                        bluetoothDeviceMetadataInteractor.metadataUpdate,
+                        if (
+                            BluetoothUtils.isAudioSharingEnabled() &&
+                                audioSharingQsDialogImprovement()
+                        ) {
+                            audioSharingInteractor.audioSourceStateUpdate
+                        } else {
+                            emptyFlow()
+                        }
                     )
                     .onEach {
                         dialogDelegate.animateProgressBar(dialog, true)
@@ -155,6 +166,10 @@ constructor(
                     .launchIn(this)
 
                 if (BluetoothUtils.isAudioSharingEnabled()) {
+                    if (audioSharingQsDialogImprovement()) {
+                        launch { audioSharingInteractor.handleAudioSourceWhenReady() }
+                    }
+
                     audioSharingButtonViewModelFactory.create().run {
                         audioSharingButtonStateUpdate
                             .onEach {

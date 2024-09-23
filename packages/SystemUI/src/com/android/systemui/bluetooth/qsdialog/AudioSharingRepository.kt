@@ -18,13 +18,22 @@ package com.android.systemui.bluetooth.qsdialog
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant
 import com.android.settingslib.bluetooth.LocalBluetoothManager
+import com.android.settingslib.bluetooth.onSourceConnectedOrRemoved
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.withContext
 
 interface AudioSharingRepository {
+    val leAudioBroadcastProfile: LocalBluetoothLeBroadcast?
+
+    val audioSourceStateUpdate: Flow<Unit>
+
+    suspend fun addSource()
 
     suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice)
 
@@ -37,8 +46,24 @@ class AudioSharingRepositoryImpl(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : AudioSharingRepository {
 
-    private val leAudioBroadcastProfile: LocalBluetoothLeBroadcast?
+    override val leAudioBroadcastProfile: LocalBluetoothLeBroadcast?
         get() = localBluetoothManager.profileManager?.leAudioBroadcastProfile
+
+    private val leAudioBroadcastAssistantProfile: LocalBluetoothLeBroadcastAssistant?
+        get() = localBluetoothManager.profileManager?.leAudioBroadcastAssistantProfile
+
+    override val audioSourceStateUpdate: Flow<Unit> =
+        leAudioBroadcastAssistantProfile?.onSourceConnectedOrRemoved ?: emptyFlow()
+
+    override suspend fun addSource() {
+        withContext(backgroundDispatcher) {
+            leAudioBroadcastProfile?.latestBluetoothLeBroadcastMetadata?.let { metadata ->
+                leAudioBroadcastAssistantProfile?.let {
+                    it.allConnectedDevices.forEach { sink -> it.addSource(sink, metadata, false) }
+                }
+            }
+        }
+    }
 
     override suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice) {
         withContext(backgroundDispatcher) { cachedBluetoothDevice.setActive() }
@@ -51,6 +76,11 @@ class AudioSharingRepositoryImpl(
 
 @SysUISingleton
 class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
+    override val leAudioBroadcastProfile: LocalBluetoothLeBroadcast? = null
+
+    override val audioSourceStateUpdate: Flow<Unit> = emptyFlow()
+
+    override suspend fun addSource() {}
 
     override suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
 
