@@ -48,7 +48,7 @@ import com.android.systemui.recordissue.IssueRecordingService.Companion.getStopI
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
-import com.android.systemui.recordissue.TraceurMessageSender
+import com.android.systemui.recordissue.TraceurConnection
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.RecordingService
@@ -78,7 +78,7 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val userContextProvider: UserContextProvider,
-    private val traceurMessageSender: TraceurMessageSender,
+    private val traceurConnection: TraceurConnection,
     @Background private val bgExecutor: Executor,
     private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
@@ -93,7 +93,7 @@ constructor(
         metricsLogger,
         statusBarStateController,
         activityStarter,
-        qsLogger
+        qsLogger,
     ) {
 
     private val onRecordingChangeListener = Runnable { refreshState() }
@@ -109,7 +109,7 @@ constructor(
 
     override fun handleDestroy() {
         super.handleDestroy()
-        bgExecutor.execute { traceurMessageSender.unbindFromTraceur(mContext) }
+        bgExecutor.execute { traceurConnection.doUnBind() }
     }
 
     override fun getTileLabel(): CharSequence = mContext.getString(R.string.qs_record_issue_label)
@@ -142,7 +142,7 @@ constructor(
             DELAY_MS,
             INTERVAL_MS,
             pendingServiceIntent(getStartIntent(userContextProvider.userContext)),
-            pendingServiceIntent(getStopIntent(userContextProvider.userContext))
+            pendingServiceIntent(getStopIntent(userContextProvider.userContext)),
         )
 
     private fun stopIssueRecordingService() =
@@ -154,7 +154,7 @@ constructor(
             userContextProvider.userContext,
             RecordingService.REQUEST_CODE,
             action,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
     private fun showPrompt(expandable: Expandable?) {

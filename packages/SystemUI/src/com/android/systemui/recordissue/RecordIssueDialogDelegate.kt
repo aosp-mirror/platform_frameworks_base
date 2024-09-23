@@ -64,7 +64,7 @@ constructor(
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     private val screenCaptureDisabledDialogDelegate: ScreenCaptureDisabledDialogDelegate,
     private val state: IssueRecordingState,
-    private val traceurMessageSender: TraceurMessageSender,
+    private val traceurConnection: TraceurConnection,
     @Assisted private val onStarted: Runnable,
 ) : SystemUIDialog.Delegate {
 
@@ -88,8 +88,8 @@ constructor(
             setPositiveButton(R.string.qs_record_issue_start) { _, _ -> onStarted.run() }
         }
         bgExecutor.execute {
-            traceurMessageSender.onBoundToTraceur.add { traceurMessageSender.getTags(state) }
-            traceurMessageSender.bindToTraceur(dialog.context)
+            traceurConnection.onBound.add { traceurConnection.getTags(state) }
+            traceurConnection.doBind()
         }
     }
 
@@ -151,7 +151,7 @@ constructor(
 
         mediaProjectionMetricsLogger.notifyProjectionInitiated(
             userTracker.userId,
-            SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER
+            SessionCreationSource.SYSTEM_UI_SCREEN_RECORDER,
         )
 
         if (!state.hasUserApprovedScreenRecording) {
@@ -189,7 +189,7 @@ constructor(
                         CustomTraceSettingsDialogDelegate(
                                 factory,
                                 state.customTraceState,
-                                state.tagTitles
+                                state.tagTitles,
                             ) {
                                 onMenuItemClickListener.onMenuItemClick(it)
                             }

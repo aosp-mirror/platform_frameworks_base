@@ -50,7 +50,7 @@ constructor(
     keyguardDismissUtil: KeyguardDismissUtil,
     dialogTransitionAnimator: DialogTransitionAnimator,
     panelInteractor: PanelInteractor,
-    traceurMessageSender: TraceurMessageSender,
+    traceurConnection: TraceurConnection,
     private val issueRecordingState: IssueRecordingState,
     iActivityManager: IActivityManager,
 ) :
@@ -69,7 +69,7 @@ constructor(
             bgExecutor,
             dialogTransitionAnimator,
             panelInteractor,
-            traceurMessageSender,
+            traceurConnection,
             issueRecordingState,
             iActivityManager,
             notificationManager,

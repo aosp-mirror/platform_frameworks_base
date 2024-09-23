@@ -33,7 +33,7 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
-import com.android.systemui.recordissue.TraceurMessageSender
+import com.android.systemui.recordissue.TraceurConnection
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.settings.UserContextProvider
@@ -75,7 +75,7 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var panelInteractor: PanelInteractor
     @Mock private lateinit var userContextProvider: UserContextProvider
     @Mock private lateinit var issueRecordingState: IssueRecordingState
-    @Mock private lateinit var traceurMessageSender: TraceurMessageSender
+    @Mock private lateinit var traceurConnection: TraceurConnection
     @Mock private lateinit var delegateFactory: RecordIssueDialogDelegate.Factory
     @Mock private lateinit var dialogDelegate: RecordIssueDialogDelegate
     @Mock private lateinit var dialog: SystemUIDialog
@@ -107,7 +107,7 @@ class RecordIssueTileTest : SysuiTestCase() {
                 dialogLauncherAnimator,
                 panelInteractor,
                 userContextProvider,
-                traceurMessageSender,
+                traceurConnection,
                 Executors.newSingleThreadExecutor(),
                 issueRecordingState,
                 delegateFactory,
@@ -169,7 +169,7 @@ class RecordIssueTileTest : SysuiTestCase() {
             .executeWhenUnlocked(
                 isA(ActivityStarter.OnDismissAction::class.java),
                 eq(false),
-                eq(true)
+                eq(true),
             )
     }
 }

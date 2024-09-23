@@ -53,7 +53,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
     private val bgExecutor = kosmos.fakeExecutor
     private val userContextProvider: UserContextProvider = kosmos.userTracker
     private val dialogTransitionAnimator: DialogTransitionAnimator = kosmos.dialogTransitionAnimator
-    private lateinit var traceurMessageSender: TraceurMessageSender
+    private lateinit var traceurConnection: TraceurConnection
     private val issueRecordingState =
         IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
 
@@ -65,13 +65,13 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        traceurMessageSender = mock<TraceurMessageSender>()
+        traceurConnection = mock<TraceurConnection>()
         underTest =
             IssueRecordingServiceSession(
                 bgExecutor,
                 dialogTransitionAnimator,
                 panelInteractor,
-                traceurMessageSender,
+                traceurConnection,
                 issueRecordingState,
                 iActivityManager,
                 notificationManager,
@@ -85,7 +85,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isTrue()
-        verify(traceurMessageSender).startTracing(any<TraceConfig>())
+        verify(traceurConnection).startTracing(any<TraceConfig>())
     }
 
     @Test
@@ -94,7 +94,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isFalse()
-        verify(traceurMessageSender).stopTracing()
+        verify(traceurConnection).stopTracing()
     }
 
     @Test
@@ -124,7 +124,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         underTest.share(0, uri, mContext)
         bgExecutor.runAllReady()
 
-        verify(traceurMessageSender).shareTraces(mContext, uri)
+        verify(traceurConnection).shareTraces(mContext, uri)
     }
 
     @Test
