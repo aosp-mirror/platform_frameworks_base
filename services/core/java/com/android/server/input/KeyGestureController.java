@@ -16,14 +16,23 @@
 
 package com.android.server.input;
 
+import static android.content.pm.PackageManager.FEATURE_LEANBACK;
+import static android.content.pm.PackageManager.FEATURE_WATCH;
+import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
+
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiPressGestures;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 
 import android.annotation.BinderThread;
 import android.annotation.MainThread;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.input.AidlKeyGestureEvent;
 import android.hardware.input.IKeyGestureEventListener;
 import android.hardware.input.IKeyGestureHandler;
@@ -35,18 +44,23 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.InputDevice;
+import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.policy.KeyCombinationManager;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
@@ -82,19 +96,35 @@ final class KeyGestureController {
     private static final int SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY = 1;
     private static final int LAST_SEARCH_KEY_BEHAVIOR = SEARCH_KEY_BEHAVIOR_TARGET_ACTIVITY;
 
+    // must match: config_keyChordPowerVolumeUp in config.xml
+    static final int POWER_VOLUME_UP_BEHAVIOR_NOTHING = 0;
+    static final int POWER_VOLUME_UP_BEHAVIOR_MUTE = 1;
+    static final int POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS = 2;
+
     private final Context mContext;
     private final Handler mHandler;
     private final int mSystemPid;
+    private final KeyCombinationManager mKeyCombinationManager;
+    private final SettingsObserver mSettingsObserver;
 
     // Pending actions
     private boolean mPendingMetaAction;
     private boolean mPendingCapsLockToggle;
     private boolean mPendingHideRecentSwitcher;
 
-    // Key behaviors
+    // Platform behaviors
     private boolean mEnableBugReportKeyboardShortcut;
+    private boolean mHasFeatureWatch;
+    private boolean mHasFeatureLeanback;
+
+    // Key behaviors
     private int mSearchKeyBehavior;
     private int mSettingsKeyBehavior;
+
+    // Settings behaviors
+    private int mRingerToggleChord = Settings.Secure.VOLUME_HUSH_OFF;
+    private int mPowerVolUpBehavior;
+
 
     // List of currently registered key gesture event listeners keyed by process pid
     @GuardedBy("mKeyGestureEventListenerRecords")
@@ -128,11 +158,18 @@ final class KeyGestureController {
                 return Integer.compare(p1, p2);
             }
         });
+        mKeyCombinationManager = new KeyCombinationManager(mHandler);
+        mSettingsObserver = new SettingsObserver(mHandler);
         initBehaviors();
+        initKeyCombinationRules();
     }
 
     private void initBehaviors() {
         mEnableBugReportKeyboardShortcut = "1".equals(SystemProperties.get("ro.debuggable"));
+
+        PackageManager pm = mContext.getPackageManager();
+        mHasFeatureWatch = pm.hasSystemFeature(FEATURE_WATCH);
+        mHasFeatureLeanback = pm.hasSystemFeature(FEATURE_LEANBACK);
 
         Resources res = mContext.getResources();
         mSearchKeyBehavior = res.getInteger(R.integer.config_searchKeyBehavior);
@@ -145,6 +182,251 @@ final class KeyGestureController {
                 || mSettingsKeyBehavior > LAST_SETTINGS_KEY_BEHAVIOR) {
             mSettingsKeyBehavior = SETTINGS_KEY_BEHAVIOR_SETTINGS_ACTIVITY;
         }
+
+        mHandler.post(this::initBehaviorsFromSettings);
+    }
+
+    private void initBehaviorsFromSettings() {
+        ContentResolver resolver = mContext.getContentResolver();
+        mRingerToggleChord = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.VOLUME_HUSH_GESTURE, Settings.Secure.VOLUME_HUSH_OFF,
+                UserHandle.USER_CURRENT);
+
+        mPowerVolUpBehavior = Settings.Global.getInt(resolver,
+                Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
+                mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_keyChordPowerVolumeUp));
+    }
+
+    private void initKeyCombinationRules() {
+        if (!useKeyGestureEventHandler() || !useKeyGestureEventHandlerMultiPressGestures()) {
+            return;
+        }
+        // TODO(b/358569822): Handle Power, Back key properly since key combination gesture is
+        //  captured here and rest of the Power, Back key behaviors are handled in PWM
+        final boolean screenshotChordEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableScreenshotChord);
+
+        if (screenshotChordEnabled) {
+            mKeyCombinationManager.addRule(
+                    new KeyCombinationManager.TwoKeysCombinationRule(KeyEvent.KEYCODE_VOLUME_DOWN,
+                            KeyEvent.KEYCODE_POWER) {
+                        @Override
+                        public boolean preCondition() {
+                            return isKeyGestureSupported(
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD);
+                        }
+
+                        @Override
+                        public void execute() {
+                            handleKeyGesture(
+                                    new int[]{KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_POWER},
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
+                                    KeyGestureEvent.ACTION_GESTURE_START, 0);
+                        }
+
+                        @Override
+                        public void cancel() {
+                            handleKeyGesture(
+                                    new int[]{KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_POWER},
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
+                                    KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                    KeyGestureEvent.FLAG_CANCELLED);
+                        }
+                    });
+
+            if (mHasFeatureWatch) {
+                mKeyCombinationManager.addRule(
+                        new KeyCombinationManager.TwoKeysCombinationRule(KeyEvent.KEYCODE_POWER,
+                                KeyEvent.KEYCODE_STEM_PRIMARY) {
+                            @Override
+                            public boolean preCondition() {
+                                return isKeyGestureSupported(
+                                        KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD);
+                            }
+
+                            @Override
+                            public void execute() {
+                                handleKeyGesture(new int[]{KeyEvent.KEYCODE_POWER,
+                                                KeyEvent.KEYCODE_STEM_PRIMARY},
+                                        KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
+                                        KeyGestureEvent.ACTION_GESTURE_START, 0);
+                            }
+                            @Override
+                            public void cancel() {
+                                handleKeyGesture(new int[]{KeyEvent.KEYCODE_POWER,
+                                                KeyEvent.KEYCODE_STEM_PRIMARY},
+                                        KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
+                                        KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                        KeyGestureEvent.FLAG_CANCELLED);
+                            }
+                        });
+            }
+        }
+
+        mKeyCombinationManager.addRule(
+                new KeyCombinationManager.TwoKeysCombinationRule(KeyEvent.KEYCODE_VOLUME_DOWN,
+                        KeyEvent.KEYCODE_VOLUME_UP) {
+                    @Override
+                    public boolean preCondition() {
+                        return isKeyGestureSupported(
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD);
+                    }
+
+                    @Override
+                    public void execute() {
+                        handleKeyGesture(
+                                new int[]{KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP},
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD,
+                                KeyGestureEvent.ACTION_GESTURE_START, 0);
+                    }
+
+                    @Override
+                    public void cancel() {
+                        handleKeyGesture(
+                                new int[]{KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP},
+                                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                KeyGestureEvent.FLAG_CANCELLED);
+                    }
+                });
+
+        // Volume up + power can either be the "ringer toggle chord" or as another way to
+        // launch GlobalActions. This behavior can change at runtime so we must check behavior
+        // inside the TwoKeysCombinationRule.
+        mKeyCombinationManager.addRule(
+                new KeyCombinationManager.TwoKeysCombinationRule(KeyEvent.KEYCODE_VOLUME_UP,
+                        KeyEvent.KEYCODE_POWER) {
+                    @Override
+                    public boolean preCondition() {
+                        if (!isKeyGestureSupported(getGestureType())) {
+                            return false;
+                        }
+                        switch (mPowerVolUpBehavior) {
+                            case POWER_VOLUME_UP_BEHAVIOR_MUTE:
+                                return mRingerToggleChord != Settings.Secure.VOLUME_HUSH_OFF;
+                            default:
+                                return true;
+                        }
+                    }
+                    @Override
+                    public void execute() {
+                        int gestureType = getGestureType();
+                        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+                            return;
+                        }
+                        handleKeyGesture(
+                                new int[]{KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_POWER},
+                                gestureType, KeyGestureEvent.ACTION_GESTURE_START, 0);
+                    }
+                    @Override
+                    public void cancel() {
+                        int gestureType = getGestureType();
+                        if (gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED) {
+                            return;
+                        }
+                        handleKeyGesture(
+                                new int[]{KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_POWER},
+                                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                KeyGestureEvent.FLAG_CANCELLED);
+                    }
+
+                    @KeyGestureEvent.KeyGestureType
+                    private int getGestureType() {
+                        switch (mPowerVolUpBehavior) {
+                            case POWER_VOLUME_UP_BEHAVIOR_MUTE -> {
+                                return KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD;
+                            }
+                            case POWER_VOLUME_UP_BEHAVIOR_GLOBAL_ACTIONS -> {
+                                return KeyGestureEvent.KEY_GESTURE_TYPE_GLOBAL_ACTIONS;
+                            }
+                            default -> {
+                                return KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED;
+                            }
+                        }
+                    }
+                });
+
+        if (mHasFeatureLeanback) {
+            mKeyCombinationManager.addRule(
+                    new KeyCombinationManager.TwoKeysCombinationRule(KeyEvent.KEYCODE_BACK,
+                            KeyEvent.KEYCODE_DPAD_DOWN) {
+                        @Override
+                        public boolean preCondition() {
+                            return isKeyGestureSupported(
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD);
+                        }
+
+                        @Override
+                        public void execute() {
+                            handleKeyGesture(
+                                    new int[]{KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_DOWN},
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD,
+                                    KeyGestureEvent.ACTION_GESTURE_START, 0);
+                        }
+
+                        @Override
+                        public void cancel() {
+                            handleKeyGesture(
+                                    new int[]{KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_DOWN},
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD,
+                                    KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                    KeyGestureEvent.FLAG_CANCELLED);
+                        }
+                        @Override
+                        public long getKeyInterceptDelayMs() {
+                            // Use a timeout of 0 to prevent additional latency in processing of
+                            // this key. This will potentially cause some unwanted UI actions if the
+                            // user does end up triggering the key combination later, but in most
+                            // cases, the user will simply hit a single key, and this will allow us
+                            // to process it without first waiting to see if the combination is
+                            // going to be triggered.
+                            return 0;
+                        }
+                    });
+
+            mKeyCombinationManager.addRule(
+                    new KeyCombinationManager.TwoKeysCombinationRule(KeyEvent.KEYCODE_BACK,
+                            KeyEvent.KEYCODE_DPAD_CENTER) {
+                        @Override
+                        public boolean preCondition() {
+                            return isKeyGestureSupported(
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT);
+                        }
+
+                        @Override
+                        public void execute() {
+                            handleKeyGesture(
+                                    new int[]{KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_CENTER},
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT,
+                                    KeyGestureEvent.ACTION_GESTURE_START, 0);
+                        }
+                        @Override
+                        public void cancel() {
+                            handleKeyGesture(
+                                    new int[]{KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_CENTER},
+                                    KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT,
+                                    KeyGestureEvent.ACTION_GESTURE_COMPLETE,
+                                    KeyGestureEvent.FLAG_CANCELLED);
+                        }
+                        @Override
+                        public long getKeyInterceptDelayMs() {
+                            return 0;
+                        }
+                    });
+        }
+    }
+
+    public void systemRunning() {
+        mSettingsObserver.observe();
+    }
+
+    public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
+        final boolean interactive = (policyFlags & FLAG_INTERACTIVE) != 0;
+        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
+            return mKeyCombinationManager.interceptKey(event, interactive);
+        }
+        return false;
     }
 
     public long interceptKeyBeforeDispatching(IBinder focusedToken, KeyEvent event,
@@ -153,8 +435,21 @@ final class KeyGestureController {
         //  KeyGestureHandler (PWM is one of the handlers)
         final int keyCode = event.getKeyCode();
         final int deviceId = event.getDeviceId();
+        final int flags = event.getFlags();
         final long keyConsumed = -1;
         final long keyNotConsumed = 0;
+
+        if (mKeyCombinationManager.isKeyConsumed(event)) {
+            return keyConsumed;
+        }
+
+        if ((flags & KeyEvent.FLAG_FALLBACK) == 0) {
+            final long now = SystemClock.uptimeMillis();
+            final long interceptTimeout = mKeyCombinationManager.getKeyInterceptTimeout(keyCode);
+            if (now < interceptTimeout) {
+                return interceptTimeout - now;
+            }
+        }
 
         Set<Integer> consumedKeys = mConsumedKeysForDevice.get(deviceId);
         if (consumedKeys == null) {
@@ -577,10 +872,16 @@ final class KeyGestureController {
         return false;
     }
 
+    private boolean handleKeyGesture(int[] keycodes,
+            @KeyGestureEvent.KeyGestureType int gestureType, int action, int flags) {
+        return handleKeyGesture(KeyCharacterMap.VIRTUAL_KEYBOARD, keycodes, /* modifierState= */0,
+                gestureType, action, Display.DEFAULT_DISPLAY, /* focusedToken = */null, flags);
+    }
+
     @VisibleForTesting
     boolean handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int displayId,
-            IBinder focusedToken, int flags) {
+            @Nullable IBinder focusedToken, int flags) {
         return handleKeyGesture(createKeyGestureEvent(deviceId, keycodes,
                 modifierState, gestureType, action, displayId, flags), focusedToken);
     }
@@ -628,7 +929,7 @@ final class KeyGestureController {
     @MainThread
     private void notifyKeyGestureEvent(AidlKeyGestureEvent event) {
         InputDevice device = getInputDevice(event.deviceId);
-        if (device == null || device.isVirtual()) {
+        if (device == null) {
             return;
         }
         if (event.action == KeyGestureEvent.ACTION_GESTURE_COMPLETE) {
@@ -822,6 +1123,27 @@ final class KeyGestureController {
         }
     }
 
+    private class SettingsObserver extends ContentObserver {
+        private SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        private void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                            Settings.Secure.VOLUME_HUSH_GESTURE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Global.getUriFor(
+                            Settings.Global.KEY_CHORD_POWER_VOLUME_UP), false, this,
+                    UserHandle.USER_ALL);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            initBehaviorsFromSettings();
+        }
+    }
+
     @Nullable
     private InputDevice getInputDevice(int deviceId) {
         InputManager inputManager = mContext.getSystemService(InputManager.class);
@@ -851,6 +1173,8 @@ final class KeyGestureController {
         ipw.println("mPendingHideRecentSwitcher = " + mPendingHideRecentSwitcher);
         ipw.println("mSearchKeyBehavior = " + mSearchKeyBehavior);
         ipw.println("mSettingsKeyBehavior = " + mSettingsKeyBehavior);
+        ipw.println("mRingerToggleChord = " + mRingerToggleChord);
+        ipw.println("mPowerVolUpBehavior = " + mPowerVolUpBehavior);
         ipw.print("mKeyGestureEventListenerRecords = {");
         synchronized (mKeyGestureEventListenerRecords) {
             int size = mKeyGestureEventListenerRecords.size();
@@ -881,5 +1205,6 @@ final class KeyGestureController {
             ipw.println(ev);
         }
         ipw.decreaseIndent();
+        mKeyCombinationManager.dump("", ipw);
     }
 }

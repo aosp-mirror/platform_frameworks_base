@@ -657,14 +657,30 @@ class TestPhoneWindowManager {
         verify(mPowerManager).userActivity(anyLong(), anyBoolean());
     }
 
+    void assertShowGlobalActionsNotCalled() {
+        mTestLooper.dispatchAll();
+        verify(mGlobalActions, never()).showDialog(anyBoolean(), anyBoolean());
+        verify(mPowerManager, never()).userActivity(anyLong(), anyBoolean());
+    }
+
     void assertVolumeMute() {
         mTestLooper.dispatchAll();
         verify(mAudioManagerInternal).silenceRingerModeInternal(eq("volume_hush"));
     }
 
+    void assertVolumeNotMuted() {
+        mTestLooper.dispatchAll();
+        verify(mAudioManagerInternal, never()).silenceRingerModeInternal(any());
+    }
+
     void assertAccessibilityKeychordCalled() {
         mTestLooper.dispatchAll();
         verify(mAccessibilityShortcutController).performAccessibilityShortcut();
+    }
+
+    void assertAccessibilityKeychordNotCalled() {
+        mTestLooper.dispatchAll();
+        verify(mAccessibilityShortcutController, never()).performAccessibilityShortcut();
     }
 
     void assertDreamRequest() {
@@ -807,6 +823,16 @@ class TestPhoneWindowManager {
             verify(mActivityManagerService, never()).requestInteractiveBugReport();
         }
 
+    }
+
+    void assertBugReportTakenForTv() {
+        mTestLooper.dispatchAll();
+        verify(mPhoneWindowManager).requestBugreportForTv();
+    }
+
+    void assertBugReportNotTakenForTv() {
+        mTestLooper.dispatchAll();
+        verify(mPhoneWindowManager, never()).requestBugreportForTv();
     }
 
     void assertTogglePanel() throws RemoteException {

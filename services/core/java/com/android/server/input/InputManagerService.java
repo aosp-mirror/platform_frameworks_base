@@ -117,6 +117,7 @@ import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -611,6 +612,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
+        mKeyGestureController.systemRunning();
 
         initKeyGestures();
     }
@@ -2468,6 +2470,14 @@ public class InputManagerService extends IInputManager.Stub
             if (mFocusEventDebugView != null) {
                 mFocusEventDebugView.reportKeyEvent(event);
             }
+        }
+        if (useKeyGestureEventHandler() && mKeyGestureController.interceptKeyBeforeQueueing(event,
+                policyFlags)) {
+            // If key gesture gets triggered, we send the event to policy with KEY_GESTURE flag
+            // indicating, the event is used in triggering a key gesture. We can't block event
+            // like Power or volume keys since policy might still want to handle it to change
+            // certain states.
+            policyFlags |= WindowManagerPolicyConstants.FLAG_KEY_GESTURE_TRIGGERED;
         }
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
     }

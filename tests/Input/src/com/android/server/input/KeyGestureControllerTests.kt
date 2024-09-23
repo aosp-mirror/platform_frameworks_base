@@ -18,6 +18,7 @@ package com.android.server.input
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.input.IInputManager
 import android.hardware.input.AidlKeyGestureEvent
@@ -28,6 +29,7 @@ import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyGestureEvent
 import android.os.IBinder
 import android.os.Process
+import android.os.SystemClock
 import android.os.SystemProperties
 import android.os.test.TestLooper
 import android.platform.test.annotations.DisableFlags
@@ -36,6 +38,7 @@ import android.platform.test.annotations.Presubmit
 import android.platform.test.flag.junit.SetFlagsRule
 import android.view.InputDevice
 import android.view.KeyEvent
+import android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE
 import androidx.test.core.app.ApplicationProvider
 import com.android.internal.R
 import com.android.internal.annotations.Keep
@@ -105,6 +108,9 @@ class KeyGestureControllerTests {
     @Mock
     private lateinit var resources: Resources
 
+    @Mock
+    private lateinit var packageManager: PackageManager
+
     private var currentPid = 0
     private lateinit var context: Context
     private lateinit var inputManagerGlobalSession: InputManagerGlobal.TestSession
@@ -117,8 +123,22 @@ class KeyGestureControllerTests {
         Mockito.`when`(context.resources).thenReturn(resources)
         inputManagerGlobalSession = InputManagerGlobal.createTestSession(iInputManager)
         setupInputDevices()
+        setupBehaviors()
         testLooper = TestLooper()
         currentPid = Process.myPid()
+    }
+
+    private fun setupBehaviors() {
+        Mockito.`when`(
+            resources.getBoolean(
+                com.android.internal.R.bool.config_enableScreenshotChord
+            )
+        ).thenReturn(true)
+        Mockito.`when`(packageManager.hasSystemFeature(PackageManager.FEATURE_WATCH))
+            .thenReturn(true)
+        Mockito.`when`(packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK))
+            .thenReturn(true)
+        Mockito.`when`(context.packageManager).thenReturn(packageManager)
     }
 
     private fun setupInputDevices() {
@@ -178,15 +198,15 @@ class KeyGestureControllerTests {
         var callbackCount2 = 0
         var selfCallback = 0
         val externalHandler1 = KeyGestureHandler { _, _ ->
-            callbackCount1++;
+            callbackCount1++
             true
         }
         val externalHandler2 = KeyGestureHandler { _, _ ->
-            callbackCount2++;
+            callbackCount2++
             true
         }
         val selfHandler = KeyGestureHandler { _, _ ->
-            selfCallback++;
+            selfCallback++
             false
         }
 
@@ -740,6 +760,78 @@ class KeyGestureControllerTests {
         )
     }
 
+    @Keep
+    private fun keyGestureEventHandlerTestArguments_forKeyCombinations(): Array<TestData> {
+        return arrayOf(
+            TestData(
+                "VOLUME_DOWN + POWER -> Screenshot Chord",
+                intArrayOf(KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_POWER),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
+                intArrayOf(KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_POWER),
+                0,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_START,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+            TestData(
+                "POWER + STEM_PRIMARY -> Screenshot Chord",
+                intArrayOf(KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_STEM_PRIMARY),
+                KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
+                intArrayOf(KeyEvent.KEYCODE_POWER, KeyEvent.KEYCODE_STEM_PRIMARY),
+                0,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_START,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+            TestData(
+                "VOLUME_DOWN + VOLUME_UP -> Accessibility Chord",
+                intArrayOf(KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP),
+                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD,
+                intArrayOf(KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP),
+                0,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_START,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+            TestData(
+                "BACK + DPAD_DOWN -> TV Accessibility Chord",
+                intArrayOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_DOWN),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD,
+                intArrayOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_DOWN),
+                0,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_START,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+            TestData(
+                "BACK + DPAD_CENTER -> TV Trigger Bug Report",
+                intArrayOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_CENTER),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT,
+                intArrayOf(KeyEvent.KEYCODE_BACK, KeyEvent.KEYCODE_DPAD_CENTER),
+                0,
+                intArrayOf(
+                    KeyGestureEvent.ACTION_GESTURE_START,
+                    KeyGestureEvent.ACTION_GESTURE_COMPLETE
+                )
+            ),
+        )
+    }
+
+    @Test
+    @Parameters(method = "keyGestureEventHandlerTestArguments_forKeyCombinations")
+    @EnableFlags(
+        com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER,
+        com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER_MULTI_PRESS_GESTURES
+    )
+    fun testKeyCombinationGestures(test: TestData) {
+        val keyGestureController = KeyGestureController(context, testLooper.looper)
+        testKeyGestureInternal(keyGestureController, test)
+    }
+
     private fun testKeyGestureInternal(keyGestureController: KeyGestureController, test: TestData) {
         var handleEvents = mutableListOf<KeyGestureEvent>()
         val handler = KeyGestureHandler { event, _ ->
@@ -806,12 +898,17 @@ class KeyGestureControllerTests {
         assertAllConsumed: Boolean = false
     ) {
         var metaState = 0
+        val now = SystemClock.uptimeMillis()
         for (key in testKeys) {
             val downEvent = KeyEvent(
-                /* downTime = */0, /* eventTime = */ 0, KeyEvent.ACTION_DOWN, key,
-                0 /*repeat*/, metaState, DEVICE_ID, 0 /*scancode*/,
-                0 /*flags*/, InputDevice.SOURCE_KEYBOARD
+                now, now, KeyEvent.ACTION_DOWN, key, 0 /*repeat*/, metaState,
+                DEVICE_ID, 0 /*scancode*/, 0 /*flags*/,
+                InputDevice.SOURCE_KEYBOARD
             )
+
+            keyGestureController.interceptKeyBeforeQueueing(downEvent, FLAG_INTERACTIVE)
+            testLooper.dispatchAll()
+
             val consumed =
                 keyGestureController.interceptKeyBeforeDispatching(null, downEvent, 0) == -1L
             if (assertAllConsumed) {
@@ -828,10 +925,14 @@ class KeyGestureControllerTests {
 
         for (key in testKeys.reversed()) {
             val upEvent = KeyEvent(
-                /* downTime = */0, /* eventTime = */ 0, KeyEvent.ACTION_UP, key,
-                0 /*repeat*/, metaState, DEVICE_ID, 0 /*scancode*/,
-                0 /*flags*/, InputDevice.SOURCE_KEYBOARD
+                now, now, KeyEvent.ACTION_UP, key, 0 /*repeat*/, metaState,
+                DEVICE_ID, 0 /*scancode*/, 0 /*flags*/,
+                InputDevice.SOURCE_KEYBOARD
             )
+
+            keyGestureController.interceptKeyBeforeQueueing(upEvent, FLAG_INTERACTIVE)
+            testLooper.dispatchAll()
+
             val consumed =
                 keyGestureController.interceptKeyBeforeDispatching(null, upEvent, 0) == -1L
             if (assertAllConsumed) {
@@ -840,6 +941,7 @@ class KeyGestureControllerTests {
                     consumed
                 )
             }
+            metaState = metaState and MODIFIER.getOrDefault(key, 0).inv()
 
             upEvent.recycle()
             testLooper.dispatchAll()

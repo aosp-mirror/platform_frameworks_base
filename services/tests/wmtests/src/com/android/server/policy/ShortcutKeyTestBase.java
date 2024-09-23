@@ -241,6 +241,13 @@ class ShortcutKeyTestBase {
                         KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
     }
 
+    boolean sendKeyGestureEventCancel(int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).setFlags(
+                        KeyGestureEvent.FLAG_CANCELLED).build());
+    }
+
     boolean sendKeyGestureEventComplete(int gestureType, int modifierState) {
         return mPhoneWindowManager.sendKeyGestureEvent(
                 new KeyGestureEvent.Builder().setModifierState(modifierState).setKeyGestureType(
