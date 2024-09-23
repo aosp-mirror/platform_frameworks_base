@@ -36,7 +36,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.infra.AndroidFuture
 import com.android.server.appfunctions.FutureAppSearchSession.FutureSearchResults
 import com.google.common.truth.Truth.assertThat
-import com.google.common.util.concurrent.MoreExecutors
 import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,7 +45,6 @@ import org.junit.runners.JUnit4
 class MetadataSyncAdapterTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val appSearchManager = context.getSystemService(AppSearchManager::class.java)
-    private val testExecutor = MoreExecutors.directExecutor()
     private val packageManager = context.packageManager
 
     @Test
@@ -138,8 +136,7 @@ class MetadataSyncAdapterTest {
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         runtimeSearchSession.put(putDocumentsRequest).get()
         staticSearchSession.put(putDocumentsRequest).get()
-        val metadataSyncAdapter =
-            MetadataSyncAdapter(testExecutor, packageManager, appSearchManager)
+        val metadataSyncAdapter = MetadataSyncAdapter(packageManager, appSearchManager)
 
         val submitSyncRequest =
             metadataSyncAdapter.trySyncAppFunctionMetadataBlocking(
@@ -180,8 +177,7 @@ class MetadataSyncAdapterTest {
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         staticSearchSession.put(putDocumentsRequest).get()
-        val metadataSyncAdapter =
-            MetadataSyncAdapter(testExecutor, packageManager, appSearchManager)
+        val metadataSyncAdapter = MetadataSyncAdapter(packageManager, appSearchManager)
 
         val submitSyncRequest =
             metadataSyncAdapter.trySyncAppFunctionMetadataBlocking(
@@ -236,8 +232,7 @@ class MetadataSyncAdapterTest {
         val putDocumentsRequest: PutDocumentsRequest =
             PutDocumentsRequest.Builder().addGenericDocuments(functionRuntimeMetadata).build()
         runtimeSearchSession.put(putDocumentsRequest).get()
-        val metadataSyncAdapter =
-            MetadataSyncAdapter(testExecutor, packageManager, appSearchManager)
+        val metadataSyncAdapter = MetadataSyncAdapter(packageManager, appSearchManager)
 
         val submitSyncRequest =
             metadataSyncAdapter.trySyncAppFunctionMetadataBlocking(
