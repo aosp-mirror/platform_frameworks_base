@@ -727,7 +727,17 @@ public class CrashRecoveryTest {
         when(mRollbackManager.getAvailableRollbacks()).thenReturn(List.of(ROLLBACK_INFO_LOW,
                 ROLLBACK_INFO_HIGH, ROLLBACK_INFO_MANUAL));
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
-
+        try {
+            when(mMockPackageManager.getPackageInfo(anyString(), anyInt())).then(inv -> {
+                final PackageInfo res = new PackageInfo();
+                res.packageName = inv.getArgument(0);
+                res.setApexPackageName(res.packageName);
+                res.setLongVersionCode(VERSION_CODE);
+                return res;
+            });
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         watchdog.registerHealthObserver(rollbackObserver);
         return rollbackObserver;
     }
@@ -787,8 +797,10 @@ public class CrashRecoveryTest {
             // Verify controller by default is started when packages are ready
             assertThat(controller.mIsEnabled).isTrue();
 
-            verify(mConnectivityModuleConnector).registerHealthListener(
-                    mConnectivityModuleCallbackCaptor.capture());
+            if (!Flags.refactorCrashrecovery()) {
+                verify(mConnectivityModuleConnector).registerHealthListener(
+                        mConnectivityModuleCallbackCaptor.capture());
+            }
         }
         mAllocatedWatchdogs.add(watchdog);
         return watchdog;
