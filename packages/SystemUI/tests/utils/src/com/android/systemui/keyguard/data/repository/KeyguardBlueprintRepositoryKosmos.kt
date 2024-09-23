@@ -24,6 +24,7 @@ import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBl
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
@@ -41,6 +42,7 @@ val Kosmos.keyguardClockSection: ClockSection by
             smartspaceViewModel = keyguardSmartspaceViewModel,
             blueprintInteractor = { keyguardBlueprintInteractor },
             rootViewModel = keyguardRootViewModel,
+            aodBurnInViewModel = aodBurnInViewModel,
         )
     }
 
@@ -95,11 +97,7 @@ val Kosmos.keyguardBlueprintRepository by
     Kosmos.Fixture {
         spy(
             KeyguardBlueprintRepository(
-                blueprints =
-                    setOf(
-                        defaultKeyguardBlueprint,
-                        splitShadeBlueprint,
-                    ),
+                blueprints = setOf(defaultKeyguardBlueprint, splitShadeBlueprint),
                 handler = fakeExecutorHandler,
                 assert = mock(),
             )
