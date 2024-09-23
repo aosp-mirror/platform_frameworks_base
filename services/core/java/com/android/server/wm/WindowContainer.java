@@ -4351,4 +4351,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         t.merge(mSyncTransaction);
     }
 
+    int getSyncTransactionCommitCallbackDepth() {
+        return mSyncTransactionCommitCallbackDepth;
+    }
 }
