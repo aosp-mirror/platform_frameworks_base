@@ -265,3 +265,12 @@ flag {
     description: "Enables logging of the AppOp access tracking"
     bug: "365584286"
 }
+
+flag {
+    name: "replace_body_sensor_permission_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "android_health_services"
+    description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
+    bug: "364638912"
+}
