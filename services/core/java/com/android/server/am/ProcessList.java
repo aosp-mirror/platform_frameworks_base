@@ -4998,50 +4998,67 @@ public final class ProcessList {
     }
 
     @GuardedBy("mService")
-    ProcessChangeItem enqueueProcessChangeItemLocked(int pid, int uid) {
+    void enqueueProcessChangeItemLocked(int pid, int uid, int changes, int foregroundServicetypes) {
         synchronized (mProcessChangeLock) {
-            int i = mPendingProcessChanges.size() - 1;
-            ActivityManagerService.ProcessChangeItem item = null;
-            while (i >= 0) {
-                item = mPendingProcessChanges.get(i);
-                if (item.pid == pid) {
-                    if (DEBUG_PROCESS_OBSERVERS) {
-                        Slog.i(TAG_PROCESS_OBSERVERS, "Re-using existing item: " + item);
-                    }
-                    break;
-                }
-                i--;
-            }
-
-            if (i < 0) {
-                // No existing item in pending changes; need a new one.
-                final int num = mAvailProcessChanges.size();
-                if (num > 0) {
-                    item = mAvailProcessChanges.remove(num - 1);
-                    if (DEBUG_PROCESS_OBSERVERS) {
-                        Slog.i(TAG_PROCESS_OBSERVERS, "Retrieving available item: " + item);
-                    }
-                } else {
-                    item = new ActivityManagerService.ProcessChangeItem();
-                    if (DEBUG_PROCESS_OBSERVERS) {
-                        Slog.i(TAG_PROCESS_OBSERVERS, "Allocating new item: " + item);
-                    }
-                }
-                item.changes = 0;
-                item.pid = pid;
-                item.uid = uid;
-                if (mPendingProcessChanges.size() == 0) {
-                    if (DEBUG_PROCESS_OBSERVERS) {
-                        Slog.i(TAG_PROCESS_OBSERVERS, "*** Enqueueing dispatch processes changed!");
-                    }
-                    mService.mUiHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED_UI_MSG)
-                            .sendToTarget();
-                }
-                mPendingProcessChanges.add(item);
-            }
-
-            return item;
+            final ProcessChangeItem item = enqueueProcessChangeItemLocked(pid, uid);
+            item.changes |= changes;
+            item.foregroundServiceTypes = foregroundServicetypes;
         }
+    }
+
+    @GuardedBy("mService")
+    void enqueueProcessChangeItemLocked(int pid, int uid, int changes,
+            boolean hasForegroundActivities) {
+        synchronized (mProcessChangeLock) {
+            final ProcessChangeItem item = enqueueProcessChangeItemLocked(pid, uid);
+            item.changes |= changes;
+            item.foregroundActivities = hasForegroundActivities;
+        }
+    }
+
+    @GuardedBy({"mService", "mProcessChangeLock"})
+    private ProcessChangeItem enqueueProcessChangeItemLocked(int pid, int uid) {
+        int i = mPendingProcessChanges.size() - 1;
+        ActivityManagerService.ProcessChangeItem item = null;
+        while (i >= 0) {
+            item = mPendingProcessChanges.get(i);
+            if (item.pid == pid) {
+                if (DEBUG_PROCESS_OBSERVERS) {
+                    Slog.i(TAG_PROCESS_OBSERVERS, "Re-using existing item: " + item);
+                }
+                break;
+            }
+            i--;
+        }
+
+        if (i < 0) {
+            // No existing item in pending changes; need a new one.
+            final int num = mAvailProcessChanges.size();
+            if (num > 0) {
+                item = mAvailProcessChanges.remove(num - 1);
+                if (DEBUG_PROCESS_OBSERVERS) {
+                    Slog.i(TAG_PROCESS_OBSERVERS, "Retrieving available item: " + item);
+                }
+            } else {
+                item = new ActivityManagerService.ProcessChangeItem();
+                if (DEBUG_PROCESS_OBSERVERS) {
+                    Slog.i(TAG_PROCESS_OBSERVERS, "Allocating new item: " + item);
+                }
+            }
+            item.changes = 0;
+            item.pid = pid;
+            item.uid = uid;
+            if (mPendingProcessChanges.size() == 0) {
+                if (DEBUG_PROCESS_OBSERVERS) {
+                    Slog.i(TAG_PROCESS_OBSERVERS, "*** Enqueueing dispatch processes changed!");
+                }
+                mService.mUiHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED_UI_MSG)
+                        .sendToTarget();
+            }
+            mPendingProcessChanges.add(item);
+        }
+
+        return item;
     }
 
     @GuardedBy("mService")

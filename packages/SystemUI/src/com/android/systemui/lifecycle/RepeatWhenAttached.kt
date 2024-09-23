@@ -26,7 +26,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.coroutines.createCoroutineTracingContext
-import com.android.app.tracing.coroutines.launch
+import com.android.app.tracing.coroutines.traceCoroutine
 import com.android.systemui.Flags.coroutineTracing
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Compile
@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.launch
 
 /**
  * Runs the given [block] every time the [View] becomes attached (or immediately after calling this
@@ -137,7 +138,7 @@ private fun createLifecycleOwnerAndRun(
 ): ViewLifecycleOwner {
     return ViewLifecycleOwner(view).apply {
         onCreate()
-        lifecycleScope.launch(nameForTrace, coroutineContext) { block(view) }
+        lifecycleScope.launch(coroutineContext) { traceCoroutine(nameForTrace) { block(view) } }
     }
 }
 
@@ -367,7 +368,8 @@ private val ViewTreeObserver.isWindowVisible
  * an extension function, and plumbing dagger-injected instances for static usage has little
  * benefit.
  */
-private val MAIN_DISPATCHER_SINGLETON = Dispatchers.Main + createCoroutineTracingContext()
+private val MAIN_DISPATCHER_SINGLETON =
+    Dispatchers.Main + createCoroutineTracingContext("RepeatWhenAttached")
 private const val DEFAULT_TRACE_NAME = "repeatWhenAttached"
 private const val CURRENT_CLASS_NAME = "com.android.systemui.lifecycle.RepeatWhenAttachedKt"
 private const val JAVA_ADAPTER_CLASS_NAME = "com.android.systemui.util.kotlin.JavaAdapterKt"
