@@ -71,6 +71,37 @@ constructor(private val dataStore: DataStore<WindowingEducationProto>) {
   suspend fun windowingEducationProto(): WindowingEducationProto = dataStoreFlow.first()
 
   /**
+   * Updates [WindowingEducationProto.educationViewedTimestampMillis_] field in datastore with
+   * current timestamp if [isViewed] is true, if not then clears the field.
+   */
+  suspend fun updateEducationViewedTimestampMillis(isViewed: Boolean) {
+    dataStore.updateData { preferences ->
+      if (isViewed) {
+        preferences
+            .toBuilder()
+            .setEducationViewedTimestampMillis(System.currentTimeMillis())
+            .build()
+      } else {
+        preferences.toBuilder().clearEducationViewedTimestampMillis().build()
+      }
+    }
+  }
+
+  /**
+   * Updates [WindowingEducationProto.featureUsedTimestampMillis_] field in datastore with current
+   * timestamp if [isViewed] is true, if not then clears the field.
+   */
+  suspend fun updateFeatureUsedTimestampMillis(isViewed: Boolean) {
+    dataStore.updateData { preferences ->
+      if (isViewed) {
+        preferences.toBuilder().setFeatureUsedTimestampMillis(System.currentTimeMillis()).build()
+      } else {
+        preferences.toBuilder().clearFeatureUsedTimestampMillis().build()
+      }
+    }
+  }
+
+  /**
    * Updates [AppHandleEducation.appUsageStats] and
    * [AppHandleEducation.appUsageStatsLastUpdateTimestampMillis] fields in datastore with
    * [appUsageStats] and [appUsageStatsLastUpdateTimestamp].

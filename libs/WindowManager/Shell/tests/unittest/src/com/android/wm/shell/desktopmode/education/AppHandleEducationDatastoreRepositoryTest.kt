@@ -109,6 +109,24 @@ class AppHandleEducationDatastoreRepositoryTest {
         assertThat(result).isEqualTo(windowingEducationProto)
       }
 
+  @Test
+  fun updateEducationViewedTimestampMillis_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        datastoreRepository.updateEducationViewedTimestampMillis(true)
+
+        val result = testDatastore.data.first().hasEducationViewedTimestampMillis()
+        assertThat(result).isEqualTo(true)
+      }
+
+  @Test
+  fun updateFeatureUsedTimestampMillis_updatesDatastoreProto() =
+      runTest(StandardTestDispatcher()) {
+        datastoreRepository.updateFeatureUsedTimestampMillis(true)
+
+        val result = testDatastore.data.first().hasFeatureUsedTimestampMillis()
+        assertThat(result).isEqualTo(true)
+      }
+
   companion object {
     private const val APP_HANDLE_EDUCATION_DATASTORE_TEST_FILE = "app_handle_education_test.pb"
   }
