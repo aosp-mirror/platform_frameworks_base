@@ -76,6 +76,9 @@ public final class FakeVibratorControllerProvider {
     private float mFrequencyResolution = Float.NaN;
     private float mQFactor = Float.NaN;
     private float[] mMaxAmplitudes;
+
+    private float[] mFrequenciesHz;
+    private float[] mOutputAccelerationsGs;
     private long mVendorEffectDuration = EFFECT_DURATION;
 
     void recordEffectSegment(long vibrationId, VibrationEffectSegment segment) {
@@ -220,6 +223,9 @@ public final class FakeVibratorControllerProvider {
             infoBuilder.setQFactor(mQFactor);
             infoBuilder.setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
+            infoBuilder.setFrequencyProfile(
+                    new VibratorInfo.FrequencyProfile(mResonantFrequency, mFrequenciesHz,
+                            mOutputAccelerationsGs));
             infoBuilder.setMaxEnvelopeEffectSize(mMaxEnvelopeEffectSize);
             infoBuilder.setMinEnvelopeEffectControlPointDurationMillis(
                     mMinEnvelopeEffectControlPointDurationMillis);
@@ -358,6 +364,16 @@ public final class FakeVibratorControllerProvider {
     /** Set the max amplitude supported for each frequency f the fake vibrator hardware. */
     public void setMaxAmplitudes(float... maxAmplitudes) {
         mMaxAmplitudes = maxAmplitudes;
+    }
+
+    /** Set the list of available frequencies. */
+    public void setFrequenciesHz(float[] frequenciesHz) {
+        mFrequenciesHz = frequenciesHz;
+    }
+
+    /** Set the max output acceleration achievable by the supported frequencies. */
+    public void setOutputAccelerationsGs(float[] outputAccelerationsGs) {
+        mOutputAccelerationsGs = outputAccelerationsGs;
     }
 
     /** Set the duration of vendor effects in fake vibrator hardware. */
