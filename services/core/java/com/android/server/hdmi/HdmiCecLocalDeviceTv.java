@@ -261,6 +261,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                 .setDisplayName(HdmiUtils.getDefaultDeviceName(source))
                 .setDeviceType(deviceTypes.get(0))
                 .setVendorId(Constants.VENDOR_ID_UNKNOWN)
+                .setPortId(mService.getHdmiCecNetwork().physicalAddressToPortId(physicalAddress))
                 .build();
         mService.getHdmiCecNetwork().addCecDevice(newDevice);
     }
@@ -1433,6 +1434,7 @@ public class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected void disableDevice(boolean initiatedByCec, PendingActionClearedCallback callback) {
         assertRunOnServiceThread();
         mService.unregisterTvInputCallback(mTvInputCallback);
+        mTvInputs.clear();
         // Remove any repeated working actions.
         // HotplugDetectionAction will be reinstated during the wake up process.
         // HdmiControlService.onWakeUp() -> initializeLocalDevices() ->
