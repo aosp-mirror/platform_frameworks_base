@@ -619,7 +619,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             this.op = op;
             this.uid = uid;
             this.uidState = uidState;
-            this.packageName = packageName;
+            this.packageName = packageName.intern();
             // We keep an invariant that the persistent device will always have an entry in
             // mDeviceAttributedOps.
             mDeviceAttributedOps.put(PERSISTENT_DEVICE_ID_DEFAULT,
@@ -1031,7 +1031,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            String pkgName = intent.getData().getEncodedSchemeSpecificPart();
+            String pkgName = intent.getData().getEncodedSchemeSpecificPart().intern();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
             if (action.equals(ACTION_PACKAGE_ADDED)
@@ -1235,7 +1235,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops ops = uidState.pkgOps.get(packageName);
         if (ops == null) {
             ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+            uidState.pkgOps.put(packageName.intern(), ops);
         }
 
         SparseIntArray packageModes =
@@ -4739,7 +4739,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return null;
             }
             ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+            uidState.pkgOps.put(packageName.intern(), ops);
         }
 
         if (edit) {
@@ -5076,7 +5076,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops ops = uidState.pkgOps.get(pkgName);
         if (ops == null) {
             ops = new Ops(pkgName, uidState);
-            uidState.pkgOps.put(pkgName, ops);
+            uidState.pkgOps.put(pkgName.intern(), ops);
         }
         ops.put(op.op, op);
     }
