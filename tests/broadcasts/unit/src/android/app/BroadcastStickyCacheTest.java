@@ -15,6 +15,9 @@
  */
 package android.app;
 
+import static android.content.Intent.ACTION_BATTERY_CHANGED;
+import static android.content.Intent.ACTION_DEVICE_STORAGE_LOW;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -60,9 +63,8 @@ public class BroadcastStickyCacheTest {
             .mockStatic(SystemProperties.class)
             .build();
 
-    private static final String ACTION_TEST_RED = "action.test.red";
-    private static final String ACTION_TEST_GREEN = "action.test.green";
-    private static final String PROP_TEST_GREEN = BroadcastStickyCache.getKey(ACTION_TEST_GREEN);
+    private static final String PROP_KEY_BATTERY_CHANGED = BroadcastStickyCache.getKey(
+            ACTION_BATTERY_CHANGED);
 
     private final TestSystemProps mTestSystemProps = new TestSystemProps();
 
@@ -106,52 +108,52 @@ public class BroadcastStickyCacheTest {
     @Test
     public void testUseCache_multipleActions() {
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_TEST_RED);
-        filter.addAction(ACTION_TEST_GREEN);
+        filter.addAction(ACTION_DEVICE_STORAGE_LOW);
+        filter.addAction(ACTION_BATTERY_CHANGED);
         assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
     }
 
     @Test
     public void testUseCache_valueNotSet() {
-        final IntentFilter filter = new IntentFilter(ACTION_TEST_GREEN);
+        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
         assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
     }
 
     @Test
     public void testUseCache() {
-        final IntentFilter filter = new IntentFilter(ACTION_TEST_GREEN);
-        final Intent intent = new Intent(ACTION_TEST_GREEN)
+        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
+        final Intent intent = new Intent(ACTION_BATTERY_CHANGED)
                 .putExtra(BatteryManager.EXTRA_LEVEL, 90);
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
         BroadcastStickyCache.add(filter, intent);
         assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(true);
     }
 
     @Test
     public void testUseCache_versionMismatch() {
-        final IntentFilter filter = new IntentFilter(ACTION_TEST_GREEN);
-        final Intent intent = new Intent(ACTION_TEST_GREEN)
+        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
+        final Intent intent = new Intent(ACTION_BATTERY_CHANGED)
                 .putExtra(BatteryManager.EXTRA_LEVEL, 90);
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
         BroadcastStickyCache.add(filter, intent);
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
 
         assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
     }
 
     @Test
     public void testAdd() {
-        final IntentFilter filter = new IntentFilter(ACTION_TEST_GREEN);
-        Intent intent = new Intent(ACTION_TEST_GREEN)
+        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
+        Intent intent = new Intent(ACTION_BATTERY_CHANGED)
                 .putExtra(BatteryManager.EXTRA_LEVEL, 90);
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
         BroadcastStickyCache.add(filter, intent);
         assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(true);
         Intent actualIntent = BroadcastStickyCache.getIntentUnchecked(filter);
         assertThat(actualIntent).isNotNull();
         assertEquals(actualIntent, intent);
 
-        intent = new Intent(ACTION_TEST_GREEN)
+        intent = new Intent(ACTION_BATTERY_CHANGED)
                 .putExtra(BatteryManager.EXTRA_LEVEL, 99);
         BroadcastStickyCache.add(filter, intent);
         actualIntent = BroadcastStickyCache.getIntentUnchecked(filter);
@@ -161,45 +163,45 @@ public class BroadcastStickyCacheTest {
 
     @Test
     public void testIncrementVersion_propExists() {
-        SystemProperties.set(PROP_TEST_GREEN, String.valueOf(100));
+        SystemProperties.set(PROP_KEY_BATTERY_CHANGED, String.valueOf(100));
 
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(101);
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(102);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(101);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(102);
     }
 
     @Test
     public void testIncrementVersion_propNotExists() {
         // Verify that the property doesn't exist
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(-1);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
 
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(1);
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(2);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(1);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(2);
     }
 
     @Test
     public void testIncrementVersionIfExists_propExists() {
-        BroadcastStickyCache.incrementVersion(ACTION_TEST_GREEN);
+        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
 
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(2);
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(3);
+        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(2);
+        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(3);
     }
 
     @Test
     public void testIncrementVersionIfExists_propNotExists() {
         // Verify that the property doesn't exist
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(-1);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
 
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(-1);
+        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
         // Verify that property is not added as part of the querying.
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_TEST_GREEN);
-        assertThat(mTestSystemProps.get(PROP_TEST_GREEN, -1 /* def */)).isEqualTo(-1);
+        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
+        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
     }
 
     private void assertEquals(Intent actualIntent, Intent expectedIntent) {

@@ -20,16 +20,53 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.hardware.usb.UsbManager;
+import android.media.AudioManager;
+import android.net.ConnectivityManager;
+import android.net.TetheringManager;
+import android.net.nsd.NsdManager;
+import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.SystemProperties;
+import android.os.UpdateLock;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 
 /** @hide */
 public class BroadcastStickyCache {
+
+    private static final String[] CACHED_BROADCAST_ACTIONS = {
+            AudioManager.ACTION_HDMI_AUDIO_PLUG,
+            AudioManager.ACTION_HEADSET_PLUG,
+            AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED,
+            AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED,
+            AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION,
+            AudioManager.RINGER_MODE_CHANGED_ACTION,
+            ConnectivityManager.CONNECTIVITY_ACTION,
+            Intent.ACTION_BATTERY_CHANGED,
+            Intent.ACTION_DEVICE_STORAGE_FULL,
+            Intent.ACTION_DEVICE_STORAGE_LOW,
+            Intent.ACTION_SIM_STATE_CHANGED,
+            NsdManager.ACTION_NSD_STATE_CHANGED,
+            TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED,
+            TetheringManager.ACTION_TETHER_STATE_CHANGED,
+            UpdateLock.UPDATE_LOCK_CHANGED,
+            UsbManager.ACTION_USB_STATE,
+            WifiManager.ACTION_WIFI_SCAN_AVAILABILITY_CHANGED,
+            WifiManager.NETWORK_STATE_CHANGED_ACTION,
+            WifiManager.SUPPLICANT_STATE_CHANGED_ACTION,
+            WifiManager.WIFI_STATE_CHANGED_ACTION,
+            WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION,
+            WindowManagerPolicyConstants.ACTION_HDMI_PLUGGED,
+            "android.net.conn.INET_CONDITION_ACTION" // ConnectivityManager.INET_CONDITION_ACTION
+    };
 
     @GuardedBy("sCachedStickyBroadcasts")
     private static final ArrayList<CachedStickyBroadcast> sCachedStickyBroadcasts =
@@ -41,10 +78,7 @@ public class BroadcastStickyCache {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static boolean useCache(@Nullable IntentFilter filter) {
-        if (!Flags.useStickyBcastCache()) {
-            return false;
-        }
-        if (filter == null || filter.safeCountActions() != 1) {
+        if (!shouldCache(filter)) {
             return false;
         }
         synchronized (sCachedStickyBroadcasts) {
@@ -59,10 +93,7 @@ public class BroadcastStickyCache {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static void add(@Nullable IntentFilter filter, @Nullable Intent intent) {
-        if (!Flags.useStickyBcastCache()) {
-            return;
-        }
-        if (filter == null || filter.safeCountActions() != 1) {
+        if (!shouldCache(filter)) {
             return;
         }
         synchronized (sCachedStickyBroadcasts) {
@@ -84,6 +115,19 @@ public class BroadcastStickyCache {
                         .getLong(-1 /* def */);
             }
         }
+    }
+
+    private static boolean shouldCache(@Nullable IntentFilter filter) {
+        if (!Flags.useStickyBcastCache()) {
+            return false;
+        }
+        if (filter == null || filter.safeCountActions() != 1) {
+            return false;
+        }
+        if (!ArrayUtils.contains(CACHED_BROADCAST_ACTIONS, filter.getAction(0))) {
+            return false;
+        }
+        return true;
     }
 
     @VisibleForTesting
@@ -114,7 +158,7 @@ public class BroadcastStickyCache {
     }
 
     public static void incrementVersion(@NonNull String action) {
-        if (!Flags.useStickyBcastCache()) {
+        if (!shouldIncrementVersion(action)) {
             return;
         }
         final String key = getKey(action);
@@ -136,7 +180,7 @@ public class BroadcastStickyCache {
     }
 
     public static void incrementVersionIfExists(@NonNull String action) {
-        if (!Flags.useStickyBcastCache()) {
+        if (!shouldIncrementVersion(action)) {
             return;
         }
         final String key = getKey(action);
@@ -148,6 +192,16 @@ public class BroadcastStickyCache {
             final long version = handle.getLong(0 /* def */);
             SystemProperties.set(key, String.valueOf(version + 1));
         }
+    }
+
+    private static boolean shouldIncrementVersion(@NonNull String action) {
+        if (!Flags.useStickyBcastCache()) {
+            return false;
+        }
+        if (!ArrayUtils.contains(CACHED_BROADCAST_ACTIONS, action)) {
+            return false;
+        }
+        return true;
     }
 
     @VisibleForTesting
