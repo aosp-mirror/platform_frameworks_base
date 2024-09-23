@@ -27,10 +27,13 @@ import static android.view.MotionEvent.ACTION_UP;
 import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
+
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge;
+import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge.NONE;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getResizeEdgeHandleSize;
@@ -154,6 +157,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private DragResizeInputListener mDragResizeListener;
     private Runnable mCurrentViewHostRunnable = null;
     private RelayoutParams mRelayoutParams = new RelayoutParams();
+    private DisabledEdge mDisabledResizingEdge =
+            NONE;
     private final WindowDecoration.RelayoutResult<WindowDecorLinearLayout> mResult =
             new WindowDecoration.RelayoutResult<>();
     private final Runnable mViewHostRunnable =
@@ -393,6 +398,24 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             t.apply();
         }
     }
+
+    /**
+     * Disables resizing for the given edge.
+     *
+     * @param disabledResizingEdge edge to disable.
+     * @param shouldDelayUpdate whether the update should be executed immediately or delayed.
+     */
+    public void updateDisabledResizingEdge(
+            DragResizeWindowGeometry.DisabledEdge disabledResizingEdge, boolean shouldDelayUpdate) {
+        mDisabledResizingEdge = disabledResizingEdge;
+        final boolean inFullImmersive = mDesktopRepository
+                .isTaskInFullImmersiveState(mTaskInfo.taskId);
+        if (shouldDelayUpdate) {
+            return;
+        }
+        updateDragResizeListener(mDecorationContainerSurface, inFullImmersive);
+    }
+
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
@@ -650,7 +673,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 new DragResizeWindowGeometry(mRelayoutParams.mCornerRadius,
                         new Size(mResult.mWidth, mResult.mHeight),
                         getResizeEdgeHandleSize(res), getResizeHandleEdgeInset(res),
-                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
+                        getFineResizeCornerSize(res), getLargeResizeCornerSize(res),
+                        mDisabledResizingEdge), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
             updateExclusionRegion(inFullImmersive);
         }

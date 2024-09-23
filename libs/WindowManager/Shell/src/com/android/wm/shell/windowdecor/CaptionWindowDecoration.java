@@ -290,9 +290,11 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         final Resources res = mResult.mRootView.getResources();
         mDragResizeListener.setGeometry(new DragResizeWindowGeometry(0 /* taskCornerRadius */,
-                new Size(mResult.mWidth, mResult.mHeight), getResizeEdgeHandleSize(res),
-                getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
-                getLargeResizeCornerSize(res)), touchSlop);
+                        new Size(mResult.mWidth, mResult.mHeight),
+                        getResizeEdgeHandleSize(res),
+                        getResizeHandleEdgeInset(res), getFineResizeCornerSize(res),
+                        getLargeResizeCornerSize(res), DragResizeWindowGeometry.DisabledEdge.NONE),
+                touchSlop);
     }
 
     /**
