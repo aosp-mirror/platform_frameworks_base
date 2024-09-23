@@ -229,8 +229,10 @@ public class MockingOomAdjusterTests {
         doCallRealMethod().when(mService).enqueueOomAdjTargetLocked(any(ProcessRecord.class));
         doCallRealMethod().when(mService).updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_ACTIVITY);
         setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
-        doReturn(new ActivityManagerService.ProcessChangeItem()).when(pr)
-                .enqueueProcessChangeItemLocked(anyInt(), anyInt());
+        doNothing().when(pr).enqueueProcessChangeItemLocked(anyInt(), anyInt(), anyInt(),
+                anyInt());
+        doNothing().when(pr).enqueueProcessChangeItemLocked(anyInt(), anyInt(), anyInt(),
+                anyBoolean());
         mService.mOomAdjuster = mService.mConstants.ENABLE_NEW_OOMADJ
                 ? new OomAdjusterModernImpl(mService, mService.mProcessList,
                         new ActiveUids(mService, false), mInjector)

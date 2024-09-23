@@ -52,6 +52,8 @@ public class TouchpadDebugView extends LinearLayout {
     private static final float DEFAULT_RES_Y = 45f;
     private static final int TEXT_PADDING_DP = 12;
     private static final int ROUNDED_CORNER_RADIUS_DP = 24;
+    private static final int BUTTON_PRESSED_BACKGROUND_COLOR = Color.rgb(118, 151, 99);
+    private static final int BUTTON_RELEASED_BACKGROUND_COLOR = Color.rgb(84, 85, 169);
 
     /**
      * Input device ID for the touchpad that this debug view is displaying.
@@ -75,6 +77,8 @@ public class TouchpadDebugView extends LinearLayout {
     private int mWindowLocationBeforeDragY;
     private int mLatestGestureType = 0;
     private TextView mGestureInfoView;
+    private TextView mNameView;
+
     @NonNull
     private TouchpadHardwareState mLastTouchpadState =
             new TouchpadHardwareState(0, 0 /* buttonsDown */, 0, 0,
@@ -119,35 +123,34 @@ public class TouchpadDebugView extends LinearLayout {
                 LayoutParams.WRAP_CONTENT));
         setBackgroundColor(Color.TRANSPARENT);
 
-        TextView nameView = new TextView(context);
-        nameView.setBackgroundColor(Color.RED);
-        nameView.setTextSize(TEXT_SIZE_SP);
-        nameView.setText(Objects.requireNonNull(Objects.requireNonNull(
+        mNameView = new TextView(context);
+        mNameView.setBackgroundColor(BUTTON_RELEASED_BACKGROUND_COLOR);
+        mNameView.setTextSize(TEXT_SIZE_SP);
+        mNameView.setText(Objects.requireNonNull(Objects.requireNonNull(
                         mContext.getSystemService(InputManager.class))
                 .getInputDevice(touchpadId)).getName());
-        nameView.setGravity(Gravity.CENTER);
-        nameView.setTextColor(Color.WHITE);
+        mNameView.setGravity(Gravity.CENTER);
+        mNameView.setTextColor(Color.WHITE);
         int paddingInDP = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP, TEXT_PADDING_DP,
                 getResources().getDisplayMetrics());
-        nameView.setPadding(paddingInDP, paddingInDP, paddingInDP, paddingInDP);
-        nameView.setLayoutParams(
+        mNameView.setPadding(paddingInDP, paddingInDP, paddingInDP, paddingInDP);
+        mNameView.setLayoutParams(
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
         mTouchpadVisualizationView = new TouchpadVisualizationView(context,
                 mTouchpadHardwareProperties);
-        mTouchpadVisualizationView.setBackgroundColor(Color.WHITE);
 
         mGestureInfoView = new TextView(context);
-        mGestureInfoView.setBackgroundColor(Color.BLACK);
         mGestureInfoView.setTextSize(TEXT_SIZE_SP);
         mGestureInfoView.setText("Latest Gesture: ");
         mGestureInfoView.setGravity(Gravity.CENTER);
-        mGestureInfoView.setTextColor(Color.WHITE);
         mGestureInfoView.setPadding(paddingInDP, paddingInDP, paddingInDP, paddingInDP);
         mGestureInfoView.setLayoutParams(
                 new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-        addView(nameView);
+        updateTheme(getResources().getConfiguration().uiMode);
+
+        addView(mNameView);
         addView(mTouchpadVisualizationView);
         addView(mGestureInfoView);
 
@@ -239,6 +242,8 @@ public class TouchpadDebugView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        updateTheme(newConfig.uiMode);
         updateScreenDimensions();
         updateViewsDimensions();
 
@@ -248,6 +253,27 @@ public class TouchpadDebugView extends LinearLayout {
         mWindowLayoutParams.y =
                 Math.max(0, Math.min(mWindowLayoutParams.y, mScreenHeight - getHeight()));
         mWindowManager.updateViewLayout(this, mWindowLayoutParams);
+    }
+
+    private void updateTheme(int uiMode) {
+        int currentNightMode = uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+            setNightModeTheme();
+        } else {
+            setLightModeTheme();
+        }
+    }
+
+    private void setLightModeTheme() {
+        mTouchpadVisualizationView.setLightModeTheme();
+        mGestureInfoView.setBackgroundColor(Color.WHITE);
+        mGestureInfoView.setTextColor(Color.BLACK);
+    }
+
+    private void setNightModeTheme() {
+        mTouchpadVisualizationView.setNightModeTheme();
+        mGestureInfoView.setBackgroundColor(Color.BLACK);
+        mGestureInfoView.setTextColor(Color.WHITE);
     }
 
     private boolean isSlopExceeded(float deltaX, float deltaY) {
@@ -333,12 +359,12 @@ public class TouchpadDebugView extends LinearLayout {
 
     private void onTouchpadButtonPress() {
         Slog.d(TAG, "You clicked me!");
-        getChildAt(0).setBackgroundColor(Color.BLUE);
+        mNameView.setBackgroundColor(BUTTON_PRESSED_BACKGROUND_COLOR);
     }
 
     private void onTouchpadButtonRelease() {
         Slog.d(TAG, "You released the click");
-        getChildAt(0).setBackgroundColor(Color.RED);
+        mNameView.setBackgroundColor(BUTTON_RELEASED_BACKGROUND_COLOR);
     }
 
     /**

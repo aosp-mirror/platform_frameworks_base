@@ -357,6 +357,7 @@ public:
     FloatPoint getMouseCursorPosition(ui::LogicalDisplayId displayId);
     void setStylusPointerIconEnabled(bool enabled);
     void setInputMethodConnectionIsActive(bool isActive);
+    void setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -504,6 +505,9 @@ private:
 
         // True if there is an active input method connection.
         bool isInputMethodConnectionActive{false};
+
+        // Keycodes to be remapped.
+        std::map<int32_t /* fromKeyCode */, int32_t /* toKeyCode */> keyRemapping{};
     } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
@@ -761,6 +765,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->stylusButtonMotionEventsEnabled = mLocked.stylusButtonMotionEventsEnabled;
 
         outConfig->stylusPointerIconEnabled = mLocked.stylusPointerIconEnabled;
+
+        outConfig->keyRemapping = mLocked.keyRemapping;
     } // release lock
 }
 
@@ -1910,6 +1916,16 @@ void NativeInputManager::setInputMethodConnectionIsActive(bool isActive) {
     mInputManager->getDispatcher().setInputMethodConnectionIsActive(isActive);
 }
 
+void NativeInputManager::setKeyRemapping(const std::map<int32_t, int32_t>& keyRemapping) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+        mLocked.keyRemapping = keyRemapping;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::KEY_REMAPPING);
+}
+
 // ----------------------------------------------------------------------------
 
 static NativeInputManager* getNativeInputManager(JNIEnv* env, jobject clazz) {
@@ -1983,10 +1999,19 @@ static std::vector<int32_t> getIntArray(JNIEnv* env, jintArray arr) {
     return vec;
 }
 
-static void nativeAddKeyRemapping(JNIEnv* env, jobject nativeImplObj, jint deviceId,
-                                  jint fromKeyCode, jint toKeyCode) {
+static void nativeSetKeyRemapping(JNIEnv* env, jobject nativeImplObj, jintArray fromKeyCodesArr,
+                                  jintArray toKeyCodesArr) {
+    const std::vector<int32_t> fromKeycodes = getIntArray(env, fromKeyCodesArr);
+    const std::vector<int32_t> toKeycodes = getIntArray(env, toKeyCodesArr);
+    if (fromKeycodes.size() != toKeycodes.size()) {
+        jniThrowRuntimeException(env, "FromKeycodes and toKeycodes cannot match.");
+    }
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
-    im->getInputManager()->getReader().addKeyRemapping(deviceId, fromKeyCode, toKeyCode);
+    std::map<int32_t, int32_t> keyRemapping;
+    for (int i = 0; i < fromKeycodes.size(); i++) {
+        keyRemapping.insert_or_assign(fromKeycodes[i], toKeycodes[i]);
+    }
+    im->setKeyRemapping(keyRemapping);
 }
 
 static jboolean nativeHasKeys(JNIEnv* env, jobject nativeImplObj, jint deviceId, jint sourceMask,
@@ -2491,7 +2516,7 @@ static jobject nativeGetLights(JNIEnv* env, jobject nativeImplObj, jint deviceId
             jTypeId = env->GetStaticIntField(gLightClassInfo.clazz,
                                              gLightClassInfo.lightTypeKeyboardMicMute);
         } else {
-            ALOGW("Unknown light type %d", lightInfo.type);
+            ALOGW("Unknown light type %s", ftl::enum_string(lightInfo.type).c_str());
             continue;
         }
 
@@ -2955,7 +2980,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"getScanCodeState", "(III)I", (void*)nativeGetScanCodeState},
         {"getKeyCodeState", "(III)I", (void*)nativeGetKeyCodeState},
         {"getSwitchState", "(III)I", (void*)nativeGetSwitchState},
-        {"addKeyRemapping", "(III)V", (void*)nativeAddKeyRemapping},
+        {"setKeyRemapping", "([I[I)V", (void*)nativeSetKeyRemapping},
         {"hasKeys", "(II[I[Z)Z", (void*)nativeHasKeys},
         {"getKeyCodeForKeyLocation", "(II)I", (void*)nativeGetKeyCodeForKeyLocation},
         {"createInputChannel", "(Ljava/lang/String;)Landroid/view/InputChannel;",

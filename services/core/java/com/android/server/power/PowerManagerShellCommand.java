@@ -16,13 +16,19 @@
 
 package com.android.server.power;
 
+import android.app.AlarmManager;
+import android.app.IAlarmCompleteListener;
+import android.app.IAlarmListener;
+import android.app.IAlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.util.SparseArray;
 import android.view.Display;
 
@@ -34,12 +40,26 @@ class PowerManagerShellCommand extends ShellCommand {
 
     private final Context mContext;
     private final PowerManagerService.BinderService mService;
+    private final IAlarmListener mAlarmListener;
+    private IAlarmManager mAlarmManager;
 
     private SparseArray<WakeLock> mProxWakelocks = new SparseArray<>();
 
     PowerManagerShellCommand(Context context, PowerManagerService.BinderService service) {
         mContext = context;
         mService = service;
+        mAlarmManager =
+            IAlarmManager.Stub.asInterface(ServiceManager.getService(Context.ALARM_SERVICE));
+        mAlarmListener = new IAlarmListener.Stub() {
+            @Override
+            public void doAlarm(IAlarmCompleteListener callback) throws RemoteException {
+                mService.wakeUp(
+                        SystemClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_APPLICATION,
+                        "PowerManagerShellCommand",
+                        mContext.getOpPackageName());
+            }
+        };
     }
 
     @Override
@@ -65,6 +85,10 @@ class PowerManagerShellCommand extends ShellCommand {
                     return runSetProx();
                 case "set-face-down-detector":
                     return runSetFaceDownDetector();
+                case "sleep":
+                    return runSleep();
+                case "wakeup":
+                    return runWakeUp();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -194,6 +218,70 @@ class PowerManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSleep() {
+        try {
+            mService.goToSleep(
+                    SystemClock.uptimeMillis(),
+                    PowerManager.GO_TO_SLEEP_REASON_APPLICATION,
+                    PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+        } catch (Exception e) {
+            final PrintWriter pw = getOutPrintWriter();
+            pw.println("Error: " + e);
+            return -1;
+        }
+        return 0;
+    }
+
+    private int runWakeUp() {
+        final PrintWriter pw = getOutPrintWriter();
+        String delay = getNextArg();
+        if (delay == null) {
+            try {
+                mService.wakeUp(
+                        SystemClock.uptimeMillis(),
+                        PowerManager.WAKE_REASON_APPLICATION,
+                        "PowerManagerShellCommand",
+                        mContext.getOpPackageName());
+            } catch (Exception e) {
+                pw.println("Error: " + e);
+                return -1;
+            }
+        } else {
+            long delayMillis;
+            try {
+                delayMillis = Long.parseLong(delay);
+            } catch (NumberFormatException e) {
+                pw.println("Error: Can't parse arg " + delay + " as a long: " + e);
+                return -1;
+            }
+            if (delayMillis < 0) {
+                pw.println("Error: Can't set a negative delay: " + delayMillis);
+                return -1;
+            }
+            long wakeUpTime = System.currentTimeMillis() + delayMillis;
+            if (mAlarmManager == null) {
+                // PowerManagerShellCommand may be initialized before AlarmManagerService
+                // is brought up. Make sure mAlarmManager exists.
+                mAlarmManager = IAlarmManager.Stub.asInterface(
+                        ServiceManager.getService(Context.ALARM_SERVICE));
+            }
+            try {
+                // This command is called by the shell, which has "com.android.shell" as package
+                // name.
+                pw.println("Schedule an alarm to wakeup in "
+                        + delayMillis + " ms, on behalf of shell.");
+                mAlarmManager.set("com.android.shell",
+                        AlarmManager.RTC_WAKEUP, wakeUpTime,
+                        0, 0, AlarmManager.FLAG_PRIORITIZE,
+                        null, mAlarmListener, "PowerManagerShellCommand", null, null);
+            } catch (Exception e) {
+                pw.println("Error: " + e);
+                return -1;
+            }
+        }
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -221,6 +309,11 @@ class PowerManagerShellCommand extends ShellCommand {
         pw.println("    created by set-prox including their held status.");
         pw.println("  set-face-down-detector [true|false]");
         pw.println("    sets whether we use face down detector timeouts or not");
+        pw.println("  sleep");
+        pw.println("    requests to sleep the device");
+        pw.println("  wakeup <delay>");
+        pw.println("    requests to wake up the device. If a delay of milliseconds is specified,");
+        pw.println("    alarm manager will schedule a wake up after the delay.");
 
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
