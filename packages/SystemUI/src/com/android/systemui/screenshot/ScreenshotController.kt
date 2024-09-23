@@ -169,6 +169,7 @@ internal constructor(
         requestCallback: TakeScreenshotService.RequestCallback,
     ) {
         Assert.isMainThread()
+        screenshotHandler.resetTimeout()
 
         currentRequestCallback = requestCallback
         if (screenshot.type == TAKE_SCREENSHOT_FULLSCREEN && screenshot.bitmap == null) {
