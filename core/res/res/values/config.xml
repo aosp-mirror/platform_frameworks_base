@@ -4380,7 +4380,7 @@
              modes dimensions {@link config_minPercentageMultiWindowSupportWidth} the device
              supports to determine if the activity can be shown in multi windowing modes.
     -->
-    <integer name="config_respectsActivityMinWidthHeightMultiWindow">0</integer>
+    <integer name="config_respectsActivityMinWidthHeightMultiWindow">-1</integer>
 
     <!-- This value is only used when the device checks activity min height to determine if it
          can be shown in multi windowing modes.
