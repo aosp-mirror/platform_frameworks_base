@@ -26,6 +26,7 @@ import android.view.View.SCALE_Y
 import android.view.View.TRANSLATION_Y
 import android.view.View.TRANSLATION_Z
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import androidx.core.animation.doOnEnd
 import androidx.core.view.children
@@ -83,7 +84,12 @@ class HandleMenuAnimator(
         animateWindowingPillOpen()
         animateMoreActionsPillOpen()
         animateOpenInBrowserPill()
-        runAnimations()
+        runAnimations {
+            appInfoPill.post {
+                appInfoPill.requireViewById<View>(R.id.collapse_menu_button).sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_VIEW_FOCUSED)
+            }
+        }
     }
 
     /**
@@ -98,7 +104,12 @@ class HandleMenuAnimator(
         animateWindowingPillOpen()
         animateMoreActionsPillOpen()
         animateOpenInBrowserPill()
-        runAnimations()
+        runAnimations {
+            appInfoPill.post {
+                appInfoPill.requireViewById<View>(R.id.collapse_menu_button).sendAccessibilityEvent(
+                    AccessibilityEvent.TYPE_VIEW_FOCUSED)
+            }
+        }
     }
 
     /**
