@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.trust.TrustManager
 import android.os.DeadObjectException
 import android.os.RemoteException
 import com.android.internal.policy.IKeyguardStateCallback
@@ -24,6 +25,7 @@ import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -32,7 +34,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -53,6 +54,9 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val trustInteractor: TrustInteractor,
     private val simBouncerInteractor: SimBouncerInteractor,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
+    private val wmLockscreenVisibilityInteractor: WindowManagerLockscreenVisibilityInteractor,
+    private val trustManager: TrustManager,
 ) : CoreStartable {
     private val callbacks = mutableListOf<IKeyguardStateCallback>()
 
@@ -62,28 +66,31 @@ constructor(
         }
 
         applicationScope.launch {
-            combine(
-                    selectedUserInteractor.selectedUser,
-                    keyguardTransitionInteractor.currentKeyguardState,
-                    keyguardTransitionInteractor.startedKeyguardTransitionStep,
-                    ::Triple,
-                )
-                .collectLatest { (selectedUser, _, _) ->
-                    val iterator = callbacks.iterator()
-                    withContext(backgroundDispatcher) {
-                        while (iterator.hasNext()) {
-                            val callback = iterator.next()
-                            try {
-                                callback.onShowingStateChanged(!isIdleInGone(), selectedUser)
-                                callback.onInputRestrictedStateChanged(!isIdleInGone())
-                            } catch (e: RemoteException) {
-                                if (e is DeadObjectException) {
-                                    iterator.remove()
-                                }
+            wmLockscreenVisibilityInteractor.lockscreenVisibility.collectLatest { visible ->
+                val iterator = callbacks.iterator()
+                withContext(backgroundDispatcher) {
+                    while (iterator.hasNext()) {
+                        val callback = iterator.next()
+                        try {
+                            callback.onShowingStateChanged(
+                                visible,
+                                selectedUserInteractor.getSelectedUserId(),
+                            )
+                            callback.onInputRestrictedStateChanged(visible)
+
+                            trustManager.reportKeyguardShowingChanged()
+
+                            if (!visible) {
+                                dismissCallbackRegistry.notifyDismissSucceeded()
+                            }
+                        } catch (e: RemoteException) {
+                            if (e is DeadObjectException) {
+                                iterator.remove()
                             }
                         }
                     }
                 }
+            }
         }
 
         applicationScope.launch {

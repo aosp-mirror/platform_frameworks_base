@@ -3046,6 +3046,11 @@ public final class ContactsContract {
              * <li> {@link #DEFAULT_ACCOUNT_STATE_CLOUD}: The default account is set to a
              * cloud-synced account. New raw contacts requested for insertion without a specified
              * {@link Account} will be saved in the default cloud account. </li>
+             * <li> {@link #DEFAULT_ACCOUNT_STATE_SIM}: The default account is set to a
+             * account that is associated with one of
+             * {@link SimContacts#getSimAccounts(ContentResolver)}. New raw contacts requested
+             * for insertion without a specified {@link Account} will be
+             * saved in this SIM account. </li>
              * </ul>
              */
             @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
@@ -3063,44 +3068,51 @@ public final class ContactsContract {
                 public static final int DEFAULT_ACCOUNT_STATE_CLOUD = 3;
 
                 /**
+                 * A state indicating that the default account is set as an account that is
+                 * associated with one of {@link SimContacts#getSimAccounts(ContentResolver)}.
+                 */
+                public static final int DEFAULT_ACCOUNT_STATE_SIM = 4;
+
+                /**
                  * The state of the default account. One of
                  * {@link #DEFAULT_ACCOUNT_STATE_NOT_SET},
-                 * {@link #DEFAULT_ACCOUNT_STATE_LOCAL} or
-                 * {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+                 * {@link #DEFAULT_ACCOUNT_STATE_LOCAL},
+                 * {@link #DEFAULT_ACCOUNT_STATE_CLOUD}
+                 * {@link #DEFAULT_ACCOUNT_STATE_SIM}.
                  */
                 @DefaultAccountState
                 private final int mState;
 
                 /**
-                 * The account of the default account, when {@link mState} is {
+                 * The account of the default account, when {@link #mState} is {
                  *
-                 * @link #STATE_SET_TO_CLOUD}, or null otherwise.
+                 * @link #DEFAULT_ACCOUNT_STATE_CLOUD} or {@link #DEFAULT_ACCOUNT_STATE_SIM}, or
+                 * null otherwise.
                  */
-                private final Account mCloudAccount;
+                private final Account mAccount;
 
                 /**
                  * Constructs a new `DefaultAccountAndState` instance with the specified state and
                  * cloud
                  * account.
                  *
-                 * @param state        The state of the default account.
-                 * @param cloudAccount The cloud account associated with the default account,
-                 *                     or null if the state is not
-                 *                     {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+                 * @param state   The state of the default account.
+                 * @param account The account associated with the default account if the state is
+                 *                {@link #DEFAULT_ACCOUNT_STATE_CLOUD} or
+                 *                {@link #DEFAULT_ACCOUNT_STATE_SIM}, or null otherwise.
                  */
                 public DefaultAccountAndState(@DefaultAccountState int state,
-                        @Nullable Account cloudAccount) {
+                        @Nullable Account account) {
                     if (!isValidDefaultAccountState(state)) {
                         throw new IllegalArgumentException("Invalid default account state.");
                     }
-                    if ((state == DEFAULT_ACCOUNT_STATE_CLOUD) != (cloudAccount != null)) {
+                    if (isCloudOrSimAccount(state) != (account != null)) {
                         throw new IllegalArgumentException(
-                                "Default account can be set to cloud if and only if the cloud "
+                                "Default account can be set to cloud or SIM if and only if the "
                                         + "account is provided.");
                     }
                     this.mState = state;
-                    this.mCloudAccount =
-                            (mState == DEFAULT_ACCOUNT_STATE_CLOUD) ? cloudAccount : null;
+                    this.mAccount = isCloudOrSimAccount(state) ? account : null;
                 }
 
                 /**
@@ -3116,6 +3128,21 @@ public final class ContactsContract {
                 public static @NonNull DefaultAccountAndState ofCloud(
                         @NonNull Account cloudAccount) {
                     return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_CLOUD, cloudAccount);
+                }
+
+
+                /**
+                 * Creates a `DefaultAccountAndState` instance representing a default account
+                 * that is set to the sim and associated with the specified sim account.
+                 *
+                 * @param simAccount The non-null sim account associated with the default
+                 *                   contacts account.
+                 * @return A new `DefaultAccountAndState` instance with state
+                 * {@link #DEFAULT_ACCOUNT_STATE_SIM}.
+                 */
+                public static @NonNull DefaultAccountAndState ofSim(
+                        @NonNull Account simAccount) {
+                    return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_SIM, simAccount);
                 }
 
                 /**
@@ -3140,6 +3167,18 @@ public final class ContactsContract {
                     return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_NOT_SET, null);
                 }
 
+                private static boolean isCloudOrSimAccount(@DefaultAccountState int state) {
+                    return state == DEFAULT_ACCOUNT_STATE_CLOUD
+                            || state == DEFAULT_ACCOUNT_STATE_SIM;
+                }
+
+                private static boolean isValidDefaultAccountState(int state) {
+                    return state == DEFAULT_ACCOUNT_STATE_NOT_SET
+                            || state == DEFAULT_ACCOUNT_STATE_LOCAL
+                            || state == DEFAULT_ACCOUNT_STATE_CLOUD
+                            || state == DEFAULT_ACCOUNT_STATE_SIM;
+                }
+
                 /**
                  * @return the state of the default account.
                  */
@@ -3149,16 +3188,17 @@ public final class ContactsContract {
                 }
 
                 /**
-                 * @return the cloud account associated with the default account, or null if the
-                 * state is not {@link #DEFAULT_ACCOUNT_STATE_CLOUD}.
+                 * @return the cloud account associated with the default account if the
+                 * state is {@link #DEFAULT_ACCOUNT_STATE_CLOUD} or
+                 * {@link #DEFAULT_ACCOUNT_STATE_SIM}.
                  */
-                public @Nullable Account getCloudAccount() {
-                    return mCloudAccount;
+                public @Nullable Account getAccount() {
+                    return mAccount;
                 }
 
                 @Override
                 public int hashCode() {
-                    return Objects.hash(mState, mCloudAccount);
+                    return Objects.hash(mState, mAccount);
                 }
 
                 @Override
@@ -3170,14 +3210,8 @@ public final class ContactsContract {
                         return false;
                     }
 
-                    return mState == that.mState && Objects.equals(mCloudAccount,
-                            that.mCloudAccount);
-                }
-
-                private static boolean isValidDefaultAccountState(int state) {
-                    return state == DEFAULT_ACCOUNT_STATE_NOT_SET
-                            || state == DEFAULT_ACCOUNT_STATE_LOCAL
-                            || state == DEFAULT_ACCOUNT_STATE_CLOUD;
+                    return mState == that.mState && Objects.equals(mAccount,
+                            that.mAccount);
                 }
 
                 /**
@@ -3189,7 +3223,8 @@ public final class ContactsContract {
                 @IntDef(
                         prefix = {"DEFAULT_ACCOUNT_STATE_"},
                         value = {DEFAULT_ACCOUNT_STATE_NOT_SET,
-                                DEFAULT_ACCOUNT_STATE_LOCAL, DEFAULT_ACCOUNT_STATE_CLOUD})
+                                DEFAULT_ACCOUNT_STATE_LOCAL, DEFAULT_ACCOUNT_STATE_CLOUD,
+                                DEFAULT_ACCOUNT_STATE_SIM})
                 public @interface DefaultAccountState {
                 }
             }

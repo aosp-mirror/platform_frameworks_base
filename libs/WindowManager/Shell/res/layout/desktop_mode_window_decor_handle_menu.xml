@@ -43,13 +43,15 @@
             android:layout_height="@dimen/desktop_mode_caption_icon_radius"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
-            android:contentDescription="@string/app_icon_text"/>
+            android:contentDescription="@string/app_icon_text"
+            android:importantForAccessibility="no"/>
 
         <TextView
             android:id="@+id/application_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             tools:text="Gmail"
+            android:importantForAccessibility="no"
             android:textColor="?androidprv:attr/materialColorOnSurface"
             android:textSize="14sp"
             android:textFontWeight="500"

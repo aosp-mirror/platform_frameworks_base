@@ -99,6 +99,7 @@ filegroup {
         ":android.hardware.biometrics.common-V4-java-source",
         ":android.hardware.biometrics.fingerprint-V5-java-source",
         ":android.hardware.biometrics.fingerprint.virtualhal-java-source",
+        ":android.hardware.biometrics.face.virtualhal-java-source",
         ":android.hardware.biometrics.face-V4-java-source",
         ":android.hardware.gnss-V2-java-source",
         ":android.hardware.graphics.common-V3-java-source",

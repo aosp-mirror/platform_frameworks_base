@@ -23,12 +23,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.DismissCallbackRegistry
-import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
@@ -37,7 +35,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -59,7 +56,6 @@ constructor(
     trustRepository: TrustRepository,
     alternateBouncerInteractor: AlternateBouncerInteractor,
     powerInteractor: PowerInteractor,
-    keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
     /*
      * Updates when a biometric has authenticated the device and is requesting to dismiss
@@ -162,16 +158,6 @@ constructor(
                 // and simply ask KeyguardTransitionInteractor to transition to a bouncer state or
                 // dismiss keyguard.
                 primaryBouncerInteractor.show(true)
-            }
-        }
-    }
-
-    init {
-        if (KeyguardWmStateRefactor.isEnabled) {
-            scope.launch {
-                keyguardTransitionInteractor.currentKeyguardState
-                    .filter { it == KeyguardState.GONE }
-                    .collect { dismissCallbackRegistry.notifyDismissSucceeded() }
             }
         }
     }
