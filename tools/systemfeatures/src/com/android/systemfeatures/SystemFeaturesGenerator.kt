@@ -20,7 +20,10 @@ import com.google.common.base.CaseFormat
 import com.squareup.javapoet.ClassName
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.MethodSpec
+import com.squareup.javapoet.ParameterizedTypeName
 import com.squareup.javapoet.TypeSpec
+import java.util.HashMap
+import java.util.Map
 import javax.lang.model.element.Modifier
 
 /*
@@ -49,6 +52,7 @@ import javax.lang.model.element.Modifier
  *     public static boolean hasFeatureAutomotive(Context context);
  *     public static boolean hasFeatureLeanback(Context context);
  *     public static Boolean maybeHasFeature(String feature, int version);
+ *     public static ArrayMap<String, FeatureInfo> getCompileTimeAvailableFeatures();
  * }
  * </pre>
  */
@@ -58,6 +62,7 @@ object SystemFeaturesGenerator {
     private const val READONLY_ARG = "--readonly="
     private val PACKAGEMANAGER_CLASS = ClassName.get("android.content.pm", "PackageManager")
     private val CONTEXT_CLASS = ClassName.get("android.content", "Context")
+    private val FEATUREINFO_CLASS = ClassName.get("android.content.pm", "FeatureInfo")
     private val ASSUME_TRUE_CLASS =
         ClassName.get("com.android.aconfig.annotations", "AssumeTrueForR8")
     private val ASSUME_FALSE_CLASS =
@@ -142,6 +147,7 @@ object SystemFeaturesGenerator {
 
         addFeatureMethodsToClass(classBuilder, features.values)
         addMaybeFeatureMethodToClass(classBuilder, features.values)
+        addGetFeaturesMethodToClass(classBuilder, features.values)
 
         // TODO(b/203143243): Add validation of build vs runtime values to ensure consistency.
         JavaFile.builder(outputClassName.packageName(), classBuilder.build())
@@ -225,7 +231,7 @@ object SystemFeaturesGenerator {
     /*
      * Adds a generic query method to the class with the form: {@code public static boolean
      * maybeHasFeature(String featureName, int version)}, returning null if the feature version is
-     * undefined or not readonly.
+     * undefined or not (compile-time) readonly.
      *
      * This method is useful for internal usage within the framework, e.g., from the implementation
      * of {@link android.content.pm.PackageManager#hasSystemFeature(Context)}, when we may only
@@ -271,6 +277,42 @@ object SystemFeaturesGenerator {
             methodBuilder.endControlFlow()
         }
         methodBuilder.addStatement("return null")
+        builder.addMethod(methodBuilder.build())
+    }
+
+    /*
+     * Adds a method to get all compile-time enabled features.
+     *
+     * This method is useful for internal usage within the framework to augment
+     * any system features that are parsed from the various partitions.
+     */
+    private fun addGetFeaturesMethodToClass(
+        builder: TypeSpec.Builder,
+        features: Collection<FeatureInfo>,
+    ) {
+        val methodBuilder =
+                MethodSpec.methodBuilder("getCompileTimeAvailableFeatures")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .addAnnotation(ClassName.get("android.annotation", "NonNull"))
+                .addJavadoc("Gets features marked as available at compile-time, keyed by name." +
+                        "\n\n@hide")
+                .returns(ParameterizedTypeName.get(
+                        ClassName.get(Map::class.java),
+                        ClassName.get(String::class.java),
+                        FEATUREINFO_CLASS))
+
+        val availableFeatures = features.filter { it.readonly && it.version != null }
+        methodBuilder.addStatement("Map<String, FeatureInfo> features = new \$T<>(\$L)",
+                HashMap::class.java, availableFeatures.size)
+        if (!availableFeatures.isEmpty()) {
+            methodBuilder.addStatement("FeatureInfo fi = new FeatureInfo()")
+        }
+        for (feature in availableFeatures) {
+            methodBuilder.addStatement("fi.name = \$T.\$N", PACKAGEMANAGER_CLASS, feature.name)
+            methodBuilder.addStatement("fi.version = \$L", feature.version)
+            methodBuilder.addStatement("features.put(fi.name, new FeatureInfo(fi))")
+        }
+        methodBuilder.addStatement("return features")
         builder.addMethod(methodBuilder.build())
     }
 
