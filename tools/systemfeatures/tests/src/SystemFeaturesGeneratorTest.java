@@ -110,10 +110,13 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.hasFeatureWatch(mContext)).isTrue();
         assertThat(RoFeatures.hasFeatureWifi(mContext)).isTrue();
         assertThat(RoFeatures.hasFeatureVulkan(mContext)).isFalse();
-        assertThat(RoFeatures.hasFeatureAuto(mContext)).isFalse();
         verify(mPackageManager, never()).hasSystemFeature(anyString(), anyInt());
 
-        // For defined feature types, conditional queries should reflect the build-time versions.
+        // For defined feature types, conditional queries should reflect either:
+        //  * Enabled if the feature version is specified
+        //  * Disabled if UNAVAILABLE is specified
+        //  * Unknown if no version value is provided
+
         // VERSION=1
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_WATCH, -1)).isTrue();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_WATCH, 0)).isTrue();
@@ -124,15 +127,19 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_WIFI, 0)).isTrue();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_WIFI, 100)).isFalse();
 
-        // VERSION=-1
-        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, -1)).isTrue();
+        // VERSION=UNAVAILABLE
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, -1)).isFalse();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 0)).isFalse();
         assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_VULKAN, 100)).isFalse();
 
-        // DISABLED
-        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, -1)).isFalse();
-        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isFalse();
-        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 100)).isFalse();
+        // VERSION=
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO, 0)).thenReturn(false);
+        assertThat(RoFeatures.hasFeatureAuto(mContext)).isFalse();
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTO, 0)).thenReturn(true);
+        assertThat(RoFeatures.hasFeatureAuto(mContext)).isTrue();
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, -1)).isNull();
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 0)).isNull();
+        assertThat(RoFeatures.maybeHasFeature(PackageManager.FEATURE_AUTO, 100)).isNull();
 
         // For feature APIs without an associated feature definition, conditional queries should
         // report null, and explicit queries should report runtime-defined versions.
@@ -148,5 +155,6 @@ public class SystemFeaturesGeneratorTest {
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", -1)).isNull();
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", 0)).isNull();
         assertThat(RoFeatures.maybeHasFeature("com.arbitrary.feature", 100)).isNull();
+        assertThat(RoFeatures.maybeHasFeature("", 0)).isNull();
     }
 }

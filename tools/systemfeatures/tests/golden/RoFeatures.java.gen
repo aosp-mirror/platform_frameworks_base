@@ -3,7 +3,7 @@
 //            --readonly=true \
 //            --feature=WATCH:1 \
 //            --feature=WIFI:0 \
-//            --feature=VULKAN:-1 \
+//            --feature=VULKAN:UNAVAILABLE \
 //            --feature=AUTO: \
 //            --feature-apis=WATCH,PC
 package com.android.systemfeatures;
@@ -62,9 +62,8 @@ public final class RoFeatures {
      *
      * @hide
      */
-    @AssumeFalseForR8
     public static boolean hasFeatureAuto(Context context) {
-        return false;
+        return hasFeatureFallback(context, PackageManager.FEATURE_AUTO);
     }
 
     private static boolean hasFeatureFallback(Context context, String featureName) {
@@ -79,8 +78,7 @@ public final class RoFeatures {
         switch (featureName) {
             case PackageManager.FEATURE_WATCH: return 1 >= version;
             case PackageManager.FEATURE_WIFI: return 0 >= version;
-            case PackageManager.FEATURE_VULKAN: return -1 >= version;
-            case PackageManager.FEATURE_AUTO: return false;
+            case PackageManager.FEATURE_VULKAN: return false;
             default: break;
         }
         return null;
