@@ -19,7 +19,6 @@ package com.android.systemui.recordissue
 import android.app.IActivityManager
 import android.app.NotificationManager
 import android.content.ContentResolver
-import android.content.Context
 import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings
@@ -64,7 +63,7 @@ class IssueRecordingServiceSession(
         issueRecordingState.isRecording = false
     }
 
-    fun share(notificationId: Int, screenRecording: Uri?, context: Context) {
+    fun share(notificationId: Int, screenRecording: Uri?) {
         bgExecutor.execute {
             notificationManager.cancelAsUser(
                 null,
@@ -75,7 +74,7 @@ class IssueRecordingServiceSession(
             if (issueRecordingState.takeBugreport) {
                 iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
             } else {
-                traceurConnection.shareTraces(context, screenRecording)
+                traceurConnection.shareTraces(screenRecording)
             }
         }
 

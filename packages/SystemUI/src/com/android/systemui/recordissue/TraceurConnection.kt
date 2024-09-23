@@ -17,7 +17,6 @@
 package com.android.systemui.recordissue
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -69,8 +68,8 @@ constructor(userContextProvider: UserContextProvider, @Background private val bg
     @WorkerThread fun stopTracing() = sendMessage(MessageConstants.STOP_WHAT)
 
     @WorkerThread
-    fun shareTraces(context: Context, screenRecord: Uri?) {
-        val replyHandler = Messenger(ShareFilesHandler(context, screenRecord, bgLooper))
+    fun shareTraces(screenRecord: Uri?) {
+        val replyHandler = Messenger(ShareFilesHandler(screenRecord, userContextProvider, bgLooper))
         sendMessage(MessageConstants.SHARE_WHAT, replyTo = replyHandler)
     }
 
@@ -87,15 +86,15 @@ constructor(userContextProvider: UserContextProvider, @Background private val bg
                     this.data = data
                     this.replyTo = replyTo
                 }
-            binder!!.send(msg)
+            binder?.send(msg) ?: onBound.add { binder!!.send(msg) }
         } catch (e: Exception) {
             Log.e(TAG, "failed to notify Traceur", e)
         }
 }
 
 private class ShareFilesHandler(
-    private val context: Context,
     private val screenRecord: Uri?,
+    private val userContextProvider: UserContextProvider,
     looper: Looper,
 ) : Handler(looper) {
 
@@ -118,9 +117,12 @@ private class ShareFilesHandler(
                 screenRecord?.let { add(it) }
             }
         val fileSharingIntent =
-            FileSender.buildSendIntent(context, uris)
+            FileSender.buildSendIntent(userContextProvider.userContext, uris)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT)
-        context.startActivity(fileSharingIntent)
+        userContextProvider.userContext.startActivityAsUser(
+            fileSharingIntent,
+            userContextProvider.userContext.user,
+        )
     }
 }
 

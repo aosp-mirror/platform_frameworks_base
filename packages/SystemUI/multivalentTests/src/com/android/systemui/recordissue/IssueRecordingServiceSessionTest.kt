@@ -99,7 +99,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Test
     fun cancelsNotification_afterReceivingShareCommand() {
-        underTest.share(0, null, mContext)
+        underTest.share(0, null)
         bgExecutor.runAllReady()
 
         verify(notificationManager).cancelAsUser(isNull(), anyInt(), any<UserHandle>())
@@ -110,7 +110,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         issueRecordingState.takeBugreport = true
         val uri = mock<Uri>()
 
-        underTest.share(0, uri, mContext)
+        underTest.share(0, uri)
         bgExecutor.runAllReady()
 
         verify(iActivityManager).requestBugReportWithExtraAttachment(uri)
@@ -121,17 +121,17 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         issueRecordingState.takeBugreport = false
         val uri = mock<Uri>()
 
-        underTest.share(0, uri, mContext)
+        underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(traceurConnection).shareTraces(mContext, uri)
+        verify(traceurConnection).shareTraces(uri)
     }
 
     @Test
     fun closesShade_afterReceivingShareCommand() {
         val uri = mock<Uri>()
 
-        underTest.share(0, uri, mContext)
+        underTest.share(0, uri)
         bgExecutor.runAllReady()
 
         verify(panelInteractor).collapsePanels()

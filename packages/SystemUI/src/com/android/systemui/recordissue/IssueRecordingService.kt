@@ -99,7 +99,6 @@ constructor(
                 session.share(
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
                     intent.getParcelableExtra(EXTRA_PATH, Uri::class.java),
-                    this,
                 )
                 // Unlike all other actions, action_share has different behavior for the screen
                 // recording qs tile than it does for the record issue qs tile. Return sticky to
