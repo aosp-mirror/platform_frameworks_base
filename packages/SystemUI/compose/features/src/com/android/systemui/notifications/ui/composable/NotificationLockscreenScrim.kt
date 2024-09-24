@@ -114,5 +114,6 @@ private fun shouldShowScrimFadeOut(
 ): Boolean {
     return shadeMode == ShadeMode.Single &&
         currentTransition.isInitiatedByUserInput &&
-        currentTransition.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
+        (currentTransition.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen) ||
+            currentTransition.isTransitioning(from = Scenes.Bouncer, to = Scenes.Lockscreen))
 }
