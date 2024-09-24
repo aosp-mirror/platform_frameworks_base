@@ -749,12 +749,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * Map userId to its companion app uids.
      */
+    @GuardedBy("mCompanionAppUidsMap")
     private final Map<Integer, Set<Integer>> mCompanionAppUidsMap = new ArrayMap<>();
 
     /**
      * The profile owner UIDs.
      */
-    private ArraySet<Integer> mProfileOwnerUids = null;
+    @GuardedBy("mProfileOwnerUids")
+    private final ArraySet<Integer> mProfileOwnerUids = new ArraySet<>();
 
     final UserController mUserController;
     @VisibleForTesting
@@ -17400,10 +17402,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             psr.setReportedForegroundServiceTypes(fgServiceTypes);
-            ProcessChangeItem item = mProcessList.enqueueProcessChangeItemLocked(
-                    proc.getPid(), proc.info.uid);
-            item.changes |= ProcessChangeItem.CHANGE_FOREGROUND_SERVICES;
-            item.foregroundServiceTypes = fgServiceTypes;
+            mProcessList.enqueueProcessChangeItemLocked(proc.getPid(), proc.info.uid,
+                    ProcessChangeItem.CHANGE_FOREGROUND_SERVICES, fgServiceTypes);
         }
         if (oomAdj) {
             updateOomAdjLocked(proc, OOM_ADJ_REASON_UI_VISIBILITY);
@@ -19604,32 +19604,35 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setProfileOwnerUid(ArraySet<Integer> profileOwnerUids) {
-            synchronized (ActivityManagerService.this) {
-                mProfileOwnerUids = profileOwnerUids;
+            synchronized (mProfileOwnerUids) {
+                mProfileOwnerUids.clear();
+                mProfileOwnerUids.addAll(profileOwnerUids);
             }
         }
 
         @Override
         public boolean isProfileOwner(int uid) {
-            synchronized (ActivityManagerService.this) {
-                return mProfileOwnerUids != null && mProfileOwnerUids.indexOf(uid) >= 0;
+            synchronized (mProfileOwnerUids) {
+                return mProfileOwnerUids.indexOf(uid) >= 0;
             }
         }
 
         @Override
         public void setCompanionAppUids(int userId, Set<Integer> companionAppUids) {
-            synchronized (ActivityManagerService.this) {
+            synchronized (mCompanionAppUidsMap) {
                 mCompanionAppUidsMap.put(userId, companionAppUids);
             }
         }
 
         @Override
         public boolean isAssociatedCompanionApp(int userId, int uid) {
-            final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
-            if (allUids == null) {
-                return false;
+            synchronized (mCompanionAppUidsMap) {
+                final Set<Integer> allUids = mCompanionAppUidsMap.get(userId);
+                if (allUids == null) {
+                    return false;
+                }
+                return allUids.contains(uid);
             }
-            return allUids.contains(uid);
         }
 
         @Override
