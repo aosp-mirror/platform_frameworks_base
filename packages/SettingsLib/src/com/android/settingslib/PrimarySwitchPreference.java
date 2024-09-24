@@ -31,6 +31,8 @@ import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import com.android.settingslib.core.instrumentation.SettingsJankMonitor;
+import com.android.settingslib.widget.SettingsThemeHelper;
+import com.android.settingslib.widget.theme.R;
 
 /**
  * A custom preference that provides inline switch toggle. It has a mandatory field for title, and
@@ -62,7 +64,9 @@ public class PrimarySwitchPreference extends RestrictedPreference {
 
     @Override
     protected int getSecondTargetResId() {
-        return androidx.preference.R.layout.preference_widget_switch_compat;
+        return SettingsThemeHelper.isExpressiveTheme(getContext())
+                ? R.layout.settingslib_expressive_preference_switch
+                : androidx.preference.R.layout.preference_widget_switch_compat;
     }
 
     @Override

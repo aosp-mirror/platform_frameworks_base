@@ -33,6 +33,7 @@ import static android.app.Notification.EXTRA_LARGE_ICON_BIG;
 import static android.app.Notification.EXTRA_SUB_TEXT;
 import static android.app.Notification.EXTRA_TEXT;
 import static android.app.Notification.EXTRA_TEXT_LINES;
+import static android.app.Notification.EXTRA_TITLE;
 import static android.app.Notification.EXTRA_TITLE_BIG;
 import static android.app.Notification.FLAG_AUTOGROUP_SUMMARY;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
@@ -45,6 +46,7 @@ import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
+import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationChannel.NEWS_ID;
@@ -3516,7 +3518,7 @@ public class NotificationManagerService extends SystemService {
     private String getHistoryTitle(Notification n) {
         CharSequence title = null;
         if (n.extras != null) {
-            title = n.extras.getCharSequence(Notification.EXTRA_TITLE);
+            title = n.extras.getCharSequence(EXTRA_TITLE);
             if (title == null) {
                 title = n.extras.getCharSequence(EXTRA_TITLE_BIG);
             }
@@ -4111,6 +4113,75 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystem();
             mPreferencesHelper.setShowBadge(pkg, uid, showBadge);
             handleSavePolicyFile();
+        }
+
+        @Override
+        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        public boolean canBePromoted(String pkg, int uid) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            if (!android.app.Flags.uiRichOngoing()) {
+                return false;
+            }
+            return mPreferencesHelper.canBePromoted(pkg, uid);
+        }
+
+        @Override
+        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        public void setCanBePromoted(String pkg, int uid, boolean promote) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            if (!android.app.Flags.uiRichOngoing()) {
+                return;
+            }
+            boolean changed = mPreferencesHelper.setCanBePromoted(pkg, uid, promote);
+            if (changed) {
+                // check for pending/posted notifs from this app and update the flag
+                synchronized (mNotificationLock) {
+                    // for enqueued we just need to update the flag
+                    List<NotificationRecord> enqueued = findAppNotificationByListLocked(
+                            mEnqueuedNotifications, pkg, UserHandle.getUserId(uid));
+                    for (NotificationRecord r : enqueued) {
+                        if (promote
+                                && r.getNotification().hasPromotableCharacteristics()
+                                && r.getImportance() > IMPORTANCE_MIN) {
+                            r.getNotification().flags |= FLAG_PROMOTED_ONGOING;
+                        } else if (!promote) {
+                            r.getNotification().flags &= ~FLAG_PROMOTED_ONGOING;
+                        }
+                    }
+                    // if the notification is posted we need to update the flag and tell listeners
+                    List<NotificationRecord> posted = findAppNotificationByListLocked(
+                            mNotificationList, pkg, UserHandle.getUserId(uid));
+                    for (NotificationRecord r : posted) {
+                        if (promote
+                                && !hasFlag(r.getNotification().flags, FLAG_PROMOTED_ONGOING)
+                                && r.getNotification().hasPromotableCharacteristics()
+                                && r.getImportance() > IMPORTANCE_MIN) {
+                            r.getNotification().flags |= FLAG_PROMOTED_ONGOING;
+                            // we could set a wake lock here but this value should only change
+                            // in response to user action, so the device should be awake long enough
+                            // to post
+                            PostNotificationTracker tracker =
+                                    mPostNotificationTrackerFactory.newTracker(null);
+                            // Set false for isAppForeground because that field is only used
+                            // for bubbles and messagingstyle can not be promoted
+                            mHandler.post(new EnqueueNotificationRunnable(
+                                    r.getUser().getIdentifier(),
+                                    r, /* isAppForeground */ false, /* isAppProvided= */ false,
+                                    tracker));
+                        } else if (!promote
+                                && hasFlag(r.getNotification().flags, FLAG_PROMOTED_ONGOING)){
+                            r.getNotification().flags &= ~FLAG_PROMOTED_ONGOING;
+                            PostNotificationTracker tracker =
+                                    mPostNotificationTrackerFactory.newTracker(null);
+                            mHandler.post(new EnqueueNotificationRunnable(
+                                    r.getUser().getIdentifier(),
+                                    r, /* isAppForeground */ false, /* isAppProvided= */ false,
+                                    tracker));
+                        }
+                    }
+                }
+                handleSavePolicyFile();
+            }
         }
 
         @Override
@@ -7698,6 +7769,16 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
+        if (android.app.Flags.uiRichOngoing()) {
+            // This would normally be done in fixNotification(), but we need the channel info so
+            // it's done a little late
+            if (mPreferencesHelper.canBePromoted(pkg, notificationUid)
+                    && notification.hasPromotableCharacteristics()
+                    && channel.getImportance() > IMPORTANCE_MIN) {
+                notification.flags |= FLAG_PROMOTED_ONGOING;
+            }
+        }
+
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
         r.setIsAppImportanceLocked(mPermissionHelper.isPermissionUserSet(pkg, userId));
         r.setPostSilently(postSilently);
@@ -7938,6 +8019,9 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        // Apps cannot set this flag
+         notification.flags &= ~FLAG_PROMOTED_ONGOING;
+
         // Ensure CallStyle has all the correct actions
         if (notification.isStyle(Notification.CallStyle.class)) {
             Notification.Builder builder =
@@ -8061,12 +8145,7 @@ public class NotificationManagerService extends SystemService {
 
     private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {
         if (android.app.Flags.removeRemoteViews()) {
-            if (notification.contentView != null || notification.bigContentView != null
-                    ||  notification.headsUpContentView != null
-                    || (notification.publicVersion != null
-                    && (notification.publicVersion.contentView != null
-                    || notification.publicVersion.bigContentView != null
-                    || notification.publicVersion.headsUpContentView != null))) {
+            if (notification.containsCustomViews()) {
                 Slog.i(TAG, "Removed customViews for " + pkg);
                 mUsageStats.registerImageRemoved(pkg);
             }
@@ -9236,8 +9315,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        final String oldTitle = String.valueOf(oldN.extras.get(Notification.EXTRA_TITLE));
-        final String newTitle = String.valueOf(newN.extras.get(Notification.EXTRA_TITLE));
+        final String oldTitle = String.valueOf(oldN.extras.get(EXTRA_TITLE));
+        final String newTitle = String.valueOf(newN.extras.get(EXTRA_TITLE));
         if (!Objects.equals(oldTitle, newTitle)) {
             if (DEBUG_INTERRUPTIVENESS) {
                 Slog.v(TAG, "INTERRUPTIVENESS: "
@@ -10651,6 +10730,22 @@ public class NotificationManagerService extends SystemService {
         }
         return r;
 
+    }
+
+    @GuardedBy("mNotificationLock")
+    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    private @NonNull List<NotificationRecord> findAppNotificationByListLocked(
+            ArrayList<NotificationRecord> list, String pkg, int userId) {
+        List<NotificationRecord> records = new ArrayList<>();
+        final int len = list.size();
+        for (int i = 0; i < len; i++) {
+            NotificationRecord r = list.get(i);
+            if (notificationMatchesUserId(r, userId, false)
+                    && r.getSbn().getPackageName().equals(pkg)) {
+                records.add(r);
+            }
+        }
+        return records;
     }
 
     @GuardedBy("mNotificationLock")

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.content.Context
 import android.graphics.Rect
 import android.graphics.Region
 import android.util.ArrayMap
@@ -27,13 +28,27 @@ import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
 import com.android.internal.protolog.ProtoLog
+import com.android.window.flags.Flags
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.desktopmode.persistence.DesktopTask
+import com.android.wm.shell.desktopmode.persistence.DesktopTaskState
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.sysui.ShellInit
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import java.util.function.Consumer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Tracks task data for Desktop Mode. */
-class DesktopModeTaskRepository {
+class DesktopModeTaskRepository (
+    private val context: Context,
+    shellInit: ShellInit,
+    private val persistentRepository: DesktopPersistentRepository,
+    @ShellMainThread private val mainCoroutineScope: CoroutineScope,
+){
 
     /**
      * Task data tracked per desktop.
@@ -54,7 +69,15 @@ class DesktopModeTaskRepository {
         // TODO(b/332682201): Remove when the repository state is updated via TransitionObserver
         val closingTasks: ArraySet<Int> = ArraySet(),
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
-    )
+    ) {
+        fun deepCopy(): DesktopTaskData = DesktopTaskData(
+            activeTasks = ArraySet(activeTasks),
+            visibleTasks = ArraySet(visibleTasks),
+            minimizedTasks = ArraySet(minimizedTasks),
+            closingTasks = ArraySet(closingTasks),
+            freeformTasksInZOrder = ArrayList(freeformTasksInZOrder)
+        )
+    }
 
     /* Current wallpaper activity token to remove wallpaper activity when last task is removed. */
     var wallpaperActivityToken: WindowContainerToken? = null
@@ -75,6 +98,40 @@ class DesktopModeTaskRepository {
         /** Gets [DesktopTaskData] for existing [displayId] or creates a new one. */
         fun getOrCreate(displayId: Int): DesktopTaskData =
             this[displayId] ?: DesktopTaskData().also { this[displayId] = it }
+    }
+
+    init {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            shellInit.addInitCallback(::initRepoFromPersistentStorage, this)
+        }
+    }
+
+    private fun initRepoFromPersistentStorage() {
+        if (!Flags.enableDesktopWindowingPersistence()) return
+        //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
+        mainCoroutineScope.launch {
+            val desktop = persistentRepository.readDesktop()
+            val maxTasks =
+                DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
+                    ?: desktop.zOrderedTasksCount
+
+            desktop.zOrderedTasksList
+                // Reverse it so we initialize the repo from bottom to top.
+                .reversed()
+                .map { taskId ->
+                    desktop.tasksByTaskIdMap.getOrDefault(
+                        taskId,
+                        DesktopTask.getDefaultInstance()
+                    )
+                }
+                .filter { task -> task.desktopTaskState == DesktopTaskState.VISIBLE }
+                .take(maxTasks)
+                .forEach { task ->
+                    addOrMoveFreeformTaskToTop(desktop.displayId, task.taskId)
+                    addActiveTask(desktop.displayId, task.taskId)
+                    updateTaskVisibility(desktop.displayId, task.taskId, visible = false)
+                }
+        }
     }
 
     /** Adds [activeTasksListener] to be notified of updates to active tasks. */
@@ -266,12 +323,18 @@ class DesktopModeTaskRepository {
         desktopTaskDataByDisplayId.getOrCreate(displayId).freeformTasksInZOrder.add(0, taskId)
         // Unminimize the task if it is minimized.
         unminimizeTask(displayId, taskId)
+        if (Flags.enableDesktopWindowingPersistence()) {
+            updatePersistentRepository(displayId)
+        }
     }
 
     /** Minimizes the task for [taskId] and [displayId] */
     fun minimizeTask(displayId: Int, taskId: Int) {
         logD("Minimize Task: display=%d, task=%d", displayId, taskId)
         desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
+        if (Flags.enableDesktopWindowingPersistence()) {
+            updatePersistentRepository(displayId)
+        }
     }
 
     /** Unminimizes the task for [taskId] and [displayId] */
@@ -315,7 +378,10 @@ class DesktopModeTaskRepository {
         // Remove task from unminimized task if it is minimized.
         unminimizeTask(displayId, taskId)
         removeActiveTask(taskId)
-        updateTaskVisibility(displayId, taskId, visible = false);
+        updateTaskVisibility(displayId, taskId, visible = false)
+        if (Flags.enableDesktopWindowingPersistence()) {
+            updatePersistentRepository(displayId)
+        }
     }
 
     /**
@@ -351,6 +417,27 @@ class DesktopModeTaskRepository {
     /** Saves the bounds of the given task before maximizing. */
     fun saveBoundsBeforeMaximize(taskId: Int, bounds: Rect) =
         boundsBeforeMaximizeByTaskId.set(taskId, Rect(bounds))
+
+    private fun updatePersistentRepository(displayId: Int) {
+        // Create a deep copy of the data
+        desktopTaskDataByDisplayId[displayId]?.deepCopy()?.let { desktopTaskDataByDisplayIdCopy ->
+            mainCoroutineScope.launch {
+                try {
+                    persistentRepository.addOrUpdateDesktop(
+                        visibleTasks = desktopTaskDataByDisplayIdCopy.visibleTasks,
+                        minimizedTasks = desktopTaskDataByDisplayIdCopy.minimizedTasks,
+                        freeformTasksInZOrder = desktopTaskDataByDisplayIdCopy.freeformTasksInZOrder
+                    )
+                } catch (exception: Exception) {
+                    logE(
+                        "An exception occurred while updating the persistent repository \n%s",
+                        exception.stackTrace
+                    )
+                }
+            }
+        }
+    }
+
 
     internal fun dump(pw: PrintWriter, prefix: String) {
         val innerPrefix = "$prefix  "
@@ -388,6 +475,10 @@ class DesktopModeTaskRepository {
 
     private fun logW(msg: String, vararg arguments: Any?) {
         ProtoLog.w(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+
+    private fun logE(msg: String, vararg arguments: Any?) {
+        ProtoLog.e(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }
 
     companion object {

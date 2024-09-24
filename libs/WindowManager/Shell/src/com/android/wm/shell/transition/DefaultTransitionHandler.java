@@ -358,12 +358,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             if (mode == TRANSIT_CHANGE && change.hasFlags(FLAG_IS_DISPLAY)) {
                 if (info.getType() == TRANSIT_CHANGE) {
-                    int anim = getRotationAnimationHint(change, info, mDisplayController);
+                    final int anim = getRotationAnimationHint(change, info, mDisplayController);
                     isSeamlessDisplayChange = anim == ROTATION_ANIMATION_SEAMLESS;
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
-                        if (wallpaperTransit != WALLPAPER_TRANSITION_NONE) {
-                            anim |= ScreenRotationAnimation.ANIMATION_HINT_HAS_WALLPAPER;
-                        }
                         startRotationAnimation(startTransaction, change, info, anim, animations,
                                 onAnimFinish);
                         isDisplayRotationAnimationStarted = true;

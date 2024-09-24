@@ -39,6 +39,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -596,6 +597,18 @@ public class ShellTaskOrganizerTests extends ShellTestCase {
         mOrganizer.onTaskInfoChanged(task2);
 
         verify(mRecentTasksController).onTaskRunningInfoChanged(task2);
+    }
+
+    @Test
+    public void testRecentTasks_visibilityChanges_notFreeForm_shouldNotNotifyTaskController() {
+        RunningTaskInfo task1_visible = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(task1_visible, /* leash= */ null);
+        RunningTaskInfo task1_hidden = createTaskInfo(/* taskId= */ 1, WINDOWING_MODE_FULLSCREEN);
+        task1_hidden.isVisible = false;
+
+        mOrganizer.onTaskInfoChanged(task1_hidden);
+
+        verify(mRecentTasksController, never()).onTaskRunningInfoChanged(task1_hidden);
     }
 
     @Test

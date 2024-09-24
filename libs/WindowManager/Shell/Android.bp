@@ -147,8 +147,10 @@ java_library {
 java_library {
     name: "WindowManager-Shell-lite-proto",
 
-    srcs: ["src/com/android/wm/shell/desktopmode/education/data/proto/**/*.proto"],
-
+    srcs: [
+        "src/com/android/wm/shell/desktopmode/education/data/proto/**/*.proto",
+        "src/com/android/wm/shell/desktopmode/persistence/*.proto",
+    ],
     proto: {
         type: "lite",
     },

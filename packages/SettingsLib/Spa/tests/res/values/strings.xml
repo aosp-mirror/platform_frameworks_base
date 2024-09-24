@@ -28,5 +28,7 @@
 
     <string name="test_annotated_string_resource">Annotated string with <b>bold</b> and <a href="https://www.android.com/">link</a>.</string>
 
+    <string name="test_top_intro_preference_label"><a href="https://www.android.com/">Label</a></string>
+
     <string name="test_link"><a href="https://www.android.com/">link</a></string>
 </resources>

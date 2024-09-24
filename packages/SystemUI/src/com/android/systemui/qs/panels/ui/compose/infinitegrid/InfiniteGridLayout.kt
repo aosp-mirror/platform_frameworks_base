@@ -101,7 +101,7 @@ constructor(
         val (currentTiles, otherTiles) = sizedTiles.partition { it.tile.isCurrent }
         val currentListState = rememberEditListState(currentTiles, columns)
         DefaultEditTileGrid(
-            currentListState = currentListState,
+            listState = currentListState,
             otherTiles = otherTiles,
             columns = columns,
             modifier = modifier,

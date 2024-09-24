@@ -38,7 +38,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.platform.test.annotations.Presubmit;
 import android.util.SparseArray;
-import android.view.SurfaceControl.Transaction;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
@@ -79,7 +78,6 @@ public class InsetsAnimationControlImplTest {
     private SurfaceControl mNavLeash;
     private InsetsState mInsetsState;
 
-    @Mock Transaction mMockTransaction;
     @Mock InsetsController mMockController;
     @Mock WindowInsetsAnimationControlListener mMockListener;
 
@@ -98,16 +96,14 @@ public class InsetsAnimationControlImplTest {
         mInsetsState.getOrCreateSource(ID_NAVIGATION_BAR, navigationBars())
                 .setFrame(new Rect(400, 0, 500, 500));
         InsetsSourceConsumer topConsumer = new InsetsSourceConsumer(ID_STATUS_BAR,
-                WindowInsets.Type.statusBars(), mInsetsState,
-                () -> mMockTransaction, mMockController);
+                WindowInsets.Type.statusBars(), mInsetsState, mMockController);
         topConsumer.setControl(
                 new InsetsSourceControl(ID_STATUS_BAR, WindowInsets.Type.statusBars(),
                         mStatusLeash, true, new Point(0, 0), Insets.of(0, 100, 0, 0)),
                 new int[1], new int[1]);
 
         InsetsSourceConsumer navConsumer = new InsetsSourceConsumer(ID_NAVIGATION_BAR,
-                WindowInsets.Type.navigationBars(), mInsetsState,
-                () -> mMockTransaction, mMockController);
+                WindowInsets.Type.navigationBars(), mInsetsState, mMockController);
         navConsumer.setControl(
                 new InsetsSourceControl(ID_NAVIGATION_BAR, WindowInsets.Type.navigationBars(),
                         mNavLeash, true, new Point(400, 0), Insets.of(0, 0, 100, 0)),
@@ -131,8 +127,9 @@ public class InsetsAnimationControlImplTest {
 
         mController = new InsetsAnimationControlImpl(controls,
                 new Rect(0, 0, 500, 500), mInsetsState, mMockListener, systemBars(),
-                mMockController, spec /* insetsAnimationSpecCreator */, 0 /* animationType */,
-                0 /* layoutInsetsDuringAnimation */, null /* translator */, null /* statsToken */);
+                mMockController, mMockController, spec /* insetsAnimationSpecCreator */,
+                0 /* animationType */, 0 /* layoutInsetsDuringAnimation */, null /* translator */,
+                null /* statsToken */);
         mController.setReadyDispatched(true);
     }
 
