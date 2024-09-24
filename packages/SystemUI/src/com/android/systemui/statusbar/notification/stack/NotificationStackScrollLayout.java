@@ -22,7 +22,6 @@ import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
-import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
@@ -1549,15 +1548,6 @@ public class NotificationStackScrollLayout
 
     @VisibleForTesting
     public void updateInterpolatedStackHeight(float endHeight, float fraction) {
-        if (!newAodTransition()) {
-            // During the (AOD<=>LS) transition where dozeAmount is changing,
-            // apply dozeAmount to stack height instead of expansionFraction
-            // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
-            final float dozeAmount = mAmbientState.getDozeAmount();
-            if (0f < dozeAmount && dozeAmount < 1f) {
-                fraction = 1f - dozeAmount;
-            }
-        }
         mAmbientState.setInterpolatedStackHeight(
                 MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,
                         endHeight, fraction));

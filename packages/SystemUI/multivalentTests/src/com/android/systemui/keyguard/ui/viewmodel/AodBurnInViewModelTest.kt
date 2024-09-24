@@ -129,6 +129,53 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun translationX_aodToLockscreen() =
+        testScope.runTest {
+            underTest.updateBurnInParams(burnInParameters.copy(translationX = { -100f }))
+            val movement by collectLastValue(underTest.movement)
+            assertThat(movement?.translationX).isEqualTo(0)
+
+            // Trigger a change to the burn-in model
+            burnInFlow.value = BurnInModel(translationX = 20, translationY = 30, scale = 0.5f)
+
+            // Set to not dozing (on lockscreen)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED,
+                ),
+                validateStep = false,
+            )
+            // Set to not dozing (on lockscreen)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    value = 0f,
+                    transitionState = TransitionState.RUNNING,
+                ),
+                validateStep = false,
+            )
+            assertThat(movement?.translationX).isEqualTo(-100)
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED,
+                ),
+                validateStep = false,
+            )
+
+            assertThat(movement?.translationX).isEqualTo(0)
+            assertThat(movement?.translationY).isEqualTo(0)
+            assertThat(movement?.scale).isEqualTo(1f)
+            assertThat(movement?.scaleClockOnly).isEqualTo(true)
+        }
+
+    @Test
     fun translationAndScale_whenFullyDozing() =
         testScope.runTest {
             underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100))
