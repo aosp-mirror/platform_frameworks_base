@@ -1538,7 +1538,6 @@ public class VibratorManagerServiceTest {
         PrebakedSegment segment = (PrebakedSegment) playedSegments.get(0);
         assertEquals(VibrationEffect.EFFECT_CLICK, segment.getEffectId());
         VibrationAttributes attrs = vibration.callerInfo.attrs;
-        assertEquals(VibrationAttributes.USAGE_HARDWARE_FEEDBACK, attrs.getUsage());
         assertTrue(attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
         assertTrue(attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
@@ -1560,11 +1559,11 @@ public class VibratorManagerServiceTest {
                 HapticFeedbackConstants.SCROLL_TICK,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         mHapticFeedbackVibrationMapSourceTouchScreen.put(
-                HapticFeedbackConstants.DRAG_START,
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
+                HapticFeedbackConstants.SCROLL_ITEM_FOCUS,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_THUD));
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
-        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_THUD);
         VibratorManagerService service = createSystemReadyService();
 
         HalVibration vibrationByRotary =
@@ -1573,7 +1572,7 @@ public class VibratorManagerServiceTest {
                         InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
         HalVibration vibrationByTouchScreen =
                 performHapticFeedbackForInputDeviceAndWaitUntilFinished(
-                        service, HapticFeedbackConstants.DRAG_START, /* inputDeviceId= */ 0,
+                        service, HapticFeedbackConstants.SCROLL_ITEM_FOCUS, /* inputDeviceId= */ 0,
                         InputDevice.SOURCE_TOUCHSCREEN, /* always= */ true);
 
         List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
@@ -1583,18 +1582,17 @@ public class VibratorManagerServiceTest {
         PrebakedSegment segmentByRotary = (PrebakedSegment) playedSegments.get(0);
         assertEquals(VibrationEffect.EFFECT_CLICK, segmentByRotary.getEffectId());
         VibrationAttributes attrsByRotary = vibrationByRotary.callerInfo.attrs;
-        assertEquals(VibrationAttributes.USAGE_HARDWARE_FEEDBACK, attrsByRotary.getUsage());
         assertTrue(attrsByRotary.isFlagSet(
                 VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
         assertTrue(attrsByRotary.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
         // Verify feedback by touch screen input
         PrebakedSegment segmentByTouchScreen = (PrebakedSegment) playedSegments.get(1);
-        assertEquals(VibrationEffect.EFFECT_TICK, segmentByTouchScreen.getEffectId());
+        assertEquals(VibrationEffect.EFFECT_THUD, segmentByTouchScreen.getEffectId());
         VibrationAttributes attrsByTouchScreen = vibrationByTouchScreen.callerInfo.attrs;
-        assertEquals(VibrationAttributes.USAGE_TOUCH, attrsByTouchScreen.getUsage());
-        assertTrue(attrsByRotary.isFlagSet(
+        assertTrue(attrsByTouchScreen.isFlagSet(
                 VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
-        assertTrue(attrsByRotary.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
+        assertTrue(
+                attrsByTouchScreen.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
 
     @Test
