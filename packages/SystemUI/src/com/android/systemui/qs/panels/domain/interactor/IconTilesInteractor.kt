@@ -40,7 +40,7 @@ constructor(
     private val currentTilesInteractor: CurrentTilesInteractor,
     private val preferencesInteractor: QSPreferencesInteractor,
     @PanelsLog private val logBuffer: LogBuffer,
-    @Application private val applicationScope: CoroutineScope
+    @Application private val applicationScope: CoroutineScope,
 ) {
 
     val largeTilesSpecs =
@@ -64,14 +64,15 @@ constructor(
 
     fun isIconTile(spec: TileSpec): Boolean = !largeTilesSpecs.value.contains(spec)
 
-    fun resize(spec: TileSpec) {
+    fun resize(spec: TileSpec, toIcon: Boolean) {
         if (!isCurrent(spec)) {
             return
         }
 
-        if (largeTilesSpecs.value.contains(spec)) {
+        val isIcon = !largeTilesSpecs.value.contains(spec)
+        if (toIcon && !isIcon) {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value - spec)
-        } else {
+        } else if (!toIcon && isIcon) {
             preferencesInteractor.setLargeTilesSpecs(largeTilesSpecs.value + spec)
         }
     }
@@ -85,7 +86,7 @@ constructor(
             LOG_BUFFER_LARGE_TILES_SPECS_CHANGE_TAG,
             LogLevel.DEBUG,
             { str1 = specs.toString() },
-            { "Large tiles change: $str1" }
+            { "Large tiles change: $str1" },
         )
     }
 

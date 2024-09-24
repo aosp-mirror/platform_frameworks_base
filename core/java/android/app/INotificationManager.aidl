@@ -258,4 +258,6 @@ interface INotificationManager
     @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
     void unregisterCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
 
+    void setCanBePromoted(String pkg, int uid, boolean promote);
+    boolean canBePromoted(String pkg, int uid);
 }

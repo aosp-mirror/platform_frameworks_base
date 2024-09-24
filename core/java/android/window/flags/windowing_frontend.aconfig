@@ -266,3 +266,14 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "remove_starting_window_wait_for_multi_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid remove starting window too early when playing multiple transitions"
+  bug: "362347290"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -39,12 +39,16 @@ import org.mockito.kotlin.argumentCaptor
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-class StatusBarWindowStateRepositoryTest : SysuiTestCase() {
+class StatusBarWindowStatePerDisplayRepositoryTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val commandQueue = kosmos.commandQueue
     private val underTest =
-        StatusBarWindowStateRepository(commandQueue, DISPLAY_ID, testScope.backgroundScope)
+        StatusBarWindowStatePerDisplayRepositoryImpl(
+            DISPLAY_ID,
+            commandQueue,
+            testScope.backgroundScope,
+        )
 
     private val callback: CommandQueue.Callbacks
         get() {

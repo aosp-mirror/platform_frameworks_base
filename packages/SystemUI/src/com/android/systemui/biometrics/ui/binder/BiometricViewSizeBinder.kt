@@ -18,11 +18,13 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.animation.Animator
 import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.graphics.Outline
 import android.graphics.Rect
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.TypedValue
+import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
@@ -158,13 +160,16 @@ object BiometricViewSizeBinder {
             fun setVisibilities(hideSensorIcon: Boolean, size: PromptSize) {
                 viewsToHideWhenSmall.forEach { it.showContentOrHide(forceHide = size.isSmall) }
                 largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
+                largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                 largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
                 largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
                 if (hideSensorIcon) {
                     smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)
+                    smallConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     smallConstraintSet.setVisibility(R.id.indicator, View.GONE)
                     mediumConstraintSet.setVisibility(iconHolderView.id, View.GONE)
+                    mediumConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     mediumConstraintSet.setVisibility(R.id.indicator, View.GONE)
                 }
             }

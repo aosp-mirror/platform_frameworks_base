@@ -92,6 +92,14 @@ flag {
 }
 
 flag {
+    name: "display_topology"
+    namespace: "display_manager"
+    description: "Display topology for moving cursors and windows between extended displays"
+    bug: "278199220"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_displays_refresh_rates_synchronization"
     namespace: "display_manager"
     description: "Enables synchronization of refresh rates across displays"

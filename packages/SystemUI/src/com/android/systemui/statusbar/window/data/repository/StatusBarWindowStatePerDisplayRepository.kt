@@ -22,13 +22,13 @@ import android.app.StatusBarManager.WINDOW_STATE_HIDING
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
 import android.app.StatusBarManager.WindowVisibleState
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,16 +40,23 @@ import kotlinx.coroutines.flow.stateIn
  *
  * Classes that want to get updates about the status bar window state should subscribe to
  * [windowState] and should NOT add their own callback on [CommandQueue].
+ *
+ * Each concrete implementation of this class will be for a specific display ID. Use
+ * [StatusBarWindowStateRepositoryStore] to fetch a concrete implementation for a certain display.
  */
-@SysUISingleton
-class StatusBarWindowStateRepository
-@Inject
+interface StatusBarWindowStatePerDisplayRepository {
+    /** Emits the current window state for the status bar on this specific display. */
+    val windowState: StateFlow<StatusBarWindowState>
+}
+
+class StatusBarWindowStatePerDisplayRepositoryImpl
+@AssistedInject
 constructor(
+    @Assisted private val thisDisplayId: Int,
     private val commandQueue: CommandQueue,
-    @DisplayId private val thisDisplayId: Int,
     @Application private val scope: CoroutineScope,
-) {
-    val windowState: StateFlow<StatusBarWindowState> =
+) : StatusBarWindowStatePerDisplayRepository {
+    override val windowState: StateFlow<StatusBarWindowState> =
         conflatedCallbackFlow {
                 val callback =
                     object : CommandQueue.Callbacks {
@@ -83,4 +90,9 @@ constructor(
             else -> StatusBarWindowState.Hidden
         }
     }
+}
+
+@AssistedFactory
+interface StatusBarWindowStatePerDisplayRepositoryFactory {
+    fun create(@Assisted displayId: Int): StatusBarWindowStatePerDisplayRepositoryImpl
 }

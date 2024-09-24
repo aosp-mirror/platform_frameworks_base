@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.domain.interactor
+package android.content.pm;
 
-import com.android.systemui.keyguard.domain.interactor.deviceEntrySideFpsOverlayInteractor
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+/** Stub for testing */
+public final class FeatureInfo {
+    public String name;
+    public int version;
 
-@OptIn(ExperimentalCoroutinesApi::class)
-val Kosmos.sideFpsOverlayInteractor by Fixture {
-    SideFpsOverlayInteractorImpl(
-        biometricStatusInteractor,
-        displayStateInteractor,
-        deviceEntrySideFpsOverlayInteractor,
-        sideFpsSensorInteractor,
-    )
+    public FeatureInfo() {}
+
+    public FeatureInfo(FeatureInfo orig) {
+        name = orig.name;
+        version = orig.version;
+    }
 }

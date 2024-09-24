@@ -300,12 +300,19 @@
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
     <string name="collapse_menu_text">Close Menu</string>
-    <!-- Accessibility text for the handle menu open menu button [CHAR LIMIT=NONE] -->
-    <string name="expand_menu_text">Open Menu</string>
+    <!-- Accessibility text for the App Header's App Chip [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_app_header_chip_text">Open Menu</string>
     <!-- Maximize menu maximize button string. -->
     <string name="desktop_mode_maximize_menu_maximize_text">Maximize Screen</string>
     <!-- Maximize menu snap buttons string. -->
     <string name="desktop_mode_maximize_menu_snap_text">Snap Screen</string>
     <!-- Snap resizing non-resizable string. -->
     <string name="desktop_mode_non_resizable_snap_text">This app can\'t be resized</string>
+    <!-- Accessibility text for the Maximize Menu's maximize button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the Maximize Menu's snap left button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_snap_left_button_text">Snap left</string>
+    <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_snap_right_button_text">Snap right</string>
+
 </resources>

@@ -91,12 +91,13 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         kosmos.fakeKeyguardClockRepository.setCurrentClock(clockController)
 
         underTest = kosmos.aodBurnInViewModel
+        underTest.updateBurnInParams(burnInParameters)
     }
 
     @Test
     fun movement_initializedToDefaultValues() =
         testScope.runTest {
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
             assertThat(movement?.translationY).isEqualTo(0)
             assertThat(movement?.translationX).isEqualTo(0)
             assertThat(movement?.scale).isEqualTo(1f)
@@ -105,7 +106,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @Test
     fun translationAndScale_whenNotDozing() =
         testScope.runTest {
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to not dozing (on lockscreen)
             keyguardTransitionRepository.sendTransitionStep(
@@ -130,8 +131,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @Test
     fun translationAndScale_whenFullyDozing() =
         testScope.runTest {
-            burnInParameters = burnInParameters.copy(minViewY = 100)
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -171,8 +172,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @DisableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_whenFullyDozing_MigrationFlagOff_staysOutOfTopInset() =
         testScope.runTest {
-            burnInParameters = burnInParameters.copy(minViewY = 100, topInset = 80)
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100, topInset = 80))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -213,8 +214,8 @@ class AodBurnInViewModelTest : SysuiTestCase() {
     @EnableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
     fun translationAndScale_whenFullyDozing_MigrationFlagOn_staysOutOfTopInset() =
         testScope.runTest {
-            burnInParameters = burnInParameters.copy(minViewY = 100, topInset = 80)
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            underTest.updateBurnInParams(burnInParameters.copy(minViewY = 100, topInset = 80))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -256,7 +257,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
         testScope.runTest {
             whenever(clockController.config.useAlternateSmartspaceAODTransition).thenReturn(true)
 
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
@@ -374,7 +375,7 @@ class AodBurnInViewModelTest : SysuiTestCase() {
             whenever(clockController.config.useAlternateSmartspaceAODTransition)
                 .thenReturn(if (isWeatherClock) true else false)
 
-            val movement by collectLastValue(underTest.movement(burnInParameters))
+            val movement by collectLastValue(underTest.movement)
 
             // Set to dozing (on AOD)
             keyguardTransitionRepository.sendTransitionStep(
