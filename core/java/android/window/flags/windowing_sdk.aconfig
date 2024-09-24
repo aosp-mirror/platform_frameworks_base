@@ -68,16 +68,6 @@ flag {
 
 flag {
     namespace: "windowing_sdk"
-    name: "insets_control_changed_item"
-    description: "Pass insetsControlChanged through ClientTransaction to fix the racing"
-    bug: "339380439"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
-    namespace: "windowing_sdk"
     name: "insets_control_seq"
     description: "Add seqId to InsetsControls to ensure the stale update is ignored"
     bug: "339380439"
