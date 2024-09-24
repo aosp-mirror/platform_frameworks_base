@@ -4799,7 +4799,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                 userData.mImeBindingState.mFocusedWindowEditorInfo,
                 info.focusedWindowName, userData.mImeBindingState.mFocusedWindowSoftInputMode,
                 reason, userData.mInFullscreenMode, info.requestWindowName,
-                info.imeControlTargetName, info.imeLayerTargetName, info.imeSurfaceParentName));
+                info.imeControlTargetName, info.imeLayerTargetName, info.imeSurfaceParentName,
+                userId));
 
         if (statsToken != null) {
             mImeTrackerService.onImmsUpdate(statsToken, info.requestWindowName);
@@ -6132,8 +6133,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             dumpAsStringNoCheckForUser(userData, fd, pw, args, isCritical);
         }
 
-        // TODO(b/365868861): Make StartInputHistory, SoftInputShowHideHistory and ImeTracker per
-        //  user.
+        // TODO(b/365868861): Make StartInputHistory and ImeTracker multi-user aware.
         synchronized (ImfLock.class) {
             p.println("  mStartInputHistory:");
             mStartInputHistory.dump(pw, "    ");
