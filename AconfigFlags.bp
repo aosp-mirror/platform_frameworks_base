@@ -15,6 +15,7 @@
 aconfig_declarations_group {
     name: "framework-minus-apex-aconfig-declarations",
     aconfig_declarations_groups: [
+        "aconfig_trade_in_mode_flags",
         "audio-framework-aconfig",
     ],
     java_aconfig_libraries: [
@@ -1629,4 +1630,30 @@ java_aconfig_library {
     name: "android.app.jank.flags-aconfig-java",
     aconfig_declarations: "android.app.jank.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Trade in mode
+aconfig_declarations {
+    name: "aconfig_trade_in_mode_flags",
+    package: "com.android.tradeinmode.flags",
+    container: "system",
+    srcs: [
+        "core/java/android/os/image/flags/trade_in_mode_flags.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "aconfig_trade_in_mode_flags_java_lib",
+    aconfig_declarations: "aconfig_trade_in_mode_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+cc_aconfig_library {
+    name: "android_trade_in_mode_flags_cc_lib",
+    aconfig_declarations: "aconfig_trade_in_mode_flags",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.adbd",
+    ],
+    min_sdk_version: "apex_inherit",
 }
