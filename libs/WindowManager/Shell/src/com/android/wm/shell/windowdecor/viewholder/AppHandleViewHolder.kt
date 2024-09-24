@@ -22,6 +22,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Point
 import android.hardware.input.InputManager
+import android.os.Bundle
 import android.os.Handler
 import android.view.MotionEvent.ACTION_DOWN
 import android.view.SurfaceControl
@@ -29,7 +30,12 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowManager
+import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.ImageButton
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import com.android.internal.policy.SystemBarUtils
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
@@ -67,6 +73,20 @@ internal class AppHandleViewHolder(
         captionView.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnTouchListener(onCaptionTouchListener)
         captionHandle.setOnClickListener(onCaptionButtonClickListener)
+        captionHandle.accessibilityDelegate = object : View.AccessibilityDelegate() {
+            override fun sendAccessibilityEvent(host: View, eventType: Int) {
+                when (eventType) {
+                    AccessibilityEvent.TYPE_VIEW_HOVER_ENTER,
+                    AccessibilityEvent.TYPE_VIEW_HOVER_EXIT -> {
+                        // Caption Handle itself can't get a11y focus because it's under the status
+                        // bar, so pass through TYPE_VIEW_HOVER a11y events to the status bar
+                        // input layer, so that it can get a11y focus on the caption handle's behalf
+                        statusBarInputLayer?.view?.sendAccessibilityEvent(eventType)
+                    }
+                    else -> super.sendAccessibilityEvent(host, eventType)
+                }
+            }
+        }
     }
 
     override fun bindData(
@@ -134,7 +154,51 @@ internal class AppHandleViewHolder(
             captionHandle.dispatchTouchEvent(event)
             return@setOnTouchListener true
         }
+        setupAppHandleA11y(view)
         windowManagerWrapper.updateViewLayout(view, lp)
+    }
+
+    private fun setupAppHandleA11y(view: View) {
+        view.accessibilityDelegate = object : View.AccessibilityDelegate() {
+            override fun onInitializeAccessibilityNodeInfo(
+                host: View,
+                info: AccessibilityNodeInfo
+            ) {
+                // Allow the status bar input layer to be a11y clickable so it can interact with
+                // a11y services on behalf of caption handle (due to being under status bar)
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.addAction(AccessibilityAction.ACTION_CLICK)
+                host.isClickable = true
+            }
+
+            override fun performAccessibilityAction(
+                host: View,
+                action: Int,
+                args: Bundle?
+            ): Boolean {
+                // Passthrough the a11y click action so the caption handle, so that app handle menu
+                // is opened on a11y click, similar to a real click
+                if (action == AccessibilityAction.ACTION_CLICK.id) {
+                    captionHandle.performClick()
+                }
+                return super.performAccessibilityAction(host, action, args)
+            }
+
+            override fun onPopulateAccessibilityEvent(host: View, event: AccessibilityEvent) {
+                super.onPopulateAccessibilityEvent(host, event)
+                // When the status bar input layer is focused, use the content description of the
+                // caption handle so that it appears as "App handle" and not "Unlabelled view"
+                if (event.eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
+                    event.text.add(captionHandle.contentDescription)
+                }
+            }
+        }
+
+        // Update a11y action text so that Talkback announces "Press double tap to open app handle
+        // menu" while focused on status bar input layer
+        ViewCompat.replaceAccessibilityAction(
+            view, AccessibilityActionCompat.ACTION_CLICK, "Open app handle menu", null
+        )
     }
 
     private fun updateStatusBarInputLayer(globalPosition: Point) {
@@ -173,7 +237,8 @@ internal class AppHandleViewHolder(
         return taskInfo.taskDescription
             ?.let { taskDescription ->
                 if (Color.alpha(taskDescription.statusBarColor) != 0 &&
-                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
+                ) {
                     Color.valueOf(taskDescription.statusBarColor).luminance() < 0.5
                 } else {
                     taskDescription.systemBarsAppearance and APPEARANCE_LIGHT_STATUS_BARS == 0
