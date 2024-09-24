@@ -3,3 +3,4 @@ set noparent
 # Bug component: 879035
 include /services/core/java/com/android/server/biometrics/OWNERS
 beverlyt@google.com
+include /packages/SystemUI/TEST_OWNERS

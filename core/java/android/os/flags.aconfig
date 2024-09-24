@@ -217,3 +217,11 @@ flag {
      description: "Tracing using Perfetto SDK."
      bug: "303199244"
 }
+
+flag {
+     name: "mainline_vcn_platform_api"
+     namespace: "vcn"
+     description: "Expose platform APIs to mainline VCN"
+     is_exported: true
+     bug: "366598445"
+}
