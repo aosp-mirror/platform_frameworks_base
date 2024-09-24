@@ -31,6 +31,8 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.MediaRecom
 import com.android.systemui.media.controls.shared.model.MediaRecModel
 import com.android.systemui.media.controls.shared.model.MediaRecommendationsModel
 import com.android.systemui.media.controls.shared.model.NUM_REQUIRED_RECOMMENDATIONS
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.media.controls.ui.controller.MediaViewController.Companion.GUTS_ANIMATION_DURATION
 import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
@@ -66,7 +68,7 @@ constructor(
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 
-    private var location = -1
+    @MediaLocation private var location = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /**
      * Called whenever the recommendation has been expired or removed by the user. This method
