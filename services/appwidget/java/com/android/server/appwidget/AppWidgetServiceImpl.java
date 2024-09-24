@@ -18,6 +18,7 @@ package com.android.server.appwidget;
 
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
+import static android.appwidget.flags.Flags.securityPolicyInteractAcrossUsers;
 import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -32,6 +33,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionName;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -1463,13 +1465,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         // Check that if a cross-profile binding is attempted, it is allowed.
-        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)) {
+        // Cross-profile binding is also allowed if the caller has interact across users permission.
+        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)
+                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
             return false;
         }
 
-        // If the provider is not under the calling user, make sure this
-        // provider is allowlisted for access from the parent.
-        if (!mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+        // If the provider is not under the calling user, make sure this provider is allowlisted for
+        // access from the parent, or that the caller has permission to interact across users.
+        if (!mSecurityPolicy.canAccessProvider(
                 providerComponent.getPackageName(), providerProfileId)) {
             return false;
         }
@@ -2190,8 +2194,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
         }
 
-        // Ensure the profile is in the group and enabled.
-        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)) {
+        // Ensure the profile is in the group and enabled, or that the caller has permission to
+        // interact across users.
+        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)
+                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
             return null;
         }
 
@@ -2226,7 +2232,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Add providers only for the requested profile that are allowlisted.
                 final int providerProfileId = info.getProfile().getIdentifier();
                 if (providerProfileId == profileId
-                        && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                        && mSecurityPolicy.canAccessProvider(
                         providerPackageName, providerProfileId)
                         && !mPackageManagerInternal.filterAppAccess(providerPackageName, callingUid,
                         profileId)) {
@@ -4620,7 +4626,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final int callingUid = Binder.getCallingUid();
                 final String providerPackageName = componentName.getPackageName();
                 final boolean providerIsInCallerProfile =
-                        mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                        mSecurityPolicy.canAccessProvider(
                                 providerPackageName, providerProfileId);
                 final boolean shouldFilterAppAccess = mPackageManagerInternal.filterAppAccess(
                         providerPackageName, callingUid, providerProfileId);
@@ -4948,8 +4954,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final int userId = UserHandle.getUserId(uid);
             if ((widget.host.getUserId() == userId || (widget.provider != null
                     && widget.provider.getUserId() == userId))
-                && mContext.checkCallingPermission(android.Manifest.permission.BIND_APPWIDGET)
-                    == PackageManager.PERMISSION_GRANTED) {
+                    && callerHasPermission(android.Manifest.permission.BIND_APPWIDGET)) {
                 // Apps that run in the same user as either the host or the provider and
                 // have the bind widget permission have access to the widget.
                 return true;
@@ -4968,10 +4973,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return getProfileParent(profileId) == parentId;
         }
 
-        public boolean isProviderInCallerOrInProfileAndWhitelListed(String packageName,
-                int profileId) {
+        /**
+         * The provider is accessible by the caller if any of the following is true:
+         * - The provider belongs to the caller
+         * - The provider belongs to a profile of the caller and is allowlisted
+         * - The caller has permission to interact across users
+         */
+        public boolean canAccessProvider(String packageName, int profileId) {
             final int callerId = UserHandle.getCallingUserId();
             if (profileId == callerId) {
+                return true;
+            }
+            if (hasCallerInteractAcrossUsersPermission()) {
                 return true;
             }
             final int parentId = getProfileParent(profileId);
@@ -5040,6 +5053,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 Binder.restoreCallingIdentity(identity);
             }
             return true;
+        }
+
+        /** Returns true if the caller has permission to interact across users. */
+        public boolean hasCallerInteractAcrossUsersPermission() {
+            if (!securityPolicyInteractAcrossUsers()) {
+                return false;
+            }
+
+            return callerHasPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+                    || callerHasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        }
+
+        private boolean callerHasPermission(@NonNull @PermissionName String permission) {
+            return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
         }
     }
 
