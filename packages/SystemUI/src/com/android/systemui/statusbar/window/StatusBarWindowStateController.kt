@@ -32,13 +32,14 @@ import javax.inject.Inject
  * A centralized class maintaining the state of the status bar window.
  *
  * @deprecated use
- *   [com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepository] instead.
+ *   [com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore.defaultDisplay]
+ *   repo instead.
  *
  * Classes that want to get updates about the status bar window state should subscribe to this class
  * via [addListener] and should NOT add their own callback on [CommandQueue].
  */
 @SysUISingleton
-@Deprecated("Use StatusBarWindowRepository instead")
+@Deprecated("Use StatusBarWindowStateRepositoryStore.defaultDisplay instead")
 class StatusBarWindowStateController
 @Inject
 constructor(@DisplayId private val thisDisplayId: Int, commandQueue: CommandQueue) {

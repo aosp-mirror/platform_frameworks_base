@@ -60,7 +60,7 @@ package android.nfc {
     method @FlaggedApi("android.nfc.nfc_oem_extension") @NonNull public java.util.List<java.lang.String> getActiveNfceeList();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void maybeTriggerFirmwareUpdate();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void registerCallback(@NonNull java.util.concurrent.Executor, @NonNull android.nfc.NfcOemExtension.Callback);
-    method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void setControllerAlwaysOn(int);
+    method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.NFC_SET_CONTROLLER_ALWAYS_ON) public void setControllerAlwaysOnMode(int);
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void synchronizeScreenState();
     method @FlaggedApi("android.nfc.nfc_oem_extension") @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void unregisterCallback(@NonNull android.nfc.NfcOemExtension.Callback);
     field @FlaggedApi("android.nfc.nfc_oem_extension") public static final int DISABLE = 0; // 0x0

@@ -79,6 +79,7 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -712,8 +713,14 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
-    static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
-        return new DesktopModeTaskRepository();
+    static DesktopModeTaskRepository provideDesktopModeTaskRepository(
+            Context context,
+            ShellInit shellInit,
+            DesktopPersistentRepository desktopPersistentRepository,
+            @ShellMainThread CoroutineScope mainScope
+    ) {
+        return new DesktopModeTaskRepository(context, shellInit, desktopPersistentRepository,
+                mainScope);
     }
 
     @WMSingleton
@@ -796,6 +803,14 @@ public abstract class WMShellModule {
             @ShellMainThread CoroutineScope applicationScope) {
         return new AppHandleEducationController(appHandleEducationFilter,
                 shellTaskOrganizer, appHandleEducationDatastoreRepository, applicationScope);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopPersistentRepository provideDesktopPersistentRepository(
+            Context context,
+            @ShellBackgroundThread CoroutineScope bgScope) {
+        return new DesktopPersistentRepository(context, bgScope);
     }
 
     //

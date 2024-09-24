@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.domain.interactor
+package com.android.settingslib.spa.framework.util
 
-import com.android.systemui.keyguard.domain.interactor.deviceEntrySideFpsOverlayInteractor
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.Test
+import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
-val Kosmos.sideFpsOverlayInteractor by Fixture {
-    SideFpsOverlayInteractorImpl(
-        biometricStatusInteractor,
-        displayStateInteractor,
-        deviceEntrySideFpsOverlayInteractor,
-        sideFpsSensorInteractor,
-    )
+@RunWith(AndroidJUnit4::class)
+class SystemPropertiesTest {
+
+    @Test
+    fun getBoolean_noCrash() {
+        SystemProperties.getBoolean("is_expressive_design_enabled", false)
+    }
 }
