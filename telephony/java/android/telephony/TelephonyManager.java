@@ -2757,7 +2757,7 @@ public class TelephonyManager {
 
     /**
      * Returns a constant indicating the device phone type.  This
-     * indicates the type of radio used to transmit voice calls.
+     * indicates the type of radio used to transmit voice/data calls.
      *
      * @see #PHONE_TYPE_NONE
      * @see #PHONE_TYPE_GSM
@@ -2769,7 +2769,7 @@ public class TelephonyManager {
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY)
     public int getPhoneType() {
-        if (!isVoiceCapable()) {
+        if (!isVoiceCapable() && !isDataCapable()) {
             return PHONE_TYPE_NONE;
         }
         return getCurrentPhoneType();
