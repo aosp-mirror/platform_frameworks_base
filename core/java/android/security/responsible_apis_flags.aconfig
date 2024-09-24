@@ -52,3 +52,11 @@ flag {
     description: "Opt the system into enforcement of BAL"
     bug: "339403750"
 }
+
+flag {
+    name: "prevent_intent_redirect"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks"
+    bug: "361143368"
+    is_fixed_read_only: true
+}
