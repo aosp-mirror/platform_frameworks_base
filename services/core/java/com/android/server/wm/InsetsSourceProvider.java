@@ -75,7 +75,8 @@ class InsetsSourceProvider {
 
     private final Rect mTmpRect = new Rect();
     private final InsetsSourceControl mFakeControl;
-    private final Consumer<Transaction> mSetLeashPositionConsumer;
+    private final Point mPosition = new Point();
+    private final Consumer<Transaction> mSetControlPositionConsumer;
     private @Nullable InsetsControlTarget mPendingControlTarget;
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
@@ -126,13 +127,14 @@ class InsetsSourceProvider {
                 source.getId(), source.getType(), null /* leash */, false /* initialVisible */,
                 new Point(), Insets.NONE);
         mControllable = (InsetsPolicy.CONTROLLABLE_TYPES & source.getType()) != 0;
-        mSetLeashPositionConsumer = t -> {
-            if (mControl != null) {
-                final SurfaceControl leash = mControl.getLeash();
-                if (leash != null) {
-                    final Point position = mControl.getSurfacePosition();
-                    t.setPosition(leash, position.x, position.y);
-                }
+        mSetControlPositionConsumer = t -> {
+            if (mControl == null || mControlTarget == null) {
+                return;
+            }
+            boolean changed = mControl.setSurfacePosition(mPosition.x, mPosition.y);
+            final SurfaceControl leash = mControl.getLeash();
+            if (changed && leash != null) {
+                t.setPosition(leash, mPosition.x, mPosition.y);
             }
             if (mHasPendingPosition) {
                 mHasPendingPosition = false;
@@ -140,7 +142,20 @@ class InsetsSourceProvider {
                     mStateController.notifyControlTargetChanged(mPendingControlTarget, this);
                 }
             }
+            changed |= updateInsetsHint();
+            if (changed) {
+                mStateController.notifyControlChanged(mControlTarget, this);
+            }
         };
+    }
+
+    private boolean updateInsetsHint() {
+        final Insets insetsHint = getInsetsHint();
+        if (!mControl.getInsetsHint().equals(insetsHint)) {
+            mControl.setInsetsHint(insetsHint);
+            return true;
+        }
+        return false;
     }
 
     InsetsSource getSource() {
@@ -363,26 +378,32 @@ class InsetsSourceProvider {
         }
         final boolean serverVisibleChanged = mServerVisible != isServerVisible;
         setServerVisible(isServerVisible);
-        updateInsetsControlPosition(windowState, serverVisibleChanged);
-    }
-
-    void updateInsetsControlPosition(WindowState windowState) {
-        updateInsetsControlPosition(windowState, false);
-    }
-
-    private void updateInsetsControlPosition(WindowState windowState,
-            boolean serverVisibleChanged) {
-        if (mControl == null) {
-            return;
+        final boolean positionChanged = updateInsetsControlPosition(windowState);
+        if (mControl != null && !positionChanged
+                // The insets hint would be updated if the position is changed. Here updates it for
+                // the possible change of the bounds or the server visibility.
+                && (updateInsetsHint()
+                        || serverVisibleChanged
+                                && android.view.inputmethod.Flags.refactorInsetsController())) {
+            // Only call notifyControlChanged here when the position is not changed. Otherwise, it
+            // is called or is scheduled to be called during updateInsetsControlPosition.
+            mStateController.notifyControlChanged(mControlTarget, this);
         }
-        boolean changed = false;
+    }
+
+    /**
+     * @return {#code true} if the surface position of the control is changed.
+     */
+    boolean updateInsetsControlPosition(WindowState windowState) {
+        if (mControl == null) {
+            return false;
+        }
         final Point position = getWindowFrameSurfacePosition();
-        if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
-            changed = true;
+        if (!mPosition.equals(position)) {
+            mPosition.set(position.x, position.y);
             if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
                     && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
-                mHasPendingPosition = true;
-                windowState.applyWithNextDraw(mSetLeashPositionConsumer);
+                windowState.applyWithNextDraw(mSetControlPositionConsumer);
             } else {
                 Transaction t = mWindowContainer.getSyncTransaction();
                 if (windowState != null) {
@@ -399,20 +420,11 @@ class InsetsSourceProvider {
                         }
                     }
                 }
-                mSetLeashPositionConsumer.accept(t);
+                mSetControlPositionConsumer.accept(t);
             }
+            return true;
         }
-        final Insets insetsHint = getInsetsHint();
-        if (!mControl.getInsetsHint().equals(insetsHint)) {
-            mControl.setInsetsHint(insetsHint);
-            changed = true;
-        }
-        if (android.view.inputmethod.Flags.refactorInsetsController() && serverVisibleChanged) {
-            changed = true;
-        }
-        if (changed) {
-            mStateController.notifyControlChanged(mControlTarget, this);
-        }
+        return false;
     }
 
     private Point getWindowFrameSurfacePosition() {

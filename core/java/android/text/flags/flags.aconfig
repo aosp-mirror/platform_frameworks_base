@@ -168,3 +168,13 @@ flag {
   description: "Decouple variation settings, weight and style information from Typeface class"
   bug: "361260253"
 }
+
+flag {
+  name: "handwriting_track_disabled"
+  namespace: "text"
+  description: "Handwriting initiator tracks focused view even if handwriting is disabled to fix initiation bug."
+  bug: "361256391"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

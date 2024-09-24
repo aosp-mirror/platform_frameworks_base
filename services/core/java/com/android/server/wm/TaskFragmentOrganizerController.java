@@ -429,7 +429,7 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             }
 
             final IBinder activityToken;
-            if (activity.getPid() == mOrganizerPid) {
+            if (activity.getPid() == mOrganizerPid && activity.getUid() == mOrganizerUid) {
                 // We only pass the actual token if the activity belongs to the organizer process.
                 activityToken = activity.token;
             } else {
@@ -458,7 +458,8 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
                 change.setTaskFragmentToken(lastParentTfToken);
             }
             // Only pass the activity token to the client if it belongs to the same process.
-            if (nextFillTaskActivity != null && nextFillTaskActivity.getPid() == mOrganizerPid) {
+            if (nextFillTaskActivity != null && nextFillTaskActivity.getPid() == mOrganizerPid
+                    && nextFillTaskActivity.getUid() == mOrganizerUid) {
                 change.setOtherActivityToken(nextFillTaskActivity.token);
             }
             return change;
@@ -551,6 +552,10 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             if (isOrganizerRegistered(organizer)) {
                 throw new IllegalStateException(
                         "Replacing existing organizer currently unsupported");
+            }
+
+            if (pid <= 0) {
+                throw new IllegalStateException("Cannot register from invalid pid: " + pid);
             }
 
             if (restoreFromCachedStateIfPossible(organizer, pid, uid, outSavedState)) {

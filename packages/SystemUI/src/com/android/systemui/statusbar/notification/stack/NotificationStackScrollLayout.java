@@ -1260,6 +1260,7 @@ public class NotificationStackScrollLayout
     @Override
     public void setHeadsUpBottom(float headsUpBottom) {
         mAmbientState.setHeadsUpBottom(headsUpBottom);
+        mStateAnimator.setHeadsUpAppearHeightBottom(Math.round(headsUpBottom));
     }
 
     @Override

@@ -2397,7 +2397,11 @@ public abstract class WallpaperService extends Service {
                 // it hasn't changed and there is no need to update.
                 ret = mBlastBufferQueue.createSurface();
             } else {
-                mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
+                if (mBbqSurfaceControl != null && mBbqSurfaceControl.isValid()) {
+                    mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
+                } else {
+                    Log.w(TAG, "Skipping BlastBufferQueue update - invalid surface control");
+                }
             }
 
             return ret;

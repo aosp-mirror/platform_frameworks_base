@@ -130,8 +130,8 @@ object Notifications {
 fun SceneScope.HeadsUpNotificationSpace(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
+    useHunBounds: () -> Boolean = { true },
     modifier: Modifier = Modifier,
-    isPeekFromBottom: Boolean = false,
 ) {
     Box(
         modifier =
@@ -141,17 +141,25 @@ fun SceneScope.HeadsUpNotificationSpace(
                 .notificationHeadsUpHeight(stackScrollView)
                 .debugBackground(viewModel, DEBUG_HUN_COLOR)
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
-                    val positionInWindow = coordinates.positionInWindow()
-                    val boundsInWindow = coordinates.boundsInWindow()
-                    debugLog(viewModel) {
-                        "HUNS onGloballyPositioned:" +
-                            " size=${coordinates.size}" +
-                            " bounds=$boundsInWindow"
+                    // This element is sometimes opted out of the shared element system, so there
+                    // can be multiple instances of it during a transition. Thus we need to
+                    // determine which instance should feed its bounds to NSSL to avoid providing
+                    // conflicting values
+                    val useBounds = useHunBounds()
+                    if (useBounds) {
+                        val positionInWindow = coordinates.positionInWindow()
+                        val boundsInWindow = coordinates.boundsInWindow()
+                        debugLog(viewModel) {
+                            "HUNS onGloballyPositioned:" +
+                                " size=${coordinates.size}" +
+                                " bounds=$boundsInWindow"
+                        }
+                        // Note: boundsInWindow doesn't scroll off the screen, so use
+                        // positionInWindow
+                        // for top bound, which can scroll off screen while snoozing
+                        stackScrollView.setHeadsUpTop(positionInWindow.y)
+                        stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                     }
-                    // Note: boundsInWindow doesn't scroll off the screen, so use positionInWindow
-                    // for top bound, which can scroll off screen while snoozing
-                    stackScrollView.setHeadsUpTop(positionInWindow.y)
-                    stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                 }
     )
 }

@@ -20,13 +20,12 @@ import android.app.Instrumentation
 import android.platform.test.annotations.Postsubmit
 import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.device.apphelpers.CalculatorAppHelper
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
 import com.android.server.wm.flicker.helpers.StartMediaProjectionAppHelper
 import com.android.wm.shell.Utils
 import org.junit.After
@@ -47,8 +46,7 @@ open class StartAppMediaProjectionWithDisplayRotations {
 
     private val initialRotation = Rotation.ROTATION_0
     private val targetApp = CalculatorAppHelper(instrumentation)
-    private val mediaProjectionAppHelper = StartMediaProjectionAppHelper(instrumentation)
-    private val testApp = DesktopModeAppHelper(mediaProjectionAppHelper)
+    private val testApp = StartMediaProjectionAppHelper(instrumentation)
 
     @Rule
     @JvmField
@@ -63,7 +61,7 @@ open class StartAppMediaProjectionWithDisplayRotations {
 
     @Test
     open fun startMediaProjectionAndRotate() {
-        mediaProjectionAppHelper.startSingleAppMediaProjection(wmHelper, targetApp)
+        testApp.startSingleAppMediaProjection(wmHelper, targetApp)
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
         ChangeDisplayOrientationRule.setRotation(Rotation.ROTATION_90)
