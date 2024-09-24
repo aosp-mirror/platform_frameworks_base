@@ -289,6 +289,13 @@ constructor(
         )
     }
 
+    private fun resetTouchMonitor() {
+        touchMonitor?.apply {
+            destroy()
+            touchMonitor = null
+        }
+    }
+
     /** Override for testing. */
     @VisibleForTesting
     internal fun initView(containerView: View): View {
@@ -297,12 +304,13 @@ constructor(
             throw RuntimeException("Communal view has already been initialized")
         }
 
-        if (touchMonitor == null) {
-            touchMonitor =
-                ambientTouchComponentFactory.create(this, HashSet(), TAG).getTouchMonitor().apply {
-                    init()
-                }
-        }
+        resetTouchMonitor()
+
+        touchMonitor =
+            ambientTouchComponentFactory.create(this, HashSet(), TAG).getTouchMonitor().apply {
+                init()
+            }
+
         lifecycleRegistry.addObserver(touchLifecycleLogger)
         lifecycleRegistry.currentState = Lifecycle.State.CREATED
 
@@ -474,6 +482,8 @@ constructor(
         }
 
         lifecycleRegistry.removeObserver(touchLifecycleLogger)
+
+        resetTouchMonitor()
 
         logger.d("Hub container disposed")
     }
