@@ -48,6 +48,7 @@ import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePagePr
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.TopIntroPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ZeroStatePreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
@@ -113,6 +114,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 BannerPageProvider,
                 CopyablePageProvider,
                 IntroPreferencePageProvider,
+                TopIntroPreferencePageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),

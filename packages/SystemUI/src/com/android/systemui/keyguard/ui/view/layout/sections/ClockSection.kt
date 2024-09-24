@@ -37,6 +37,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardClockViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -49,25 +50,17 @@ import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 
-internal fun ConstraintSet.setVisibility(
-    views: Iterable<View>,
-    visibility: Int,
-) = views.forEach { view -> this.setVisibility(view.id, visibility) }
+internal fun ConstraintSet.setVisibility(views: Iterable<View>, visibility: Int) =
+    views.forEach { view -> this.setVisibility(view.id, visibility) }
 
-internal fun ConstraintSet.setAlpha(
-    views: Iterable<View>,
-    alpha: Float,
-) = views.forEach { view -> this.setAlpha(view.id, alpha) }
+internal fun ConstraintSet.setAlpha(views: Iterable<View>, alpha: Float) =
+    views.forEach { view -> this.setAlpha(view.id, alpha) }
 
-internal fun ConstraintSet.setScaleX(
-    views: Iterable<View>,
-    alpha: Float,
-) = views.forEach { view -> this.setScaleX(view.id, alpha) }
+internal fun ConstraintSet.setScaleX(views: Iterable<View>, alpha: Float) =
+    views.forEach { view -> this.setScaleX(view.id, alpha) }
 
-internal fun ConstraintSet.setScaleY(
-    views: Iterable<View>,
-    alpha: Float,
-) = views.forEach { view -> this.setScaleY(view.id, alpha) }
+internal fun ConstraintSet.setScaleY(views: Iterable<View>, alpha: Float) =
+    views.forEach { view -> this.setScaleY(view.id, alpha) }
 
 @SysUISingleton
 class ClockSection
@@ -79,6 +72,7 @@ constructor(
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
     private val rootViewModel: KeyguardRootViewModel,
+    private val aodBurnInViewModel: AodBurnInViewModel,
 ) : KeyguardSection() {
     private var disposableHandle: DisposableHandle? = null
 
@@ -97,6 +91,7 @@ constructor(
                 clockInteractor,
                 blueprintInteractor.get(),
                 rootViewModel,
+                aodBurnInViewModel,
             )
     }
 
@@ -120,7 +115,7 @@ constructor(
 
     private fun buildConstraints(
         clock: ClockController,
-        constraintSet: ConstraintSet
+        constraintSet: ConstraintSet,
     ): ConstraintSet {
         // Add constraint between rootView and clockContainer
         applyDefaultConstraints(constraintSet)
@@ -136,8 +131,8 @@ constructor(
             if (!keyguardClockViewModel.isLargeClockVisible.value) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
             } else {
-                setScaleX(getTargetClockFace(clock).views, rootViewModel.burnInModel.value.scale)
-                setScaleY(getTargetClockFace(clock).views, rootViewModel.burnInModel.value.scale)
+                setScaleX(getTargetClockFace(clock).views, aodBurnInViewModel.movement.value.scale)
+                setScaleY(getTargetClockFace(clock).views, aodBurnInViewModel.movement.value.scale)
             }
         }
     }
@@ -156,7 +151,7 @@ constructor(
                 R.id.weather_clock_bc_smartspace_bottom,
                 Barrier.BOTTOM,
                 getDimen(ENHANCED_SMARTSPACE_HEIGHT),
-                (custR.id.weather_clock_time)
+                (custR.id.weather_clock_time),
             )
             if (
                 rootViewModel.isNotifIconContainerVisible.value.value &&
@@ -168,15 +163,15 @@ constructor(
                     0,
                     *intArrayOf(
                         R.id.aod_notification_icon_container,
-                        R.id.weather_clock_bc_smartspace_bottom
-                    )
+                        R.id.weather_clock_bc_smartspace_bottom,
+                    ),
                 )
             } else {
                 createBarrier(
                     R.id.weather_clock_date_and_icons_barrier_bottom,
                     Barrier.BOTTOM,
                     0,
-                    *intArrayOf(R.id.weather_clock_bc_smartspace_bottom)
+                    *intArrayOf(R.id.weather_clock_bc_smartspace_bottom),
                 )
             }
         }
@@ -204,7 +199,7 @@ constructor(
             constrainWidth(R.id.lockscreen_clock_view, WRAP_CONTENT)
             constrainHeight(
                 R.id.lockscreen_clock_view,
-                context.resources.getDimensionPixelSize(custR.dimen.small_clock_height)
+                context.resources.getDimensionPixelSize(custR.dimen.small_clock_height),
             )
             connect(
                 R.id.lockscreen_clock_view,
@@ -212,7 +207,7 @@ constructor(
                 PARENT_ID,
                 START,
                 context.resources.getDimensionPixelSize(custR.dimen.clock_padding_start) +
-                    context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
+                    context.resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal),
             )
             val smallClockTopMargin = keyguardClockViewModel.getSmallClockTopMargin()
             create(R.id.small_clock_guideline_top, ConstraintSet.HORIZONTAL_GUIDELINE)

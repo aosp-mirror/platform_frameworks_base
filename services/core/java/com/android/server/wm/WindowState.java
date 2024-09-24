@@ -3856,16 +3856,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         fillInsetsState(mLastReportedInsetsState, false /* copySources */);
         fillInsetsSourceControls(mLastReportedActiveControls, false /* copyControls */);
-        if (Flags.insetsControlChangedItem()) {
-            getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
-                    mClient, mLastReportedInsetsState, mLastReportedActiveControls));
-        } else {
-            try {
-                mClient.insetsControlChanged(mLastReportedInsetsState, mLastReportedActiveControls);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to deliver inset control state change to w=" + this, e);
-            }
-        }
+        getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
+                mClient, mLastReportedInsetsState, mLastReportedActiveControls));
     }
 
     @Override

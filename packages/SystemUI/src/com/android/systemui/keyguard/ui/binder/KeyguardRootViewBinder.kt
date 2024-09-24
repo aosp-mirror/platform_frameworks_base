@@ -261,10 +261,7 @@ object KeyguardRootViewBinder {
                             ->
                             if (biometricMessage?.message != null) {
                                 chipbarCoordinator!!.displayView(
-                                    createChipbarInfo(
-                                        biometricMessage.message,
-                                        R.drawable.ic_lock,
-                                    )
+                                    createChipbarInfo(biometricMessage.message, R.drawable.ic_lock)
                                 )
                             } else {
                                 chipbarCoordinator!!.removeView(ID, "occludingAppMsgNull")
@@ -327,6 +324,9 @@ object KeyguardRootViewBinder {
                                     .getDimensionPixelSize(R.dimen.shelf_appear_translation)
                                     .stateIn(this)
                             viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                if (isVisible.value) {
+                                    blueprintViewModel.refreshBlueprint()
+                                }
                                 childViews[aodNotificationIconContainerId]
                                     ?.setAodNotifIconContainerIsVisible(
                                         isVisible,
@@ -382,7 +382,7 @@ object KeyguardRootViewBinder {
                                 if (msdlFeedback()) {
                                     msdlPlayer?.playToken(
                                         MSDLToken.UNLOCK,
-                                        authInteractionProperties
+                                        authInteractionProperties,
                                     )
                                 } else {
                                     vibratorHelper.performHapticFeedback(
@@ -398,7 +398,7 @@ object KeyguardRootViewBinder {
                                 if (msdlFeedback()) {
                                     msdlPlayer?.playToken(
                                         MSDLToken.FAILURE,
-                                        authInteractionProperties
+                                        authInteractionProperties,
                                     )
                                 } else {
                                     vibratorHelper.performHapticFeedback(
@@ -425,7 +425,7 @@ object KeyguardRootViewBinder {
                     blueprintViewModel,
                     clockViewModel,
                     childViews,
-                    burnInParams
+                    burnInParams,
                 )
             )
 
@@ -464,11 +464,7 @@ object KeyguardRootViewBinder {
      */
     private fun createChipbarInfo(message: String, @DrawableRes icon: Int): ChipbarInfo {
         return ChipbarInfo(
-            startIcon =
-                TintedIcon(
-                    Icon.Resource(icon, null),
-                    ChipbarInfo.DEFAULT_ICON_TINT,
-                ),
+            startIcon = TintedIcon(Icon.Resource(icon, null), ChipbarInfo.DEFAULT_ICON_TINT),
             text = Text.Loaded(message),
             endItem = null,
             vibrationEffect = null,
@@ -499,7 +495,7 @@ object KeyguardRootViewBinder {
             oldLeft: Int,
             oldTop: Int,
             oldRight: Int,
-            oldBottom: Int
+            oldBottom: Int,
         ) {
             // After layout, ensure the notifications are positioned correctly
             childViews[nsslPlaceholderId]?.let { notificationListPlaceholder ->
@@ -515,7 +511,7 @@ object KeyguardRootViewBinder {
                 viewModel.onNotificationContainerBoundsChanged(
                     notificationListPlaceholder.top.toFloat(),
                     notificationListPlaceholder.bottom.toFloat(),
-                    animate = shouldAnimate
+                    animate = shouldAnimate,
                 )
             }
 
@@ -531,7 +527,7 @@ object KeyguardRootViewBinder {
                                         Int.MAX_VALUE
                                     } else {
                                         view.getTop()
-                                    }
+                                    },
                                 )
                             }
                         } else {

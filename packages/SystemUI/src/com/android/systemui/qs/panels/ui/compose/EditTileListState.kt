@@ -60,8 +60,35 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
         return _tiles.filterIsInstance<TileGridCell>().map { it.tile.tileSpec }
     }
 
-    fun indexOf(tileSpec: TileSpec): Int {
+    private fun indexOf(tileSpec: TileSpec): Int {
         return _tiles.indexOfFirst { it is TileGridCell && it.tile.tileSpec == tileSpec }
+    }
+
+    /**
+     * Whether the tile with this [TileSpec] is currently an icon in the [EditTileListState]
+     *
+     * @return true if the tile is an icon, false if it's large, null if the tile isn't in the list
+     */
+    fun isIcon(tileSpec: TileSpec): Boolean? {
+        val index = indexOf(tileSpec)
+        return if (index != -1) {
+            val cell = _tiles[index]
+            cell as TileGridCell
+            return cell.isIcon
+        } else {
+            null
+        }
+    }
+
+    /** Toggle the size of the tile corresponding to the [TileSpec] */
+    fun toggleSize(tileSpec: TileSpec) {
+        val fromIndex = indexOf(tileSpec)
+        if (fromIndex != -1) {
+            val cell = _tiles.removeAt(fromIndex)
+            cell as TileGridCell
+            _tiles.add(fromIndex, cell.copy(width = if (cell.isIcon) 2 else 1))
+            regenerateGrid(fromIndex)
+        }
     }
 
     override fun isMoving(tileSpec: TileSpec): Boolean {
@@ -71,8 +98,8 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
     override fun onStarted(cell: SizedTile<EditTileViewModel>) {
         _draggedCell.value = cell
 
-        // Add visible spacers to the grid to indicate where the user can move a tile
-        regenerateGrid(includeSpacers = true)
+        // Add spacers to the grid to indicate where the user can move a tile
+        regenerateGrid()
     }
 
     override fun onMoved(target: Int, insertAfter: Boolean) {
@@ -86,7 +113,7 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
         val insertionIndex = if (insertAfter) target + 1 else target
         if (fromIndex != -1) {
             val cell = _tiles.removeAt(fromIndex)
-            regenerateGrid(includeSpacers = true)
+            regenerateGrid()
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), cell)
         } else {
             // Add the tile with a temporary row which will get reassigned when
@@ -94,7 +121,7 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
             _tiles.add(insertionIndex.coerceIn(0, _tiles.size), TileGridCell(draggedTile, 0))
         }
 
-        regenerateGrid(includeSpacers = true)
+        regenerateGrid()
     }
 
     override fun movedOutOfBounds() {
@@ -109,12 +136,27 @@ class EditTileListState(tiles: List<SizedTile<EditTileViewModel>>, private val c
         _draggedCell.value = null
 
         // Remove the spacers
-        regenerateGrid(includeSpacers = false)
+        regenerateGrid()
     }
 
-    private fun regenerateGrid(includeSpacers: Boolean) {
-        _tiles.filterIsInstance<TileGridCell>().toGridCells(columns, includeSpacers).let {
+    /** Regenerate the list of [GridCell] with their new potential rows */
+    private fun regenerateGrid() {
+        _tiles.filterIsInstance<TileGridCell>().toGridCells(columns).let {
             _tiles.clear()
+            _tiles.addAll(it)
+        }
+    }
+
+    /**
+     * Regenerate the list of [GridCell] with their new potential rows from [fromIndex], leaving
+     * cells before that untouched.
+     */
+    private fun regenerateGrid(fromIndex: Int) {
+        val fromRow = _tiles[fromIndex].row
+        val (pre, post) = _tiles.partition { it.row < fromRow }
+        post.filterIsInstance<TileGridCell>().toGridCells(columns, startingRow = fromRow).let {
+            _tiles.clear()
+            _tiles.addAll(pre)
             _tiles.addAll(it)
         }
     }

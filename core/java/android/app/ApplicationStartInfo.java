@@ -680,6 +680,7 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeParcelable(mStartIntent, flags);
         dest.writeInt(mLaunchMode);
         dest.writeBoolean(mWasForceStopped);
+        dest.writeLong(mMonoticCreationTimeMs);
     }
 
     /** @hide */

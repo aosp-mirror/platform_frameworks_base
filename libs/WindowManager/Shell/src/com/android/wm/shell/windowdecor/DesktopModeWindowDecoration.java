@@ -610,7 +610,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 || !Flags.enableHandleInputFix()) {
             return;
         }
-        ((AppHandleViewHolder) mWindowDecorViewHolder).disposeStatusBarInputLayer();
+        asAppHandle(mWindowDecorViewHolder).disposeStatusBarInputLayer();
     }
 
     private WindowDecorationViewHolder createViewHolder() {
@@ -645,6 +645,22 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private boolean isAppHandle(WindowDecorationViewHolder viewHolder) {
         return viewHolder instanceof AppHandleViewHolder;
+    }
+
+    @Nullable
+    private AppHandleViewHolder asAppHandle(WindowDecorationViewHolder viewHolder) {
+        if (viewHolder instanceof AppHandleViewHolder) {
+            return (AppHandleViewHolder) viewHolder;
+        }
+        return null;
+    }
+
+    @Nullable
+    private AppHeaderViewHolder asAppHeader(WindowDecorationViewHolder viewHolder) {
+        if (viewHolder instanceof AppHeaderViewHolder) {
+            return (AppHeaderViewHolder) viewHolder;
+        }
+        return null;
     }
 
     @VisibleForTesting
@@ -1025,7 +1041,15 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     void closeMaximizeMenu() {
         if (!isMaximizeMenuActive()) return;
-        mMaximizeMenu.close();
+        mMaximizeMenu.close(() -> {
+            // Request the accessibility service to refocus on the maximize button after closing
+            // the menu.
+            final AppHeaderViewHolder appHeader = asAppHeader(mWindowDecorViewHolder);
+            if (appHeader != null) {
+                appHeader.requestAccessibilityFocus();
+            }
+            return Unit.INSTANCE;
+        });
         mMaximizeMenu = null;
     }
 
@@ -1408,7 +1432,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void setAnimatingTaskResizeOrReposition(boolean animatingTaskResizeOrReposition) {
         if (mRelayoutParams.mLayoutResId == R.layout.desktop_mode_app_handle) return;
-        ((AppHeaderViewHolder) mWindowDecorViewHolder)
+        asAppHeader(mWindowDecorViewHolder)
                 .setAnimatingTaskResizeOrReposition(animatingTaskResizeOrReposition);
     }
 
@@ -1416,16 +1440,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      * Called when there is a {@link MotionEvent#ACTION_HOVER_EXIT} on the maximize window button.
      */
     void onMaximizeButtonHoverExit() {
-        ((AppHeaderViewHolder) mWindowDecorViewHolder)
-                .onMaximizeWindowHoverExit();
+        asAppHeader(mWindowDecorViewHolder).onMaximizeWindowHoverExit();
     }
 
     /**
      * Called when there is a {@link MotionEvent#ACTION_HOVER_ENTER} on the maximize window button.
      */
     void onMaximizeButtonHoverEnter() {
-        ((AppHeaderViewHolder) mWindowDecorViewHolder)
-                .onMaximizeWindowHoverEnter();
+        asAppHeader(mWindowDecorViewHolder).onMaximizeWindowHoverEnter();
     }
 
     @Override

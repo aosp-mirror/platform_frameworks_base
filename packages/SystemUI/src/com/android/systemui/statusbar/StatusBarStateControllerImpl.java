@@ -50,8 +50,8 @@ import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteract
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
 import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.data.model.SceneStack;
@@ -115,6 +115,7 @@ public class StatusBarStateControllerImpl implements
     private final UiEventLogger mUiEventLogger;
     private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final JavaAdapter mJavaAdapter;
+    private final Lazy<KeyguardInteractor> mKeyguardInteractorLazy;
     private final Lazy<KeyguardTransitionInteractor> mKeyguardTransitionInteractorLazy;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
     private final Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
@@ -185,6 +186,7 @@ public class StatusBarStateControllerImpl implements
             UiEventLogger uiEventLogger,
             Lazy<InteractionJankMonitor> interactionJankMonitorLazy,
             JavaAdapter javaAdapter,
+            Lazy<KeyguardInteractor> keyguardInteractor,
             Lazy<KeyguardTransitionInteractor> keyguardTransitionInteractor,
             Lazy<ShadeInteractor> shadeInteractorLazy,
             Lazy<DeviceUnlockedInteractor> deviceUnlockedInteractorLazy,
@@ -195,6 +197,7 @@ public class StatusBarStateControllerImpl implements
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mJavaAdapter = javaAdapter;
+        mKeyguardInteractorLazy = keyguardInteractor;
         mKeyguardTransitionInteractorLazy = keyguardTransitionInteractor;
         mShadeInteractorLazy = shadeInteractorLazy;
         mDeviceUnlockedInteractorLazy = deviceUnlockedInteractorLazy;
@@ -233,8 +236,8 @@ public class StatusBarStateControllerImpl implements
                     this::onStatusBarStateChanged);
 
             mJavaAdapter.alwaysCollectFlow(
-                    mKeyguardTransitionInteractorLazy.get().transitionValue(KeyguardState.AOD),
-                    this::onAodKeyguardStateTransitionValueChanged);
+                    mKeyguardInteractorLazy.get().getDozeAmount(),
+                    this::setDozeAmountInternal);
         }
     }
 
@@ -404,6 +407,7 @@ public class StatusBarStateControllerImpl implements
 
     @Override
     public void setAndInstrumentDozeAmount(View view, float dozeAmount, boolean animated) {
+        SceneContainerFlag.assertInLegacyMode();
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animated && mDozeAmountTarget == dozeAmount) {
                 return;
@@ -439,6 +443,7 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void startDozeAnimation() {
+        SceneContainerFlag.assertInLegacyMode();
         if (mDozeAmount == 0f || mDozeAmount == 1f) {
             mDozeInterpolator = mIsDozing
                     ? Interpolators.FAST_OUT_SLOW_IN
@@ -457,6 +462,7 @@ public class StatusBarStateControllerImpl implements
 
     @VisibleForTesting
     protected ObjectAnimator createDarkAnimator() {
+        SceneContainerFlag.assertInLegacyMode();
         ObjectAnimator darkAnimator = ObjectAnimator.ofFloat(
                 this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
         darkAnimator.setInterpolator(Interpolators.LINEAR);
@@ -708,14 +714,6 @@ public class StatusBarStateControllerImpl implements
         }
 
         updateStateAndNotifyListeners(newState);
-    }
-
-    private void onAodKeyguardStateTransitionValueChanged(float value) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
-            return;
-        }
-
-        setDozeAmountInternal(value);
     }
 
     private static final Map<SceneKey, Integer> sStatusBarStateByLockedSceneKey = Map.of(

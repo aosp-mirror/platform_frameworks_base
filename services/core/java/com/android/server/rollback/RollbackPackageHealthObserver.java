@@ -81,7 +81,7 @@ import java.util.function.Consumer;
 public final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
-    private static final String ACTION_NAME = RollbackPackageHealthObserver.class.getName();
+    private static final String CLASS_NAME = RollbackPackageHealthObserver.class.getName();
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
@@ -610,14 +610,16 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
                 }
             };
 
+            String intentActionName = CLASS_NAME + rollback.getRollbackId();
             // Register the BroadcastReceiver
             mContext.registerReceiver(rollbackReceiver,
-                    new IntentFilter(ACTION_NAME),
+                    new IntentFilter(intentActionName),
                     Context.RECEIVER_NOT_EXPORTED);
 
-            Intent intentReceiver = new Intent(ACTION_NAME);
+            Intent intentReceiver = new Intent(intentActionName);
             intentReceiver.putExtra("rollbackId", rollback.getRollbackId());
             intentReceiver.setPackage(mContext.getPackageName());
+            intentReceiver.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 
             PendingIntent rollbackPendingIntent = PendingIntent.getBroadcast(mContext,
                     rollback.getRollbackId(),

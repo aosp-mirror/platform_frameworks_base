@@ -518,6 +518,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         doneLatch.await();
     }
 
+    private static NotificationChannel cloneChannel(NotificationChannel original) {
+        Parcel parcel = Parcel.obtain();
+        try {
+            original.writeToParcel(parcel, 0);
+            parcel.setDataPosition(0);
+            return NotificationChannel.CREATOR.createFromParcel(parcel);
+        } finally {
+            parcel.recycle();
+        }
+    }
+
     @Test
     public void testWriteXml_onlyBackupsTargetUser() throws Exception {
         // Setup package notifications.
@@ -631,6 +642,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         }
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
+        if (android.app.Flags.uiRichOngoing()) {
+            mHelper.setCanBePromoted(PKG_N_MR1, UID_N_MR1, true);
+        }
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, false,
                 UserHandle.USER_ALL, channel1.getId(), channel2.getId(),
@@ -641,6 +655,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertTrue(mXmlHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
+        if (android.app.Flags.uiRichOngoing()) {
+            assertThat(mXmlHelper.canBePromoted(PKG_N_MR1, UID_N_MR1)).isTrue();
+        }
         assertEquals(channel1,
                 mXmlHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
         compareChannels(channel2,
@@ -6293,14 +6310,21 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         }, 20, 50);
     }
 
-    private static NotificationChannel cloneChannel(NotificationChannel original) {
-        Parcel parcel = Parcel.obtain();
-        try {
-            original.writeToParcel(parcel, 0);
-            parcel.setDataPosition(0);
-            return NotificationChannel.CREATOR.createFromParcel(parcel);
-        } finally {
-            parcel.recycle();
-        }
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public void testNoAppHasPermissionToPromoteByDefault() {
+        mHelper.setShowBadge(PKG_P, UID_P, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public void testSetCanBePromoted() {
+        mHelper.setCanBePromoted(PKG_P, UID_P, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
+
+        mHelper.setCanBePromoted(PKG_P, UID_P, false);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
+        verify(mHandler, never()).requestSort();
     }
 }

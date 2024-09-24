@@ -132,15 +132,23 @@ object TileType
 
 @Composable
 fun DefaultEditTileGrid(
-    currentListState: EditTileListState,
+    listState: EditTileListState,
     otherTiles: List<SizedTile<EditTileViewModel>>,
     columns: Int,
     modifier: Modifier,
     onRemoveTile: (TileSpec) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
-    onResize: (TileSpec) -> Unit,
+    onResize: (TileSpec, toIcon: Boolean) -> Unit,
 ) {
-    val selectionState = rememberSelectionState()
+    val currentListState by rememberUpdatedState(listState)
+    val selectionState =
+        rememberSelectionState(
+            onResize = { currentListState.toggleSize(it) },
+            onResizeEnd = { spec ->
+                // Commit the size currently in the list
+                currentListState.isIcon(spec)?.let { onResize(spec, it) }
+            },
+        )
 
     CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
         Column(
@@ -149,11 +157,11 @@ fun DefaultEditTileGrid(
             modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()),
         ) {
             AnimatedContent(
-                targetState = currentListState.dragInProgress,
+                targetState = listState.dragInProgress,
                 modifier = Modifier.wrapContentSize(),
                 label = "",
             ) { dragIsInProgress ->
-                EditGridHeader(Modifier.dragAndDropRemoveZone(currentListState, onRemoveTile)) {
+                EditGridHeader(Modifier.dragAndDropRemoveZone(listState, onRemoveTile)) {
                     if (dragIsInProgress) {
                         RemoveTileTarget()
                     } else {
@@ -162,11 +170,11 @@ fun DefaultEditTileGrid(
                 }
             }
 
-            CurrentTilesGrid(currentListState, selectionState, columns, onResize, onSetTiles)
+            CurrentTilesGrid(listState, selectionState, columns, onResize, onSetTiles)
 
             // Hide available tiles when dragging
             AnimatedVisibility(
-                visible = !currentListState.dragInProgress,
+                visible = !listState.dragInProgress,
                 enter = fadeIn(),
                 exit = fadeOut(),
             ) {
@@ -177,7 +185,7 @@ fun DefaultEditTileGrid(
                 ) {
                     EditGridHeader { Text(text = "Hold and drag to add tiles.") }
 
-                    AvailableTileGrid(otherTiles, selectionState, columns, currentListState)
+                    AvailableTileGrid(otherTiles, selectionState, columns, listState)
                 }
             }
 
@@ -186,7 +194,7 @@ fun DefaultEditTileGrid(
                 modifier =
                     Modifier.fillMaxWidth()
                         .weight(1f)
-                        .dragAndDropRemoveZone(currentListState, onRemoveTile)
+                        .dragAndDropRemoveZone(listState, onRemoveTile)
             )
         }
     }
@@ -229,7 +237,7 @@ private fun CurrentTilesGrid(
     listState: EditTileListState,
     selectionState: MutableSelectionState,
     columns: Int,
-    onResize: (TileSpec) -> Unit,
+    onResize: (TileSpec, toIcon: Boolean) -> Unit,
     onSetTiles: (List<TileSpec>) -> Unit,
 ) {
     val currentListState by rememberUpdatedState(listState)
@@ -242,19 +250,6 @@ private fun CurrentTilesGrid(
         )
     val gridState = rememberLazyGridState()
     var gridContentOffset by remember { mutableStateOf(Offset(0f, 0f)) }
-    var droppedSpec by remember { mutableStateOf<TileSpec?>(null) }
-
-    // Select the tile that was dropped. A delay is introduced to avoid clipping issues on the
-    // selected border and resizing handle, as well as letting the selection animation play.
-    LaunchedEffect(droppedSpec) {
-        droppedSpec?.let {
-            delay(200)
-            selectionState.select(it)
-
-            // Reset droppedSpec in case a tile is dropped twice in a row
-            droppedSpec = null
-        }
-    }
 
     TileLazyGrid(
         state = gridState,
@@ -270,14 +265,17 @@ private fun CurrentTilesGrid(
                 )
                 .dragAndDropTileList(gridState, { gridContentOffset }, listState) { spec ->
                     onSetTiles(currentListState.tileSpecs())
-                    droppedSpec = spec
+                    selectionState.select(spec, manual = false)
                 }
                 .onGloballyPositioned { coordinates ->
                     gridContentOffset = coordinates.positionInRoot()
                 }
                 .testTag(CURRENT_TILES_GRID_TEST_TAG),
     ) {
-        EditTiles(listState.tiles, listState, selectionState, onResize)
+        EditTiles(listState.tiles, listState, selectionState) { spec ->
+            // Toggle the current size of the tile
+            currentListState.isIcon(spec)?.let { onResize(spec, !it) }
+        }
     }
 }
 
@@ -348,11 +346,19 @@ private fun GridCell.key(index: Int, dragAndDropState: DragAndDropState): Any {
     }
 }
 
+/**
+ * Adds a list of [GridCell] to the lazy grid
+ *
+ * @param cells the list of [GridCell]
+ * @param dragAndDropState the [DragAndDropState] for this grid
+ * @param selectionState the [MutableSelectionState] for this grid
+ * @param onToggleSize the callback when a tile's size is toggled
+ */
 fun LazyGridScope.EditTiles(
     cells: List<GridCell>,
     dragAndDropState: DragAndDropState,
     selectionState: MutableSelectionState,
-    onResize: (TileSpec) -> Unit,
+    onToggleSize: (spec: TileSpec) -> Unit,
 ) {
     items(
         count = cells.size,
@@ -378,7 +384,7 @@ fun LazyGridScope.EditTiles(
                         index = index,
                         dragAndDropState = dragAndDropState,
                         selectionState = selectionState,
-                        onResize = onResize,
+                        onToggleSize = onToggleSize,
                     )
                 }
             is SpacerGridCell -> SpacerGridCell()
@@ -392,15 +398,27 @@ private fun LazyGridItemScope.TileGridCell(
     index: Int,
     dragAndDropState: DragAndDropState,
     selectionState: MutableSelectionState,
-    onResize: (TileSpec) -> Unit,
+    onToggleSize: (spec: TileSpec) -> Unit,
 ) {
-    val selected = selectionState.isSelected(cell.tile.tileSpec)
     val stateDescription = stringResource(id = R.string.accessibility_qs_edit_position, index + 1)
+    var selected by remember { mutableStateOf(false) }
     val selectionAlpha by
         animateFloatAsState(
             targetValue = if (selected) 1f else 0f,
             label = "QSEditTileSelectionAlpha",
         )
+
+    LaunchedEffect(selectionState.selection?.tileSpec) {
+        selectionState.selection?.let {
+            // A delay is introduced on automatic selections such as dragged tiles or reflow caused
+            // by resizing. This avoids clipping issues on the border and resizing handle, as well
+            // as letting the selection animation play correctly.
+            if (!it.manual) {
+                delay(250)
+            }
+        }
+        selected = selectionState.selection?.tileSpec == cell.tile.tileSpec
+    }
 
     val modifier =
         Modifier.animateItem()
@@ -411,7 +429,7 @@ private fun LazyGridItemScope.TileGridCell(
                     listOf(
                         // TODO(b/367748260): Add final accessibility actions
                         CustomAccessibilityAction("Toggle size") {
-                            onResize(cell.tile.tileSpec)
+                            onToggleSize(cell.tile.tileSpec)
                             true
                         }
                     )
@@ -438,11 +456,9 @@ private fun LazyGridItemScope.TileGridCell(
 
     if (selected) {
         SelectedTile(
-            tileSpec = cell.tile.tileSpec,
             isIcon = cell.isIcon,
             selectionAlpha = { selectionAlpha },
             selectionState = selectionState,
-            onResize = onResize,
             modifier = modifier.zIndex(2f), // 2f to display this tile over neighbors when dragged
             content = content,
         )
@@ -458,11 +474,9 @@ private fun LazyGridItemScope.TileGridCell(
 
 @Composable
 private fun SelectedTile(
-    tileSpec: TileSpec,
     isIcon: Boolean,
     selectionAlpha: () -> Float,
     selectionState: MutableSelectionState,
-    onResize: (TileSpec) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -492,9 +506,7 @@ private fun SelectedTile(
                     selectionState = selectionState,
                     transition = selectionAlpha,
                     tileWidths = { tileWidths },
-                ) {
-                    onResize(tileSpec)
-                }
+                )
             }
 
         Layout(contents = listOf(content, handle)) {

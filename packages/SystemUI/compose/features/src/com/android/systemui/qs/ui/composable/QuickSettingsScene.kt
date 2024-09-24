@@ -416,11 +416,11 @@ private fun SceneScope.QuickSettingsScene(
         HeadsUpNotificationSpace(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
+            useHunBounds = { shouldUseQuickSettingsHunBounds(layoutState.transitionState) },
             modifier =
                 Modifier.align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .padding(horizontal = shadeHorizontalPadding),
-            isPeekFromBottom = true,
         )
         NotificationScrollingStack(
             shadeSession = shadeSession,
@@ -445,4 +445,8 @@ private fun SceneScope.QuickSettingsScene(
                     .padding(horizontal = shadeHorizontalPadding),
         )
     }
+}
+
+private fun shouldUseQuickSettingsHunBounds(state: TransitionState): Boolean {
+    return state is TransitionState.Idle && state.currentScene == Scenes.QuickSettings
 }

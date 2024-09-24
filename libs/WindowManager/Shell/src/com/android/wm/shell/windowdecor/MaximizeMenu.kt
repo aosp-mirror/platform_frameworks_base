@@ -51,6 +51,7 @@ import android.view.View.TRANSLATION_Z
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.WindowlessWindowManager
+import android.view.accessibility.AccessibilityEvent
 import android.widget.Button
 import android.widget.TextView
 import android.window.TaskConstants
@@ -116,19 +117,24 @@ class MaximizeMenu(
             onHoverListener = onHoverListener,
             onOutsideTouchListener = onOutsideTouchListener
         )
-        maximizeMenuView?.animateOpenMenu()
+        maximizeMenuView?.let { view ->
+            view.animateOpenMenu(onEnd = {
+                view.requestAccessibilityFocus()
+            })
+        }
     }
 
     /** Closes the maximize window and releases its view. */
-    fun close() {
+    fun close(onEnd: () -> Unit) {
         val view = maximizeMenuView
         val menu = maximizeMenu
         if (view == null) {
             menu?.releaseView()
         } else {
-            view.animateCloseMenu {
+            view.animateCloseMenu(onEnd = {
                 menu?.releaseView()
-            }
+                onEnd.invoke()
+            })
         }
         maximizeMenu = null
         maximizeMenuView = null
@@ -351,7 +357,7 @@ class MaximizeMenu(
         }
 
         /** Animate the opening of the menu */
-        fun animateOpenMenu() {
+        fun animateOpenMenu(onEnd: () -> Unit) {
             maximizeButton.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             maximizeText.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             menuAnimatorSet = AnimatorSet()
@@ -419,6 +425,7 @@ class MaximizeMenu(
                 onEnd = {
                     maximizeButton.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                     maximizeText.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                    onEnd.invoke()
                 }
             )
             menuAnimatorSet?.start()
@@ -497,6 +504,14 @@ class MaximizeMenu(
                     }
             )
             menuAnimatorSet?.start()
+        }
+
+        /** Request that the accessibility service focus on the menu. */
+        fun requestAccessibilityFocus() {
+            // Focus the first button in the menu by default.
+            maximizeButton.post {
+                maximizeButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
+            }
         }
 
         /** Cancel the menu animation. */

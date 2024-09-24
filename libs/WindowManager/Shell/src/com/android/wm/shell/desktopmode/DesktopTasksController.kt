@@ -58,6 +58,7 @@ import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
+import com.android.window.flags.Flags
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -80,8 +81,8 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
-import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.ShellSharedConstants
+import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import android.window.flags.DesktopModeFlags
@@ -728,7 +729,7 @@ class DesktopTasksController(
                 // exclude current task since maximize/restore transition has not taken place yet.
                 .filterNot { taskId -> taskId == excludeTaskId }
                 .any { taskId ->
-                    val taskInfo = shellTaskOrganizer.getRunningTaskInfo(taskId)!!
+                    val taskInfo = shellTaskOrganizer.getRunningTaskInfo(taskId) ?: return false
                     val displayLayout = displayController.getDisplayLayout(taskInfo.displayId)
                     val stableBounds = Rect().apply { displayLayout?.getStableBounds(this) }
                     logD("taskInfo = %s", taskInfo)
@@ -896,6 +897,7 @@ class DesktopTasksController(
         val nonMinimizedTasksOrderedFrontToBack =
             taskRepository.getActiveNonMinimizedOrderedTasks(displayId)
         // If we're adding a new Task we might need to minimize an old one
+        // TODO(b/365725441): Handle non running task minimization
         val taskToMinimize: RunningTaskInfo? =
             if (newTaskIdInFront != null && desktopTasksLimiter.isPresent) {
                 desktopTasksLimiter
@@ -907,12 +909,26 @@ class DesktopTasksController(
             } else {
                 null
             }
+
         nonMinimizedTasksOrderedFrontToBack
             // If there is a Task to minimize, let it stay behind the Home Task
             .filter { taskId -> taskId != taskToMinimize?.taskId }
-            .mapNotNull { taskId -> shellTaskOrganizer.getRunningTaskInfo(taskId) }
             .reversed() // Start from the back so the front task is brought forward last
-            .forEach { task -> wct.reorder(task.token, /* onTop= */ true) }
+            .forEach { taskId ->
+                val runningTaskInfo = shellTaskOrganizer.getRunningTaskInfo(taskId)
+                if (runningTaskInfo != null) {
+                    // Task is already running, reorder it to the front
+                    wct.reorder(runningTaskInfo.token, /* onTop= */ true)
+                } else if (Flags.enableDesktopWindowingPersistence()) {
+                    // Task is not running, start it
+                    wct.startTask(
+                        taskId,
+                        ActivityOptions.makeBasic().apply {
+                            launchWindowingMode = WINDOWING_MODE_FREEFORM
+                        }.toBundle(),
+                    )
+                }
+            }
 
         taskbarDesktopTaskListener?.
             onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding(displayId))
@@ -1211,6 +1227,7 @@ class DesktopTasksController(
             wct.reorder(task.token, true)
             return wct
         }
+        // TODO(b/365723620): Handle non running tasks that were launched after reboot.
         // If task is already visible, it must have been handled already and added to desktop mode.
         // Cascade task only if it's not visible yet.
         if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue()

@@ -584,7 +584,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             final boolean windowModeChanged =
                     data.getTaskInfo().getWindowingMode() != taskInfo.getWindowingMode();
             final boolean visibilityChanged = data.getTaskInfo().isVisible != taskInfo.isVisible;
-            if (windowModeChanged || visibilityChanged) {
+            if (windowModeChanged || (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && visibilityChanged)) {
                 mRecentTasks.ifPresent(recentTasks ->
                         recentTasks.onTaskRunningInfoChanged(taskInfo));
             }

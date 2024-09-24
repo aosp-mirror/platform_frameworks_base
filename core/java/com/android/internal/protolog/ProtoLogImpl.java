@@ -23,6 +23,7 @@ import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.LO
 import static com.android.internal.protolog.common.ProtoLogToolInjected.Value.VIEWER_CONFIG_PATH;
 
 import android.annotation.Nullable;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -106,18 +107,23 @@ public class ProtoLogImpl {
             final var groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
 
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                File f = new File(sViewerConfigPath);
-                if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
-                    // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
-                    // In some tests the viewer config file might not exist in which we don't
-                    // want to provide config path to the user
-                    Log.w(LOG_TAG, "Failed to find viewerConfigFile when setting up "
-                            + ProtoLogImpl.class.getSimpleName() + ". "
-                            + "Setting up without a viewer config instead...");
-                    sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater, groups);
-                } else {
-                    sServiceInstance =
-                            new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
+                try {
+                    File f = new File(sViewerConfigPath);
+                    if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
+                        // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
+                        // In some tests the viewer config file might not exist in which we don't
+                        // want to provide config path to the user
+                        Log.w(LOG_TAG, "Failed to find viewerConfigFile when setting up "
+                                + ProtoLogImpl.class.getSimpleName() + ". "
+                                + "Setting up without a viewer config instead...");
+
+                        sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater, groups);
+                    } else {
+                        sServiceInstance =
+                                new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
+                    }
+                } catch (ServiceManager.ServiceNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
             } else {
                 var protologImpl = new LegacyProtoLogImpl(
