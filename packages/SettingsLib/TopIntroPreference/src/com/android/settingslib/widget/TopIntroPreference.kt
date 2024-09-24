@@ -18,7 +18,9 @@ package com.android.settingslib.widget
 
 import android.content.Context
 import android.os.Build
+import android.text.TextUtils
 import android.util.AttributeSet
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
@@ -33,6 +35,8 @@ open class TopIntroPreference @JvmOverloads constructor(
 
     private var isCollapsable: Boolean = false
     private var minLines: Int = 2
+    private var learnMoreListener: View.OnClickListener? = null
+    private var learnMoreText: CharSequence? = null
 
     init {
         if (SettingsThemeHelper.isExpressiveTheme(context)) {
@@ -71,6 +75,10 @@ open class TopIntroPreference @JvmOverloads constructor(
             setCollapsable(isCollapsable)
             setMinLines(minLines)
             setText(title.toString())
+            if (learnMoreListener != null) {
+                setLearnMoreText(learnMoreText)
+                setLearnMoreAction(learnMoreListener)
+            }
         }
     }
 
@@ -92,6 +100,30 @@ open class TopIntroPreference @JvmOverloads constructor(
     fun setMinLines(lines: Int) {
         minLines = lines.coerceIn(1, DEFAULT_MAX_LINES)
         notifyChanged()
+    }
+
+    /**
+     * Sets the action when clicking on the learn more view.
+     * @param listener The click listener for learn more.
+     */
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    fun setLearnMoreAction(listener: View.OnClickListener) {
+        if (learnMoreListener != listener) {
+            learnMoreListener = listener
+            notifyChanged()
+        }
+    }
+
+    /**
+     * Sets the text of learn more view.
+     * @param text The text of learn more.
+     */
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    fun setLearnMoreText(text: CharSequence) {
+        if (!TextUtils.equals(learnMoreText, text)) {
+            learnMoreText = text
+            notifyChanged()
+        }
     }
 
     companion object {
