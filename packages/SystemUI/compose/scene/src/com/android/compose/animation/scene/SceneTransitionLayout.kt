@@ -498,6 +498,12 @@ sealed class UserActionResult(
      * bigger than 100% when the user released their finger. `
      */
     open val requiresFullDistanceSwipe: Boolean,
+
+    /**
+     * Whether swiping back in the opposite direction past the origin point of the swipe can replace
+     * the action with the action for the opposite direction.
+     */
+    open val isIrreversible: Boolean = false,
 ) {
     internal abstract fun toContent(currentScene: SceneKey): ContentKey
 
@@ -507,6 +513,7 @@ sealed class UserActionResult(
         val toScene: SceneKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
+        override val isIrreversible: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = toScene
     }
@@ -516,6 +523,7 @@ sealed class UserActionResult(
         val overlay: OverlayKey,
         override val transitionKey: TransitionKey? = null,
         override val requiresFullDistanceSwipe: Boolean = false,
+        override val isIrreversible: Boolean = false,
     ) : UserActionResult(transitionKey, requiresFullDistanceSwipe) {
         override fun toContent(currentScene: SceneKey): ContentKey = overlay
     }
@@ -558,7 +566,14 @@ sealed class UserActionResult(
              * the user released their finger.
              */
             requiresFullDistanceSwipe: Boolean = false,
-        ): UserActionResult = ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe)
+
+            /**
+             * Whether swiping back in the opposite direction past the origin point of the swipe can
+             * replace the action with the action for the opposite direction.
+             */
+            isIrreversible: Boolean = false,
+        ): UserActionResult =
+            ChangeScene(toScene, transitionKey, requiresFullDistanceSwipe, isIrreversible)
 
         /** A [UserActionResult] that shows [toOverlay]. */
         operator fun invoke(
