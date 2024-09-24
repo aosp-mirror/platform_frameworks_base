@@ -17,9 +17,13 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.infiniteGridViewModelFactory
+import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture { InfiniteGridLayout(iconTilesViewModel, infiniteGridViewModelFactory) }
+val Kosmos.dynamicIconTilesInteractorFactory by
+    Kosmos.Fixture {
+        object : DynamicIconTilesInteractor.Factory {
+            override fun create(): DynamicIconTilesInteractor {
+                return DynamicIconTilesInteractor(iconTilesInteractor, currentTilesInteractor)
+            }
+        }
+    }
