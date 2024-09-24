@@ -23,6 +23,7 @@ import android.app.smartspace.SmartspaceSession.OnTargetsAvailableListener
 import android.app.smartspace.SmartspaceTarget
 import android.content.ComponentName
 import android.content.ContentResolver
+import android.content.Context
 import android.content.pm.UserInfo
 import android.database.ContentObserver
 import android.graphics.drawable.Drawable
@@ -207,6 +208,9 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
     private val userHandleManaged: UserHandle = UserHandle(2)
     private val userHandleSecondary: UserHandle = UserHandle(3)
 
+    @Mock private lateinit var userContextPrimary: Context
+    @Mock private lateinit var userContextSecondary: Context
+
     private val userList = listOf(
             mockUserInfo(userHandlePrimary, isManagedProfile = false),
             mockUserInfo(userHandleManaged, isManagedProfile = true),
@@ -234,7 +238,11 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         `when`(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
         `when`(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
 
-        setActiveUser(userHandlePrimary)
+        `when`(userContextPrimary.getSystemService(SmartspaceManager::class.java)).thenReturn(
+            smartspaceManager
+        )
+
+        setActiveUser(userHandlePrimary, userContextPrimary)
         setAllowPrivateNotifications(userHandlePrimary, true)
         setAllowPrivateNotifications(userHandleManaged, true)
         setAllowPrivateNotifications(userHandleSecondary, true)
@@ -252,7 +260,6 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         controller = LockscreenSmartspaceController(
                 context,
                 featureFlags,
-                smartspaceManager,
                 activityStarter,
                 falsingManager,
                 clock,
@@ -709,7 +716,8 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         connectSession()
 
         // WHEN the secondary user becomes the active user
-        setActiveUser(userHandleSecondary)
+        // Note: it doesn't switch to the SmartspaceManager for userContextSecondary
+        setActiveUser(userHandleSecondary, userContextSecondary)
         userListener.onUserChanged(userHandleSecondary.identifier, context)
 
         // WHEN we receive a new list of targets
@@ -912,9 +920,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
         clearInvocations(smartspaceView)
     }
 
-    private fun setActiveUser(userHandle: UserHandle) {
+    private fun setActiveUser(userHandle: UserHandle, userContext: Context) {
         `when`(userTracker.userId).thenReturn(userHandle.identifier)
         `when`(userTracker.userHandle).thenReturn(userHandle)
+        `when`(userTracker.userContext).thenReturn(userContext)
     }
 
     private fun mockUserInfo(userHandle: UserHandle, isManagedProfile: Boolean): UserInfo {
