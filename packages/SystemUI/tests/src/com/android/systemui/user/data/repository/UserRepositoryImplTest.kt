@@ -248,10 +248,17 @@ class UserRepositoryImplTest : SysuiTestCase() {
 
             setUpUsers(count = 2, selectedIndex = 1)
 
+            // WHEN the user switch is starting
+            tracker.onBeforeUserSwitching(userId = 1)
+
+            // THEN the selection status is IN_PROGRESS
+            assertThat(selectedUser!!.selectionStatus)
+                .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
+
             // WHEN the user is changing
             tracker.onUserChanging(userId = 1)
 
-            // THEN the selection status is IN_PROGRESS
+            // THEN the selection status is still IN_PROGRESS
             assertThat(selectedUser!!.selectionStatus)
                 .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
 
@@ -266,6 +273,7 @@ class UserRepositoryImplTest : SysuiTestCase() {
 
             setUpUsers(count = 2, selectedIndex = 0)
 
+            tracker.onBeforeUserSwitching(userId = 0)
             tracker.onUserChanging(userId = 0)
             assertThat(selectedUser!!.selectionStatus)
                 .isEqualTo(SelectionStatus.SELECTION_IN_PROGRESS)
