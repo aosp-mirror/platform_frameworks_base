@@ -324,6 +324,9 @@ object KeyguardRootViewBinder {
                                     .getDimensionPixelSize(R.dimen.shelf_appear_translation)
                                     .stateIn(this)
                             viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                if (isVisible.value) {
+                                    blueprintViewModel.refreshBlueprint()
+                                }
                                 childViews[aodNotificationIconContainerId]
                                     ?.setAodNotifIconContainerIsVisible(
                                         isVisible,
