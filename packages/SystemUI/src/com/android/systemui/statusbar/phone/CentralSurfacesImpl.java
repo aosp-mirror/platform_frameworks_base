@@ -1509,7 +1509,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationShadeWindowController.fetchWindowRootView();
         getNotificationShadeWindowViewController().setupExpandedStatusBar();
         getNotificationShadeWindowViewController().setupCommunalHubLayout();
-        mBackActionInteractor.setup(mQsController, mShadeSurface);
     }
 
     protected NotificationShadeWindowViewController getNotificationShadeWindowViewController() {
