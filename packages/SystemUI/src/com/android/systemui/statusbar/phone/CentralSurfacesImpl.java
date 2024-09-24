@@ -206,6 +206,7 @@ import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment;
 import com.android.systemui.statusbar.data.model.StatusBarMode;
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -1204,7 +1205,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
                     setBouncerShowingForStatusBarComponents(mBouncerShowing);
                     checkBarModes();
                 });
-        mStatusBarInitializer.initializeStatusBar();
+        // When the flag is on, we register the fragment as a core startable and this is not needed
+        if (!StatusBarSimpleFragment.isEnabled()) {
+            mStatusBarInitializer.initializeStatusBar();
+        }
 
         mStatusBarTouchableRegionManager.setup(getNotificationShadeWindowView());
 
