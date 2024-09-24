@@ -604,7 +604,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                     decoration.mTaskInfo.configuration.windowConfiguration.getBounds(),
                     left ? SnapPosition.LEFT : SnapPosition.RIGHT,
                     resizeTrigger,
-                    motionEvent);
+                    motionEvent,
+                    mWindowDecorByTaskId.get(taskId));
         }
 
         decoration.closeHandleMenu();
@@ -1063,7 +1064,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             taskInfo, decoration.mTaskSurface, position,
                             new PointF(e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx)),
                             newTaskBounds, decoration.calculateValidDragArea(),
-                            new Rect(mOnDragStartInitialBounds), e);
+                            new Rect(mOnDragStartInitialBounds), e,
+                            mWindowDecorByTaskId.get(taskInfo.taskId));
                     if (touchingButton && !mHasLongClicked) {
                         // We need the input event to not be consumed here to end the ripple
                         // effect on the touched button. We will reset drag state in the ensuing

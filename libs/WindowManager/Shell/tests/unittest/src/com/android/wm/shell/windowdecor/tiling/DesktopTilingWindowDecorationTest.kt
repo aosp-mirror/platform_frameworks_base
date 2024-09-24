@@ -1,0 +1,338 @@
+/*
+ * Copyright (C) 2024 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.android.wm.shell.windowdecor.tiling
+
+import android.content.Context
+import android.content.res.Resources
+import android.graphics.Rect
+import android.testing.AndroidTestingRunner
+import android.view.SurfaceControl
+import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.WindowContainerTransaction
+import androidx.test.filters.SmallTest
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer
+import com.android.wm.shell.ShellTaskOrganizer
+import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopTasksController
+import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
+import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
+import com.android.wm.shell.transition.Transitions
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.google.common.truth.Truth.assertThat
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.Captor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.capture
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+
+@SmallTest
+@RunWith(AndroidTestingRunner::class)
+class DesktopTilingWindowDecorationTest : ShellTestCase() {
+
+    private val context: Context = mock()
+
+    private val syncQueue: SyncTransactionQueue = mock()
+
+    private val displayController: DisplayController = mock()
+    private val displayId: Int = 0
+
+    private val rootTdaOrganizer: RootTaskDisplayAreaOrganizer = mock()
+
+    private val transitions: Transitions = mock()
+
+    private val shellTaskOrganizer: ShellTaskOrganizer = mock()
+
+    private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler =
+        mock()
+
+    private val returnToDragStartAnimator: ReturnToDragStartAnimator = mock()
+
+    private val desktopWindowDecoration: DesktopModeWindowDecoration = mock()
+
+    private val displayLayout: DisplayLayout = mock()
+
+    private val resources: Resources = mock()
+    private val surfaceControlMock: SurfaceControl = mock()
+    private val transaction: SurfaceControl.Transaction = mock()
+    private val tiledTaskHelper: DesktopTilingWindowDecoration.AppResizingHelper = mock()
+
+    private lateinit var tilingDecoration: DesktopTilingWindowDecoration
+
+    private val split_divider_width = 10
+
+    @Captor private lateinit var wctCaptor: ArgumentCaptor<WindowContainerTransaction>
+
+    @Before
+    fun setUp() {
+        tilingDecoration =
+            DesktopTilingWindowDecoration(
+                context,
+                syncQueue,
+                displayController,
+                displayId,
+                rootTdaOrganizer,
+                transitions,
+                shellTaskOrganizer,
+                toggleResizeDesktopTaskTransitionHandler,
+                returnToDragStartAnimator,
+            )
+    }
+
+    @Test
+    fun taskTiled_toCorrectBounds_leftTile() {
+        val task1 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+
+        verify(toggleResizeDesktopTaskTransitionHandler).startTransition(capture(wctCaptor), any())
+        for (change in wctCaptor.value.changes) {
+            val bounds = change.value.configuration.windowConfiguration.bounds
+            val leftBounds = getLeftTaskBounds()
+            assertRectEqual(bounds, leftBounds)
+        }
+    }
+
+    @Test
+    fun taskTiled_toCorrectBounds_rightTile() {
+        // Setup
+        val task1 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+
+        verify(toggleResizeDesktopTaskTransitionHandler).startTransition(capture(wctCaptor), any())
+        for (change in wctCaptor.value.changes) {
+            val bounds = change.value.configuration.windowConfiguration.bounds
+            val leftBounds = getRightTaskBounds()
+            assertRectEqual(bounds, leftBounds)
+        }
+    }
+
+    @Test
+    fun taskTiled_notAnimated_whenTilingPositionNotChange() {
+        val task1 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        whenever(desktopWindowDecoration.getLeash()).thenReturn(surfaceControlMock)
+
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+        task1.configuration.windowConfiguration.setBounds(getLeftTaskBounds())
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            NON_STABLE_BOUNDS_MOCK,
+        )
+
+        verify(toggleResizeDesktopTaskTransitionHandler, times(1))
+            .startTransition(capture(wctCaptor), any())
+        verify(returnToDragStartAnimator, times(1)).start(any(), any(), any(), any(), any())
+        for (change in wctCaptor.value.changes) {
+            val bounds = change.value.configuration.windowConfiguration.bounds
+            val leftBounds = getLeftTaskBounds()
+            assertRectEqual(bounds, leftBounds)
+        }
+    }
+
+    @Test
+    fun taskNotTiled_NotBroughtToFront_TilingNotInitialised() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+
+        assertThat(tilingDecoration.moveTiledPairToFront(task2)).isFalse()
+        verify(transitions, never()).startTransition(any(), any(), any())
+    }
+
+    @Test
+    fun taskNotTiled_NotBroughtToFront_TaskNotTiled() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val task3 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+        tilingDecoration.onAppTiled(
+            task2,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+
+        assertThat(tilingDecoration.moveTiledPairToFront(task3)).isFalse()
+        verify(transitions, never()).startTransition(any(), any(), any())
+    }
+
+    @Test
+    fun taskTiled_BroughtToFront_AlreadyInFrontNoAction() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+        tilingDecoration.onAppTiled(
+            task2,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+        task1.isFocused = true
+
+        assertThat(tilingDecoration.moveTiledPairToFront(task1)).isFalse()
+        verify(transitions, never()).startTransition(any(), any(), any())
+    }
+
+    @Test
+    fun taskTiled_BroughtToFront_BringToFront() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val task3 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        whenever(desktopWindowDecoration.getLeash()).thenReturn(surfaceControlMock)
+        whenever(desktopRepository.isVisibleTask(any())).thenReturn(true)
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+        tilingDecoration.onAppTiled(
+            task2,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+        task1.isFocused = true
+        task3.isFocused = true
+
+        assertThat(tilingDecoration.moveTiledPairToFront(task3)).isFalse()
+        assertThat(tilingDecoration.moveTiledPairToFront(task1)).isTrue()
+        verify(transitions, times(1)).startTransition(eq(TRANSIT_TO_FRONT), any(), eq(null))
+    }
+
+    private fun assertRectEqual(rect1: Rect, rect2: Rect) {
+        assertThat(rect1.left).isEqualTo(rect2.left)
+        assertThat(rect1.right).isEqualTo(rect2.right)
+        assertThat(rect1.top).isEqualTo(rect2.top)
+        assertThat(rect1.bottom).isEqualTo(rect2.bottom)
+        return
+    }
+
+    private fun getRightTaskBounds(): Rect {
+        val stableBounds = STABLE_BOUNDS_MOCK
+        val destinationWidth = stableBounds.width() / 2
+        val leftBound = stableBounds.right - destinationWidth + split_divider_width / 2
+        return Rect(leftBound, stableBounds.top, stableBounds.right, stableBounds.bottom)
+    }
+
+    private fun getLeftTaskBounds(): Rect {
+        val stableBounds = STABLE_BOUNDS_MOCK
+        val destinationWidth = stableBounds.width() / 2
+        val rightBound = stableBounds.left + destinationWidth - split_divider_width / 2
+        return Rect(stableBounds.left, stableBounds.top, rightBound, stableBounds.bottom)
+    }
+
+    companion object {
+        private val NON_STABLE_BOUNDS_MOCK = Rect(50, 55, 100, 100)
+        private val STABLE_BOUNDS_MOCK = Rect(0, 0, 100, 100)
+        private val BOUNDS = Rect(1, 2, 3, 4)
+    }
+}

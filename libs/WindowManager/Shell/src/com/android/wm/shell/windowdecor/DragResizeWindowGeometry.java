@@ -42,7 +42,7 @@ import java.util.Objects;
 /**
  * Geometry for a drag resize region for a particular window.
  */
-final class DragResizeWindowGeometry {
+public final class DragResizeWindowGeometry {
     private final int mTaskCornerRadius;
     private final Size mTaskSize;
     // The size of the handle outside the task window applied to the edges of the window, for the
