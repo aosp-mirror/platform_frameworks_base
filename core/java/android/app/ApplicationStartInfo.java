@@ -1047,7 +1047,7 @@ public final class ApplicationStartInfo implements Parcelable {
     private static String startComponentToString(@StartComponent int startComponent) {
         return switch (startComponent) {
             case START_COMPONENT_ACTIVITY -> "ACTIVITY";
-            case START_COMPONENT_BROADCAST -> "SERVICE";
+            case START_COMPONENT_BROADCAST -> "BROADCAST";
             case START_COMPONENT_CONTENT_PROVIDER -> "CONTENT PROVIDER";
             case START_COMPONENT_SERVICE -> "SERVICE";
             case START_COMPONENT_OTHER -> "OTHER";
