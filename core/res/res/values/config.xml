@@ -1250,6 +1250,7 @@
          a watch, setting this config is no-op.
             0 - Nothing
             1 - Switch to the recent app
+            2 - Launch the default fitness app
     -->
     <integer name="config_doublePressOnStemPrimaryBehavior">0</integer>
 
