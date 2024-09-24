@@ -23,8 +23,6 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Bitmap
-import android.graphics.BlendMode
-import android.graphics.BlendModeColorFilter
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
@@ -568,9 +566,7 @@ class HandleMenu(
             appIconBitmap: Bitmap?,
             appName: CharSequence?
         ) {
-            appInfoPill.background.colorFilter = BlendModeColorFilter(
-                style.backgroundColor, BlendMode.MULTIPLY
-            )
+            appInfoPill.background.setTint(style.backgroundColor)
 
             collapseMenuButton.apply {
                 imageTintList = ColorStateList.valueOf(style.textColor)
@@ -584,9 +580,7 @@ class HandleMenu(
         }
 
         private fun bindWindowingPill(style: MenuStyle) {
-            windowingPill.background.colorFilter = BlendModeColorFilter(
-                style.backgroundColor, BlendMode.MULTIPLY
-            )
+            windowingPill.background.setTint(style.backgroundColor)
 
             // TODO: Remove once implemented.
             floatingBtn.visibility = View.GONE
@@ -612,23 +606,19 @@ class HandleMenu(
             }
             screenshotBtn.apply {
                 isGone = !SHOULD_SHOW_SCREENSHOT_BUTTON
-                background.colorFilter =
-                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY
-                )
+                background.setTint(style.backgroundColor)
                 setTextColor(style.textColor)
                 compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
             }
             newWindowBtn.apply {
                 isGone = !shouldShowNewWindowButton
-                background.colorFilter =
-                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+                background.setTint(style.backgroundColor)
                 setTextColor(style.textColor)
                 compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
             }
             manageWindowBtn.apply {
                 isGone = !shouldShowManageWindowsButton
-                background.colorFilter =
-                    BlendModeColorFilter(style.backgroundColor, BlendMode.MULTIPLY)
+                background.setTint(style.backgroundColor)
                 setTextColor(style.textColor)
                 compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
             }
@@ -637,9 +627,7 @@ class HandleMenu(
         private fun bindOpenInBrowserPill(style: MenuStyle) {
             openInBrowserPill.apply {
                 isGone = !shouldShowBrowserPill
-                background.colorFilter = BlendModeColorFilter(
-                    style.backgroundColor, BlendMode.MULTIPLY
-                )
+                background.setTint(style.backgroundColor)
             }
 
             browserBtn.apply {

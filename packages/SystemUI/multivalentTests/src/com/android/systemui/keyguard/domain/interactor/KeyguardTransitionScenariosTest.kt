@@ -1465,10 +1465,8 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
             // WHEN the keyguard is occluded and device wakes up and is no longer dreaming
             keyguardRepository.setDreaming(false)
-            testScheduler.advanceTimeBy(150) // The dreaming signal is debounced.
-            runCurrent()
             keyguardRepository.setKeyguardOccluded(true)
-            powerInteractor.setAwakeForTest()
+            testScheduler.advanceTimeBy(150) // The dreaming and occluded signals are debounced.
             runCurrent()
 
             // THEN a transition to OCCLUDED should occur
@@ -2059,12 +2057,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     fun glanceableHubToOccluded_communalKtfRefactor() =
         testScope.runTest {
             // GIVEN device is not dreaming
-            powerInteractor.setAwakeForTest()
             keyguardRepository.setDreaming(false)
-            keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
-            )
-            advanceTimeBy(600.milliseconds)
 
             // GIVEN a prior transition has run to GLANCEABLE_HUB
             communalSceneInteractor.changeScene(CommunalScenes.Communal, "test")
@@ -2073,6 +2066,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
 
             // WHEN the keyguard is occluded
             keyguardRepository.setKeyguardOccluded(true)
+            advanceTimeBy(200.milliseconds)
             runCurrent()
 
             assertThat(transitionRepository)
@@ -2218,6 +2212,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
             advanceTimeBy(10.milliseconds)
             keyguardRepository.setKeyguardOccluded(true)
             advanceTimeBy(200.milliseconds)
+            runCurrent()
 
             assertThat(transitionRepository)
                 .startedTransition(

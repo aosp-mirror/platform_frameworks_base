@@ -202,10 +202,8 @@ public class ZenModeConfig implements Parcelable {
     private static final int DEFAULT_CALLS_SOURCE = SOURCE_STAR;
 
     public static final String MANUAL_RULE_ID = "MANUAL_RULE";
-    public static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
+    public static final String EVENTS_OBSOLETE_RULE_ID = "EVENTS_DEFAULT_RULE";
     public static final String EVERY_NIGHT_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
-    public static final List<String> DEFAULT_RULE_IDS = Arrays.asList(EVERY_NIGHT_DEFAULT_RULE_ID,
-            EVENTS_DEFAULT_RULE_ID);
 
     public static final int[] ALL_DAYS = { Calendar.SUNDAY, Calendar.MONDAY, Calendar.TUESDAY,
             Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY };
@@ -424,20 +422,9 @@ public class ZenModeConfig implements Parcelable {
         return policy;
     }
 
+    @FlaggedApi(Flags.FLAG_MODES_UI)
     public static ZenModeConfig getDefaultConfig() {
         ZenModeConfig config = new ZenModeConfig();
-
-        EventInfo eventInfo = new EventInfo();
-        eventInfo.reply = REPLY_YES_OR_MAYBE;
-        ZenRule events = new ZenRule();
-        events.id = EVENTS_DEFAULT_RULE_ID;
-        events.conditionId = toEventConditionId(eventInfo);
-        events.component = ComponentName.unflattenFromString(
-                "android/com.android.server.notification.EventConditionProvider");
-        events.enabled = false;
-        events.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        events.pkg = "android";
-        config.automaticRules.put(EVENTS_DEFAULT_RULE_ID, events);
 
         ScheduleInfo scheduleInfo = new ScheduleInfo();
         scheduleInfo.days = new int[] {1, 2, 3, 4, 5, 6, 7};
@@ -455,6 +442,13 @@ public class ZenModeConfig implements Parcelable {
         config.automaticRules.put(EVERY_NIGHT_DEFAULT_RULE_ID, sleeping);
 
         return config;
+    }
+
+    // TODO: b/368247671 - Can be made a constant again when modes_ui is inlined
+    public static List<String> getDefaultRuleIds() {
+        return Flags.modesUi()
+            ? List.of(EVERY_NIGHT_DEFAULT_RULE_ID)
+            : List.of(EVERY_NIGHT_DEFAULT_RULE_ID, EVENTS_OBSOLETE_RULE_ID);
     }
 
     void ensureManualZenRule() {

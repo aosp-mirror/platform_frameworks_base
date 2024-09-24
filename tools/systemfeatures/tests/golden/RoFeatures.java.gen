@@ -3,16 +3,20 @@
 //            --readonly=true \
 //            --feature=WATCH:1 \
 //            --feature=WIFI:0 \
-//            --feature=VULKAN:-1 \
+//            --feature=VULKAN:UNAVAILABLE \
 //            --feature=AUTO: \
 //            --feature-apis=WATCH,PC
 package com.android.systemfeatures;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import com.android.aconfig.annotations.AssumeFalseForR8;
 import com.android.aconfig.annotations.AssumeTrueForR8;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @hide
@@ -62,9 +66,8 @@ public final class RoFeatures {
      *
      * @hide
      */
-    @AssumeFalseForR8
     public static boolean hasFeatureAuto(Context context) {
-        return false;
+        return hasFeatureFallback(context, PackageManager.FEATURE_AUTO);
     }
 
     private static boolean hasFeatureFallback(Context context, String featureName) {
@@ -79,10 +82,27 @@ public final class RoFeatures {
         switch (featureName) {
             case PackageManager.FEATURE_WATCH: return 1 >= version;
             case PackageManager.FEATURE_WIFI: return 0 >= version;
-            case PackageManager.FEATURE_VULKAN: return -1 >= version;
-            case PackageManager.FEATURE_AUTO: return false;
+            case PackageManager.FEATURE_VULKAN: return false;
             default: break;
         }
         return null;
+    }
+
+    /**
+     * Gets features marked as available at compile-time, keyed by name.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Map<String, FeatureInfo> getCompileTimeAvailableFeatures() {
+        Map<String, FeatureInfo> features = new HashMap<>(2);
+        FeatureInfo fi = new FeatureInfo();
+        fi.name = PackageManager.FEATURE_WATCH;
+        fi.version = 1;
+        features.put(fi.name, new FeatureInfo(fi));
+        fi.name = PackageManager.FEATURE_WIFI;
+        fi.version = 0;
+        features.put(fi.name, new FeatureInfo(fi));
+        return features;
     }
 }

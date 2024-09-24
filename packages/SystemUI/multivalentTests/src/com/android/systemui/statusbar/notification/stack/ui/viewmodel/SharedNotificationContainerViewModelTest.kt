@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -356,6 +357,69 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     fun glanceableHubAlpha_dreamToHub() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.glanceableHubAlpha)
+
+            // Start on lockscreen, notifications should be unhidden.
+            showLockscreen()
+            assertThat(alpha).isEqualTo(1f)
+
+            // Go to dozing
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = LOCKSCREEN,
+                to = DOZING,
+                testScope,
+            )
+            assertThat(alpha).isEqualTo(1f)
+
+            // Start transitioning to glanceable hub
+            val progress = 0.6f
+            kosmos.setTransition(
+                sceneTransition = Transition(from = Scenes.Lockscreen, to = Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.STARTED,
+                        from = DOZING,
+                        to = GLANCEABLE_HUB,
+                        value = 0f,
+                    ),
+            )
+            runCurrent()
+            kosmos.setTransition(
+                sceneTransition =
+                    Transition(
+                        from = Scenes.Lockscreen,
+                        to = Scenes.Communal,
+                        progress = flowOf(progress),
+                    ),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.RUNNING,
+                        from = DOZING,
+                        to = GLANCEABLE_HUB,
+                        value = progress,
+                    ),
+            )
+            runCurrent()
+            // Keep notifications hidden during the transition from dream to hub
+            assertThat(alpha).isEqualTo(0)
+
+            // Finish transition to glanceable hub
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.FINISHED,
+                        from = DOZING,
+                        to = GLANCEABLE_HUB,
+                        value = 1f,
+                    ),
+            )
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun glanceableHubAlpha_dozingToHub() =
         testScope.runTest {
             val alpha by collectLastValue(underTest.glanceableHubAlpha)
 

@@ -1482,7 +1482,7 @@
     <!-- Text which is shown in the expanded notification shade when there are currently no notifications visible that the user hasn't already seen. [CHAR LIMIT=30] -->
     <string name="no_unseen_notif_text">No new notifications</string>
 
-    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=50] -->
+    <!-- Title of heads up notification for adaptive notifications user education. [CHAR LIMIT=60] -->
     <string name="adaptive_notification_edu_hun_title">Notification cooldown is on</string>
 
     <!-- Text of heads up notification for adaptive notifications user education. [CHAR LIMIT=100] -->
