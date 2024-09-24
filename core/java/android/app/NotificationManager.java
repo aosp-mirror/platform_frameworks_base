@@ -68,9 +68,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -3094,4 +3096,19 @@ public class NotificationManager {
         }
     }
 
+    /**
+     * Returns the list of {@link Adjustment} keys that the current approved
+     * {@link android.service.notification.NotificationAssistantService} does not support.
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public @NonNull Set<String> getUnsupportedAdjustmentTypes() {
+        INotificationManager service = getService();
+        try {
+            return new HashSet<>(service.getUnsupportedAdjustmentTypes());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

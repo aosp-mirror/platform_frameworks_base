@@ -18,6 +18,7 @@ package android.service.notification;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -362,6 +363,23 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         if (!isBound()) return;
         try {
             getNotificationInterface().unsnoozeNotificationFromAssistant(mWrapper, key);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
+    /**
+     * Informs the notification manager about what {@link Adjustment Adjustments} are supported by
+     * this NAS.
+     *
+     * For backwards compatibility, we assume all Adjustment types are supported by the NAS.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public final void setAdjustmentTypeSupportedState(@NonNull @Adjustment.Keys String key,
+            boolean supported) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().setAdjustmentTypeSupportedState(mWrapper, key, supported);
         } catch (android.os.RemoteException ex) {
             Log.v(TAG, "Unable to contact notification manager", ex);
         }
