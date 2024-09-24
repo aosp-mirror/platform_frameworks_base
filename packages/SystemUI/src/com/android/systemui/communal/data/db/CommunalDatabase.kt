@@ -26,7 +26,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.systemui.res.R
 
-@Database(entities = [CommunalWidgetItem::class, CommunalItemRank::class], version = 3)
+@Database(entities = [CommunalWidgetItem::class, CommunalItemRank::class], version = 4)
 abstract class CommunalDatabase : RoomDatabase() {
     abstract fun communalWidgetDao(): CommunalWidgetDao
 
@@ -43,19 +43,16 @@ abstract class CommunalDatabase : RoomDatabase() {
          * @param callback An optional callback registered to the database. Only effective when a
          *   new instance is created.
          */
-        fun getInstance(
-            context: Context,
-            callback: Callback? = null,
-        ): CommunalDatabase {
+        fun getInstance(context: Context, callback: Callback? = null): CommunalDatabase {
             if (instance == null) {
                 instance =
                     Room.databaseBuilder(
                             context,
                             CommunalDatabase::class.java,
-                            context.resources.getString(R.string.config_communalDatabase)
+                            context.resources.getString(R.string.config_communalDatabase),
                         )
                         .also { builder ->
-                            builder.addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                            builder.addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                             builder.fallbackToDestructiveMigration(dropAllTables = true)
                             callback?.let { callback -> builder.addCallback(callback) }
                         }
@@ -100,6 +97,22 @@ abstract class CommunalDatabase : RoomDatabase() {
                     db.execSQL(
                         "UPDATE communal_item_rank_table " +
                             "SET rank = (SELECT MAX(rank) FROM communal_item_rank_table) - rank"
+                    )
+                }
+            }
+
+        /**
+         * This migration adds a span_y column to the communal_widget_table and sets its default
+         * value to 3.
+         */
+        @VisibleForTesting
+        val MIGRATION_3_4 =
+            object : Migration(3, 4) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    Log.i(TAG, "Migrating from version 3 to 4")
+                    db.execSQL(
+                        "ALTER TABLE communal_widget_table " +
+                            "ADD COLUMN span_y INTEGER NOT NULL DEFAULT 3"
                     )
                 }
             }

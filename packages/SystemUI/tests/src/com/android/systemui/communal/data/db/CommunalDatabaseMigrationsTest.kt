@@ -148,11 +148,52 @@ class CommunalDatabaseMigrationsTest : SysuiTestCase() {
         )
     }
 
+    @Test
+    fun migrate3To4_addSpanYColumn_defaultValuePopulated() {
+        val databaseV3 = migrationTestHelper.createDatabase(DATABASE_NAME, version = 3)
+
+        val fakeWidgetsV3 =
+            listOf(
+                FakeCommunalWidgetItemV3(1, "test_widget_1", 11, 0),
+                FakeCommunalWidgetItemV3(2, "test_widget_2", 12, 10),
+                FakeCommunalWidgetItemV3(3, "test_widget_3", 13, 0),
+            )
+        databaseV3.insertWidgetsV3(fakeWidgetsV3)
+
+        databaseV3.verifyWidgetsV3(fakeWidgetsV3)
+
+        val databaseV4 =
+            migrationTestHelper.runMigrationsAndValidate(
+                name = DATABASE_NAME,
+                version = 4,
+                validateDroppedTables = false,
+                CommunalDatabase.MIGRATION_3_4,
+            )
+
+        databaseV4.verifyWidgetsV4(fakeWidgetsV3.map { it.getV4() })
+    }
+
     private fun SupportSQLiteDatabase.insertWidgetsV1(widgets: List<FakeCommunalWidgetItemV1>) {
         widgets.forEach { widget ->
             execSQL(
                 "INSERT INTO communal_widget_table(widget_id, component_name, item_id) " +
                     "VALUES(${widget.widgetId}, '${widget.componentName}', ${widget.itemId})"
+            )
+        }
+    }
+
+    private fun SupportSQLiteDatabase.insertWidgetsV3(widgets: List<FakeCommunalWidgetItemV3>) {
+        widgets.forEach { widget ->
+            execSQL(
+                "INSERT INTO communal_widget_table(" +
+                    "widget_id, " +
+                    "component_name, " +
+                    "item_id, " +
+                    "user_serial_number) " +
+                    "VALUES(${widget.widgetId}, " +
+                    "'${widget.componentName}', " +
+                    "${widget.itemId}, " +
+                    "${widget.userSerialNumber})"
             )
         }
     }
@@ -190,6 +231,42 @@ class CommunalDatabaseMigrationsTest : SysuiTestCase() {
         }
 
         // Verify there is no more columns
+        assertThat(cursor.isAfterLast).isTrue()
+    }
+
+    private fun SupportSQLiteDatabase.verifyWidgetsV3(widgets: List<FakeCommunalWidgetItemV3>) {
+        val cursor = query("SELECT * FROM communal_widget_table")
+        assertThat(cursor.moveToFirst()).isTrue()
+
+        widgets.forEach { widget ->
+            assertThat(cursor.getInt(cursor.getColumnIndex("widget_id"))).isEqualTo(widget.widgetId)
+            assertThat(cursor.getString(cursor.getColumnIndex("component_name")))
+                .isEqualTo(widget.componentName)
+            assertThat(cursor.getInt(cursor.getColumnIndex("item_id"))).isEqualTo(widget.itemId)
+            assertThat(cursor.getInt(cursor.getColumnIndex("user_serial_number")))
+                .isEqualTo(widget.userSerialNumber)
+
+            cursor.moveToNext()
+        }
+        assertThat(cursor.isAfterLast).isTrue()
+    }
+
+    private fun SupportSQLiteDatabase.verifyWidgetsV4(widgets: List<FakeCommunalWidgetItemV4>) {
+        val cursor = query("SELECT * FROM communal_widget_table")
+        assertThat(cursor.moveToFirst()).isTrue()
+
+        widgets.forEach { widget ->
+            assertThat(cursor.getInt(cursor.getColumnIndex("widget_id"))).isEqualTo(widget.widgetId)
+            assertThat(cursor.getString(cursor.getColumnIndex("component_name")))
+                .isEqualTo(widget.componentName)
+            assertThat(cursor.getInt(cursor.getColumnIndex("item_id"))).isEqualTo(widget.itemId)
+            assertThat(cursor.getInt(cursor.getColumnIndex("user_serial_number")))
+                .isEqualTo(widget.userSerialNumber)
+            assertThat(cursor.getInt(cursor.getColumnIndex("span_y"))).isEqualTo(widget.spanY)
+
+            cursor.moveToNext()
+        }
+
         assertThat(cursor.isAfterLast).isTrue()
     }
 
@@ -238,9 +315,26 @@ class CommunalDatabaseMigrationsTest : SysuiTestCase() {
         val userSerialNumber: Int,
     )
 
-    private data class FakeCommunalItemRank(
-        val rank: Int,
+    private fun FakeCommunalWidgetItemV3.getV4(): FakeCommunalWidgetItemV4 {
+        return FakeCommunalWidgetItemV4(widgetId, componentName, itemId, userSerialNumber, 3)
+    }
+
+    private data class FakeCommunalWidgetItemV3(
+        val widgetId: Int,
+        val componentName: String,
+        val itemId: Int,
+        val userSerialNumber: Int,
     )
+
+    private data class FakeCommunalWidgetItemV4(
+        val widgetId: Int,
+        val componentName: String,
+        val itemId: Int,
+        val userSerialNumber: Int,
+        val spanY: Int,
+    )
+
+    private data class FakeCommunalItemRank(val rank: Int)
 
     companion object {
         private const val DATABASE_NAME = "communal_db"
