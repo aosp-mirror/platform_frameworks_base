@@ -4451,8 +4451,8 @@
          True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
 
-    <!-- Bytes that the PinnerService will pin for Home app -->
-    <integer name="config_pinnerHomePinBytes">0</integer>
+    <!-- Default: 60 MB. Bytes that the PinnerService will pin for Home app -->
+    <integer name="config_pinnerHomePinBytes">62914560</integer>
 
     <!-- Default: 80 MB. Bytes that the PinnerService will pin for Camera app -->
     <integer name="config_pinnerCameraPinBytes">83886080</integer>
