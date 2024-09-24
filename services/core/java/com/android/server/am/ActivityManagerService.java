@@ -397,6 +397,7 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallHeavyHitterWatcher.BinderCallHeavyHitterListener;
 import com.android.internal.os.BinderCallHeavyHitterWatcher.HeavyHitterContainer;
@@ -835,6 +836,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final ComponentAliasResolver mComponentAliasResolver;
+
+    final FileDescriptor mApplicationSharedMemoryReadOnlyFd;
 
     private static final long HOME_LAUNCH_TIMEOUT_MS = 15000;
     private final AtomicBoolean mHasHomeDelay = new AtomicBoolean(false);
@@ -2412,6 +2415,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBroadcastQueue = injector.getBroadcastQueue(this);
         mBroadcastController = new BroadcastController(mContext, this, mBroadcastQueue);
         mComponentAliasResolver = new ComponentAliasResolver(this);
+        mApplicationSharedMemoryReadOnlyFd = null;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2518,6 +2522,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mTraceErrorLogger = new TraceErrorLogger();
         mComponentAliasResolver = new ComponentAliasResolver(this);
+        try {
+            mApplicationSharedMemoryReadOnlyFd =
+                    ApplicationSharedMemory.getInstance().getReadOnlyFileDescriptor();
+        } catch (IOException e) {
+            Slog.e(TAG, "Failed to get read only fd for shared memory", e);
+            throw new RuntimeException(e);
+        }
     }
 
     void setBroadcastQueueForTest(BroadcastQueue broadcastQueue) {
@@ -4724,6 +4735,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getDisabledCompatChanges(),
                         app.getLoggableCompatChanges(),
                         serializedSystemFontMap,
+                        mApplicationSharedMemoryReadOnlyFd,
                         app.getStartElapsedTime(),
                         app.getStartUptime());
             }
