@@ -49,7 +49,7 @@ object MediaCarouselStateLoader {
             Scenes.Shade -> MediaHierarchyManager.LOCATION_QQS
             Scenes.Lockscreen -> MediaHierarchyManager.LOCATION_LOCKSCREEN
             Scenes.Communal -> MediaHierarchyManager.LOCATION_COMMUNAL_HUB
-            else -> -1
+            else -> MediaHierarchyManager.LOCATION_UNKNOWN
         }
     }
 
@@ -59,7 +59,7 @@ object MediaCarouselStateLoader {
         return when (content) {
             Overlays.QuickSettingsShade -> MediaHierarchyManager.LOCATION_QS
             Overlays.NotificationsShade -> MediaHierarchyManager.LOCATION_QQS
-            else -> -1
+            else -> MediaHierarchyManager.LOCATION_UNKNOWN
         }
     }
 
@@ -75,8 +75,8 @@ object MediaCarouselStateLoader {
         data object Gone : State {
             override val transitionProgress: Float = 1.0F
             override val squishFraction: () -> Float = { 1.0F }
-            override val endLocation: Int = -1
-            override val startLocation: Int = -1
+            override val endLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
+            override val startLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
         }
 
         /** State when media carousel is moving from one media location to another */
@@ -91,7 +91,7 @@ object MediaCarouselStateLoader {
         /** State when media carousel reached the end location. */
         data class Idle(override val endLocation: Int) : State {
             override val transitionProgress = 1.0F
-            override val startLocation = -1
+            override val startLocation = MediaHierarchyManager.LOCATION_UNKNOWN
             override val squishFraction = { 1.0F }
         }
     }
@@ -120,7 +120,7 @@ object MediaCarouselStateLoader {
                     } else if (MediaContentPicker.contents.contains(toScene)) {
                         State.InProgress(
                             transitionProgress = 1.0F,
-                            startLocation = -1,
+                            startLocation = MediaHierarchyManager.LOCATION_UNKNOWN,
                             getMediaLocation(toScene),
                         )
                     } else {
@@ -141,7 +141,7 @@ object MediaCarouselStateLoader {
                     } else if (MediaContentPicker.contents.contains(toContent)) {
                         State.InProgress(
                             transitionProgress = 1.0F,
-                            startLocation = -1,
+                            startLocation = MediaHierarchyManager.LOCATION_UNKNOWN,
                             getMediaLocation(toContent),
                         )
                     } else {

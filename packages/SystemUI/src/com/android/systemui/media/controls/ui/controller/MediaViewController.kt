@@ -120,7 +120,7 @@ constructor(
      * finished
      */
     @MediaLocation
-    var currentEndLocation: Int = -1
+    var currentEndLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
         set(value) {
             if (field != value) {
                 field = value
@@ -130,7 +130,7 @@ constructor(
         }
 
     /** The starting location of the view where it starts for all animations and transitions */
-    @MediaLocation private var currentStartLocation: Int = -1
+    @MediaLocation private var currentStartLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /** The progress of the transition or 1.0 if there is no transition happening */
     private var currentTransitionProgress: Float = 1.0f
@@ -653,7 +653,7 @@ constructor(
             logger.logMediaLocation("attach $type", currentStartLocation, currentEndLocation)
             this.transitionLayout = transitionLayout
             layoutController.attach(transitionLayout)
-            if (currentEndLocation == -1) {
+            if (currentEndLocation == MediaHierarchyManager.LOCATION_UNKNOWN) {
                 return
             }
             // Set the previously set state immediately to the view, now that it's finally attached

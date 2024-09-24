@@ -175,19 +175,21 @@ constructor(
      * The desired location where we'll be at the end of the transformation. Usually this matches
      * the end location, except when we're still waiting on a state update call.
      */
-    @MediaLocation private var desiredLocation: Int = -1
+    @MediaLocation private var desiredLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation @VisibleForTesting var currentEndLocation: Int = -1
+    @MediaLocation
+    @VisibleForTesting
+    var currentEndLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation private var currentStartLocation: Int = -1
+    @MediaLocation private var currentStartLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /** The progress of the transition or 1.0 if there is no transition happening */
     private var currentTransitionProgress: Float = 1.0f
