@@ -413,7 +413,10 @@ object KeyguardRootViewBinder {
 
         if (MigrateClocksToBlueprint.isEnabled) {
             burnInParams.update { current ->
-                current.copy(translationY = { childViews[burnInLayerId]?.translationY })
+                current.copy(
+                    translationX = { childViews[burnInLayerId]?.translationX },
+                    translationY = { childViews[burnInLayerId]?.translationY },
+                )
             }
         }
 
