@@ -70,6 +70,17 @@ flag {
 }
 
 flag {
+  name: "common_surface_animator"
+  namespace: "windowing_frontend"
+  description: "A reusable surface animator for default transition"
+  bug: "326331384"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "reduce_keyguard_transitions"
   namespace: "windowing_frontend"
   description: "Avoid setting keyguard transitions ready unless there are no other changes"
