@@ -149,16 +149,6 @@ flag {
 }
 
 flag {
-   name: "modes_dialog_single_rows"
-   namespace: "systemui"
-   description: "[Experiment] Display one entry per grid row in the Modes Dialog."
-   bug: "366034002"
-   metadata {
-        purpose: PURPOSE_BUGFIX
-   }
-}
-
-flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
@@ -593,6 +583,16 @@ flag {
     namespace: "systemui"
     description: "Wait for clipboard image to load before showing UI"
     bug: "359864629"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "clipboard_use_description_mimetype"
+    namespace: "systemui"
+    description: "Read item mimetype from description rather than checking URI"
+    bug: "357197236"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

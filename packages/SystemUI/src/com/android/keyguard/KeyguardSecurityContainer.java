@@ -109,6 +109,8 @@ import com.android.systemui.util.settings.GlobalSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 /** Determines how the bouncer is displayed to the user. */
 public class KeyguardSecurityContainer extends ConstraintLayout {
@@ -170,6 +172,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
     private ViewMode mViewMode = new DefaultViewMode();
     private boolean mIsInteractable;
     protected ViewMediatorCallback mViewMediatorCallback;
+    private Executor mBgExecutor;
     /*
      * Using MODE_UNINITIALIZED to mean the view mode is set to DefaultViewMode, but init() has not
      * yet been called on it. This will happen when the ViewController is initialized.
@@ -352,6 +355,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         updateBiometricRetry(securityMode, faceAuthEnabled);
     }
 
+    void setBackgroundExecutor(Executor bgExecutor) {
+        mBgExecutor = bgExecutor;
+    }
+
     void initMode(@Mode int mode, GlobalSettings globalSettings, FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
             UserSwitcherViewMode.UserSwitcherCallback userSwitcherCallback,
@@ -367,7 +374,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 mViewMode = new OneHandedViewMode();
                 break;
             case MODE_USER_SWITCHER:
-                mViewMode = new UserSwitcherViewMode(userSwitcherCallback);
+                mViewMode = new UserSwitcherViewMode(userSwitcherCallback, mBgExecutor);
                 break;
             default:
                 mViewMode = new DefaultViewMode();
@@ -991,6 +998,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         private FalsingManager mFalsingManager;
         private UserSwitcherController mUserSwitcherController;
         private KeyguardUserSwitcherPopupMenu mPopup;
+        private Executor mBgExecutor;
         private Resources mResources;
         private UserSwitcherController.UserSwitchCallback mUserSwitchCallback =
                 this::setupUserSwitcher;
@@ -998,8 +1006,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         private UserSwitcherCallback mUserSwitcherCallback;
         private FalsingA11yDelegate mFalsingA11yDelegate;
 
-        UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback) {
+        UserSwitcherViewMode(UserSwitcherCallback userSwitcherCallback, Executor bgExecutor) {
             mUserSwitcherCallback = userSwitcherCallback;
+            mBgExecutor = bgExecutor;
         }
 
         @Override
@@ -1068,18 +1077,22 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             mView.removeView(mUserSwitcher);
         }
 
-        private Drawable findLargeUserIcon(int userId) {
-            Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
-            if (userIcon != null) {
-                int iconSize =
-                        mResources.getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size);
-                return CircleFramedDrawable.getInstance(
-                    mView.getContext(),
-                    Icon.scaleDownIfNecessary(userIcon, iconSize, iconSize)
-                );
-            }
-
-            return UserIcons.getDefaultUserIcon(mResources, userId, false);
+        private void findLargeUserIcon(int userId, Consumer<Drawable> consumer) {
+            mBgExecutor.execute(() -> {
+                Drawable icon;
+                Bitmap userIcon = UserManager.get(mView.getContext()).getUserIcon(userId);
+                if (userIcon != null) {
+                    int iconSize = mResources.getDimensionPixelSize(
+                            R.dimen.bouncer_user_switcher_icon_size);
+                    icon = CircleFramedDrawable.getInstance(
+                        mView.getContext(),
+                        Icon.scaleDownIfNecessary(userIcon, iconSize, iconSize)
+                    );
+                } else  {
+                    icon = UserIcons.getDefaultUserIcon(mResources, userId, false);
+                }
+                consumer.accept(icon);
+            });
         }
 
         @Override
@@ -1136,8 +1149,15 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 return;
             }
             final String currentUserName = mUserSwitcherController.getCurrentUserName();
-            Drawable userIcon = findLargeUserIcon(currentUser.info.id);
-            ((ImageView) mView.findViewById(R.id.user_icon)).setImageDrawable(userIcon);
+            findLargeUserIcon(currentUser.info.id,
+                    (Drawable userIcon) -> {
+                        mView.post(() -> {
+                            ImageView view = (ImageView) mView.findViewById(R.id.user_icon);
+                            if (view != null) {
+                                view.setImageDrawable(userIcon);
+                            }
+                        });
+                });
             mUserSwitcher.setText(currentUserName);
 
             KeyguardUserSwitcherAnchor anchor = mView.findViewById(R.id.user_switcher_anchor);

@@ -18,7 +18,6 @@ package com.android.wm.shell.dagger;
 
 import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -79,6 +78,7 @@ import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationFilter;
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository;
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.draganddrop.GlobalDragListener;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -116,8 +116,6 @@ import com.android.wm.shell.unfold.qualifier.UnfoldTransition;
 import com.android.wm.shell.windowdecor.CaptionWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
-import com.android.wm.shell.windowdecor.viewhost.DefaultWindowDecorViewHostSupplier;
-import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -249,8 +247,7 @@ public abstract class WMShellModule {
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler,
-            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
+            Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return new DesktopModeWindowDecorViewModel(
                     context,
@@ -275,8 +272,7 @@ public abstract class WMShellModule {
                     multiInstanceHelper,
                     desktopTasksLimiter,
                     windowDecorCaptionHandleRepository,
-                    desktopActivityOrientationHandler,
-                    windowDecorViewHostSupplier);
+                    desktopActivityOrientationHandler);
         }
         return new CaptionWindowDecorViewModel(
                 context,
@@ -290,8 +286,7 @@ public abstract class WMShellModule {
                 displayController,
                 rootTaskDisplayAreaOrganizer,
                 syncQueue,
-                transitions,
-                windowDecorViewHostSupplier);
+                transitions);
     }
 
     @WMSingleton
@@ -380,13 +375,6 @@ public abstract class WMShellModule {
             WindowDecorViewModel windowDecorViewModel) {
         return new FreeformTaskTransitionObserver(
                 context, shellInit, transitions, windowDecorViewModel);
-    }
-
-    @WMSingleton
-    @Provides
-    static WindowDecorViewHostSupplier provideWindowDecorViewHostSupplier(
-            @ShellMainThread @NonNull CoroutineScope mainScope) {
-        return new DefaultWindowDecorViewHostSupplier(mainScope);
     }
 
     //
@@ -712,8 +700,14 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
-    static DesktopModeTaskRepository provideDesktopModeTaskRepository() {
-        return new DesktopModeTaskRepository();
+    static DesktopModeTaskRepository provideDesktopModeTaskRepository(
+            Context context,
+            ShellInit shellInit,
+            DesktopPersistentRepository desktopPersistentRepository,
+            @ShellMainThread CoroutineScope mainScope
+    ) {
+        return new DesktopModeTaskRepository(context, shellInit, desktopPersistentRepository,
+                mainScope);
     }
 
     @WMSingleton
@@ -796,6 +790,14 @@ public abstract class WMShellModule {
             @ShellMainThread CoroutineScope applicationScope) {
         return new AppHandleEducationController(appHandleEducationFilter,
                 shellTaskOrganizer, appHandleEducationDatastoreRepository, applicationScope);
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopPersistentRepository provideDesktopPersistentRepository(
+            Context context,
+            @ShellBackgroundThread CoroutineScope bgScope) {
+        return new DesktopPersistentRepository(context, bgScope);
     }
 
     //

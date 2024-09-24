@@ -34,8 +34,6 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.realKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.DozeStateModel
-import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
@@ -50,8 +48,6 @@ import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
@@ -220,15 +216,11 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun transition_from_hub_end_in_dream() =
         testScope.runTest {
-            // Device is dreaming and not dozing.
-            kosmos.powerInteractor.setAwakeForTest()
-            kosmos.fakeKeyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
-            )
+            // Device is dreaming and occluded.
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
             kosmos.fakeKeyguardRepository.setDreaming(true)
             kosmos.fakeKeyguardRepository.setDreamingWithOverlay(true)
-            advanceTimeBy(600L)
+            runCurrent()
 
             sceneTransitions.value = hubToBlank
 
@@ -663,7 +655,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     from = LOCKSCREEN,
                     to = OCCLUDED,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET
+                    modeOnCanceled = TransitionModeOnCanceled.RESET,
                 )
             )
 
@@ -750,7 +742,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     from = LOCKSCREEN,
                     to = OCCLUDED,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET
+                    modeOnCanceled = TransitionModeOnCanceled.RESET,
                 )
             )
 
@@ -852,8 +844,8 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     to = ALTERNATE_BOUNCER,
                     animator = null,
                     ownerName = "external",
-                    modeOnCanceled = TransitionModeOnCanceled.RESET
-                ),
+                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                )
             )
 
             val allSteps by collectValues(keyguardTransitionRepository.transitions)

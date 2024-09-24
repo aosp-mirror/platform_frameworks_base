@@ -122,6 +122,16 @@ flag {
 }
 
 flag {
+    name: "enable_shell_top_task_tracking"
+    namespace: "multitasking"
+    description: "Enables tracking top tasks from the shell"
+    bug: "342627272"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_bubble_bar_in_persistent_task_bar"
     namespace: "multitasking"
     description: "Enable bubble bar to be shown in the persistent task bar"

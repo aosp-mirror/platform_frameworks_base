@@ -41,6 +41,7 @@ import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_P
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -162,6 +163,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_SENT_VALID_MESSAGE = "sent_valid_msg";
     private static final String ATT_USER_DEMOTED_INVALID_MSG_APP = "user_demote_msg_app";
     private static final String ATT_SENT_VALID_BUBBLE = "sent_valid_bubble";
+    private static final String ATT_PROMOTE_NOTIFS = "promote";
 
     private static final String ATT_CREATION_TIME = "creation_time";
 
@@ -351,6 +353,10 @@ public class PreferencesHelper implements RankingConfig {
             r.userDemotedMsgApp = parser.getAttributeBoolean(
                     null, ATT_USER_DEMOTED_INVALID_MSG_APP, false);
             r.hasSentValidBubble = parser.getAttributeBoolean(null, ATT_SENT_VALID_BUBBLE, false);
+            if (android.app.Flags.uiRichOngoing()) {
+                r.canHavePromotedNotifs =
+                        parser.getAttributeBoolean(null, ATT_PROMOTE_NOTIFS, false);
+            }
 
             final int innerDepth = parser.getDepth();
             int type;
@@ -739,6 +745,11 @@ public class PreferencesHelper implements RankingConfig {
         out.attributeBoolean(null, ATT_USER_DEMOTED_INVALID_MSG_APP,
                 r.userDemotedMsgApp);
         out.attributeBoolean(null, ATT_SENT_VALID_BUBBLE, r.hasSentValidBubble);
+        if (android.app.Flags.uiRichOngoing()) {
+            if (r.canHavePromotedNotifs) {
+                out.attributeBoolean(null, ATT_PROMOTE_NOTIFS, r.canHavePromotedNotifs);
+            }
+        }
 
         if (Flags.persistIncompleteRestoreData() && r.uid == UNKNOWN_UID) {
             out.attributeLong(null, ATT_CREATION_TIME, r.creationTime);
@@ -837,6 +848,28 @@ public class PreferencesHelper implements RankingConfig {
         if (changed) {
             updateConfig();
         }
+    }
+
+    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public boolean canBePromoted(String packageName, int uid) {
+        synchronized (mLock) {
+            return getOrCreatePackagePreferencesLocked(packageName, uid).canHavePromotedNotifs;
+        }
+    }
+
+    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    public boolean setCanBePromoted(String packageName, int uid, boolean promote) {
+        boolean changed = false;
+        synchronized (mLock) {
+            PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
+            if (pkgPrefs.canHavePromotedNotifs != promote) {
+                pkgPrefs.canHavePromotedNotifs = promote;
+                changed = true;
+            }
+        }
+        // no need to send a ranking update because we need to update the flag value on all pending
+        // and posted notifs and NMS will take care of that
+        return changed;
     }
 
     public boolean isInInvalidMsgState(String packageName, int uid) {
@@ -2180,6 +2213,10 @@ public class PreferencesHelper implements RankingConfig {
                     pw.print(" fixedImportance=");
                     pw.print(r.fixedImportance);
                 }
+                if (android.app.Flags.uiRichOngoing() && r.canHavePromotedNotifs) {
+                    pw.print(" promoted=");
+                    pw.print(r.canHavePromotedNotifs);
+                }
                 pw.println();
                 for (NotificationChannel channel : r.channels.values()) {
                     pw.print(prefix);
@@ -3027,6 +3064,9 @@ public class PreferencesHelper implements RankingConfig {
 
         boolean migrateToPm = false;
         long creationTime;
+
+        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        boolean canHavePromotedNotifs = false;
 
         @UserIdInt int userId;
 

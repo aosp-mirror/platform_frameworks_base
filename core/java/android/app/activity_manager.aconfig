@@ -147,3 +147,21 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "backstage_power"
+     name: "use_sticky_bcast_cache"
+     description: "Use cache for sticky broadcast intents"
+     is_fixed_read_only: true
+     bug: "356148006"
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}
+
+flag {
+     namespace: "system_performance"
+     name: "app_start_info_component"
+     description: "Control ApplicationStartInfo component field and API"
+     bug: "362537357"
+}

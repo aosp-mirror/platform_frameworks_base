@@ -114,14 +114,15 @@ class BackActionInteractorTest : SysuiTestCase() {
 
     private val backActionInteractor: BackActionInteractor by lazy {
         BackActionInteractor(
-                testScope.backgroundScope,
-                statusBarStateController,
-                statusBarKeyguardViewManager,
-                shadeController,
-                notificationShadeWindowController,
-                windowRootViewVisibilityInteractor
-            )
-            .apply { this.setup(qsController, shadeBackActionInteractor) }
+            testScope.backgroundScope,
+            statusBarStateController,
+            statusBarKeyguardViewManager,
+            shadeController,
+            notificationShadeWindowController,
+            windowRootViewVisibilityInteractor,
+            shadeBackActionInteractor,
+            qsController,
+        )
     }
 
     private val powerInteractor = PowerInteractorFactory.create().powerInteractor

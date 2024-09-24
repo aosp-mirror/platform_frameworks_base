@@ -26,15 +26,12 @@ import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
-import android.view.SurfaceControl.Transaction;
 import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-
-import java.util.function.Supplier;
 
 /**
  * Controls the visibility and animations of IME window insets source.
@@ -54,10 +51,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      */
     private boolean mIsRequestedVisibleAwaitingLeash;
 
-    public ImeInsetsSourceConsumer(
-            int id, InsetsState state, Supplier<Transaction> transactionSupplier,
-            InsetsController controller) {
-        super(id, WindowInsets.Type.ime(), state, transactionSupplier, controller);
+    public ImeInsetsSourceConsumer(int id, InsetsState state, InsetsController controller) {
+        super(id, WindowInsets.Type.ime(), state, controller);
     }
 
     @Override

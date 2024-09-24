@@ -17,9 +17,12 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
+import android.app.DreamManager
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.systemui.Flags.communalSceneKtfRefactor
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -60,10 +63,12 @@ constructor(
     @Main mainDispatcher: CoroutineDispatcher,
     keyguardInteractor: KeyguardInteractor,
     private val glanceableHubTransitions: GlanceableHubTransitions,
+    private val communalInteractor: CommunalInteractor,
     private val communalSceneInteractor: CommunalSceneInteractor,
     private val communalSettingsInteractor: CommunalSettingsInteractor,
     powerInteractor: PowerInteractor,
     keyguardOcclusionInteractor: KeyguardOcclusionInteractor,
+    private val dreamManager: DreamManager,
     private val deviceEntryInteractor: DeviceEntryInteractor,
 ) :
     TransitionInteractor(
@@ -76,6 +81,7 @@ constructor(
         keyguardInteractor = keyguardInteractor,
     ) {
 
+    @SuppressLint("MissingPermission")
     override fun start() {
         listenForDreamingToAlternateBouncer()
         listenForDreamingToOccluded()
@@ -86,6 +92,8 @@ constructor(
         listenForTransitionToCamera(scope, keyguardInteractor)
         if (!communalSceneKtfRefactor()) {
             listenForDreamingToGlanceableHub()
+        } else {
+            listenForDreamingToGlanceableHubFromPowerButton()
         }
         listenForDreamingToPrimaryBouncer()
     }
@@ -109,6 +117,34 @@ constructor(
                 fromState = KeyguardState.DREAMING,
                 toState = KeyguardState.GLANCEABLE_HUB,
             )
+        }
+    }
+
+    /**
+     * Normally when pressing power button from the dream, the devices goes from DREAMING to DOZING,
+     * then [FromDozingTransitionInteractor] handles the transition to GLANCEABLE_HUB. However if
+     * the power button is pressed quickly, we may need to go directly from DREAMING to
+     * GLANCEABLE_HUB as the transition to DOZING has not occurred yet.
+     */
+    @SuppressLint("MissingPermission")
+    private fun listenForDreamingToGlanceableHubFromPowerButton() {
+        if (!communalSettingsInteractor.isCommunalFlagEnabled()) return
+        if (SceneContainerFlag.isEnabled) return
+        scope.launch {
+            powerInteractor.isAwake
+                .debounce(50L)
+                .filterRelevantKeyguardStateAnd { isAwake -> isAwake }
+                .sample(communalInteractor.isCommunalAvailable)
+                .collect { isCommunalAvailable ->
+                    if (isCommunalAvailable && dreamManager.canStartDreaming(false)) {
+                        // This case handles tapping the power button to transition through
+                        // dream -> off -> hub.
+                        communalSceneInteractor.snapToScene(
+                            newScene = CommunalScenes.Communal,
+                            loggingReason = "from dreaming to hub",
+                        )
+                    }
+                }
         }
     }
 
@@ -144,7 +180,7 @@ constructor(
                     } else {
                         startTransitionTo(
                             KeyguardState.LOCKSCREEN,
-                            ownerReason = "Dream has ended and device is awake"
+                            ownerReason = "Dream has ended and device is awake",
                         )
                     }
                 }
@@ -158,15 +194,14 @@ constructor(
             scope.launch {
                 combine(
                         keyguardInteractor.isKeyguardOccluded,
-                        keyguardInteractor.isAbleToDream
-                            // Debounce the dreaming signal since there is a race condition between
-                            // the occluded and dreaming signals. We therefore add a small delay
-                            // to give enough time for occluded to flip to false when the dream
-                            // ends, to avoid transitioning to OCCLUDED erroneously when exiting
-                            // the dream.
-                            .debounce(100.milliseconds),
-                        ::Pair
+                        keyguardInteractor.isDreaming,
+                        ::Pair,
                     )
+                    // Debounce signals since there is a race condition between the occluded and
+                    // dreaming signals when starting or stopping dreaming. We therefore add a small
+                    // delay to give enough time for occluded to flip to false when the dream
+                    // ends, to avoid transitioning to OCCLUDED erroneously when exiting the dream.
+                    .debounce(100.milliseconds)
                     .filterRelevantKeyguardStateAnd { (isOccluded, isDreaming) ->
                         isOccluded && !isDreaming
                     }
@@ -194,12 +229,12 @@ constructor(
                     if (dismissable) {
                         startTransitionTo(
                             KeyguardState.GONE,
-                            ownerReason = "No longer dreaming; dismissable"
+                            ownerReason = "No longer dreaming; dismissable",
                         )
                     } else {
                         startTransitionTo(
                             KeyguardState.LOCKSCREEN,
-                            ownerReason = "No longer dreaming"
+                            ownerReason = "No longer dreaming",
                         )
                     }
                 }

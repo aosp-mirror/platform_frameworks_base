@@ -124,8 +124,9 @@ fun SceneScope.ShadeBody(viewModel: QuickSettingsContainerViewModel) {
     }
 }
 
+/** Column containing Brightness and QS tiles. */
 @Composable
-private fun SceneScope.QuickSettingsLayout(
+fun SceneScope.QuickSettingsLayout(
     viewModel: QuickSettingsContainerViewModel,
     modifier: Modifier = Modifier,
 ) {

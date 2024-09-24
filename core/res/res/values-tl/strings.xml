@@ -2439,7 +2439,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Hindi na makilala ang iyong face model. I-set up ulit ang Pag-unlock Gamit ang Mukha."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"I-set up"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Huwag muna"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay/sa <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Alarm para kay <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Magpalit ng user"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"I-mute"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"I-tap para i-mute ang tunog"</string>

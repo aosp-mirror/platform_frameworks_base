@@ -17,27 +17,70 @@
 package com.android.wm.shell.desktopmode
 
 import android.graphics.Rect
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
+import android.util.ArraySet
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
 import androidx.test.filters.SmallTest
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
+import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.desktopmode.persistence.Desktop
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
+import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.inOrder
+import org.mockito.Mockito.spy
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@ExperimentalCoroutinesApi
 class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
     private lateinit var repo: DesktopModeTaskRepository
+    private lateinit var shellInit: ShellInit
+    private lateinit var datastoreScope: CoroutineScope
+
+    @Mock private lateinit var testExecutor: ShellExecutor
+    @Mock private lateinit var persistentRepository: DesktopPersistentRepository
 
     @Before
     fun setUp() {
-        repo = DesktopModeTaskRepository()
+        Dispatchers.setMain(StandardTestDispatcher())
+        datastoreScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
+        shellInit = spy(ShellInit(testExecutor))
+
+        repo = DesktopModeTaskRepository(context, shellInit, persistentRepository, datastoreScope)
+        whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
+            Desktop.getDefaultInstance()
+        )
+        shellInit.init()
+    }
+
+    @After
+    fun tearDown() {
+        datastoreScope.cancel()
     }
 
     @Test
@@ -455,6 +498,44 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    fun addOrMoveFreeformTaskToTop_noTaskExists_persistenceEnabled_addsToTop() =
+        runTest(StandardTestDispatcher()) {
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
+
+            val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+            assertThat(tasks).containsExactly(7, 6, 5).inOrder()
+            inOrder(persistentRepository).run {
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf(5)
+                    )
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf(6, 5)
+                    )
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf(7, 6, 5)
+                    )
+            }
+    }
+
+    @Test
     fun addOrMoveFreeformTaskToTop_alreadyExists_movesToTop() {
         repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
         repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
@@ -477,6 +558,55 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks).containsExactly(7, 6, 5).inOrder()
         assertThat(repo.isMinimizedTask(taskId = 6)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    fun minimizeTask_persistenceEnabled_taskIsPersistedAsMinimized() =
+        runTest(StandardTestDispatcher()) {
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 5)
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 6)
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, 7)
+
+            repo.minimizeTask(displayId = 0, taskId = 6)
+
+            val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
+            assertThat(tasks).containsExactly(7, 6, 5).inOrder()
+            assertThat(repo.isMinimizedTask(taskId = 6)).isTrue()
+            inOrder(persistentRepository).run {
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf(5)
+                    )
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf(6, 5)
+                    )
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(),
+                        freeformTasksInZOrder = arrayListOf(7, 6, 5)
+                    )
+                verify(persistentRepository)
+                    .addOrUpdateDesktop(
+                        DEFAULT_USER_ID,
+                        DEFAULT_DESKTOP_ID,
+                        visibleTasks = ArraySet(),
+                        minimizedTasks = ArraySet(arrayOf(6)),
+                        freeformTasksInZOrder = arrayListOf(7, 6, 5)
+                    )
+            }
     }
 
     @Test
@@ -503,6 +633,33 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    fun removeFreeformTask_invalidDisplay_persistenceEnabled_removesTaskFromFreeformTasks() {
+        runTest(StandardTestDispatcher()) {
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
+
+            repo.removeFreeformTask(INVALID_DISPLAY, taskId = 1)
+
+            verify(persistentRepository)
+                .addOrUpdateDesktop(
+                    DEFAULT_USER_ID,
+                    DEFAULT_DESKTOP_ID,
+                    visibleTasks = ArraySet(),
+                    minimizedTasks = ArraySet(),
+                    freeformTasksInZOrder = arrayListOf(1)
+                )
+            verify(persistentRepository)
+                .addOrUpdateDesktop(
+                    DEFAULT_USER_ID,
+                    DEFAULT_DESKTOP_ID,
+                    visibleTasks = ArraySet(),
+                    minimizedTasks = ArraySet(),
+                    freeformTasksInZOrder = ArrayList()
+                )
+        }
+    }
+
+    @Test
     fun removeFreeformTask_validDisplay_removesTaskFromFreeformTasks() {
         repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
 
@@ -513,6 +670,33 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    fun removeFreeformTask_validDisplay_persistenceEnabled_removesTaskFromFreeformTasks() {
+        runTest(StandardTestDispatcher()) {
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
+
+            repo.removeFreeformTask(DEFAULT_DISPLAY, taskId = 1)
+
+            verify(persistentRepository)
+                .addOrUpdateDesktop(
+                    DEFAULT_USER_ID,
+                    DEFAULT_DESKTOP_ID,
+                    visibleTasks = ArraySet(),
+                    minimizedTasks = ArraySet(),
+                    freeformTasksInZOrder = arrayListOf(1)
+                )
+            verify(persistentRepository)
+                .addOrUpdateDesktop(
+                    DEFAULT_USER_ID,
+                    DEFAULT_DESKTOP_ID,
+                    visibleTasks = ArraySet(),
+                    minimizedTasks = ArraySet(),
+                    freeformTasksInZOrder = ArrayList()
+                )
+        }
+    }
+
+    @Test
     fun removeFreeformTask_validDisplay_differentDisplay_doesNotRemovesTask() {
         repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
 
@@ -520,6 +704,33 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
 
         val tasks = repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)
         assertThat(tasks).containsExactly(1)
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    fun removeFreeformTask_validDisplayButDifferentDisplay_persistenceEnabled_doesNotRemoveTask() {
+        runTest(StandardTestDispatcher()) {
+            repo.addOrMoveFreeformTaskToTop(DEFAULT_DISPLAY, taskId = 1)
+
+            repo.removeFreeformTask(SECOND_DISPLAY, taskId = 1)
+
+            verify(persistentRepository)
+                .addOrUpdateDesktop(
+                    DEFAULT_USER_ID,
+                    DEFAULT_DESKTOP_ID,
+                    visibleTasks = ArraySet(),
+                    minimizedTasks = ArraySet(),
+                    freeformTasksInZOrder = arrayListOf(1)
+                )
+            verify(persistentRepository, never())
+                .addOrUpdateDesktop(
+                    DEFAULT_USER_ID,
+                    DEFAULT_DESKTOP_ID,
+                    visibleTasks = ArraySet(),
+                    minimizedTasks = ArraySet(),
+                    freeformTasksInZOrder = ArrayList()
+                )
+        }
     }
 
     @Test
@@ -709,5 +920,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     companion object {
         const val SECOND_DISPLAY = 1
         const val THIRD_DISPLAY = 345
+        private const val DEFAULT_USER_ID = 1000
+        private const val DEFAULT_DESKTOP_ID = 0
     }
 }

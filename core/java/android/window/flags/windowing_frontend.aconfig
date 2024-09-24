@@ -111,6 +111,17 @@ flag {
 }
 
 flag {
+    name: "remove_activity_starter_dream_callback"
+    namespace: "windowing_frontend"
+    description: "Avoid a race with DreamManagerService callbacks for isDreaming by checking Activity state directly"
+    bug: "366452352"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+    is_fixed_read_only: true
+}
+
+flag {
     name: "supports_multi_instance_system_ui"
     is_exported: true
     namespace: "multitasking"
@@ -261,6 +272,17 @@ flag {
   namespace: "windowing_frontend"
   description: "Always capture activity snapshot regardless predictive back status"
   bug: "362183912"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "remove_starting_window_wait_for_multi_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid remove starting window too early when playing multiple transitions"
+  bug: "362347290"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX

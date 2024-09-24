@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Uygulamanın medya koleksiyonunuzdaki konumları okumasına izin verir."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Biyometri kullan"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Biyometri veya ekran kilidi kullan"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Siz olduğunuzu doğrulayın"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Kimliğinizi doğrulayın"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Devam etmek için biyometri kullanın"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Devam etmek için biyometrik kimlik bilginizi veya ekran kilidinizi kullanın"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biyometrik donanım kullanılamıyor"</string>

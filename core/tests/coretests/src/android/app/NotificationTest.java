@@ -37,6 +37,7 @@ import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
 import static android.app.Notification.EXTRA_SUMMARY_TEXT;
 import static android.app.Notification.EXTRA_TITLE;
+import static android.app.Notification.FLAG_CAN_COLORIZE;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.GROUP_ALERT_SUMMARY;
 import static android.app.Notification.GROUP_KEY_SILENT;
@@ -96,6 +97,7 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Pair;
+import android.util.Slog;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
@@ -126,6 +128,8 @@ public class NotificationTest {
 
     private Context mContext;
 
+    private RemoteViews mRemoteViews;
+
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -133,23 +137,25 @@ public class NotificationTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
+        mRemoteViews = new RemoteViews(
+                mContext.getPackageName(), R.layout.notification_template_header);
     }
 
     @Test
     public void testColorizedByPermission() {
         Notification n = new Notification.Builder(mContext, "test")
-                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .setFlag(FLAG_CAN_COLORIZE, true)
                 .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertTrue(n.isColorized());
 
         n = new Notification.Builder(mContext, "test")
-                .setFlag(Notification.FLAG_CAN_COLORIZE, true)
+                .setFlag(FLAG_CAN_COLORIZE, true)
                 .build();
         assertFalse(n.isColorized());
 
         n = new Notification.Builder(mContext, "test")
-                .setFlag(Notification.FLAG_CAN_COLORIZE, false)
+                .setFlag(FLAG_CAN_COLORIZE, false)
                 .setColorized(true).setColor(Color.WHITE)
                 .build();
         assertFalse(n.isColorized());
@@ -212,6 +218,275 @@ public class NotificationTest {
                 .setProgress(0, 0, true)
                 .build();
         assertFalse(n.hasCompletedProgress());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasTitle_noStyle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setContentTitle("TITLE")
+                .build();
+        assertThat(n.hasTitle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasTitle_bigText() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .build();
+        assertThat(n.hasTitle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasTitle_noTitle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setContentText("text not title")
+                .build();
+        assertThat(n.hasTitle()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_none() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_content() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomContentView(mRemoteViews)
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_big() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomBigContentView(mRemoteViews)
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_headsUp() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomHeadsUpContentView(mRemoteViews)
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_content_public() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("public")
+                .setCustomContentView(mRemoteViews)
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_big_public() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomBigContentView(mRemoteViews)
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testContainsCustomViews_headsUp_public() {
+        Notification np = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setCustomHeadsUpContentView(mRemoteViews)
+                .build();
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .setPublicVersion(np)
+                .build();
+        assertThat(n.containsCustomViews()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_noStyle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setContentText("test")
+                .build();
+        assertThat(n.hasPromotableStyle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_bigPicture() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigPictureStyle())
+                .build();
+        assertThat(n.hasPromotableStyle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_bigText() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle())
+                .build();
+        assertThat(n.hasPromotableStyle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_no_messagingStyle() {
+        Notification.MessagingStyle style = new Notification.MessagingStyle("self name")
+                .setGroupConversation(true)
+                .setConversationTitle("test conversation title");
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(style)
+                .build();
+        assertThat(n.hasPromotableStyle()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_no_mediaStyle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.MediaStyle())
+                .build();
+        assertThat(n.hasPromotableStyle()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_no_inboxStyle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.InboxStyle())
+                .build();
+        assertThat(n.hasPromotableStyle()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableStyle_callText() {
+        PendingIntent answerIntent = createPendingIntent("answer");
+        PendingIntent declineIntent = createPendingIntent("decline");
+        Notification.CallStyle style = Notification.CallStyle.forIncomingCall(
+                new Person.Builder().setName("A Caller").build(),
+                declineIntent,
+                answerIntent
+        );
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(style)
+                .build();
+        assertThat(n.hasPromotableStyle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_wrongStyle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.InboxStyle())
+                .setContentTitle("TITLE")
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_notColorized() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_noTitle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle())
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
 
     @Test

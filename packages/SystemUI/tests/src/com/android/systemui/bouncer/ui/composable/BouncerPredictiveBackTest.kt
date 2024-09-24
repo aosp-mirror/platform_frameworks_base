@@ -72,6 +72,7 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -115,11 +116,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
     private val Kosmos.sceneKeys by Fixture { listOf(Scenes.Lockscreen, Scenes.Bouncer) }
     private val Kosmos.initialSceneKey by Fixture { Scenes.Bouncer }
     private val Kosmos.sceneContainerConfig by Fixture {
-        val navigationDistances =
-            mapOf(
-                Scenes.Lockscreen to 1,
-                Scenes.Bouncer to 0,
-            )
+        val navigationDistances = mapOf(Scenes.Lockscreen to 1, Scenes.Bouncer to 0)
         SceneContainerConfig(sceneKeys, initialSceneKey, emptyList(), navigationDistances)
     }
 
@@ -160,7 +157,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
         BouncerScene(
             bouncerSceneActionsViewModelFactory,
             bouncerSceneContentViewModelFactory,
-            bouncerDialogFactory
+            bouncerDialogFactory,
         )
 
     @Before
@@ -175,7 +172,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
 
     @Test
     fun bouncerPredictiveBackMotion() =
-        motionTestRule.runTest {
+        motionTestRule.runTest(timeout = 30.seconds) {
             val motion =
                 recordMotion(
                     content = { play ->
@@ -189,11 +186,11 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                                 sceneByKey =
                                     mapOf(
                                         Scenes.Lockscreen to FakeLockscreen(),
-                                        Scenes.Bouncer to bouncerScene
+                                        Scenes.Bouncer to bouncerScene,
                                     ),
                                 initialSceneKey = Scenes.Bouncer,
                                 overlayByKey = emptyMap(),
-                                dataSourceDelegator = kosmos.sceneDataSourceDelegator
+                                dataSourceDelegator = kosmos.sceneDataSourceDelegator,
                             )
                         }
                     },
@@ -215,14 +212,14 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                         feature(
                             isElement(Bouncer.Elements.Content),
                             positionInRoot,
-                            "content_offset"
+                            "content_offset",
                         )
                         feature(
                             isElement(Bouncer.Elements.Background),
                             elementAlpha,
-                            "background_alpha"
+                            "background_alpha",
                         )
-                    }
+                    },
                 )
 
             assertThat(motion).timeSeriesMatchesGolden()
@@ -240,7 +237,7 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                 }
                 backProgress.animateTo(
                     targetValue = 1f,
-                    animationSpec = tween(durationMillis = 500)
+                    animationSpec = tween(durationMillis = 500),
                 ) {
                     androidComposeTestRule.runOnUiThread {
                         dispatcher.dispatchOnBackProgressed(
@@ -309,10 +306,10 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                                         is JSONObject ->
                                             Offset(
                                                 pivot.getDouble("x").toFloat(),
-                                                pivot.getDouble("y").toFloat()
+                                                pivot.getDouble("y").toFloat(),
                                             )
                                         else -> throw UnknownTypeException()
-                                    }
+                                    },
                             )
                         }
                         else -> throw UnknownTypeException()
@@ -337,12 +334,12 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                                                 put("x", it.pivot.x)
                                                 put("y", it.pivot.y)
                                             }
-                                    }
+                                    },
                                 )
                             }
                         }
                     }
-                }
+                },
             )
     }
 }

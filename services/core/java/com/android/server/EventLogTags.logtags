@@ -96,6 +96,8 @@ option java_package com.android.server
 27535 notification_adjusted (key|3),(adjustment_type|3),(new_value|3)
 # when a notification cancellation is prevented by the system
 27536 notification_cancel_prevented (key|3)
+# when a summary notification is converted to a regular notification because of force autogrouping
+27537 notification_summary_converted (key|3)
 
 # ---------------------------
 # Watchdog.java

@@ -73,11 +73,15 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
 
     private static final int MESSAGE_MOVE_MOUSE_POINTER = 1;
     private static final int MESSAGE_SCROLL_MOUSE_POINTER = 2;
-    private static final float MOUSE_POINTER_MOVEMENT_STEP = 1.8f;
     private static final int KEY_NOT_SET = -1;
 
     /** Time interval after which mouse action will be repeated */
     private static final int INTERVAL_MILLIS = 10;
+
+    @VisibleForTesting
+    public static final float MOUSE_POINTER_MOVEMENT_STEP = 1.8f;
+    @VisibleForTesting
+    public static final float MOUSE_SCROLL_STEP = 0.2f;
 
     private final AccessibilityManagerService mAms;
     private final Handler mHandler;
@@ -281,8 +285,8 @@ public class MouseKeysInterceptor extends BaseEventStreamTransformation
         MouseKeyEvent mouseKeyEvent = MouseKeyEvent.from(
                 keyCode, mActiveInputDeviceId, mDeviceKeyCodeMap);
         float y = switch (mouseKeyEvent) {
-            case UP_MOVE_OR_SCROLL -> 1.0f;
-            case DOWN_MOVE_OR_SCROLL -> -1.0f;
+            case UP_MOVE_OR_SCROLL -> MOUSE_SCROLL_STEP;
+            case DOWN_MOVE_OR_SCROLL -> -MOUSE_SCROLL_STEP;
             default -> 0.0f;
         };
         waitForVirtualMouseCreation();

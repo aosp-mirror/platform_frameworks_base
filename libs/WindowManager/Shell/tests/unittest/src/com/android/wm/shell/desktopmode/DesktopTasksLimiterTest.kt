@@ -35,13 +35,23 @@ import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.util.StubTransaction
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertFailsWith
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -49,6 +59,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.spy
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
@@ -62,6 +73,7 @@ import org.mockito.quality.Strictness
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@ExperimentalCoroutinesApi
 class DesktopTasksLimiterTest : ShellTestCase() {
 
     @JvmField
@@ -72,19 +84,26 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock lateinit var handler: Handler
+    @Mock lateinit var testExecutor: ShellExecutor
+    @Mock lateinit var persistentRepository: DesktopPersistentRepository
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
     private lateinit var desktopTaskRepo: DesktopModeTaskRepository
+    private lateinit var shellInit: ShellInit
+    private lateinit var testScope: CoroutineScope
 
     @Before
     fun setUp() {
         mockitoSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
                 .spyStatic(DesktopModeStatus::class.java).startMocking()
         doReturn(true).`when`{ DesktopModeStatus.canEnterDesktopMode(any()) }
+        shellInit = spy(ShellInit(testExecutor))
+        Dispatchers.setMain(StandardTestDispatcher())
+        testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
-        desktopTaskRepo = DesktopModeTaskRepository()
-
+        desktopTaskRepo =
+            DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
         desktopTasksLimiter =
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT,
                 interactionJankMonitor, mContext, handler)
@@ -93,6 +112,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @After
     fun tearDown() {
         mockitoSession.finishMocking()
+        testScope.cancel()
     }
 
     @Test

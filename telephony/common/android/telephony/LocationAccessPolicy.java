@@ -33,6 +33,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.android.internal.telephony.TelephonyPermissions;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.TelephonyUtils;
 
 /**
@@ -283,6 +284,8 @@ public final class LocationAccessPolicy {
         int minSdkVersion = Manifest.permission.ACCESS_FINE_LOCATION.equals(permissionToCheck)
                 ? query.minSdkVersionForFine : query.minSdkVersionForCoarse;
 
+        UserHandle callingUserHandle = UserHandle.getUserHandleForUid(query.callingUid);
+
         // If the app fails for some reason, see if it should be allowed to proceed.
         if (minSdkVersion > MAX_SDK_FOR_ANY_ENFORCEMENT) {
             String errorMsg = "Allowing " + query.callingPackage + " " + locationTypeForLog
@@ -291,7 +294,8 @@ public final class LocationAccessPolicy {
                     + query.method;
             logError(context, query, errorMsg);
             return null;
-        } else if (!isAppAtLeastSdkVersion(context, query.callingPackage, minSdkVersion)) {
+        } else if (!isAppAtLeastSdkVersion(context, callingUserHandle, query.callingPackage,
+                minSdkVersion)) {
             String errorMsg = "Allowing " + query.callingPackage + " " + locationTypeForLog
                     + " because it doesn't target API " + minSdkVersion + " yet."
                     + " Please fix this app. Called from " + query.method;
@@ -420,11 +424,19 @@ public final class LocationAccessPolicy {
         }
     }
 
-    private static boolean isAppAtLeastSdkVersion(Context context, String pkgName, int sdkVersion) {
+    private static boolean isAppAtLeastSdkVersion(Context context,
+            @NonNull UserHandle callingUserHandle, String pkgName, int sdkVersion) {
         try {
-            if (context.getPackageManager().getApplicationInfo(pkgName, 0).targetSdkVersion
-                    >= sdkVersion) {
-                return true;
+            if (Flags.hsumPackageManager()) {
+                if (context.getPackageManager().getApplicationInfoAsUser(
+                        pkgName, 0, callingUserHandle).targetSdkVersion >= sdkVersion) {
+                    return true;
+                }
+            } else {
+                if (context.getPackageManager().getApplicationInfo(pkgName, 0).targetSdkVersion
+                        >= sdkVersion) {
+                    return true;
+                }
             }
         } catch (PackageManager.NameNotFoundException e) {
             // In case of exception, assume known app (more strict checking)
