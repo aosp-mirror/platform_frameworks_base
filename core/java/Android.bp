@@ -28,6 +28,7 @@ filegroup {
     exclude_srcs: [
         "android/os/*MessageQueue/**/*.java",
         "android/ranging/**/*.java",
+        ":dynamic_instrumentation_manager_aidl_sources",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -117,6 +118,17 @@ filegroup {
 filegroup {
     name: "TraceReportParams.aidl",
     srcs: ["android/tracing/TraceReportParams.aidl"],
+}
+
+filegroup {
+    name: "dynamic_instrumentation_manager_aidl_sources",
+    srcs: ["android/os/instrumentation/*.aidl"],
+}
+
+aidl_interface {
+    name: "dynamic_instrumentation_manager_aidl",
+    srcs: [":dynamic_instrumentation_manager_aidl_sources"],
+    unstable: true,
 }
 
 filegroup {
