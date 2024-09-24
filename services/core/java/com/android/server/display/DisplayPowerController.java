@@ -22,6 +22,7 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+import static com.android.server.display.brightness.BrightnessEvent.FLAG_EVEN_DIMMER;
 import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessPresetToString;
 
 import android.animation.Animator;
@@ -1748,6 +1749,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final float brightnessOnAvailableScale = MathUtils.constrainedMap(0.0f, 1.0f,
                 clampedState.getMinBrightness(), clampedMax,
                 brightnessState);
+        final boolean evenDimmerModeOn =
+                mCdsi != null && mCdsi.getReduceBrightColorsActivatedForEvenDimmer();
         mTempBrightnessEvent.setPercent(Math.round(
                 1000.0f * com.android.internal.display.BrightnessUtils.convertLinearToGamma(
                         brightnessOnAvailableScale) / 10)); // rounded to one dp
@@ -1762,7 +1765,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTempBrightnessEvent.setHbmMode(mBrightnessRangeController.getHighBrightnessMode());
         mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
                 | (mIsRbcActive ? BrightnessEvent.FLAG_RBC : 0)
-                | (mPowerRequest.lowPowerMode ? BrightnessEvent.FLAG_LOW_POWER_MODE : 0));
+                | (mPowerRequest.lowPowerMode ? BrightnessEvent.FLAG_LOW_POWER_MODE : 0)
+                | (evenDimmerModeOn ? FLAG_EVEN_DIMMER : 0));
         mTempBrightnessEvent.setRbcStrength(mCdsi != null
                 ? mCdsi.getReduceBrightColorsStrength() : -1);
         mTempBrightnessEvent.setPowerFactor(mPowerRequest.screenLowPowerBrightnessFactor);
