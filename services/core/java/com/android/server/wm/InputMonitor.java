@@ -222,7 +222,8 @@ final class InputMonitor {
             UserHandle clientUser) {
         final InputConsumerImpl existingConsumer = getInputConsumer(name);
         if (existingConsumer != null && existingConsumer.mClientUser.equals(clientUser)) {
-            throw new IllegalStateException("Existing input consumer found with name: " + name
+            destroyInputConsumer(existingConsumer.mToken);
+            Slog.w(TAG_WM, "Replacing existing input consumer found with name: " + name
                     + ", display: " + mDisplayId + ", user: " + clientUser);
         }
 
