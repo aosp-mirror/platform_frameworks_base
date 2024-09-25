@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static android.os.Trace.TRACE_TAG_VIBRATOR;
+
 import android.annotation.Nullable;
 import android.hardware.vibrator.IVibrator;
 import android.os.Binder;
@@ -124,7 +126,7 @@ final class VibratorController {
 
     /** Reruns the query to the vibrator to load the {@link VibratorInfo}, if not yet successful. */
     public void reloadVibratorInfoIfNeeded() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#reloadVibratorInfoIfNeeded");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#reloadVibratorInfoIfNeeded");
         try {
             // Early check outside lock, for quick return.
             if (mVibratorInfoLoadSuccessful) {
@@ -143,7 +145,7 @@ final class VibratorController {
                 }
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -199,13 +201,13 @@ final class VibratorController {
 
     /** Return {@code true} if the underlying vibrator is currently available, false otherwise. */
     public boolean isAvailable() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#isAvailable");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#isAvailable");
         try {
             synchronized (mLock) {
                 return mNativeWrapper.isAvailable();
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -215,7 +217,9 @@ final class VibratorController {
      * <p>This will affect the state of {@link #isUnderExternalControl()}.
      */
     public void setExternalControl(boolean externalControl) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "setExternalControl(" + externalControl + ")");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR,
+                externalControl ? "VibratorController#enableExternalControl"
+                : "VibratorController#disableExternalControl");
         try {
             if (!mVibratorInfo.hasCapability(IVibrator.CAP_EXTERNAL_CONTROL)) {
                 return;
@@ -225,7 +229,7 @@ final class VibratorController {
                 mNativeWrapper.setExternalControl(externalControl);
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -234,7 +238,7 @@ final class VibratorController {
      * if given {@code effect} is {@code null}.
      */
     public void updateAlwaysOn(int id, @Nullable PrebakedSegment prebaked) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#updateAlwaysOn");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#updateAlwaysOn");
         try {
             if (!mVibratorInfo.hasCapability(IVibrator.CAP_ALWAYS_ON_CONTROL)) {
                 return;
@@ -248,13 +252,13 @@ final class VibratorController {
                 }
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
     /** Set the vibration amplitude. This will NOT affect the state of {@link #isVibrating()}. */
     public void setAmplitude(float amplitude) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#setAmplitude");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#setAmplitude");
         try {
             synchronized (mLock) {
                 if (mVibratorInfo.hasCapability(IVibrator.CAP_AMPLITUDE_CONTROL)) {
@@ -265,7 +269,7 @@ final class VibratorController {
                 }
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -279,7 +283,7 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(long milliseconds, long vibrationId) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#on");
         try {
             synchronized (mLock) {
                 long duration = mNativeWrapper.on(milliseconds, vibrationId);
@@ -290,7 +294,7 @@ final class VibratorController {
                 return duration;
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -304,7 +308,7 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(VibrationEffect.VendorEffect vendorEffect, long vibrationId) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (vendor)");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#on (vendor)");
         synchronized (mLock) {
             Parcel vendorData = Parcel.obtain();
             try {
@@ -320,7 +324,7 @@ final class VibratorController {
                 return duration;
             } finally {
                 vendorData.recycle();
-                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+                Trace.traceEnd(TRACE_TAG_VIBRATOR);
             }
         }
     }
@@ -335,7 +339,7 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(PrebakedSegment prebaked, long vibrationId) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (Prebaked)");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#on (Prebaked)");
         try {
             synchronized (mLock) {
                 long duration = mNativeWrapper.perform(prebaked.getEffectId(),
@@ -347,7 +351,7 @@ final class VibratorController {
                 return duration;
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -361,7 +365,7 @@ final class VibratorController {
      * do not support the input or a negative number if the operation failed.
      */
     public long on(PrimitiveSegment[] primitives, long vibrationId) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (Primitive)");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#on (Primitive)");
         try {
             if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
                 return 0;
@@ -375,7 +379,7 @@ final class VibratorController {
                 return duration;
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -388,7 +392,7 @@ final class VibratorController {
      * @return The duration of the effect playing, or 0 if unsupported.
      */
     public long on(RampSegment[] primitives, long vibrationId) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#on (PWLE)");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#on (PWLE)");
         try {
             if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
                 return 0;
@@ -403,7 +407,7 @@ final class VibratorController {
                 return duration;
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -413,7 +417,7 @@ final class VibratorController {
      * <p>This will affect the state of {@link #isVibrating()}.
      */
     public void off() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "VibratorController#off");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "VibratorController#off");
         try {
             synchronized (mLock) {
                 mNativeWrapper.off();
@@ -421,7 +425,7 @@ final class VibratorController {
                 notifyListenerOnVibrating(false);
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 

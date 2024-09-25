@@ -16,6 +16,8 @@
 
 package com.android.server.vibrator;
 
+import static android.os.Trace.TRACE_TAG_VIBRATOR;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.PowerManager;
@@ -117,7 +119,7 @@ final class VibrationThread extends Thread {
      *  before the release callback.
      */
     boolean runVibrationOnVibrationThread(VibrationStepConductor conductor) {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runVibrationOnVibrationThread");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "runVibrationOnVibrationThread");
         try {
             synchronized (mLock) {
                 if (mRequestedActiveConductor != null) {
@@ -129,7 +131,7 @@ final class VibrationThread extends Thread {
             }
             return true;
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 
@@ -249,17 +251,17 @@ final class VibrationThread extends Thread {
     private void clientVibrationCompleteIfNotAlready(@NonNull Vibration.EndInfo vibrationEndInfo) {
         if (!mCalledVibrationCompleteCallback) {
             mCalledVibrationCompleteCallback = true;
-            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "notifyVibrationComplete");
+            Trace.traceBegin(TRACE_TAG_VIBRATOR, "notifyVibrationComplete");
             try {
                 mExecutingConductor.notifyVibrationComplete(vibrationEndInfo);
             } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+                Trace.traceEnd(TRACE_TAG_VIBRATOR);
             }
         }
     }
 
     private void playVibration() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "playVibration");
         try {
             mExecutingConductor.prepareToStart();
             while (!mExecutingConductor.isFinished()) {
@@ -283,7 +285,7 @@ final class VibrationThread extends Thread {
                 }
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 }
