@@ -35,6 +35,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
 import android.os.Parcel;
+import android.view.Display;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -64,10 +65,12 @@ public final class ScreenshotRequestTest {
         assertNull("Bitmap was expected to be null", out.getBitmap());
         assertNull("Bounds were expected to be null", out.getBoundsInScreen());
         assertEquals(Insets.NONE, out.getInsets());
+        assertEquals(Display.INVALID_DISPLAY, out.getDisplayId());
     }
 
     @Test
     public void testProvidedScreenshot() {
+        int displayId = 5;
         Bitmap bitmap = makeHardwareBitmap(50, 50);
         ScreenshotRequest in =
                 new ScreenshotRequest.Builder(TAKE_SCREENSHOT_PROVIDED_IMAGE, SCREENSHOT_OTHER)
@@ -77,6 +80,7 @@ public final class ScreenshotRequestTest {
                         .setBitmap(bitmap)
                         .setBoundsOnScreen(new Rect(10, 10, 60, 60))
                         .setInsets(Insets.of(2, 3, 4, 5))
+                        .setDisplayId(displayId)
                         .build();
 
         Parcel parcel = Parcel.obtain();
@@ -92,6 +96,7 @@ public final class ScreenshotRequestTest {
         assertTrue("Bitmaps should be equal", out.getBitmap().sameAs(bitmap));
         assertEquals(new Rect(10, 10, 60, 60), out.getBoundsInScreen());
         assertEquals(Insets.of(2, 3, 4, 5), out.getInsets());
+        assertEquals(displayId, out.getDisplayId());
     }
 
     @Test
