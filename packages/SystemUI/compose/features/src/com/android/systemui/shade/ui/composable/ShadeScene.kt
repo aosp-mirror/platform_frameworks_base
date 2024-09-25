@@ -70,7 +70,7 @@ import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.compose.animation.scene.animateSceneDpAsState
+import com.android.compose.animation.scene.animateContentDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.padding
@@ -101,7 +101,6 @@ import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibi
 import com.android.systemui.qs.ui.composable.BrightnessMirror
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
-import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQQS
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
@@ -292,7 +291,11 @@ private fun SceneScope.SingleShade(
     // Media is visible and we are in landscape on a small height screen
     val mediaInRow = isMediaVisible && isLandscape()
     val mediaOffset by
-        animateSceneDpAsState(value = InQQS, key = MediaLandscapeTopOffset, canOverflow = false)
+        animateContentDpAsState(
+            value = QuickSettings.SharedValues.MediaOffset.inQqs(mediaInRow),
+            key = MediaLandscapeTopOffset,
+            canOverflow = false,
+        )
 
     val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
