@@ -53,16 +53,13 @@ abstract class Vibration {
     public final long id;
     public final VibrationSession.CallerInfo callerInfo;
     public final VibrationStats stats = new VibrationStats();
-    public final IBinder callerToken;
 
     private VibrationSession.Status mStatus;
 
-    Vibration(@NonNull IBinder token, @NonNull VibrationSession.CallerInfo callerInfo) {
-        Objects.requireNonNull(token);
+    Vibration(@NonNull VibrationSession.CallerInfo callerInfo) {
         Objects.requireNonNull(callerInfo);
         mStatus = VibrationSession.Status.RUNNING;
         this.id = sNextVibrationId.getAndIncrement();
-        this.callerToken = token;
         this.callerInfo = callerInfo;
     }
 

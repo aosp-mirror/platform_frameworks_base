@@ -18,10 +18,8 @@ package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.WorkSource;
@@ -31,7 +29,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.vibrator.VibrationSession.Status;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /** Plays a {@link HalVibration} in dedicated thread. */
@@ -70,14 +67,6 @@ final class VibrationThread extends Thread {
 
         /** Record that a vibrator was turned off, on behalf of the given uid. */
         void noteVibratorOff(int uid);
-
-        /**
-         * Tell the manager that the currently active vibration has completed its vibration, from
-         * the perspective of the Effect. However, the VibrationThread may still be continuing with
-         * cleanup tasks, and should not be given new work until {@link #onVibrationThreadReleased}
-         * is called.
-         */
-        void onVibrationCompleted(long vibrationId, @NonNull Vibration.EndInfo vibrationEndInfo);
 
         /**
          * Tells the manager that the VibrationThread is finished with the previous vibration and
@@ -243,7 +232,7 @@ final class VibrationThread extends Thread {
         mWakeLock.acquire();
         try {
             try {
-                runCurrentVibrationWithWakeLockAndDeathLink();
+                playVibration();
             } finally {
                 clientVibrationCompleteIfNotAlready(
                         new Vibration.EndInfo(Status.FINISHED_UNEXPECTED));
@@ -254,41 +243,18 @@ final class VibrationThread extends Thread {
         }
     }
 
-    /**
-     * Runs the VibrationThread with the binder death link, handling link/unlink failures.
-     * Called from within runWithWakeLock.
-     */
-    private void runCurrentVibrationWithWakeLockAndDeathLink() {
-        IBinder vibrationBinderToken = mExecutingConductor.getVibration().callerToken;
-        try {
-            vibrationBinderToken.linkToDeath(mExecutingConductor, 0);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error linking vibration to token death", e);
-            clientVibrationCompleteIfNotAlready(
-                    new Vibration.EndInfo(Status.IGNORED_ERROR_TOKEN));
-            return;
-        }
-        // Ensure that the unlink always occurs now.
-        try {
-            // This is the actual execution of the vibration.
-            playVibration();
-        } finally {
-            try {
-                vibrationBinderToken.unlinkToDeath(mExecutingConductor, 0);
-            } catch (NoSuchElementException e) {
-                Slog.wtf(TAG, "Failed to unlink token", e);
-            }
-        }
-    }
-
     // Indicate that the vibration is complete. This can be called multiple times only for
     // convenience of handling error conditions - an error after the client is complete won't
     // affect the status.
     private void clientVibrationCompleteIfNotAlready(@NonNull Vibration.EndInfo vibrationEndInfo) {
         if (!mCalledVibrationCompleteCallback) {
             mCalledVibrationCompleteCallback = true;
-            mVibratorManagerHooks.onVibrationCompleted(
-                    mExecutingConductor.getVibration().id, vibrationEndInfo);
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "notifyVibrationComplete");
+            try {
+                mExecutingConductor.notifyVibrationComplete(vibrationEndInfo);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
         }
     }
 

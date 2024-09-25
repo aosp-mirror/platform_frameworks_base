@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.CancellationException;
@@ -358,6 +360,28 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     }
 
     /**
+     * Returns true if successfully linked this conductor to the death of the binder that requested
+     * the vibration.
+     */
+    public boolean linkToDeath() {
+        try {
+            mVibration.callerToken.linkToDeath(this, 0);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error linking vibration to token death", e);
+            return false;
+        }
+        return true;
+    }
+
+    public void unlinkToDeath() {
+        try {
+            mVibration.callerToken.unlinkToDeath(this, 0);
+        } catch (NoSuchElementException e) {
+            Slog.wtf(TAG, "Failed to unlink vibration to token death", e);
+        }
+    }
+
+    /**
      * Notify the execution that cancellation is requested. This will be acted upon
      * asynchronously in the VibrationThread.
      *
@@ -450,6 +474,23 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             }
             mLock.notify();
         }
+    }
+
+    /**
+     * Notify that the VibrationThread has completed the vibration effect playback.
+     *
+     * <p>This is a lightweight method intended to be called by the vibration thread directly. The
+     * VibrationThread may still be continuing with cleanup tasks, and should not be given new work
+     * until it notifies the manager that it has been released.
+     */
+    public void notifyVibrationComplete(@NonNull Vibration.EndInfo endInfo) {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Vibration " + mVibration.id + " finished with " + endInfo);
+        }
+        mVibration.end(endInfo);
     }
 
     /** Returns true if a cancellation signal was sent via {@link #notifyCancelled}. */
