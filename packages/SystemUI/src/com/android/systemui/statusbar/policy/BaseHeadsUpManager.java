@@ -1005,7 +1005,6 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
          * Clear any pending removal runnables.
          */
         public void cancelAutoRemovalCallbacks(@Nullable String reason) {
-            mLogger.logAutoRemoveCancelRequest(this.mEntry, reason);
             Runnable runnable = () -> {
                 final boolean removed = cancelAutoRemovalCallbackInternal();
 
@@ -1014,6 +1013,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
                 }
             };
             if (mEntry != null && isHeadsUpEntry(mEntry.getKey())) {
+                mLogger.logAutoRemoveCancelRequest(this.mEntry, reason);
                 mAvalancheController.update(this, runnable, reason + " cancelAutoRemovalCallbacks");
             } else {
                 // Just removed
