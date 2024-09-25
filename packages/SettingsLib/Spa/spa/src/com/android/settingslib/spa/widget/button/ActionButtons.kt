@@ -18,6 +18,7 @@ package com.android.settingslib.spa.widget.button
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -25,11 +26,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Launch
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.ButtonDefaults
@@ -51,7 +55,7 @@ import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.divider
-import androidx.compose.material.icons.automirrored.outlined.Launch
+import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 
 data class ActionButton(
     val text: String,
@@ -62,48 +66,64 @@ data class ActionButton(
 
 @Composable
 fun ActionButtons(actionButtons: List<ActionButton>) {
-    Row(
-        Modifier
-            .padding(SettingsDimension.buttonPadding)
-            .clip(SettingsShape.CornerExtraLarge)
-            .height(IntrinsicSize.Min)
-    ) {
-        for ((index, actionButton) in actionButtons.withIndex()) {
-            if (index > 0) ButtonDivider()
-            ActionButton(actionButton)
+    if (isSpaExpressiveEnabled) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .padding(SettingsDimension.buttonPadding)
+                .height(IntrinsicSize.Min)
+                .fillMaxWidth()
+        ) {
+            for (actionButton in actionButtons) {
+                ActionButton(actionButton)
+            }
+        }
+    } else {
+        Row(
+            Modifier
+                .padding(SettingsDimension.buttonPadding)
+                .clip(SettingsShape.CornerExtraLarge)
+                .height(IntrinsicSize.Min)
+        ) {
+            for ((index, actionButton) in actionButtons.withIndex()) {
+                if (index > 0) ButtonDivider()
+                ActionButton(actionButton)
+            }
         }
     }
 }
 
 @Composable
 private fun RowScope.ActionButton(actionButton: ActionButton) {
-    FilledTonalButton(
-        onClick = actionButton.onClick,
-        modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight(),
-        enabled = actionButton.enabled,
-        // Because buttons could appear, disappear or change positions, reset the interaction source
-        // to prevent highlight the wrong button.
-        interactionSource = remember(actionButton) { MutableInteractionSource() },
-        shape = RectangleShape,
-        colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.primary,
-            disabledContainerColor = MaterialTheme.colorScheme.surface,
-        ),
-        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 20.dp),
-    ) {
+    if (isSpaExpressiveEnabled) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = actionButton.imageVector,
-                contentDescription = null,
-                modifier = Modifier.size(SettingsDimension.itemIconSize),
-            )
+            FilledTonalButton(
+                onClick = actionButton.onClick,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(100.dp)),
+                enabled = actionButton.enabled,
+                // Because buttons could appear, disappear or change positions, reset the interaction source
+                // to prevent highlight the wrong button.
+                interactionSource = remember(actionButton) { MutableInteractionSource() },
+                shape = RectangleShape,
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surface,
+                ),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+            ) {
+                Icon(
+                    imageVector = actionButton.imageVector,
+                    contentDescription = null,
+                    modifier = Modifier.size(SettingsDimension.itemIconSize),
+                )
+            }
             Box(
                 modifier = Modifier
-                    .padding(top = 4.dp)
-                    .fillMaxHeight(),
+                    .padding(top = 6.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
@@ -111,6 +131,44 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.labelMedium,
                 )
+            }
+        }
+    } else {
+        FilledTonalButton(
+            onClick = actionButton.onClick,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
+            enabled = actionButton.enabled,
+            // Because buttons could appear, disappear or change positions, reset the interaction source
+            // to prevent highlight the wrong button.
+            interactionSource = remember(actionButton) { MutableInteractionSource() },
+            shape = RectangleShape,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
+                disabledContainerColor = MaterialTheme.colorScheme.surface,
+            ),
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 20.dp),
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = actionButton.imageVector,
+                    contentDescription = null,
+                    modifier = Modifier.size(SettingsDimension.itemIconSize),
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxHeight(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = actionButton.text,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
             }
         }
     }

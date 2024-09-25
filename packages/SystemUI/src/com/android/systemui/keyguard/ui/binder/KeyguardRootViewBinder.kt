@@ -45,7 +45,6 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.AuthInteractionProperties
 import com.android.systemui.Flags
 import com.android.systemui.Flags.msdlFeedback
-import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
@@ -261,10 +260,7 @@ object KeyguardRootViewBinder {
                             ->
                             if (biometricMessage?.message != null) {
                                 chipbarCoordinator!!.displayView(
-                                    createChipbarInfo(
-                                        biometricMessage.message,
-                                        R.drawable.ic_lock,
-                                    )
+                                    createChipbarInfo(biometricMessage.message, R.drawable.ic_lock)
                                 )
                             } else {
                                 chipbarCoordinator!!.removeView(ID, "occludingAppMsgNull")
@@ -327,6 +323,9 @@ object KeyguardRootViewBinder {
                                     .getDimensionPixelSize(R.dimen.shelf_appear_translation)
                                     .stateIn(this)
                             viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                if (isVisible.value) {
+                                    blueprintViewModel.refreshBlueprint()
+                                }
                                 childViews[aodNotificationIconContainerId]
                                     ?.setAodNotifIconContainerIsVisible(
                                         isVisible,
@@ -382,7 +381,7 @@ object KeyguardRootViewBinder {
                                 if (msdlFeedback()) {
                                     msdlPlayer?.playToken(
                                         MSDLToken.UNLOCK,
-                                        authInteractionProperties
+                                        authInteractionProperties,
                                     )
                                 } else {
                                     vibratorHelper.performHapticFeedback(
@@ -398,7 +397,7 @@ object KeyguardRootViewBinder {
                                 if (msdlFeedback()) {
                                     msdlPlayer?.playToken(
                                         MSDLToken.FAILURE,
-                                        authInteractionProperties
+                                        authInteractionProperties,
                                     )
                                 } else {
                                     vibratorHelper.performHapticFeedback(
@@ -414,7 +413,10 @@ object KeyguardRootViewBinder {
 
         if (MigrateClocksToBlueprint.isEnabled) {
             burnInParams.update { current ->
-                current.copy(translationY = { childViews[burnInLayerId]?.translationY })
+                current.copy(
+                    translationX = { childViews[burnInLayerId]?.translationX },
+                    translationY = { childViews[burnInLayerId]?.translationY },
+                )
             }
         }
 
@@ -425,7 +427,7 @@ object KeyguardRootViewBinder {
                     blueprintViewModel,
                     clockViewModel,
                     childViews,
-                    burnInParams
+                    burnInParams,
                 )
             )
 
@@ -464,11 +466,7 @@ object KeyguardRootViewBinder {
      */
     private fun createChipbarInfo(message: String, @DrawableRes icon: Int): ChipbarInfo {
         return ChipbarInfo(
-            startIcon =
-                TintedIcon(
-                    Icon.Resource(icon, null),
-                    ChipbarInfo.DEFAULT_ICON_TINT,
-                ),
+            startIcon = TintedIcon(Icon.Resource(icon, null), ChipbarInfo.DEFAULT_ICON_TINT),
             text = Text.Loaded(message),
             endItem = null,
             vibrationEffect = null,
@@ -499,7 +497,7 @@ object KeyguardRootViewBinder {
             oldLeft: Int,
             oldTop: Int,
             oldRight: Int,
-            oldBottom: Int
+            oldBottom: Int,
         ) {
             // After layout, ensure the notifications are positioned correctly
             childViews[nsslPlaceholderId]?.let { notificationListPlaceholder ->
@@ -515,7 +513,7 @@ object KeyguardRootViewBinder {
                 viewModel.onNotificationContainerBoundsChanged(
                     notificationListPlaceholder.top.toFloat(),
                     notificationListPlaceholder.bottom.toFloat(),
-                    animate = shouldAnimate
+                    animate = shouldAnimate,
                 )
             }
 
@@ -531,7 +529,7 @@ object KeyguardRootViewBinder {
                                         Int.MAX_VALUE
                                     } else {
                                         view.getTop()
-                                    }
+                                    },
                                 )
                             }
                         } else {
@@ -597,59 +595,13 @@ object KeyguardRootViewBinder {
                         View.INVISIBLE
                     }
             }
-            newAodTransition() -> {
+            else -> {
                 animateInIconTranslation()
                 if (isVisible.value) {
                     CrossFadeHelper.fadeIn(this, animatorListener)
                 } else {
                     CrossFadeHelper.fadeOut(this, animatorListener)
                 }
-            }
-            !isVisible.value -> {
-                // Let's make sure the icon are translated to 0, since we cancelled it above
-                animateInIconTranslation()
-                CrossFadeHelper.fadeOut(this, animatorListener)
-            }
-            visibility != View.VISIBLE -> {
-                // No fading here, let's just appear the icons instead!
-                visibility = View.VISIBLE
-                alpha = 1f
-                appearIcons(
-                    animate = screenOffAnimationController.shouldAnimateAodIcons(),
-                    iconsAppearTranslationPx,
-                    animatorListener,
-                )
-            }
-            else -> {
-                // Let's make sure the icons are translated to 0, since we cancelled it above
-                animateInIconTranslation()
-                // We were fading out, let's fade in instead
-                CrossFadeHelper.fadeIn(this, animatorListener)
-            }
-        }
-    }
-
-    private fun View.appearIcons(
-        animate: Boolean,
-        iconAppearTranslation: Int,
-        animatorListener: Animator.AnimatorListener,
-    ) {
-        if (animate) {
-            if (!MigrateClocksToBlueprint.isEnabled) {
-                translationY = -iconAppearTranslation.toFloat()
-            }
-            alpha = 0f
-            animate()
-                .alpha(1f)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .apply { if (MigrateClocksToBlueprint.isEnabled) animateInIconTranslation() }
-                .setListener(animatorListener)
-                .start()
-        } else {
-            alpha = 1.0f
-            if (!MigrateClocksToBlueprint.isEnabled) {
-                translationY = 0f
             }
         }
     }

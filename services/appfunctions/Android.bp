@@ -22,4 +22,7 @@ java_library_static {
         "java/**/*.logtags",
     ],
     libs: ["services.core"],
+    lint: {
+        baseline_filename: "lint-baseline.xml",
+    },
 }

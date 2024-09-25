@@ -55,7 +55,6 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
-import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
@@ -70,7 +69,6 @@ import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -155,7 +153,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun setUp() {
         shadeTestUtil.setSplitShade(false)
         movementFlow = MutableStateFlow(BurnInModel())
-        whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)
+        whenever(aodBurnInViewModel.movement).thenReturn(movementFlow)
         underTest = kosmos.sharedNotificationContainerViewModel
     }
 
@@ -810,7 +808,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @DisableSceneContainer
     fun translationYUpdatesOnKeyguardForBurnIn() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+            val translationY by collectLastValue(underTest.translationY)
 
             showLockscreen()
             assertThat(translationY).isEqualTo(0)
@@ -823,7 +821,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @DisableSceneContainer
     fun translationYUpdatesOnKeyguard() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+            val translationY by collectLastValue(underTest.translationY)
 
             configurationRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
@@ -844,7 +842,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @DisableSceneContainer
     fun translationYDoesNotUpdateWhenShadeIsExpanded() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+            val translationY by collectLastValue(underTest.translationY)
 
             configurationRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,

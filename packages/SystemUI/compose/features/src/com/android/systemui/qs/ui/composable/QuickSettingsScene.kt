@@ -48,7 +48,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -85,6 +84,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
+import com.android.systemui.media.controls.ui.composable.isLandscape
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
@@ -288,9 +288,7 @@ private fun SceneScope.QuickSettingsScene(
 
         // ############# Media ###############
         val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
-        val mediaInRow =
-            isMediaVisible &&
-                LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
+        val mediaInRow = isMediaVisible && isLandscape()
         val mediaOffset by
             animateSceneDpAsState(value = InQS, key = MediaLandscapeTopOffset, canOverflow = false)
 
