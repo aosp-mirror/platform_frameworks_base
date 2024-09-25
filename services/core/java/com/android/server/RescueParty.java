@@ -659,7 +659,7 @@ public class RescueParty {
             @Override
             public void run() {
                 try {
-                    RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
+                    RecoverySystem.rebootPromptAndWipeUserData(context, TAG + "," + failedPackage);
                 } catch (Throwable t) {
                     logRescueException(level, failedPackage, t);
                 }
