@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,40 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.statusbar.notification
 
-package com.android.systemui.statusbar.notification;
-
-import android.content.Intent;
-import android.view.View;
-
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import android.content.Intent
+import android.view.View
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 
 /**
  * Component responsible for handling actions on a notification which cause activites to start.
  * (e.g. clicking on a notification, tapping on the settings icon in the notification guts)
  */
-public interface NotificationActivityStarter {
+interface NotificationActivityStarter {
     /** Called when the user clicks on the notification bubble icon. */
-    void onNotificationBubbleIconClicked(NotificationEntry entry);
+    fun onNotificationBubbleIconClicked(entry: NotificationEntry?)
 
     /** Called when the user clicks on the surface of a notification. */
-    void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row);
+    fun onNotificationClicked(entry: NotificationEntry?, row: ExpandableNotificationRow?)
 
     /** Called when the user clicks on a button in the notification guts which fires an intent. */
-    void startNotificationGutsIntent(Intent intent, int appUid,
-            ExpandableNotificationRow row);
+    fun startNotificationGutsIntent(intent: Intent?, appUid: Int, row: ExpandableNotificationRow?)
 
     /**
      * Called when the user clicks "Manage" or "History" in the Shade, or the "No notifications"
      * text.
      */
-    void startHistoryIntent(View view, boolean showHistory);
+    fun startHistoryIntent(view: View?, showHistory: Boolean)
 
     /** Called when the user succeed to drop notification to proper target view. */
-    void onDragSuccess(NotificationEntry entry);
+    fun onDragSuccess(entry: NotificationEntry?)
 
-    default boolean isCollapsingToShowActivityOverLockscreen() {
-        return false;
-    }
+    val isCollapsingToShowActivityOverLockscreen: Boolean
+        get() = false
 }
