@@ -109,8 +109,8 @@ sealed class DragToDesktopTransitionHandler(
      * after one of the "end" or "cancel" transitions is merged into this transition.
      */
     fun startDragToDesktopTransition(
-        taskId: Int,
-        dragToDesktopAnimator: MoveToDesktopAnimator,
+        taskInfo: RunningTaskInfo,
+        dragToDesktopAnimator: MoveToDesktopAnimator
     ) {
         if (inProgress) {
             ProtoLog.v(
@@ -137,23 +137,26 @@ sealed class DragToDesktopTransitionHandler(
             )
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, Bundle())
+        // The home launch done above will result in an attempt to move the task to pip if
+        // applicable, resulting in a broken state. Prevent that here.
+        wct.setDoNotPip(taskInfo.token)
         val startTransitionToken =
             transitions.startTransition(TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP, wct, this)
 
         transitionState =
-            if (isSplitTask(taskId)) {
+            if (isSplitTask(taskInfo.taskId)) {
                 val otherTask =
-                    getOtherSplitTask(taskId)
+                    getOtherSplitTask(taskInfo.taskId)
                         ?: throw IllegalStateException("Expected split task to have a counterpart.")
                 TransitionState.FromSplit(
-                    draggedTaskId = taskId,
+                    draggedTaskId = taskInfo.taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken,
                     otherSplitTask = otherTask
                 )
             } else {
                 TransitionState.FromFullscreen(
-                    draggedTaskId = taskId,
+                    draggedTaskId = taskInfo.taskId,
                     dragAnimator = dragToDesktopAnimator,
                     startTransitionToken = startTransitionToken
                 )
