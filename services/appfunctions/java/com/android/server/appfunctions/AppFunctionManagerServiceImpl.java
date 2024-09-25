@@ -204,7 +204,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                             serviceIntent,
                                             targetUser,
                                             safeExecuteAppFunctionCallback,
-                                            /* bindFlags= */ Context.BIND_AUTO_CREATE);
+                                            /* bindFlags= */ Context.BIND_AUTO_CREATE
+                                                    | Context.BIND_FOREGROUND_SERVICE);
                                 })
                         .exceptionally(
                                 ex -> {
