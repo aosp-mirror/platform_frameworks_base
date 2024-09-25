@@ -196,7 +196,7 @@ constructor(
             runnable.run()
             return
         }
-        val stateAfter: String
+        val outcome: String
         if (entry in nextMap) {
             outcome = "remove from next"
             if (entry in nextMap) nextMap.remove(entry)
