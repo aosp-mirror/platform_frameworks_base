@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Қолданбаға медиамазмұн жинағынан геодеректерді оқуға мүмкіндік береді."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометриканы пайдалану"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Биометриканы немесе экран құлпын пайдалану"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Бұл сіз екеніңізді растаңыз"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Cіз екеніңізді растаңыз"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Жалғастыру үшін биометрикаңызды пайдаланыңыз."</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"Жалғастыру үшін биометриканы немесе экран құлпын пайдаланыңыз."</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Биометрикалық жабдық жоқ"</string>

@@ -33,10 +33,10 @@ import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.widget.preference.SliderPreference
-import com.android.settingslib.spa.widget.preference.SliderPreferenceModel
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
+import com.android.settingslib.spa.widget.preference.SliderPreference
+import com.android.settingslib.spa.widget.preference.SliderPreferenceModel
 
 private const val TITLE = "Sample Slider"
 
@@ -49,24 +49,30 @@ object SliderPageProvider : SettingsPageProvider {
         entryList.add(
             SettingsEntryBuilder.create("Simple Slider", owner)
                 .setUiLayoutFn {
-                    SliderPreference(object : SliderPreferenceModel {
-                        override val title = "Simple Slider"
-                        override val initValue = 40
-                    })
-                }.build()
+                    SliderPreference(
+                        object : SliderPreferenceModel {
+                            override val title = "Simple Slider"
+                            override val initValue = 40
+                        }
+                    )
+                }
+                .build()
         )
         entryList.add(
             SettingsEntryBuilder.create("Slider with icon", owner)
                 .setUiLayoutFn {
-                    SliderPreference(object : SliderPreferenceModel {
-                        override val title = "Slider with icon"
-                        override val initValue = 30
-                        override val onValueChangeFinished = {
-                            println("onValueChangeFinished")
+                    SliderPreference(
+                        object : SliderPreferenceModel {
+                            override val title = "Slider with icon"
+                            override val initValue = 30
+                            override val onValueChangeFinished = {
+                                println("onValueChangeFinished")
+                            }
+                            override val iconStart = Icons.Outlined.AccessAlarm
                         }
-                        override val icon = Icons.Outlined.AccessAlarm
-                    })
-                }.build()
+                    )
+                }
+                .build()
         )
         entryList.add(
             SettingsEntryBuilder.create("Slider with changeable icon", owner)
@@ -74,43 +80,52 @@ object SliderPageProvider : SettingsPageProvider {
                     val initValue = 0
                     var icon by remember { mutableStateOf(Icons.Outlined.MusicOff) }
                     var sliderPosition by remember { mutableStateOf(initValue) }
-                    SliderPreference(object : SliderPreferenceModel {
-                        override val title = "Slider with changeable icon"
-                        override val initValue = initValue
-                        override val onValueChange = { it: Int ->
-                            sliderPosition = it
-                            icon = if (it > 0) Icons.Outlined.MusicNote else Icons.Outlined.MusicOff
+                    SliderPreference(
+                        object : SliderPreferenceModel {
+                            override val title = "Slider with changeable icon"
+                            override val initValue = initValue
+                            override val onValueChange = { it: Int ->
+                                sliderPosition = it
+                                icon =
+                                    if (it > 0) Icons.Outlined.MusicNote
+                                    else Icons.Outlined.MusicOff
+                            }
+                            override val onValueChangeFinished = {
+                                println("onValueChangeFinished: the value is $sliderPosition")
+                            }
+                            override val iconEnd = icon
                         }
-                        override val onValueChangeFinished = {
-                            println("onValueChangeFinished: the value is $sliderPosition")
-                        }
-                        override val icon = icon
-                    })
-                }.build()
+                    )
+                }
+                .build()
         )
         entryList.add(
             SettingsEntryBuilder.create("Slider with steps", owner)
                 .setUiLayoutFn {
-                    SliderPreference(object : SliderPreferenceModel {
-                        override val title = "Slider with steps"
-                        override val initValue = 2
-                        override val valueRange = 1..5
-                        override val showSteps = true
-                    })
-                }.build()
+                    SliderPreference(
+                        object : SliderPreferenceModel {
+                            override val title = "Slider with steps"
+                            override val initValue = 2
+                            override val valueRange = 1..5
+                            override val showSteps = true
+                        }
+                    )
+                }
+                .build()
         )
 
         return entryList
     }
 
     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
+        return SettingsEntryBuilder.createInject(owner).setUiLayoutFn {
+            Preference(
+                object : PreferenceModel {
                     override val title = TITLE
                     override val onClick = navigator(name)
-                })
-            }
+                }
+            )
+        }
     }
 
     override fun getTitle(arguments: Bundle?): String {
@@ -121,7 +136,5 @@ object SliderPageProvider : SettingsPageProvider {
 @Preview(showBackground = true)
 @Composable
 private fun SliderPagePreview() {
-    SettingsTheme {
-        SliderPageProvider.Page(null)
-    }
+    SettingsTheme { SliderPageProvider.Page(null) }
 }

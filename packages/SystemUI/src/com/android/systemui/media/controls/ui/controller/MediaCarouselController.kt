@@ -110,6 +110,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -174,19 +175,21 @@ constructor(
      * The desired location where we'll be at the end of the transformation. Usually this matches
      * the end location, except when we're still waiting on a state update call.
      */
-    @MediaLocation private var desiredLocation: Int = -1
+    @MediaLocation private var desiredLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation @VisibleForTesting var currentEndLocation: Int = -1
+    @MediaLocation
+    @VisibleForTesting
+    var currentEndLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
-    @MediaLocation private var currentStartLocation: Int = -1
+    @MediaLocation private var currentStartLocation: Int = MediaHierarchyManager.LOCATION_UNKNOWN
 
     /** The progress of the transition or 1.0 if there is no transition happening */
     private var currentTransitionProgress: Float = 1.0f
@@ -726,6 +729,13 @@ constructor(
                     )
                 DiffUtil.calculateDiff(diffUtilCallback).dispatchUpdatesTo(listUpdateCallback)
                 setNewViewModelsList(it)
+
+                // Update host visibility when media changes.
+                merge(
+                        mediaCarouselViewModel.hasAnyMediaOrRecommendations,
+                        mediaCarouselViewModel.hasActiveMediaOrRecommendations,
+                    )
+                    .collect { updateHostVisibility() }
             }
         }
     }

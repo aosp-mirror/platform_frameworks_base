@@ -20,7 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
-import com.android.systemui.Flags.newAodTransition
+import com.android.app.tracing.coroutines.launch
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -386,10 +386,7 @@ constructor(
                         !dozeParameters.alwaysOn -> false
                         // Don't animate when going to AOD if the display needs blanking.
                         dozeParameters.displayNeedsBlanking -> false
-                        // We only want the appear animations to happen when the notifications
-                        // get fully hidden, since otherwise the un-hide animation overlaps.
-                        newAodTransition() -> true
-                        else -> fullyHidden
+                        else -> true
                     }
                 AnimatableEvent(fullyHidden, animate)
             }

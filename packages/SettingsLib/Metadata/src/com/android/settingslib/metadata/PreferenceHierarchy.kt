@@ -54,6 +54,20 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         children.add(PreferenceHierarchyNode(metadata))
     }
 
+    /** Adds a preference to the hierarchy before a specific preference. */
+    fun addBefore(key: String, metadata: PreferenceMetadata) {
+        var foundIndex = children.indexOfFirst { it.metadata.key == key }
+        if (foundIndex == -1) foundIndex = children.size
+        children.add(foundIndex, PreferenceHierarchyNode(metadata))
+    }
+
+    /** Adds a preference to the hierarchy after a specific preference. */
+    fun addAfter(key: String, metadata: PreferenceMetadata) {
+        var foundIndex = children.indexOfFirst { it.metadata.key == key }
+        if (foundIndex == -1) foundIndex = children.size else foundIndex++
+        children.add(foundIndex, PreferenceHierarchyNode(metadata))
+    }
+
     /** Adds a preference group to the hierarchy. */
     operator fun PreferenceGroup.unaryPlus() = PreferenceHierarchy(this).also { children.add(it) }
 

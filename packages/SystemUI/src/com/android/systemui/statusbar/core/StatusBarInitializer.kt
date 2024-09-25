@@ -16,6 +16,8 @@
 package com.android.systemui.statusbar.core
 
 import android.app.Fragment
+import androidx.annotation.VisibleForTesting
+import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.fragments.FragmentHostManager
 import com.android.systemui.res.R
@@ -72,11 +74,38 @@ constructor(
     private val windowController: StatusBarWindowController,
     private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
     private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
-) : StatusBarInitializer {
+) : CoreStartable, StatusBarInitializer {
+    private var component: StatusBarFragmentComponent? = null
+
+    @get:VisibleForTesting
+    var initialized = false
+        private set
 
     override var statusBarViewUpdatedListener: OnStatusBarViewUpdatedListener? = null
+        set(value) {
+            field = value
+            // If a listener is added after initialization, immediately call the callback
+            component?.let { component ->
+                field?.onStatusBarViewUpdated(
+                    component.phoneStatusBarViewController,
+                    component.phoneStatusBarTransitions,
+                )
+            }
+        }
+
+    override fun start() {
+        if (StatusBarSimpleFragment.isEnabled) {
+            doStart()
+        }
+    }
 
     override fun initializeStatusBar() {
+        StatusBarSimpleFragment.assertInLegacyMode()
+        doStart()
+    }
+
+    private fun doStart() {
+        initialized = true
         windowController.fragmentHostManager
             .addTagListener(
                 CollapsedStatusBarFragment.TAG,

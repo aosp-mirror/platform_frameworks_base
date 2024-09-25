@@ -29,7 +29,6 @@ import static android.view.InsetsSourceConsumerProto.SOURCE_CONTROL;
 import static android.view.InsetsSourceConsumerProto.TYPE_NUMBER;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.window.flags.Flags.insetsControlSeq;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -431,9 +430,6 @@ public class InsetsSourceConsumer {
 
         // Frame is changing while animating. Keep note of the new frame but keep existing frame
         // until animation is finished.
-        if (!insetsControlSeq()) {
-            newSource = new InsetsSource(newSource);
-        }
         mPendingFrame = new Rect(newSource.getFrame());
         mPendingVisibleFrame = newSource.getVisibleFrame() != null
                 ? new Rect(newSource.getVisibleFrame())
