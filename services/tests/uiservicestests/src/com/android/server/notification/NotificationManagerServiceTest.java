@@ -16556,7 +16556,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_granted() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16632,7 +16632,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16663,7 +16663,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_revoked() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16728,7 +16728,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_revoked_onlyNotifiesOnce() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16763,10 +16763,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification() throws Exception {
         mBinderService.setCanBePromoted(mPkg, mUid, true);
-        assertThat(mBinderService.canBePromoted(mPkg, mUid)).isTrue();
+        assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isTrue();
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
 
@@ -16776,7 +16776,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setColor(Color.WHITE)
                 .setColorized(true)
                 .build();
-        //assertThat(n.hasPromotableCharacteristics()).isTrue();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
                 n, UserHandle.getUserHandleForUid(mUid), null, 0);
 
@@ -16794,7 +16793,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_noPermission() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16822,7 +16821,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_unimportantNotification() throws Exception {
         mBinderService.setCanBePromoted(mPkg, mUid, true);
         mContext.getTestablePermissions().setPermission(

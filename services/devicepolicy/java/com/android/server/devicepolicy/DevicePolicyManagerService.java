@@ -3515,6 +3515,48 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return true;
     }
 
+    @GuardedBy("getLockObject()")
+    private boolean maybeMigrateResetPasswordTokenLocked(String backupId) {
+        if (!Flags.resetPasswordWithTokenCoexistence()) {
+            Slog.i(LOG_TAG, "ResetPasswordWithToken not migrated because coexistence "
+                    + "support is not enabled.");
+            return false;
+        }
+        if (mOwners.isResetPasswordWithTokenMigrated()) {
+            // TODO(b/359187209): Remove log after Flags.resetPasswordWithTokenCoexistence full
+            //  rollout.
+            Slog.v(LOG_TAG, "ResetPasswordWithToken was previously migrated to "
+                    + "policy engine.");
+            return false;
+        }
+
+        Slog.i(LOG_TAG, "Migrating ResetPasswordWithToken to policy engine");
+
+        // Create backup if none exists
+        mDevicePolicyEngine.createBackup(backupId);
+        try {
+            iterateThroughDpcAdminsLocked((admin, enforcingAdmin) -> {
+                int userId = enforcingAdmin.getUserId();
+                DevicePolicyData policy = getUserData(userId);
+                if (policy.mPasswordTokenHandle != 0) {
+                    Slog.i(LOG_TAG, "Setting RESET_PASSWORD_TOKEN policy");
+                    mDevicePolicyEngine.setLocalPolicy(
+                            PolicyDefinition.RESET_PASSWORD_TOKEN,
+                            enforcingAdmin,
+                            new LongPolicyValue(policy.mPasswordTokenHandle),
+                            userId);
+                }
+            });
+        } catch (Exception e) {
+            Slog.wtf(LOG_TAG,
+                    "Failed to migrate ResetPasswordWithToken to policy engine", e);
+        }
+
+        Slog.i(LOG_TAG, "Marking ResetPasswordWithToken migration complete");
+        mOwners.markResetPasswordWithTokenMigrated();
+        return true;
+    }
+
     /** Register callbacks for statsd pulled atoms. */
     private void registerStatsCallbacks() {
         final StatsManager statsManager = mContext.getSystemService(StatsManager.class);
@@ -6395,7 +6437,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void lockNow(int flags, String callerPackageName, boolean parent) {
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.lockNowCoexistence()) {
             caller = getCallerIdentity(callerPackageName);
         } else {
             caller = getCallerIdentity();
@@ -6407,7 +6449,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin;
             // Make sure the caller has any active admin with the right policy or
             // the required permission.
-            if (isUnicornFlagEnabled()) {
+            if (Flags.lockNowCoexistence()) {
                 admin = enforcePermissionsAndGetEnforcingAdmin(
                         /* admin= */ null,
                         /* permissions= */ new String[]{MANAGE_DEVICE_POLICY_LOCK, LOCK_DEVICE},
@@ -9179,13 +9221,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeEnabledCoexistence()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeEnabledCoexistence()) {
             // The effect of this policy is device-wide.
             enforcePermission(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
@@ -9213,13 +9255,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeEnabledCoexistence()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeEnabledCoexistence()) {
             enforceCanQuery(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
@@ -9242,13 +9284,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
             // The effect of this policy is device-wide.
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
@@ -9288,13 +9330,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setAutoTimeZoneEnabledCoexistence()) {
             // The effect of this policy is device-wide.
             enforceCanQuery(SET_TIME_ZONE, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
@@ -9544,7 +9586,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setKeyguardDisabledFeaturesCoexistence()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
@@ -9554,7 +9596,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userHandle = caller.getUserId();
         int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
         synchronized (getLockObject()) {
-            if (isUnicornFlagEnabled()) {
+            if (Flags.setKeyguardDisabledFeaturesCoexistence()) {
                 // SUPPORT USES_POLICY_DISABLE_KEYGUARD_FEATURES
                 EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
                         who, MANAGE_DEVICE_POLICY_KEYGUARD, caller.getPackageName(),
@@ -9633,7 +9675,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (getLockObject()) {
             if (who != null) {
-                if (isUnicornFlagEnabled()) {
+                if (Flags.setKeyguardDisabledFeaturesCoexistence()) {
                     EnforcingAdmin admin = getEnforcingAdminForPackage(
                             who, who.getPackageName(), userHandle);
                     Integer features = mDevicePolicyEngine.getLocalPolicySetByAdmin(
@@ -9652,7 +9694,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // the different behaviour between a profile with separate challenge vs a profile with
             // unified challenge, which was part of getActiveAdminsForLockscreenPoliciesLocked()
             // before the migration.
-            if (isUnicornFlagEnabled()) {
+            if (Flags.setKeyguardDisabledFeaturesCoexistence()) {
                 Integer features = mDevicePolicyEngine.getResolvedPolicy(
                         PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
                         affectedUserId);
@@ -11845,7 +11887,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Invalid package name: " + validationResult);
         }
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setApplicationRestrictionsCoexistence()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
@@ -13228,7 +13270,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String packageName, boolean parent) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        if (isUnicornFlagEnabled()) {
+        // IMPORTANT: The code behind the if branch is OUTDATED and requires additional work before
+        // enabling the feature flag below.
+        // TODO(b/369141952): Update DPM.getApplicationRestrictions coexistence code
+        if (Flags.setApplicationRestrictionsCoexistence()) {
             EnforcingAdmin enforcingAdmin = enforceCanQueryAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
@@ -13328,21 +13373,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         ActiveAdmin admin;
 
-        if (isUnicornFlagEnabled()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    who,
-                    MANAGE_DEVICE_POLICY_PACKAGE_STATE,
-                    caller.getPackageName(),
-                    caller.getUserId());
-            admin = enforcingAdmin.getActiveAdmin();
-        } else {
-            Preconditions.checkCallAuthorization((caller.hasAdminComponent()
-                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                    || (caller.hasPackage() && isCallerDelegate(caller,
-                    DELEGATION_PACKAGE_ACCESS)));
-            synchronized (getLockObject()) {
-                admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
-            }
+        Preconditions.checkCallAuthorization((caller.hasAdminComponent()
+                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                || (caller.hasPackage() && isCallerDelegate(caller,
+                DELEGATION_PACKAGE_ACCESS)));
+        synchronized (getLockObject()) {
+            admin = getProfileOwnerOrDeviceOwnerLocked(caller.getUserId());
         }
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_PACKAGES_SUSPENDED);
 
@@ -15585,12 +15621,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean setStatusBarDisabled(ComponentName who, String callerPackageName,
             boolean disabled) {
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (isSetStatusBarDisabledCoexistenceEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
-        if (isUnicornFlagEnabled()) {
+        if (isSetStatusBarDisabledCoexistenceEnabled()) {
             enforcePermission(MANAGE_DEVICE_POLICY_STATUS_BAR, caller.getPackageName(),
                     UserHandle.USER_ALL);
         } else {
@@ -15601,7 +15637,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            if (!isUnicornFlagEnabled()) {
+            if (!isSetStatusBarDisabledCoexistenceEnabled()) {
                 Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
                         "Admin " + who + " is neither the device owner or affiliated "
                                 + "user's profile owner.");
@@ -15660,7 +15696,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isStatusBarDisabled(String callerPackage) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        if (isUnicornFlagEnabled()) {
+        if (isSetStatusBarDisabledCoexistenceEnabled()) {
             enforceCanQuery(
                     MANAGE_DEVICE_POLICY_STATUS_BAR, caller.getPackageName(), caller.getUserId());
         } else {
@@ -15670,7 +15706,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            if (!isUnicornFlagEnabled()) {
+            if (!isSetStatusBarDisabledCoexistenceEnabled()) {
                 Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
                         "Admin " + callerPackage
                                 + " is neither the device owner or affiliated user's profile owner.");
@@ -16862,7 +16898,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         EnforcingAdmin enforcingAdmin;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setPermissionGrantStateCoexistence()) {
             enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,
@@ -17047,7 +17083,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public int getPermissionGrantState(ComponentName admin, String callerPackage,
             String packageName, String permission) throws RemoteException {
         final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
-        if (isUnicornFlagEnabled()) {
+        if (Flags.setPermissionGrantStateCoexistence()) {
             enforceCanQuery(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, caller.getPackageName(),
                     caller.getUserId());
         } else {
@@ -19331,14 +19367,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("token must be at least 32-byte long");
         }
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
         }
         final int userId = caller.getUserId();
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
@@ -19351,6 +19387,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             long tokenHandle = addEscrowToken(
                     token, currentTokenHandle == null ? 0 : currentTokenHandle, userId);
             if (tokenHandle == 0) {
+                mDevicePolicyEngine.removeLocalPolicy(
+                        PolicyDefinition.RESET_PASSWORD_TOKEN,
+                        enforcingAdmin,
+                        userId);
                 return false;
             }
             mDevicePolicyEngine.setLocalPolicy(
@@ -19394,7 +19434,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
@@ -19402,7 +19442,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userId = caller.getUserId();
         boolean result = false;
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
@@ -19441,14 +19481,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
         }
         int userId = caller.getUserId();
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
@@ -19490,7 +19530,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(token);
 
         CallerIdentity caller;
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
@@ -19500,7 +19540,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean result = false;
         final String password = passwordOrNull != null ? passwordOrNull : "";
 
-        if (isUnicornFlagEnabled()) {
+        if (Flags.resetPasswordWithTokenCoexistence()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
@@ -19531,7 +19571,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         if (result) {
-            if (isUnicornFlagEnabled()) {
+            if (Flags.resetPasswordWithTokenCoexistence()) {
                 DevicePolicyEventLogger
                         .createEvent(DevicePolicyEnums.RESET_PASSWORD_WITH_TOKEN)
                         .setAdmin(callerPackageName)
@@ -23812,7 +23852,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 DEFAULT_VALUE_PERMISSION_BASED_ACCESS_FLAG);
     }
 
-    static boolean isUnicornFlagEnabled() {
+    private static boolean isSetStatusBarDisabledCoexistenceEnabled() {
         return false;
     }
 
@@ -24255,8 +24295,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 synchronized (getLockObject()) {
                     Slogf.i(LOG_TAG,
                             "Started device policies migration to the device policy engine.");
-                    if (isUnicornFlagEnabled()) {
+                    // TODO(b/359188869): Move this to the current migration method.
+                    if (Flags.setAutoTimeZoneEnabledCoexistence()) {
                         migrateAutoTimezonePolicy();
+                    }
+                    if (Flags.setPermissionGrantStateCoexistence()) {
                         migratePermissionGrantStatePolicies();
                     }
                     migratePermittedInputMethodsPolicyLocked();
@@ -24283,12 +24326,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         maybeMigrateSecurityLoggingPolicyLocked();
         // ID format: <sdk-int>.<auto_increment_id>.<descriptions>'
         String unmanagedBackupId = "35.1.unmanaged-mode";
-        boolean migrated = false;
-        migrated = migrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
-        migrated = migrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
-        if (migrated) {
+        boolean unmanagedMigrated = false;
+        unmanagedMigrated =
+                unmanagedMigrated | maybeMigrateRequiredPasswordComplexityLocked(unmanagedBackupId);
+        unmanagedMigrated =
+                unmanagedMigrated | maybeMigrateSuspendedPackagesLocked(unmanagedBackupId);
+        if (unmanagedMigrated) {
             Slogf.i(LOG_TAG, "Backup made: " + unmanagedBackupId);
         }
+
+        String supervisionBackupId = "36.2.supervision-support";
+        boolean supervisionMigrated = maybeMigrateResetPasswordTokenLocked(supervisionBackupId);
+        if (supervisionMigrated) {
+            Slogf.i(LOG_TAG, "Backup made: " + supervisionBackupId);
+        }
+
         // Additional migration steps should repeat the pattern above with a new backupId.
     }
 

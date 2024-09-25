@@ -17,12 +17,15 @@
 package com.android.systemui.qs.composefragment
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Bundle
 import android.util.IndentingPrintWriter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
@@ -185,62 +188,76 @@ constructor(
         savedInstanceState: Bundle?,
     ): View {
         val context = inflater.context
-        return ComposeView(context).apply {
-            setBackPressedDispatcher()
-            setContent {
-                PlatformTheme {
-                    val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
+        val composeView =
+            ComposeView(context).apply {
+                setBackPressedDispatcher()
+                setContent {
+                    PlatformTheme {
+                        val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
 
-                    AnimatedVisibility(
-                        visible = visible,
-                        modifier =
-                            Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-                                .thenIf(notificationScrimClippingParams.isEnabled) {
-                                    Modifier.notificationScrimClip(
-                                        notificationScrimClippingParams.leftInset,
-                                        notificationScrimClippingParams.top,
-                                        notificationScrimClippingParams.rightInset,
-                                        notificationScrimClippingParams.bottom,
-                                        notificationScrimClippingParams.radius,
+                        AnimatedVisibility(
+                            visible = visible,
+                            modifier =
+                                Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+                                    .thenIf(notificationScrimClippingParams.isEnabled) {
+                                        Modifier.notificationScrimClip(
+                                            notificationScrimClippingParams.leftInset,
+                                            notificationScrimClippingParams.top,
+                                            notificationScrimClippingParams.rightInset,
+                                            notificationScrimClippingParams.bottom,
+                                            notificationScrimClippingParams.radius,
+                                        )
+                                    }
+                                    .graphicsLayer { elevation = 4.dp.toPx() },
+                        ) {
+                            val isEditing by
+                                viewModel.containerViewModel.editModeViewModel.isEditing
+                                    .collectAsStateWithLifecycle()
+                            val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                            AnimatedContent(
+                                targetState = isEditing,
+                                transitionSpec = {
+                                    fadeIn(animationSpecEditMode) togetherWith
+                                        fadeOut(animationSpecEditMode)
+                                },
+                                label = "EditModeAnimatedContent",
+                            ) { editing ->
+                                if (editing) {
+                                    val qqsPadding by
+                                        viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+                                    EditMode(
+                                        viewModel = viewModel.containerViewModel.editModeViewModel,
+                                        modifier =
+                                            Modifier.fillMaxWidth()
+                                                .padding(top = { qqsPadding })
+                                                .padding(
+                                                    horizontal = {
+                                                        QuickSettingsShade.Dimensions.Padding
+                                                            .roundToPx()
+                                                    }
+                                                ),
                                     )
+                                } else {
+                                    CollapsableQuickSettingsSTL()
                                 }
-                                .graphicsLayer { elevation = 4.dp.toPx() },
-                    ) {
-                        val isEditing by
-                            viewModel.containerViewModel.editModeViewModel.isEditing
-                                .collectAsStateWithLifecycle()
-                        val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                        AnimatedContent(
-                            targetState = isEditing,
-                            transitionSpec = {
-                                fadeIn(animationSpecEditMode) togetherWith
-                                    fadeOut(animationSpecEditMode)
-                            },
-                            label = "EditModeAnimatedContent",
-                        ) { editing ->
-                            if (editing) {
-                                val qqsPadding by
-                                    viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
-                                EditMode(
-                                    viewModel = viewModel.containerViewModel.editModeViewModel,
-                                    modifier =
-                                        Modifier.fillMaxWidth()
-                                            .padding(top = { qqsPadding })
-                                            .padding(
-                                                horizontal = {
-                                                    QuickSettingsShade.Dimensions.Padding
-                                                        .roundToPx()
-                                                }
-                                            ),
-                                )
-                            } else {
-                                CollapsableQuickSettingsSTL()
                             }
                         }
                     }
                 }
             }
-        }
+
+        val frame =
+            FrameLayoutTouchPassthrough(
+                context,
+                { notificationScrimClippingParams.isEnabled },
+                { notificationScrimClippingParams.top },
+            )
+        frame.addView(
+            composeView,
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT,
+        )
+        return frame
     }
 
     /**
@@ -762,3 +779,26 @@ private class ExpansionTransition(currentProgress: Float) :
 }
 
 private const val EDIT_MODE_TIME_MILLIS = 500
+
+/**
+ * Ignore touches below the value returned by [clippingTopProvider], when clipping is enabled, as
+ * per [clippingEnabledProvider].
+ */
+private class FrameLayoutTouchPassthrough(
+    context: Context,
+    private val clippingEnabledProvider: () -> Boolean,
+    private val clippingTopProvider: () -> Int,
+) : FrameLayout(context) {
+    override fun isTransformedTouchPointInView(
+        x: Float,
+        y: Float,
+        child: View?,
+        outLocalPoint: PointF?,
+    ): Boolean {
+        return if (clippingEnabledProvider() && y + translationY > clippingTopProvider()) {
+            false
+        } else {
+            super.isTransformedTouchPointInView(x, y, child, outLocalPoint)
+        }
+    }
+}

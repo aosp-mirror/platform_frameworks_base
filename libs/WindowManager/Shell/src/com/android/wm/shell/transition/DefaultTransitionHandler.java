@@ -826,6 +826,11 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             @NonNull Runnable finishCallback, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @Nullable Point position, float cornerRadius,
             @Nullable Rect clipRect, boolean isActivity) {
+        if (Flags.commonSurfaceAnimator()) {
+            DefaultSurfaceAnimator.buildSurfaceAnimation(animations, anim, leash, finishCallback,
+                    pool, mainExecutor, position, cornerRadius, clipRect, isActivity);
+            return;
+        }
         final SurfaceControl.Transaction transaction = pool.acquire();
         final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
         final Transformation transformation = new Transformation();
