@@ -391,11 +391,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final WindowDecorationInsets newInsets = new WindowDecorationInsets(
                 mTaskInfo.token, mOwner, captionInsetsRect, boundingRects,
-                params.mInsetSourceFlags);
+                params.mInsetSourceFlags, params.mIsInsetSource);
         if (!newInsets.equals(mWindowDecorationInsets)) {
             // Add or update this caption as an insets source.
             mWindowDecorationInsets = newInsets;
-            mWindowDecorationInsets.addOrUpdate(wct);
+            mWindowDecorationInsets.update(wct);
         }
     }
 
@@ -710,10 +710,11 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
         final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
         final WindowDecorationInsets newInsets = new WindowDecorationInsets(mTaskInfo.token,
-                mOwner, captionInsets, null /* boundingRets */, 0 /* flags */);
+                mOwner, captionInsets, null /* boundingRets */, 0 /* flags */,
+                true /* shouldAddCaptionInset */);
         if (!newInsets.equals(mWindowDecorationInsets)) {
             mWindowDecorationInsets = newInsets;
-            mWindowDecorationInsets.addOrUpdate(wct);
+            mWindowDecorationInsets.update(wct);
         }
     }
 
@@ -814,21 +815,26 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         private final Rect mFrame;
         private final Rect[] mBoundingRects;
         private final @InsetsSource.Flags int mFlags;
+        private final boolean mShouldAddCaptionInset;
 
         private WindowDecorationInsets(WindowContainerToken token, Binder owner, Rect frame,
-                Rect[] boundingRects, @InsetsSource.Flags int flags) {
+                Rect[] boundingRects, @InsetsSource.Flags int flags,
+                boolean shouldAddCaptionInset) {
             mToken = token;
             mOwner = owner;
             mFrame = frame;
             mBoundingRects = boundingRects;
             mFlags = flags;
+            mShouldAddCaptionInset = shouldAddCaptionInset;
         }
 
-        void addOrUpdate(WindowContainerTransaction wct) {
-            wct.addInsetsSource(mToken, mOwner, INDEX, captionBar(), mFrame, mBoundingRects,
-                    mFlags);
-            wct.addInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures(), mFrame,
-                    mBoundingRects, 0 /* flags */);
+        void update(WindowContainerTransaction wct) {
+            if (mShouldAddCaptionInset) {
+                wct.addInsetsSource(mToken, mOwner, INDEX, captionBar(), mFrame, mBoundingRects,
+                        mFlags);
+                wct.addInsetsSource(mToken, mOwner, INDEX, mandatorySystemGestures(), mFrame,
+                        mBoundingRects, 0 /* flags */);
+            }
         }
 
         void remove(WindowContainerTransaction wct) {
@@ -843,7 +849,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             return Objects.equals(mToken, that.mToken) && Objects.equals(mOwner,
                     that.mOwner) && Objects.equals(mFrame, that.mFrame)
                     && Objects.deepEquals(mBoundingRects, that.mBoundingRects)
-                    && mFlags == that.mFlags;
+                    && mFlags == that.mFlags
+                    && mShouldAddCaptionInset == that.mShouldAddCaptionInset;
         }
 
         @Override
