@@ -403,7 +403,7 @@ private fun ShortcutSubCategorySinglePane(searchQuery: String, subCategory: Shor
     SubCategoryTitle(subCategory.label)
     subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
         if (index > 0) {
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
         }
         ShortcutView(Modifier.padding(vertical = 24.dp), searchQuery, shortcut)
     }
@@ -482,7 +482,7 @@ private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: Short
             Spacer(Modifier.height(8.dp))
             subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
                 if (index > 0) {
-                    HorizontalDivider()
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
                 }
                 ShortcutView(Modifier.padding(vertical = 16.dp), searchQuery, shortcut)
             }

@@ -76,6 +76,7 @@ import com.android.settingslib.media.InputMediaDevice;
 import com.android.settingslib.media.InputRouteManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -103,6 +104,8 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -120,6 +123,8 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
     private static final int MAX_VOLUME = 1;
     private static final int CURRENT_VOLUME = 0;
     private static final boolean VOLUME_FIXED_TRUE = true;
+    private static final int LATCH_COUNT_DOWN_TIME_IN_SECOND = 5;
+    private static final int LATCH_TIME_OUT_TIME_IN_SECOND = 10;
 
     @Mock
     private DialogTransitionAnimator mDialogTransitionAnimator;
@@ -1338,5 +1343,40 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
         List<MediaDevice> selectedMediaDevices = mMediaSwitchingController.getSelectedMediaDevice();
         assertThat(selectedMediaDevices)
                 .containsExactly(selectedOutputMediaDevice, selectedInputMediaDevice);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void selectInputDevice() throws InterruptedException {
+        final MediaDevice inputMediaDevice =
+                InputMediaDevice.create(
+                        mContext,
+                        TEST_DEVICE_1_ID,
+                        AudioDeviceInfo.TYPE_BUILTIN_MIC,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        VOLUME_FIXED_TRUE);
+        mMediaSwitchingController.connectDevice(inputMediaDevice);
+
+        CountDownLatch latch = new CountDownLatch(LATCH_COUNT_DOWN_TIME_IN_SECOND);
+        var unused = ThreadUtils.postOnBackgroundThread(latch::countDown);
+        latch.await(LATCH_TIME_OUT_TIME_IN_SECOND, TimeUnit.SECONDS);
+
+        verify(mInputRouteManager, atLeastOnce()).selectDevice(inputMediaDevice);
+        verify(mLocalMediaManager, never()).connectDevice(inputMediaDevice);
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_AUDIO_INPUT_DEVICE_ROUTING_AND_VOLUME_CONTROL)
+    @Test
+    public void selectOutputDevice() throws InterruptedException {
+        final MediaDevice outputMediaDevice = mock(MediaDevice.class);
+        mMediaSwitchingController.connectDevice(outputMediaDevice);
+
+        CountDownLatch latch = new CountDownLatch(LATCH_COUNT_DOWN_TIME_IN_SECOND);
+        var unused = ThreadUtils.postOnBackgroundThread(latch::countDown);
+        latch.await(LATCH_TIME_OUT_TIME_IN_SECOND, TimeUnit.SECONDS);
+
+        verify(mInputRouteManager, never()).selectDevice(outputMediaDevice);
+        verify(mLocalMediaManager, atLeastOnce()).connectDevice(outputMediaDevice);
     }
 }

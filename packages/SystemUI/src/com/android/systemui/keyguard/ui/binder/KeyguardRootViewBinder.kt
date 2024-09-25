@@ -45,7 +45,6 @@ import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.AuthInteractionProperties
 import com.android.systemui.Flags
 import com.android.systemui.Flags.msdlFeedback
-import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
@@ -414,7 +413,10 @@ object KeyguardRootViewBinder {
 
         if (MigrateClocksToBlueprint.isEnabled) {
             burnInParams.update { current ->
-                current.copy(translationY = { childViews[burnInLayerId]?.translationY })
+                current.copy(
+                    translationX = { childViews[burnInLayerId]?.translationX },
+                    translationY = { childViews[burnInLayerId]?.translationY },
+                )
             }
         }
 
@@ -593,59 +595,13 @@ object KeyguardRootViewBinder {
                         View.INVISIBLE
                     }
             }
-            newAodTransition() -> {
+            else -> {
                 animateInIconTranslation()
                 if (isVisible.value) {
                     CrossFadeHelper.fadeIn(this, animatorListener)
                 } else {
                     CrossFadeHelper.fadeOut(this, animatorListener)
                 }
-            }
-            !isVisible.value -> {
-                // Let's make sure the icon are translated to 0, since we cancelled it above
-                animateInIconTranslation()
-                CrossFadeHelper.fadeOut(this, animatorListener)
-            }
-            visibility != View.VISIBLE -> {
-                // No fading here, let's just appear the icons instead!
-                visibility = View.VISIBLE
-                alpha = 1f
-                appearIcons(
-                    animate = screenOffAnimationController.shouldAnimateAodIcons(),
-                    iconsAppearTranslationPx,
-                    animatorListener,
-                )
-            }
-            else -> {
-                // Let's make sure the icons are translated to 0, since we cancelled it above
-                animateInIconTranslation()
-                // We were fading out, let's fade in instead
-                CrossFadeHelper.fadeIn(this, animatorListener)
-            }
-        }
-    }
-
-    private fun View.appearIcons(
-        animate: Boolean,
-        iconAppearTranslation: Int,
-        animatorListener: Animator.AnimatorListener,
-    ) {
-        if (animate) {
-            if (!MigrateClocksToBlueprint.isEnabled) {
-                translationY = -iconAppearTranslation.toFloat()
-            }
-            alpha = 0f
-            animate()
-                .alpha(1f)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .apply { if (MigrateClocksToBlueprint.isEnabled) animateInIconTranslation() }
-                .setListener(animatorListener)
-                .start()
-        } else {
-            alpha = 1.0f
-            if (!MigrateClocksToBlueprint.isEnabled) {
-                translationY = 0f
             }
         }
     }

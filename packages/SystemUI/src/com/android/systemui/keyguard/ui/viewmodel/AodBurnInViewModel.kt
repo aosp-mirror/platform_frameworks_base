@@ -114,6 +114,9 @@ constructor(
                                 emit(0f)
                             },
                             aodToLockscreenTransitionViewModel
+                                .translationX(params.translationX)
+                                .onStart { emit(StateToValue()) },
+                            aodToLockscreenTransitionViewModel
                                 .translationY(params.translationY)
                                 .onStart { emit(StateToValue()) },
                         ) { flows ->
@@ -123,11 +126,12 @@ constructor(
                             val goneToAodTranslationX = flows[3] as StateToValue
                             val lockscreenToAodTranslationX = flows[4] as StateToValue
                             val occludedToLockscreen = flows[5] as Float
-                            val aodToLockscreen = flows[6] as StateToValue
+                            val aodToLockscreenTranslationX = flows[6] as StateToValue
+                            val aodToLockscreenTranslationY = flows[7] as StateToValue
 
                             val translationY =
-                                if (aodToLockscreen.transitionState.isTransitioning()) {
-                                    aodToLockscreen.value ?: 0f
+                                if (aodToLockscreenTranslationY.transitionState.isTransitioning()) {
+                                    aodToLockscreenTranslationY.value ?: 0f
                                 } else if (
                                     goneToAodTranslationY.transitionState.isTransitioning()
                                 ) {
@@ -138,9 +142,13 @@ constructor(
                                         keyguardTranslationY
                                 }
                             val translationX =
-                                burnInModel.translationX +
-                                    (goneToAodTranslationX.value ?: 0f) +
-                                    (lockscreenToAodTranslationX.value ?: 0f)
+                                if (aodToLockscreenTranslationX.transitionState.isTransitioning()) {
+                                    aodToLockscreenTranslationX.value ?: 0f
+                                } else {
+                                    burnInModel.translationX +
+                                        (goneToAodTranslationX.value ?: 0f) +
+                                        (lockscreenToAodTranslationX.value ?: 0f)
+                                }
                             burnInModel.copy(
                                 translationX = translationX.toInt(),
                                 translationY = translationY.toInt(),
@@ -198,6 +206,8 @@ data class BurnInParameters(
     val minViewY: Int = Int.MAX_VALUE,
     /** The current y translation of the view */
     val translationY: () -> Float? = { null },
+    /** The current x translation of the view */
+    val translationX: () -> Float? = { null },
 )
 
 /**

@@ -483,6 +483,16 @@ class DisplayRepositoryTest : SysuiTestCase() {
             assertThat(values.toIdSets()).containsExactly(setOf(0))
         }
 
+    @Test
+    fun displayIdToId() =
+        testScope.runTest {
+            setDisplays(0, 1)
+
+            assertThat(displayRepository.getDisplay(0)?.displayId).isEqualTo(0)
+            assertThat(displayRepository.getDisplay(1)?.displayId).isEqualTo(1)
+            assertThat(displayRepository.getDisplay(2)).isNull()
+        }
+
     private fun Iterable<Display>.ids(): List<Int> = map { it.displayId }
 
     private fun Iterable<Set<Display>>.toIdSets(): List<Set<Int>> = map { it.ids().toSet() }

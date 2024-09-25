@@ -586,8 +586,7 @@
     <skip />
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <!-- no translation found for media_transfer_internal_mic (797333824290228595) -->
-    <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Mikrofon (intern)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dock-Lautsprecher"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Externes Gerät"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Verbundenes Gerät"</string>
@@ -694,10 +693,8 @@
     <skip />
     <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
     <skip />
-    <!-- no translation found for media_transfer_wired_device_mic_name (7417067197803840965) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_device_mic_name (9189914846215516322) -->
-    <skip />
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Mikrofonanschluss"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB‑Mikrofon"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"An"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Aus"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Mobilfunknetzwerk wird gewechselt"</string>

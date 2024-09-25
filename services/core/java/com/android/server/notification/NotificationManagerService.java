@@ -6866,6 +6866,9 @@ public class NotificationManagerService extends SystemService {
             if (notificationForceGrouping()) {
                 if (r.getSbn().isAppGroup()) {
                     mListeners.notifyPostedLocked(r, r);
+
+                    mNotificationRecordLogger.log(
+                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_FORCE_GROUP, r);
                 }
             }
         }
@@ -7046,6 +7049,10 @@ public class NotificationManagerService extends SystemService {
             // Clear summary flag
             StatusBarNotification sbn = r.getSbn();
             sbn.getNotification().flags = (r.mOriginalFlags & ~FLAG_GROUP_SUMMARY);
+
+            EventLogTags.writeNotificationSummaryConverted(key);
+            mNotificationRecordLogger.log(
+                NotificationRecordLogger.NotificationEvent.NOTIFICATION_FORCE_GROUP_SUMMARY, r);
             return true;
         }
         return false;
