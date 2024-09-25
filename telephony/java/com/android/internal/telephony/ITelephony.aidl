@@ -3409,4 +3409,20 @@ interface ITelephony {
      * @hide
      */
     boolean setSatelliteSubscriberIdListChangedIntentComponent(in String name);
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing
+     * @hide
+     */
+    void setTestEuiccUiComponent(in ComponentName componentName);
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return The Euicc UI component for testing.
+     * @hide
+     */
+    ComponentName getTestEuiccUiComponent();
 }
