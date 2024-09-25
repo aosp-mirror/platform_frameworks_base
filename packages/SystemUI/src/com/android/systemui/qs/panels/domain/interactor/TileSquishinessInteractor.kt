@@ -16,13 +16,19 @@
 
 package com.android.systemui.qs.panels.domain.interactor
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.fixedColumnsSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileSquishinessViewModel
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.data.repository.TileSquishinessRepository
+import javax.inject.Inject
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture {
-        InfiniteGridLayout(iconTilesViewModel, fixedColumnsSizeViewModel, tileSquishinessViewModel)
+@SysUISingleton
+class TileSquishinessInteractor
+@Inject
+constructor(
+    private val repository: TileSquishinessRepository
+) {
+    val squishiness = repository.squishiness
+
+    fun setSquishinessValue(value: Float) {
+        repository.setSquishinessValue(value)
     }
+}

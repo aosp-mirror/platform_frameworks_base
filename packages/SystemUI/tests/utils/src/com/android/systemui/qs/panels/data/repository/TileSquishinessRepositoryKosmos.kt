@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.fixedColumnsSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileSquishinessViewModel
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture {
-        InfiniteGridLayout(iconTilesViewModel, fixedColumnsSizeViewModel, tileSquishinessViewModel)
-    }
+val Kosmos.tileSquishinessRepository by Kosmos.Fixture { TileSquishinessRepository() }

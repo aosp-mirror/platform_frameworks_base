@@ -22,6 +22,7 @@ import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
+import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModel
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
@@ -46,6 +47,7 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     largeScreenShadeInterpolator,
                     configurationInteractor,
                     largeScreenHeaderHelper,
+                    tileSquishinessInteractor,
                     lifecycleScope,
                 )
             }

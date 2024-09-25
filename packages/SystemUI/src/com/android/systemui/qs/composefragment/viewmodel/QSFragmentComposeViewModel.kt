@@ -24,9 +24,11 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.systemui.Dumpable
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
@@ -42,7 +44,6 @@ import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import java.io.PrintWriter
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.PrintWriter
 
 class QSFragmentComposeViewModel
 @AssistedInject
@@ -66,8 +68,9 @@ constructor(
     private val largeScreenShadeInterpolator: LargeScreenShadeInterpolator,
     private val configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
+    private val squishinessInteractor: TileSquishinessInteractor,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
-) : Dumpable {
+) : Dumpable, ExclusiveActivatable() {
     val footerActionsViewModel =
         footerActionsViewModelFactory.create(lifecycleScope).also {
             lifecycleScope.launch { footerActionsController.init() }
@@ -110,7 +113,7 @@ constructor(
             _panelFraction.value = value
         }
 
-    private val _squishinessFraction = MutableStateFlow(0f)
+    private val _squishinessFraction = MutableStateFlow(1f)
     var squishinessFractionValue: Float
         get() = _squishinessFraction.value
         set(value) {
@@ -190,8 +193,18 @@ constructor(
     private val _inSplitShade = MutableStateFlow(false)
 
     private val _transitioningToFullShade = MutableStateFlow(false)
+    var transitioningToFullShadeValue: Boolean
+        get() = _transitioningToFullShade.value
+        set(value) {
+            _transitioningToFullShade.value = value
+        }
 
-    private val _lockscreenToShadeProgress = MutableStateFlow(false)
+    private val _lockscreenToShadeProgress = MutableStateFlow(0.0f)
+    var lockscreenToShadeProgressValue: Float
+        get() = _lockscreenToShadeProgress.value
+        set(value) {
+            _lockscreenToShadeProgress.value = value
+        }
 
     private val _overscrolling = MutableStateFlow(false)
 
@@ -225,6 +238,16 @@ constructor(
      */
     var collapseExpandAccessibilityAction: Runnable? = null
 
+    override suspend fun onActivated(): Nothing {
+        hydrateSquishinessInteractor()
+    }
+
+    private suspend fun hydrateSquishinessInteractor(): Nothing {
+        _squishinessFraction.collect {
+            squishinessInteractor.setSquishinessValue(it.constrainSquishiness())
+        }
+    }
+
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.asIndenting().run {
             printSection("Quick Settings state") {
@@ -256,4 +279,8 @@ constructor(
 
     // In the future, this will have other relevant elements like squishiness.
     data class QSExpansionState(@FloatRange(0.0, 1.0) val progress: Float)
+}
+
+private fun Float.constrainSquishiness(): Float {
+    return (0.1f + this * 0.9f).coerceIn(0f, 1f)
 }

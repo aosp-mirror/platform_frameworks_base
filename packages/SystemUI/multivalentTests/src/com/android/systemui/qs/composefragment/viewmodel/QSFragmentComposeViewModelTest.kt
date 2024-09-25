@@ -30,6 +30,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.fgsManagerController
+import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.res.R
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.statusbar.StatusBarState
@@ -40,6 +41,7 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestResult
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.resetMain
@@ -205,16 +207,40 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
             }
         }
 
+    @Test
+    fun squishinessInExpansion_setInInteractor() =
+        with(kosmos) {
+            testScope.testWithinLifecycle {
+                val squishiness by collectLastValue(tileSquishinessInteractor.squishiness)
+
+                underTest.squishinessFractionValue = 0.3f
+                assertThat(squishiness).isWithin(epsilon).of(0.3f.constrainSquishiness())
+
+                underTest.squishinessFractionValue = 0f
+                assertThat(squishiness).isWithin(epsilon).of(0f.constrainSquishiness())
+
+                underTest.squishinessFractionValue = 1f
+                assertThat(squishiness).isWithin(epsilon).of(1f.constrainSquishiness())
+            }
+        }
+
     private inline fun TestScope.testWithinLifecycle(
         crossinline block: suspend TestScope.() -> TestResult
     ): TestResult {
         return runTest {
             lifecycleOwner.setCurrentState(Lifecycle.State.RESUMED)
+            lifecycleOwner.lifecycleScope.launch { underTest.activate() }
             block().also { lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED) }
         }
     }
 
     companion object {
         private const val QS_DISABLE_FLAG = StatusBarManager.DISABLE2_QUICK_SETTINGS
+
+        private fun Float.constrainSquishiness(): Float {
+            return (0.1f + this * 0.9f).coerceIn(0f, 1f)
+        }
+
+        private const val epsilon = 0.001f
     }
 }

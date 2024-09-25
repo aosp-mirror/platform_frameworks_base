@@ -180,6 +180,7 @@ constructor(
         qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
         qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
         setListenerCollections()
+        lifecycleScope.launch { viewModel.activate() }
     }
 
     override fun onCreateView(
@@ -410,11 +411,11 @@ constructor(
         qsTransitionFraction: Float,
         qsSquishinessFraction: Float,
     ) {
-        super.setTransitionToFullShadeProgress(
-            isTransitioningToFullShade,
-            qsTransitionFraction,
-            qsSquishinessFraction,
-        )
+        viewModel.transitioningToFullShadeValue = isTransitioningToFullShade
+        viewModel.lockscreenToShadeProgressValue = qsTransitionFraction
+        if (isTransitioningToFullShade) {
+            viewModel.squishinessFractionValue = qsSquishinessFraction
+        }
     }
 
     override fun setFancyClipping(

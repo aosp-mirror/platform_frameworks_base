@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.data.repository
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.ui.compose.infinitegrid.InfiniteGridLayout
-import com.android.systemui.qs.panels.ui.viewmodel.fixedColumnsSizeViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.iconTilesViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.tileSquishinessViewModel
+import com.android.systemui.dagger.SysUISingleton
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-val Kosmos.infiniteGridLayout by
-    Kosmos.Fixture {
-        InfiniteGridLayout(iconTilesViewModel, fixedColumnsSizeViewModel, tileSquishinessViewModel)
+@SysUISingleton
+class TileSquishinessRepository @Inject constructor() {
+    private val _squishiness = MutableStateFlow(1f)
+    val squishiness = _squishiness.asStateFlow()
+
+    fun setSquishinessValue(value: Float) {
+        _squishiness.value = value
     }
+}

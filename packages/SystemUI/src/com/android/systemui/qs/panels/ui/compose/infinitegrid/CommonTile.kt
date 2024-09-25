@@ -73,6 +73,7 @@ fun LargeTileContent(
     secondaryLabel: String?,
     icon: Icon,
     colors: TileColors,
+    squishiness: () -> Float,
     accessibilityUiState: AccessibilityUiState? = null,
     toggleClickSupported: Boolean = false,
     iconShape: Shape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
@@ -89,6 +90,7 @@ fun LargeTileContent(
             modifier =
                 Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClickSupported) {
                     Modifier.clip(iconShape)
+                        .verticalSquish(squishiness)
                         .background(colors.iconBackground, { 1f })
                         .combinedClickable(
                             onClick = onClick,
