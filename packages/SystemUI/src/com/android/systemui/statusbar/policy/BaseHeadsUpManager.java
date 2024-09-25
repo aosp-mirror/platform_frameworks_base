@@ -116,6 +116,7 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
         mAccessibilityMgr = accessibilityManagerWrapper;
         mUiEventLogger = uiEventLogger;
         mAvalancheController = avalancheController;
+        mAvalancheController.setBaseEntryMapStr(this::getEntryMapStr);
         Resources resources = context.getResources();
         mMinimumDisplayTime = NotificationThrottleHun.isEnabled()
                 ? 500 : resources.getInteger(R.integer.heads_up_notification_minimum_time);
@@ -581,6 +582,18 @@ public abstract class BaseHeadsUpManager implements HeadsUpManager {
     /** Returns the ID of the current user. */
     public int getUser() {
         return  mUser;
+    }
+
+    private String getEntryMapStr() {
+        if (mHeadsUpEntryMap.isEmpty()) {
+            return "EMPTY";
+        }
+        StringBuilder entryMapStr = new StringBuilder();
+        for (HeadsUpEntry entry: mHeadsUpEntryMap.values()) {
+            entryMapStr.append("\n\t").append(
+                    entry.mEntry == null ? "null" : entry.mEntry.getKey());
+        }
+        return entryMapStr.toString();
     }
 
     @Override

@@ -46,6 +46,8 @@ constructor(
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
+    var baseEntryMapStr : () -> String = { "baseEntryMapStr not initialized" }
+
     var enableAtRuntime = true
         set(value) {
             if (!value) {
@@ -405,7 +407,9 @@ constructor(
                 "\n\tprevious: [$previousHunKey]" +
                 "\n\tnext list: $nextListStr" +
                 "\n\tnext map: $nextMapStr" +
-                "\n\tdropped: $dropSetStr"
+                "\n\tdropped: $dropSetStr" +
+                "\nBHUM.mHeadsUpEntryMap: " +
+                baseEntryMapStr()
     }
 
     private val dropSetStr: String
