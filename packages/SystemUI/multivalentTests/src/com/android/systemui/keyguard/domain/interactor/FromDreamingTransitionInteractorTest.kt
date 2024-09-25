@@ -198,6 +198,13 @@ class FromDreamingTransitionInteractorTest(flags: FlagsParameterization?) : Sysu
     @DisableFlags(Flags.FLAG_SCENE_CONTAINER)
     fun testTransitionToGlanceableHubOnWake() =
         testScope.runTest {
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.DREAMING,
+                testScope,
+            )
+            reset(transitionRepository)
+
             whenever(kosmos.dreamManager.canStartDreaming(anyBoolean())).thenReturn(true)
             kosmos.setCommunalAvailable(true)
             runCurrent()
