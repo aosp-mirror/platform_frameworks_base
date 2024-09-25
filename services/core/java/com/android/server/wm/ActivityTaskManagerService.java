@@ -6706,6 +6706,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLockWithoutBoost) {
                 mTaskSupervisor.getActivityMetricsLogger().notifyBindApplication(wpc.mInfo);
                 wpc.onConfigurationChanged(getGlobalConfiguration());
+                // Let the application initialize with consistent configuration as its activity.
+                for (int i = mStartingProcessActivities.size() - 1; i >= 0; i--) {
+                    final ActivityRecord r = mStartingProcessActivities.get(i);
+                    if (wpc.mUid == r.info.applicationInfo.uid && wpc.mName.equals(r.processName)) {
+                        wpc.registerActivityConfigurationListener(r);
+                        break;
+                    }
+                }
                 // The "info" can be the target of instrumentation.
                 return new PreBindInfo(compatibilityInfoForPackageLocked(info),
                         new Configuration(wpc.getConfiguration()));
