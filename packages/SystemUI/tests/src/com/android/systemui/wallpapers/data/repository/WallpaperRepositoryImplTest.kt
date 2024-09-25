@@ -18,18 +18,21 @@ package com.android.systemui.wallpapers.data.repository
 
 import android.app.WallpaperInfo
 import android.app.WallpaperManager
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.UserInfo
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardClockRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.user.data.model.SelectedUserModel
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
+import com.android.systemui.wallpapers.data.repository.WallpaperRepositoryImpl.Companion.MAGIC_PORTRAIT_CLASSNAME
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -39,6 +42,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -48,6 +54,8 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val userRepository = FakeUserRepository()
+    private val keyguardClockRepository = FakeKeyguardClockRepository()
+    private val keyguardRepository = FakeKeyguardRepository()
     private val wallpaperManager: WallpaperManager = mock()
 
     private val underTest: WallpaperRepositoryImpl by lazy {
@@ -56,6 +64,8 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
             testDispatcher,
             fakeBroadcastDispatcher,
             userRepository,
+            keyguardRepository,
+            keyguardClockRepository,
             wallpaperManager,
             context,
         )
@@ -219,7 +229,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             context.orCreateTestableResources.addOverride(
                 com.android.internal.R.bool.config_dozeSupportsAodWallpaper,
-                false
+                false,
             )
 
             val latest by collectLastValue(underTest.wallpaperInfo)
@@ -407,7 +417,7 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         testScope.runTest {
             context.orCreateTestableResources.addOverride(
                 com.android.internal.R.bool.config_dozeSupportsAodWallpaper,
-                false
+                false,
             )
 
             val latest by collectLastValue(underTest.wallpaperSupportsAmbientMode)
@@ -425,6 +435,54 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
         }
 
+    @Test
+    @EnableFlags(Flags.FLAG_MAGIC_PORTRAIT_WALLPAPERS)
+    fun shouldSendNotificationLayout_setMagicPortraitWallpaper_launchSendLayoutJob() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.shouldSendNotificationLayout)
+            val magicPortraitWallpaper =
+                mock<WallpaperInfo>().apply {
+                    whenever(this.component)
+                        .thenReturn(ComponentName(context, MAGIC_PORTRAIT_CLASSNAME))
+                }
+            whenever(wallpaperManager.getWallpaperInfoForUser(any()))
+                .thenReturn(magicPortraitWallpaper)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+            assertThat(latest).isTrue()
+            assertThat(underTest.sendLockscreenLayoutJob).isNotNull()
+            assertThat(underTest.sendLockscreenLayoutJob!!.isActive).isEqualTo(true)
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MAGIC_PORTRAIT_WALLPAPERS)
+    fun shouldSendNotificationLayout_setNotMagicPortraitWallpaper_cancelSendLayoutJob() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.shouldSendNotificationLayout)
+            val magicPortraitWallpaper = MAGIC_PORTRAIT_WP
+            whenever(wallpaperManager.getWallpaperInfoForUser(any()))
+                .thenReturn(magicPortraitWallpaper)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+            assertThat(latest).isTrue()
+            assertThat(underTest.sendLockscreenLayoutJob).isNotNull()
+            assertThat(underTest.sendLockscreenLayoutJob!!.isActive).isEqualTo(true)
+
+            val nonMagicPortraitWallpaper = UNSUPPORTED_WP
+            whenever(wallpaperManager.getWallpaperInfoForUser(any()))
+                .thenReturn(nonMagicPortraitWallpaper)
+            fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
+                context,
+                Intent(Intent.ACTION_WALLPAPER_CHANGED),
+            )
+            assertThat(latest).isFalse()
+            assertThat(underTest.sendLockscreenLayoutJob?.isCancelled).isEqualTo(true)
+        }
+
     private companion object {
         val USER_WITH_UNSUPPORTED_WP = UserInfo(/* id= */ 3, /* name= */ "user3", /* flags= */ 0)
         val UNSUPPORTED_WP =
@@ -433,5 +491,10 @@ class WallpaperRepositoryImplTest : SysuiTestCase() {
         val USER_WITH_SUPPORTED_WP = UserInfo(/* id= */ 4, /* name= */ "user4", /* flags= */ 0)
         val SUPPORTED_WP =
             mock<WallpaperInfo>().apply { whenever(this.supportsAmbientMode()).thenReturn(true) }
+
+        val MAGIC_PORTRAIT_WP =
+            mock<WallpaperInfo>().apply {
+                whenever(this.component).thenReturn(ComponentName("", MAGIC_PORTRAIT_CLASSNAME))
+            }
     }
 }

@@ -526,6 +526,10 @@ constructor(
         repository.showDismissibleKeyguard()
     }
 
+    fun setShortcutAbsoluteTop(top: Float) {
+        repository.setShortcutAbsoluteTop(top)
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
     }
