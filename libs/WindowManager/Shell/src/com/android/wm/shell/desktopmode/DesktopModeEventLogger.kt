@@ -19,6 +19,7 @@ package com.android.wm.shell.desktopmode
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.protolog.ProtoLog
 import com.android.internal.util.FrameworkStatsLog
+import com.android.wm.shell.EventLogTags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 
 /** Event logger for logging desktop mode session events */
@@ -41,6 +42,7 @@ class DesktopModeEventLogger {
             /* exitReason */ 0,
             /* session_id */ sessionId
         )
+        EventLogTags.writeWmShellEnterDesktopMode(enterReason.reason, sessionId)
     }
 
     /**
@@ -61,6 +63,7 @@ class DesktopModeEventLogger {
             /* exitReason */ exitReason.reason,
             /* session_id */ sessionId
         )
+        EventLogTags.writeWmShellExitDesktopMode(exitReason.reason, sessionId)
     }
 
     /**
@@ -114,6 +117,28 @@ class DesktopModeEventLogger {
     private fun logTaskUpdate(taskEvent: Int, sessionId: Int, taskUpdate: TaskUpdate) {
         FrameworkStatsLog.write(
             DESKTOP_MODE_TASK_UPDATE_ATOM_ID,
+            /* task_event */
+            taskEvent,
+            /* instance_id */
+            taskUpdate.instanceId,
+            /* uid */
+            taskUpdate.uid,
+            /* task_height */
+            taskUpdate.taskHeight,
+            /* task_width */
+            taskUpdate.taskWidth,
+            /* task_x */
+            taskUpdate.taskX,
+            /* task_y */
+            taskUpdate.taskY,
+            /* session_id */
+            sessionId,
+            taskUpdate.minimizeReason?.reason ?: UNSET_MINIMIZE_REASON,
+            taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
+            /* visible_task_count */
+            taskUpdate.visibleTaskCount
+        )
+        EventLogTags.writeWmShellDesktopModeTaskUpdate(
             /* task_event */
             taskEvent,
             /* instance_id */

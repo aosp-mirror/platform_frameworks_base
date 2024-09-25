@@ -19,6 +19,8 @@ package com.android.wm.shell.desktopmode
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
 import com.android.internal.util.FrameworkStatsLog
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.wm.shell.EventLogTags
+import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
@@ -34,14 +36,15 @@ import org.mockito.kotlin.eq
 /**
  * Tests for [DesktopModeEventLogger].
  */
-class DesktopModeEventLoggerTest {
+class DesktopModeEventLoggerTest : ShellTestCase() {
 
     private val desktopModeEventLogger = DesktopModeEventLogger()
 
     @JvmField
     @Rule
     val extendedMockitoRule = ExtendedMockitoRule.Builder(this)
-            .mockStatic(FrameworkStatsLog::class.java).build()!!
+            .mockStatic(FrameworkStatsLog::class.java)
+            .mockStatic(EventLogTags::class.java).build()!!
 
     @Test
     fun logSessionEnter_enterReason() = runBlocking {
@@ -59,6 +62,11 @@ class DesktopModeEventLoggerTest {
                 /* sessionId */
                 eq(SESSION_ID)
             )
+        }
+        verify {
+            EventLogTags.writeWmShellEnterDesktopMode(
+                eq(EnterReason.UNKNOWN_ENTER.reason),
+                eq(SESSION_ID))
         }
     }
 
@@ -78,6 +86,11 @@ class DesktopModeEventLoggerTest {
                 /* sessionId */
                 eq(SESSION_ID)
             )
+        }
+        verify {
+            EventLogTags.writeWmShellExitDesktopMode(
+                eq(ExitReason.UNKNOWN_EXIT.reason),
+                eq(SESSION_ID))
         }
     }
 
@@ -106,6 +119,22 @@ class DesktopModeEventLoggerTest {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 /* visible_task_count */
+                eq(TASK_COUNT))
+        }
+
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_ADDED),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(SESSION_ID),
+                eq(UNSET_MINIMIZE_REASON),
+                eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT))
         }
     }
@@ -137,6 +166,22 @@ class DesktopModeEventLoggerTest {
                 /* visible_task_count */
                 eq(TASK_COUNT))
         }
+
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_REMOVED),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(SESSION_ID),
+                eq(UNSET_MINIMIZE_REASON),
+                eq(UNSET_UNMINIMIZE_REASON),
+                eq(TASK_COUNT))
+        }
     }
 
     @Test
@@ -165,6 +210,22 @@ class DesktopModeEventLoggerTest {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 /* visible_task_count */
+                eq(TASK_COUNT))
+        }
+
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(SESSION_ID),
+                eq(UNSET_MINIMIZE_REASON),
+                eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT))
         }
     }
@@ -200,6 +261,22 @@ class DesktopModeEventLoggerTest {
                 /* visible_task_count */
                 eq(TASK_COUNT))
         }
+
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(SESSION_ID),
+                eq(MinimizeReason.TASK_LIMIT.reason),
+                eq(UNSET_UNMINIMIZE_REASON),
+                eq(TASK_COUNT))
+        }
     }
 
     @Test
@@ -231,6 +308,22 @@ class DesktopModeEventLoggerTest {
                 /* unminimize_reason */
                 eq(UnminimizeReason.TASKBAR_TAP.reason),
                 /* visible_task_count */
+                eq(TASK_COUNT))
+        }
+
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(SESSION_ID),
+                eq(UNSET_MINIMIZE_REASON),
+                eq(UnminimizeReason.TASKBAR_TAP.reason),
                 eq(TASK_COUNT))
         }
     }
