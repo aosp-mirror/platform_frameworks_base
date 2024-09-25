@@ -35,6 +35,7 @@ open class TopIntroPreference @JvmOverloads constructor(
 
     private var isCollapsable: Boolean = false
     private var minLines: Int = 2
+    private var hyperlinkListener: View.OnClickListener? = null
     private var learnMoreListener: View.OnClickListener? = null
     private var learnMoreText: CharSequence? = null
 
@@ -75,6 +76,9 @@ open class TopIntroPreference @JvmOverloads constructor(
             setCollapsable(isCollapsable)
             setMinLines(minLines)
             setText(title.toString())
+            if (hyperlinkListener != null) {
+                setHyperlinkListener(hyperlinkListener)
+            }
             if (learnMoreListener != null) {
                 setLearnMoreText(learnMoreText)
                 setLearnMoreAction(learnMoreListener)
@@ -100,6 +104,18 @@ open class TopIntroPreference @JvmOverloads constructor(
     fun setMinLines(lines: Int) {
         minLines = lines.coerceIn(1, DEFAULT_MAX_LINES)
         notifyChanged()
+    }
+
+    /**
+     * Sets the action when clicking on the hyperlink in the text.
+     * @param listener The click listener for hyperlink.
+     */
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    fun setHyperlinkListener(listener: View.OnClickListener) {
+        if (hyperlinkListener != listener) {
+            hyperlinkListener = listener
+            notifyChanged()
+        }
     }
 
     /**
