@@ -283,7 +283,7 @@ class ShortcutKeyTestBase {
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             if (0 == mPhoneWindowManager.interceptKeyBeforeDispatching(keyEvent)) {
                 if (!mDispatchedKeyHandler.onKeyDispatched(keyEvent)) {
-                    mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
+                    mPhoneWindowManager.interceptUnhandledKey(keyEvent);
                 }
             }
         }

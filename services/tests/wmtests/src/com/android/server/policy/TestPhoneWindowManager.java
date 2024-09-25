@@ -418,8 +418,8 @@ class TestPhoneWindowManager {
                 mKeyEventPolicyFlags);
     }
 
-    void dispatchUnhandledKey(KeyEvent event) {
-        mPhoneWindowManager.dispatchUnhandledKey(mInputToken, event, FLAG_INTERACTIVE);
+    void interceptUnhandledKey(KeyEvent event) {
+        mPhoneWindowManager.interceptUnhandledKey(event, mInputToken);
     }
 
     boolean sendKeyGestureEvent(KeyGestureEvent event) {
@@ -681,6 +681,10 @@ class TestPhoneWindowManager {
     void assertAccessibilityKeychordNotCalled() {
         mTestLooper.dispatchAll();
         verify(mAccessibilityShortcutController, never()).performAccessibilityShortcut();
+    }
+
+    void assertCloseAllDialogs() {
+        verify(mContext).closeSystemDialogs();
     }
 
     void assertDreamRequest() {

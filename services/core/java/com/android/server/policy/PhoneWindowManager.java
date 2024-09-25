@@ -199,7 +199,6 @@ import android.view.HapticFeedbackConstants;
 import android.view.IDisplayFoldListener;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
-import android.view.KeyCharacterMap.FallbackAction;
 import android.view.KeyEvent;
 import android.view.KeyboardShortcutGroup;
 import android.view.MotionEvent;
@@ -698,10 +697,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
-
-    // Fallback actions by key code.
-    private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
-            new SparseArray<KeyCharacterMap.FallbackAction>();
 
     private final com.android.internal.policy.LogDecelerateInterpolator mLogDecelerateInterpolator
             = new LogDecelerateInterpolator(100, 0);
@@ -3993,6 +3988,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
                         return true;
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD:
@@ -4211,6 +4208,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     cancelBugreportGestureTv();
                 }
                 return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
+                if (complete && mAccessibilityShortcutController.isAccessibilityShortcutAvailable(
+                        isKeyguardLocked())) {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_ACCESSIBILITY_SHORTCUT));
+                }
+                return true;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
+                if (complete) {
+                    mContext.closeSystemDialogs();
+                }
+                return true;
         }
         return false;
     }
@@ -4396,7 +4404,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // TODO(b/117479243): handle it in InputPolicy
     /** {@inheritDoc} */
     @Override
-    public KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags) {
+    public boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
         // Note: This method is only called if the initial down was unhandled.
         if (DEBUG_INPUT) {
             final KeyInterceptionInfo info =
@@ -4409,75 +4417,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + ", keyCode=" + event.getKeyCode()
                     + ", scanCode=" + event.getScanCode()
                     + ", metaState=" + event.getMetaState()
-                    + ", repeatCount=" + event.getRepeatCount()
-                    + ", policyFlags=" + policyFlags);
+                    + ", repeatCount=" + event.getRepeatCount());
         }
 
-        if (interceptUnhandledKey(event, focusedToken)) {
-            return null;
-        }
-
-        KeyEvent fallbackEvent = null;
-        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-            final KeyCharacterMap kcm = event.getKeyCharacterMap();
-            final int keyCode = event.getKeyCode();
-            final int metaState = event.getMetaState();
-            final boolean initialDown = event.getAction() == KeyEvent.ACTION_DOWN
-                    && event.getRepeatCount() == 0;
-
-            // Check for fallback actions specified by the key character map.
-            final FallbackAction fallbackAction;
-            if (initialDown) {
-                fallbackAction = kcm.getFallbackAction(keyCode, metaState);
-            } else {
-                fallbackAction = mFallbackActions.get(keyCode);
-            }
-
-            if (fallbackAction != null) {
-                if (DEBUG_INPUT) {
-                    Slog.d(TAG, "Fallback: keyCode=" + fallbackAction.keyCode
-                            + " metaState=" + Integer.toHexString(fallbackAction.metaState));
-                }
-
-                final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
-                fallbackEvent = KeyEvent.obtain(
-                        event.getDownTime(), event.getEventTime(),
-                        event.getAction(), fallbackAction.keyCode,
-                        event.getRepeatCount(), fallbackAction.metaState,
-                        event.getDeviceId(), event.getScanCode(),
-                        flags, event.getSource(), event.getDisplayId(), null);
-
-                if (!interceptFallback(focusedToken, fallbackEvent, policyFlags)) {
-                    fallbackEvent.recycle();
-                    fallbackEvent = null;
-                }
-
-                if (initialDown) {
-                    mFallbackActions.put(keyCode, fallbackAction);
-                } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                    mFallbackActions.remove(keyCode);
-                    fallbackAction.recycle();
-                }
-            }
-        }
-
-        if (DEBUG_INPUT) {
-            if (fallbackEvent == null) {
-                Slog.d(TAG, "No fallback.");
-            } else {
-                Slog.d(TAG, "Performing fallback: " + fallbackEvent);
-            }
-        }
-        return fallbackEvent;
-    }
-
-    private boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
         final int keyCode = event.getKeyCode();
         final int repeatCount = event.getRepeatCount();
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final int metaState = event.getModifiers();
 
-        switch(keyCode) {
+        // TODO(b/358569822): Shift to KeyGestureEvent based handling
+        if (keyCode == KeyEvent.KEYCODE_STEM_PRIMARY) {
+            handleUnhandledSystemKey(event);
+            sendSystemKeyToStatusBarAsync(event);
+            return true;
+        }
+
+        if (useKeyGestureEventHandler()) {
+            return false;
+        }
+
+        switch (keyCode) {
             case KeyEvent.KEYCODE_SPACE:
                 if (down && repeatCount == 0) {
                     // Handle keyboard layout switching. (CTRL + SPACE)
@@ -4514,10 +4473,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
-            case KeyEvent.KEYCODE_STEM_PRIMARY:
-                handleUnhandledSystemKey(event);
-                sendSystemKeyToStatusBarAsync(event);
-                return true;
         }
 
         return false;
@@ -4554,19 +4509,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mWindowManagerInternal.getTargetWindowTokenFromInputToken(focusedToken);
         InputMethodManagerInternal.get().onSwitchKeyboardLayoutShortcut(direction, displayId,
                 targetWindowToken);
-    }
-
-    private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
-            int policyFlags) {
-        int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags);
-        if ((actions & ACTION_PASS_TO_USER) != 0) {
-            long delayMillis = interceptKeyBeforeDispatching(
-                    focusedToken, fallbackEvent, policyFlags);
-            if (delayMillis == 0 && !interceptUnhandledKey(fallbackEvent, focusedToken)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override

@@ -97,6 +97,8 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_GLOBAL_ACTIONS = 57;
     public static final int KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD = 58;
     public static final int KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT = 59;
+    public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT = 60;
+    public static final int KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS = 61;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -170,7 +172,10 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD,
             KEY_GESTURE_TYPE_GLOBAL_ACTIONS,
             KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD,
-            KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT
+            KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT,
+            KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
+            KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
+
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -583,6 +588,10 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD";
             case KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT:
                 return "KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT";
+            case KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
+                return "KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT";
+            case KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
+                return "KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS";
             default:
                 return Integer.toHexString(value);
         }

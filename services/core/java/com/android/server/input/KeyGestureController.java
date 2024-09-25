@@ -872,6 +872,61 @@ final class KeyGestureController {
         return false;
     }
 
+    boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
+        final int keyCode = event.getKeyCode();
+        final int repeatCount = event.getRepeatCount();
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        final int metaState = event.getModifiers();
+        final int deviceId = event.getDeviceId();
+        final int displayId = event.getDisplayId();
+
+        switch(keyCode) {
+            case KeyEvent.KEYCODE_SPACE:
+                if (down && repeatCount == 0) {
+                    // Handle keyboard layout switching. (CTRL + SPACE)
+                    if (KeyEvent.metaStateHasModifiers(metaState & ~KeyEvent.META_SHIFT_MASK,
+                            KeyEvent.META_CTRL_ON)) {
+                        return handleKeyGesture(deviceId, new int[]{keyCode},
+                                KeyEvent.META_CTRL_ON | (event.isShiftPressed()
+                                        ? KeyEvent.META_SHIFT_ON : 0),
+                                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                                KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                                focusedToken, /* flags = */0);
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_Z:
+                if (down && KeyEvent.metaStateHasModifiers(metaState,
+                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON)) {
+                    // Intercept the Accessibility keychord (CTRL + ALT + Z) for keyboard users.
+                    return handleKeyGesture(deviceId, new int[]{keyCode},
+                            KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_SYSRQ:
+                if (down && repeatCount == 0) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (down && KeyEvent.metaStateHasNoModifiers(metaState) && repeatCount == 0) {
+                    return handleKeyGesture(deviceId, new int[]{keyCode}, /* modifierState = */0,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
+                            KeyGestureEvent.ACTION_GESTURE_COMPLETE, displayId,
+                            focusedToken, /* flags = */0);
+                }
+                break;
+        }
+
+        return false;
+    }
+
     private boolean handleKeyGesture(int[] keycodes,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int flags) {
         return handleKeyGesture(KeyCharacterMap.VIRTUAL_KEYBOARD, keycodes, /* modifierState= */0,

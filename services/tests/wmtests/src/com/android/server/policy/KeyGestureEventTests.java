@@ -684,4 +684,19 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 sendKeyGestureEventCancel(KeyGestureEvent.KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT));
         mPhoneWindowManager.assertBugReportNotTakenForTv();
     }
+
+    @Test
+    public void testKeyGestureAccessibilityShortcut() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT));
+        mPhoneWindowManager.assertAccessibilityKeychordCalled();
+    }
+
+    @Test
+    public void testKeyGestureCloseAllDialogs() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS));
+        mPhoneWindowManager.assertCloseAllDialogs();
+    }
 }

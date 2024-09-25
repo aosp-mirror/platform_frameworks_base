@@ -130,6 +130,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * CTRL + SPACE to switch keyboard layout.
      */
     @Test
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testCtrlSpace() {
         sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SPACE}, /* duration= */ 0,
                 ANY_DISPLAY_ID);
@@ -140,6 +141,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * CTRL + SHIFT + SPACE to switch keyboard layout backwards.
      */
     @Test
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testCtrlShiftSpace() {
         sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE},
                 /* duration= */ 0, ANY_DISPLAY_ID);
@@ -150,6 +152,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * CTRL + ALT + Z to enable accessibility service.
      */
     @Test
+    @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testCtrlAltZ() {
         sendKeyCombination(new int[]{KEYCODE_CTRL_LEFT, KEYCODE_ALT_LEFT, KEYCODE_Z}, 0);
         mPhoneWindowManager.assertAccessibilityKeychordCalled();

@@ -152,9 +152,11 @@ class KeyGestureControllerTests {
     }
 
     private fun notifyHomeGestureCompleted(keyGestureController: KeyGestureController) {
-        keyGestureController.notifyKeyGestureCompleted(DEVICE_ID, intArrayOf(KeyEvent.KEYCODE_H),
+        keyGestureController.notifyKeyGestureCompleted(
+            DEVICE_ID, intArrayOf(KeyEvent.KEYCODE_H),
             KeyEvent.META_META_ON or KeyEvent.META_META_LEFT_ON,
-            KeyGestureEvent.KEY_GESTURE_TYPE_HOME)
+            KeyGestureEvent.KEY_GESTURE_TYPE_HOME
+        )
     }
 
     @Test
@@ -574,6 +576,54 @@ class KeyGestureControllerTests {
                     KeyGestureEvent.ACTION_GESTURE_COMPLETE
                 )
             ),
+            TestData(
+                "CTRL + SPACE -> Switch Language Forward",
+                intArrayOf(KeyEvent.KEYCODE_CTRL_LEFT, KeyEvent.KEYCODE_SPACE),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                intArrayOf(KeyEvent.KEYCODE_SPACE),
+                KeyEvent.META_CTRL_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "CTRL + SHIFT + SPACE -> Switch Language Backward",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_SHIFT_LEFT,
+                    KeyEvent.KEYCODE_SPACE
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_LANGUAGE_SWITCH,
+                intArrayOf(KeyEvent.KEYCODE_SPACE),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_SHIFT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "CTRL + ALT + Z -> Accessibility Shortcut",
+                intArrayOf(
+                    KeyEvent.KEYCODE_CTRL_LEFT,
+                    KeyEvent.KEYCODE_ALT_LEFT,
+                    KeyEvent.KEYCODE_Z
+                ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
+                intArrayOf(KeyEvent.KEYCODE_Z),
+                KeyEvent.META_CTRL_ON or KeyEvent.META_ALT_ON,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "SYSRQ -> Take screenshot",
+                intArrayOf(KeyEvent.KEYCODE_SYSRQ),
+                KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+                intArrayOf(KeyEvent.KEYCODE_SYSRQ),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
+            TestData(
+                "ESC -> Close All Dialogs",
+                intArrayOf(KeyEvent.KEYCODE_ESCAPE),
+                KeyGestureEvent.KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
+                intArrayOf(KeyEvent.KEYCODE_ESCAPE),
+                0,
+                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
+            ),
         )
     }
 
@@ -614,7 +664,7 @@ class KeyGestureControllerTests {
         keyGestureController.registerKeyGestureHandler(handler, 0)
 
         for (key in testKeys) {
-            sendKeys(keyGestureController, intArrayOf(key), assertAllConsumed = true)
+            sendKeys(keyGestureController, intArrayOf(key), assertNotSentToApps = true)
         }
     }
 
@@ -895,7 +945,7 @@ class KeyGestureControllerTests {
     private fun sendKeys(
         keyGestureController: KeyGestureController,
         testKeys: IntArray,
-        assertAllConsumed: Boolean = false
+        assertNotSentToApps: Boolean = false
     ) {
         var metaState = 0
         val now = SystemClock.uptimeMillis()
@@ -905,18 +955,7 @@ class KeyGestureControllerTests {
                 DEVICE_ID, 0 /*scancode*/, 0 /*flags*/,
                 InputDevice.SOURCE_KEYBOARD
             )
-
-            keyGestureController.interceptKeyBeforeQueueing(downEvent, FLAG_INTERACTIVE)
-            testLooper.dispatchAll()
-
-            val consumed =
-                keyGestureController.interceptKeyBeforeDispatching(null, downEvent, 0) == -1L
-            if (assertAllConsumed) {
-                assertTrue(
-                    "interceptKeyBeforeDispatching should consume all events $downEvent",
-                    consumed
-                )
-            }
+            interceptKey(keyGestureController, downEvent, assertNotSentToApps)
             metaState = metaState or MODIFIER.getOrDefault(key, 0)
 
             downEvent.recycle()
@@ -929,22 +968,32 @@ class KeyGestureControllerTests {
                 DEVICE_ID, 0 /*scancode*/, 0 /*flags*/,
                 InputDevice.SOURCE_KEYBOARD
             )
-
-            keyGestureController.interceptKeyBeforeQueueing(upEvent, FLAG_INTERACTIVE)
-            testLooper.dispatchAll()
-
-            val consumed =
-                keyGestureController.interceptKeyBeforeDispatching(null, upEvent, 0) == -1L
-            if (assertAllConsumed) {
-                assertTrue(
-                    "interceptKeyBeforeDispatching should consume all events $upEvent",
-                    consumed
-                )
-            }
+            interceptKey(keyGestureController, upEvent, assertNotSentToApps)
             metaState = metaState and MODIFIER.getOrDefault(key, 0).inv()
 
             upEvent.recycle()
             testLooper.dispatchAll()
+        }
+    }
+
+    private fun interceptKey(
+        keyGestureController: KeyGestureController,
+        event: KeyEvent,
+        assertNotSentToApps: Boolean
+    ) {
+        keyGestureController.interceptKeyBeforeQueueing(event, FLAG_INTERACTIVE)
+        testLooper.dispatchAll()
+
+        val consumed =
+            keyGestureController.interceptKeyBeforeDispatching(null, event, 0) == -1L
+        if (assertNotSentToApps) {
+            assertTrue(
+                "interceptKeyBeforeDispatching should consume all events $event",
+                consumed
+            )
+        }
+        if (!consumed) {
+            keyGestureController.interceptUnhandledKey(event, null)
         }
     }
 
