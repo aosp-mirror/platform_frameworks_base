@@ -32,7 +32,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.anyFloat
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -84,7 +83,7 @@ class SliderStateTrackerTest : SysuiTestCase() {
 
         // THEN The state is idle and the listener is not called to play haptics
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
-        verifyZeroInteractions(sliderStateListener)
+        verifyNoMoreInteractions(sliderStateListener)
     }
 
     @Test
@@ -97,7 +96,7 @@ class SliderStateTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves to the wait state and the timer job begins
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.WAIT)
-        verifyZeroInteractions(sliderStateListener)
+        verifyNoMoreInteractions(sliderStateListener)
         assertThat(mSliderStateTracker.isWaiting).isTrue()
     }
 
@@ -591,7 +590,7 @@ class SliderStateTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves back to IDLE and there are no haptics
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
-        verifyZeroInteractions(sliderStateListener)
+        verifyNoMoreInteractions(sliderStateListener)
     }
 
     @Test
@@ -608,7 +607,7 @@ class SliderStateTrackerTest : SysuiTestCase() {
         // haptics
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.WAIT)
         assertThat(mSliderStateTracker.isWaiting).isTrue()
-        verifyZeroInteractions(sliderStateListener)
+        verifyNoMoreInteractions(sliderStateListener)
     }
 
     @Test
@@ -644,7 +643,7 @@ class SliderStateTrackerTest : SysuiTestCase() {
 
         // THEN the tracker moves to IDLE and no haptics are played
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.IDLE)
-        verifyZeroInteractions(sliderStateListener)
+        verifyNoMoreInteractions(sliderStateListener)
     }
 
     @Test
@@ -660,7 +659,7 @@ class SliderStateTrackerTest : SysuiTestCase() {
         // THEN the tracker moves to WAIT and the wait job starts.
         assertThat(mSliderStateTracker.currentState).isEqualTo(SliderState.WAIT)
         assertThat(mSliderStateTracker.isWaiting).isTrue()
-        verifyZeroInteractions(sliderStateListener)
+        verifyNoMoreInteractions(sliderStateListener)
     }
 
     @Test

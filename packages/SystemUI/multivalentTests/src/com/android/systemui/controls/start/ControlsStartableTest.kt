@@ -69,7 +69,7 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -109,7 +109,7 @@ class ControlsStartableTest : SysuiTestCase() {
             onBootCompleted()
         }
 
-        verifyZeroInteractions(controlsController, controlsListingController, userTracker)
+        verifyNoMoreInteractions(controlsController, controlsListingController, userTracker)
     }
 
     @Test
@@ -119,7 +119,7 @@ class ControlsStartableTest : SysuiTestCase() {
         fakeExecutor.advanceClockToLast()
         fakeExecutor.runAllReady()
 
-        verifyZeroInteractions(controlsController, controlsListingController, userTracker)
+        verifyNoMoreInteractions(controlsController, controlsListingController, userTracker)
     }
 
     @Test

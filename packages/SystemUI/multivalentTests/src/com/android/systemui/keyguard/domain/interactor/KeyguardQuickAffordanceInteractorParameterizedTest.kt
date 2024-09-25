@@ -72,7 +72,7 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.ArgumentMatchers.same
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 import platform.test.runner.parameterized.Parameter
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
@@ -388,7 +388,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                         )
                 }
             } else {
-                verifyZeroInteractions(activityStarter)
+                verifyNoMoreInteractions(activityStarter)
             }
         }
 

@@ -25,7 +25,7 @@ import com.android.systemui.util.mockito.mock
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -51,6 +51,6 @@ class MediaProjectionTaskSwitcherCoreStartableTest : SysuiTestCase() {
 
         coreStartable.start()
 
-        verifyZeroInteractions(coordinator)
+        verifyNoMoreInteractions(coordinator)
     }
 }

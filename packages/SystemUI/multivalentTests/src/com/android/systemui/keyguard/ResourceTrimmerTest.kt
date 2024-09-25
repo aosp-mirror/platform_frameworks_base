@@ -32,7 +32,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -72,7 +71,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
         testScope.runTest {
             powerInteractor.setAsleepForTest()
             testScope.runCurrent()
-            verifyZeroInteractions(globalWindowManager)
+            verifyNoMoreInteractions(globalWindowManager)
         }
 
     @Test
@@ -82,7 +81,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
             keyguardRepository.setDozeAmount(1f)
             powerInteractor.setAsleepForTest()
             testScope.runCurrent()
-            verifyZeroInteractions(globalWindowManager)
+            verifyNoMoreInteractions(globalWindowManager)
         }
 
     @Test
@@ -92,7 +91,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
             keyguardRepository.setDozeAmount(0f)
             powerInteractor.setAsleepForTest()
             testScope.runCurrent()
-            verifyZeroInteractions(globalWindowManager)
+            verifyNoMoreInteractions(globalWindowManager)
         }
 
     @Test
@@ -103,7 +102,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
             powerInteractor.setAsleepForTest()
 
             testScope.runCurrent()
-            verifyZeroInteractions(globalWindowManager)
+            verifyNoMoreInteractions(globalWindowManager)
 
             generateSequence(0f) { it + 0.1f }
                 .takeWhile { it < 0.8f }
@@ -111,7 +110,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
                     keyguardRepository.setDozeAmount(it)
                     testScope.runCurrent()
                 }
-            verifyZeroInteractions(globalWindowManager)
+            verifyNoMoreInteractions(globalWindowManager)
 
             generateSequence(0.8f) { it - 0.1f }
                 .takeWhile { it >= 0f }
@@ -122,7 +121,7 @@ class ResourceTrimmerTest : SysuiTestCase() {
 
             keyguardRepository.setDozeAmount(0f)
             testScope.runCurrent()
-            verifyZeroInteractions(globalWindowManager)
+            verifyNoMoreInteractions(globalWindowManager)
         }
     }
 

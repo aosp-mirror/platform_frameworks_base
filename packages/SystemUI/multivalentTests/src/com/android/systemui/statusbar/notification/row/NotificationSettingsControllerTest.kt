@@ -50,7 +50,6 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -139,7 +138,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
     @Test
     fun addCallback_onlyFirstForUriRegistersObserver() {
         controller.addCallback(settingUri1, Mockito.mock(Listener::class.java))
-        verifyZeroInteractions(secureSettings)
+        verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
             .registerContentObserverForUserSync(
@@ -157,7 +156,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
     @Test
     fun addCallback_secondUriRegistersObserver() {
         controller.addCallback(settingUri1, Mockito.mock(Listener::class.java))
-        verifyZeroInteractions(secureSettings)
+        verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
             .registerContentObserverForUserSync(
@@ -185,7 +184,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         val listenerSetting1: Listener = mock()
         val listenerSetting2: Listener = mock()
         controller.addCallback(settingUri1, listenerSetting1)
-        verifyZeroInteractions(secureSettings)
+        verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
         verify(secureSettings)
             .registerContentObserverForUserSync(
@@ -229,7 +228,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         controller.addCallback(settingUri1, listenerSetting1b)
         controller.addCallback(settingUri2, listenerSetting2)
 
-        verifyZeroInteractions(secureSettings)
+        verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
 
         verify(listenerSetting1a)
@@ -251,7 +250,7 @@ class NotificationSettingsControllerTest : SysuiTestCase() {
         // First, register
         controller.addCallback(settingUri1, listenerSetting1a)
         controller.addCallback(settingUri1, listenerSetting1b)
-        verifyZeroInteractions(secureSettings)
+        verifyNoMoreInteractions(secureSettings)
         testableLooper.processAllMessages()
 
         verify(secureSettings)

@@ -33,7 +33,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
@@ -462,7 +462,7 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     public void testHandleSetListening_notListening_notQueryCards() {
         mTile.handleSetListening(false);
 
-        verifyZeroInteractions(mQuickAccessWalletClient);
+        verifyNoMoreInteractions(mQuickAccessWalletClient);
     }
 
     private WalletCard createWalletCardWithType(Context context, int cardType) {

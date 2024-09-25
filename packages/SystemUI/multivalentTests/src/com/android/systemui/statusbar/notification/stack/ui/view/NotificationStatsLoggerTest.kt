@@ -40,7 +40,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -115,7 +115,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // THEN visibility changes are reported
             verify(mockStatusBarService)
                 .onNotificationVisibilityChanged(eq(emptyArray()), visibilityArrayCaptor.capture())
-            verifyZeroInteractions(mockNotificationListenerService)
+            verifyNoMoreInteractions(mockNotificationListenerService)
             val noLongerVisible = visibilityArrayCaptor.value
             assertThat(noLongerVisible).hasLength(2)
             assertThat(noLongerVisible[0]).apply {
@@ -152,7 +152,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // THEN visibility changes are reported
             verify(mockStatusBarService)
                 .onNotificationVisibilityChanged(eq(emptyArray()), visibilityArrayCaptor.capture())
-            verifyZeroInteractions(mockNotificationListenerService)
+            verifyNoMoreInteractions(mockNotificationListenerService)
             val noLongerVisible = visibilityArrayCaptor.value
             assertThat(noLongerVisible).hasLength(2)
             assertThat(noLongerVisible[0]).apply {
@@ -186,7 +186,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             runCurrent()
 
             // THEN no visibility changes are reported
-            verifyZeroInteractions(mockStatusBarService, mockNotificationListenerService)
+            verifyNoMoreInteractions(mockStatusBarService, mockNotificationListenerService)
         }
 
     @Test
@@ -205,7 +205,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             runCurrent()
 
             // THEN we call the new Callable
-            verifyZeroInteractions(callable)
+            verifyNoMoreInteractions(callable)
             verify(otherCallable).call()
         }
 
@@ -226,7 +226,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             // THEN visibility changes are reported
             verify(mockStatusBarService)
                 .onNotificationVisibilityChanged(eq(emptyArray()), visibilityArrayCaptor.capture())
-            verifyZeroInteractions(mockNotificationListenerService)
+            verifyNoMoreInteractions(mockNotificationListenerService)
             val noLongerVisible = visibilityArrayCaptor.value
             assertThat(noLongerVisible).hasLength(2)
             assertThat(noLongerVisible[0]).apply {
@@ -325,7 +325,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             runCurrent()
 
             // THEN the Expand event is not reported again
-            verifyZeroInteractions(mockStatusBarService)
+            verifyNoMoreInteractions(mockStatusBarService)
         }
 
     @Test
@@ -341,7 +341,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
             runCurrent()
 
             // No events are reported
-            verifyZeroInteractions(mockStatusBarService)
+            verifyNoMoreInteractions(mockStatusBarService)
         }
 
     @Test
@@ -424,7 +424,7 @@ class NotificationStatsLoggerTest : SysuiTestCase() {
 
             // THEN no events are reported, because we consider the Notification initially
             // collapsed, so only expanded is logged in the first time.
-            verifyZeroInteractions(mockStatusBarService)
+            verifyNoMoreInteractions(mockStatusBarService)
         }
 
     @Test

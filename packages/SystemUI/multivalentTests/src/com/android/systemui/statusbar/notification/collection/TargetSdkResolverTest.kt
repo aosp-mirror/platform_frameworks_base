@@ -40,7 +40,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when` as whenever
 
 private const val SDK_VERSION = 33
@@ -80,7 +80,7 @@ class TargetSdkResolverTest : SysuiTestCase() {
         notifListener.onEntryBind(entry, sbn)
 
         assertEquals(SDK_VERSION, entry.targetSdk)
-        verifyZeroInteractions(packageManager)
+        verifyNoMoreInteractions(packageManager)
     }
 
     @Test

@@ -64,7 +64,7 @@ import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.nullable
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import java.util.Optional
@@ -320,7 +320,7 @@ class DeviceControlsTileTest : SysuiTestCase() {
         tile.click(null /* view */)
         testableLooper.processAllMessages()
 
-        verifyZeroInteractions(activityStarter)
+        verifyNoMoreInteractions(activityStarter)
     }
 
     @Test

@@ -48,7 +48,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -122,7 +122,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
         observerCaptor.value.onChanged(AudioManager.RINGER_MODE_SILENT)
 
         //then
-        verifyZeroInteractions(userFileManager)
+        verifyNoMoreInteractions(userFileManager)
         coroutineContext.cancelChildren()
     }
 

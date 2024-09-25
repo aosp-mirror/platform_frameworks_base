@@ -38,7 +38,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -75,7 +75,7 @@ class StickyKeysIndicatorCoordinatorTest : SysuiTestCase() {
     @Test
     fun dialogIsShownWhenStickyKeysAreEmitted() {
         testScope.run {
-            verifyZeroInteractions(dialog)
+            verifyNoMoreInteractions(dialog)
 
             stickyKeysRepository.setStickyKeys(linkedMapOf(SHIFT to Locked(true)))
             runCurrent()
@@ -87,7 +87,7 @@ class StickyKeysIndicatorCoordinatorTest : SysuiTestCase() {
     @Test
     fun dialogDisappearsWhenStickyKeysAreEmpty() {
         testScope.run {
-            verifyZeroInteractions(dialog)
+            verifyNoMoreInteractions(dialog)
 
             stickyKeysRepository.setStickyKeys(linkedMapOf(SHIFT to Locked(true)))
             runCurrent()

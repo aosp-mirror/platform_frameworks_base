@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
@@ -168,8 +168,8 @@ public class KeyguardAbsKeyInputViewControllerTest extends SysuiTestCase {
         verify(mAbsKeyInputView).setKeyDownListener(onKeyDownListenerArgumentCaptor.capture());
         onKeyDownListenerArgumentCaptor.getValue().onKeyDown(
                 KeyEvent.KEYCODE_UNKNOWN, mock(KeyEvent.class));
-        verifyZeroInteractions(mKeyguardSecurityCallback);
-        verifyZeroInteractions(mKeyguardMessageAreaController);
+        verifyNoMoreInteractions(mKeyguardSecurityCallback);
+        verifyNoMoreInteractions(mKeyguardMessageAreaController);
     }
 
     @Test

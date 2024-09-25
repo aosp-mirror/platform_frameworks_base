@@ -45,7 +45,7 @@ import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.clearInvocations
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -112,11 +112,11 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // flag is enabled.
             underTest.setIsAirplaneMode(IconState(true, TelephonyIcons.FLIGHT_MODE_ICON, ""))
             runCurrent()
-            verifyZeroInteractions(statusBarIconController)
+            verifyNoMoreInteractions(statusBarIconController)
 
             underTest.setIsAirplaneMode(IconState(false, TelephonyIcons.FLIGHT_MODE_ICON, ""))
             runCurrent()
-            verifyZeroInteractions(statusBarIconController)
+            verifyNoMoreInteractions(statusBarIconController)
         }
 
     @Test
@@ -126,7 +126,7 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // Make sure StatusBarSignalPolicy.init does no initialization when
             // the refactor flag is disabled.
             underTest.init()
-            verifyZeroInteractions(securityController, networkController, tunerService)
+            verifyNoMoreInteractions(securityController, networkController, tunerService)
         }
 
     @Test
@@ -154,11 +154,11 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // if the StatusBarSignalPolicyRefactor is not enabled.
             airplaneModeInteractor.setIsAirplaneMode(true)
             runCurrent()
-            verifyZeroInteractions(statusBarIconController)
+            verifyNoMoreInteractions(statusBarIconController)
 
             airplaneModeInteractor.setIsAirplaneMode(false)
             runCurrent()
-            verifyZeroInteractions(statusBarIconController)
+            verifyNoMoreInteractions(statusBarIconController)
         }
 
     @Test
@@ -168,6 +168,6 @@ class StatusBarSignalPolicyTest : SysuiTestCase() {
             // Make sure StatusBarSignalPolicy.start does no initialization when
             // the refactor flag is disabled.
             underTest.start()
-            verifyZeroInteractions(securityController, networkController, tunerService)
+            verifyNoMoreInteractions(securityController, networkController, tunerService)
         }
 }

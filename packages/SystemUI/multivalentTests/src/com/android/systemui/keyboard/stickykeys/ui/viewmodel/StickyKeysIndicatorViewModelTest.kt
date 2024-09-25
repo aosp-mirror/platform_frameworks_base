@@ -52,7 +52,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -98,7 +98,7 @@ class StickyKeysIndicatorViewModelTest : SysuiTestCase() {
             keyboardRepository.setIsAnyKeyboardConnected(true)
             runCurrent()
 
-            verifyZeroInteractions(inputManager)
+            verifyNoMoreInteractions(inputManager)
         }
     }
 

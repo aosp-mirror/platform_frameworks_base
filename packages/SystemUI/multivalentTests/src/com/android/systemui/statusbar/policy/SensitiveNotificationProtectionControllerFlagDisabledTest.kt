@@ -34,7 +34,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -70,6 +70,6 @@ class SensitiveNotificationProtectionControllerFlagDisabledTest : SysuiTestCase(
 
     @Test
     fun init_noRegisterMediaProjectionManagerCallback() {
-        verifyZeroInteractions(mediaProjectionManager)
+        verifyNoMoreInteractions(mediaProjectionManager)
     }
 }

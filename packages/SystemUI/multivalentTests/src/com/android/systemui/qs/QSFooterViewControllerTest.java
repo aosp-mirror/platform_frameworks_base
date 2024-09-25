@@ -22,7 +22,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.ClipData;
@@ -125,7 +125,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         mEditButton.performClick();
 
         verify(mQSPanelController, never()).showEdit(any());
-        verifyZeroInteractions(mActivityStarter);
+        verifyNoMoreInteractions(mActivityStarter);
     }
 
     @Test
