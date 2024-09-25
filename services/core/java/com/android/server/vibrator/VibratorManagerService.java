@@ -813,17 +813,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 mCurrentExternalVibration.getDebugInfo().dump(proto,
                         VibratorManagerServiceDumpProto.CURRENT_EXTERNAL_VIBRATION);
             }
-
-            boolean isVibrating = false;
-            boolean isUnderExternalControl = false;
             for (int i = 0; i < mVibrators.size(); i++) {
                 proto.write(VibratorManagerServiceDumpProto.VIBRATOR_IDS, mVibrators.keyAt(i));
-                isVibrating |= mVibrators.valueAt(i).isVibrating();
-                isUnderExternalControl |= mVibrators.valueAt(i).isUnderExternalControl();
             }
-            proto.write(VibratorManagerServiceDumpProto.IS_VIBRATING, isVibrating);
-            proto.write(VibratorManagerServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
-                    isUnderExternalControl);
         }
         mVibratorManagerRecords.dump(proto);
         mVibratorControlService.dump(proto);
