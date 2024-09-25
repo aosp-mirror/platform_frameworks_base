@@ -1357,6 +1357,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
 
+        // Use doze brightness if one of following is true:
+        // 1. The target `state` isDozeState.
+        // 2. Doze power request(POLICY_DOZE) if there's no exception(useNormalBrightnessForDoze).
+        final boolean useDozeBrightness = mFlags.isNormalBrightnessForDozeParameterEnabled()
+                ? (!mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE)
+                        || Display.isDozeState(state) : Display.isDozeState(state);
+
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
                 .updateBrightness(mPowerRequest, state, mDisplayOffloadSession);
         float brightnessState = displayBrightnessState.getBrightness();
@@ -1399,7 +1406,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && !mAutomaticBrightnessController.isInIdleMode()) {
                 // Set sendUpdate to false, we're already in updatePowerState() so there's no need
                 // to trigger it again
-                mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
+                mAutomaticBrightnessController.switchMode(useDozeBrightness
                         ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT,
                         /* sendUpdate= */ false);
             }
@@ -1472,9 +1479,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessState = clampScreenBrightness(brightnessState);
         }
 
-        if (mFlags.isNormalBrightnessForDozeParameterEnabled()
-                ? !mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE
-                : Display.isDozeState(state)) {
+        if (useDozeBrightness) {
             // TODO(b/329676661): Introduce a config property to choose between this brightness
             //  strategy and DOZE_DEFAULT
             // On some devices, when auto-brightness is disabled and the device is dozing, we use

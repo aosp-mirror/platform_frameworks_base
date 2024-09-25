@@ -188,7 +188,7 @@ public class InsetsSourceProviderTest extends WindowTestsBase {
         assertNull(mProvider.getLeash(target));
 
         // Set the leash to be ready for dispatching.
-        mProvider.mIsLeashReadyForDispatching = true;
+        mProvider.mIsLeashInitialized = true;
         assertNotNull(mProvider.getLeash(target));
 
         // We do have fake control for the fake control target, but that has no leash.

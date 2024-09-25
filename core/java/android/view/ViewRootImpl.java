@@ -130,8 +130,6 @@ import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
-import static com.android.window.flags.Flags.insetsControlChangedItem;
-import static com.android.window.flags.Flags.insetsControlSeq;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
@@ -889,10 +887,7 @@ public final class ViewRootImpl implements ViewParent,
     /** Non-{@code null} if {@link #mActivityConfigCallback} is not {@code null}. */
     @Nullable
     private ActivityWindowInfo mLastReportedActivityWindowInfo;
-    @Nullable
-    private final ClientWindowFrames mLastReportedFrames = insetsControlSeq()
-            ? new ClientWindowFrames()
-            : null;
+    private final ClientWindowFrames mLastReportedFrames = new ClientWindowFrames();
     private int mLastReportedInsetsStateSeq = getInitSeq();
     private int mLastReportedActiveControlsSeq = getInitSeq();
 
@@ -2317,9 +2312,6 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void onClientWindowFramesChanged(@NonNull ClientWindowFrames inOutFrames) {
-        if (mLastReportedFrames == null) {
-            return;
-        }
         if (isIncomingSeqStale(mLastReportedFrames.seq, inOutFrames.seq)) {
             // If the incoming is stale, use the last reported instead.
             inOutFrames.setTo(mLastReportedFrames);
@@ -2330,14 +2322,12 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void onInsetsStateChanged(@NonNull InsetsState insetsState) {
-        if (insetsControlSeq()) {
-            if (isIncomingSeqStale(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
-                // The incoming is stale. Skip.
-                return;
-            }
-            // Keep track of the latest.
-            mLastReportedInsetsStateSeq = insetsState.getSeq();
+        if (isIncomingSeqStale(mLastReportedInsetsStateSeq, insetsState.getSeq())) {
+            // The incoming is stale. Skip.
+            return;
         }
+        // Keep track of the latest.
+        mLastReportedInsetsStateSeq = insetsState.getSeq();
 
         if (mTranslator != null) {
             mTranslator.translateInsetsStateInScreenToAppWindow(insetsState);
@@ -2352,15 +2342,13 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        if (insetsControlSeq()) {
-            if (isIncomingSeqStale(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
-                // The incoming is stale. Skip.
-                activeControls.release();
-                return;
-            }
-            // Keep track of the latest.
-            mLastReportedActiveControlsSeq = activeControls.getSeq();
+        if (isIncomingSeqStale(mLastReportedActiveControlsSeq, activeControls.getSeq())) {
+            // The incoming is stale. Skip.
+            activeControls.release();
+            return;
         }
+        // Keep track of the latest.
+        mLastReportedActiveControlsSeq = activeControls.getSeq();
 
         final InsetsSourceControl[] controls = activeControls.get();
         if (mTranslator != null) {
@@ -11519,12 +11507,8 @@ public final class ViewRootImpl implements ViewParent,
         public void insetsControlChanged(InsetsState insetsState,
                 InsetsSourceControl.Array activeControls) {
             final boolean isFromInsetsControlChangeItem;
-            if (insetsControlChangedItem()) {
-                isFromInsetsControlChangeItem = mIsFromTransactionItem;
-                mIsFromTransactionItem = false;
-            } else {
-                isFromInsetsControlChangeItem = false;
-            }
+            isFromInsetsControlChangeItem = mIsFromTransactionItem;
+            mIsFromTransactionItem = false;
             final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor == null) {
                 if (isFromInsetsControlChangeItem) {

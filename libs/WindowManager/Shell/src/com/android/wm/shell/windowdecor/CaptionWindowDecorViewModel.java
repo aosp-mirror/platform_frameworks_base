@@ -63,7 +63,6 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
-import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with
@@ -85,7 +84,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
     private final Transitions mTransitions;
     private final Region mExclusionRegion = Region.obtain();
     private final InputManager mInputManager;
-    private final WindowDecorViewHostSupplier mWindowDecorViewHostSupplier;
     private TaskOperations mTaskOperations;
 
     /**
@@ -123,8 +121,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             DisplayController displayController,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             SyncTransactionQueue syncQueue,
-            Transitions transitions,
-            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
+            Transitions transitions) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -136,7 +133,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
         mSyncQueue = syncQueue;
         mTransitions = transitions;
-        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskOperations = new TaskOperations(null, mContext, mSyncQueue);
         }
@@ -300,8 +296,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mMainHandler,
                         mBgExecutor,
                         mMainChoreographer,
-                        mSyncQueue,
-                        mWindowDecorViewHostSupplier);
+                        mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final FluidResizeTaskPositioner taskPositioner =

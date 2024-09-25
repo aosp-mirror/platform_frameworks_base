@@ -40,6 +40,19 @@ android:layout_height="match_parent">
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
+    <com.android.systemui.biometrics.BiometricPromptLottieViewWrapper
+        android:id="@+id/biometric_icon_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="@+id/biometric_icon"
+        app:layout_constraintEnd_toEndOf="@+id/biometric_icon"
+        app:layout_constraintStart_toStartOf="@+id/biometric_icon"
+        app:layout_constraintTop_toTopOf="@+id/biometric_icon" />
+
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"

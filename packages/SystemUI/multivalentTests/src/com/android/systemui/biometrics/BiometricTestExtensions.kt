@@ -27,17 +27,6 @@ import android.hardware.face.FaceSensorProperties
 import android.hardware.face.FaceSensorPropertiesInternal
 import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
-import com.android.keyguard.keyguardUpdateMonitor
-import com.android.systemui.SysuiTestableContext
-import com.android.systemui.biometrics.data.repository.biometricStatusRepository
-import com.android.systemui.biometrics.shared.model.AuthenticationReason
-import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.res.R
-import com.android.systemui.util.mockito.whenever
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 
 /** Create [FingerprintSensorPropertiesInternal] for a test. */
 internal fun fingerprintSensorPropertiesInternal(
@@ -155,68 +144,4 @@ internal fun promptInfo(
     credentialDescription?.let { info.deviceCredentialDescription = it }
     info.negativeButtonText = negativeButton
     return info
-}
-
-@OptIn(ExperimentalCoroutinesApi::class)
-internal fun TestScope.updateSfpsIndicatorRequests(
-    kosmos: Kosmos,
-    mContext: SysuiTestableContext,
-    primaryBouncerRequest: Boolean? = null,
-    alternateBouncerRequest: Boolean? = null,
-    biometricPromptRequest: Boolean? = null,
-    // TODO(b/365182034): update when rest to unlock feature is implemented
-    //    progressBarShowing: Boolean? = null
-) {
-    biometricPromptRequest?.let { hasBiometricPromptRequest ->
-        if (hasBiometricPromptRequest) {
-            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
-                AuthenticationReason.BiometricPromptAuthentication
-            )
-        } else {
-            kosmos.biometricStatusRepository.setFingerprintAuthenticationReason(
-                AuthenticationReason.NotRunning
-            )
-        }
-    }
-
-    primaryBouncerRequest?.let { hasPrimaryBouncerRequest ->
-        updatePrimaryBouncer(
-            kosmos,
-            mContext,
-            isShowing = hasPrimaryBouncerRequest,
-            isAnimatingAway = false,
-            fpsDetectionRunning = true,
-            isUnlockingWithFpAllowed = true
-        )
-    }
-
-    alternateBouncerRequest?.let { hasAlternateBouncerRequest ->
-        kosmos.keyguardBouncerRepository.setAlternateVisible(hasAlternateBouncerRequest)
-    }
-
-    // TODO(b/365182034): set progress bar visibility when rest to unlock feature is implemented
-
-    runCurrent()
-}
-
-internal fun updatePrimaryBouncer(
-    kosmos: Kosmos,
-    mContext: SysuiTestableContext,
-    isShowing: Boolean,
-    isAnimatingAway: Boolean,
-    fpsDetectionRunning: Boolean,
-    isUnlockingWithFpAllowed: Boolean,
-) {
-    kosmos.keyguardBouncerRepository.setPrimaryShow(isShowing)
-    kosmos.keyguardBouncerRepository.setPrimaryStartingToHide(false)
-    val primaryStartDisappearAnimation = if (isAnimatingAway) Runnable {} else null
-    kosmos.keyguardBouncerRepository.setPrimaryStartDisappearAnimation(
-        primaryStartDisappearAnimation
-    )
-
-    whenever(kosmos.keyguardUpdateMonitor.isFingerprintDetectionRunning)
-        .thenReturn(fpsDetectionRunning)
-    whenever(kosmos.keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
-        .thenReturn(isUnlockingWithFpAllowed)
-    mContext.orCreateTestableResources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer, true)
 }

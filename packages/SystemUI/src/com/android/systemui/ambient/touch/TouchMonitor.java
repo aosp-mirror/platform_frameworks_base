@@ -25,7 +25,6 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
@@ -76,10 +75,9 @@ import javax.inject.Named;
  * touches are consumed.
  */
 public class TouchMonitor {
+    private final Logger mLogger;
     // This executor is used to protect {@code mActiveTouchSessions} from being modified
     // concurrently. Any operation that adds or removes values should use this executor.
-    public String TAG = "DreamOverlayTouchMonitor";
-    private final Logger mLogger;
     private final Executor mMainExecutor;
     private final Executor mBackgroundExecutor;
 
@@ -298,13 +296,12 @@ public class TouchMonitor {
                     mWindowManagerService.registerSystemGestureExclusionListener(
                             mGestureExclusionListener, mDisplayId);
                 } catch (RemoteException e) {
-                    // Handle the exception
-                    Log.e(TAG, "Failed to register gesture exclusion listener", e);
+                    mLogger.e("Failed to register gesture exclusion listener", e);
                 }
             });
         }
         mCurrentInputSession = mInputSessionFactory.create(
-                        "dreamOverlay",
+                        mLoggingName,
                         mInputEventListener,
                         mOnGestureListener,
                         true)
@@ -326,7 +323,7 @@ public class TouchMonitor {
                     }
                 } catch (RemoteException e) {
                     // Handle the exception
-                    Log.e(TAG, "unregisterSystemGestureExclusionListener: failed", e);
+                    mLogger.e("unregisterSystemGestureExclusionListener: failed", e);
                 }
             });
         }
@@ -543,6 +540,7 @@ public class TouchMonitor {
     private InputSession mCurrentInputSession;
     private final int mDisplayId;
     private final IWindowManager mWindowManagerService;
+    private final String mLoggingName;
 
     private Rect mMaxBounds;
 
@@ -589,7 +587,8 @@ public class TouchMonitor {
         mDisplayHelper = displayHelper;
         mWindowManagerService = windowManagerService;
         mConfigurationInteractor = configurationInteractor;
-        mLogger = new Logger(logBuffer, loggingName + ":TouchMonitor");
+        mLoggingName = loggingName + ":TouchMonitor";
+        mLogger = new Logger(logBuffer, mLoggingName);
     }
 
     /**
