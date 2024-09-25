@@ -16,6 +16,7 @@
 
 package com.android.server.input.debug;
 
+import android.annotation.AnyThread;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.input.InputManager;
@@ -157,19 +158,28 @@ public class TouchpadDebugViewController implements InputManager.InputDeviceList
      * @param touchpadHardwareState the hardware state of a touchpad
      * @param deviceId              the deviceId of the touchpad that is sending the hardware state
      */
+    @AnyThread
     public void updateTouchpadHardwareState(TouchpadHardwareState touchpadHardwareState,
                                             int deviceId) {
-        if (mTouchpadDebugView != null) {
-            mTouchpadDebugView.updateHardwareState(touchpadHardwareState, deviceId);
-        }
+        mHandler.post(() -> {
+            if (mTouchpadDebugView != null) {
+                mTouchpadDebugView.post(
+                        () -> mTouchpadDebugView.updateHardwareState(touchpadHardwareState,
+                                deviceId));
+            }
+        });
     }
 
     /**
      * Notify the TouchpadDebugView of a new touchpad gesture.
      */
+    @AnyThread
     public void updateTouchpadGestureInfo(int gestureType, int deviceId) {
-        if (mTouchpadDebugView != null) {
-            mTouchpadDebugView.updateGestureInfo(gestureType, deviceId);
-        }
+        mHandler.post(() -> {
+            if (mTouchpadDebugView != null) {
+                mTouchpadDebugView.post(
+                        () -> mTouchpadDebugView.updateGestureInfo(gestureType, deviceId));
+            }
+        });
     }
 }

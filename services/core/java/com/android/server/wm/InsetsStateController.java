@@ -420,7 +420,7 @@ class InsetsStateController {
                 final ArrayList<InsetsSourceProvider> providers = pendingControlMap.valueAt(i);
                 for (int p = providers.size() - 1; p >= 0; p--) {
                     final InsetsSourceProvider provider = providers.get(p);
-                    if (provider.isLeashReadyForDispatching(target)) {
+                    if (provider.isLeashInitialized() || provider.getControlTarget() != target) {
                         // Stop waiting for this provider.
                         providers.remove(p);
                     }

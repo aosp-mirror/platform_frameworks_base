@@ -40,7 +40,9 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.text.TextUtils;
 
 import com.android.internal.os.Clock;
@@ -87,6 +89,7 @@ public class ApplicationStartInfoTest {
     private static final String APP_1_PACKAGE_NAME = "com.android.test.stub1";
 
     @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Mock private AppOpsService mAppOpsService;
     @Mock private PackageManagerInternal mPackageManagerInt;
 
@@ -144,6 +147,7 @@ public class ApplicationStartInfoTest {
     }
 
     @Test
+    @EnableFlags(android.app.Flags.FLAG_APP_START_INFO_COMPONENT)
     public void testApplicationStartInfo() throws Exception {
         // Make sure we can write to the file.
         assertTrue(FileUtils.createDir(mAppStartInfoTracker.mProcStartStoreDir));
@@ -167,7 +171,7 @@ public class ApplicationStartInfoTest {
         ArrayList<ApplicationStartInfo> list = new ArrayList<ApplicationStartInfo>();
 
         // Case 1: Activity start intent failed
-        mAppStartInfoTracker.onIntentStarted(buildIntent(COMPONENT),
+        mAppStartInfoTracker.onActivityIntentStarted(buildIntent(COMPONENT),
                 appStartTimestampIntentStarted);
         mAppStartInfoTracker.getStartInfo(APP_1_PACKAGE_NAME, APP_1_UID, APP_1_PID_1, 0, list);
         verifyInProgressRecordsSize(1);
@@ -185,7 +189,7 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_TYPE_UNSET,                // state type
                 ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
 
-        mAppStartInfoTracker.onIntentFailed(appStartTimestampIntentStarted);
+        mAppStartInfoTracker.onActivityIntentFailed(appStartTimestampIntentStarted);
         list.clear();
         mAppStartInfoTracker.getStartInfo(APP_1_PACKAGE_NAME, APP_1_UID, APP_1_PID_1, 0, list);
         verifyInProgressRecordsSize(0);
@@ -194,7 +198,7 @@ public class ApplicationStartInfoTest {
         mAppStartInfoTracker.clearProcessStartInfo(true);
 
         // Case 2: Activity start launch cancelled
-        mAppStartInfoTracker.onIntentStarted(buildIntent(COMPONENT),
+        mAppStartInfoTracker.onActivityIntentStarted(buildIntent(COMPONENT),
                 appStartTimestampIntentStarted);
         list.clear();
         mAppStartInfoTracker.getStartInfo(APP_1_PACKAGE_NAME, APP_1_UID, APP_1_PID_1, 0, list);
@@ -236,12 +240,13 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_REASON_START_ACTIVITY,     // reason
                 ApplicationStartInfo.STARTUP_STATE_ERROR,             // startup state
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
-                ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
+                ApplicationStartInfo.LAUNCH_MODE_STANDARD,            // launch mode
+                ApplicationStartInfo.START_COMPONENT_ACTIVITY);       // start component
 
         mAppStartInfoTracker.clearProcessStartInfo(true);
 
         // Case 3: Activity start success
-        mAppStartInfoTracker.onIntentStarted(buildIntent(COMPONENT),
+        mAppStartInfoTracker.onActivityIntentStarted(buildIntent(COMPONENT),
                 appStartTimestampIntentStarted);
         list.clear();
         mAppStartInfoTracker.getStartInfo(APP_1_PACKAGE_NAME, APP_1_UID, APP_1_PID_1, 0, list);
@@ -255,6 +260,7 @@ public class ApplicationStartInfoTest {
         verifyInProgressRecordsSize(1);
         assertEquals(list.size(), 1);
 
+        // The records will now be in both backing data structures, so verify in each.
         verifyInProgressApplicationStartInfo(
                 0,                                                    // index
                 APP_1_PID_1,                                          // pid
@@ -277,7 +283,8 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_REASON_START_ACTIVITY,     // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
-                ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
+                ApplicationStartInfo.LAUNCH_MODE_STANDARD,            // launch mode
+                ApplicationStartInfo.START_COMPONENT_ACTIVITY);       // start component
 
         mAppStartInfoTracker.onActivityLaunchFinished(appStartTimestampIntentStarted, COMPONENT,
                 appStartTimestampActivityLaunchFinished, ApplicationStartInfo.LAUNCH_MODE_STANDARD);
@@ -300,7 +307,7 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
                 ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
 
-        mAppStartInfoTracker.onReportFullyDrawn(appStartTimestampIntentStarted,
+        mAppStartInfoTracker.onActivityReportFullyDrawn(appStartTimestampIntentStarted,
                 appStartTimestampReportFullyDrawn);
         list.clear();
         mAppStartInfoTracker.getStartInfo(APP_1_PACKAGE_NAME, APP_1_UID, APP_1_PID_1, 0, list);
@@ -317,7 +324,8 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_REASON_START_ACTIVITY,     // reason
                 ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN, // startup state
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
-                ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
+                ApplicationStartInfo.LAUNCH_MODE_STANDARD,            // launch mode
+                ApplicationStartInfo.START_COMPONENT_ACTIVITY);       // start component
 
         // Don't clear records for use in subsequent cases.
 
@@ -347,7 +355,8 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_REASON_SERVICE,            // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
-                ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
+                ApplicationStartInfo.LAUNCH_MODE_STANDARD,            // launch mode
+                ApplicationStartInfo.START_COMPONENT_SERVICE);        // start component
 
         // Case 5: Create an instance of app1 with a different user started for a broadcast
         sleep(1);
@@ -376,7 +385,8 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_REASON_BROADCAST,          // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
-                ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
+                ApplicationStartInfo.LAUNCH_MODE_STANDARD,            // launch mode
+                ApplicationStartInfo.START_COMPONENT_BROADCAST);      // start component
 
         // Case 6: User 2 gets removed
         mAppStartInfoTracker.onPackageRemoved(APP_1_PACKAGE_NAME, APP_1_UID_USER_2, false);
@@ -422,7 +432,9 @@ public class ApplicationStartInfoTest {
                 ApplicationStartInfo.START_REASON_CONTENT_PROVIDER,   // reason
                 ApplicationStartInfo.STARTUP_STATE_STARTED,           // startup state
                 ApplicationStartInfo.START_TYPE_COLD,                 // state type
-                ApplicationStartInfo.LAUNCH_MODE_STANDARD);           // launch mode
+                ApplicationStartInfo.LAUNCH_MODE_STANDARD,            // launch mode
+                ApplicationStartInfo.START_COMPONENT_CONTENT_PROVIDER // start component
+        );
 
         // Case 8: Save and load again
         ArrayList<ApplicationStartInfo> original = new ArrayList<ApplicationStartInfo>();
@@ -453,6 +465,7 @@ public class ApplicationStartInfoTest {
      */
     @SuppressWarnings("GuardedBy")
     @Test
+    @EnableFlags(android.app.Flags.FLAG_APP_START_INFO_COMPONENT)
     public void testInProgressRecordsLimit() throws Exception {
         ProcessRecord app = makeProcessRecord(
                 APP_1_PID_1,                 // pid
@@ -466,7 +479,7 @@ public class ApplicationStartInfoTest {
         // never exceeds the expected size of MAX_IN_PROGRESS_RECORDS.
         for (int i = 0; i < AppStartInfoTracker.MAX_IN_PROGRESS_RECORDS * 2; i++) {
             Long startTime = Long.valueOf(i);
-            mAppStartInfoTracker.onIntentStarted(buildIntent(COMPONENT), startTime);
+            mAppStartInfoTracker.onActivityIntentStarted(buildIntent(COMPONENT), startTime);
             verifyInProgressRecordsSize(
                     Math.min(i + 1, AppStartInfoTracker.MAX_IN_PROGRESS_RECORDS));
 
@@ -618,6 +631,10 @@ public class ApplicationStartInfoTest {
         }
     }
 
+    /**
+     * Convenience helper to access the record from the in progress data structure. Only applies for
+     * activity starts.
+     */
     private void verifyInProgressApplicationStartInfo(int index,
             Integer pid, Integer uid, Integer packageUid,
             Integer definingUid, String processName,
@@ -625,14 +642,15 @@ public class ApplicationStartInfoTest {
         synchronized (mAppStartInfoTracker.mLock) {
             verifyApplicationStartInfo(mAppStartInfoTracker.mInProgressRecords.valueAt(index),
                     pid, uid, packageUid, definingUid, processName, reason, startupState,
-                    startType, launchMode);
+                    startType, launchMode, ApplicationStartInfo.START_COMPONENT_ACTIVITY);
         }
     }
 
     private void verifyApplicationStartInfo(ApplicationStartInfo info,
             Integer pid, Integer uid, Integer packageUid,
             Integer definingUid, String processName,
-            Integer reason, Integer startupState, Integer startType, Integer launchMode) {
+            Integer reason, Integer startupState, Integer startType, Integer launchMode,
+            Integer startComponent) {
         assertNotNull(info);
 
         if (pid != null) {
@@ -661,6 +679,9 @@ public class ApplicationStartInfoTest {
         }
         if (launchMode != null) {
             assertEquals(launchMode.intValue(), info.getLaunchMode());
+        }
+        if (startComponent != null) {
+            assertEquals(startComponent.intValue(), info.getStartComponent());
         }
     }
 
