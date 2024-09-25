@@ -927,7 +927,7 @@ public class BatteryStatsImplTest {
         assertThat(mPowerStatsStore.getTableOfContents()).isEmpty();
 
         mBatteryStatsImpl.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider,
-                mPowerStatsStore);
+                mPowerStatsStore, /* accumulateBatteryUsageStats */ false);
 
         synchronized (mBatteryStatsImpl) {
             mBatteryStatsImpl.noteFlashlightOnLocked(42, mMockClock.realtime, mMockClock.uptime);
