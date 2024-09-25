@@ -3359,6 +3359,33 @@ public final class ContactsContract {
                         SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD, null, extras);
             }
 
+            /**
+             * Get a list of cloud accounts that is eligible to set as default account with state of
+             * {@link DefaultAccountAndState#DEFAULT_ACCOUNT_STATE_CLOUD}. May be empty but never
+             * null.
+             *
+             * @param resolver content resolver to query.
+             * @return a of cloud accounts that is eligible to set as default account with state of
+             * {@link DefaultAccountAndState#DEFAULT_ACCOUNT_STATE_CLOUD}.
+             * @throws RuntimeException if the query fails.
+             *
+             * @hide
+             */
+            @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS)
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            @SystemApi
+            public static @NonNull List<Account> getEligibleCloudAccounts(
+                    @NonNull ContentResolver resolver) {
+                Bundle response = nullSafeCall(resolver, ContactsContract.AUTHORITY_URI,
+                        QUERY_ELIGIBLE_DEFAULT_ACCOUNTS_METHOD, null, null);
+                List<Account> result = response.getParcelableArrayList(
+                        KEY_ELIGIBLE_DEFAULT_ACCOUNTS, Account.class);
+                if (result == null) {
+                    return new ArrayList<>();
+                }
+                return result;
+            }
+
 
 
             /**
@@ -9338,30 +9365,6 @@ public final class ContactsContract {
          * @hide
          */
         public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
-
-        /**
-         * Key in the Bundle for the default account state.
-         *
-         * @hide
-         */
-        public static final String KEY_DEFAULT_ACCOUNT_STATE =
-                "key_default_contacts_account_state";
-
-        /**
-         * The method to invoke in order to set the default account.
-         *
-         * @hide
-         */
-        public static final String SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
-                "setDefaultAccountForNewContacts";
-
-        /**
-         * The method to invoke in order to query the default account.
-         *
-         * @hide
-         */
-        public static final String QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
-                "queryDefaultAccountForNewContacts";
 
         /**
          * Get the account that is set as the default account for new contacts, which should be
