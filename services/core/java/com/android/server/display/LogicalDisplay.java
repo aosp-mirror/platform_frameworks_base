@@ -506,6 +506,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.rotation = Surface.ROTATION_0;
             mBaseDisplayInfo.modeId = deviceInfo.modeId;
             mBaseDisplayInfo.renderFrameRate = deviceInfo.renderFrameRate;
+            mBaseDisplayInfo.hasArrSupport = deviceInfo.hasArrSupport;
             mBaseDisplayInfo.defaultModeId = deviceInfo.defaultModeId;
             mBaseDisplayInfo.userPreferredModeId = deviceInfo.userPreferredModeId;
             mBaseDisplayInfo.supportedModes = Arrays.copyOf(

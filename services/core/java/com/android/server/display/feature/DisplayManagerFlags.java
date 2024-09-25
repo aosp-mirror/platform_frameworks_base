@@ -222,6 +222,11 @@ public class DisplayManagerFlags {
             Flags::enableBatteryStatsForAllDisplays
     );
 
+    private final FlagState mHasArrSupport = new FlagState(
+            Flags.FLAG_ENABLE_HAS_ARR_SUPPORT,
+            Flags::enableHasArrSupport
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -468,6 +473,12 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return {@code true} if hasArrSupport API is enabled.
+     */
+    public boolean hasArrSupportFlag() {
+        return mHasArrSupport.isEnabled();
+    }
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -514,6 +525,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
         pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
         pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
+        pw.println(" " + mHasArrSupport);
     }
 
     private static class FlagState {

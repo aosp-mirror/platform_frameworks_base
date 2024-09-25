@@ -246,6 +246,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveModeId = INVALID_MODE_ID;
         private boolean mDisplayModeSpecsInvalid;
         private int mActiveColorMode;
+        private boolean mHasArrSupport;
         private Display.HdrCapabilities mHdrCapabilities;
         private boolean mAllmSupported;
         private boolean mGameContentTypeSupported;
@@ -311,6 +312,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             changed |= updateHdrCapabilitiesLocked(dynamicInfo.hdrCapabilities);
             changed |= updateAllmSupport(dynamicInfo.autoLowLatencyModeSupported);
             changed |= updateGameContentTypeSupport(dynamicInfo.gameContentTypeSupported);
+            changed |= updateHasArrSupportLocked(dynamicInfo.hasArrSupport);
 
             if (changed) {
                 mHavePendingChanges = true;
@@ -602,6 +604,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
+        private boolean updateHasArrSupportLocked(boolean newHasArrSupport) {
+            if (mHasArrSupport == newHasArrSupport) {
+                return false;
+            }
+            mHasArrSupport = newHasArrSupport;
+            return true;
+        }
+
         private boolean updateAllmSupport(boolean supported) {
             if (mAllmSupported == supported) {
                 return false;
@@ -684,6 +694,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     mInfo.supportedColorModes[i] = mSupportedColorModes.get(i);
                 }
                 mInfo.hdrCapabilities = mHdrCapabilities;
+                mInfo.hasArrSupport = mHasArrSupport;
                 mInfo.appVsyncOffsetNanos = mActiveSfDisplayMode.appVsyncOffsetNanos;
                 mInfo.presentationDeadlineNanos = mActiveSfDisplayMode.presentationDeadlineNanos;
                 mInfo.state = mState;
@@ -1274,6 +1285,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mActiveColorMode=" + mActiveColorMode);
             pw.println("mDefaultModeId=" + mDefaultModeId);
             pw.println("mUserPreferredModeId=" + mUserPreferredModeId);
+            pw.println("mHasArrSupport=" + mHasArrSupport);
             pw.println("mState=" + Display.stateToString(mState));
             pw.println("mCommittedState=" + Display.stateToString(mCommittedState));
             pw.println("mBrightnessState=" + mBrightnessState);
