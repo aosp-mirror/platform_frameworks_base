@@ -2584,6 +2584,9 @@ public class LocationProviderManager extends
                 registration -> {
                     if (registration.getIdentity().getPackageName().equals(
                             packageName)) {
+                        if (D) {
+                            Log.d(TAG, "package reset remove registration " + registration);
+                        }
                         registration.remove();
                     }
 
