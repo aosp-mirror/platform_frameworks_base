@@ -127,7 +127,20 @@ constructor(
 
     val executeDismissAction: Flow<() -> KeyguardDone> =
         merge(
-                finishedTransitionToGone,
+                if (SceneContainerFlag.isEnabled) {
+                    // Using currentScene instead of finishedTransitionToGone because of a race
+                    // condition that forms between finishedTransitionToGone and
+                    // isOnShadeWhileUnlocked where the latter emits false before the former emits
+                    // true, causing the merge to not emit until it's too late.
+                    sceneInteractor
+                        .get()
+                        .currentScene
+                        .map { it == Scenes.Gone }
+                        .distinctUntilChanged()
+                        .filter { it }
+                } else {
+                    finishedTransitionToGone
+                },
                 isOnShadeWhileUnlocked.filter { it }.map {},
                 dismissInteractor.dismissKeyguardRequestWithImmediateDismissAction,
             )
@@ -137,10 +150,24 @@ constructor(
 
     val resetDismissAction: Flow<Unit> =
         combine(
-                transitionInteractor.isFinishedIn(
-                    scene = Scenes.Gone,
-                    stateWithoutSceneContainer = GONE,
-                ),
+                if (SceneContainerFlag.isEnabled) {
+                    // Using currentScene instead of isFinishedIn because of a race condition that
+                    // forms between isFinishedIn(Gone) and isOnShadeWhileUnlocked where the latter
+                    // emits false before the former emits true, causing the evaluation of the
+                    // combine to come up with true, temporarily, before settling on false, which is
+                    // a valid final state. That causes an incorrect reset of the dismiss action to
+                    // occur before it gets executed.
+                    sceneInteractor
+                        .get()
+                        .currentScene
+                        .map { it == Scenes.Gone }
+                        .distinctUntilChanged()
+                } else {
+                    transitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = GONE,
+                    )
+                },
                 transitionInteractor.isFinishedIn(
                     scene = Scenes.Bouncer,
                     stateWithoutSceneContainer = PRIMARY_BOUNCER,

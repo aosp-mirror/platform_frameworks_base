@@ -19,17 +19,22 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.fakeAuthenticationRepository
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceUnlockedInteractor
 import com.android.systemui.flags.EnableSceneContainer
+import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.data.repository.fakePowerRepository
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -44,6 +49,7 @@ import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -180,7 +186,11 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
             )
             assertThat(executeDismissAction).isNull()
 
+            kosmos.fakeDeviceEntryFingerprintAuthRepository.setAuthenticationStatus(
+                SuccessFingerprintAuthenticationStatus(0, true)
+            )
             kosmos.setSceneTransition(Idle(Scenes.Gone))
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
 
             assertThat(executeDismissAction).isNotNull()
         }
@@ -302,5 +312,79 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
 
             underTest.setKeyguardDone(KeyguardDone.IMMEDIATE)
             assertThat(keyguardDoneTiming).isEqualTo(KeyguardDone.IMMEDIATE)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun dismissAction_executesBeforeItsReset_sceneContainerOn_swipeAuth_fromQsScene() =
+        testScope.runTest {
+            val canSwipeToEnter by collectLastValue(kosmos.deviceEntryInteractor.canSwipeToEnter)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(currentScene!!)
+                )
+            kosmos.sceneInteractor.setTransitionState(transitionState)
+            val executeDismissAction by collectLastValue(underTest.executeDismissAction)
+            val resetDismissAction by collectLastValue(underTest.resetDismissAction)
+            assertThat(executeDismissAction).isNull()
+            assertThat(resetDismissAction).isNull()
+            kosmos.fakeAuthenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.None
+            )
+            kosmos.fakeDeviceEntryRepository.setLockscreenEnabled(true)
+            assertThat(canSwipeToEnter).isTrue()
+            kosmos.sceneInteractor.changeScene(Scenes.QuickSettings, "")
+            transitionState.value = ObservableTransitionState.Idle(Scenes.QuickSettings)
+            assertThat(currentScene).isEqualTo(Scenes.QuickSettings)
+
+            assertThat(executeDismissAction).isNull()
+            assertThat(resetDismissAction).isNull()
+
+            val dismissAction =
+                DismissAction.RunImmediately(
+                    onDismissAction = { KeyguardDone.LATER },
+                    onCancelAction = {},
+                    message = "message",
+                    willAnimateOnLockscreen = true,
+                )
+            underTest.setDismissAction(dismissAction)
+            // Should still be null because the transition to Gone has not yet happened.
+            assertThat(executeDismissAction).isNull()
+            assertThat(resetDismissAction).isNull()
+
+            transitionState.value =
+                ObservableTransitionState.Transition.ChangeScene(
+                    fromScene = Scenes.QuickSettings,
+                    toScene = Scenes.Gone,
+                    currentScene = flowOf(Scenes.QuickSettings),
+                    currentOverlays = emptySet(),
+                    progress = flowOf(0.5f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            runCurrent()
+            assertThat(executeDismissAction).isNull()
+            assertThat(resetDismissAction).isNull()
+
+            transitionState.value =
+                ObservableTransitionState.Transition.ChangeScene(
+                    fromScene = Scenes.QuickSettings,
+                    toScene = Scenes.Gone,
+                    currentScene = flowOf(Scenes.Gone),
+                    currentOverlays = emptySet(),
+                    progress = flowOf(1f),
+                    isInitiatedByUserInput = true,
+                    isUserInputOngoing = flowOf(false),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+            kosmos.sceneInteractor.changeScene(Scenes.Gone, "")
+            assertThat(currentScene).isEqualTo(Scenes.Gone)
+            runCurrent()
+            assertThat(executeDismissAction).isNotNull()
+            assertThat(resetDismissAction).isNull()
         }
 }
