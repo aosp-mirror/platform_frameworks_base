@@ -136,6 +136,8 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
     @Mock
     private ViewTreeObserver mViewTreeObserver;
 
+    private boolean mPagedTileLayoutListening = false;
+
     private TestableLongPressEffectProvider mLongPressEffectProvider =
             new TestableLongPressEffectProvider();
 
@@ -212,6 +214,11 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
             when(mQSPanel.isListening()).thenReturn(invocation.getArgument(0));
             return null;
         }).when(mQSPanel).setListening(anyBoolean());
+
+        doAnswer(invocation -> {
+            mPagedTileLayoutListening = invocation.getArgument(0);
+            return null;
+        }).when(mPagedTileLayout).setListening(anyBoolean(), any());
 
         mController = new TestableQSPanelControllerBase(mQSPanel, mQSHost,
                 mQSCustomizerController, mMediaHost,
@@ -570,6 +577,33 @@ public class QSPanelControllerBaseTest extends SysuiTestCase {
 
         assertThat(mController.mRecords).isEmpty();
     }
+
+    @Test
+    public void listening_dettach_reAttach_listeningSetAgain() {
+        mController.setListening(true);
+
+        assertThat(mPagedTileLayoutListening).isTrue();
+
+        mController.onViewDetached();
+        assertThat(mPagedTileLayoutListening).isFalse();
+
+        mController.onViewAttached();
+        assertThat(mPagedTileLayoutListening).isTrue();
+    }
+
+    @Test
+    public void notListening_dettach_reAttach_stillNotListening() {
+        mController.setListening(false);
+
+        assertThat(mPagedTileLayoutListening).isFalse();
+
+        mController.onViewDetached();
+        assertThat(mPagedTileLayoutListening).isFalse();
+
+        mController.onViewAttached();
+        assertThat(mPagedTileLayoutListening).isFalse();
+    }
+
 
     private boolean usingMediaPlayer() {
         return !SceneContainerFlag.isEnabled();
