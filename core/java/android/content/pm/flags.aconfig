@@ -302,3 +302,10 @@ flag {
     bug: "332664521"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "delete_packages_silently_backport"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the holder of SYSTEM_APP_PROTECTION_SERVICE role to silently delete packages. To be deprecated by delete_packages_silently."
+    bug: "361776825"
+}
