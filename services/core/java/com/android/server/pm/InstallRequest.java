@@ -615,6 +615,20 @@ final class InstallRequest {
         return mScanResult.mDynamicSharedLibraryInfos;
     }
 
+    public void updateAllCodePaths(List<String> paths) {
+        if (mScanResult.mSdkSharedLibraryInfo != null) {
+            mScanResult.mSdkSharedLibraryInfo.setAllCodePaths(paths);
+        }
+        if (mScanResult.mStaticSharedLibraryInfo != null) {
+            mScanResult.mStaticSharedLibraryInfo.setAllCodePaths(paths);
+        }
+        if (mScanResult.mDynamicSharedLibraryInfos != null) {
+            for (SharedLibraryInfo info : mScanResult.mDynamicSharedLibraryInfos) {
+                info.setAllCodePaths(paths);
+            }
+        }
+    }
+
     @Nullable
     public PackageSetting getScannedPackageSetting() {
         assertScanResultExists();
