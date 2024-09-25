@@ -579,7 +579,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int RESERVED_BYTES_PER_LOGCAT_LINE = 100;
 
     // How many seconds should the system wait before terminating the spawned logcat process.
-    static final int LOGCAT_TIMEOUT_SEC = 10;
+    static final int LOGCAT_TIMEOUT_SEC = Flags.logcatLongerTimeout() ? 15 : 10;
 
     // Necessary ApplicationInfo flags to mark an app as persistent
     static final int PERSISTENT_MASK =
