@@ -1026,9 +1026,14 @@ public class Transitions implements RemoteCallable<Transitions>,
      * Gives every handler (in order) a chance to animate until one consumes the transition.
      * @return the handler which consumed the transition.
      */
-    TransitionHandler dispatchTransition(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction startT, @NonNull SurfaceControl.Transaction finishT,
-            @NonNull TransitionFinishCallback finishCB, @Nullable TransitionHandler skip) {
+    public TransitionHandler dispatchTransition(
+            @NonNull IBinder transition,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
+            @NonNull TransitionFinishCallback finishCB,
+            @Nullable TransitionHandler skip
+    ) {
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             if (mHandlers.get(i) == skip) continue;
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try handler %s",
