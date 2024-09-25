@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
@@ -39,6 +40,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.ravenwood.RavenwoodRuntimeNative;
 import com.android.ravenwood.common.RavenwoodCommonUtils;
 import com.android.ravenwood.common.RavenwoodRuntimeException;
 import com.android.ravenwood.common.SneakyThrow;
@@ -69,6 +71,8 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static final String MAIN_THREAD_NAME = "RavenwoodMain";
+    private static final String RAVENWOOD_NATIVE_SYSPROP_NAME = "ravenwood_sysprop";
+    private static final String RAVENWOOD_NATIVE_RUNTIME_NAME = "ravenwood_runtime";
 
     /**
      * When enabled, attempt to dump all thread stacks just before we hit the
@@ -119,6 +123,7 @@ public class RavenwoodRuntimeEnvironmentController {
     }
 
     private static RavenwoodConfig sConfig;
+    private static RavenwoodSystemProperties sProps;
     private static boolean sInitialized = false;
 
     /**
@@ -132,6 +137,14 @@ public class RavenwoodRuntimeEnvironmentController {
 
         // We haven't initialized liblog yet, so directly write to System.out here.
         RavenwoodCommonUtils.log(TAG, "globalInit()");
+
+        // Load libravenwood_sysprop first
+        var libProp = RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_SYSPROP_NAME);
+        System.load(libProp);
+        RavenwoodRuntimeNative.reloadNativeLibrary(libProp);
+
+        // Make sure libravenwood_runtime is loaded.
+        System.load(RavenwoodCommonUtils.getJniLibraryPath(RAVENWOOD_NATIVE_RUNTIME_NAME));
 
         // Do the basic set up for the android sysprops.
         setSystemProperties(RavenwoodSystemProperties.DEFAULT_VALUES);
@@ -358,12 +371,21 @@ public class RavenwoodRuntimeEnvironmentController {
     /**
      * Set the current configuration to the actual SystemProperties.
      */
-    public static void setSystemProperties(RavenwoodSystemProperties ravenwoodSystemProperties) {
-        var clone = new RavenwoodSystemProperties(ravenwoodSystemProperties, true);
+    private static void setSystemProperties(RavenwoodSystemProperties systemProperties) {
+        SystemProperties.clearChangeCallbacksForTest();
+        RavenwoodRuntimeNative.clearSystemProperties();
+        sProps = new RavenwoodSystemProperties(systemProperties, true);
+        for (var entry : systemProperties.getValues().entrySet()) {
+            RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
+        }
+    }
 
-        android.os.SystemProperties.init$ravenwood(
-                clone.getValues(),
-                clone.getKeyReadablePredicate(),
-                clone.getKeyWritablePredicate());
+    @SuppressWarnings("unused")  // Called from native code (ravenwood_sysprop.cpp)
+    private static void checkSystemPropertyAccess(String key, boolean write) {
+        boolean result = write ? sProps.isKeyWritable(key) : sProps.isKeyReadable(key);
+        if (!result) {
+            throw new IllegalArgumentException((write ? "Write" : "Read")
+                    + " access to system property '" + key + "' denied via RavenwoodConfig");
+        }
     }
 }
