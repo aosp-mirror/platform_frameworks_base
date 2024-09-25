@@ -24,6 +24,7 @@ import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
@@ -48,6 +49,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
     private val syncQueueMock: SyncTransactionQueue = mock()
     private val transitionsMock: Transitions = mock()
     private val shellTaskOrganizerMock: ShellTaskOrganizer = mock()
+    private val desktopRepository: DesktopRepository = mock()
     private val toggleResizeDesktopTaskTransitionHandlerMock:
         ToggleResizeDesktopTaskTransitionHandler =
         mock()
@@ -69,6 +71,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
                 shellTaskOrganizerMock,
                 toggleResizeDesktopTaskTransitionHandlerMock,
                 returnToDragStartAnimatorMock,
+                desktopRepository,
             )
     }
 
@@ -108,7 +111,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
         )
         desktopTilingDecorViewModel.removeTaskIfTiled(task1.displayId, task1.taskId)
 
-        verify(desktopTilingDecoration, times(1)).removeTaskIfTiled(any(), any())
+        verify(desktopTilingDecoration, times(1)).removeTaskIfTiled(any(), any(), any())
     }
 
     @Test

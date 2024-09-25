@@ -33,12 +33,14 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
+import com.android.wm.shell.windowdecor.DragResizeWindowGeometry
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -87,6 +89,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     private val transition: IBinder = mock()
     private val info: TransitionInfo = mock()
     private val finishCallback: Transitions.TransitionFinishCallback = mock()
+    private val desktopRepository: DesktopRepository = mock()
     private lateinit var tilingDecoration: DesktopTilingWindowDecoration
 
     private val split_divider_width = 10
@@ -106,6 +109,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
                 shellTaskOrganizer,
                 toggleResizeDesktopTaskTransitionHandler,
                 returnToDragStartAnimator,
+                desktopRepository,
             )
     }
 
@@ -199,7 +203,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     }
 
     @Test
-    fun taskNotTiled_NotBroughtToFront_TilingNotInitialised() {
+    fun taskNotTiled_notBroughtToFront_tilingNotInitialised() {
         val task1 = createFreeformTask()
         val task2 = createFreeformTask()
         val stableBounds = STABLE_BOUNDS_MOCK
@@ -222,7 +226,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     }
 
     @Test
-    fun taskNotTiled_NotBroughtToFront_TaskNotTiled() {
+    fun taskNotTiled_notBroughtToFront_taskNotTiled() {
         val task1 = createFreeformTask()
         val task2 = createFreeformTask()
         val task3 = createFreeformTask()
@@ -252,7 +256,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     }
 
     @Test
-    fun taskTiled_BroughtToFront_AlreadyInFrontNoAction() {
+    fun taskTiled_broughtToFront_alreadyInFrontNoAction() {
         val task1 = createFreeformTask()
         val task2 = createFreeformTask()
         val stableBounds = STABLE_BOUNDS_MOCK
@@ -282,7 +286,7 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     }
 
     @Test
-    fun taskTiled_BroughtToFront_BringToFront() {
+    fun taskTiled_broughtToFront_bringToFront() {
         val task1 = createFreeformTask()
         val task2 = createFreeformTask()
         val task3 = createFreeformTask()
@@ -379,6 +383,64 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         tilingDecoration.startAnimation(transition, info, transaction, transaction, finishCallback)
         // the startAnimation function should hide the veils.
         verify(tiledTaskHelper, times(4)).hideVeil()
+    }
+
+    @Test
+    fun taskTiled_shouldBeRemoved_whenTileBroken() {
+        val task1 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        whenever(tiledTaskHelper.taskInfo).thenReturn(task1)
+        whenever(tiledTaskHelper.desktopModeWindowDecoration).thenReturn(desktopWindowDecoration)
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+        tilingDecoration.leftTaskResizingHelper = tiledTaskHelper
+
+        tilingDecoration.removeTaskIfTiled(task1.taskId)
+
+        assertThat(tilingDecoration.leftTaskResizingHelper).isNull()
+        verify(desktopWindowDecoration, times(1)).removeDragResizeListener(any())
+        verify(desktopWindowDecoration, times(1))
+            .updateDisabledResizingEdge(eq(DragResizeWindowGeometry.DisabledEdge.NONE), eq(false))
+        verify(tiledTaskHelper, times(1)).dispose()
+    }
+
+    @Test
+    fun taskNotTiled_shouldNotBeRemoved_whenNotTiled() {
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        whenever(tiledTaskHelper.taskInfo).thenReturn(task1)
+        whenever(tiledTaskHelper.desktopModeWindowDecoration).thenReturn(desktopWindowDecoration)
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+        tilingDecoration.leftTaskResizingHelper = tiledTaskHelper
+
+        tilingDecoration.removeTaskIfTiled(task2.taskId)
+
+        assertThat(tilingDecoration.leftTaskResizingHelper).isNotNull()
+        verify(desktopWindowDecoration, never()).removeDragResizeListener(any())
+        verify(desktopWindowDecoration, never()).updateDisabledResizingEdge(any(), any())
+        verify(tiledTaskHelper, never()).dispose()
     }
 
     private fun initTiledTaskHelperMock(taskInfo: ActivityManager.RunningTaskInfo) {

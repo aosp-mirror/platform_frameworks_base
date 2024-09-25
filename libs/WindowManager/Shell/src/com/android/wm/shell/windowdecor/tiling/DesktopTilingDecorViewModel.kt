@@ -27,6 +27,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
+import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
@@ -43,6 +44,7 @@ class DesktopTilingDecorViewModel(
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
+    private val taskRepository: DesktopRepository,
 ) {
     @VisibleForTesting
     var tilingTransitionHandlerByDisplayId = SparseArray<DesktopTilingWindowDecoration>()
@@ -68,10 +70,12 @@ class DesktopTilingDecorViewModel(
                             shellTaskOrganizer,
                             toggleResizeDesktopTaskTransitionHandler,
                             returnToDragStartAnimator,
+                            taskRepository,
                         )
                     tilingTransitionHandlerByDisplayId.put(displayId, newHandler)
                     newHandler
                 }
+        transitions.registerObserver(handler)
         return handler.onAppTiled(
             taskInfo,
             desktopModeWindowDecoration,
