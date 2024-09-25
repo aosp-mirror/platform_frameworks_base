@@ -160,6 +160,12 @@ class DeviceSettingServiceConnection(
             }
             .shareIn(scope = coroutineScope, started = SharingStarted.WhileSubscribed(), replay = 1)
 
+    private val services =
+        ConcurrentHashMap<
+            EndPoint,
+            StateFlow<ServiceConnectionStatus<IDeviceSettingsProviderService>>,
+        >()
+
     /** Gets [DeviceSettingsConfig] for the device, return null when failed. */
     suspend fun getDeviceSettingsConfig(): DeviceSettingsConfig? {
         if (!isServiceEnabled.await()) {
@@ -320,11 +326,5 @@ class DeviceSettingServiceConnection(
         const val CONFIG_SERVICE_PACKAGE_NAME = "DEVICE_SETTINGS_CONFIG_PACKAGE_NAME"
         const val CONFIG_SERVICE_CLASS_NAME = "DEVICE_SETTINGS_CONFIG_CLASS"
         const val CONFIG_SERVICE_INTENT_ACTION = "DEVICE_SETTINGS_CONFIG_ACTION"
-
-        val services =
-            ConcurrentHashMap<
-                EndPoint,
-                StateFlow<ServiceConnectionStatus<IDeviceSettingsProviderService>>,
-            >()
     }
 }

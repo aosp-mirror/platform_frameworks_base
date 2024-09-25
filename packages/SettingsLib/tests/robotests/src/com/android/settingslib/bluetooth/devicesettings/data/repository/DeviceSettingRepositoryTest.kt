@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -138,11 +137,6 @@ class DeviceSettingRepositoryTest {
                 testScope.backgroundScope,
                 testScope.testScheduler,
             )
-    }
-
-    @After
-    fun clean() {
-        DeviceSettingServiceConnection.services.clear()
     }
 
     @Test
