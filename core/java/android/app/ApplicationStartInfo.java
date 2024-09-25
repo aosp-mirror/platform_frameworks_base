@@ -34,6 +34,7 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
@@ -777,7 +778,9 @@ public final class ApplicationStartInfo implements Parcelable {
         mStartComponent = other.mStartComponent;
     }
 
-    private ApplicationStartInfo(@NonNull Parcel in) {
+    /** @hide */
+    @VisibleForTesting
+    public ApplicationStartInfo(@NonNull Parcel in) {
         mStartupState = in.readInt();
         mPid = in.readInt();
         mRealUid = in.readInt();
@@ -1061,12 +1064,20 @@ public final class ApplicationStartInfo implements Parcelable {
         if (other == null || !(other instanceof ApplicationStartInfo)) {
             return false;
         }
+
         final ApplicationStartInfo o = (ApplicationStartInfo) other;
-        return mPid == o.mPid && mRealUid == o.mRealUid && mPackageUid == o.mPackageUid
-                && mDefiningUid == o.mDefiningUid && mReason == o.mReason
-                && mStartupState == o.mStartupState && mStartType == o.mStartType
-                && mLaunchMode == o.mLaunchMode && TextUtils.equals(mPackageName, o.mPackageName)
-                && TextUtils.equals(mProcessName, o.mProcessName) && timestampsEquals(o)
+
+        return mPid == o.mPid
+                && mRealUid == o.mRealUid
+                && mPackageUid == o.mPackageUid
+                && mDefiningUid == o.mDefiningUid
+                && mReason == o.mReason
+                && mStartupState == o.mStartupState
+                && mStartType == o.mStartType
+                && mLaunchMode == o.mLaunchMode
+                && TextUtils.equals(mPackageName, o.mPackageName)
+                && TextUtils.equals(mProcessName, o.mProcessName)
+                && timestampsEquals(o)
                 && mWasForceStopped == o.mWasForceStopped
                 && mMonoticCreationTimeMs == o.mMonoticCreationTimeMs
                 && mStartComponent == o.mStartComponent;
