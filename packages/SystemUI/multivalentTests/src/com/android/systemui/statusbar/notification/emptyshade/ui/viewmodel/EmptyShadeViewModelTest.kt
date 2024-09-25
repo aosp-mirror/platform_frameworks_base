@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
@@ -53,6 +54,7 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val zenModeRepository = kosmos.zenModeRepository
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
+    private val fakeSecureSettingsRepository = kosmos.fakeSecureSettingsRepository
 
     private val underTest = kosmos.emptyShadeViewModel
 
@@ -204,5 +206,85 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             runCurrent()
 
             assertThat(footerVisible).isTrue()
+        }
+
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @Test
+    fun onClick_whenHistoryDisabled_leadsToSettingsPage() =
+        testScope.runTest {
+            val onClick by collectLastValue(underTest.onClick)
+            runCurrent()
+
+            fakeSecureSettingsRepository.setInt(Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0)
+
+            assertThat(onClick?.targetIntent?.action)
+                .isEqualTo(Settings.ACTION_NOTIFICATION_SETTINGS)
+            assertThat(onClick?.backStack).isEmpty()
+        }
+
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @Test
+    fun onClick_whenHistoryEnabled_leadsToHistoryPage() =
+        testScope.runTest {
+            val onClick by collectLastValue(underTest.onClick)
+            runCurrent()
+
+            fakeSecureSettingsRepository.setInt(Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1)
+
+            assertThat(onClick?.targetIntent?.action)
+                .isEqualTo(Settings.ACTION_NOTIFICATION_HISTORY)
+            assertThat(onClick?.backStack?.map { it.action })
+                .containsExactly(Settings.ACTION_NOTIFICATION_SETTINGS)
+        }
+
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @Test
+    fun onClick_whenOneModeHidingNotifications_leadsToModeSettings() =
+        testScope.runTest {
+            val onClick by collectLastValue(underTest.onClick)
+            runCurrent()
+
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setId("ID")
+                    .setActive(true)
+                    .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                    .build()
+            )
+            runCurrent()
+
+            assertThat(onClick?.targetIntent?.action)
+                .isEqualTo(Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS)
+            assertThat(
+                    onClick?.targetIntent?.extras?.getString(Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID)
+                )
+                .isEqualTo("ID")
+            assertThat(onClick?.backStack?.map { it.action })
+                .containsExactly(Settings.ACTION_ZEN_MODE_SETTINGS)
+        }
+
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @Test
+    fun onClick_whenMultipleModesHidingNotifications_leadsToGeneralModesSettings() =
+        testScope.runTest {
+            val onClick by collectLastValue(underTest.onClick)
+            runCurrent()
+
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setActive(true)
+                    .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                    .build()
+            )
+            zenModeRepository.addMode(
+                TestModeBuilder()
+                    .setActive(true)
+                    .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                    .build()
+            )
+            runCurrent()
+
+            assertThat(onClick?.targetIntent?.action).isEqualTo(Settings.ACTION_ZEN_MODE_SETTINGS)
+            assertThat(onClick?.backStack).isEmpty()
         }
 }
