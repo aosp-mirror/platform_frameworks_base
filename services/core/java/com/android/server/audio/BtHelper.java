@@ -603,7 +603,11 @@ public class BtHelper {
                 break;
             case BluetoothProfile.LE_AUDIO:
                 if (mLeAudio != null && mLeAudioCallback != null) {
-                    mLeAudio.unregisterCallback(mLeAudioCallback);
+                    try {
+                        mLeAudio.unregisterCallback(mLeAudioCallback);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Exception while unregistering callback for LE audio", e);
+                    }
                 }
                 mLeAudio = null;
                 mLeAudioCallback = null;
@@ -680,12 +684,21 @@ public class BtHelper {
                     return;
                 }
                 if (mLeAudio != null && mLeAudioCallback != null) {
-                    mLeAudio.unregisterCallback(mLeAudioCallback);
+                    try {
+                        mLeAudio.unregisterCallback(mLeAudioCallback);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Exception while unregistering callback for LE audio", e);
+                    }
                 }
                 mLeAudio = (BluetoothLeAudio) proxy;
                 mLeAudioCallback = new MyLeAudioCallback();
-                mLeAudio.registerCallback(
-                            mContext.getMainExecutor(), mLeAudioCallback);
+                try{
+                    mLeAudio.registerCallback(
+                                mContext.getMainExecutor(), mLeAudioCallback);
+                } catch (Exception e) {
+                    mLeAudioCallback = null;
+                    Log.e(TAG, "Exception while registering callback for LE audio", e);
+                }
                 break;
             case BluetoothProfile.A2DP_SINK:
             case BluetoothProfile.LE_AUDIO_BROADCAST:
