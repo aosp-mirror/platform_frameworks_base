@@ -16,6 +16,7 @@
 
 package com.android.systemui.util.kotlin
 
+import android.util.Log
 import java.util.Optional
 
 /**
@@ -28,3 +29,14 @@ inline fun <T : Any, R> transform(value: T?, block: (T) -> R): R? = value?.let(b
  */
 @Suppress("NOTHING_TO_INLINE")
 inline fun <T> Optional<T>.getOrNull(): T? = orElse(null)
+
+/**
+ * Utility method to check if a value that is technically nullable is actually null. If it is null,
+ * this will crash development builds (but just log on production/droidfood builds). It can be used
+ * as a first step to verify if a nullable value can be made non-nullable instead.
+ */
+fun <T> expectNotNull(logTag: String, name: String, nullable: T?) {
+    if (nullable == null) {
+        Log.wtf(logTag, "Expected value of $name to not be null.")
+    }
+}
