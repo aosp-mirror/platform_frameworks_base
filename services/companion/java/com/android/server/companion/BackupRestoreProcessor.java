@@ -240,9 +240,10 @@ class BackupRestoreProcessor {
             boolean matchesMacAddress = Objects.equals(
                     associationInfo.getDeviceMacAddress(),
                     restored.getDeviceMacAddress());
-            boolean matchesTag = !Flags.associationTag()
-                    || Objects.equals(associationInfo.getTag(), restored.getTag());
-            return matchesMacAddress && matchesTag;
+            boolean matchesDeviceId = !Flags.associationTag()
+                    || (associationInfo.getDeviceId() != null
+                        && associationInfo.getDeviceId().isSameDevice(restored.getDeviceId()));
+            return matchesMacAddress || matchesDeviceId;
         };
         AssociationInfo local = CollectionUtils.find(localAssociations, isSameDevice);
 

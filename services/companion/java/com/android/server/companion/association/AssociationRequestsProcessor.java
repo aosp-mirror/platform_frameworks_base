@@ -41,6 +41,7 @@ import android.app.PendingIntent;
 import android.companion.AssociatedDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.DeviceId;
 import android.companion.Flags;
 import android.companion.IAssociationRequestCallback;
 import android.content.ComponentName;
@@ -298,10 +299,10 @@ public class AssociationRequestsProcessor {
         final long timestamp = System.currentTimeMillis();
 
         final AssociationInfo association = new AssociationInfo(id, userId, packageName,
-                /* tag */ null, macAddress, displayName, deviceProfile, associatedDevice,
+                 macAddress, displayName, deviceProfile, associatedDevice,
                 selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
                 /* pending */ false, timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0,
-                deviceIcon);
+                deviceIcon, /* deviceId */ null);
         // Add role holder for association (if specified) and add new association to store.
         maybeGrantRoleAndStoreAssociation(association, callback, resultReceiver);
     }
@@ -354,14 +355,14 @@ public class AssociationRequestsProcessor {
     }
 
     /**
-     * Set association tag.
+     * Set Device id for the association.
      */
-    public void setAssociationTag(int associationId, String tag) {
-        Slog.i(TAG, "Setting association tag=[" + tag + "] to id=[" + associationId + "]...");
+    public void setDeviceId(int associationId, DeviceId deviceId) {
+        Slog.i(TAG, "Setting DeviceId=[" + deviceId + "] to id=[" + associationId + "]...");
 
         AssociationInfo association = mAssociationStore.getAssociationWithCallerChecks(
                 associationId);
-        association = (new AssociationInfo.Builder(association)).setTag(tag).build();
+        association = (new AssociationInfo.Builder(association)).setDeviceId(deviceId).build();
         mAssociationStore.updateAssociation(association);
     }
 

@@ -278,12 +278,6 @@ public final class CompanionDeviceManager {
     public static final int MESSAGE_ONEWAY_TO_WEARABLE = 0x43847987; // +TOW
 
     /**
-     * The length limit of Association tag.
-     * @hide
-     */
-    private static final int ASSOCIATION_TAG_LENGTH_LIMIT = 1024;
-
-    /**
      * Callback for applications to receive updates about and the outcome of
      * {@link AssociationRequest} issued via {@code associate()} call.
      *
@@ -1780,57 +1774,25 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Sets the {@link AssociationInfo#getTag() tag} for this association.
+     * Sets the {@link DeviceId deviceId} for this association.
      *
-     * <p>The length of the tag must be at most 1024 characters to save disk space.
-     *
-     * <p>This allows to store useful information about the associated devices.
+     * <p>This device id helps the system uniquely identify your device for efficient device
+     * management and prevents duplicate entries.
      *
      * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
-     *                          of the companion device recorded by CompanionDeviceManager
-     * @param tag the tag of this association
+     *                          of the companion device recorded by CompanionDeviceManager.
+     * @param deviceId to be used as device identifier to represent the associated device.
      */
     @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
     @UserHandleAware
-    public void setAssociationTag(int associationId, @NonNull String tag) {
-        if (mService == null) {
-            Log.w(TAG, "CompanionDeviceManager service is not available.");
-            return;
-        }
-
-        Objects.requireNonNull(tag, "tag cannot be null");
-
-        if (tag.length() > ASSOCIATION_TAG_LENGTH_LIMIT) {
-            throw new IllegalArgumentException("Length of the tag must be at most"
-                    + ASSOCIATION_TAG_LENGTH_LIMIT + " characters");
-        }
-
-        try {
-            mService.setAssociationTag(associationId, tag);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Clears the {@link AssociationInfo#getTag() tag} for this association.
-     *
-     * <p>The tag will be set to null for this association when calling this API.
-     *
-     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the Association
-     *                          of the companion device recorded by CompanionDeviceManager
-     * @see CompanionDeviceManager#setAssociationTag(int, String)
-     */
-    @FlaggedApi(Flags.FLAG_ASSOCIATION_TAG)
-    @UserHandleAware
-    public void clearAssociationTag(int associationId) {
+    public void setDeviceId(int associationId, @Nullable DeviceId deviceId) {
         if (mService == null) {
             Log.w(TAG, "CompanionDeviceManager service is not available.");
             return;
         }
 
         try {
-            mService.clearAssociationTag(associationId);
+            mService.setDeviceId(associationId, deviceId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

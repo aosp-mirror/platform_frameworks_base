@@ -55,6 +55,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.DeviceId;
 import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IOnAssociationsChangedListener;
@@ -318,7 +319,6 @@ public class CompanionDeviceManagerService extends SystemService {
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "get associations");
-
             return mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
         }
 
@@ -694,14 +694,10 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void setAssociationTag(int associationId, String tag) {
-            mAssociationRequestsProcessor.setAssociationTag(associationId, tag);
+        public void setDeviceId(int associationId, DeviceId deviceId) {
+            mAssociationRequestsProcessor.setDeviceId(associationId, deviceId);
         }
 
-        @Override
-        public void clearAssociationTag(int associationId) {
-            setAssociationTag(associationId, null);
-        }
 
         @Override
         public byte[] getBackupPayload(int userId) {
