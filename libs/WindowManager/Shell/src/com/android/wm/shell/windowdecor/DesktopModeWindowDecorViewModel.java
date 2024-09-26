@@ -935,14 +935,18 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
             final boolean touchingButton = (id == R.id.close_window || id == R.id.maximize_window
                     || id == R.id.open_menu_button || id == R.id.minimize_window);
+            final boolean dragAllowed =
+                    !mDesktopRepository.isTaskInFullImmersiveState(taskInfo.taskId);
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
-                    mDragPointerId = e.getPointerId(0);
-                    final Rect initialBounds = mDragPositioningCallback.onDragPositioningStart(
-                            0 /* ctrlType */, e.getRawX(0),
-                            e.getRawY(0));
-                    updateDragStatus(e.getActionMasked());
-                    mOnDragStartInitialBounds.set(initialBounds);
+                    if (dragAllowed) {
+                        mDragPointerId = e.getPointerId(0);
+                        final Rect initialBounds = mDragPositioningCallback.onDragPositioningStart(
+                                0 /* ctrlType */, e.getRawX(0),
+                                e.getRawY(0));
+                        updateDragStatus(e.getActionMasked());
+                        mOnDragStartInitialBounds.set(initialBounds);
+                    }
                     mHasLongClicked = false;
                     // Do not consume input event if a button is touched, otherwise it would
                     // prevent the button's ripple effect from showing.
@@ -951,6 +955,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 case ACTION_MOVE: {
                     // If a decor's resize drag zone is active, don't also try to reposition it.
                     if (decoration.isHandlingDragResize()) break;
+                    // Dragging the header isn't allowed, so skip the positioning work.
+                    if (!dragAllowed) break;
+
                     decoration.closeMaximizeMenu();
                     if (e.findPointerIndex(mDragPointerId) == -1) {
                         mDragPointerId = e.getPointerId(0);
@@ -1034,6 +1041,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             final int action = e.getActionMasked();
             if (mIsDragging || (action != MotionEvent.ACTION_UP
                     && action != MotionEvent.ACTION_CANCEL)) {
+                return false;
+            }
+            if (mDesktopRepository.isTaskInFullImmersiveState(mTaskId)) {
+                // Disallow double-tap to resize when in full immersive.
                 return false;
             }
             onMaximizeOrRestore(mTaskId, "double_tap");
