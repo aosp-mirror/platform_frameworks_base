@@ -262,6 +262,7 @@ import android.appwidget.AppWidgetManagerInternal;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
+import android.content.ClipData;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentCaptureOptions;
@@ -418,7 +419,6 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
@@ -438,6 +438,7 @@ import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
+import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.graphics.fonts.FontManagerInternal;
@@ -482,6 +483,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -499,6 +501,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -19077,5 +19080,88 @@ public class ActivityManagerService extends IActivityManager.Stub
     @NonNull
     Freezer getFreezer() {
         return mFreezer;
+    }
+
+    // Set of IntentCreatorToken objects that are currently active.
+    private static final Map<IntentCreatorToken.Key, WeakReference<IntentCreatorToken>>
+            sIntentCreatorTokenCache = new ConcurrentHashMap<>();
+
+    /**
+     * A binder token used to keep track of which app created the intent. This token can be used to
+     * defend against intent redirect attacks. It stores uid of the intent creator and key fields of
+     * the intent to make it impossible for attacker to fake uid with a malicious intent.
+     *
+     * @hide
+     */
+    public static final class IntentCreatorToken extends Binder {
+        @NonNull
+        private final Key mKeyFields;
+
+        public IntentCreatorToken(int creatorUid, Intent intent) {
+            super();
+            this.mKeyFields = new Key(creatorUid, intent);
+        }
+
+        public int getCreatorUid() {
+            return mKeyFields.mCreatorUid;
+        }
+
+        /** {@hide} */
+        public static boolean isValid(@NonNull Intent intent) {
+            IBinder binder = intent.getCreatorToken();
+            IntentCreatorToken token = null;
+            if (binder instanceof IntentCreatorToken) {
+                token = (IntentCreatorToken) binder;
+            }
+            return token != null && token.mKeyFields.equals(
+                    new Key(token.mKeyFields.mCreatorUid, intent));
+        }
+
+        private static class Key {
+            private Key(int creatorUid, Intent intent) {
+                this.mCreatorUid = creatorUid;
+                this.mAction = intent.getAction();
+                this.mData = intent.getData();
+                this.mType = intent.getType();
+                this.mPackage = intent.getPackage();
+                this.mComponent = intent.getComponent();
+                this.mFlags = intent.getFlags() & Intent.IMMUTABLE_FLAGS;
+                ClipData clipData = intent.getClipData();
+                if (clipData != null) {
+                    this.mClipDataUris = new ArrayList<>(clipData.getItemCount());
+                    for (int i = 0; i < clipData.getItemCount(); i++) {
+                        this.mClipDataUris.add(clipData.getItemAt(i).getUri());
+                    }
+                }
+            }
+
+            private final int mCreatorUid;
+            private final String mAction;
+            private final Uri mData;
+            private final String mType;
+            private final String mPackage;
+            private final ComponentName mComponent;
+            private final int mFlags;
+            private List<Uri> mClipDataUris;
+
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Key key = (Key) o;
+                return mCreatorUid == key.mCreatorUid && mFlags == key.mFlags && Objects.equals(
+                        mAction, key.mAction) && Objects.equals(mData, key.mData)
+                        && Objects.equals(mType, key.mType) && Objects.equals(mPackage,
+                        key.mPackage) && Objects.equals(mComponent, key.mComponent)
+                        && Objects.equals(mClipDataUris, key.mClipDataUris);
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mCreatorUid, mAction, mData, mType, mPackage, mComponent,
+                        mFlags,
+                        mClipDataUris);
+            }
+        }
     }
 }
