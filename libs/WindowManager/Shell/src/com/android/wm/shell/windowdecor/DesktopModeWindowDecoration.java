@@ -450,8 +450,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         final boolean inFullImmersive = mDesktopRepository
                 .isTaskInFullImmersiveState(taskInfo.taskId);
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
-                shouldSetTaskPositionAndCrop, inFullImmersive, mDisplayController.getInsetsState(
-                        taskInfo.displayId));
+                shouldSetTaskPositionAndCrop, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
+                inFullImmersive, mDisplayController.getInsetsState(taskInfo.displayId));
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -755,6 +755,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
             boolean shouldSetTaskPositionAndCrop,
+            boolean isStatusBarVisible,
+            boolean isKeyguardVisibleAndOccluded,
             boolean inFullImmersiveMode,
             @NonNull InsetsState displayInsetsState) {
         final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
@@ -766,6 +768,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mLayoutResId = captionLayoutId;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
+
+        final boolean showCaption;
+        if (Flags.enableFullyImmersiveInDesktop()) {
+            if (inFullImmersiveMode) {
+                showCaption = isStatusBarVisible && !isKeyguardVisibleAndOccluded;
+            } else {
+                showCaption = taskInfo.isFreeform()
+                        || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
+            }
+        } else {
+            // Caption should always be visible in freeform mode. When not in freeform,
+            // align with the status bar except when showing over keyguard (where it should not
+            // shown).
+            //  TODO(b/356405803): Investigate how it's possible for the status bar visibility to
+            //   be false while a freeform window is open if the status bar is always
+            //   forcibly-shown. It may be that the InsetsState (from which |mIsStatusBarVisible|
+            //   is set) still contains an invisible insets source in immersive cases even if the
+            //   status bar is shown?
+            showCaption = taskInfo.isFreeform()
+                    || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
+        }
+        relayoutParams.mIsCaptionVisible = showCaption;
 
         if (isAppHeader) {
             if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
