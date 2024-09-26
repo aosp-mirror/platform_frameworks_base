@@ -6,13 +6,16 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.domain.interactor.systemGestureExclusionInteractor
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.FakeOverlay
+import com.android.systemui.scene.ui.viewmodel.SceneContainerGestureFilter
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
+import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -30,10 +33,7 @@ var Kosmos.sceneKeys by Fixture {
 val Kosmos.initialSceneKey by Fixture { Scenes.Lockscreen }
 
 var Kosmos.overlayKeys by Fixture {
-    listOf(
-        Overlays.NotificationsShade,
-        Overlays.QuickSettingsShade,
-    )
+    listOf(Overlays.NotificationsShade, Overlays.QuickSettingsShade)
 }
 
 val Kosmos.fakeOverlaysByKeys by Fixture { overlayKeys.associateWith { FakeOverlay(it) } }
@@ -74,8 +74,21 @@ val Kosmos.sceneContainerViewModel by Fixture {
             powerInteractor = powerInteractor,
             shadeInteractor = shadeInteractor,
             splitEdgeDetector = splitEdgeDetector,
+            gestureFilterFactory = sceneContainerGestureFilterFactory,
+            displayId = displayTracker.defaultDisplayId,
             motionEventHandlerReceiver = {},
-            logger = sceneLogger
+            logger = sceneLogger,
         )
         .apply { setTransitionState(transitionState) }
+}
+
+val Kosmos.sceneContainerGestureFilterFactory by Fixture {
+    object : SceneContainerGestureFilter.Factory {
+        override fun create(displayId: Int): SceneContainerGestureFilter {
+            return SceneContainerGestureFilter(
+                interactor = systemGestureExclusionInteractor,
+                displayId = displayId,
+            )
+        }
+    }
 }
