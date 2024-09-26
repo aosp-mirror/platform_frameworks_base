@@ -860,15 +860,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
-        doMotionEvent(actionDown, coordinate, 0);
-    }
-
-    private void doMotionEvent(int actionDown, int coordinate, float velocity) {
         mController.onMotionEvent(
                 /* touchX */ coordinate,
                 /* touchY */ coordinate,
-                /* velocityX = */ velocity,
-                /* velocityY = */ velocity,
                 /* keyAction */ actionDown,
                 /* swipeEdge */ BackEvent.EDGE_LEFT);
     }
