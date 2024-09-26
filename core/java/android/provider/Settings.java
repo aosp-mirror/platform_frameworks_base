@@ -2092,23 +2092,6 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
-     * Activity Action: Show Zen Mode visual effects configuration settings.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ZEN_MODE_BLOCKED_EFFECTS_SETTINGS =
-            "android.settings.ZEN_MODE_BLOCKED_EFFECTS_SETTINGS";
-
-    /**
-     * Activity Action: Show Zen Mode onboarding activity.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ZEN_MODE_ONBOARDING = "android.settings.ZEN_MODE_ONBOARDING";
-
-    /**
      * Activity Action: Show Zen Mode (aka Do Not Disturb) priority configuration settings.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -8746,35 +8729,6 @@ public final class Settings {
 
         /** @hide */ public static final int ZEN_DURATION_PROMPT = -1;
         /** @hide */ public static final int ZEN_DURATION_FOREVER = 0;
-
-        /**
-         * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
-         * @hide
-         */
-        @Readable
-        public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
-
-        /**
-         * If nonzero, will show the zen update settings suggestion.
-         * @hide
-         */
-        @Readable
-        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
-
-        /**
-         * If nonzero, zen has not been updated to reflect new changes.
-         * @hide
-         */
-        @Readable
-        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
-
-        /**
-         * If nonzero, zen setting suggestion has been viewed by user
-         * @hide
-         */
-        @Readable
-        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
-                "zen_settings_suggestion_viewed";
 
         /**
          * Whether the in call notification is enabled to play sound during calls.  The value is
@@ -18062,10 +18016,6 @@ public final class Settings {
             MOVED_TO_SECURE = new HashSet<>(8);
             MOVED_TO_SECURE.add(Global.INSTALL_NON_MARKET_APPS);
             MOVED_TO_SECURE.add(Global.ZEN_DURATION);
-            MOVED_TO_SECURE.add(Global.SHOW_ZEN_UPGRADE_NOTIFICATION);
-            MOVED_TO_SECURE.add(Global.SHOW_ZEN_SETTINGS_SUGGESTION);
-            MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_UPDATED);
-            MOVED_TO_SECURE.add(Global.ZEN_SETTINGS_SUGGESTION_VIEWED);
             MOVED_TO_SECURE.add(Global.CHARGING_SOUNDS_ENABLED);
             MOVED_TO_SECURE.add(Global.CHARGING_VIBRATION_ENABLED);
             MOVED_TO_SECURE.add(Global.NOTIFICATION_BUBBLES);
@@ -18899,40 +18849,6 @@ public final class Settings {
          */
         @Readable
         public static final String SHOW_MUTE_IN_CRASH_DIALOG = "show_mute_in_crash_dialog";
-
-
-        /**
-         * If nonzero, will show the zen upgrade notification when the user toggles DND on/off.
-         * @hide
-         * @deprecated - Use {@link android.provider.Settings.Secure#SHOW_ZEN_UPGRADE_NOTIFICATION}
-         */
-        @Deprecated
-        public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
-
-        /**
-         * If nonzero, will show the zen update settings suggestion.
-         * @hide
-         * @deprecated - Use {@link android.provider.Settings.Secure#SHOW_ZEN_SETTINGS_SUGGESTION}
-         */
-        @Deprecated
-        public static final String SHOW_ZEN_SETTINGS_SUGGESTION = "show_zen_settings_suggestion";
-
-        /**
-         * If nonzero, zen has not been updated to reflect new changes.
-         * @deprecated - Use {@link android.provider.Settings.Secure#ZEN_SETTINGS_UPDATED}
-         * @hide
-         */
-        @Deprecated
-        public static final String ZEN_SETTINGS_UPDATED = "zen_settings_updated";
-
-        /**
-         * If nonzero, zen setting suggestion has been viewed by user
-         * @hide
-         * @deprecated - Use {@link android.provider.Settings.Secure#ZEN_SETTINGS_SUGGESTION_VIEWED}
-         */
-        @Deprecated
-        public static final String ZEN_SETTINGS_SUGGESTION_VIEWED =
-                "zen_settings_suggestion_viewed";
 
         /**
          * Backup and restore agent timeout parameters.

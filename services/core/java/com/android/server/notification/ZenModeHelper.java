@@ -54,10 +54,8 @@ import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.Flags;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
-import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -74,7 +72,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
-import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -90,7 +87,6 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
@@ -117,8 +113,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.MetricsLogger;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -309,7 +303,6 @@ public class ZenModeHelper {
         mHandler.postMetricsTimer();
         cleanUpZenRules();
         mIsSystemServicesReady = true;
-        showZenUpgradeNotification(mZenMode);
     }
 
     /**
@@ -1584,8 +1577,6 @@ public class ZenModeHelper {
             String reason, @Nullable String caller, int callingUid) {
         setManualZenMode(zenMode, conditionId, origin, reason, caller, true /*setRingerMode*/,
                 callingUid);
-        Settings.Secure.putInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION, 0);
     }
 
     private void setManualZenMode(int zenMode, Uri conditionId, @ConfigOrigin int origin,
@@ -1781,17 +1772,6 @@ public class ZenModeHelper {
 
             if (Flags.modesApi() && Flags.modesUi()) {
                 SystemZenRules.maybeUpgradeRules(mContext, config);
-            }
-
-            // Resolve user id for settings.
-            userId = userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId;
-            if (config.version < ZenModeConfig.XML_VERSION_ZEN_UPGRADE) {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1, userId);
-            } else {
-                // devices not restoring/upgrading already have updated zen settings
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ZEN_SETTINGS_UPDATED, 1, userId);
             }
 
             if (Flags.modesApi() && forRestore) {
@@ -2062,7 +2042,6 @@ public class ZenModeHelper {
         Global.putInt(mContext.getContentResolver(), Global.ZEN_MODE, zen);
         ZenLog.traceSetZenMode(Global.getInt(mContext.getContentResolver(), Global.ZEN_MODE, -1),
                 "updated setting");
-        showZenUpgradeNotification(zen);
     }
 
     private int getPreviousRingerModeSetting() {
@@ -2117,12 +2096,6 @@ public class ZenModeHelper {
             for (ZenRule automaticRule : mConfig.automaticRules.values()) {
                 if (automaticRule.isActive()) {
                     if (zenSeverity(automaticRule.zenMode) > zenSeverity(zen)) {
-                        // automatic rule triggered dnd and user hasn't seen update dnd dialog
-                        if (Settings.Secure.getInt(mContext.getContentResolver(),
-                                Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED, 1) == 0) {
-                            Settings.Secure.putInt(mContext.getContentResolver(),
-                                    Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION, 1);
-                        }
                         zen = automaticRule.zenMode;
                     }
                 }
@@ -2700,62 +2673,6 @@ public class ZenModeHelper {
                 }
             }
         }
-    }
-
-    private void showZenUpgradeNotification(int zen) {
-        final boolean isWatch = mContext.getPackageManager().hasSystemFeature(
-            PackageManager.FEATURE_WATCH);
-        final boolean showNotification = mIsSystemServicesReady
-                && zen != Global.ZEN_MODE_OFF
-                && !isWatch
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ZEN_SETTINGS_UPDATED, 0) != 1;
-
-        if (isWatch) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-        }
-
-        if (showNotification) {
-            mNotificationManager.notify(TAG, SystemMessage.NOTE_ZEN_UPGRADE,
-                    createZenUpgradeNotification());
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-        }
-    }
-
-    @VisibleForTesting
-    protected Notification createZenUpgradeNotification() {
-        final Bundle extras = new Bundle();
-        extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                mContext.getResources().getString(R.string.global_action_settings));
-        int title = R.string.zen_upgrade_notification_title;
-        int content = R.string.zen_upgrade_notification_content;
-        int drawable = R.drawable.ic_zen_24dp;
-        if (NotificationManager.Policy.areAllVisualEffectsSuppressed(
-                getConsolidatedNotificationPolicy().suppressedVisualEffects)) {
-            title = R.string.zen_upgrade_notification_visd_title;
-            content = R.string.zen_upgrade_notification_visd_content;
-            drawable = R.drawable.ic_dnd_block_notifications;
-        }
-
-        Intent onboardingIntent = new Intent(Settings.ZEN_MODE_ONBOARDING);
-        onboardingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        return new Notification.Builder(mContext, SystemNotificationChannels.DO_NOT_DISTURB)
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_settings_24dp)
-                .setLargeIcon(Icon.createWithResource(mContext, drawable))
-                .setContentTitle(mContext.getResources().getString(title))
-                .setContentText(mContext.getResources().getString(content))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, onboardingIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
-                .setAutoCancel(true)
-                .setLocalOnly(true)
-                .addExtras(extras)
-                .setStyle(new Notification.BigTextStyle())
-                .build();
     }
 
     private int drawableResNameToResId(String packageName, String resourceName) {

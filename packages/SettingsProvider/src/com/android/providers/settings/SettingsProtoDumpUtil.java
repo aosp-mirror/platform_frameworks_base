@@ -2734,18 +2734,6 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ZEN_DURATION,
                 SecureSettingsProto.Zen.DURATION);
         dumpSetting(s, p,
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION,
-                SecureSettingsProto.Zen.SHOW_ZEN_UPGRADE_NOTIFICATION);
-        dumpSetting(s, p,
-                Settings.Secure.SHOW_ZEN_SETTINGS_SUGGESTION,
-                SecureSettingsProto.Zen.SHOW_ZEN_SETTINGS_SUGGESTION);
-        dumpSetting(s, p,
-                Settings.Secure.ZEN_SETTINGS_UPDATED,
-                SecureSettingsProto.Zen.SETTINGS_UPDATED);
-        dumpSetting(s, p,
-                Settings.Secure.ZEN_SETTINGS_SUGGESTION_VIEWED,
-                SecureSettingsProto.Zen.SETTINGS_SUGGESTION_VIEWED);
-        dumpSetting(s, p,
                 Settings.Secure.CHARGE_OPTIMIZATION_MODE,
                 SecureSettingsProto.CHARGE_OPTIMIZATION_MODE);
         p.end(zenToken);

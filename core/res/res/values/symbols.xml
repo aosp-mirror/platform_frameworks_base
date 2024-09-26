@@ -3933,7 +3933,6 @@
   <java-symbol type="string" name="notification_channel_usb" />
   <java-symbol type="string" name="notification_channel_heavy_weight_app" />
   <java-symbol type="string" name="notification_channel_system_changes" />
-  <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
   <java-symbol type="string" name="notification_channel_display" />
@@ -4159,11 +4158,6 @@
 
   <!-- For Wear devices -->
   <java-symbol type="array" name="config_wearActivityModeRadios" />
-
-  <java-symbol type="string" name="zen_upgrade_notification_title" />
-  <java-symbol type="string" name="zen_upgrade_notification_content" />
-  <java-symbol type="string" name="zen_upgrade_notification_visd_title" />
-  <java-symbol type="string" name="zen_upgrade_notification_visd_content" />
 
   <java-symbol type="string" name="review_notification_settings_title" />
   <java-symbol type="string" name="review_notification_settings_text" />

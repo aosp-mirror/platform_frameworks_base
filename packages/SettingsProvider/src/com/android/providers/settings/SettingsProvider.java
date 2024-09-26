@@ -4771,9 +4771,9 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 169) {
-                    // Version 169: Set the default value for Secure Settings ZEN_DURATION,
-                    // SHOW_ZEN_SETTINGS_SUGGESTION, ZEN_SETTINGS_UPDATE and
-                    // ZEN_SETTINGS_SUGGESTION_VIEWED
+                    // Version 169: Set the default value for Secure Settings ZEN_DURATION.
+                    // Also used to update SHOW_ZEN_SETTINGS_SUGGESTION, ZEN_SETTINGS_UPDATE and
+                    // ZEN_SETTINGS_SUGGESTION_VIEWED, but those properties are gone now.
 
                     final SettingsState globalSettings = getGlobalSettingsLocked();
                     final Setting globalZenDuration = globalSettings.getSettingLocked(
@@ -4799,33 +4799,6 @@ public class SettingsProvider extends ContentProvider {
                         secureSettings.insertSettingOverrideableByRestoreLocked(
                                 Secure.ZEN_DURATION, defaultZenDuration, null, true,
                                 SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    // SHOW_ZEN_SETTINGS_SUGGESTION
-                    final Setting currentShowZenSettingSuggestion = secureSettings.getSettingLocked(
-                            Secure.SHOW_ZEN_SETTINGS_SUGGESTION);
-                    if (currentShowZenSettingSuggestion.isNull()) {
-                        secureSettings.insertSettingOverrideableByRestoreLocked(
-                                Secure.SHOW_ZEN_SETTINGS_SUGGESTION, "1",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    // ZEN_SETTINGS_UPDATED
-                    final Setting currentUpdatedSetting = secureSettings.getSettingLocked(
-                            Secure.ZEN_SETTINGS_UPDATED);
-                    if (currentUpdatedSetting.isNull()) {
-                        secureSettings.insertSettingOverrideableByRestoreLocked(
-                                Secure.ZEN_SETTINGS_UPDATED, "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                    }
-
-                    // ZEN_SETTINGS_SUGGESTION_VIEWED
-                    final Setting currentSettingSuggestionViewed = secureSettings.getSettingLocked(
-                            Secure.ZEN_SETTINGS_SUGGESTION_VIEWED);
-                    if (currentSettingSuggestionViewed.isNull()) {
-                        secureSettings.insertSettingOverrideableByRestoreLocked(
-                                Secure.ZEN_SETTINGS_SUGGESTION_VIEWED, "0",
-                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
 
                     currentVersion = 170;

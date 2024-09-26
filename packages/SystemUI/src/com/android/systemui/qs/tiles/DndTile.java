@@ -169,50 +169,34 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private void enableZenMode(@Nullable Expandable expandable) {
         int zenDuration = mSettingZenDuration.getValue();
-        boolean showOnboarding = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0
-                && Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ZEN_SETTINGS_UPDATED, 0) != 1;
-        if (showOnboarding) {
-            // don't show on-boarding again or notification ever
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-            // turn on DND
-            mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
-            // show on-boarding screen
-            Intent intent = new Intent(Settings.ZEN_MODE_ONBOARDING);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
-        } else {
-            switch (zenDuration) {
-                case Settings.Secure.ZEN_DURATION_PROMPT:
-                    mUiHandler.post(() -> {
-                        Dialog dialog = makeZenModeDialog();
-                        if (expandable != null) {
-                            DialogTransitionAnimator.Controller controller =
-                                    expandable.dialogTransitionController(new DialogCuj(
-                                            InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                            INTERACTION_JANK_TAG));
-                            if (controller != null) {
-                                mDialogTransitionAnimator.show(dialog,
-                                        controller, /* animateBackgroundBoundsChange= */ false);
-                            } else {
-                                dialog.show();
-                            }
+        switch (zenDuration) {
+            case Settings.Secure.ZEN_DURATION_PROMPT:
+                mUiHandler.post(() -> {
+                    Dialog dialog = makeZenModeDialog();
+                    if (expandable != null) {
+                        DialogTransitionAnimator.Controller controller =
+                                expandable.dialogTransitionController(new DialogCuj(
+                                        InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                        INTERACTION_JANK_TAG));
+                        if (controller != null) {
+                            mDialogTransitionAnimator.show(dialog,
+                                    controller, /* animateBackgroundBoundsChange= */ false);
                         } else {
                             dialog.show();
                         }
-                    });
-                    break;
-                case Settings.Secure.ZEN_DURATION_FOREVER:
-                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
-                    break;
-                default:
-                    Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
-                            mHost.getUserId(), true).id;
-                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
-                            conditionId, TAG);
-            }
+                    } else {
+                        dialog.show();
+                    }
+                });
+                break;
+            case Settings.Secure.ZEN_DURATION_FOREVER:
+                mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+                break;
+            default:
+                Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
+                        mHost.getUserId(), true).id;
+                mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        conditionId, TAG);
         }
     }
 
