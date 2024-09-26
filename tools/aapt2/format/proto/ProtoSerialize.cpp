@@ -427,6 +427,14 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
           SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(),
                              source_pool.get());
         }
+
+        for (const ResourceConfigValue* config_value : entry.flag_disabled_values) {
+          pb::ConfigValue* pb_config_value = pb_entry->add_flag_disabled_config_value();
+          SerializeConfig(config_value->config, pb_config_value->mutable_config());
+          pb_config_value->mutable_config()->set_product(config_value->product);
+          SerializeValueToPb(*config_value->value, pb_config_value->mutable_value(),
+                             source_pool.get());
+        }
       }
     }
   }
@@ -721,6 +729,11 @@ void SerializeValueToPb(const Value& value, pb::Value* out_value, android::Strin
   }
   if (out_value->has_item()) {
     out_value->mutable_item()->set_flag_status((uint32_t)value.GetFlagStatus());
+    if (value.GetFlag()) {
+      const auto& flag = value.GetFlag();
+      out_value->mutable_item()->set_flag_negated(flag->negated);
+      out_value->mutable_item()->set_flag_name(flag->name);
+    }
   }
 }
 
@@ -730,6 +743,11 @@ void SerializeItemToPb(const Item& item, pb::Item* out_item) {
   item.Accept(&serializer);
   out_item->MergeFrom(value.item());
   out_item->set_flag_status((uint32_t)item.GetFlagStatus());
+  if (item.GetFlag()) {
+    const auto& flag = item.GetFlag();
+    out_item->set_flag_negated(flag->negated);
+    out_item->set_flag_name(flag->name);
+  }
 }
 
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file) {

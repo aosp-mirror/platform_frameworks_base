@@ -5293,6 +5293,17 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public IntArray getDisplayIds() {
+            IntArray displayIds = new IntArray();
+            synchronized (mSyncRoot) {
+                mLogicalDisplayMapper.forEachLocked((logicalDisplay -> {
+                    displayIds.add(logicalDisplay.getDisplayIdLocked());
+                }), /* includeDisabled= */ false);
+            }
+            return displayIds;
+        }
+
+        @Override
         public DisplayManagerInternal.DisplayOffloadSession registerDisplayOffloader(
                 int displayId, @NonNull DisplayManagerInternal.DisplayOffloader displayOffloader) {
             if (!mFlags.isDisplayOffloadEnabled()) {

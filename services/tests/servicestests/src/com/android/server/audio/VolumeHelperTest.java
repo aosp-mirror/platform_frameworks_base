@@ -39,8 +39,9 @@ import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.view.KeyEvent.ACTION_DOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_UP;
 
-import static com.android.media.audio.Flags.FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME;
 import static com.android.media.audio.Flags.FLAG_ABS_VOLUME_INDEX_FIX;
+import static com.android.media.audio.Flags.FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME;
+import static com.android.media.audio.Flags.absVolumeIndexFix;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -627,7 +628,6 @@ public class VolumeHelperTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
-    @RequiresFlagsDisabled(FLAG_ABS_VOLUME_INDEX_FIX)
     public void disablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         final int minIndex = mAm.getStreamMinVolume(STREAM_MUSIC);
         final int maxIndex = mAm.getStreamMaxVolume(STREAM_MUSIC);
@@ -638,6 +638,7 @@ public class VolumeHelperTest {
         final AudioDeviceAttributes bleDevice = new AudioDeviceAttributes(
                 /*native type*/ AudioSystem.DEVICE_OUT_BLE_HEADSET, /*address*/ "bla");
         final int maxPreScaleIndex = 3;
+        int passedIndex = maxIndex;
 
         for (int i = 0; i < maxPreScaleIndex; i++) {
             final VolumeInfo volCur = new VolumeInfo.Builder(volMedia)
@@ -646,9 +647,12 @@ public class VolumeHelperTest {
             mAudioService.setDeviceVolume(volCur, bleDevice, mContext.getOpPackageName());
             mTestLooper.dispatchAll();
 
+            if (absVolumeIndexFix()) {
+                passedIndex = i + 1;
+            }
             // Stream volume changes
             verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                    STREAM_MUSIC, maxIndex,
+                    STREAM_MUSIC, passedIndex,
                     AudioSystem.DEVICE_OUT_BLE_HEADSET);
         }
 
@@ -658,8 +662,11 @@ public class VolumeHelperTest {
         mAudioService.setDeviceVolume(volIndex4, bleDevice, mContext.getOpPackageName());
         mTestLooper.dispatchAll();
 
+        if (absVolumeIndexFix()) {
+            passedIndex = 4;
+        }
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                STREAM_MUSIC, maxIndex,
+                STREAM_MUSIC, passedIndex,
                 AudioSystem.DEVICE_OUT_BLE_HEADSET);
     }
 

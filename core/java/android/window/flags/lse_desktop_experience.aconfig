@@ -287,6 +287,13 @@ flag {
 }
 
 flag {
+    name: "enable_fully_immersive_in_desktop"
+    namespace: "lse_desktop_experience"
+    description: "Enabled the fully immersive experience from desktop"
+    bug: "359523924"
+}
+
+flag {
     name: "enable_display_focus_in_shell_transitions"
     namespace: "lse_desktop_experience"
     description: "Creates a shell transition when display focus switches."

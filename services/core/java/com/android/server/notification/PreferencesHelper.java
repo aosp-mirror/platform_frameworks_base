@@ -40,6 +40,7 @@ import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_P
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
+import static com.android.server.notification.PreferencesHelper.LockableAppFields.USER_LOCKED_PROMOTABLE;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -192,10 +193,13 @@ public class PreferencesHelper implements RankingConfig {
     /**
      * All user-lockable fields for a given application.
      */
-    @IntDef({LockableAppFields.USER_LOCKED_IMPORTANCE})
+    @IntDef({LockableAppFields.USER_LOCKED_IMPORTANCE,
+            LockableAppFields.USER_LOCKED_BUBBLE,
+            LockableAppFields.USER_LOCKED_PROMOTABLE})
     public @interface LockableAppFields {
         int USER_LOCKED_IMPORTANCE = 0x00000001;
         int USER_LOCKED_BUBBLE = 0x00000002;
+        int USER_LOCKED_PROMOTABLE = 0x00000004;
     }
 
     private final Object mLock = new Object();
@@ -858,13 +862,19 @@ public class PreferencesHelper implements RankingConfig {
     }
 
     @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
-    public boolean setCanBePromoted(String packageName, int uid, boolean promote) {
+    public boolean setCanBePromoted(String packageName, int uid, boolean promote,
+            boolean fromUser) {
         boolean changed = false;
         synchronized (mLock) {
             PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
-            if (pkgPrefs.canHavePromotedNotifs != promote) {
-                pkgPrefs.canHavePromotedNotifs = promote;
-                changed = true;
+            if (fromUser || ((pkgPrefs.lockedAppFields & USER_LOCKED_PROMOTABLE) == 0)) {
+                if (pkgPrefs.canHavePromotedNotifs != promote) {
+                    pkgPrefs.canHavePromotedNotifs = promote;
+                    if (fromUser) {
+                        pkgPrefs.lockedAppFields |= USER_LOCKED_PROMOTABLE;
+                    }
+                    changed = true;
+                }
             }
         }
         // no need to send a ranking update because we need to update the flag value on all pending

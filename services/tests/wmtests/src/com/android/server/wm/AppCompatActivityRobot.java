@@ -230,6 +230,10 @@ class AppCompatActivityRobot {
         mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
+    void setTopActivityOrganizedTask() {
+        doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
+    }
+
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
         doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }

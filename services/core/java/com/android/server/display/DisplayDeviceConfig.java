@@ -1080,7 +1080,7 @@ public class DisplayDeviceConfig {
      */
     public float[] getNits() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mNits;
+            return mEvenDimmerBrightnessData.nits;
         }
         return mNits;
     }
@@ -1093,7 +1093,7 @@ public class DisplayDeviceConfig {
     @VisibleForTesting
     public float[] getBacklight() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBacklight;
+            return mEvenDimmerBrightnessData.backlight;
         }
         return mBacklight;
     }
@@ -1107,7 +1107,7 @@ public class DisplayDeviceConfig {
      */
     public float getBacklightFromBrightness(float brightness) {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBrightnessToBacklight.interpolate(brightness);
+            return mEvenDimmerBrightnessData.brightnessToBacklight.interpolate(brightness);
         }
         return mBrightnessToBacklightSpline.interpolate(brightness);
     }
@@ -1120,7 +1120,7 @@ public class DisplayDeviceConfig {
      */
     public float getBrightnessFromBacklight(float backlight) {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBacklightToBrightness.interpolate(backlight);
+            return mEvenDimmerBrightnessData.backlightToBrightness.interpolate(backlight);
         }
         return mBacklightToBrightnessSpline.interpolate(backlight);
     }
@@ -1131,7 +1131,7 @@ public class DisplayDeviceConfig {
      */
     private Spline getBacklightToBrightnessSpline() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBacklightToBrightness;
+            return mEvenDimmerBrightnessData.backlightToBrightness;
         }
         return mBacklightToBrightnessSpline;
     }
@@ -1144,11 +1144,11 @@ public class DisplayDeviceConfig {
      */
     public float getNitsFromBacklight(float backlight) {
         if (mEvenDimmerBrightnessData != null) {
-            if (mEvenDimmerBrightnessData.mBacklightToNits == null) {
+            if (mEvenDimmerBrightnessData.backlightToNits == null) {
                 return INVALID_NITS;
             }
             backlight = Math.max(backlight, mBacklightMinimum);
-            return mEvenDimmerBrightnessData.mBacklightToNits.interpolate(backlight);
+            return mEvenDimmerBrightnessData.backlightToNits.interpolate(backlight);
         }
 
         if (mBacklightToNitsSpline == null) {
@@ -1165,14 +1165,14 @@ public class DisplayDeviceConfig {
      */
     public float getBacklightFromNits(float nits) {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mNitsToBacklight.interpolate(nits);
+            return mEvenDimmerBrightnessData.nitsToBacklight.interpolate(nits);
         }
         return mNitsToBacklightSpline.interpolate(nits);
     }
 
     private Spline getNitsToBacklightSpline() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mNitsToBacklight;
+            return mEvenDimmerBrightnessData.nitsToBacklight;
         }
         return mNitsToBacklightSpline;
     }
@@ -1186,7 +1186,7 @@ public class DisplayDeviceConfig {
         if (mEvenDimmerBrightnessData == null) {
             return INVALID_NITS;
         }
-        return mEvenDimmerBrightnessData.mMinLuxToNits.interpolate(lux);
+        return mEvenDimmerBrightnessData.minLuxToNits.interpolate(lux);
     }
 
     /**
@@ -1197,7 +1197,7 @@ public class DisplayDeviceConfig {
         if (mEvenDimmerBrightnessData == null) {
             return PowerManager.BRIGHTNESS_MIN;
         }
-        return mEvenDimmerBrightnessData.mTransitionPoint;
+        return mEvenDimmerBrightnessData.transitionPoint;
     }
 
     /**
@@ -1268,7 +1268,7 @@ public class DisplayDeviceConfig {
      */
     public float[] getBrightness() {
         if (mEvenDimmerBrightnessData != null) {
-            return mEvenDimmerBrightnessData.mBrightness;
+            return mEvenDimmerBrightnessData.brightness;
         }
         return mBrightness;
     }
@@ -2617,13 +2617,13 @@ public class DisplayDeviceConfig {
                 List<NonNegativeFloatToFloatPoint> points = map.getMap().getPoint();
                 for (NonNegativeFloatToFloatPoint point : points) {
                     float lux = point.getFirst().floatValue();
-                    float maxBrightness = point.getSecond().floatValue();
-                    if (maxBrightness > hbmTransitionPoint) {
+                    float maxBacklight = point.getSecond().floatValue();
+                    if (maxBacklight > hbmTransitionPoint) {
                         Slog.wtf(TAG,
-                                "Invalid NBM config: maxBrightness is greater than hbm"
+                                "Invalid NBM config: maxBacklight is greater than hbm"
                                         + ".transitionPoint. type="
-                                        + type + "; lux=" + lux + "; maxBrightness="
-                                        + maxBrightness);
+                                        + type + "; lux=" + lux + "; maxBacklight="
+                                        + maxBacklight);
                         continue;
                     }
                     if (luxToTransitionPointMap.containsKey(lux)) {
@@ -2632,8 +2632,7 @@ public class DisplayDeviceConfig {
                                         + lux);
                         continue;
                     }
-                    luxToTransitionPointMap.put(lux,
-                            getBrightnessFromBacklight(maxBrightness));
+                    luxToTransitionPointMap.put(lux, getBrightnessFromBacklight(maxBacklight));
                 }
                 if (!luxToTransitionPointMap.isEmpty()) {
                     mLuxThrottlingData.put(mappedType, luxToTransitionPointMap);

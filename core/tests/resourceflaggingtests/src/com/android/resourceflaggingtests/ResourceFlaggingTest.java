@@ -78,6 +78,16 @@ public class ResourceFlaggingTest {
     }
 
     @Test
+    public void testNegatedDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool5)).isTrue();
+    }
+
+    @Test
+    public void testNegatedEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool6)).isTrue();
+    }
+
+    @Test
     public void testFlagEnabledDifferentCompilationUnit() {
         assertThat(mResources.getBoolean(R.bool.bool3)).isTrue();
     }

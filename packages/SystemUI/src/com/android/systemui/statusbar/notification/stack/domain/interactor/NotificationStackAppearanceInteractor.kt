@@ -56,10 +56,9 @@ constructor(
 
     /** The rounding of the notification stack. */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
-        combine(
-                shadeInteractor.shadeMode,
-                isExpandingFromHeadsUp,
-            ) { shadeMode, isExpandingFromHeadsUp ->
+        combine(shadeInteractor.shadeMode, isExpandingFromHeadsUp) {
+                shadeMode,
+                isExpandingFromHeadsUp ->
                 ShadeScrimRounding(
                     isTopRounded = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
                     isBottomRounded = shadeMode != ShadeMode.Single,
@@ -70,6 +69,10 @@ constructor(
     /** The alpha of the Notification Stack for the brightness mirror */
     val alphaForBrightnessMirror: StateFlow<Float> =
         placeholderRepository.alphaForBrightnessMirror.asStateFlow()
+
+    /** The alpha of the Notification Stack for lockscreen fade-in */
+    val alphaForLockscreenFadeIn: StateFlow<Float> =
+        placeholderRepository.alphaForLockscreenFadeIn.asStateFlow()
 
     /** The height of the keyguard's available space bounds */
     val constrainedAvailableSpace: StateFlow<Int> =
@@ -99,7 +102,7 @@ constructor(
     val shouldCloseGuts: Flow<Boolean> =
         combine(
             sceneInteractor.isSceneContainerUserInputOngoing,
-            viewHeightRepository.isCurrentGestureInGuts
+            viewHeightRepository.isCurrentGestureInGuts,
         ) { isUserInputOngoing, isCurrentGestureInGuts ->
             isUserInputOngoing && !isCurrentGestureInGuts
         }
@@ -107,6 +110,11 @@ constructor(
     /** Sets the alpha to apply to the NSSL for the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         placeholderRepository.alphaForBrightnessMirror.value = alpha
+    }
+
+    /** Sets the alpha to apply to the NSSL for fade-in on lockscreen */
+    fun setAlphaForLockscreenFadeIn(alpha: Float) {
+        placeholderRepository.alphaForLockscreenFadeIn.value = alpha
     }
 
     /** Sets the position of the notification stack in the current scene. */

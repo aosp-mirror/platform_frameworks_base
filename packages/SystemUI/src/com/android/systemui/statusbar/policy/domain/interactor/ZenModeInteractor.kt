@@ -20,6 +20,7 @@ import android.content.Context
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import android.util.Log
 import androidx.concurrent.futures.await
 import com.android.settingslib.notification.data.repository.ZenModeRepository
@@ -29,6 +30,7 @@ import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.policy.data.repository.DeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
@@ -39,6 +41,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -54,8 +57,8 @@ constructor(
     private val notificationSettingsRepository: NotificationSettingsRepository,
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val iconLoader: ZenIconLoader,
-    private val deviceProvisioningRepository: DeviceProvisioningRepository,
-    private val userSetupRepository: UserSetupRepository,
+    deviceProvisioningRepository: DeviceProvisioningRepository,
+    userSetupRepository: UserSetupRepository,
 ) {
     val isZenAvailable: Flow<Boolean> =
         combine(
@@ -125,6 +128,25 @@ constructor(
 
     val mainActiveMode: Flow<ZenModeInfo?> =
         activeModes.map { a -> a.mainMode }.distinctUntilChanged()
+
+    val modesHidingNotifications: Flow<List<ZenMode>> by lazy {
+        if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode() || !ModesUi.isEnabled) {
+            flowOf(listOf())
+        } else {
+            modes
+                .map { modes ->
+                    modes.filter { mode ->
+                        mode.isActive &&
+                            !mode.policy.isVisualEffectAllowed(
+                                /* effect = */ VISUAL_EFFECT_NOTIFICATION_LIST,
+                                /* defaultVal = */ true,
+                            )
+                    }
+                }
+                .flowOn(bgDispatcher)
+                .distinctUntilChanged()
+        }
+    }
 
     suspend fun getModeIcon(mode: ZenMode): ZenIcon {
         return iconLoader.getIcon(context, mode).await()

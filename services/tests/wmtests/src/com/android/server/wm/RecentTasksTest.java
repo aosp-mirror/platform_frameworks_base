@@ -432,6 +432,29 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     @Test
+    public void testAddTaskCompatibleWindowingMode_withFreeformAndFullscreen_expectRemove() {
+        Task task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .build();
+        doReturn(WINDOWING_MODE_FREEFORM).when(task1).getWindowingMode();
+        mRecentTasks.add(task1);
+        mCallbacksRecorder.clear();
+
+        Task task2 = createTaskBuilder(".Task1")
+                .setWindowingMode(WINDOWING_MODE_FULLSCREEN)
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .build();
+        assertEquals(WINDOWING_MODE_FULLSCREEN, task2.getWindowingMode());
+        mRecentTasks.add(task2);
+
+        assertThat(mCallbacksRecorder.mAdded).hasSize(1);
+        assertThat(mCallbacksRecorder.mAdded).contains(task2);
+        assertThat(mCallbacksRecorder.mTrimmed).isEmpty();
+        assertThat(mCallbacksRecorder.mRemoved).hasSize(1);
+        assertThat(mCallbacksRecorder.mRemoved).contains(task1);
+    }
+
+    @Test
     public void testAddTaskIncompatibleWindowingMode_expectNoRemove() {
         Task task1 = createTaskBuilder(".Task1")
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN)

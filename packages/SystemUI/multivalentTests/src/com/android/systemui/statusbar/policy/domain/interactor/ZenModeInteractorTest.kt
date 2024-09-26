@@ -25,6 +25,7 @@ import android.provider.Settings.Secure.ZEN_DURATION
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.SystemZenRules
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
@@ -34,6 +35,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.testKosmos
@@ -378,5 +380,47 @@ class ZenModeInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(dndMode!!.isActive).isTrue()
+        }
+
+    @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME, Flags.FLAG_MODES_UI, Flags.FLAG_MODES_API)
+    fun modesHidingNotifications_onlyIncludesModesWithNotifListSuppression() =
+        testScope.runTest {
+            val modesHidingNotifications by collectLastValue(underTest.modesHidingNotifications)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Not active, no list suppression")
+                        .setActive(false)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Not active, has list suppression")
+                        .setActive(false)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("No list suppression")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Has list suppression 1")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Has list suppression 2")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(modesHidingNotifications?.map { it.name })
+                .containsExactly("Has list suppression 1", "Has list suppression 2")
+                .inOrder()
         }
 }

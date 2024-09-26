@@ -63,6 +63,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -1513,50 +1514,56 @@ public class SoundTrigger {
      *  A RecognitionConfig is provided to
      *  {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)} to configure the
      *  recognition request.
-     *
-     *  @hide
      */
-    @TestApi
+    @FlaggedApi(android.media.soundtrigger.Flags.FLAG_MANAGER_API)
     public static final class RecognitionConfig implements Parcelable {
-        /** True if the DSP should capture the trigger sound and make it available for further
-         * capture. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public final boolean captureRequested;
-        /**
-         * True if the service should restart listening after the DSP triggers.
-         * Note: This config flag is currently used at the service layer rather than by the DSP.
-         */
-        public final boolean allowMultipleTriggers;
-        /** List of all keyphrases in the sound model for which recognition should be performed with
-         * options for each keyphrase. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        @NonNull
-        @SuppressLint("ArrayReturn")
-        public final KeyphraseRecognitionExtra keyphrases[];
-        /** Opaque data for use by system applications who know about voice engine internals,
-         * typically during enrollment. */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        @NonNull
-        public final byte[] data;
-
-        /**
-         * Bit field encoding of the AudioCapabilities
-         * supported by the firmware.
-         */
+        private final boolean mCaptureRequested;
+        private final boolean mAllowMultipleTriggers;
+        private final KeyphraseRecognitionExtra mKeyphrases[];
+        private final byte[] mData;
         @ModuleProperties.AudioCapabilities
-        public final int audioCapabilities;
+        private final int mAudioCapabilities;
 
+        /**
+         * Constructor for {@link RecognitionConfig} with {@code audioCapabilities} describes a
+         * config that can be used by
+         * {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)}
+         *
+         * @param captureRequested Whether the DSP should capture the trigger sound.
+         * @param allowMultipleTriggers Whether the service should restart listening after the DSP
+         *                              triggers.
+         * @param keyphrases List of keyphrases in the sound model.
+         * @param data Opaque data for use by system applications who know about voice engine
+         *             internals, typically during enrollment.
+         * @param audioCapabilities Bit field encoding of the AudioCapabilities.
+         *
+         * @hide
+         */
+        @TestApi
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
                 @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
                 @Nullable byte[] data, int audioCapabilities) {
-            this.captureRequested = captureRequested;
-            this.allowMultipleTriggers = allowMultipleTriggers;
-            this.keyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
-            this.data = data != null ? data : new byte[0];
-            this.audioCapabilities = audioCapabilities;
+            this.mCaptureRequested = captureRequested;
+            this.mAllowMultipleTriggers = allowMultipleTriggers;
+            this.mKeyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
+            this.mData = data != null ? data : new byte[0];
+            this.mAudioCapabilities = audioCapabilities;
         }
 
+        /**
+         * Constructor for {@link RecognitionConfig} without audioCapabilities. The
+         * audioCapabilities is set to 0.
+         *
+         * @param captureRequested Whether the DSP should capture the trigger sound.
+         * @param allowMultipleTriggers Whether the service should restart listening after the DSP
+         *                              triggers.
+         * @param keyphrases List of keyphrases in the sound model.
+         * @param data Opaque data for use by system applications.
+         *
+         * @hide
+         */
         @UnsupportedAppUsage
+        @TestApi
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
                 @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
                 @Nullable byte[] data) {
@@ -1574,9 +1581,52 @@ public class SoundTrigger {
             }
         };
 
+        /**
+         * Returns whether the DSP should capture the trigger sound and make it available for
+         * further capture.
+         */
+        public boolean isCaptureRequested() {
+            return mCaptureRequested;
+        }
+
+        /**
+         * Returns whether the service should restart listening after the DSP triggers.
+         *
+         * <p><b>Note:</b> This config flag is currently used at the service layer rather than by
+         * the DSP.
+         */
+        public boolean isAllowMultipleTriggers() {
+            return mAllowMultipleTriggers;
+        }
+
+        /**
+         * Gets all keyphrases in the sound model for which recognition should be performed with
+         * options for each keyphrase.
+         */
+        @NonNull
+        public List<KeyphraseRecognitionExtra> getKeyphrases() {
+            return Arrays.asList(mKeyphrases);
+        }
+
+        /**
+         * Opaque data.
+         *
+         * <p>For use by system applications who knows about voice engine internals, typically
+         * during enrollment.
+         */
+        @NonNull
+        public byte[] getData() {
+            return mData;
+        }
+
+        /** Bit field encoding of the AudioCapabilities supported by the firmware. */
+        public int getAudioCapabilities() {
+            return mAudioCapabilities;
+        }
+
         private static RecognitionConfig fromParcel(Parcel in) {
-            boolean captureRequested = in.readByte() == 1;
-            boolean allowMultipleTriggers = in.readByte() == 1;
+            boolean captureRequested = in.readBoolean();
+            boolean allowMultipleTriggers = in.readBoolean();
             KeyphraseRecognitionExtra[] keyphrases =
                     in.createTypedArray(KeyphraseRecognitionExtra.CREATOR);
             byte[] data = in.readBlob();
@@ -1587,11 +1637,11 @@ public class SoundTrigger {
 
         @Override
         public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeByte((byte) (captureRequested ? 1 : 0));
-            dest.writeByte((byte) (allowMultipleTriggers ? 1 : 0));
-            dest.writeTypedArray(keyphrases, flags);
-            dest.writeBlob(data);
-            dest.writeInt(audioCapabilities);
+            dest.writeBoolean(mCaptureRequested);
+            dest.writeBoolean(mAllowMultipleTriggers);
+            dest.writeTypedArray(mKeyphrases, flags);
+            dest.writeBlob(mData);
+            dest.writeInt(mAudioCapabilities);
         }
 
         @Override
@@ -1601,10 +1651,10 @@ public class SoundTrigger {
 
         @Override
         public String toString() {
-            return "RecognitionConfig [captureRequested=" + captureRequested
-                    + ", allowMultipleTriggers=" + allowMultipleTriggers + ", keyphrases="
-                    + Arrays.toString(keyphrases) + ", data=" + Arrays.toString(data)
-                    + ", audioCapabilities=" + Integer.toHexString(audioCapabilities) + "]";
+            return "RecognitionConfig [captureRequested=" + mCaptureRequested
+                    + ", allowMultipleTriggers=" + mAllowMultipleTriggers + ", keyphrases="
+                    + Arrays.toString(mKeyphrases) + ", data=" + Arrays.toString(mData)
+                    + ", audioCapabilities=" + Integer.toHexString(mAudioCapabilities) + "]";
         }
 
         @Override
@@ -1616,19 +1666,19 @@ public class SoundTrigger {
             if (!(obj instanceof RecognitionConfig))
                 return false;
             RecognitionConfig other = (RecognitionConfig) obj;
-            if (captureRequested != other.captureRequested) {
+            if (mCaptureRequested != other.mCaptureRequested) {
                 return false;
             }
-            if (allowMultipleTriggers != other.allowMultipleTriggers) {
+            if (mAllowMultipleTriggers != other.mAllowMultipleTriggers) {
                 return false;
             }
-            if (!Arrays.equals(keyphrases, other.keyphrases)) {
+            if (!Arrays.equals(mKeyphrases, other.mKeyphrases)) {
                 return false;
             }
-            if (!Arrays.equals(data, other.data)) {
+            if (!Arrays.equals(mData, other.mData)) {
                 return false;
             }
-            if (audioCapabilities != other.audioCapabilities) {
+            if (mAudioCapabilities != other.mAudioCapabilities) {
                 return false;
             }
             return true;
@@ -1638,11 +1688,11 @@ public class SoundTrigger {
         public final int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + (captureRequested ? 1 : 0);
-            result = prime * result + (allowMultipleTriggers ? 1 : 0);
-            result = prime * result + Arrays.hashCode(keyphrases);
-            result = prime * result + Arrays.hashCode(data);
-            result = prime * result + audioCapabilities;
+            result = prime * result + (mCaptureRequested ? 1 : 0);
+            result = prime * result + (mAllowMultipleTriggers ? 1 : 0);
+            result = prime * result + Arrays.hashCode(mKeyphrases);
+            result = prime * result + Arrays.hashCode(mData);
+            result = prime * result + mAudioCapabilities;
             return result;
         }
     }

@@ -89,6 +89,12 @@ interface NotificationScrollView {
     /** sets the current QS expand fraction */
     fun setQsExpandFraction(expandFraction: Float)
 
+    /** set whether we are idle on the lockscreen scene */
+    fun setShowingStackOnLockscreen(showingStackOnLockscreen: Boolean)
+
+    /** set the alpha from 0-1f of stack fade-in on lockscreen */
+    fun setAlphaForLockscreenFadeIn(alphaForLockscreenFadeIn: Float)
+
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
 
