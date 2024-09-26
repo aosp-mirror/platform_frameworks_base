@@ -1356,6 +1356,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         mController.mAtm.setLastResumedActivityUncheckLocked(ar,
                                 "transitionFinished");
                     }
+
+                    // Prevent spurious background app switches.
+                    if (ar.mDisplayContent.mFocusedApp == ar) {
+                        mController.mAtm.stopAppSwitches();
+                    }
                 }
                 continue;
             }
@@ -1410,8 +1415,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (enterAutoPip) {
                 mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
             }
-            // Prevent spurious background app switches.
-            mController.mAtm.stopAppSwitches();
             // The end of transient launch may not reorder task, so make sure to compute the latest
             // task rank according to the current visibility.
             mController.mAtm.mRootWindowContainer.rankTaskLayers();

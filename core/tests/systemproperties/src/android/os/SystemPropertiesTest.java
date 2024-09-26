@@ -23,11 +23,10 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.platform.test.ravenwood.RavenwoodRule;
+import android.platform.test.ravenwood.RavenwoodConfig;
 
 import androidx.test.filters.SmallTest;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -35,16 +34,18 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class SystemPropertiesTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
-            .setSystemPropertyMutable(KEY, null)
-            .setSystemPropertyMutable(UNSET_KEY, null)
-            .setSystemPropertyMutable(PERSIST_KEY, null)
-            .build();
-
     private static final String KEY = "sys.testkey";
     private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
     private static final String PERSIST_KEY = "persist.sys.testkey";
+    private static final String NONEXIST_KEY = "doesnotexist_2341431";
+
+    @RavenwoodConfig.Config
+    public static final RavenwoodConfig mRavenwood = new RavenwoodConfig.Builder()
+            .setSystemPropertyMutable(KEY, null)
+            .setSystemPropertyMutable(UNSET_KEY, null)
+            .setSystemPropertyMutable(PERSIST_KEY, null)
+            .setSystemPropertyImmutable(NONEXIST_KEY, null)
+            .build();
 
     @Test
     @SmallTest
@@ -117,7 +118,7 @@ public class SystemPropertiesTest {
     @SmallTest
     public void testHandle() throws Exception {
         String value;
-        SystemProperties.Handle handle = SystemProperties.find("doesnotexist_2341431");
+        SystemProperties.Handle handle = SystemProperties.find(NONEXIST_KEY);
         assertNull(handle);
         SystemProperties.set(KEY, "abc");
         handle = SystemProperties.find(KEY);

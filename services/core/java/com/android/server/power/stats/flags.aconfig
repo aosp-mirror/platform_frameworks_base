@@ -76,3 +76,13 @@ flag {
     bug: "364350206"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "accumulate_battery_usage_stats"
+    namespace: "backstage_power"
+    description: "Add support for monotonically accumulated BatteryUsageStats"
+    bug: "345022340"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

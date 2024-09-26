@@ -953,6 +953,36 @@ public class NotificationManager {
     }
 
     /**
+     * Returns whether the calling app's properly formatted notifications can appear in a promoted
+     * format, which may result in higher ranking, appearances on additional surfaces, and richer
+     * presentation.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public boolean canPostPromotedNotifications() {
+        INotificationManager service = getService();
+        try {
+            return service.canBePromoted(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Setter for {@link #canPostPromotedNotifications()}. Only callable by the OS.
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void setCanPostPromotedNotifications(@NonNull String pkg, int uid, boolean allowed) {
+        INotificationManager service = getService();
+        try {
+            service.setCanBePromoted(pkg, uid, allowed);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a group container for {@link NotificationChannel} objects.
      *
      * This can be used to rename an existing group.

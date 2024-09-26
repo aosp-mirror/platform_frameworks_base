@@ -788,6 +788,12 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
     /** Parses an XML representation of BatteryUsageStats */
     public static BatteryUsageStats createFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
+        return createBuilderFromXml(parser).build();
+    }
+
+    /** Parses an XML representation of BatteryUsageStats */
+    public static BatteryUsageStats.Builder createBuilderFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
         Builder builder = null;
         int eventType = parser.getEventType();
         while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -862,7 +868,7 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             eventType = parser.next();
         }
 
-        return builder.build();
+        return builder;
     }
 
     @Override
@@ -978,7 +984,18 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
          */
         @NonNull
         public BatteryUsageStats build() {
+            if (mBatteryConsumersCursorWindow == null) {
+                throw new IllegalStateException("Builder has been discarded");
+            }
             return new BatteryUsageStats(this);
+        }
+
+        /**
+         * Close this builder without actually calling ".build()". Do not attempt
+         * to continue using the builder after this call.
+         */
+        public void discard() {
+            mBatteryConsumersCursorWindow.close();
         }
 
         /**

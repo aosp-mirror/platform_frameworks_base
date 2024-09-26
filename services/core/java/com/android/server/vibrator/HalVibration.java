@@ -36,6 +36,7 @@ import java.util.concurrent.CountDownLatch;
 final class HalVibration extends Vibration {
 
     public final SparseArray<VibrationEffect> mFallbacks = new SparseArray<>();
+    public final IBinder callerToken;
 
     /** A {@link CountDownLatch} to enable waiting for completion. */
     private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
@@ -55,9 +56,10 @@ final class HalVibration extends Vibration {
     private int mScaleLevel;
     private float mAdaptiveScale;
 
-    HalVibration(@NonNull IBinder token, @NonNull CombinedVibration effect,
+    HalVibration(@NonNull IBinder callerToken, @NonNull CombinedVibration effect,
             @NonNull VibrationSession.CallerInfo callerInfo) {
-        super(token, callerInfo);
+        super(callerInfo);
+        this.callerToken = callerToken;
         mOriginalEffect = effect;
         mEffectToPlay = effect;
         mScaleLevel = VibrationScaler.SCALE_NONE;

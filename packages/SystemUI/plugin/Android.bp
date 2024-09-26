@@ -30,6 +30,9 @@ java_library {
         "src/**/*.java",
         "src/**/*.kt",
     ],
+    exclude_srcs: [
+        "src/**/PluginProtectorStub.kt",
+    ],
 
     optimize: {
         proguard_flags_files: [
