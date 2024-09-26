@@ -815,6 +815,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
                         false /* ignoreVisibility */);
                 relayoutParams.mCaptionTopPadding = systemBarInsets.top;
+                relayoutParams.mIsInsetSource = false;
             }
             // Report occluding elements as bounding rects to the insets system so that apps can
             // draw in the empty space in the center:

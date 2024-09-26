@@ -614,6 +614,27 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void updateRelayoutParams_header_notAnInsetsSourceInFullyImmersive() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ true,
+                new InsetsState());
+
+        assertThat(relayoutParams.mIsInsetSource).isFalse();
+    }
+
+    @Test
     @DisableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     public void updateRelayoutParams_header_statusBarInvisible_captionVisible() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
