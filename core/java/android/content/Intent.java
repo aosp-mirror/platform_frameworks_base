@@ -20,7 +20,6 @@ import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_AC
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
-import static android.security.Flags.preventIntentRedirect;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -7688,17 +7687,9 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public static final int LOCAL_FLAG_FROM_SYSTEM = 1 << 5;
 
-    /**
-     * This flag indicates the creator token of this intent has been verified.
-     *
-     * @hide
-     */
-    public static final int LOCAL_FLAG_CREATOR_TOKEN_VERIFIED = 1 << 6;
-
     /** @hide */
     @IntDef(flag = true, prefix = { "EXTENDED_FLAG_" }, value = {
             EXTENDED_FLAG_FILTER_MISMATCH,
-            EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ExtendedFlags {}
@@ -7711,13 +7702,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     @TestApi
     public static final int EXTENDED_FLAG_FILTER_MISMATCH = 1 << 0;
-
-    /**
-     * This flag indicates the creator token of this intent is either missing or invalid.
-     *
-     * @hide
-     */
-    public static final int EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN = 1 << 1;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -7886,7 +7870,6 @@ public class Intent implements Parcelable, Cloneable {
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
         this.mOriginalIntent = o.mOriginalIntent;
-        this.mCreatorTokenInfo = o.mCreatorTokenInfo;
 
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<>(o.mCategories);
@@ -12193,60 +12176,6 @@ public class Intent implements Parcelable, Cloneable {
         return (mExtras != null) ? mExtras.describeContents() : 0;
     }
 
-    private static class CreatorTokenInfo {
-        // Stores a creator token for an intent embedded as an extra intent in a top level intent,
-        private IBinder mCreatorToken;
-        // Stores all extra keys whose values are intents for a top level intent.
-        private ArraySet<String> mExtraIntentKeys;
-    }
-
-    private @Nullable CreatorTokenInfo mCreatorTokenInfo;
-
-    /** @hide */
-    public void removeCreatorTokenInfo() {
-        mCreatorTokenInfo = null;
-    }
-
-    /** @hide */
-    public @Nullable IBinder getCreatorToken() {
-        return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mCreatorToken;
-    }
-
-    /** @hide */
-    public Set<String> getExtraIntentKeys() {
-        return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mExtraIntentKeys;
-    }
-
-    /** @hide */
-    public void setCreatorToken(@NonNull IBinder creatorToken) {
-        if (mCreatorTokenInfo == null) {
-            mCreatorTokenInfo = new CreatorTokenInfo();
-        }
-        mCreatorTokenInfo.mCreatorToken = creatorToken;
-    }
-
-    /**
-     * Collects keys in the extra bundle whose value are intents.
-     * @hide
-     */
-    public void collectExtraIntentKeys() {
-        if (!preventIntentRedirect()) return;
-
-        if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
-            for (String key : mExtras.keySet()) {
-                if (mExtras.get(key) instanceof Intent) {
-                    if (mCreatorTokenInfo == null) {
-                        mCreatorTokenInfo = new CreatorTokenInfo();
-                    }
-                    if (mCreatorTokenInfo.mExtraIntentKeys == null) {
-                        mCreatorTokenInfo.mExtraIntentKeys = new ArraySet<>();
-                    }
-                    mCreatorTokenInfo.mExtraIntentKeys.add(key);
-                }
-            }
-        }
-    }
-
     public void writeToParcel(Parcel out, int flags) {
         out.writeString8(mAction);
         Uri.writeToParcel(out, mData);
@@ -12295,16 +12224,6 @@ public class Intent implements Parcelable, Cloneable {
             mOriginalIntent.writeToParcel(out, flags);
         } else {
             out.writeInt(0);
-        }
-
-        if (preventIntentRedirect()) {
-            if (mCreatorTokenInfo == null) {
-                out.writeInt(0);
-            } else {
-                out.writeInt(1);
-                out.writeStrongBinder(mCreatorTokenInfo.mCreatorToken);
-                out.writeArraySet(mCreatorTokenInfo.mExtraIntentKeys);
-            }
         }
     }
 
@@ -12362,14 +12281,6 @@ public class Intent implements Parcelable, Cloneable {
         mExtras = in.readBundle();
         if (in.readInt() != 0) {
             mOriginalIntent = new Intent(in);
-        }
-
-        if (preventIntentRedirect()) {
-            if (in.readInt() != 0) {
-                mCreatorTokenInfo = new CreatorTokenInfo();
-                mCreatorTokenInfo.mCreatorToken = in.readStrongBinder();
-                mCreatorTokenInfo.mExtraIntentKeys = (ArraySet<String>) in.readArraySet(null);
-            }
         }
     }
 

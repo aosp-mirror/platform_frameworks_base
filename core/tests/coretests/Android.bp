@@ -104,7 +104,6 @@ android_test {
         "mockito-target-extended-minus-junit4",
         "TestParameterInjector",
         "android.content.res.flags-aconfig-java",
-        "android.security.flags-aconfig-java",
     ],
 
     libs: [
