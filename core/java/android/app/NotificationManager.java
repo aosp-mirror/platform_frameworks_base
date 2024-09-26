@@ -976,7 +976,7 @@ public class NotificationManager {
     public void setCanPostPromotedNotifications(@NonNull String pkg, int uid, boolean allowed) {
         INotificationManager service = getService();
         try {
-            service.setCanBePromoted(pkg, uid, allowed);
+            service.setCanBePromoted(pkg, uid, allowed, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
