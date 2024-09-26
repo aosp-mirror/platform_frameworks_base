@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 
 import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 
 import android.Manifest;
 import android.annotation.EnforcePermission;
@@ -117,6 +118,7 @@ import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -325,6 +327,9 @@ public class InputManagerService extends IInputManager.Stub
     // Manages Sticky modifier state
     private final StickyModifierStateController mStickyModifierStateController;
     private final KeyGestureController mKeyGestureController;
+    /** Fallback actions by key code */
+    private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
+            new SparseArray<>();
 
     // Manages Keyboard microphone mute led
     private final KeyboardLedController mKeyboardLedController;
@@ -611,6 +616,7 @@ public class InputManagerService extends IInputManager.Stub
         mKeyRemapper.systemRunning();
         mPointerIconCache.systemRunning();
         mKeyboardGlyphManager.systemRunning();
+        mKeyGestureController.systemRunning();
 
         initKeyGestures();
     }
@@ -2469,6 +2475,14 @@ public class InputManagerService extends IInputManager.Stub
                 mFocusEventDebugView.reportKeyEvent(event);
             }
         }
+        if (useKeyGestureEventHandler() && mKeyGestureController.interceptKeyBeforeQueueing(event,
+                policyFlags)) {
+            // If key gesture gets triggered, we send the event to policy with KEY_GESTURE flag
+            // indicating, the event is used in triggering a key gesture. We can't block event
+            // like Power or volume keys since policy might still want to handle it to change
+            // certain states.
+            policyFlags |= WindowManagerPolicyConstants.FLAG_KEY_GESTURE_TRIGGERED;
+        }
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
     }
 
@@ -2509,6 +2523,74 @@ public class InputManagerService extends IInputManager.Stub
         return hasInterceptWindowFlag && PermissionChecker.checkPermissionForDataDelivery(mContext,
                 OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW, PID_UNKNOWN, info.windowOwnerUid,
                 null, null, null) == PERMISSION_GRANTED;
+    }
+
+    // Native callback.
+    @SuppressWarnings("unused")
+    private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
+        if (interceptUnhandledKey(event, focus)) {
+            return null;
+        }
+        // TODO(b/358569822): Move fallback logic to KeyGestureController
+        if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) != 0) {
+            return null;
+        }
+        final KeyCharacterMap kcm = event.getKeyCharacterMap();
+        final int keyCode = event.getKeyCode();
+        final int metaState = event.getMetaState();
+        final boolean initialDown = event.getAction() == KeyEvent.ACTION_DOWN
+                && event.getRepeatCount() == 0;
+
+        // Check for fallback actions specified by the key character map.
+        final KeyCharacterMap.FallbackAction fallbackAction;
+        if (initialDown) {
+            fallbackAction = kcm.getFallbackAction(keyCode, metaState);
+        } else {
+            fallbackAction = mFallbackActions.get(keyCode);
+        }
+
+        if (fallbackAction == null) {
+            return null;
+        }
+        KeyEvent fallbackEvent = null;
+        final int flags = event.getFlags() | KeyEvent.FLAG_FALLBACK;
+        fallbackEvent = KeyEvent.obtain(
+                event.getDownTime(), event.getEventTime(),
+                event.getAction(), fallbackAction.keyCode,
+                event.getRepeatCount(), fallbackAction.metaState,
+                event.getDeviceId(), event.getScanCode(),
+                flags, event.getSource(), event.getDisplayId(), null);
+
+        if (!interceptFallback(focus, fallbackEvent, policyFlags)) {
+            fallbackEvent.recycle();
+            fallbackEvent = null;
+        }
+
+        if (initialDown) {
+            mFallbackActions.put(keyCode, fallbackAction);
+        } else if (event.getAction() == KeyEvent.ACTION_UP) {
+            mFallbackActions.remove(keyCode);
+            fallbackAction.recycle();
+        }
+        return fallbackEvent;
+    }
+
+    private boolean interceptFallback(IBinder focusedToken, KeyEvent fallbackEvent,
+            int policyFlags) {
+        int actions = interceptKeyBeforeQueueing(fallbackEvent, policyFlags);
+        if ((actions & ACTION_PASS_TO_USER) == 0) {
+            return false;
+        }
+        long delayMillis = interceptKeyBeforeDispatching(focusedToken, fallbackEvent, policyFlags);
+        return delayMillis == 0 && !interceptUnhandledKey(fallbackEvent, focusedToken);
+    }
+
+    private boolean interceptUnhandledKey(KeyEvent event, IBinder focus) {
+        if (useKeyGestureEventHandler() && mKeyGestureController.interceptUnhandledKey(event,
+                focus)) {
+            return true;
+        }
+        return mWindowManagerCallbacks.interceptUnhandledKey(event, focus);
     }
 
     private void initKeyGestures() {
@@ -2562,12 +2644,6 @@ public class InputManagerService extends IInputManager.Stub
                 }
             }
         });
-    }
-
-    // Native callback.
-    @SuppressWarnings("unused")
-    private KeyEvent dispatchUnhandledKey(IBinder focus, KeyEvent event, int policyFlags) {
-        return mWindowManagerCallbacks.dispatchUnhandledKey(focus, event, policyFlags);
     }
 
     // Native callback.
@@ -2986,9 +3062,9 @@ public class InputManagerService extends IInputManager.Stub
         long interceptKeyBeforeDispatching(IBinder token, KeyEvent event, int policyFlags);
 
         /**
-         * Dispatch unhandled key
+         * Intercept unhandled key
          */
-        KeyEvent dispatchUnhandledKey(IBinder token, KeyEvent event, int policyFlags);
+        boolean interceptUnhandledKey(KeyEvent event, IBinder token);
 
         int getPointerLayer();
 
