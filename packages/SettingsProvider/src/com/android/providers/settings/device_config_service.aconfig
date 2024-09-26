@@ -28,6 +28,17 @@ flag {
 }
 
 flag {
+    name: "notify_individual_aconfig_sysprop_changed"
+    namespace: "core_experiments_team_internal"
+    description: "When enabled, propagate individual aconfig sys props on flag stage."
+    bug: "331963764"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "load_apex_aconfig_protobufs"
     namespace: "core_experiments_team_internal"
     description: "When enabled, loads aconfig default values in apex flag protobufs into DeviceConfig on boot."

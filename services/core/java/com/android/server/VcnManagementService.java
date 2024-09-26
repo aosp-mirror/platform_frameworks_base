@@ -178,9 +178,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
     public static final boolean VDBG = false; // STOPSHIP: if true
 
+    // The system path is copied from Environment.getDataSystemDirectory
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static final String VCN_CONFIG_FILE =
-            new File(Environment.getDataSystemDirectory(), "vcn/configs.xml").getPath();
+            new File(Environment.getDataDirectory(), "system/vcn/configs.xml").getPath();
 
     // TODO(b/176956496): Directly use CarrierServiceBindHelper.UNBIND_DELAY_MILLIS
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -379,10 +380,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
         }
 
         /** Gets transports that need to be marked as restricted by the VCN from CarrierConfig */
+        // TODO: b/262269892 This method was created to perform experiments before the relevant API
+        // was exposed. Now it is obsolete and should be removed.
         @VisibleForTesting(visibility = Visibility.PRIVATE)
         public Set<Integer> getRestrictedTransportsFromCarrierConfig(
                 ParcelUuid subGrp, TelephonySubscriptionSnapshot lastSnapshot) {
-            if (!Build.IS_ENG && !Build.IS_USERDEBUG) {
+            if (!Build.isDebuggable()) {
                 return RESTRICTED_TRANSPORTS_DEFAULT;
             }
 
