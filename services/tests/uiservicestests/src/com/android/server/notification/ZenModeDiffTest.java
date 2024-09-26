@@ -60,6 +60,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -127,7 +128,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.ZenRule.class, getZenRuleExemptFields());
+                ZenModeConfig.ZenRule.class, getZenRuleExemptFields(), false);
         generateFieldDiffs(r1, r2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.RuleDiff d = new ZenModeDiff.RuleDiff(r1, r2);
@@ -144,6 +145,85 @@ public class ZenModeDiffTest extends UiServiceTestCase {
             assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
         }
     }
+
+    @Test
+    public void testDeviceEffectsDiff_addRemoveSame() {
+        // Test add, remove, and both sides same
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder().build();
+
+        // Both sides same rule
+        ZenModeDiff.DeviceEffectsDiff dSame = new ZenModeDiff.DeviceEffectsDiff(effects, effects);
+        assertFalse(dSame.hasDiff());
+
+        // from existent rule to null: expect deleted
+        ZenModeDiff.DeviceEffectsDiff deleted = new ZenModeDiff.DeviceEffectsDiff(effects, null);
+        assertTrue(deleted.hasDiff());
+        assertTrue(deleted.wasRemoved());
+
+        // from null to new rule: expect added
+        ZenModeDiff.DeviceEffectsDiff added = new ZenModeDiff.DeviceEffectsDiff(null, effects);
+        assertTrue(added.hasDiff());
+        assertTrue(added.wasAdded());
+    }
+
+    @Test
+    public void testDeviceEffectsDiff_fieldDiffs() throws Exception {
+        // Start these the same
+        ZenDeviceEffects effects1 = new ZenDeviceEffects.Builder().build();
+        ZenDeviceEffects effects2 = new ZenDeviceEffects.Builder().build();
+
+        // maps mapping field name -> expected output value as we set diffs
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(
+                ZenDeviceEffects.class, Collections.emptySet() /*no exempt fields*/, true);
+        generateFieldDiffs(effects1, effects2, fieldsForDiff, expectedFrom, expectedTo);
+
+        ZenModeDiff.DeviceEffectsDiff d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
+        assertTrue(d.hasDiff());
+
+        // Now diff them and check that each of the fields has a diff
+        for (Field f : fieldsForDiff) {
+            String name = f.getName();
+            assertNotNull("diff not found for field: " + name, d.getDiffForField(name));
+            assertTrue(d.getDiffForField(name).hasDiff());
+            assertTrue("unexpected field: " + name, expectedFrom.containsKey(name));
+            assertTrue("unexpected field: " + name, expectedTo.containsKey(name));
+            assertEquals(expectedFrom.get(name), d.getDiffForField(name).from());
+            assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
+        }
+    }
+
+    @Test
+    public void testDeviceEffectsDiff_toString() throws Exception {
+        // Ensure device effects toString is readable.
+        ZenDeviceEffects effects1 = new ZenDeviceEffects.Builder().build();
+        ZenDeviceEffects effects2 = new ZenDeviceEffects.Builder().build();
+
+        ZenModeDiff.DeviceEffectsDiff d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{no changes}");
+
+        d = new ZenModeDiff.DeviceEffectsDiff(effects1, null);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{removed}");
+
+        d = new ZenModeDiff.DeviceEffectsDiff(null, effects2);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{added}");
+
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(
+                ZenDeviceEffects.class, Collections.emptySet() /*no exempt fields*/, true);
+        generateFieldDiffs(effects1, effects2, fieldsForDiff, expectedFrom, expectedTo);
+
+        d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{mNightMode:true->false, "
+                + "mDisableTapToWake:true->false, mDisableAutoBrightness:true->false, "
+                + "mSuppressAmbientDisplay:true->false, mDisableTiltToWake:true->false, "
+                + "mGrayscale:true->false, mDisableTouch:true->false, mMaximizeDoze:true->false, "
+                + "mMinimizeRadioUsage:true->false, mExtraEffects:null->[], "
+                + "mDimWallpaper:true->false}");
+    }
+
 
     private static Set<String> getZenRuleExemptFields() {
         // "Metadata" fields are never compared.
@@ -194,7 +274,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.class, getConfigExemptAndFlaggedFields());
+                ZenModeConfig.class, getConfigExemptAndFlaggedFields(), false);
         generateFieldDiffs(c1, c2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.ConfigDiff d = new ZenModeDiff.ConfigDiff(c1, c2);
@@ -223,7 +303,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.class, ZEN_MODE_CONFIG_EXEMPT_FIELDS);
+                ZenModeConfig.class, ZEN_MODE_CONFIG_EXEMPT_FIELDS, false);
         generateFieldDiffs(c1, c2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.ConfigDiff d = new ZenModeDiff.ConfigDiff(c1, c2);
@@ -359,17 +439,23 @@ public class ZenModeDiffTest extends UiServiceTestCase {
 
     // Get the fields on which we would want to check a diff. The requirements are: not final or/
     // static (as these should/can never change), and not in a specific list that's exempted.
-    private List<Field> getFieldsForDiffCheck(Class<?> c, Set<String> exemptNames)
+    private List<Field> getFieldsForDiffCheck(Class<?> c, Set<String> exemptNames,
+                                              boolean includeFinal)
             throws SecurityException {
         Field[] fields = c.getDeclaredFields();
         ArrayList<Field> out = new ArrayList<>();
 
         for (Field field : fields) {
             // Check for exempt reasons
+            // Anything in provided exemptNames is skipped.
+            if (exemptNames.contains(field.getName())) {
+                continue;
+            }
             int m = field.getModifiers();
-            if (Modifier.isFinal(m)
-                    || Modifier.isStatic(m)
-                    || exemptNames.contains(field.getName())) {
+            if (Modifier.isStatic(m)) {
+                continue;
+            }
+            if (!includeFinal && Modifier.isFinal(m)) {
                 continue;
             }
             out.add(field);

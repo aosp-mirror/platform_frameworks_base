@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.Flags;
@@ -663,4 +664,141 @@ public class ZenModeDiff {
             return mActiveDiff != null && !mActiveDiff.to();
         }
     }
+
+    /**
+     * Diff class representing a change between two
+     * {@link android.service.notification.ZenDeviceEffects}.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static class DeviceEffectsDiff extends BaseDiff {
+        public static final String FIELD_GRAYSCALE = "mGrayscale";
+        public static final String FIELD_SUPPRESS_AMBIENT_DISPLAY = "mSuppressAmbientDisplay";
+        public static final String FIELD_DIM_WALLPAPER = "mDimWallpaper";
+        public static final String FIELD_NIGHT_MODE = "mNightMode";
+        public static final String FIELD_DISABLE_AUTO_BRIGHTNESS = "mDisableAutoBrightness";
+        public static final String FIELD_DISABLE_TAP_TO_WAKE = "mDisableTapToWake";
+        public static final String FIELD_DISABLE_TILT_TO_WAKE = "mDisableTiltToWake";
+        public static final String FIELD_DISABLE_TOUCH = "mDisableTouch";
+        public static final String FIELD_MINIMIZE_RADIO_USAGE = "mMinimizeRadioUsage";
+        public static final String FIELD_MAXIMIZE_DOZE = "mMaximizeDoze";
+        public static final String FIELD_EXTRA_EFFECTS = "mExtraEffects";
+        // NOTE: new field strings must match the variable names in ZenDeviceEffects
+
+        /**
+         * Create a DeviceEffectsDiff representing the difference between two ZenDeviceEffects
+         * objects.
+         * @param from previous ZenDeviceEffects
+         * @param to new ZenDeviceEffects
+         * @return The diff between the two given ZenDeviceEffects
+         */
+        public DeviceEffectsDiff(ZenDeviceEffects from, ZenDeviceEffects to) {
+            super(from, to);
+            // Short-circuit the both-null case
+            if (from == null && to == null) {
+                return;
+            }
+            if (hasExistenceChange()) {
+                // either added or removed; return here. otherwise (they're not both null) there's
+                // field diffs.
+                return;
+            }
+
+            // Compare all fields, knowing there's some diff and that neither is null.
+            if (from.shouldDisplayGrayscale() != to.shouldDisplayGrayscale()) {
+                addField(FIELD_GRAYSCALE, new FieldDiff<>(from.shouldDisplayGrayscale(),
+                        to.shouldDisplayGrayscale()));
+            }
+            if (from.shouldSuppressAmbientDisplay() != to.shouldSuppressAmbientDisplay()) {
+                addField(FIELD_SUPPRESS_AMBIENT_DISPLAY,
+                        new FieldDiff<>(from.shouldSuppressAmbientDisplay(),
+                                to.shouldSuppressAmbientDisplay()));
+            }
+            if (from.shouldDimWallpaper() != to.shouldDimWallpaper()) {
+                addField(FIELD_DIM_WALLPAPER, new FieldDiff<>(from.shouldDimWallpaper(),
+                        to.shouldDimWallpaper()));
+            }
+            if (from.shouldUseNightMode() != to.shouldUseNightMode()) {
+                addField(FIELD_NIGHT_MODE, new FieldDiff<>(from.shouldUseNightMode(),
+                        to.shouldUseNightMode()));
+            }
+            if (from.shouldDisableAutoBrightness() != to.shouldDisableAutoBrightness()) {
+                addField(FIELD_DISABLE_AUTO_BRIGHTNESS,
+                        new FieldDiff<>(from.shouldDisableAutoBrightness(),
+                                to.shouldDisableAutoBrightness()));
+            }
+            if (from.shouldDisableTapToWake() != to.shouldDisableTapToWake()) {
+                addField(FIELD_DISABLE_TAP_TO_WAKE, new FieldDiff<>(from.shouldDisableTapToWake(),
+                        to.shouldDisableTapToWake()));
+            }
+            if (from.shouldDisableTiltToWake() != to.shouldDisableTiltToWake()) {
+                addField(FIELD_DISABLE_TILT_TO_WAKE,
+                        new FieldDiff<>(from.shouldDisableTiltToWake(),
+                                to.shouldDisableTiltToWake()));
+            }
+            if (from.shouldDisableTouch() != to.shouldDisableTouch()) {
+                addField(FIELD_DISABLE_TOUCH, new FieldDiff<>(from.shouldDisableTouch(),
+                        to.shouldDisableTouch()));
+            }
+            if (from.shouldMinimizeRadioUsage() != to.shouldMinimizeRadioUsage()) {
+                addField(FIELD_MINIMIZE_RADIO_USAGE,
+                        new FieldDiff<>(from.shouldMinimizeRadioUsage(),
+                                to.shouldMinimizeRadioUsage()));
+            }
+            if (from.shouldMaximizeDoze() != to.shouldMaximizeDoze()) {
+                addField(FIELD_MAXIMIZE_DOZE, new FieldDiff<>(from.shouldMaximizeDoze(),
+                        to.shouldMaximizeDoze()));
+            }
+            if (!Objects.equals(from.getExtraEffects(), to.getExtraEffects())) {
+                addField(FIELD_EXTRA_EFFECTS, new FieldDiff<>(from.getExtraEffects(),
+                        to.getExtraEffects()));
+            }
+        }
+
+        /**
+         * Returns whether this object represents an actual diff.
+         */
+        @Override
+        public boolean hasDiff() {
+            return hasExistenceChange() || hasFieldDiffs();
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ZenDeviceEffectsDiff{");
+            if (!hasDiff()) {
+                sb.append("no changes");
+            }
+
+            // If added or deleted, we just append that.
+            if (hasExistenceChange()) {
+                if (wasAdded()) {
+                    sb.append("added");
+                } else if (wasRemoved()) {
+                    sb.append("removed");
+                }
+            }
+
+            // Append all of the individual field diffs
+            boolean first = true;
+            for (String key : fieldNamesWithDiff()) {
+                FieldDiff diff = getDiffForField(key);
+                if (diff == null) {
+                    // The diff should not have null diffs added, but we add this to be defensive.
+                    continue;
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+
+                sb.append(key);
+                sb.append(":");
+                sb.append(diff);
+            }
+
+            return sb.append("}").toString();
+        }
+    }
+
 }
