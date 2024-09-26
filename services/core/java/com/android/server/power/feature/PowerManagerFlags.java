@@ -47,6 +47,9 @@ public class PowerManagerFlags {
             Flags::perDisplayWakeByTouch
     );
 
+    private final FlagState mFrameworkWakelockInfo =
+            new FlagState(Flags.FLAG_FRAMEWORK_WAKELOCK_INFO, Flags::frameworkWakelockInfo);
+
     /** Returns whether early-screen-timeout-detector is enabled on not. */
     public boolean isEarlyScreenTimeoutDetectorEnabled() {
         return mEarlyScreenTimeoutDetectorFlagState.isEnabled();
@@ -67,6 +70,13 @@ public class PowerManagerFlags {
     }
 
     /**
+     * @return Whether FrameworkWakelockInfo atom logging is enabled or not.
+     */
+    public boolean isFrameworkWakelockInfoEnabled() {
+        return mFrameworkWakelockInfo.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -75,6 +85,7 @@ public class PowerManagerFlags {
         pw.println(" " + mEarlyScreenTimeoutDetectorFlagState);
         pw.println(" " + mImproveWakelockLatency);
         pw.println(" " + mPerDisplayWakeByTouch);
+        pw.println(" " + mFrameworkWakelockInfo);
     }
 
     private static class FlagState {
