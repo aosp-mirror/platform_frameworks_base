@@ -230,7 +230,7 @@ class AppCompatActivityRobot {
         mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
-    void setTopOrganizedTaskAsTopTask() {
+    void setTopActivityOrganizedTask() {
         doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
     }
 
