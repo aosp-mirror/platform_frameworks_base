@@ -76,10 +76,14 @@ import java.util.concurrent.Executor;
  * PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} before querying the service. If the feature is
  * absent, {@link Context#getSystemService} may return null.
  */
-@SystemService(Context.VCN_MANAGEMENT_SERVICE)
+@SystemService(VcnManager.VCN_MANAGEMENT_SERVICE_STRING)
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
 public class VcnManager {
     @NonNull private static final String TAG = VcnManager.class.getSimpleName();
+
+    // TODO: b/366598445: Expose and use Context.VCN_MANAGEMENT_SERVICE
+    /** @hide */
+    public static final String VCN_MANAGEMENT_SERVICE_STRING = "vcn_management";
 
     /**
      * Key for WiFi entry RSSI thresholds

@@ -1,0 +1,20 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "SettingsLibService-srcs",
+    srcs: ["src/**/*.kt"],
+}
+
+android_library {
+    name: "SettingsLibService",
+    defaults: [
+        "SettingsLintDefaults",
+    ],
+    srcs: [":SettingsLibService-srcs"],
+    static_libs: [
+        "SettingsLibGraph",
+    ],
+    kotlincflags: ["-Xjvm-default=all"],
+}

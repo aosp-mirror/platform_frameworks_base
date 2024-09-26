@@ -18,6 +18,7 @@ package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -41,9 +42,12 @@ import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificat
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 /** Models UI state for the scene container. */
 class SceneContainerViewModel
@@ -55,6 +59,8 @@ constructor(
     shadeInteractor: ShadeInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
+    gestureFilterFactory: SceneContainerGestureFilter.Factory,
+    @Assisted displayId: Int,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
 
@@ -80,6 +86,8 @@ constructor(
                 },
         )
 
+    private val gestureFilter: SceneContainerGestureFilter = gestureFilterFactory.create(displayId)
+
     override suspend fun onActivated(): Nothing {
         try {
             // Sends a MotionEventHandler to the owner of the view-model so they can report
@@ -96,7 +104,11 @@ constructor(
                 }
             )
 
-            hydrator.activate()
+            coroutineScope {
+                launch { hydrator.activate() }
+                launch { gestureFilter.activate() }
+            }
+            awaitCancellation()
         } finally {
             // Clears the previously-sent MotionEventHandler so the owner of the view-model releases
             // their reference to it.
@@ -243,6 +255,17 @@ constructor(
         }
     }
 
+    /**
+     * Returns `true` if a drag gesture starting at [startPosition] should be filtered out (e.g.
+     * ignored, `false` otherwise.
+     *
+     * Invoke this and pass in the position of the `ACTION_DOWN` pointer event that began the
+     * gesture.
+     */
+    fun shouldFilterGesture(startPosition: Offset): Boolean {
+        return gestureFilter.shouldFilterGesture(startPosition)
+    }
+
     /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
     interface MotionEventHandler {
         /** Notifies that a [MotionEvent] has occurred. */
@@ -258,7 +281,8 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit
+            displayId: Int,
+            motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
         ): SceneContainerViewModel
     }
 }

@@ -133,6 +133,19 @@ public class PowerStatsStore {
     }
 
     /**
+     * Schedules saving the specified span on the background thread.
+     */
+    public void storePowerStatsSpanAsync(PowerStatsSpan span, Runnable onComplete) {
+        mHandler.post(() -> {
+            try {
+                storePowerStatsSpan(span);
+            } finally {
+                onComplete.run();
+            }
+        });
+    }
+
+    /**
      * Saves the specified span in the store.
      */
     public void storePowerStatsSpan(PowerStatsSpan span) {
@@ -172,6 +185,9 @@ public class PowerStatsStore {
         lockStoreDirectory();
         try {
             File file = makePowerStatsSpanFilename(id);
+            if (!file.exists()) {
+                return null;
+            }
             try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
                 return PowerStatsSpan.read(inputStream, parser, mSectionReaders, sectionTypes);
             } catch (IOException | XmlPullParserException e) {

@@ -54,6 +54,7 @@ android_test {
         "services.flags",
         "services.net",
         "services.people",
+        "services.supervision",
         "services.usage",
         "service-permission.stubs.system_server",
         "guava",

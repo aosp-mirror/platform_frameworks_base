@@ -1473,6 +1473,16 @@
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
     <string name="dnd_suppressing_shade_text">Notifications paused by Do Not Disturb</string>
 
+    <!-- The text to show in the notifications shade when a mode is suppressing notifications. [CHAR LIMIT=100] -->
+    <string name="modes_suppressing_shade_text">
+        {count, plural, offset:1
+            =0 {No notifications}
+            =1 {Notifications paused by {mode}}
+            =2 {Notifications paused by {mode} and one other mode}
+            other {Notifications paused by {mode} and # other modes}
+        }
+    </string>
+
     <!-- Media projection permission dialog action text. [CHAR LIMIT=60] -->
     <string name="media_projection_action_text">Start now</string>
 
