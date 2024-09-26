@@ -1065,8 +1065,9 @@ public final class ApplicationStartInfo implements Parcelable {
         return mPid == o.mPid && mRealUid == o.mRealUid && mPackageUid == o.mPackageUid
                 && mDefiningUid == o.mDefiningUid && mReason == o.mReason
                 && mStartupState == o.mStartupState && mStartType == o.mStartType
-                && mLaunchMode == o.mLaunchMode && TextUtils.equals(mProcessName, o.mProcessName)
-                && timestampsEquals(o) && mWasForceStopped == o.mWasForceStopped
+                && mLaunchMode == o.mLaunchMode && TextUtils.equals(mPackageName, o.mPackageName)
+                && TextUtils.equals(mProcessName, o.mProcessName) && timestampsEquals(o)
+                && mWasForceStopped == o.mWasForceStopped
                 && mMonoticCreationTimeMs == o.mMonoticCreationTimeMs
                 && mStartComponent == o.mStartComponent;
     }
@@ -1074,7 +1075,7 @@ public final class ApplicationStartInfo implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mPid, mRealUid, mPackageUid, mDefiningUid, mReason, mStartupState,
-                mStartType, mLaunchMode, mProcessName, mStartupTimestampsNs,
+                mStartType, mLaunchMode, mPackageName, mProcessName, mStartupTimestampsNs,
                 mMonoticCreationTimeMs, mStartComponent);
     }
 
