@@ -103,6 +103,7 @@ import com.android.i18n.timezone.ZoneInfoDb;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
@@ -939,6 +940,12 @@ public final class SystemServer implements Dumpable {
 
         // Setup the default WTF handler
         RuntimeInit.setDefaultApplicationWtfHandler(SystemServer::handleEarlySystemWtf);
+
+        // Initialize the application shared memory region.
+        // This needs to happen before any system services are started,
+        // as they may rely on the shared memory region having been initialized.
+        ApplicationSharedMemory instance = ApplicationSharedMemory.create();
+        ApplicationSharedMemory.setInstance(instance);
 
         // Start services.
         try {
@@ -3009,9 +3016,13 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
-        t.traceBegin("GameManagerService");
-        mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
-        t.traceEnd();
+        if (!isWatch || !android.server.Flags.removeGameManagerServiceFromWear()) {
+            t.traceBegin("GameManagerService");
+            mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
+            t.traceEnd();
+        } else {
+            Slog.d(TAG, "Not starting GameManagerService");
+        }
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
             t.traceBegin("UwbService");

@@ -46,6 +46,9 @@ import android.net.ConnectivityModuleConnector.ConnectivityModuleHealthListener;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.util.AtomicFile;
@@ -110,6 +113,9 @@ public class PackageWatchdogTest {
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Rule
+    public CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private final TestClock mTestClock = new TestClock();
     private TestLooper mTestLooper;
@@ -966,6 +972,7 @@ public class PackageWatchdogTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_CRASHRECOVERY)
     public void testNetworkStackFailure() {
         mSetFlagsRule.disableFlags(Flags.FLAG_RECOVERABILITY_DETECTION);
         final PackageWatchdog wd = createWatchdog();
@@ -986,6 +993,7 @@ public class PackageWatchdogTest {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_CRASHRECOVERY)
     public void testNetworkStackFailureRecoverabilityDetection() {
         final PackageWatchdog wd = createWatchdog();
 
@@ -1758,8 +1766,10 @@ public class PackageWatchdogTest {
             // Verify controller by default is started when packages are ready
             assertThat(controller.mIsEnabled).isTrue();
 
-            verify(mConnectivityModuleConnector).registerHealthListener(
-                    mConnectivityModuleCallbackCaptor.capture());
+            if (!Flags.refactorCrashrecovery()) {
+                verify(mConnectivityModuleConnector).registerHealthListener(
+                        mConnectivityModuleCallbackCaptor.capture());
+            }
         }
         mAllocatedWatchdogs.add(watchdog);
         return watchdog;

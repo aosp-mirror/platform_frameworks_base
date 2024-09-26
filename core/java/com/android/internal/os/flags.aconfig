@@ -28,3 +28,11 @@ flag {
     bug: "314735374"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "application_shared_memory_enabled"
+    namespace: "system_performance"
+    description: "Whether ApplicationSharedMemory is enabled."
+    bug: "365575551"
+    is_fixed_read_only: true
+}

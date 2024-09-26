@@ -77,6 +77,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE = 0x0040;
 
+    public static final int FLAG_BATTERY_USAGE_STATS_ACCUMULATED = 0x0080;
+
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
     private final int mFlags;
@@ -324,6 +326,15 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includePowerStateData() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE;
+            return this;
+        }
+
+        /**
+         * Requests the full continuously accumulated battery usage stats: across reboots
+         * and most battery stats resets.
+         */
+        public Builder accumulated() {
+            mFlags |= FLAG_BATTERY_USAGE_STATS_ACCUMULATED;
             return this;
         }
 

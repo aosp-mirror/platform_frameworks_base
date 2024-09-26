@@ -850,14 +850,14 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     public boolean canBePromoted(String packageName, int uid) {
         synchronized (mLock) {
             return getOrCreatePackagePreferencesLocked(packageName, uid).canHavePromotedNotifs;
         }
     }
 
-    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     public boolean setCanBePromoted(String packageName, int uid, boolean promote) {
         boolean changed = false;
         synchronized (mLock) {
@@ -3065,7 +3065,7 @@ public class PreferencesHelper implements RankingConfig {
         boolean migrateToPm = false;
         long creationTime;
 
-        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
         boolean canHavePromotedNotifs = false;
 
         @UserIdInt int userId;
