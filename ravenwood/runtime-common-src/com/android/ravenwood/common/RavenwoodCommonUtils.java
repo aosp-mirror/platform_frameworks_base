@@ -37,8 +37,6 @@ public class RavenwoodCommonUtils {
     private RavenwoodCommonUtils() {
     }
 
-    private static final Object sLock = new Object();
-
     /**
      * If set to "1", we enable the verbose logging.
      *
@@ -67,9 +65,6 @@ public class RavenwoodCommonUtils {
             RAVENWOOD_RUNTIME_PATH + "ravenwood-data/ravenwood-empty-res.apk";
 
     public static final String RAVENWOOD_VERSION_JAVA_SYSPROP = "android.ravenwood.version";
-
-    // @GuardedBy("sLock")
-    private static boolean sIntegrityChecked = false;
 
     /**
      * @return if we're running on Ravenwood.
