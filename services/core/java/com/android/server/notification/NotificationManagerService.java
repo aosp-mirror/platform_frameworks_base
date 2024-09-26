@@ -4116,20 +4116,31 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
-        public boolean canBePromoted(String pkg, int uid) {
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+        public boolean appCanBePromoted(String pkg, int uid) {
             checkCallerIsSystemOrSystemUiOrShell();
-            if (!android.app.Flags.uiRichOngoing()) {
+            if (!android.app.Flags.apiRichOngoing()) {
                 return false;
             }
             return mPreferencesHelper.canBePromoted(pkg, uid);
         }
 
         @Override
-        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+        public boolean canBePromoted(String callingPkg) {
+            checkCallerIsSameApp(callingPkg);
+            if (!android.app.Flags.apiRichOngoing()) {
+                return false;
+            }
+            return mPreferencesHelper.canBePromoted(callingPkg, Binder.getCallingUid());
+        }
+
+
+        @Override
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
         public void setCanBePromoted(String pkg, int uid, boolean promote) {
             checkCallerIsSystemOrSystemUiOrShell();
-            if (!android.app.Flags.uiRichOngoing()) {
+            if (!android.app.Flags.apiRichOngoing()) {
                 return;
             }
             boolean changed = mPreferencesHelper.setCanBePromoted(pkg, uid, promote);
@@ -7776,7 +7787,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
-        if (android.app.Flags.uiRichOngoing()) {
+        if (android.app.Flags.apiRichOngoing()) {
             // This would normally be done in fixNotification(), but we need the channel info so
             // it's done a little late
             if (mPreferencesHelper.canBePromoted(pkg, notificationUid)
@@ -10740,7 +10751,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     private @NonNull List<NotificationRecord> findAppNotificationByListLocked(
             ArrayList<NotificationRecord> list, String pkg, int userId) {
         List<NotificationRecord> records = new ArrayList<>();

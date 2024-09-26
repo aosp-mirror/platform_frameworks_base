@@ -169,4 +169,23 @@
         <item name="android:focusable">false</item>
         <item name="thumbIcon">@drawable/settingslib_expressive_switch_thumb_icon</item>
     </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Tonal"
+        parent="@style/Widget.Material3.Button.TonalButton">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minWidth">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="android:minHeight">@dimen/settingslib_expressive_space_medium4</item>
+        <item name="android:paddingVertical">@dimen/settingslib_expressive_space_extrasmall5</item>
+        <item name="android:paddingHorizontal">@dimen/settingslib_expressive_space_small1</item>
+        <item name="android:backgroundTint">@color/settingslib_materialColorSecondaryContainer</item>
+        <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
+        <item name="android:textColor">@color/settingslib_materialColorOnSecondaryContainer</item>
+        <item name="android:textSize">14sp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconTint">@color/settingslib_materialColorOnSecondaryContainer</item>
+        <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
+    </style>
 </resources>

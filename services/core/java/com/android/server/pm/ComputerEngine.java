@@ -2208,10 +2208,10 @@ public class ComputerEngine implements Computer {
             return true;
         }
         boolean permissionGranted = requireFullPermission ? hasPermission(
-                Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
                 : (hasPermission(
-                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-                        || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS));
+                        android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, callingUid)
+                        || hasPermission(Manifest.permission.INTERACT_ACROSS_USERS, callingUid));
         if (!permissionGranted) {
             if (Process.isIsolatedUid(callingUid) && isKnownIsolatedComputeApp(callingUid)) {
                 return checkIsolatedOwnerHasPermission(callingUid, requireFullPermission);

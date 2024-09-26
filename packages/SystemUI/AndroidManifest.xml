@@ -1013,6 +1013,7 @@
             android:excludeFromRecents="true"
             android:autoRemoveFromRecents="true"
             android:launchMode="singleTop"
+            android:showForAllUsers="true"
             android:exported="false">
         </activity>
 

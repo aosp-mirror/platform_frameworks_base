@@ -25,6 +25,7 @@ import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.util.Slog;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,16 @@ public final class InputRouteManager {
     static final AudioAttributes INPUT_ATTRIBUTES =
             new AudioAttributes.Builder().setCapturePreset(MediaRecorder.AudioSource.MIC).build();
 
+    @VisibleForTesting
+    static final int[] PRESETS = {
+        MediaRecorder.AudioSource.MIC,
+        MediaRecorder.AudioSource.CAMCORDER,
+        MediaRecorder.AudioSource.VOICE_RECOGNITION,
+        MediaRecorder.AudioSource.VOICE_COMMUNICATION,
+        MediaRecorder.AudioSource.UNPROCESSED,
+        MediaRecorder.AudioSource.VOICE_PERFORMANCE
+    };
+
     private final Context mContext;
 
     private final AudioManager mAudioManager;
@@ -55,6 +66,7 @@ public final class InputRouteManager {
     private MediaDevice mSelectedInputDevice;
 
     private final Collection<InputDeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
+    private final Object mCallbackLock = new Object();
 
     @VisibleForTesting
     final AudioDeviceCallback mAudioDeviceCallback =
@@ -76,17 +88,33 @@ public final class InputRouteManager {
         Handler handler = new Handler(context.getMainLooper());
 
         mAudioManager.registerAudioDeviceCallback(mAudioDeviceCallback, handler);
+
+        mAudioManager.addOnPreferredDevicesForCapturePresetChangedListener(
+                new HandlerExecutor(handler),
+                this::onPreferredDevicesForCapturePresetChangedListener);
     }
 
-    public void registerCallback(@NonNull InputDeviceCallback callback) {
-        if (!mCallbacks.contains(callback)) {
-            mCallbacks.add(callback);
+    private void onPreferredDevicesForCapturePresetChangedListener(
+            @MediaRecorder.SystemSource int capturePreset,
+            @NonNull List<AudioDeviceAttributes> devices) {
+        if (capturePreset == MediaRecorder.AudioSource.MIC) {
             dispatchInputDeviceListUpdate();
         }
     }
 
+    public void registerCallback(@NonNull InputDeviceCallback callback) {
+        synchronized (mCallbackLock) {
+            if (!mCallbacks.contains(callback)) {
+                mCallbacks.add(callback);
+                dispatchInputDeviceListUpdate();
+            }
+        }
+    }
+
     public void unregisterCallback(@NonNull InputDeviceCallback callback) {
-        mCallbacks.remove(callback);
+        synchronized (mCallbackLock) {
+            mCallbacks.remove(callback);
+        }
     }
 
     public @Nullable MediaDevice getSelectedInputDevice() {
@@ -134,8 +162,51 @@ public final class InputRouteManager {
         }
 
         final List<MediaDevice> inputMediaDevices = new ArrayList<>(mInputMediaDevices);
-        for (InputDeviceCallback callback : mCallbacks) {
-            callback.onInputDeviceListUpdated(inputMediaDevices);
+        synchronized (mCallbackLock) {
+            for (InputDeviceCallback callback : mCallbacks) {
+                callback.onInputDeviceListUpdated(inputMediaDevices);
+            }
+        }
+    }
+
+    public void selectDevice(@NonNull MediaDevice device) {
+        if (!(device instanceof InputMediaDevice)) {
+            Slog.w(TAG, "This device is not an InputMediaDevice: " + device.getName());
+            return;
+        }
+
+        if (device.equals(mSelectedInputDevice)) {
+            Slog.w(TAG, "This device is already selected: " + device.getName());
+            return;
+        }
+
+        // Handle edge case where the targeting device is not available, e.g. disconnected.
+        if (!mInputMediaDevices.contains(device)) {
+            Slog.w(TAG, "This device is not available: " + device.getName());
+            return;
+        }
+
+        // TODO(b/355684672): apply address for BT devices.
+        AudioDeviceAttributes deviceAttributes =
+                new AudioDeviceAttributes(
+                        AudioDeviceAttributes.ROLE_INPUT,
+                        ((InputMediaDevice) device).getAudioDeviceInfoType(),
+                        /* address= */ "");
+        try {
+            setPreferredDeviceForAllPresets(deviceAttributes);
+        } catch (IllegalArgumentException e) {
+            Slog.e(
+                    TAG,
+                    "Illegal argument exception while setPreferredDeviceForAllPreset: "
+                            + device.getName(),
+                    e);
+        }
+    }
+
+    private void setPreferredDeviceForAllPresets(@NonNull AudioDeviceAttributes deviceAttributes) {
+        // The input routing via system setting takes effect on all capture presets.
+        for (@MediaRecorder.Source int preset : PRESETS) {
+            mAudioManager.setPreferredDeviceForCapturePreset(preset, deviceAttributes);
         }
     }
 

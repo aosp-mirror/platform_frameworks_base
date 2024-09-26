@@ -1543,6 +1543,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         unregisterConfigurationListeners();
         mConfigActivityRecord = activityRecord;
         activityRecord.registerConfigurationChangeListener(this);
+        // If the process hasn't attached, make sure that prepareConfigurationForLaunchingActivity
+        // will use the newer configuration sequence.
+        if (mThread == null) {
+            mHasPendingConfigurationChange = true;
+        }
     }
 
     private void unregisterActivityConfigurationListener() {
