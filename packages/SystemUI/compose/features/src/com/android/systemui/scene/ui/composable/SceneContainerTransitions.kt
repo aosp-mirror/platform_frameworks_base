@@ -82,6 +82,10 @@ val SceneContainerTransitions = transitions {
         sharedElement(Notifications.Elements.HeadsUpNotificationPlaceholder, enabled = false)
     }
     from(Scenes.Shade, to = Scenes.QuickSettings) { shadeToQuickSettingsTransition() }
+    from(Scenes.Shade, to = Scenes.Lockscreen) {
+        reversed { lockscreenToShadeTransition() }
+        sharedElement(Notifications.Elements.NotificationStackPlaceholder, enabled = false)
+    }
 
     // Overlay transitions
 
@@ -94,6 +98,7 @@ val SceneContainerTransitions = transitions {
     // Scene overscroll
 
     overscrollDisabled(Scenes.Gone, Orientation.Vertical)
+    overscrollDisabled(Scenes.Lockscreen, Orientation.Vertical)
     overscroll(Scenes.Bouncer, Orientation.Vertical) {
         translate(Bouncer.Elements.Content, y = { absoluteDistance })
     }
