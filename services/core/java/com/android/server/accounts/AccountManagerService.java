@@ -1773,8 +1773,7 @@ public class AccountManagerService
                         // Create a Session for the target user and pass in the bundle
                         completeCloningAccount(response, result, account, toAccounts, userFrom);
                     } else {
-                        // Bundle format is not defined.
-                        super.onResultSkipSanitization(result);
+                        super.onResult(result);
                     }
                 }
             }.bind();
@@ -1861,8 +1860,7 @@ public class AccountManagerService
                     // account to avoid retries?
                     // TODO: what we do with the visibility?
 
-                    // Bundle format is not defined.
-                    super.onResultSkipSanitization(result);
+                    super.onResult(result);
                 }
 
                 @Override
@@ -2108,7 +2106,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
             IAccountManagerResponse response = getResponseAndClose();
             if (response != null) {
                 try {
@@ -2462,7 +2459,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
             if (result != null && result.containsKey(AccountManager.KEY_BOOLEAN_RESULT)
                     && !result.containsKey(AccountManager.KEY_INTENT)) {
                 final boolean removalAllowed = result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT);
@@ -2977,7 +2973,6 @@ public class AccountManagerService
                 @Override
                 public void onResult(Bundle result) {
                     Bundle.setDefusable(result, true);
-                    result = sanitizeBundle(result);
                     if (result != null) {
                         String label = result.getString(AccountManager.KEY_AUTH_TOKEN_LABEL);
                         Bundle bundle = new Bundle();
@@ -3155,7 +3150,6 @@ public class AccountManagerService
                 @Override
                 public void onResult(Bundle result) {
                     Bundle.setDefusable(result, true);
-                    result = sanitizeBundle(result);
                     if (result != null) {
                         if (result.containsKey(AccountManager.KEY_AUTH_TOKEN_LABEL)) {
                             Intent intent = newGrantCredentialsPermissionIntent(
@@ -3627,12 +3621,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            Bundle sessionBundle = null;
-            if (result != null) {
-                // Session bundle will be removed from result.
-                sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
-            }
-            result = sanitizeBundle(result);
             mNumResults++;
             Intent intent = null;
             if (result != null) {
@@ -3694,6 +3682,7 @@ public class AccountManagerService
             // bundle contains data necessary for finishing the session
             // later. The session bundle will be encrypted here and
             // decrypted later when trying to finish the session.
+            Bundle sessionBundle = result.getBundle(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE);
             if (sessionBundle != null) {
                 String accountType = sessionBundle.getString(AccountManager.KEY_ACCOUNT_TYPE);
                 if (TextUtils.isEmpty(accountType)
@@ -4081,7 +4070,6 @@ public class AccountManagerService
                 @Override
                 public void onResult(Bundle result) {
                     Bundle.setDefusable(result, true);
-                    result = sanitizeBundle(result);
                     IAccountManagerResponse response = getResponseAndClose();
                     if (response == null) {
                         return;
@@ -4395,7 +4383,6 @@ public class AccountManagerService
         @Override
         public void onResult(Bundle result) {
             Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
             mNumResults++;
             if (result == null) {
                 onError(AccountManager.ERROR_CODE_INVALID_RESPONSE, "null bundle");
@@ -4952,68 +4939,6 @@ public class AccountManagerService
                 callback, resultReceiver);
     }
 
-
-    // All keys for Strings passed from AbstractAccountAuthenticator using Bundle.
-    private static final String[] sStringBundleKeys = new String[] {
-        AccountManager.KEY_ACCOUNT_NAME,
-        AccountManager.KEY_ACCOUNT_TYPE,
-        AccountManager.KEY_AUTHTOKEN,
-        AccountManager.KEY_AUTH_TOKEN_LABEL,
-        AccountManager.KEY_ERROR_MESSAGE,
-        AccountManager.KEY_PASSWORD,
-        AccountManager.KEY_ACCOUNT_STATUS_TOKEN};
-
-    /**
-     * Keep only documented fields in a Bundle received from AbstractAccountAuthenticator.
-     */
-    protected static Bundle sanitizeBundle(Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-        Bundle sanitizedBundle = new Bundle();
-        Bundle.setDefusable(sanitizedBundle, true);
-        int updatedKeysCount = 0;
-        for (String stringKey : sStringBundleKeys) {
-            if (bundle.containsKey(stringKey)) {
-                String value = bundle.getString(stringKey);
-                sanitizedBundle.putString(stringKey, value);
-                updatedKeysCount++;
-            }
-        }
-        String key = AbstractAccountAuthenticator.KEY_CUSTOM_TOKEN_EXPIRY;
-        if (bundle.containsKey(key)) {
-            long expiryMillis = bundle.getLong(key, 0L);
-            sanitizedBundle.putLong(key, expiryMillis);
-            updatedKeysCount++;
-        }
-        key = AccountManager.KEY_BOOLEAN_RESULT;
-        if (bundle.containsKey(key)) {
-            boolean booleanResult = bundle.getBoolean(key, false);
-            sanitizedBundle.putBoolean(key, booleanResult);
-            updatedKeysCount++;
-        }
-        key = AccountManager.KEY_ERROR_CODE;
-        if (bundle.containsKey(key)) {
-            int errorCode = bundle.getInt(key, 0);
-            sanitizedBundle.putInt(key, errorCode);
-            updatedKeysCount++;
-        }
-        key = AccountManager.KEY_INTENT;
-        if (bundle.containsKey(key)) {
-            Intent intent = bundle.getParcelable(key, Intent.class);
-            sanitizedBundle.putParcelable(key, intent);
-            updatedKeysCount++;
-        }
-        if (bundle.containsKey(AccountManager.KEY_ACCOUNT_SESSION_BUNDLE)) {
-            // The field is not copied in sanitized bundle.
-            updatedKeysCount++;
-        }
-        if (updatedKeysCount != bundle.size()) {
-            Log.w(TAG, "Size mismatch after sanitizeBundle call.");
-        }
-        return sanitizedBundle;
-    }
-
     private abstract class Session extends IAccountAuthenticatorResponse.Stub
             implements IBinder.DeathRecipient, ServiceConnection {
         private final Object mSessionLock = new Object();
@@ -5304,14 +5229,9 @@ public class AccountManagerService
                 }
             }
         }
+
         @Override
         public void onResult(Bundle result) {
-            Bundle.setDefusable(result, true);
-            result = sanitizeBundle(result);
-            onResultSkipSanitization(result);
-        }
-
-        public void onResultSkipSanitization(Bundle result) {
             Bundle.setDefusable(result, true);
             mNumResults++;
             Intent intent = null;
