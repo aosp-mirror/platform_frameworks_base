@@ -150,7 +150,7 @@ public class AppCompatUtilsTest extends WindowTestsBase {
             robot.applyOnActivity((a) -> {
                 a.createActivityWithComponentInNewTask();
                 a.setIgnoreOrientationRequest(true);
-                a.setTopOrganizedTaskAsTopTask();
+                a.setTopActivityOrganizedTask();
                 a.setTopActivityInSizeCompatMode(true);
                 a.setTopActivityVisible(true);
             });
