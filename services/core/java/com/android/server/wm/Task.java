@@ -432,6 +432,9 @@ class Task extends TaskFragment {
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
     int mLayerRank = LAYER_RANK_INVISIBLE;
 
+    /** A 0~100 ratio to indicate the percentage of visible area on screen of a freeform task. */
+    int mNonOccludedFreeformAreaRatio;
+
     /* Unique identifier for this task. */
     final int mTaskId;
     /* User for which this task was created. */
@@ -1199,6 +1202,28 @@ class Task extends TaskFragment {
 
         // Ensure all animations are finished at same time in split-screen mode.
         forAllActivities(ActivityRecord::updateAnimatingActivityRegistry);
+    }
+
+    @Override
+    void onResize() {
+        super.onResize();
+        updateTaskLayerForFreeform();
+    }
+
+    @Override
+    void onMovedByResize() {
+        super.onMovedByResize();
+        updateTaskLayerForFreeform();
+    }
+
+    private void updateTaskLayerForFreeform() {
+        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
+            return;
+        }
+        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
+            return;
+        }
+        mRootWindowContainer.invalidateTaskLayersAndUpdateOomAdjIfNeeded();
     }
 
     @Override
@@ -5904,6 +5929,10 @@ class Task extends TaskFragment {
         if (mLastNonFullscreenBounds != null) {
             pw.print(prefix); pw.print("  mLastNonFullscreenBounds=");
             pw.println(mLastNonFullscreenBounds);
+        }
+        if (mNonOccludedFreeformAreaRatio != 0) {
+            pw.print(prefix); pw.print("  mNonOccludedFreeformAreaRatio=");
+            pw.println(mNonOccludedFreeformAreaRatio);
         }
         if (isLeafTask()) {
             pw.println(prefix + "  isSleeping=" + shouldSleepActivities());
