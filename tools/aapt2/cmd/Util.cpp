@@ -34,6 +34,30 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+std::optional<FlagStatus> GetFlagStatus(const std::optional<FeatureFlagAttribute>& flag,
+                                        const FeatureFlagValues& feature_flag_values,
+                                        std::string* out_err) {
+  if (!flag) {
+    return FlagStatus::NoFlag;
+  }
+  auto flag_it = feature_flag_values.find(flag->name);
+  if (flag_it == feature_flag_values.end()) {
+    *out_err = "Resource flag value undefined: " + flag->name;
+    return {};
+  }
+  const auto& flag_properties = flag_it->second;
+  if (!flag_properties.read_only) {
+    *out_err = "Only read only flags may be used with resources: " + flag->name;
+    return {};
+  }
+  if (!flag_properties.enabled.has_value()) {
+    *out_err = "Only flags with a value may be used with resources: " + flag->name;
+    return {};
+  }
+  return (flag_properties.enabled.value() != flag->negated) ? FlagStatus::Enabled
+                                                            : FlagStatus::Disabled;
+}
+
 std::optional<uint16_t> ParseTargetDensityParameter(StringPiece arg, android::IDiagnostics* diag) {
   ConfigDescription preferred_density_config;
   if (!ConfigDescription::Parse(arg, &preferred_density_config)) {

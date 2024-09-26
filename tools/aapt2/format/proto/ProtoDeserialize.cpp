@@ -536,6 +536,34 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
         config_value->value = DeserializeValueFromPb(pb_config_value.value(), src_pool, config,
                                                      &out_table->string_pool, files, out_error);
+
+        if (config_value->value == nullptr) {
+          return false;
+        }
+      }
+
+      // flag disabled
+      for (const pb::ConfigValue& pb_config_value : pb_entry.flag_disabled_config_value()) {
+        const pb::Configuration& pb_config = pb_config_value.config();
+
+        ConfigDescription config;
+        if (!DeserializeConfigFromPb(pb_config, &config, out_error)) {
+          return false;
+        }
+
+        FeatureFlagAttribute flag;
+        flag.name = pb_config_value.value().item().flag_name();
+        flag.negated = pb_config_value.value().item().flag_negated();
+        ResourceConfigValue* config_value =
+            entry->FindOrCreateFlagDisabledValue(std::move(flag), config, pb_config.product());
+        if (config_value->value != nullptr) {
+          *out_error = "duplicate configuration in resource table";
+          return false;
+        }
+
+        config_value->value = DeserializeValueFromPb(pb_config_value.value(), src_pool, config,
+                                                     &out_table->string_pool, files, out_error);
+
         if (config_value->value == nullptr) {
           return false;
         }
@@ -748,7 +776,6 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
     if (value == nullptr) {
       return {};
     }
-
   } else if (pb_value.has_compound_value()) {
     const pb::CompoundValue& pb_compound_value = pb_value.compound_value();
     switch (pb_compound_value.value_case()) {
@@ -1018,6 +1045,12 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
       DeserializeItemFromPbInternal(pb_item, src_pool, config, value_pool, files, out_error);
   if (item) {
     item->SetFlagStatus((FlagStatus)pb_item.flag_status());
+    if (!pb_item.flag_name().empty()) {
+      FeatureFlagAttribute flag;
+      flag.name = pb_item.flag_name();
+      flag.negated = pb_item.flag_negated();
+      item->SetFlag(std::move(flag));
+    }
   }
   return item;
 }
