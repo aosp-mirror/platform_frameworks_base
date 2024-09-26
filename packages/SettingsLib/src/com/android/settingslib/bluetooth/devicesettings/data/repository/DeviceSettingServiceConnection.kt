@@ -33,12 +33,15 @@ import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingPreferenceState
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingState
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfigServiceStatus
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsConfigProviderService
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsListener
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsProviderService
+import com.android.settingslib.bluetooth.devicesettings.IGetDeviceSettingsConfigCallback
 import com.android.settingslib.bluetooth.devicesettings.data.model.ServiceConnectionStatus
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -63,6 +66,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -74,22 +78,22 @@ class DeviceSettingServiceConnection(
     private val backgroundCoroutineContext: CoroutineContext,
 ) {
     data class EndPoint(
-        private val packageName: String,
+        private val packageName: String?,
         private val className: String?,
-        private val intentAction: String,
+        private val intentAction: String?,
     ) {
-        fun toIntent(): Intent =
-            Intent().apply {
+        fun toIntent(): Intent? {
+            if (TextUtils.isEmpty(packageName) || TextUtils.isEmpty(intentAction)) {
+                return null
+            }
+            return Intent().apply {
                 if (className.isNullOrBlank()) {
                     setPackage(packageName)
                 } else {
-                    setClassName(packageName, className)
+                    setClassName(packageName!!, className)
                 }
                 setAction(intentAction)
             }
-
-        fun isValid(): Boolean {
-            return !TextUtils.isEmpty(packageName) && !TextUtils.isEmpty(intentAction)
         }
     }
 
@@ -126,8 +130,9 @@ class DeviceSettingServiceConnection(
                     when (it) {
                         is ServiceConnectionStatus.Connected ->
                             flowOf(
-                                it.service.getDeviceSettingsConfig(
-                                    deviceInfo { setBluetoothAddress(cachedDevice.address) }
+                                getDeviceSettingsConfigFromService(
+                                    deviceInfo { setBluetoothAddress(cachedDevice.address) },
+                                    it.service,
                                 )
                             )
                         ServiceConnectionStatus.Connecting -> flowOf()
@@ -136,6 +141,27 @@ class DeviceSettingServiceConnection(
                 }
                 .first()
         }
+
+    private suspend fun getDeviceSettingsConfigFromService(
+        deviceInfo: DeviceInfo,
+        service: IDeviceSettingsConfigProviderService,
+    ): DeviceSettingsConfig? = suspendCancellableCoroutine { continuation ->
+        service.getDeviceSettingsConfig(
+            deviceInfo,
+            object : IGetDeviceSettingsConfigCallback.Stub() {
+                override fun onResult(
+                    status: DeviceSettingsConfigServiceStatus,
+                    config: DeviceSettingsConfig?,
+                ) {
+                    if (!status.success) {
+                        continuation.resume(null)
+                    } else {
+                        continuation.resume(config)
+                    }
+                }
+            },
+        )
+    }
 
     private val settingIdToItemMapping =
         flow {
@@ -228,24 +254,23 @@ class DeviceSettingServiceConnection(
                     )
                 }
             }
-            ?.filter { it.isValid() }
             ?.distinct()
-            ?.associateBy(
-                { it },
-                { endpoint ->
-                    services.computeIfAbsent(endpoint) {
-                        getService(
-                                endpoint.toIntent(),
-                                IDeviceSettingsProviderService.Stub::asInterface,
-                            )
-                            .stateIn(
-                                coroutineScope.plus(backgroundCoroutineContext),
-                                SharingStarted.WhileSubscribed(),
-                                ServiceConnectionStatus.Connecting,
-                            )
-                    }
-                },
-            )
+            ?.mapNotNull { endpoint ->
+                endpoint.toIntent()?.let { intent ->
+                    Pair(
+                        endpoint,
+                        services.computeIfAbsent(endpoint) {
+                            getService(intent, IDeviceSettingsProviderService.Stub::asInterface)
+                                .stateIn(
+                                    coroutineScope.plus(backgroundCoroutineContext),
+                                    SharingStarted.WhileSubscribed(),
+                                    ServiceConnectionStatus.Connecting,
+                                )
+                        },
+                    )
+                }
+            }
+            ?.toMap()
 
     private fun getDeviceSettingsFromService(
         cachedDevice: CachedBluetoothDevice,
