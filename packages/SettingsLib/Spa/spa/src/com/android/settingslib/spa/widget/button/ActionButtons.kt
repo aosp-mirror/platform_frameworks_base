@@ -110,7 +110,7 @@ private fun RowScope.ActionButton(actionButton: ActionButton) {
                 shape = RectangleShape,
                 colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     disabledContainerColor = MaterialTheme.colorScheme.surface,
                 ),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
