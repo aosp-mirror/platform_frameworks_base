@@ -6822,6 +6822,17 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
   }
 
+  @FlaggedApi("android.media.soundtrigger.manager_api") public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAudioCapabilities();
+    method @NonNull public byte[] getData();
+    method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphrases();
+    method public boolean isAllowMultipleTriggers();
+    method public boolean isCaptureRequested();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
+  }
+
   public static class SoundTrigger.RecognitionEvent {
     method @Nullable public android.media.AudioFormat getCaptureFormat();
     method public int getCaptureSession();
@@ -7772,10 +7783,16 @@ package android.media.soundtrigger {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void deleteModel(java.util.UUID);
     method public int getDetectionServiceOperationsTimeout();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getModelState(@NonNull java.util.UUID);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModuleProperties getModuleProperties();
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getParameter(@NonNull java.util.UUID, int);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean isRecognitionActive(@NonNull java.util.UUID);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModelParamRange queryParameter(@Nullable java.util.UUID, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int setParameter(@Nullable java.util.UUID, int, int);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int startRecognition(@NonNull java.util.UUID, @Nullable android.os.Bundle, @NonNull android.content.ComponentName, @NonNull android.hardware.soundtrigger.SoundTrigger.RecognitionConfig);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int stopRecognition(@NonNull java.util.UUID);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int unloadSoundModel(@NonNull java.util.UUID);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
 
@@ -13020,6 +13037,8 @@ package android.service.notification {
     method public void onSuggestedReplySent(@NonNull String, @NonNull CharSequence, int);
     method public final void unsnoozeNotification(@NonNull String);
     field public static final String ACTION_NOTIFICATION_ASSISTANT_DETAIL_SETTINGS = "android.service.notification.action.NOTIFICATION_ASSISTANT_DETAIL_SETTINGS";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String ACTION_NOTIFICATION_ASSISTANT_FEEDBACK_SETTINGS = "android.service.notification.action.NOTIFICATION_ASSISTANT_FEEDBACK_SETTINGS";
+    field @FlaggedApi("android.service.notification.notification_classification") public static final String EXTRA_NOTIFICATION_KEY = "android.service.notification.extra.NOTIFICATION_KEY";
     field public static final String FEEDBACK_RATING = "feedback.rating";
     field public static final String SERVICE_INTERFACE = "android.service.notification.NotificationAssistantService";
     field public static final int SOURCE_FROM_APP = 0; // 0x0

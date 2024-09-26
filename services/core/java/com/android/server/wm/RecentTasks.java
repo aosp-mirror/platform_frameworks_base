@@ -24,6 +24,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -2040,10 +2042,15 @@ class RecentTasks {
         final boolean isOtherUndefinedMode = otherWindowingMode == WINDOWING_MODE_UNDEFINED;
 
         // An activity type and windowing mode is compatible if they are the exact same type/mode,
-        // or if one of the type/modes is undefined
+        // or if one of the type/modes is undefined. This is with the exception of
+        // freeform/fullscreen where both modes are assumed to be compatible with each other.
         final boolean isCompatibleType = activityType == otherActivityType
                 || isUndefinedType || isOtherUndefinedType;
         final boolean isCompatibleMode = windowingMode == otherWindowingMode
+                || (windowingMode == WINDOWING_MODE_FREEFORM
+                && otherWindowingMode == WINDOWING_MODE_FULLSCREEN)
+                || (windowingMode == WINDOWING_MODE_FULLSCREEN
+                && otherWindowingMode == WINDOWING_MODE_FREEFORM)
                 || isUndefinedMode || isOtherUndefinedMode;
 
         return isCompatibleType && isCompatibleMode;

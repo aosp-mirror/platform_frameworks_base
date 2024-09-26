@@ -294,3 +294,11 @@ flag {
     bug: "363324203"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "remove_cross_user_permission_hack"
+    namespace: "package_manager_service"
+    description: "Feature flag to remove hack code of using PackageManager.MATCH_ANY_USER flag without cross user permission."
+    bug: "332664521"
+    is_fixed_read_only: true
+}

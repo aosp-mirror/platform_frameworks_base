@@ -19384,11 +19384,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     PolicyDefinition.RESET_PASSWORD_TOKEN,
                     enforcingAdmin,
                     userId);
-            // TODO(b/369152176): Address difference in behavior regarding addEscrowToken when
-            //  compared with the else branch.
             long tokenHandle = addEscrowToken(
                     token, currentTokenHandle == null ? 0 : currentTokenHandle, userId);
             if (tokenHandle == 0) {
+                mDevicePolicyEngine.removeLocalPolicy(
+                        PolicyDefinition.RESET_PASSWORD_TOKEN,
+                        enforcingAdmin,
+                        userId);
                 return false;
             }
             mDevicePolicyEngine.setLocalPolicy(

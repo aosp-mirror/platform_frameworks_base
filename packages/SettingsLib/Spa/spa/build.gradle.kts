@@ -58,12 +58,12 @@ dependencies {
     api("androidx.compose.material:material-icons-extended:$jetpackComposeVersion")
     api("androidx.compose.runtime:runtime-livedata:$jetpackComposeVersion")
     api("androidx.compose.ui:ui-tooling-preview:$jetpackComposeVersion")
+    api("androidx.graphics:graphics-shapes-android:1.0.1")
     api("androidx.lifecycle:lifecycle-livedata-ktx")
     api("androidx.lifecycle:lifecycle-runtime-compose")
     api("androidx.navigation:navigation-compose:2.8.1")
     api("com.github.PhilJay:MPAndroidChart:v3.1.0-alpha")
-    api("com.google.android.material:material:1.11.0")
-    api("androidx.graphics:graphics-shapes-android:1.0.1")
+    api("com.google.android.material:material:1.12.0")
     debugApi("androidx.compose.ui:ui-tooling:$jetpackComposeVersion")
     implementation("com.airbnb.android:lottie-compose:6.4.0")
 
@@ -84,7 +84,6 @@ tasks.register<JacocoReport>("coverageReport") {
 
                     // Excludes files forked from AndroidX.
                     "com/android/settingslib/spa/widget/scaffold/CustomizedAppBar*",
-                    "com/android/settingslib/spa/widget/scaffold/TopAppBarColors*",
 
                     // Excludes files forked from Accompanist.
                     "com/android/settingslib/spa/framework/compose/DrawablePainter*",
