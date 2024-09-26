@@ -26,6 +26,7 @@
         <option name="test-file-name" value="BinderProxyCountingTestApp.apk" />
         <option name="test-file-name" value="BinderProxyCountingTestService.apk" />
         <option name="test-file-name" value="AppThatUsesAppOps.apk" />
+        <option name="test-file-name" value="AppThatCallsBinderMethods.apk" />
     </target_preparer>
 
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
