@@ -15,4 +15,9 @@
 
     <bool name="bool6">true</bool>
     <bool name="bool6" android:featureFlag="!test.package.trueFlag">false</bool>
+
+    <bool name="bool7">true</bool>
+    <bool name="bool8">false</bool>
+    <bool name="bool9">true</bool>
+    <bool name="bool10">false</bool>
 </resources>

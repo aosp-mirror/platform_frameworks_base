@@ -34,6 +34,20 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+std::optional<FeatureFlagAttribute> ParseFlag(std::optional<std::string_view> flag_text) {
+  if (!flag_text || flag_text->empty()) {
+    return {};
+  }
+  FeatureFlagAttribute flag;
+  if (flag_text->starts_with('!')) {
+    flag.negated = true;
+    flag.name = flag_text->substr(1);
+  } else {
+    flag.name = flag_text.value();
+  }
+  return flag;
+}
+
 std::optional<FlagStatus> GetFlagStatus(const std::optional<FeatureFlagAttribute>& flag,
                                         const FeatureFlagValues& feature_flag_values,
                                         std::string* out_err) {

@@ -243,6 +243,12 @@ struct ResourceFile {
 
   // Exported symbols
   std::vector<SourcedResourceName> exported_symbols;
+
+  // Flag status
+  FlagStatus flag_status = FlagStatus::NoFlag;
+
+  // Flag
+  std::optional<FeatureFlagAttribute> flag;
 };
 
 /**
