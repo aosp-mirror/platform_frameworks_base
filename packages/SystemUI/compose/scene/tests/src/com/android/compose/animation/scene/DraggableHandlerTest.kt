@@ -108,6 +108,8 @@ class DraggableHandlerTest {
 
         val transitionInterceptionThreshold = 0.05f
 
+        var gestureFilter: (startedPosition: Offset) -> Boolean = DefaultGestureFilter
+
         private val layoutImpl =
             SceneTransitionLayoutImpl(
                     state = layoutState,
@@ -120,6 +122,7 @@ class DraggableHandlerTest {
                     // Use testScope and not backgroundScope here because backgroundScope does not
                     // work well with advanceUntilIdle(), which is used by some tests.
                     animationScope = testScope,
+                    gestureFilter = { startedPosition -> gestureFilter.invoke(startedPosition) },
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
@@ -314,6 +317,13 @@ class DraggableHandlerTest {
     fun onDragStarted_shouldStartATransition() = runGestureTest {
         onDragStarted(overSlop = down(fractionOfScreen = 0.1f))
         assertTransition(currentScene = SceneA)
+    }
+
+    @Test
+    fun onDragStarted_doesNotStartTransition_whenGestureFiltered() = runGestureTest {
+        gestureFilter = { _ -> true }
+        onDragStarted(overSlop = down(fractionOfScreen = 0.1f), expectedConsumedOverSlop = 0f)
+        assertIdle(currentScene = SceneA)
     }
 
     @Test
