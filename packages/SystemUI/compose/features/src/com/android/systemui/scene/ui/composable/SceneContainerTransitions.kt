@@ -91,8 +91,20 @@ val SceneContainerTransitions = transitions {
 
     to(Overlays.NotificationsShade) { toNotificationsShadeTransition() }
     to(Overlays.QuickSettingsShade) { toQuickSettingsShadeTransition() }
-    from(Overlays.NotificationsShade, Overlays.QuickSettingsShade) {
+    from(Overlays.NotificationsShade, to = Overlays.QuickSettingsShade) {
         notificationsShadeToQuickSettingsShadeTransition()
+    }
+    from(Scenes.Gone, to = Overlays.NotificationsShade, key = SlightlyFasterShadeCollapse) {
+        toNotificationsShadeTransition(durationScale = 0.9)
+    }
+    from(Scenes.Gone, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
+        toQuickSettingsShadeTransition(durationScale = 0.9)
+    }
+    from(Scenes.Lockscreen, to = Overlays.NotificationsShade, key = SlightlyFasterShadeCollapse) {
+        toNotificationsShadeTransition(durationScale = 0.9)
+    }
+    from(Scenes.Lockscreen, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
+        toQuickSettingsShadeTransition(durationScale = 0.9)
     }
 
     // Scene overscroll

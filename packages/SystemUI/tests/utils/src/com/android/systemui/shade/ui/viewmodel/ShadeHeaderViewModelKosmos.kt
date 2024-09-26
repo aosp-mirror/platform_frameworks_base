@@ -20,7 +20,6 @@ import android.content.applicationContext
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.activityStarter
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.privacyChipInteractor
 import com.android.systemui.shade.domain.interactor.shadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
@@ -32,7 +31,6 @@ val Kosmos.shadeHeaderViewModel: ShadeHeaderViewModel by
         ShadeHeaderViewModel(
             context = applicationContext,
             activityStarter = activityStarter,
-            sceneInteractor = sceneInteractor,
             shadeInteractor = shadeInteractor,
             mobileIconsInteractor = mobileIconsInteractor,
             mobileIconsViewModel = mobileIconsViewModel,

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -25,6 +26,7 @@ import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -35,13 +37,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @EnableSceneContainer
+@EnableFlags(DualShade.FLAG_NAME)
 class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val sceneInteractor = kosmos.sceneInteractor
 
-    private val underTest = kosmos.quickSettingsShadeOverlayContentViewModel
+    private val underTest by lazy { kosmos.quickSettingsShadeOverlayContentViewModel }
 
     @Test
     fun onScrimClicked_hidesShade() =
