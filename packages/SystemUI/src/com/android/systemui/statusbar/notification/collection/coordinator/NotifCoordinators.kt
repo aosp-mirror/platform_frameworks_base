@@ -25,7 +25,7 @@ import com.android.systemui.statusbar.notification.collection.SortBySectionTimeF
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import javax.inject.Inject
@@ -88,7 +88,7 @@ constructor(
         mCoordinators.add(hideLocallyDismissedNotifsCoordinator)
         mCoordinators.add(hideNotifsForOtherUsersCoordinator)
         mCoordinators.add(keyguardCoordinator)
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             mCoordinators.add(lockScreenMinimalismCoordinator)
         } else {
             mCoordinators.add(unseenKeyguardCoordinator)
@@ -125,11 +125,11 @@ constructor(
         }
 
         // Manually add Ordered Sections
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             mOrderedSections.add(lockScreenMinimalismCoordinator.topOngoingSectioner) // Top Ongoing
         }
         mOrderedSections.add(headsUpCoordinator.sectioner) // HeadsUp
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             mOrderedSections.add(lockScreenMinimalismCoordinator.topUnseenSectioner) // Top Unseen
         }
         mOrderedSections.add(colorizedFgsCoordinator.sectioner) // ForegroundService

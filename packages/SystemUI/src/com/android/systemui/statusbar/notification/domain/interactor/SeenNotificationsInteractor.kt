@@ -23,7 +23,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.util.printSection
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -57,25 +57,25 @@ constructor(
 
     /** Set the entry that is identified as the top ongoing notification. */
     fun setTopOngoingNotification(entry: NotificationEntry?) {
-        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return
         notificationListRepository.topOngoingNotificationKey.value = entry?.key
     }
 
     /** Determine if the given notification is the top ongoing notification. */
     fun isTopOngoingNotification(entry: NotificationEntry?): Boolean =
-        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) false
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) false
         else
             entry != null && notificationListRepository.topOngoingNotificationKey.value == entry.key
 
     /** Set the entry that is identified as the top unseen notification. */
     fun setTopUnseenNotification(entry: NotificationEntry?) {
-        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return
         notificationListRepository.topUnseenNotificationKey.value = entry?.key
     }
 
     /** Determine if the given notification is the top unseen notification. */
     fun isTopUnseenNotification(entry: NotificationEntry?): Boolean =
-        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) false
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) false
         else entry != null && notificationListRepository.topUnseenNotificationKey.value == entry.key
 
     fun dump(pw: IndentingPrintWriter) =

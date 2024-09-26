@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.headsUpEvents
 import com.android.systemui.util.asIndenting
@@ -87,7 +87,7 @@ constructor(
     private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
-        NotificationMinimalismPrototype.assertInLegacyMode()
+        NotificationMinimalism.assertInLegacyMode()
         pipeline.addFinalizeFilter(unseenNotifFilter)
         pipeline.addCollectionListener(collectionListener)
         scope.launch { trackUnseenFilterSettingChanges() }
@@ -253,7 +253,7 @@ constructor(
     }
 
     private fun unseenFeatureEnabled(): Flow<Boolean> {
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             // TODO(b/330387368): should this really just be turned off? If so, hide the setting.
             return flowOf(false)
         }

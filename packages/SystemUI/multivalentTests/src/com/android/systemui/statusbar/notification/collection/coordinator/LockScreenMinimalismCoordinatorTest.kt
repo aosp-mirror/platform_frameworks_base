@@ -42,7 +42,7 @@ import com.android.systemui.statusbar.notification.collection.modifyEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.FakeSettings
@@ -66,7 +66,7 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@EnableFlags(NotificationMinimalismPrototype.FLAG_NAME)
+@EnableFlags(NotificationMinimalism.FLAG_NAME)
 class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
 
     private val kosmos =
@@ -193,7 +193,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
             kosmos.activeNotificationListRepository.topUnseenNotificationKey.value = child2.key
             assertThat(promoter.shouldPromoteToTopLevel(child1)).isFalse()
             assertThat(promoter.shouldPromoteToTopLevel(child2))
-                .isEqualTo(NotificationMinimalismPrototype.ungroupTopUnseen)
+                .isEqualTo(NotificationMinimalism.ungroupTopUnseen)
             assertThat(promoter.shouldPromoteToTopLevel(child3)).isFalse()
             assertThat(promoter.shouldPromoteToTopLevel(parent)).isFalse()
 
@@ -201,7 +201,7 @@ class LockScreenMinimalismCoordinatorTest : SysuiTestCase() {
             kosmos.activeNotificationListRepository.topUnseenNotificationKey.value = child2.key
             assertThat(promoter.shouldPromoteToTopLevel(child1)).isTrue()
             assertThat(promoter.shouldPromoteToTopLevel(child2))
-                .isEqualTo(NotificationMinimalismPrototype.ungroupTopUnseen)
+                .isEqualTo(NotificationMinimalism.ungroupTopUnseen)
             assertThat(promoter.shouldPromoteToTopLevel(child3)).isFalse()
             assertThat(promoter.shouldPromoteToTopLevel(parent)).isFalse()
         }

@@ -35,7 +35,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_ONGOING
 import com.android.systemui.statusbar.notification.stack.BUCKET_TOP_UNSEEN
 import com.android.systemui.util.asIndenting
@@ -77,7 +77,7 @@ constructor(
     private var unseenFilterEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
-        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) {
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) {
             return
         }
         pipeline.addPromoter(unseenNotifPromoter)
@@ -132,7 +132,7 @@ constructor(
     private fun unseenFeatureEnabled(): Flow<Boolean> {
         // TODO(b/330387368): create LOCK_SCREEN_NOTIFICATION_MINIMALISM setting to use here?
         //  Or should we actually just repurpose using the existing setting?
-        if (NotificationMinimalismPrototype.isEnabled) {
+        if (NotificationMinimalism.isEnabled) {
             return flowOf(true)
         }
         return seenNotificationsInteractor.isLockScreenShowOnlyUnseenNotificationsEnabled()
@@ -178,7 +178,7 @@ constructor(
         }
 
     private fun pickOutTopUnseenNotifs(list: List<ListEntry>) {
-        if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return
+        if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return
         if (!unseenFilterEnabled) return
         // Only ever elevate a top unseen notification on keyguard, not even locked shade
         if (statusBarStateController.state != StatusBarState.KEYGUARD) {
@@ -215,9 +215,9 @@ constructor(
         object : NotifPromoter(TAG) {
             override fun shouldPromoteToTopLevel(child: NotificationEntry): Boolean =
                 when {
-                    NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode() -> false
+                    NotificationMinimalism.isUnexpectedlyInLegacyMode() -> false
                     seenNotificationsInteractor.isTopOngoingNotification(child) -> true
-                    !NotificationMinimalismPrototype.ungroupTopUnseen -> false
+                    !NotificationMinimalism.ungroupTopUnseen -> false
                     else -> seenNotificationsInteractor.isTopUnseenNotification(child)
                 }
         }
@@ -225,7 +225,7 @@ constructor(
     val topOngoingSectioner =
         object : NotifSectioner("TopOngoing", BUCKET_TOP_ONGOING) {
             override fun isInSection(entry: ListEntry): Boolean {
-                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return false
+                if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return false
                 return entry.anyEntry { notificationEntry ->
                     seenNotificationsInteractor.isTopOngoingNotification(notificationEntry)
                 }
@@ -235,7 +235,7 @@ constructor(
     val topUnseenSectioner =
         object : NotifSectioner("TopUnseen", BUCKET_TOP_UNSEEN) {
             override fun isInSection(entry: ListEntry): Boolean {
-                if (NotificationMinimalismPrototype.isUnexpectedlyInLegacyMode()) return false
+                if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return false
                 return entry.anyEntry { notificationEntry ->
                     seenNotificationsInteractor.isTopUnseenNotification(notificationEntry)
                 }

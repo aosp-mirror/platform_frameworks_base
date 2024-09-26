@@ -23,7 +23,7 @@ import com.android.systemui.flags.RefactorFlagUtils
 
 /** Helper for reading or using the minimalism prototype flag state. */
 @Suppress("NOTHING_TO_INLINE")
-object NotificationMinimalismPrototype {
+object NotificationMinimalism {
     const val FLAG_NAME = Flags.FLAG_NOTIFICATION_MINIMALISM
 
     /** A token used for dependency declaration */
