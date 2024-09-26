@@ -5,6 +5,10 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+
+    // OWNER: g/ravenwood
+    // Bug component: 25698
+    default_team: "trendy_team_framework_backstage_power",
 }
 
 // Visibility only for ravenwood prototype uses.
@@ -118,7 +122,6 @@ java_binary_host {
 
 java_test_host {
     name: "hoststubgentest",
-    // main_class: "com.android.hoststubgen.Main",
     srcs: ["test/**/*.kt"],
     static_libs: [
         "hoststubgen",
@@ -143,8 +146,7 @@ hoststubgen_common_options = "$(location hoststubgen) " +
     // "--policy-override-file $(location framework-policy-override.txt) " +
     "@$(location :hoststubgen-standard-options) " +
 
-    "--out-stub-jar $(location host_stub.jar) " +
-    "--out-impl-jar $(location host_impl.jar) " +
+    "--out-jar $(location host.jar) " +
 
     // "--keep-all-classes " + // Used it for an experiment. See KeepAllClassesFilter.
     "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
@@ -159,10 +161,8 @@ genrule_defaults {
     srcs: [
         ":hoststubgen-standard-options",
     ],
-    // Create two jar files.
     out: [
-        "host_stub.jar",
-        "host_impl.jar",
+        "host.jar",
 
         // Following files are created just as FYI.
         "hoststubgen_keep_all.txt",

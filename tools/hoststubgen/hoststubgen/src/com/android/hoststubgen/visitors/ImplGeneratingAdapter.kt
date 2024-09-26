@@ -18,7 +18,6 @@ package com.android.hoststubgen.visitors
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
 import com.android.hoststubgen.asm.ClassNodes
-import com.android.hoststubgen.asm.isVisibilityPrivateOrPackagePrivate
 import com.android.hoststubgen.asm.prependArgTypeToMethodDescriptor
 import com.android.hoststubgen.asm.writeByteCodeToPushArguments
 import com.android.hoststubgen.asm.writeByteCodeToReturn
@@ -33,21 +32,20 @@ import com.android.hoststubgen.log
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Opcodes.INVOKEINTERFACE
+import org.objectweb.asm.Opcodes.INVOKESTATIC
+import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
 import org.objectweb.asm.Type
 
 /**
  * An adapter that generates the "impl" class file from an input class file.
  */
 class ImplGeneratingAdapter(
-        classes: ClassNodes,
-        nextVisitor: ClassVisitor,
-        filter: OutputFilter,
-        options: Options,
+    classes: ClassNodes,
+    nextVisitor: ClassVisitor,
+    filter: OutputFilter,
+    options: Options,
 ) : BaseAdapter(classes, nextVisitor, filter, options) {
-
-    override fun shouldEmit(policy: FilterPolicy): Boolean {
-        return policy.needsInImpl
-    }
 
     private var classLoadHooks: List<String> = emptyList()
 
@@ -104,14 +102,14 @@ class ImplGeneratingAdapter(
     private fun writeClassLoadHookCalls(mv: MethodVisitor) {
         classLoadHooks.forEach { classLoadHook ->
             // First argument: the class type.
-            mv.visitLdcInsn(Type.getType("L" + currentClassName + ";"))
+            mv.visitLdcInsn(Type.getType("L$currentClassName;"))
 
             // Second argument: method name
             mv.visitLdcInsn(classLoadHook)
 
             // Call HostTestUtils.onClassLoaded().
             mv.visitMethodInsn(
-                Opcodes.INVOKESTATIC,
+                INVOKESTATIC,
                 HostTestUtils.CLASS_INTERNAL_NAME,
                 "onClassLoaded",
                 "(Ljava/lang/Class;Ljava/lang/String;)V",
@@ -121,69 +119,49 @@ class ImplGeneratingAdapter(
     }
 
     override fun updateAccessFlags(
-            access: Int,
-            name: String,
-            descriptor: String,
+        access: Int,
+        name: String,
+        descriptor: String,
+        policy: FilterPolicy,
     ): Int {
-        if ((access and Opcodes.ACC_NATIVE) != 0 && nativeSubstitutionClass != null) {
+        if (policy.isMethodRewriteBody) {
+            // If we are rewriting the entire method body, we need
+            // to convert native methods to non-native
             return access and Opcodes.ACC_NATIVE.inv()
         }
         return access
     }
 
     override fun visitMethodInner(
-            access: Int,
-            name: String,
-            descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            policy: FilterPolicyWithReason,
-            substituted: Boolean,
-            superVisitor: MethodVisitor?,
+        access: Int,
+        name: String,
+        descriptor: String,
+        signature: String?,
+        exceptions: Array<String>?,
+        policy: FilterPolicyWithReason,
+        substituted: Boolean,
+        superVisitor: MethodVisitor?,
     ): MethodVisitor? {
-        // Inject method log, if needed.
         var innerVisitor = superVisitor
 
         //  If method logging is enabled, inject call to the logging method.
         val methodCallHooks = filter.getMethodCallHooks(currentClassName, name, descriptor)
         if (methodCallHooks.isNotEmpty()) {
             innerVisitor = MethodCallHookInjectingAdapter(
-                access,
                 name,
                 descriptor,
-                signature,
-                exceptions,
-                innerVisitor,
                 methodCallHooks,
-                )
+                innerVisitor,
+            )
         }
 
         // If this class already has a class initializer and a class load hook is needed, then
         // we inject code.
         if (classLoadHooks.isNotEmpty() &&
             name == CLASS_INITIALIZER_NAME &&
-            descriptor == CLASS_INITIALIZER_DESC) {
-            innerVisitor = ClassLoadHookInjectingMethodAdapter(
-                access,
-                name,
-                descriptor,
-                signature,
-                exceptions,
-                innerVisitor,
-            )
-        }
-
-        // If non-stub method call detection is enabled, then inject a call to the checker.
-        if (options.enableNonStubMethodCallDetection && doesMethodNeedNonStubCallCheck(
-                access, name, descriptor, policy) ) {
-            innerVisitor = NonStubMethodCallDetectingAdapter(
-                    access,
-                    name,
-                    descriptor,
-                    signature,
-                    exceptions,
-                    innerVisitor,
-            )
+            descriptor == CLASS_INITIALIZER_DESC
+        ) {
+            innerVisitor = ClassLoadHookInjectingMethodAdapter(innerVisitor)
         }
 
         fun MethodVisitor.withAnnotation(descriptor: String): MethodVisitor {
@@ -192,37 +170,34 @@ class ImplGeneratingAdapter(
         }
 
         log.withIndent {
-            var willThrow = false
-            if (policy.policy == FilterPolicy.Throw) {
-                log.v("Making method throw...")
-                willThrow = true
-                innerVisitor = ThrowingMethodAdapter(
-                    access, name, descriptor, signature, exceptions, innerVisitor)
-                    .withAnnotation(HostStubGenProcessedAsThrow.CLASS_DESCRIPTOR)
-            }
-            if ((access and Opcodes.ACC_NATIVE) != 0 && nativeSubstitutionClass != null) {
-                log.v("Rewriting native method...")
-                return NativeSubstitutingMethodAdapter(
-                        access, name, descriptor, signature, exceptions, innerVisitor)
-                    .withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
-            }
-            if (willThrow) {
-                return innerVisitor
-            }
-
-            if (policy.policy == FilterPolicy.Ignore) {
-                when (Type.getReturnType(descriptor)) {
-                    Type.VOID_TYPE -> {
-                        log.v("Making method ignored...")
-                        return IgnoreMethodAdapter(
-                                access, name, descriptor, signature, exceptions, innerVisitor)
-                            .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
-                    }
-                    else -> {
-                        throw RuntimeException("Ignored policy only allowed for void methods")
-                    }
+            // When we encounter native methods, we want to forcefully
+            // inject a method body. Also see [updateAccessFlags].
+            val forceCreateBody = (access and Opcodes.ACC_NATIVE) != 0
+            when (policy.policy) {
+                FilterPolicy.Throw -> {
+                    log.v("Making method throw...")
+                    return ThrowingMethodAdapter(forceCreateBody, innerVisitor)
+                        .withAnnotation(HostStubGenProcessedAsThrow.CLASS_DESCRIPTOR)
                 }
+                FilterPolicy.Ignore -> {
+                    log.v("Making method ignored...")
+                    return IgnoreMethodAdapter(descriptor, forceCreateBody, innerVisitor)
+                        .withAnnotation(HostStubGenProcessedAsIgnore.CLASS_DESCRIPTOR)
+                }
+                FilterPolicy.Redirect -> {
+                    log.v("Redirecting method...")
+                    return RedirectMethodAdapter(
+                        access, name, descriptor,
+                        forceCreateBody, innerVisitor
+                    )
+                        .withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
+                }
+                else -> {}
             }
+        }
+
+        if (filter.hasAnyMethodCallReplace()) {
+            innerVisitor = MethodCallReplacingAdapter(name, innerVisitor)
         }
         if (substituted) {
             innerVisitor?.withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
@@ -231,53 +206,32 @@ class ImplGeneratingAdapter(
         return innerVisitor
     }
 
-    fun doesMethodNeedNonStubCallCheck(
-            access: Int,
-            name: String,
-            descriptor: String,
-            policy: FilterPolicyWithReason,
-    ): Boolean {
-        // If a method is in the stub, then no need to check.
-        if (policy.policy.needsInStub) {
-            return false
-        }
-        // If a method is private or package-private, no need to check.
-        // Technically test code can use framework package name, so it's a bit too lenient.
-        if (isVisibilityPrivateOrPackagePrivate(access)) {
-            return false
-        }
-        // TODO: If the method overrides a method that's accessible by tests, then we shouldn't
-        // do the check. (e.g. overrides a stub method or java standard method.)
-
-        return true
-    }
-
     /**
      * A method adapter that replaces the method body with a HostTestUtils.onThrowMethodCalled()
      * call.
      */
     private inner class ThrowingMethodAdapter(
-            access: Int,
-            val name: String,
-            descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            next: MethodVisitor?
-    ) : BodyReplacingMethodVisitor(access, name, descriptor, signature, exceptions, next) {
+        createBody: Boolean,
+        next: MethodVisitor?
+    ) : BodyReplacingMethodVisitor(createBody, next) {
         override fun emitNewCode() {
-            visitMethodInsn(Opcodes.INVOKESTATIC,
-                    HostTestUtils.CLASS_INTERNAL_NAME,
-                    "onThrowMethodCalled",
-                    "()V",
-                    false)
+            visitMethodInsn(
+                INVOKESTATIC,
+                HostTestUtils.CLASS_INTERNAL_NAME,
+                "onThrowMethodCalled",
+                "()V",
+                false
+            )
 
             // We still need a RETURN opcode for the return type.
             // For now, let's just inject a `throw`.
             visitTypeInsn(Opcodes.NEW, "java/lang/RuntimeException")
             visitInsn(Opcodes.DUP)
             visitLdcInsn("Unreachable")
-            visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/RuntimeException",
-                    "<init>", "(Ljava/lang/String;)V", false)
+            visitMethodInsn(
+                Opcodes.INVOKESPECIAL, "java/lang/RuntimeException",
+                "<init>", "(Ljava/lang/String;)V", false
+            )
             visitInsn(Opcodes.ATHROW)
 
             // visitMaxs(3, if (isStatic) 0 else 1)
@@ -289,54 +243,67 @@ class ImplGeneratingAdapter(
      * A method adapter that replaces the method body with a no-op return.
      */
     private inner class IgnoreMethodAdapter(
-            access: Int,
-            val name: String,
-            descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            next: MethodVisitor?
-    ) : BodyReplacingMethodVisitor(access, name, descriptor, signature, exceptions, next) {
+        val descriptor: String,
+        createBody: Boolean,
+        next: MethodVisitor?
+    ) : BodyReplacingMethodVisitor(createBody, next) {
         override fun emitNewCode() {
-            visitInsn(Opcodes.RETURN)
+            when (Type.getReturnType(descriptor)) {
+                Type.VOID_TYPE -> visitInsn(Opcodes.RETURN)
+                Type.BOOLEAN_TYPE, Type.BYTE_TYPE, Type.CHAR_TYPE, Type.SHORT_TYPE,
+                Type.INT_TYPE -> {
+                    visitInsn(Opcodes.ICONST_0)
+                    visitInsn(Opcodes.IRETURN)
+                }
+                Type.LONG_TYPE -> {
+                    visitInsn(Opcodes.LCONST_0)
+                    visitInsn(Opcodes.LRETURN)
+                }
+                Type.FLOAT_TYPE -> {
+                    visitInsn(Opcodes.FCONST_0)
+                    visitInsn(Opcodes.FRETURN)
+                }
+                Type.DOUBLE_TYPE -> {
+                    visitInsn(Opcodes.DCONST_0)
+                    visitInsn(Opcodes.DRETURN)
+                }
+                else -> {
+                    visitInsn(Opcodes.ACONST_NULL)
+                    visitInsn(Opcodes.ARETURN)
+                }
+            }
             visitMaxs(0, 0) // We let ASM figure them out.
         }
     }
 
     /**
-     * A method adapter that replaces a native method call with a call to the "native substitution"
-     * class.
+     * A method adapter that rewrite a method body with a
+     * call to a method in the redirection class.
      */
-    private inner class NativeSubstitutingMethodAdapter(
-            val access: Int,
-            private val name: String,
-            private val descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            next: MethodVisitor?
-    ) : MethodVisitor(OPCODE_VERSION, next) {
-        override fun visitCode() {
-            throw RuntimeException("NativeSubstitutingMethodVisitor should be called on " +
-                    " native method, where visitCode() shouldn't be called.")
-        }
+    private inner class RedirectMethodAdapter(
+        access: Int,
+        private val name: String,
+        private val descriptor: String,
+        createBody: Boolean,
+        next: MethodVisitor?
+    ) : BodyReplacingMethodVisitor(createBody, next) {
 
-        override fun visitEnd() {
-            super.visitCode()
+        private val isStatic = (access and Opcodes.ACC_STATIC) != 0
 
+        override fun emitNewCode() {
             var targetDescriptor = descriptor
             var argOffset = 0
 
-            // For non-static native method, we need to tweak it a bit.
-            if ((access and Opcodes.ACC_STATIC) == 0) {
+            // For non-static method, we need to tweak it a bit.
+            if (!isStatic) {
                 // Push `this` as the first argument.
                 this.visitVarInsn(Opcodes.ALOAD, 0)
 
                 // Update the descriptor -- add this class's type as the first argument
                 // to the method descriptor.
-                val thisType = Type.getType("L" + currentClassName + ";")
-
                 targetDescriptor = prependArgTypeToMethodDescriptor(
-                        descriptor,
-                        thisType,
+                    descriptor,
+                    currentClassName,
                 )
 
                 // Shift the original arguments by one.
@@ -345,16 +312,17 @@ class ImplGeneratingAdapter(
 
             writeByteCodeToPushArguments(descriptor, this, argOffset)
 
-            visitMethodInsn(Opcodes.INVOKESTATIC,
-                    nativeSubstitutionClass,
-                    name,
-                    targetDescriptor,
-                    false)
+            visitMethodInsn(
+                INVOKESTATIC,
+                redirectionClass,
+                name,
+                targetDescriptor,
+                false
+            )
 
             writeByteCodeToReturn(descriptor, this)
 
             visitMaxs(99, 0) // We let ASM figure them out.
-            super.visitEnd()
         }
     }
 
@@ -365,25 +333,22 @@ class ImplGeneratingAdapter(
      * `this(...)`. The logging code will be injected *before* such calls.
      */
     private inner class MethodCallHookInjectingAdapter(
-            access: Int,
-            val name: String,
-            val descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            next: MethodVisitor?,
-            val hooks: List<String>,
+        val name: String,
+        val descriptor: String,
+        val hooks: List<String>,
+        next: MethodVisitor?,
     ) : MethodVisitor(OPCODE_VERSION, next) {
         override fun visitCode() {
             super.visitCode()
 
             hooks.forEach { hook ->
-                mv.visitLdcInsn(Type.getType("L" + currentClassName + ";"))
+                mv.visitLdcInsn(Type.getType("L$currentClassName;"))
                 visitLdcInsn(name)
                 visitLdcInsn(descriptor)
                 visitLdcInsn(hook)
 
                 visitMethodInsn(
-                    Opcodes.INVOKESTATIC,
+                    INVOKESTATIC,
                     HostTestUtils.CLASS_INTERNAL_NAME,
                     "callMethodCallHook",
                     "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
@@ -397,11 +362,6 @@ class ImplGeneratingAdapter(
      * Inject a class load hook call.
      */
     private inner class ClassLoadHookInjectingMethodAdapter(
-        access: Int,
-        val name: String,
-        val descriptor: String,
-        signature: String?,
-        exceptions: Array<String>?,
         next: MethodVisitor?
     ) : MethodVisitor(OPCODE_VERSION, next) {
         override fun visitCode() {
@@ -411,44 +371,57 @@ class ImplGeneratingAdapter(
         }
     }
 
-    /**
-     * A method adapter that detects calls to non-stub methods.
-     */
-    private inner class NonStubMethodCallDetectingAdapter(
-            access: Int,
-            val name: String,
-            val descriptor: String,
-            signature: String?,
-            exceptions: Array<String>?,
-            next: MethodVisitor?
+    private inner class MethodCallReplacingAdapter(
+        val callerMethodName: String,
+        next: MethodVisitor?,
     ) : MethodVisitor(OPCODE_VERSION, next) {
-        override fun visitCode() {
-            super.visitCode()
+        override fun visitMethodInsn(
+            opcode: Int,
+            owner: String?,
+            name: String?,
+            descriptor: String?,
+            isInterface: Boolean,
+        ) {
+            when (opcode) {
+                INVOKESTATIC, INVOKEVIRTUAL, INVOKEINTERFACE -> {}
+                else -> {
+                    // Don't touch other opcodes.
+                    super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+                    return
+                }
+            }
+            val to = filter.getMethodCallReplaceTo(
+                currentClassName, callerMethodName, owner!!, name!!, descriptor!!
+            )
 
-            // First three arguments to HostTestUtils.onNonStubMethodCalled().
-            visitLdcInsn(currentClassName)
-            visitLdcInsn(name)
-            visitLdcInsn(descriptor)
+            if (to == null
+                // Don't replace if the target is the callsite.
+                || (to.className == currentClassName && to.methodName == callerMethodName)
+            ) {
+                super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
+                return
+            }
 
-            // Call: HostTestUtils.getStackWalker().getCallerClass().
-            // This push the caller Class in the stack.
-            visitMethodInsn(Opcodes.INVOKESTATIC,
-                    HostTestUtils.CLASS_INTERNAL_NAME,
-                    "getStackWalker",
-                    "()Ljava/lang/StackWalker;",
-                    false)
-            visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-                    "java/lang/StackWalker",
-                    "getCallerClass",
-                    "()Ljava/lang/Class;",
-                    false)
+            // Replace the method call with a (static) call to the target method.
+            // If it's a non-static call, the target method's first argument will receive "this".
+            // (Because of that, we don't need to manipulate the stack. Just replace the
+            // method call.)
 
-            // Then call onNonStubMethodCalled().
-            visitMethodInsn(Opcodes.INVOKESTATIC,
-                    HostTestUtils.CLASS_INTERNAL_NAME,
-                    "onNonStubMethodCalled",
-                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)V",
-                    false)
+            val toDesc = if (opcode == INVOKESTATIC) {
+                // Static call to static call, no need to change the desc.
+                descriptor
+            } else {
+                // Need to prepend the "this" type to the descriptor.
+                prependArgTypeToMethodDescriptor(descriptor, owner)
+            }
+
+            mv.visitMethodInsn(
+                INVOKESTATIC,
+                to.className,
+                to.methodName,
+                toDesc,
+                false
+            )
         }
     }
 }
