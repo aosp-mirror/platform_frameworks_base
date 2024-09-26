@@ -23,6 +23,7 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
+import android.util.SparseBooleanArray;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -45,9 +46,11 @@ public abstract class InputManagerInternal {
 
     /**
      * Called by the power manager to tell the input manager whether it should start
-     * watching for wake events.
+     * watching for wake events on given displays.
+     *
+     * @param displayInteractivities Map of display ids to their current interactive state.
      */
-    public abstract void setInteractive(boolean interactive);
+    public abstract void setDisplayInteractivities(SparseBooleanArray displayInteractivities);
 
     /**
      * Toggles Caps Lock state for input device with specific id.
