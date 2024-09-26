@@ -106,6 +106,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
@@ -154,6 +155,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellTaskOrganizer mTaskOrganizer;
+    private final DesktopModeTaskRepository mDesktopRepository;
     private final ShellController mShellController;
     private final Context mContext;
     private final @ShellMainThread Handler mMainHandler;
@@ -224,6 +226,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
+            DesktopModeTaskRepository desktopRepository,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,
@@ -248,6 +251,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 shellCommandHandler,
                 windowManager,
                 taskOrganizer,
+                desktopRepository,
                 displayController,
                 shellController,
                 displayInsetsController,
@@ -281,6 +285,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
+            DesktopModeTaskRepository desktopRepository,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,
@@ -308,6 +313,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mBgExecutor = bgExecutor;
         mActivityTaskManager = mContext.getSystemService(ActivityTaskManager.class);
         mTaskOrganizer = taskOrganizer;
+        mDesktopRepository = desktopRepository;
         mShellController = shellController;
         mDisplayController = displayController;
         mDisplayInsetsController = displayInsetsController;
@@ -1394,6 +1400,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mContext.createContextAsUser(UserHandle.of(taskInfo.userId), 0 /* flags */),
                         mDisplayController,
                         mSplitScreenController,
+                        mDesktopRepository,
                         mTaskOrganizer,
                         taskInfo,
                         taskSurface,

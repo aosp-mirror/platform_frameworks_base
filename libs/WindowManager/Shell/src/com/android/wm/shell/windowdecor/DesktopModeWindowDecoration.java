@@ -89,6 +89,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -188,12 +189,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
+    private final DesktopModeTaskRepository mDesktopRepository;
 
     DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
+            DesktopModeTaskRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -207,8 +210,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository) {
-        this (context, userContext, displayController, splitScreenController, taskOrganizer,
-                taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
+        this (context, userContext, displayController, splitScreenController, desktopRepository,
+                taskOrganizer, taskInfo, taskSurface, handler, bgExecutor, choreographer, syncQueue,
                 appHeaderViewHolderFactory, rootTaskDisplayAreaOrganizer, genericLinksParser,
                 assistContentRequester,
                 SurfaceControl.Builder::new, SurfaceControl.Transaction::new,
@@ -225,6 +228,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
+            DesktopModeTaskRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -264,6 +268,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mMultiInstanceHelper = multiInstanceHelper;
         mWindowManagerWrapper = windowManagerWrapper;
         mWindowDecorCaptionHandleRepository = windowDecorCaptionHandleRepository;
+        mDesktopRepository = desktopRepository;
     }
 
     /**
@@ -479,11 +484,18 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
             notifyCaptionStateChanged();
         }
-        mWindowDecorViewHolder.bindData(mTaskInfo,
-                position,
-                mResult.mCaptionWidth,
-                mResult.mCaptionHeight,
-                isCaptionVisible());
+
+        if (isAppHandle(mWindowDecorViewHolder)) {
+            mWindowDecorViewHolder.bindData(new AppHandleViewHolder.HandleData(
+                    mTaskInfo, position, mResult.mCaptionWidth, mResult.mCaptionHeight,
+                    isCaptionVisible()
+            ));
+        } else {
+            mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
+                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo),
+                    mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId)
+            ));
+        }
         Trace.endSection();
 
         if (!mTaskInfo.isFocused) {
@@ -1531,6 +1543,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @NonNull Context userContext,
                 DisplayController displayController,
                 SplitScreenController splitScreenController,
+                DesktopModeTaskRepository desktopRepository,
                 ShellTaskOrganizer taskOrganizer,
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,
@@ -1549,6 +1562,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     userContext,
                     displayController,
                     splitScreenController,
+                    desktopRepository,
                     taskOrganizer,
                     taskInfo,
                     taskSurface,

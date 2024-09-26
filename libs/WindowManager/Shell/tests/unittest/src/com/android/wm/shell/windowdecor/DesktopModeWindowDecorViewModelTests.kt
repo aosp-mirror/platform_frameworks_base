@@ -85,6 +85,7 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter
@@ -155,6 +156,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockTaskOrganizer: ShellTaskOrganizer
     @Mock private lateinit var mockDisplayController: DisplayController
     @Mock private lateinit var mockSplitScreenController: SplitScreenController
+    @Mock private lateinit var mockDesktopRepository: DesktopModeTaskRepository
     @Mock private lateinit var mockDisplayLayout: DisplayLayout
     @Mock private lateinit var displayInsetsController: DisplayInsetsController
     @Mock private lateinit var mockSyncQueue: SyncTransactionQueue
@@ -225,6 +227,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockShellCommandHandler,
                 mockWindowManager,
                 mockTaskOrganizer,
+                mockDesktopRepository,
                 mockDisplayController,
                 mockShellController,
                 displayInsetsController,
@@ -1213,8 +1216,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         val decoration = mock(DesktopModeWindowDecoration::class.java)
         whenever(
             mockDesktopModeWindowDecorFactory.create(
-                any(), any(), any(), any(), any(), eq(task), any(), any(), any(), any(), any(),
-                any(), any(), any(), any(), any(), any())
+                any(), any(), any(), any(), any(), any(), eq(task), any(), any(), any(), any(),
+                any(), any(), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
         whenever(decoration.isFocused).thenReturn(task.isFocused)

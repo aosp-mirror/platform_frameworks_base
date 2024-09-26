@@ -102,6 +102,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
+import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -156,6 +157,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private SplitScreenController mMockSplitScreenController;
     @Mock
     private ShellTaskOrganizer mMockShellTaskOrganizer;
+    @Mock
+    private DesktopModeTaskRepository mMockDesktopRepository;
     @Mock
     private Choreographer mMockChoreographer;
     @Mock
@@ -1086,9 +1089,9 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
             boolean relayout) {
         final DesktopModeWindowDecoration windowDecor = new DesktopModeWindowDecoration(mContext,
                 mContext, mMockDisplayController, mMockSplitScreenController,
-                mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl, mMockHandler, mBgExecutor,
-                mMockChoreographer, mMockSyncQueue, mMockAppHeaderViewHolderFactory,
-                mMockRootTaskDisplayAreaOrganizer,
+                mMockDesktopRepository, mMockShellTaskOrganizer, taskInfo, mMockSurfaceControl,
+                mMockHandler, mBgExecutor, mMockChoreographer, mMockSyncQueue,
+                mMockAppHeaderViewHolderFactory, mMockRootTaskDisplayAreaOrganizer,
                 mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
