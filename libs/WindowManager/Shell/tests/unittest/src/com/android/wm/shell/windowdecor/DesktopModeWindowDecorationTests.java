@@ -49,7 +49,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.kotlin.VerificationKt.times;
 
 import android.app.ActivityManager;
 import android.app.assist.AssistContent;
@@ -847,8 +846,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
         spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
-        // Once for view host, the other for the AppHandle input layer.
-        verify(mMockHandler, times(2)).post(runnableArgument.capture());
+        verify(mMockHandler).post(runnableArgument.capture());
         runnableArgument.getValue().run();
         verify(mMockSurfaceControlViewHostFactory).create(any(), any(), any());
     }
@@ -875,8 +873,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
         spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
-        // Once for view host, the other for the AppHandle input layer.
-        verify(mMockHandler, times(2)).post(runnableArgument.capture());
+        verify(mMockHandler).post(runnableArgument.capture());
 
         spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
 
@@ -890,8 +887,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
         spyWindowDecor.relayout(taskInfo, true /* hasGlobalFocus */);
-        // Once for view host, the other for the AppHandle input layer.
-        verify(mMockHandler, times(2)).post(runnableArgument.capture());
+        verify(mMockHandler).post(runnableArgument.capture());
 
         spyWindowDecor.close();
 
