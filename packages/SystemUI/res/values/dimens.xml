@@ -2039,4 +2039,6 @@
     <!-- SliceView icon size -->
     <dimen name="abc_slice_big_pic_min_height">64dp</dimen>
     <dimen name="abc_slice_big_pic_max_height">64dp</dimen>
+
+    <dimen name="contextual_edu_dialog_bottom_margin">70dp</dimen>
 </resources>
