@@ -1890,7 +1890,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
 
         // Callback gets an updated state
         val state = PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 1f).build()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
 
         // Listener is notified of updated state
         verify(listener)
@@ -1911,7 +1911,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
 
         // No media added with this key
 
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -1928,7 +1928,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         val state = PlaybackState.Builder().build()
 
         // Then no changes are made
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
         verify(listener, never())
             .onMediaDataLoaded(eq(KEY), any(), any(), anyBoolean(), anyInt(), anyBoolean())
     }
@@ -1939,7 +1939,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
         whenever(controller.playbackState).thenReturn(state)
 
         addNotificationAndLoad()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -1983,7 +1983,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
             backgroundExecutor.runAllReady()
             foregroundExecutor.runAllReady()
 
-            stateCallbackCaptor.value.invoke(PACKAGE_NAME, state)
+            onStateUpdated(PACKAGE_NAME, state)
 
             verify(listener)
                 .onMediaDataLoaded(
@@ -2008,7 +2008,7 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 .build()
 
         addNotificationAndLoad()
-        stateCallbackCaptor.value.invoke(KEY, state)
+        onStateUpdated(KEY, state)
 
         verify(listener)
             .onMediaDataLoaded(
@@ -2517,5 +2517,11 @@ class LegacyMediaDataManagerImplTest(flags: FlagsParameterization) : SysuiTestCa
                 eq(0),
                 eq(false),
             )
+    }
+
+    private fun onStateUpdated(key: String, state: PlaybackState) {
+        stateCallbackCaptor.value.invoke(key, state)
+        backgroundExecutor.runAllReady()
+        foregroundExecutor.runAllReady()
     }
 }
