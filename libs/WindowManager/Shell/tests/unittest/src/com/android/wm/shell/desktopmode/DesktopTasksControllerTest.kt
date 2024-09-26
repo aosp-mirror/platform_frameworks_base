@@ -147,6 +147,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.eq
@@ -183,6 +184,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Mock
   lateinit var toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
   @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
+  @Mock
+  lateinit var mockDesktopFullImmersiveTransitionHandler: DesktopFullImmersiveTransitionHandler
   @Mock lateinit var launchAdjacentController: LaunchAdjacentController
   @Mock lateinit var splitScreenController: SplitScreenController
   @Mock lateinit var recentsTransitionHandler: RecentsTransitionHandler
@@ -289,6 +292,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         dragAndDropTransitionHandler,
         toggleResizeDesktopTaskTransitionHandler,
         dragToDesktopTransitionHandler,
+        mockDesktopFullImmersiveTransitionHandler,
         taskRepository,
         desktopModeLoggerTransitionObserver,
         launchAdjacentController,
@@ -3119,6 +3123,30 @@ class DesktopTasksControllerTest : ShellTestCase() {
       verify(shellController, times(1)).addUserChangeListener(any())
   }
 
+  @Test
+  fun toggleImmersive_enter_resizesToDisplayBounds() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY)
+    taskRepository.setTaskInFullImmersiveState(DEFAULT_DISPLAY, task.taskId, false /* immersive */)
+
+    controller.toggleDesktopTaskFullImmersiveState(task)
+
+    verify(mockDesktopFullImmersiveTransitionHandler).enterImmersive(eq(task), argThat { wct ->
+      wct.hasBoundsChange(task.token, Rect())
+    })
+  }
+
+  @Test
+  fun toggleImmersive_exit_resizesToStableBounds() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY)
+    taskRepository.setTaskInFullImmersiveState(DEFAULT_DISPLAY, task.taskId, true /* immersive */)
+
+    controller.toggleDesktopTaskFullImmersiveState(task)
+
+    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersive(eq(task), argThat { wct ->
+      wct.hasBoundsChange(task.token, STABLE_BOUNDS)
+    })
+  }
+
   /**
    * Assert that an unhandled drag event launches a PendingIntent with the
    * windowing mode and bounds we are expecting.
@@ -3482,6 +3510,13 @@ private fun WindowContainerTransaction.assertLaunchTaskAt(
   assertThat(op.launchOptions?.getInt(LAUNCH_KEY_TASK_ID)).isEqualTo(taskId)
   assertThat(op.launchOptions?.getInt(keyLaunchWindowingMode, WINDOWING_MODE_UNDEFINED))
       .isEqualTo(windowingMode)
+}
+
+private fun WindowContainerTransaction.hasBoundsChange(
+  token: WindowContainerToken,
+  bounds: Rect
+): Boolean = this.changes.any { change ->
+  change.key == token.asBinder() && change.value.configuration.windowConfiguration.bounds == bounds
 }
 
 private fun WindowContainerTransaction?.anyDensityConfigChange(

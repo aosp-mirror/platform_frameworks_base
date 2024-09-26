@@ -65,6 +65,7 @@ import com.android.wm.shell.dagger.pip.PipModule;
 import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
+import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
@@ -384,9 +385,11 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             Transitions transitions,
+            Optional<DesktopFullImmersiveTransitionHandler> desktopImmersiveTransitionHandler,
             WindowDecorViewModel windowDecorViewModel) {
         return new FreeformTaskTransitionObserver(
-                context, shellInit, transitions, windowDecorViewModel);
+                context, shellInit, transitions, desktopImmersiveTransitionHandler,
+                windowDecorViewModel);
     }
 
     @WMSingleton
@@ -621,6 +624,7 @@ public abstract class WMShellModule {
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             DragToDesktopTransitionHandler dragToDesktopTransitionHandler,
             @DynamicOverride DesktopRepository desktopRepository,
+            Optional<DesktopFullImmersiveTransitionHandler> desktopFullImmersiveTransitionHandler,
             DesktopModeLoggerTransitionObserver desktopModeLoggerTransitionObserver,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
@@ -636,7 +640,8 @@ public abstract class WMShellModule {
                 returnToDragStartAnimator, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, desktopModeDragAndDropTransitionHandler,
                 toggleResizeDesktopTaskTransitionHandler,
-                dragToDesktopTransitionHandler, desktopRepository,
+                dragToDesktopTransitionHandler, desktopFullImmersiveTransitionHandler.get(),
+                desktopRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
                 recentTasksController.orElse(null), interactionJankMonitor, mainHandler);
@@ -667,6 +672,19 @@ public abstract class WMShellModule {
                         context,
                         handler)
         );
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopFullImmersiveTransitionHandler> provideDesktopImmersiveHandler(
+            Context context,
+            Transitions transitions,
+            @DynamicOverride DesktopRepository desktopRepository) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.of(
+                    new DesktopFullImmersiveTransitionHandler(transitions, desktopRepository));
+        }
+        return Optional.empty();
     }
 
     @WMSingleton

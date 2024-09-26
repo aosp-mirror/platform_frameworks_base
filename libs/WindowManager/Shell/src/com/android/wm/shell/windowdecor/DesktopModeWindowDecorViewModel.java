@@ -538,6 +538,14 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         decoration.closeMaximizeMenu();
     }
 
+    private void onEnterOrExitImmersive(int taskId) {
+        final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+        if (decoration == null) {
+            return;
+        }
+        mDesktopTasksController.toggleDesktopTaskFullImmersiveState(decoration.mTaskInfo);
+    }
+
     private void onSnapResize(int taskId, boolean left) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
         if (decoration == null) {
@@ -755,7 +763,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 //  back to the decoration using
                 //  {@link DesktopModeWindowDecoration#setOnMaximizeOrRestoreClickListener}, which
                 //  should shared with the maximize menu's maximize/restore actions.
-                onMaximizeOrRestore(decoration.mTaskInfo.taskId, "caption_bar_button");
+                if (Flags.enableFullyImmersiveInDesktop()
+                        && TaskInfoKt.getRequestingImmersive(decoration.mTaskInfo)) {
+                    // Task is requesting immersive, so it should either enter or exit immersive,
+                    // depending on immersive state.
+                    onEnterOrExitImmersive(decoration.mTaskInfo.taskId);
+                } else {
+                    // Full immersive is disabled or task doesn't request/support it, so just
+                    // toggle between maximize/restore states.
+                    onMaximizeOrRestore(decoration.mTaskInfo.taskId, "caption_bar_button");
+                }
             } else if (id == R.id.minimize_window) {
                 final WindowContainerTransaction wct = new WindowContainerTransaction();
                 mDesktopTasksController.onDesktopWindowMinimize(wct, mTaskId);
