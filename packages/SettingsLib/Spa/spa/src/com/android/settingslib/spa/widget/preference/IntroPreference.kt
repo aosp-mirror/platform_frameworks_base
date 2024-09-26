@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.framework.theme.toSemiBoldWeight
 
 @Composable
 fun IntroPreference(
@@ -112,7 +113,7 @@ private fun IntroTitle(title: String) {
         Text(
             text = title,
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleLarge.toSemiBoldWeight(),
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
@@ -126,7 +127,7 @@ private fun IntroDescription(descriptions: List<String>?) {
             Text(
                 text = description,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = SettingsDimension.paddingExtraSmall),
             )
