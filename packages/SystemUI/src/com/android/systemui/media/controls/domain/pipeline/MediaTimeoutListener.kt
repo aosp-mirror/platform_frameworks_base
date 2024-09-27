@@ -128,7 +128,7 @@ constructor(
         data: MediaData,
         immediately: Boolean,
         receivedSmartspaceCardLatency: Int,
-        isSsReactivated: Boolean
+        isSsReactivated: Boolean,
     ) {
         var reusedListener: PlaybackStateListener? = null
 
@@ -183,7 +183,7 @@ constructor(
     override fun onSmartspaceMediaDataLoaded(
         key: String,
         data: SmartspaceMediaData,
-        shouldPrioritize: Boolean
+        shouldPrioritize: Boolean,
     ) {
         if (!mediaFlags.isPersistentSsCardEnabled()) return
 
@@ -259,7 +259,9 @@ constructor(
         }
 
         override fun onPlaybackStateChanged(state: PlaybackState?) {
-            processState(state, dispatchEvents = true, currentResumption = resumption)
+            bgExecutor.execute {
+                processState(state, dispatchEvents = true, currentResumption = resumption)
+            }
         }
 
         override fun onSessionDestroyed() {
@@ -276,6 +278,7 @@ constructor(
             }
         }
 
+        @WorkerThread
         private fun processState(
             state: PlaybackState?,
             dispatchEvents: Boolean,
