@@ -224,6 +224,7 @@ public class AmbientState implements Dumpable {
      * @param isSwipingUp Whether we are swiping up.
      */
     public void setSwipingUp(boolean isSwipingUp) {
+        SceneContainerFlag.assertInLegacyMode();
         if (!isSwipingUp && mIsSwipingUp) {
             // Just stopped swiping up.
             mIsFlingRequiredAfterLockScreenSwipeUp = true;
@@ -242,6 +243,7 @@ public class AmbientState implements Dumpable {
      * @param isFlinging Whether we are flinging the shade open or closed.
      */
     public void setFlinging(boolean isFlinging) {
+        SceneContainerFlag.assertInLegacyMode();
         if (isOnKeyguard() && !isFlinging && mIsFlinging) {
             // Just stopped flinging.
             mIsFlingRequiredAfterLockScreenSwipeUp = false;
@@ -717,6 +719,7 @@ public class AmbientState implements Dumpable {
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
     public boolean isFlingingAfterSwipeUpOnLockscreen() {
+        SceneContainerFlag.assertInLegacyMode();
         return mIsFlinging && mIsFlingRequiredAfterLockScreenSwipeUp;
     }
 
