@@ -21,13 +21,13 @@ import android.os.Parcel
 import android.os.Parcelable
 
 /**
- * A data class representing a device settings provider service status.
+ * A data class representing a device settings config service status.
  *
- * @property enabled Whether the service is enabled.
+ * @property success Whether the status is succeed.
  * @property extras Extra bundle
  */
-data class DeviceSettingsProviderServiceStatus(
-    val enabled: Boolean,
+data class DeviceSettingsConfigServiceStatus(
+    val success: Boolean,
     val extras: Bundle = Bundle.EMPTY,
 ) : Parcelable {
 
@@ -35,24 +35,24 @@ data class DeviceSettingsProviderServiceStatus(
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.run {
-            writeBoolean(enabled)
+            writeBoolean(success)
             writeBundle(extras)
         }
     }
 
     companion object {
         @JvmField
-        val CREATOR: Parcelable.Creator<DeviceSettingsProviderServiceStatus> =
-            object : Parcelable.Creator<DeviceSettingsProviderServiceStatus> {
+        val CREATOR: Parcelable.Creator<DeviceSettingsConfigServiceStatus> =
+            object : Parcelable.Creator<DeviceSettingsConfigServiceStatus> {
                 override fun createFromParcel(parcel: Parcel) =
                     parcel.run {
-                        DeviceSettingsProviderServiceStatus(
-                            enabled = readBoolean(),
+                        DeviceSettingsConfigServiceStatus(
+                            success = readBoolean(),
                             extras = readBundle((Bundle::class.java.classLoader)) ?: Bundle.EMPTY,
                         )
                     }
 
-                override fun newArray(size: Int): Array<DeviceSettingsProviderServiceStatus?> {
+                override fun newArray(size: Int): Array<DeviceSettingsConfigServiceStatus?> {
                     return arrayOfNulls(size)
                 }
             }

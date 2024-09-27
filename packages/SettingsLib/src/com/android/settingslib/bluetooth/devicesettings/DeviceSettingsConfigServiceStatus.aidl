@@ -16,9 +16,4 @@
 
 package com.android.settingslib.bluetooth.devicesettings;
 
-import com.android.settingslib.bluetooth.devicesettings.DeviceInfo;
-import com.android.settingslib.bluetooth.devicesettings.IGetDeviceSettingsConfigCallback;
-
-interface IDeviceSettingsConfigProviderService {
-   oneway void getDeviceSettingsConfig(in DeviceInfo device, in IGetDeviceSettingsConfigCallback callback);
-}
+parcelable DeviceSettingsConfigServiceStatus;
