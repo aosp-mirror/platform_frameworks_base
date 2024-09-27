@@ -725,7 +725,7 @@ public class BiometricService extends SystemService {
                 return -1;
             }
 
-            if (!Utils.isValidAuthenticatorConfig(promptInfo)) {
+            if (!Utils.isValidAuthenticatorConfig(getContext(), promptInfo)) {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
@@ -763,7 +763,7 @@ public class BiometricService extends SystemService {
                     + ", Caller=" + callingUserId
                     + ", Authenticators=" + authenticators);
 
-            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+            if (!Utils.isValidAuthenticatorConfig(getContext(), authenticators)) {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
@@ -1038,7 +1038,7 @@ public class BiometricService extends SystemService {
                     + ", Caller=" + callingUserId
                     + ", Authenticators=" + authenticators);
 
-            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+            if (!Utils.isValidAuthenticatorConfig(getContext(), authenticators)) {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
@@ -1060,7 +1060,7 @@ public class BiometricService extends SystemService {
 
             Slog.d(TAG, "getSupportedModalities: Authenticators=" + authenticators);
 
-            if (!Utils.isValidAuthenticatorConfig(authenticators)) {
+            if (!Utils.isValidAuthenticatorConfig(getContext(), authenticators)) {
                 throw new SecurityException("Invalid authenticator configuration");
             }
 
