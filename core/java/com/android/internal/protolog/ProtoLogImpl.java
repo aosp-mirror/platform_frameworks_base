@@ -117,10 +117,11 @@ public class ProtoLogImpl {
                                 + ProtoLogImpl.class.getSimpleName() + ". "
                                 + "Setting up without a viewer config instead...");
 
-                        sServiceInstance = new PerfettoProtoLogImpl(sCacheUpdater, groups);
-                    } else {
                         sServiceInstance =
-                                new PerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
+                                new UnprocessedPerfettoProtoLogImpl(sCacheUpdater, groups);
+                    } else {
+                        sServiceInstance = new ProcessedPerfettoProtoLogImpl(
+                                sViewerConfigPath, sCacheUpdater, groups);
                     }
                 } catch (ServiceManager.ServiceNotFoundException e) {
                     throw new RuntimeException(e);

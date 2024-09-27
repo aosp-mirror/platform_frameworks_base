@@ -79,7 +79,7 @@ public class ProtoLog {
                 }
 
                 try {
-                    sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+                    sProtoLogInstance = new UnprocessedPerfettoProtoLogImpl(groups);
                 } catch (ServiceManager.ServiceNotFoundException e) {
                     throw new RuntimeException(e);
                 }
