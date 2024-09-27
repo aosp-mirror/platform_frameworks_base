@@ -48,49 +48,57 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL = 8;
     public static final int KEY_GESTURE_TYPE_TOGGLE_TASKBAR = 9;
     public static final int KEY_GESTURE_TYPE_TAKE_SCREENSHOT = 10;
-    public static final int KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER = 11;
-    public static final int KEY_GESTURE_TYPE_BRIGHTNESS_UP = 12;
-    public static final int KEY_GESTURE_TYPE_BRIGHTNESS_DOWN = 13;
-    public static final int KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP = 14;
-    public static final int KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN = 15;
-    public static final int KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE = 16;
-    public static final int KEY_GESTURE_TYPE_VOLUME_UP = 17;
-    public static final int KEY_GESTURE_TYPE_VOLUME_DOWN = 18;
-    public static final int KEY_GESTURE_TYPE_VOLUME_MUTE = 19;
-    public static final int KEY_GESTURE_TYPE_ALL_APPS = 20;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_SEARCH = 21;
-    public static final int KEY_GESTURE_TYPE_LANGUAGE_SWITCH = 22;
-    public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS = 23;
-    public static final int KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK = 24;
-    public static final int KEY_GESTURE_TYPE_SYSTEM_MUTE = 25;
-    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT = 26;
-    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT = 27;
-    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT = 28;
-    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT = 29;
-    public static final int KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT = 30;
-    public static final int KEY_GESTURE_TYPE_LOCK_SCREEN = 31;
-    public static final int KEY_GESTURE_TYPE_OPEN_NOTES = 32;
-    public static final int KEY_GESTURE_TYPE_TOGGLE_POWER = 33;
-    public static final int KEY_GESTURE_TYPE_SYSTEM_NAVIGATION = 34;
-    public static final int KEY_GESTURE_TYPE_SLEEP = 35;
-    public static final int KEY_GESTURE_TYPE_WAKEUP = 36;
-    public static final int KEY_GESTURE_TYPE_MEDIA_KEY = 37;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER = 38;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL = 39;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS = 40;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR = 41;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR = 42;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC = 43;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS = 44;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING = 45;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY = 46;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES = 47;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER = 48;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS = 49;
-    public static final int KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME = 50;
-    public static final int KEY_GESTURE_TYPE_DESKTOP_MODE = 51;
-    public static final int KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION = 52;
-    public static final int KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER = 53;
+    public static final int KEY_GESTURE_TYPE_SCREENSHOT_CHORD = 11;
+    public static final int KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER = 12;
+    public static final int KEY_GESTURE_TYPE_BRIGHTNESS_UP = 13;
+    public static final int KEY_GESTURE_TYPE_BRIGHTNESS_DOWN = 14;
+    public static final int KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_UP = 15;
+    public static final int KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_DOWN = 16;
+    public static final int KEY_GESTURE_TYPE_KEYBOARD_BACKLIGHT_TOGGLE = 17;
+    public static final int KEY_GESTURE_TYPE_VOLUME_UP = 18;
+    public static final int KEY_GESTURE_TYPE_VOLUME_DOWN = 19;
+    public static final int KEY_GESTURE_TYPE_VOLUME_MUTE = 20;
+    public static final int KEY_GESTURE_TYPE_ALL_APPS = 21;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_SEARCH = 22;
+    public static final int KEY_GESTURE_TYPE_LANGUAGE_SWITCH = 23;
+    public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_ALL_APPS = 24;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_CAPS_LOCK = 25;
+    public static final int KEY_GESTURE_TYPE_SYSTEM_MUTE = 26;
+    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT = 27;
+    public static final int KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT = 28;
+    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT = 29;
+    public static final int KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT = 30;
+    public static final int KEY_GESTURE_TYPE_TRIGGER_BUG_REPORT = 31;
+    public static final int KEY_GESTURE_TYPE_LOCK_SCREEN = 32;
+    public static final int KEY_GESTURE_TYPE_OPEN_NOTES = 33;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_POWER = 34;
+    public static final int KEY_GESTURE_TYPE_SYSTEM_NAVIGATION = 35;
+    public static final int KEY_GESTURE_TYPE_SLEEP = 36;
+    public static final int KEY_GESTURE_TYPE_WAKEUP = 37;
+    public static final int KEY_GESTURE_TYPE_MEDIA_KEY = 38;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER = 39;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL = 40;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS = 41;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR = 42;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALCULATOR = 43;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC = 44;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS = 45;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING = 46;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_GALLERY = 47;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FILES = 48;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_WEATHER = 49;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS = 50;
+    public static final int KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME = 51;
+    public static final int KEY_GESTURE_TYPE_DESKTOP_MODE = 52;
+    public static final int KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION = 53;
+    public static final int KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER = 54;
+    public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD = 55;
+    public static final int KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD = 56;
+    public static final int KEY_GESTURE_TYPE_GLOBAL_ACTIONS = 57;
+    public static final int KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD = 58;
+    public static final int KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT = 59;
+    public static final int KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT = 60;
+    public static final int KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS = 61;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -116,6 +124,7 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL,
             KEY_GESTURE_TYPE_TOGGLE_TASKBAR,
             KEY_GESTURE_TYPE_TAKE_SCREENSHOT,
+            KEY_GESTURE_TYPE_SCREENSHOT_CHORD,
             KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER,
             KEY_GESTURE_TYPE_BRIGHTNESS_UP,
             KEY_GESTURE_TYPE_BRIGHTNESS_DOWN,
@@ -158,7 +167,15 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_LAUNCH_APPLICATION_BY_PACKAGE_NAME,
             KEY_GESTURE_TYPE_DESKTOP_MODE,
             KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION,
-            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
+            KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER,
+            KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD,
+            KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD,
+            KEY_GESTURE_TYPE_GLOBAL_ACTIONS,
+            KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD,
+            KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT,
+            KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT,
+            KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS,
+
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -360,6 +377,7 @@ public final class KeyGestureEvent {
             case KEY_GESTURE_TYPE_TOGGLE_TASKBAR:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TOGGLE_TASKBAR;
             case KEY_GESTURE_TYPE_TAKE_SCREENSHOT:
+            case KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__TAKE_SCREENSHOT;
             case KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__OPEN_SHORTCUT_HELPER;
@@ -472,6 +490,8 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_TOGGLE_TASKBAR";
             case KEY_GESTURE_TYPE_TAKE_SCREENSHOT:
                 return "KEY_GESTURE_TYPE_TAKE_SCREENSHOT";
+            case KEY_GESTURE_TYPE_SCREENSHOT_CHORD:
+                return "KEY_GESTURE_TYPE_SCREENSHOT_CHORD";
             case KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER:
                 return "KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER";
             case KEY_GESTURE_TYPE_BRIGHTNESS_UP:
@@ -558,6 +578,20 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION";
             case KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER:
                 return "KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER";
+            case KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD:
+                return "KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT_CHORD";
+            case KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD:
+                return "KEY_GESTURE_TYPE_RINGER_TOGGLE_CHORD";
+            case KEY_GESTURE_TYPE_GLOBAL_ACTIONS:
+                return "KEY_GESTURE_TYPE_GLOBAL_ACTIONS";
+            case KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD:
+                return "KEY_GESTURE_TYPE_TV_ACCESSIBILITY_SHORTCUT_CHORD";
+            case KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT:
+                return "KEY_GESTURE_TYPE_TV_TRIGGER_BUG_REPORT";
+            case KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT:
+                return "KEY_GESTURE_TYPE_ACCESSIBILITY_SHORTCUT";
+            case KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS:
+                return "KEY_GESTURE_TYPE_CLOSE_ALL_DIALOGS";
             default:
                 return Integer.toHexString(value);
         }

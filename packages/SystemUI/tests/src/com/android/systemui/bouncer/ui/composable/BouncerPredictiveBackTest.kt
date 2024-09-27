@@ -62,6 +62,7 @@ import com.android.systemui.motion.createSysUiComposeMotionTestRule
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
+import com.android.systemui.scene.sceneContainerGestureFilterFactory
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
@@ -70,6 +71,7 @@ import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
+import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import kotlin.time.Duration.Companion.seconds
@@ -133,6 +135,8 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
                 shadeInteractor = kosmos.shadeInteractor,
                 splitEdgeDetector = kosmos.splitEdgeDetector,
                 logger = kosmos.sceneLogger,
+                gestureFilterFactory = kosmos.sceneContainerGestureFilterFactory,
+                displayId = kosmos.displayTracker.defaultDisplayId,
                 motionEventHandlerReceiver = {},
             )
             .apply { setTransitionState(transitionState) }

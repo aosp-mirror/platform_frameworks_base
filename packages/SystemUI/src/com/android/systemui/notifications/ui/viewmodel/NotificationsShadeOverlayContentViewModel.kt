@@ -16,8 +16,7 @@
 
 package com.android.systemui.notifications.ui.viewmodel
 
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.assisted.AssistedFactory
@@ -34,13 +33,10 @@ class NotificationsShadeOverlayContentViewModel
 constructor(
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
-    private val sceneInteractor: SceneInteractor,
+    private val shadeInteractor: ShadeInteractor,
 ) {
     fun onScrimClicked() {
-        sceneInteractor.hideOverlay(
-            overlay = Overlays.NotificationsShade,
-            loggingReason = "Shade scrim clicked",
-        )
+        shadeInteractor.collapseNotificationsShade(loggingReason = "Shade scrim clicked")
     }
 
     @AssistedFactory

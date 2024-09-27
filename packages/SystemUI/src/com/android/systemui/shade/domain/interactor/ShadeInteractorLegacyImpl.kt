@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.app.tracing.FlowTracing.traceAsCounter
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -111,15 +112,37 @@ constructor(
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
 
-    override fun expandNotificationShade(loggingReason: String) {
+    override fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
         throw UnsupportedOperationException(
             "expandNotificationShade() is not supported in legacy shade"
         )
     }
 
-    override fun expandQuickSettingsShade(loggingReason: String) {
+    override fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey?) {
         throw UnsupportedOperationException(
             "expandQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "collapseNotificationShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey?,
+        bypassNotificationsShade: Boolean,
+    ) {
+        throw UnsupportedOperationException(
+            "collapseQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "collapseEitherShade() is not supported in legacy shade"
         )
     }
 

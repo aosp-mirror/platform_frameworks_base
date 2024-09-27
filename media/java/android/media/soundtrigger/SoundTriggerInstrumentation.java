@@ -17,6 +17,7 @@
 package android.media.soundtrigger;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -328,6 +329,7 @@ public final class SoundTriggerInstrumentation {
          * Get the recognition config used to start this recognition.
          * @return - The config passed to the HAL for startRecognition.
          */
+        @FlaggedApi(Flags.FLAG_MANAGER_API)
         public @NonNull SoundTrigger.RecognitionConfig getRecognitionConfig() {
             return mRecognitionConfig;
         }

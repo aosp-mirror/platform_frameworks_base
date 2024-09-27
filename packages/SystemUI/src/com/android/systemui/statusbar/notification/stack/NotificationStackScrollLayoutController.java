@@ -380,7 +380,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onStatePreChange(int oldState, int newState) {
-                    if (oldState == StatusBarState.SHADE_LOCKED
+                    if (!SceneContainerFlag.isEnabled() && oldState == StatusBarState.SHADE_LOCKED
                             && newState == KEYGUARD) {
                         mView.requestAnimateEverything();
                     }

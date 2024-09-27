@@ -4136,14 +4136,18 @@ public class NotificationManagerService extends SystemService {
         }
 
 
+        /**
+         * Any changes from SystemUI or Settings should be fromUser == true. Any changes the
+         * allowlist should be fromUser == false.
+         */
         @Override
         @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
-        public void setCanBePromoted(String pkg, int uid, boolean promote) {
+        public void setCanBePromoted(String pkg, int uid, boolean promote, boolean fromUser) {
             checkCallerIsSystemOrSystemUiOrShell();
             if (!android.app.Flags.apiRichOngoing()) {
                 return;
             }
-            boolean changed = mPreferencesHelper.setCanBePromoted(pkg, uid, promote);
+            boolean changed = mPreferencesHelper.setCanBePromoted(pkg, uid, promote, fromUser);
             if (changed) {
                 // check for pending/posted notifs from this app and update the flag
                 synchronized (mNotificationLock) {

@@ -123,6 +123,10 @@ internal class DraggableHandlerImpl(
         overSlop: Float,
         pointersDown: Int,
     ): DragController {
+        if (startedPosition != null && layoutImpl.gestureFilter(startedPosition)) {
+            return NoOpDragController
+        }
+
         if (overSlop == 0f) {
             val oldDragController = dragController
             check(oldDragController != null && oldDragController.isDrivingTransition) {

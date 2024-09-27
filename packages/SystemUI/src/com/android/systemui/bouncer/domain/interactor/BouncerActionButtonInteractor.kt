@@ -103,7 +103,7 @@ constructor(
                 prepareToPerformAction()
                 returnToCall()
             },
-            onLongClick = null
+            onLongClick = null,
         )
     }
 
@@ -115,15 +115,15 @@ constructor(
                 dozeLogger.logEmergencyCall()
                 startEmergencyDialerActivity()
             },
-            // TODO(b/308001302): The long click detector doesn't work properly, investigate.
+            // TODO(b/369767936): The long click detector doesn't work properly, investigate.
             onLongClick = {
                 if (emergencyAffordanceManager.needsEmergencyAffordance()) {
                     prepareToPerformAction()
 
-                    // TODO(b/298026988): Check that !longPressWasDragged before invoking.
+                    // TODO(b/369767936): Check that !longPressWasDragged before invoking.
                     emergencyAffordanceManager.performEmergencyCall()
                 }
-            }
+            },
         )
     }
 
@@ -143,7 +143,7 @@ constructor(
             applicationContext.startActivityAsUser(
                 this,
                 ActivityOptions.makeCustomAnimation(applicationContext, 0, 0).toBundle(),
-                UserHandle(selectedUserInteractor.getSelectedUserId())
+                UserHandle(selectedUserInteractor.getSelectedUserId()),
             )
         }
     }
