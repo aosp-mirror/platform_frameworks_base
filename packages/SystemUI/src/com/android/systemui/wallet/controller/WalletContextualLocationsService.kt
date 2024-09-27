@@ -1,6 +1,7 @@
 package com.android.systemui.wallet.controller
 
 import android.content.Intent
+import android.os.DeadObjectException
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -47,7 +48,11 @@ constructor(
                 controller.allWalletCards.collect { cards ->
                     val cardsSize = cards.size
                     Log.i(TAG, "Number of cards registered $cardsSize")
-                    listener?.registerNewWalletCards(cards)
+                    try {
+                        listener?.registerNewWalletCards(cards)
+                    } catch (e: DeadObjectException) {
+                        Log.e(TAG, "Failed to register wallet cards because IWalletCardsUpdatedListener is dead")
+                    }
                 }
             }
         } else {
@@ -55,7 +60,11 @@ constructor(
                 controller.allWalletCards.collect { cards ->
                     val cardsSize = cards.size
                     Log.i(TAG, "Number of cards registered $cardsSize")
-                    listener?.registerNewWalletCards(cards)
+                    try {
+                        listener?.registerNewWalletCards(cards)
+                    } catch (e: DeadObjectException) {
+                        Log.e(TAG, "Failed to register wallet cards because IWalletCardsUpdatedListener is dead")
+                    }
                 }
             }
         }
