@@ -1118,6 +1118,16 @@ flag {
 }
 
 flag {
+  name: "media_controls_umo_inflation_in_background"
+  namespace: "systemui"
+  description: "Inflate UMO in background thread"
+  bug: "368514198"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
