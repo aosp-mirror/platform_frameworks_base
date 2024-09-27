@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.os.Build.IS_USER;
 import static android.view.CrossWindowBlurListeners.CROSS_WINDOW_BLUR_SUPPORTED;
 
@@ -30,6 +33,7 @@ import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_RE
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_CENTER;
 import static com.android.server.wm.AppCompatConfiguration.LETTERBOX_VERTICAL_REACHABILITY_POSITION_TOP;
 
+import android.app.WindowConfiguration;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -157,6 +161,10 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runReset(pw);
                 case "disable-blur":
                     return runSetBlurDisabled(pw);
+                case "set-display-windowing-mode":
+                    return runSetDisplayWindowingMode(pw);
+                case "get-display-windowing-mode":
+                    return runGetDisplayWindowingMode(pw);
                 case "shell":
                     return runWmShellCommand(pw);
                 default:
@@ -1408,6 +1416,35 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetDisplayWindowingMode(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArgRequired();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+            arg = getNextArgRequired();
+        }
+
+        final int windowingMode = Integer.parseInt(arg);
+        mInterface.setWindowingMode(displayId, windowingMode);
+
+        return 0;
+    }
+
+    private int runGetDisplayWindowingMode(PrintWriter pw) throws RemoteException {
+        int displayId = Display.DEFAULT_DISPLAY;
+        final String arg = getNextArg();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+        }
+
+        final int windowingMode = mInterface.getWindowingMode(displayId);
+        pw.println("display windowing mode="
+                + WindowConfiguration.windowingModeToString(windowingMode) + " for displayId="
+                + displayId);
+
+        return 0;
+    }
+
     private int runWmShellCommand(PrintWriter pw) {
         String arg = getNextArg();
 
@@ -1486,6 +1523,9 @@ public class WindowManagerShellCommand extends ShellCommand {
         // set-multi-window-config
         runResetMultiWindowConfig();
 
+        // set-display-windowing-mode
+        mInternal.setWindowingMode(displayId, WINDOWING_MODE_UNDEFINED);
+
         pw.println("Reset all settings for displayId=" + displayId);
         return 0;
     }
@@ -1525,6 +1565,12 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         printLetterboxHelp(pw);
         printMultiWindowConfigHelp(pw);
+
+        pw.println("  set-display-windowing-mode [-d DISPLAY_ID] [mode_id]");
+        pw.println("    As mode_id, use " + WINDOWING_MODE_UNDEFINED + " for undefined, "
+                + WINDOWING_MODE_FREEFORM + " for freeform, " + WINDOWING_MODE_FULLSCREEN + " for"
+                + " fullscreen");
+        pw.println("  get-display-windowing-mode [-d DISPLAY_ID]");
 
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
