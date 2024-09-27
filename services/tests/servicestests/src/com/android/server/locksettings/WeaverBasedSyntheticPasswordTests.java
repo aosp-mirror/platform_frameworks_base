@@ -1,6 +1,10 @@
 package com.android.server.locksettings;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.Presubmit;
 
@@ -55,5 +59,45 @@ public class WeaverBasedSyntheticPasswordTests extends SyntheticPasswordTests {
                 new byte[1]);
         mService.initializeSyntheticPassword(userId); // This should allocate a Weaver slot.
         assertEquals(Sets.newHashSet(0), mPasswordSlotManager.getUsedSlots());
+    }
+
+    private int getNumUsedWeaverSlots() {
+        return mPasswordSlotManager.getUsedSlots().size();
+    }
+
+    @Test
+    public void testDisableWeaverOnUnsecuredUsers_false() {
+        final int userId = PRIMARY_USER_ID;
+        when(mResources.getBoolean(eq(
+                        com.android.internal.R.bool.config_disableWeaverOnUnsecuredUsers)))
+                .thenReturn(false);
+        assertEquals(0, getNumUsedWeaverSlots());
+        mService.initializeSyntheticPassword(userId);
+        assertEquals(1, getNumUsedWeaverSlots());
+        assertTrue(mService.setLockCredential(newPassword("password"), nonePassword(), userId));
+        assertEquals(1, getNumUsedWeaverSlots());
+        assertTrue(mService.setLockCredential(nonePassword(), newPassword("password"), userId));
+        assertEquals(1, getNumUsedWeaverSlots());
+    }
+
+    @Test
+    public void testDisableWeaverOnUnsecuredUsers_true() {
+        final int userId = PRIMARY_USER_ID;
+        when(mResources.getBoolean(eq(
+                        com.android.internal.R.bool.config_disableWeaverOnUnsecuredUsers)))
+                .thenReturn(true);
+        assertEquals(0, getNumUsedWeaverSlots());
+        mService.initializeSyntheticPassword(userId);
+        assertEquals(0, getNumUsedWeaverSlots());
+        assertTrue(mService.setLockCredential(newPassword("password"), nonePassword(), userId));
+        assertEquals(1, getNumUsedWeaverSlots());
+        assertTrue(mService.setLockCredential(nonePassword(), newPassword("password"), userId));
+        assertEquals(0, getNumUsedWeaverSlots());
+    }
+
+    @Test
+    public void testDisableWeaverOnUnsecuredUsers_defaultsToFalse() {
+        assertFalse(mResources.getBoolean(
+                    com.android.internal.R.bool.config_disableWeaverOnUnsecuredUsers));
     }
 }

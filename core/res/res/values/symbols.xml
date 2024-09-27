@@ -3958,6 +3958,7 @@
   <java-symbol type="string" name="foreground_service_multiple_separator" />
 
   <java-symbol type="bool" name="config_enableCredentialFactoryResetProtection" />
+  <java-symbol type="bool" name="config_disableWeaverOnUnsecuredUsers" />
 
   <!-- ETWS primary messages -->
   <java-symbol type="string" name="etws_primary_default_message_earthquake" />
