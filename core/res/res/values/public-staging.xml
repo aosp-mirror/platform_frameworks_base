@@ -136,6 +136,8 @@
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
+    <!-- @FlaggedApi(android.appwidget.flags.Flags.FLAG_ENGAGEMENT_METRICS) -->
+    <public name="remoteViewsMetricsId"/>
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01b50000">
