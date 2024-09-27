@@ -10015,7 +10015,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
-        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(System.identityHashCode(this));
         sb.append(" u");
         sb.append(mUserId);
         sb.append(' ');
