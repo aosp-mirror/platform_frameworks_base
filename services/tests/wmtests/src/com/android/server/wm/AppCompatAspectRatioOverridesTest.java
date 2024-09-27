@@ -75,7 +75,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.prop().disable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_FULLSCREEN);
 
             robot.checkShouldApplyUserFullscreenOverride(/* expected */ false);
         });
@@ -88,7 +88,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.prop().disable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_FULLSCREEN);
             robot.checkShouldApplyUserFullscreenOverride(/* expected */ false);
         });
     }
@@ -100,7 +100,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.conf().enableUserAppAspectRatioFullscreen(/* enabled */ true);
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_FULLSCREEN);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_FULLSCREEN);
 
             robot.checkShouldApplyUserFullscreenOverride(/* expected */ true);
         });
@@ -113,7 +113,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.prop().disable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldEnableUserAspectRatioSettings(/* expected */ false);
         });
@@ -126,7 +126,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.prop().enable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldEnableUserAspectRatioSettings(/* expected */ true);
         });
@@ -139,7 +139,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.prop().enable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldEnableUserAspectRatioSettings(/* expected */ false);
         });
@@ -152,7 +152,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.prop().disable(PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_OVERRIDE);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldEnableUserAspectRatioSettings(/* expected */ false);
         });
@@ -175,7 +175,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.conf().enableUserAppAspectRatioSettings(/* enabled */ true);
             robot.activity().setIgnoreOrientationRequest(/* enabled */ false);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldApplyUserMinAspectRatioOverride(/* expected */ false);
         });
@@ -187,7 +187,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.conf().enableUserAppAspectRatioSettings(/* enabled */ true);
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldApplyUserMinAspectRatioOverride(/* expected */ true);
         });
@@ -199,7 +199,7 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.conf().enableUserAppAspectRatioSettings(/* enabled */ false);
             robot.activity().setIgnoreOrientationRequest(/* enabled */ true);
             robot.activity().createActivityWithComponent();
-            robot.activity().setGetUserMinAspectRatioOverrideCode(USER_MIN_ASPECT_RATIO_3_2);
+            robot.activity().setUserAspectRatioType(USER_MIN_ASPECT_RATIO_3_2);
 
             robot.checkShouldApplyUserMinAspectRatioOverride(/* expected */ false);
         });
