@@ -144,6 +144,13 @@ flag {
 }
 
 flag {
+  name: "notification_minimalism"
+  namespace: "systemui"
+  description: "Minimize the notifications to show on the lockscreen."
+  bug: "330387368"
+}
+
+flag {
   name: "notification_force_group_singletons"
   namespace: "systemui"
   description: "This flag enables forced auto-grouping singleton groups"
