@@ -105,37 +105,43 @@ public class ProtoLogImpl {
                     + "viewerConfigPath = " + sViewerConfigPath);
 
             final var groups = sLogGroups.values().toArray(new IProtoLogGroup[0]);
-
             if (android.tracing.Flags.perfettoProtologTracing()) {
-                try {
-                    File f = new File(sViewerConfigPath);
-                    if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
-                        // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
-                        // In some tests the viewer config file might not exist in which we don't
-                        // want to provide config path to the user
-                        Log.w(LOG_TAG, "Failed to find viewerConfigFile when setting up "
-                                + ProtoLogImpl.class.getSimpleName() + ". "
-                                + "Setting up without a viewer config instead...");
-
-                        sServiceInstance =
-                                new UnprocessedPerfettoProtoLogImpl(sCacheUpdater, groups);
-                    } else {
-                        sServiceInstance = new ProcessedPerfettoProtoLogImpl(
-                                sViewerConfigPath, sCacheUpdater, groups);
-                    }
-                } catch (ServiceManager.ServiceNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
+                sServiceInstance = createPerfettoProtoLogImpl(groups);
             } else {
-                var protologImpl = new LegacyProtoLogImpl(
-                        sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
-                protologImpl.registerGroups(groups);
-                sServiceInstance = protologImpl;
+                sServiceInstance = createLegacyProtoLogImpl(groups);
             }
 
             sCacheUpdater.run();
         }
         return sServiceInstance;
+    }
+
+    private static PerfettoProtoLogImpl createPerfettoProtoLogImpl(IProtoLogGroup[] groups) {
+        try {
+            File f = new File(sViewerConfigPath);
+            if (!ProtoLog.REQUIRE_PROTOLOGTOOL && !f.exists()) {
+                // TODO(b/353530422): Remove - temporary fix to unblock b/352290057
+                // In some tests the viewer config file might not exist in which we don't
+                // want to provide config path to the user
+                Log.w(LOG_TAG, "Failed to find viewerConfigFile when setting up "
+                        + ProtoLogImpl.class.getSimpleName() + ". "
+                        + "Setting up without a viewer config instead...");
+
+                return new UnprocessedPerfettoProtoLogImpl(sCacheUpdater, groups);
+            } else {
+                return new ProcessedPerfettoProtoLogImpl(sViewerConfigPath, sCacheUpdater, groups);
+            }
+        } catch (ServiceManager.ServiceNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static LegacyProtoLogImpl createLegacyProtoLogImpl(IProtoLogGroup[] groups) {
+        var protologImpl = new LegacyProtoLogImpl(
+                sLegacyOutputFilePath, sLegacyViewerConfigPath, sCacheUpdater);
+        protologImpl.registerGroups(groups);
+
+        return protologImpl;
     }
 
     @VisibleForTesting
