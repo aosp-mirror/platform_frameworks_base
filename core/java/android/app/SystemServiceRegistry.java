@@ -230,6 +230,7 @@ import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.provider.E2eeContactKeysManager;
 import android.provider.ProviderFrameworkInitializer;
+import android.ranging.RangingFrameworkInitializer;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -1825,6 +1826,12 @@ public final class SystemServiceRegistry {
             if (android.webkit.Flags.updateServiceIpcWrapper()) {
                 WebViewBootstrapFrameworkInitializer.registerServiceWrappers();
             }
+            // This is guarded by aconfig flag "com.android.ranging.flags.ranging_stack_enabled"
+            // when the build flag RELEASE_RANGING_STACK is enabled. When disabled, this calls the
+            // mock RangingFrameworkInitializer#registerServiceWrappers which is no-op. As the
+            // aconfig lib for ranging module is built only if  RELEASE_RANGING_STACK is enabled,
+            // flagcannot be added here.
+            RangingFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
