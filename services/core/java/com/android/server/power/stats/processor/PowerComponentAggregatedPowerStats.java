@@ -125,6 +125,10 @@ class PowerComponentAggregatedPowerStats {
         mProcessor.noteStateChange(this, item);
     }
 
+    public void noteBatteryLevel(int batteryLevel, int batteryChargeUah, long timestampMs) {
+        mProcessor.noteBatteryLevel(batteryLevel, batteryChargeUah, timestampMs);
+    }
+
     void setState(@AggregatedPowerStatsConfig.TrackedState int stateId, int state,
             long timestampMs) {
         if (mDeviceStats == null) {

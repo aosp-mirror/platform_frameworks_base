@@ -52,6 +52,7 @@ public class BatteryUsageStatsProvider {
     private final Clock mClock;
     private final Object mLock = new Object();
     private List<PowerCalculator> mPowerCalculators;
+    private UserPowerCalculator mUserPowerCalculator;
 
     public BatteryUsageStatsProvider(@NonNull Context context,
             @NonNull PowerAttributor powerAttributor,
@@ -63,6 +64,7 @@ public class BatteryUsageStatsProvider {
         mPowerProfile = powerProfile;
         mCpuScalingPolicies = cpuScalingPolicies;
         mClock = clock;
+        mUserPowerCalculator = new UserPowerCalculator();
 
         mPowerStatsStore.addSectionReader(new BatteryUsageStatsSection.Reader());
         mPowerStatsStore.addSectionReader(new AccumulatedBatteryUsageStatsSection.Reader());
@@ -74,7 +76,10 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators = new ArrayList<>();
 
                 // Power calculators are applied in the order of registration
-                mPowerCalculators.add(new BatteryChargeCalculator());
+                if (!mPowerAttributor.isPowerComponentSupported(
+                        BatteryConsumer.POWER_COMPONENT_BASE)) {
+                    mPowerCalculators.add(new BatteryChargeCalculator());
+                }
                 if (!mPowerAttributor.isPowerComponentSupported(
                         BatteryConsumer.POWER_COMPONENT_CPU)) {
                     mPowerCalculators.add(
@@ -141,8 +146,6 @@ public class BatteryUsageStatsProvider {
                         BatteryConsumer.POWER_COMPONENT_ANY)) {
                     mPowerCalculators.add(new CustomEnergyConsumerPowerCalculator(mPowerProfile));
                 }
-                mPowerCalculators.add(new UserPowerCalculator());
-
                 if (!com.android.server.power.optimization.Flags.disableSystemServicePowerAttr()) {
                     // It is important that SystemServicePowerCalculator be applied last,
                     // because it re-attributes some of the power estimated by the other
@@ -377,7 +380,26 @@ public class BatteryUsageStatsProvider {
         mPowerAttributor.estimatePowerConsumption(batteryUsageStatsBuilder, stats.getHistory(),
                 monotonicStartTime, monotonicEndTime);
 
+        // Combine apps by the user if necessary
+        mUserPowerCalculator.calculate(batteryUsageStatsBuilder, stats, realtimeUs, uptimeUs,
+                query);
+
+        populateGeneralInfo(batteryUsageStatsBuilder, stats);
         return batteryUsageStatsBuilder;
+    }
+
+    private void populateGeneralInfo(BatteryUsageStats.Builder builder, BatteryStatsImpl stats) {
+        builder.setBatteryCapacity(stats.getEstimatedBatteryCapacity());
+        final long batteryTimeRemainingMs = stats.computeBatteryTimeRemaining(
+                mClock.elapsedRealtime() * 1000);
+        if (batteryTimeRemainingMs != -1) {
+            builder.setBatteryTimeRemainingMs(batteryTimeRemainingMs / 1000);
+        }
+        final long chargeTimeRemainingMs = stats.computeChargeTimeRemaining(
+                mClock.elapsedRealtime() * 1000);
+        if (chargeTimeRemainingMs != -1) {
+            builder.setChargeTimeRemainingMs(chargeTimeRemainingMs / 1000);
+        }
     }
 
     // STOPSHIP(b/229906525): remove verification before shipping

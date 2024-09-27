@@ -23,7 +23,7 @@ import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND;
 import static android.os.BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.os.BatteryConsumer.PROCESS_STATE_UNSPECIFIED;
 
-import static com.android.server.power.stats.processor.AggregatedPowerStatsConfig.POWER_STATE_OTHER;
+import static com.android.server.power.stats.processor.AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
 import static com.android.server.power.stats.processor.AggregatedPowerStatsConfig.SCREEN_STATE_ON;
 import static com.android.server.power.stats.processor.AggregatedPowerStatsConfig.SCREEN_STATE_OTHER;
 import static com.android.server.power.stats.processor.AggregatedPowerStatsConfig.STATE_POWER;
@@ -65,12 +65,12 @@ public class BasePowerStatsProcessorTest {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessorSupplier(BasePowerStatsProcessor::new);
+                .setProcessorSupplier(() -> new BasePowerStatsProcessor(() -> 4000));
     }
 
     @Test
     public void processPowerStats() {
-        AggregatedPowerStats aggregatedPowerStats = prepareAggregatedPowerStats();
+        AggregatedPowerStats aggregatedPowerStats = prepareAggregatedPowerStats(true);
 
         PowerComponentAggregatedPowerStats stats = aggregatedPowerStats.getPowerComponentStats(
                 BatteryConsumer.POWER_COMPONENT_BASE);
@@ -79,40 +79,95 @@ public class BasePowerStatsProcessorTest {
         BasePowerStatsLayout statsLayout = new BasePowerStatsLayout(descriptor);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
-        stats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_ON));
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_BATTERY, SCREEN_STATE_ON));
         assertThat(statsLayout.getUsageDuration(deviceStats)).isEqualTo(2500);
 
-        stats.getDeviceStats(deviceStats, states(POWER_STATE_OTHER, SCREEN_STATE_OTHER));
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER));
         assertThat(statsLayout.getUsageDuration(deviceStats)).isEqualTo(8500);
 
         long[] uidStats = new long[descriptor.uidStatsArrayLength];
         stats.getUidStats(uidStats, APP_UID1,
-                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_FOREGROUND));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(2500);
         stats.getUidStats(uidStats, APP_UID1,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_BACKGROUND));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER, PROCESS_STATE_BACKGROUND));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(2500);
         stats.getUidStats(uidStats, APP_UID1,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_FOREGROUND_SERVICE));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER, PROCESS_STATE_FOREGROUND_SERVICE));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(5000);
         stats.getUidStats(uidStats, APP_UID1,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_UNSPECIFIED));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER, PROCESS_STATE_UNSPECIFIED));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(0);
 
         stats.getUidStats(uidStats, APP_UID2,
-                states(POWER_STATE_OTHER, SCREEN_STATE_ON, PROCESS_STATE_CACHED));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_ON, PROCESS_STATE_CACHED));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(2500);
         stats.getUidStats(uidStats, APP_UID2,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_CACHED));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER, PROCESS_STATE_CACHED));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(8500);
         stats.getUidStats(uidStats, APP_UID2,
-                states(POWER_STATE_OTHER, SCREEN_STATE_OTHER, PROCESS_STATE_UNSPECIFIED));
+                states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER, PROCESS_STATE_UNSPECIFIED));
         assertThat(statsLayout.getUidUsageDuration(uidStats)).isEqualTo(0);
     }
 
     @Test
+    public void fuelgaugeAvailable() {
+        AggregatedPowerStats aggregatedPowerStats = prepareAggregatedPowerStats(true);
+
+        PowerComponentAggregatedPowerStats stats = aggregatedPowerStats.getPowerComponentStats(
+                BatteryConsumer.POWER_COMPONENT_BASE);
+
+        PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
+        BasePowerStatsLayout statsLayout = new BasePowerStatsLayout(descriptor);
+
+        long[] deviceStats = new long[descriptor.statsArrayLength];
+        double dischargeDuration = 0;
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_BATTERY, SCREEN_STATE_ON));
+        dischargeDuration += statsLayout.getBatteryDischargeDuration(deviceStats);
+        assertThat(statsLayout.getBatteryDischargePercent(deviceStats)).isWithin(0.1).of(2.5);
+        // (2,000,000 uAh - 900,000 uAh) * 2,500 ms / 11,000 ms
+        assertThat(statsLayout.getBatteryDischargeUah(deviceStats)).isEqualTo(250_000);
+
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER));
+        dischargeDuration += statsLayout.getBatteryDischargeDuration(deviceStats);
+        assertThat(statsLayout.getBatteryDischargePercent(deviceStats)).isWithin(0.1).of(8.5);
+        // (2,000,000 uAh - 900,000 uAh) * 8,500 ms / 11,000 ms
+        assertThat(statsLayout.getBatteryDischargeUah(deviceStats)).isEqualTo(850_000);
+
+        // Allow for rounding errors
+        assertThat(dischargeDuration).isWithin(5).of(6000);
+    }
+
+    @Test
+    public void fuelgaugeUnavailable() {
+        AggregatedPowerStats aggregatedPowerStats = prepareAggregatedPowerStats(false);
+
+        PowerComponentAggregatedPowerStats stats = aggregatedPowerStats.getPowerComponentStats(
+                BatteryConsumer.POWER_COMPONENT_BASE);
+
+        PowerStats.Descriptor descriptor = stats.getPowerStatsDescriptor();
+        BasePowerStatsLayout statsLayout = new BasePowerStatsLayout(descriptor);
+
+        long[] deviceStats = new long[descriptor.statsArrayLength];
+        double dischargeDuration = 0;
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_BATTERY, SCREEN_STATE_ON));
+        dischargeDuration += statsLayout.getBatteryDischargeDuration(deviceStats);
+        assertThat(statsLayout.getBatteryDischargePercent(deviceStats)).isWithin(0.1).of(2.5);
+        // 11% * 4_000_000 uAh * 2,500 ms / 11,000 ms
+        assertThat(statsLayout.getBatteryDischargeUah(deviceStats)).isEqualTo(100_000);
+
+        stats.getDeviceStats(deviceStats, states(POWER_STATE_BATTERY, SCREEN_STATE_OTHER));
+        dischargeDuration += statsLayout.getBatteryDischargeDuration(deviceStats);
+        assertThat(statsLayout.getBatteryDischargePercent(deviceStats)).isWithin(0.1).of(8.5);
+        assertThat(statsLayout.getBatteryDischargeUah(deviceStats)).isEqualTo(340_000);
+
+        // Allow for rounding errors
+        assertThat(dischargeDuration).isWithin(5).of(6000);
+    }
+
+    @Test
     public void exporter() throws Exception {
-        AggregatedPowerStats aggregatedPowerStats = prepareAggregatedPowerStats();
+        AggregatedPowerStats aggregatedPowerStats = prepareAggregatedPowerStats(true);
 
         PowerStatsStore powerStatsStore = mock(PowerStatsStore.class);
         PowerStatsAggregator powerStatsAggregator = new PowerStatsAggregator(
@@ -134,16 +189,16 @@ public class BasePowerStatsProcessorTest {
                 .filter(u->u.getUid() == APP_UID1).findAny().get();
         assertThat(app1.getUsageDurationMillis(
                 new BatteryConsumer.Dimensions(POWER_COMPONENT_BASE, PROCESS_STATE_FOREGROUND,
-                        BatteryConsumer.SCREEN_STATE_ON, BatteryConsumer.POWER_STATE_OTHER)))
+                        BatteryConsumer.SCREEN_STATE_ON, BatteryConsumer.POWER_STATE_BATTERY)))
                 .isEqualTo(2500);
         assertThat(app1.getUsageDurationMillis(
                 new BatteryConsumer.Dimensions(POWER_COMPONENT_BASE, PROCESS_STATE_BACKGROUND,
-                        BatteryConsumer.SCREEN_STATE_OTHER, BatteryConsumer.POWER_STATE_OTHER)))
+                        BatteryConsumer.SCREEN_STATE_OTHER, BatteryConsumer.POWER_STATE_BATTERY)))
                 .isEqualTo(2500);
         assertThat(app1.getUsageDurationMillis(
                 new BatteryConsumer.Dimensions(POWER_COMPONENT_BASE,
                         PROCESS_STATE_FOREGROUND_SERVICE,
-                        BatteryConsumer.SCREEN_STATE_OTHER, BatteryConsumer.POWER_STATE_OTHER)))
+                        BatteryConsumer.SCREEN_STATE_OTHER, BatteryConsumer.POWER_STATE_BATTERY)))
                 .isEqualTo(5000);
 
         assertThat(app1.getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND)).isEqualTo(2500);
@@ -155,11 +210,11 @@ public class BasePowerStatsProcessorTest {
                 .filter(u->u.getUid() == APP_UID2).findAny().get();
         assertThat(app2.getUsageDurationMillis(
                 new BatteryConsumer.Dimensions(POWER_COMPONENT_BASE, PROCESS_STATE_CACHED,
-                        BatteryConsumer.SCREEN_STATE_ON, BatteryConsumer.POWER_STATE_OTHER)))
+                        BatteryConsumer.SCREEN_STATE_ON, BatteryConsumer.POWER_STATE_BATTERY)))
                 .isEqualTo(2500);
         assertThat(app2.getUsageDurationMillis(
                 new BatteryConsumer.Dimensions(POWER_COMPONENT_BASE, PROCESS_STATE_CACHED,
-                        BatteryConsumer.SCREEN_STATE_OTHER, BatteryConsumer.POWER_STATE_OTHER)))
+                        BatteryConsumer.SCREEN_STATE_OTHER, BatteryConsumer.POWER_STATE_BATTERY)))
                 .isEqualTo(8500);
 
         assertThat(app2.getTimeInProcessStateMs(PROCESS_STATE_CACHED)).isEqualTo(11_000);
@@ -171,12 +226,14 @@ public class BasePowerStatsProcessorTest {
         batteryUsageStats.close();
     }
 
-    private static AggregatedPowerStats prepareAggregatedPowerStats() {
+    private static AggregatedPowerStats prepareAggregatedPowerStats(boolean fuelgaugeAvailable) {
         AggregatedPowerStats stats = new AggregatedPowerStats(sAggregatedPowerStatsConfig);
         stats.getPowerComponentStats(BatteryConsumer.POWER_COMPONENT_BASE);
         stats.start(0);
 
-        stats.setDeviceState(STATE_POWER, POWER_STATE_OTHER, 0);
+        stats.noteBatteryLevel(50, fuelgaugeAvailable ? 2_000_000 : 0, 0);
+
+        stats.setDeviceState(STATE_POWER, POWER_STATE_BATTERY, 0);
         stats.setDeviceState(STATE_SCREEN, SCREEN_STATE_ON, 0);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND, 0);
         stats.setUidState(APP_UID2, STATE_PROCESS_STATE, PROCESS_STATE_CACHED, 0);
@@ -184,10 +241,14 @@ public class BasePowerStatsProcessorTest {
         // Turn the screen off after 2.5 seconds
         stats.setDeviceState(STATE_SCREEN, SCREEN_STATE_OTHER, 2500);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_BACKGROUND, 2500);
+        stats.noteBatteryLevel(45, fuelgaugeAvailable ? 1_400_000 : 0, 3000);
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_FOREGROUND_SERVICE, 5000);
+        stats.noteBatteryLevel(39, fuelgaugeAvailable ? 900_000 : 0, 6000);
 
         // Kill the app at the 10_000 mark
         stats.setUidState(APP_UID1, STATE_PROCESS_STATE, PROCESS_STATE_UNSPECIFIED, 10_000);
+
+        stats.noteBatteryLevel(49, fuelgaugeAvailable ? 1_200_000 : 0, 10_000);
 
         stats.finish(11_000);
         return stats;

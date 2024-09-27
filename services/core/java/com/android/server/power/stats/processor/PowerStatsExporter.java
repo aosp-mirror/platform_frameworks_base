@@ -28,6 +28,7 @@ import com.android.internal.os.BatteryStatsHistory;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.PowerStatsSpan;
 import com.android.server.power.stats.PowerStatsStore;
+import com.android.server.power.stats.format.BasePowerStatsLayout;
 import com.android.server.power.stats.format.PowerStatsLayout;
 
 import java.util.ArrayList;
@@ -45,6 +46,13 @@ class PowerStatsExporter {
     private final PowerStatsAggregator mPowerStatsAggregator;
     private final long mBatterySessionTimeSpanSlackMillis;
     private static final long BATTERY_SESSION_TIME_SPAN_SLACK_MILLIS = TimeUnit.MINUTES.toMillis(2);
+    private static final BasePowerStatsLayout sBasePowerStatsLayout = new BasePowerStatsLayout();
+
+    private static class BatteryLevelInfo {
+        public double batteryDischargePct;
+        public double batteryDischargeMah;
+        public long batteryDischargeDurationMs;
+    }
 
     PowerStatsExporter(PowerStatsStore powerStatsStore, PowerStatsAggregator powerStatsAggregator) {
         this(powerStatsStore, powerStatsAggregator, BATTERY_SESSION_TIME_SPAN_SLACK_MILLIS);
@@ -145,6 +153,8 @@ class PowerStatsExporter {
 
         PowerStatsLayout layout = new PowerStatsLayout(descriptor);
         long[] deviceStats = new long[descriptor.statsArrayLength];
+        BatteryLevelInfo batteryLevelInfo = new BatteryLevelInfo();
+
         for (int screenState = 0; screenState < BatteryConsumer.SCREEN_STATE_COUNT; screenState++) {
             if (batteryUsageStatsBuilder.isScreenStateDataNeeded()) {
                 if (screenState == BatteryConsumer.SCREEN_STATE_UNSPECIFIED) {
@@ -159,12 +169,12 @@ class PowerStatsExporter {
                     if (powerState != BatteryConsumer.POWER_STATE_UNSPECIFIED) {
                         populateAggregatedBatteryConsumer(batteryUsageStatsBuilder,
                                 powerComponentStats,
-                                layout, deviceStats, screenState, powerState);
+                                layout, deviceStats, batteryLevelInfo, screenState, powerState);
                     }
                 } else if (powerState == BatteryConsumer.POWER_STATE_BATTERY) {
                     populateAggregatedBatteryConsumer(batteryUsageStatsBuilder,
                             powerComponentStats,
-                            layout, deviceStats, screenState, powerState);
+                            layout, deviceStats, batteryLevelInfo, screenState, powerState);
                 }
             }
         }
@@ -172,14 +182,20 @@ class PowerStatsExporter {
             populateBatteryConsumers(batteryUsageStatsBuilder,
                     powerComponentStats, layout);
         }
+
+        populateBatteryLevelInfo(batteryUsageStatsBuilder, batteryLevelInfo);
     }
 
     private void populateAggregatedBatteryConsumer(
             BatteryUsageStats.Builder batteryUsageStatsBuilder,
             PowerComponentAggregatedPowerStats powerComponentStats, PowerStatsLayout layout,
-            long[] deviceStats, @BatteryConsumer.ScreenState int screenState,
+            long[] deviceStats, BatteryLevelInfo batteryLevelInfo,
+            @BatteryConsumer.ScreenState int screenState,
             @BatteryConsumer.PowerState int powerState) {
         int powerComponentId = powerComponentStats.powerComponentId;
+        boolean hasBatteryLevelProperties = powerComponentId == BatteryConsumer.POWER_COMPONENT_BASE
+                && powerState == BatteryConsumer.POWER_STATE_BATTERY;
+
         double[] totalPower = new double[1];
         MultiStateStats.States.forEachTrackedStateCombination(
                 powerComponentStats.getConfig().getDeviceStateConfig(),
@@ -193,6 +209,10 @@ class PowerStatsExporter {
                     }
 
                     totalPower[0] += layout.getDevicePowerEstimate(deviceStats);
+
+                    if (hasBatteryLevelProperties) {
+                        gatherBatteryLevelInfo(batteryLevelInfo, deviceStats);
+                    }
                 });
 
         AggregateBatteryConsumer.Builder deviceScope =
@@ -206,6 +226,26 @@ class PowerStatsExporter {
         }
         deviceScope.addConsumedPower(powerComponentId, totalPower[0],
                 BatteryConsumer.POWER_MODEL_UNDEFINED);
+    }
+
+    private void gatherBatteryLevelInfo(BatteryLevelInfo batteryLevelInfo, long[] deviceStats) {
+        batteryLevelInfo.batteryDischargePct +=
+                sBasePowerStatsLayout.getBatteryDischargePercent(deviceStats);
+        batteryLevelInfo.batteryDischargeMah +=
+                sBasePowerStatsLayout.getBatteryDischargeUah(deviceStats) / 1000.0;
+        batteryLevelInfo.batteryDischargeDurationMs +=
+                sBasePowerStatsLayout.getBatteryDischargeDuration(deviceStats);
+    }
+
+    private void populateBatteryLevelInfo(BatteryUsageStats.Builder builder,
+            BatteryLevelInfo batteryLevelInfo) {
+        builder.setDischargePercentage((int) Math.round(batteryLevelInfo.batteryDischargePct))
+                .setDischargedPowerRange(batteryLevelInfo.batteryDischargeMah,
+                        batteryLevelInfo.batteryDischargeMah)
+                .setDischargeDurationMs(batteryLevelInfo.batteryDischargeDurationMs)
+                .getAggregateBatteryConsumerBuilder(
+                        BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
+                .setConsumedPower(batteryLevelInfo.batteryDischargeMah);
     }
 
     private void populateBatteryConsumers(

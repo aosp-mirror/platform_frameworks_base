@@ -433,7 +433,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mPowerAttributor = new MultiStatePowerAttributor(mContext, mPowerStatsStore, mPowerProfile,
-                mCpuScalingPolicies, mPowerStatsUidResolver);
+                mCpuScalingPolicies, () -> mStats.getBatteryCapacity(),
+                mPowerStatsUidResolver);
         mPowerStatsScheduler = createPowerStatsScheduler(mContext);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context,
                 mPowerAttributor, mPowerProfile, mCpuScalingPolicies,

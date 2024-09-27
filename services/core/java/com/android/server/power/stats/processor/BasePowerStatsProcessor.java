@@ -31,16 +31,28 @@ import com.android.server.power.stats.format.BasePowerStatsLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 class BasePowerStatsProcessor extends PowerStatsProcessor {
+    private final DoubleSupplier mBatteryCapacitySupplier;
     private PowerEstimationPlan mPlan;
     private long mStartTimestamp;
     private final SparseLongArray mUidStartTimestamps = new SparseLongArray();
     private static final BasePowerStatsLayout sStatsLayout = new BasePowerStatsLayout();
     private final PowerStats.Descriptor mPowerStatsDescriptor;
     private final long[] mTmpUidStatsArray;
+    private double mBatteryCapacityUah;
+    private int mBatteryLevel;
+    private int mBatteryChargeUah;
+    private long mBatteryLevelTimestampMs;
+    private int mCumulativeDischargePct;
+    private long mCumulativeDischargeUah;
+    private long mCumulativeDischargeDurationMs;
 
-    BasePowerStatsProcessor() {
+    private static final int UNSPECIFIED = -1;
+
+    BasePowerStatsProcessor(DoubleSupplier batteryCapacitySupplier) {
+        mBatteryCapacitySupplier = batteryCapacitySupplier;
         PersistableBundle extras = new PersistableBundle();
         sStatsLayout.toExtras(extras);
         mPowerStatsDescriptor = new PowerStats.Descriptor(BatteryConsumer.POWER_COMPONENT_BASE,
@@ -54,6 +66,38 @@ class BasePowerStatsProcessor extends PowerStatsProcessor {
         mStartTimestamp = timestampMs;
         mUidStartTimestamps.clear();
         stats.setPowerStatsDescriptor(mPowerStatsDescriptor);
+        mBatteryCapacityUah = mBatteryCapacitySupplier.getAsDouble() * 1000;
+        mBatteryLevel = UNSPECIFIED;
+        mBatteryChargeUah = UNSPECIFIED;
+        mBatteryLevelTimestampMs = UNSPECIFIED;
+        mCumulativeDischargeUah = 0;
+        mCumulativeDischargePct = 0;
+        mCumulativeDischargeDurationMs = 0;
+    }
+
+    @Override
+    public void noteBatteryLevel(int batteryLevel, int batteryChargeUah, long timestampMs) {
+        boolean discharging = false;
+        if (mBatteryLevel != UNSPECIFIED && batteryLevel < mBatteryLevel) {
+            mCumulativeDischargePct += mBatteryLevel - batteryLevel;
+            discharging = true;
+        }
+
+        if (mBatteryChargeUah != UNSPECIFIED && batteryChargeUah != 0
+                && batteryChargeUah < mBatteryChargeUah) {
+            mCumulativeDischargeUah += mBatteryChargeUah - batteryChargeUah;
+            discharging = true;
+        }
+
+        if (discharging) {
+            if (mBatteryLevelTimestampMs != UNSPECIFIED) {
+                mCumulativeDischargeDurationMs += timestampMs - mBatteryLevelTimestampMs;
+            }
+        }
+
+        mBatteryLevel = batteryLevel;
+        mBatteryChargeUah = batteryChargeUah;
+        mBatteryLevelTimestampMs = timestampMs;
     }
 
     @Override
@@ -73,6 +117,19 @@ class BasePowerStatsProcessor extends PowerStatsProcessor {
 
         PowerStats powerStats = new PowerStats(mPowerStatsDescriptor);
         sStatsLayout.setUsageDuration(powerStats.stats, timestampMs - mStartTimestamp);
+
+        sStatsLayout.addBatteryDischargePercent(powerStats.stats, mCumulativeDischargePct);
+        if (mCumulativeDischargeUah != 0) {
+            sStatsLayout.addBatteryDischargeUah(powerStats.stats,
+                    mCumulativeDischargeUah);
+        } else {
+            sStatsLayout.addBatteryDischargeUah(powerStats.stats,
+                    (long) (mCumulativeDischargePct * mBatteryCapacityUah / 100.0));
+        }
+        sStatsLayout.addBatteryDischargeDuration(powerStats.stats, mCumulativeDischargeDurationMs);
+        mCumulativeDischargePct = 0;
+        mCumulativeDischargeUah = 0;
+        mCumulativeDischargeDurationMs = 0;
 
         List<Integer> uids = new ArrayList<>();
         stats.collectUids(uids);

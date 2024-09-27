@@ -90,6 +90,7 @@ public class PowerStatsAggregator {
             long lastTime = 0;
             int lastStates = 0xFFFFFFFF;
             int lastStates2 = 0xFFFFFFFF;
+            int lastBatteryLevel = 0;
             try (BatteryStatsHistoryIterator iterator = history.iterate(startTimeMs, endTimeMs)) {
                 while (iterator.hasNext()) {
                     BatteryStats.HistoryItem item = iterator.next();
@@ -107,6 +108,12 @@ public class PowerStatsAggregator {
                     }
 
                     lastTime = item.time;
+
+                    if (item.batteryLevel != lastBatteryLevel) {
+                        mStats.noteBatteryLevel(item.batteryLevel, item.batteryChargeUah,
+                                item.time);
+                        lastBatteryLevel = item.batteryLevel;
+                    }
 
                     int batteryState =
                             (item.states & BatteryStats.HistoryItem.STATE_BATTERY_PLUGGED_FLAG) != 0

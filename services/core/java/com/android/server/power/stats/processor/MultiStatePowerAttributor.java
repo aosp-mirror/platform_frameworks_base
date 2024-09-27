@@ -35,6 +35,7 @@ import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 public class MultiStatePowerAttributor implements PowerAttributor {
     private static final String TAG = "MultiStatePowerAttributor";
@@ -48,10 +49,11 @@ public class MultiStatePowerAttributor implements PowerAttributor {
     // attribution isolates UIDs are supposed to be long forgotten.
     public MultiStatePowerAttributor(Context context, PowerStatsStore powerStatsStore,
             @NonNull PowerProfile powerProfile, @NonNull CpuScalingPolicies cpuScalingPolicies,
+            @NonNull DoubleSupplier batteryCapacitySupplier,
             @NonNull PowerStatsUidResolver powerStatsUidResolver) {
         this(powerStatsStore, new PowerStatsAggregator(
                 createAggregatedPowerStatsConfig(context, powerProfile, cpuScalingPolicies,
-                        powerStatsUidResolver)));
+                        batteryCapacitySupplier, powerStatsUidResolver)));
     }
 
     @VisibleForTesting
@@ -67,7 +69,7 @@ public class MultiStatePowerAttributor implements PowerAttributor {
 
     private static AggregatedPowerStatsConfig createAggregatedPowerStatsConfig(Context context,
             PowerProfile powerProfile, CpuScalingPolicies cpuScalingPolicies,
-            PowerStatsUidResolver powerStatsUidResolver) {
+            DoubleSupplier batteryCapacitySupplier, PowerStatsUidResolver powerStatsUidResolver) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BASE)
                 .trackDeviceStates(
@@ -77,7 +79,7 @@ public class MultiStatePowerAttributor implements PowerAttributor {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
-                .setProcessorSupplier(BasePowerStatsProcessor::new);
+                .setProcessorSupplier(() -> new BasePowerStatsProcessor(batteryCapacitySupplier));
 
         config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WAKELOCK)
                 .trackDeviceStates(

@@ -3626,6 +3626,21 @@ public abstract class BatteryStats {
     public abstract int getLearnedBatteryCapacity();
 
     /**
+     * Returns best known estimate of the battery capacity in milli-amp-hours.
+     */
+    public int getBatteryCapacity() {
+        int batteryCapacityUah = getLearnedBatteryCapacity();
+        if (batteryCapacityUah > 0) {
+            return batteryCapacityUah / 1000;
+        }
+        batteryCapacityUah = getMinLearnedBatteryCapacity();
+        if (batteryCapacityUah > 0) {
+            return batteryCapacityUah / 1000;
+        }
+        return getEstimatedBatteryCapacity();
+    }
+
+    /**
      * Return the array of discharge step durations.
      */
     public abstract LevelStepTracker getDischargeLevelStepTracker();
