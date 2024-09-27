@@ -833,6 +833,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         return sService;
     }
 
+    /**
+     * Override the {@link IBatteryStats} service, for testing.
+     */
+    @VisibleForTesting
+    public static void overrideService(IBatteryStats service) {
+        sService = service;
+    }
+
     @Override
     public int getServiceType() {
         return ServiceType.BATTERY_STATS;
