@@ -6188,7 +6188,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
-        r.mPreserveWindow = tmp.mPreserveWindow;
+        r.mPreserveWindow = r.activity.mWindowAdded && tmp.mPreserveWindow;
 
         r.activity.mChangingConfigurations = true;
 
