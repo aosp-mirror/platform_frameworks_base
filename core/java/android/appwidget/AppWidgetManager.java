@@ -1042,10 +1042,11 @@ public class AppWidgetManager {
     }
 
     /**
-     * Get the available info about the AppWidget.
+     * Returns the {@link AppWidgetProviderInfo} for the specified AppWidget.
      *
-     * @return A appWidgetId.  If the appWidgetId has not been bound to a provider yet, or
-     * you don't have access to that appWidgetId, null is returned.
+     * @return Information regarding the provider of speficied widget, returns null if the
+     *         appWidgetId has not been bound to a provider yet, or you don't have access
+     *         to that widget.
      */
     public AppWidgetProviderInfo getAppWidgetInfo(int appWidgetId) {
         if (mService == null) {
@@ -1390,7 +1391,7 @@ public class AppWidgetManager {
      *
      * @param provider The {@link ComponentName} for the {@link
      *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
-     * @param extras In not null, this is passed to the launcher app. For eg {@link
+     * @param extras IF not null, this is passed to the launcher app. e.g. {@link
      *    #EXTRA_APPWIDGET_PREVIEW} can be used for a custom preview.
      * @param successCallback If not null, this intent will be sent when the widget is created.
      *

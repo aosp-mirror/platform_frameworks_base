@@ -248,7 +248,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         } else if (action == ACTION_UP) {
                             // Gesture was too short to be picked up by scene container touch
                             // handling; programmatically start the transition to the shade.
-                            mShadeInteractor.get().expandNotificationShade("short launcher swipe");
+                            mShadeInteractor.get()
+                                    .expandNotificationsShade("short launcher swipe", null);
                         }
                     }
                     event.recycle();
@@ -265,7 +266,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                         mSceneInteractor.get().onRemoteUserInputStarted(
                                 "trackpad swipe");
                     } else if (action == ACTION_UP) {
-                        mShadeInteractor.get().expandNotificationShade("short trackpad swipe");
+                        mShadeInteractor.get()
+                                .expandNotificationsShade("short trackpad swipe", null);
                     }
                     mStatusBarWinController.getWindowRootView().dispatchTouchEvent(event);
                 } else {

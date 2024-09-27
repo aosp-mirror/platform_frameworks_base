@@ -1886,17 +1886,9 @@ package android.hardware.soundtrigger {
     ctor public SoundTrigger.ModuleProperties(int, @NonNull String, @NonNull String, @NonNull String, int, @NonNull String, int, int, int, int, boolean, int, boolean, int, boolean, int);
   }
 
-  public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
-    ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
+  @FlaggedApi("android.media.soundtrigger.manager_api") public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
+    ctor @Deprecated public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
     ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[]);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
-    field public final boolean allowMultipleTriggers;
-    field public final int audioCapabilities;
-    field public final boolean captureRequested;
-    field @NonNull public final byte[] data;
-    field @NonNull public final android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[] keyphrases;
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -2217,7 +2209,7 @@ package android.media.soundtrigger {
   public class SoundTriggerInstrumentation.RecognitionSession {
     method public void clearRecognitionCallback();
     method public int getAudioSession();
-    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig getRecognitionConfig();
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig getRecognitionConfig();
     method public void setRecognitionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.RecognitionCallback);
     method public void triggerAbortRecognition();
     method public void triggerRecognitionEvent(@NonNull byte[], @Nullable java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
@@ -2228,7 +2220,6 @@ package android.media.soundtrigger {
     method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForModule(@NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties);
     method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForTestModule();
     method @NonNull public static java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
   }
 
   public static class SoundTriggerManager.Model {

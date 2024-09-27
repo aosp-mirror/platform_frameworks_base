@@ -6822,6 +6822,27 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
   }
 
+  @FlaggedApi("android.media.soundtrigger.manager_api") public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getAudioCapabilities();
+    method @NonNull public byte[] getData();
+    method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphrases();
+    method public boolean isAllowMultipleTriggers();
+    method public boolean isCaptureRequested();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
+  }
+
+  public static final class SoundTrigger.RecognitionConfig.Builder {
+    ctor public SoundTrigger.RecognitionConfig.Builder();
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig build();
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAllowMultipleTriggers(boolean);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAudioCapabilities(int);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setCaptureRequested(boolean);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@Nullable byte[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setKeyphrases(@NonNull java.util.Collection<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+  }
+
   public static class SoundTrigger.RecognitionEvent {
     method @Nullable public android.media.AudioFormat getCaptureFormat();
     method public int getCaptureSession();
@@ -7772,10 +7793,16 @@ package android.media.soundtrigger {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void deleteModel(java.util.UUID);
     method public int getDetectionServiceOperationsTimeout();
     method @Deprecated @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getModelState(@NonNull java.util.UUID);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModuleProperties getModuleProperties();
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int getParameter(@NonNull java.util.UUID, int);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public boolean isRecognitionActive(@NonNull java.util.UUID);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public android.hardware.soundtrigger.SoundTrigger.ModelParamRange queryParameter(@Nullable java.util.UUID, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int setParameter(@Nullable java.util.UUID, int, int);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int startRecognition(@NonNull java.util.UUID, @Nullable android.os.Bundle, @NonNull android.content.ComponentName, @NonNull android.hardware.soundtrigger.SoundTrigger.RecognitionConfig);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int stopRecognition(@NonNull java.util.UUID);
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int unloadSoundModel(@NonNull java.util.UUID);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
 

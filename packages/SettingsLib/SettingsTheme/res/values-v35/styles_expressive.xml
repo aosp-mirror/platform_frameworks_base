@@ -188,4 +188,9 @@
         <item name="iconTint">@color/settingslib_materialColorOnSecondaryContainer</item>
         <item name="iconSize">@dimen/settingslib_expressive_space_small4</item>
     </style>
+
+    <style name="SettingslibMainSwitchStyle.Expressive" parent="SettingslibSwitchStyle.Expressive">
+        <item name="android:layout_gravity">center</item>
+        <item name="trackTint">@color/settingslib_expressive_color_main_switch_track</item>
+    </style>
 </resources>

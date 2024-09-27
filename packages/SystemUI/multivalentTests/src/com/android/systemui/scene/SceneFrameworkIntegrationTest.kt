@@ -341,7 +341,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             bouncerActionButton?.onClick?.invoke()
             runCurrent()
 
-            // TODO(b/298026988): Assert that an activity was started once we use ActivityStarter.
+            // TODO(b/369765704): Assert that an activity was started once we use ActivityStarter.
         }
 
     @Test

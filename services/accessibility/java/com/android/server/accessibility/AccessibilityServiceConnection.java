@@ -166,8 +166,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (userState.getBindInstantServiceAllowedLocked()) {
                 flags |= Context.BIND_ALLOW_INSTANT;
             }
-            if (mService == null && mContext.bindServiceAsUser(
-                    mIntent, this, flags, new UserHandle(userState.mUserId))) {
+            if (mClientBinder == null
+                    && mContext.bindServiceAsUser(
+                            mIntent, this, flags, new UserHandle(userState.mUserId))) {
                 userState.getBindingServicesLocked().add(mComponentName);
             }
         } finally {
@@ -227,20 +228,20 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             addWindowTokensForAllDisplays();
         }
         synchronized (mLock) {
-            if (mService != service) {
-                if (mService != null) {
-                    mService.unlinkToDeath(this, 0);
+            if (mClientBinder != service) {
+                if (mClientBinder != null) {
+                    mClientBinder.unlinkToDeath(this, 0);
                 }
-                mService = service;
+                mClientBinder = service;
                 try {
-                    mService.linkToDeath(this, 0);
+                    mClientBinder.linkToDeath(this, 0);
                 } catch (RemoteException re) {
                     Slog.e(LOG_TAG, "Failed registering death link");
                     binderDied();
                     return;
                 }
             }
-            mServiceInterface = IAccessibilityServiceClient.Stub.asInterface(service);
+            mClient = IAccessibilityServiceClient.Stub.asInterface(service);
             if (userState == null) return;
             userState.addServiceLocked(this);
             mSystemSupport.onClientChangeLocked(false);
@@ -261,7 +262,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     private void initializeService() {
-        IAccessibilityServiceClient serviceInterface = null;
+        IAccessibilityServiceClient client = null;
         synchronized (mLock) {
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState == null) return;
@@ -272,18 +273,17 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 bindingServices.remove(mComponentName);
                 crashedServices.remove(mComponentName);
                 mAccessibilityServiceInfo.crashed = false;
-                serviceInterface = mServiceInterface;
+                client = mClient;
             }
             // There's a chance that service is removed from enabled_accessibility_services setting
             // key, but skip unbinding because of it's in binding state. Unbinds it if it's
             // not in enabled service list.
-            if (serviceInterface != null
-                    && !userState.getEnabledServicesLocked().contains(mComponentName)) {
+            if (client != null && !userState.getEnabledServicesLocked().contains(mComponentName)) {
                 mSystemSupport.onClientChangeLocked(false);
                 return;
             }
         }
-        if (serviceInterface == null) {
+        if (client == null) {
             binderDied();
             return;
         }
@@ -292,10 +292,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 logTraceSvcClient("init",
                         this + "," + mId + "," + mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
             }
-            serviceInterface.init(this, mId, mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
+            client.init(this, mId, mOverlayWindowTokens.get(Display.DEFAULT_DISPLAY));
         } catch (RemoteException re) {
-            Slog.w(LOG_TAG, "Error while setting connection for service: "
-                    + serviceInterface, re);
+            Slog.w(LOG_TAG, "Error while setting connection for service: " + client, re);
             binderDied();
         }
     }
@@ -496,7 +495,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     public boolean isCapturingFingerprintGestures() {
-        return (mServiceInterface != null)
+        return (mClient != null)
                 && mSecurityPolicy.canCaptureFingerprintGestures(this)
                 && mCaptureFingerprintGestures;
     }
@@ -506,17 +505,17 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         if (!isCapturingFingerprintGestures()) {
             return;
         }
-        IAccessibilityServiceClient serviceInterface;
+        IAccessibilityServiceClient client;
         synchronized (mLock) {
-            serviceInterface = mServiceInterface;
+            client = mClient;
         }
-        if (serviceInterface != null) {
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient(
                             "onFingerprintCapturingGesturesChanged", String.valueOf(active));
                 }
-                mServiceInterface.onFingerprintCapturingGesturesChanged(active);
+                mClient.onFingerprintCapturingGesturesChanged(active);
             } catch (RemoteException e) {
             }
         }
@@ -527,16 +526,16 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         if (!isCapturingFingerprintGestures()) {
             return;
         }
-        IAccessibilityServiceClient serviceInterface;
+        IAccessibilityServiceClient client;
         synchronized (mLock) {
-            serviceInterface = mServiceInterface;
+            client = mClient;
         }
-        if (serviceInterface != null) {
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onFingerprintGesture", String.valueOf(gesture));
                 }
-                mServiceInterface.onFingerprintGesture(gesture);
+                mClient.onFingerprintGesture(gesture);
             } catch (RemoteException e) {
             }
         }
@@ -546,7 +545,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     @Override
     public void dispatchGesture(int sequence, ParceledListSlice gestureSteps, int displayId) {
         synchronized (mLock) {
-            if (mServiceInterface != null && mSecurityPolicy.canPerformGestures(this)) {
+            if (mClient != null && mSecurityPolicy.canPerformGestures(this)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     MotionEventInjector motionEventInjector =
@@ -557,16 +556,18 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                     if (motionEventInjector != null
                             && mWindowManagerService.isTouchOrFaketouchDevice()) {
                         motionEventInjector.injectEvents(
-                                gestureSteps.getList(), mServiceInterface, sequence, displayId);
+                                gestureSteps.getList(), mClient, sequence, displayId);
                     } else {
                         try {
                             if (svcClientTracingEnabled()) {
                                 logTraceSvcClient("onPerformGestureResult", sequence + ", false");
                             }
-                            mServiceInterface.onPerformGestureResult(sequence, false);
+                            mClient.onPerformGestureResult(sequence, false);
                         } catch (RemoteException re) {
-                            Slog.e(LOG_TAG, "Error sending motion event injection failure to "
-                                    + mServiceInterface, re);
+                            Slog.e(
+                                    LOG_TAG,
+                                    "Error sending motion event injection failure to " + mClient,
+                                    re);
                         }
                     }
                 } finally {
@@ -631,48 +632,47 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     @Override
     protected void createImeSessionInternal() {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("createImeSession", "");
                 }
                 AccessibilityInputMethodSessionCallback
                         callback = new AccessibilityInputMethodSessionCallback(mUserId);
-                listener.createImeSession(callback);
+                client.createImeSession(callback);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error requesting IME session from " + mService, re);
+                Slog.e(LOG_TAG, "Error requesting IME session from " + mClientBinder, re);
             }
         }
     }
 
     private void notifyMotionEventInternal(MotionEvent event) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (mTrace.isA11yTracingEnabled()) {
                     logTraceSvcClient(".onMotionEvent ",
                             event.toString());
                 }
-                listener.onMotionEvent(event);
+                client.onMotionEvent(event);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error sending motion event to" + mService, re);
+                Slog.e(LOG_TAG, "Error sending motion event to" + mClientBinder, re);
             }
         }
     }
 
     private void notifyTouchStateInternal(int displayId, int state) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (mTrace.isA11yTracingEnabled()) {
                     logTraceSvcClient(".onTouchStateChanged ",
                             TouchInteractionController.stateToString(state));
                 }
-                listener.onTouchStateChanged(displayId, state);
+                client.onTouchStateChanged(displayId, state);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error sending motion event to" + mService, re);
+                Slog.e(LOG_TAG, "Error sending motion event to" + mClientBinder, re);
             }
         }
     }

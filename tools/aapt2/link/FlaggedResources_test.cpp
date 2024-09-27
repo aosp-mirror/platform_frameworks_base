@@ -17,6 +17,7 @@
 #include "LoadedApk.h"
 #include "cmd/Dump.h"
 #include "io/StringStream.h"
+#include "test/Common.h"
 #include "test/Test.h"
 #include "text/Printer.h"
 
@@ -75,6 +76,10 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTable) {
 
   std::string output;
   DumpResourceTableToString(loaded_apk.get(), &output);
+  ASSERT_EQ(output.find("bool4"), std::string::npos);
+  ASSERT_EQ(output.find("str1"), std::string::npos);
+  ASSERT_EQ(output.find("layout2"), std::string::npos);
+  ASSERT_EQ(output.find("removedpng"), std::string::npos);
 }
 
 TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTableChunks) {
@@ -86,6 +91,8 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTableChunks) {
 
   ASSERT_EQ(output.find("bool4"), std::string::npos);
   ASSERT_EQ(output.find("str1"), std::string::npos);
+  ASSERT_EQ(output.find("layout2"), std::string::npos);
+  ASSERT_EQ(output.find("removedpng"), std::string::npos);
 }
 
 TEST_F(FlaggedResourcesTest, DisabledResourcesInRJava) {
@@ -96,6 +103,49 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesInRJava) {
 
   ASSERT_NE(r_contents.find("public static final int bool4"), std::string::npos);
   ASSERT_NE(r_contents.find("public static final int str1"), std::string::npos);
+}
+
+TEST_F(FlaggedResourcesTest, TwoValuesSameDisabledFlag) {
+  test::TestDiagnosticsImpl diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+  ASSERT_FALSE(CompileFile(
+      GetTestPath("res/values/values.xml"),
+      R"(<resources xmlns:android="http://schemas.android.com/apk/res/android">
+           <bool name="bool1" android:featureFlag="test.package.falseFlag">false</bool>
+           <bool name="bool1" android:featureFlag="test.package.falseFlag">true</bool>
+         </resources>)",
+      compiled_files_dir, &diag,
+      {"--feature-flags", "test.package.falseFlag:ro=false,test.package.trueFlag:ro=true"}));
+  ASSERT_TRUE(diag.GetLog().contains("duplicate value for resource 'bool/bool1'"));
+}
+
+TEST_F(FlaggedResourcesTest, TwoValuesSameDisabledFlagDifferentFiles) {
+  test::TestDiagnosticsImpl diag;
+  const std::string compiled_files_dir = GetTestPath("compiled");
+  ASSERT_TRUE(CompileFile(
+      GetTestPath("res/values/values1.xml"),
+      R"(<resources xmlns:android="http://schemas.android.com/apk/res/android">
+           <bool name="bool1" android:featureFlag="test.package.falseFlag">false</bool>
+         </resources>)",
+      compiled_files_dir, &diag,
+      {"--feature-flags", "test.package.falseFlag:ro=false,test.package.trueFlag:ro=true"}));
+  ASSERT_TRUE(CompileFile(
+      GetTestPath("res/values/values2.xml"),
+      R"(<resources xmlns:android="http://schemas.android.com/apk/res/android">
+           <bool name="bool1" android:featureFlag="test.package.falseFlag">true</bool>
+         </resources>)",
+      compiled_files_dir, &diag,
+      {"--feature-flags", "test.package.falseFlag:ro=false,test.package.trueFlag:ro=true"}));
+  const std::string out_apk = GetTestPath("out.apk");
+  std::vector<std::string> link_args = {
+      "--manifest",
+      GetDefaultManifest(),
+      "-o",
+      out_apk,
+  };
+
+  ASSERT_FALSE(Link(link_args, compiled_files_dir, &diag));
+  ASSERT_TRUE(diag.GetLog().contains("duplicate value for resource 'bool1'"));
 }
 
 }  // namespace aapt

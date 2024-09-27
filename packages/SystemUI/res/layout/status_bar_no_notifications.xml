@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
+            android:paddingHorizontal="8dp"
             >
         <TextView
                 android:id="@+id/no_notifications"

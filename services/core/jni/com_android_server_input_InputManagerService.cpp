@@ -56,6 +56,7 @@
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <server_configurable_flags/get_flags.h>
+#include <ui/LogicalDisplayId.h>
 #include <ui/Region.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
@@ -64,6 +65,7 @@
 
 #include <atomic>
 #include <cinttypes>
+#include <map>
 #include <vector>
 
 #include "android_hardware_display_DisplayViewport.h"
@@ -343,7 +345,7 @@ public:
     void setTouchpadRightClickZoneEnabled(bool enabled);
     void setInputDeviceEnabled(uint32_t deviceId, bool enabled);
     void setShowTouches(bool enabled);
-    void setInteractive(bool interactive);
+    void setNonInteractiveDisplays(const std::set<ui::LogicalDisplayId>& displayIds);
     void reloadCalibration();
     void reloadPointerIcons();
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
@@ -508,9 +510,11 @@ private:
 
         // Keycodes to be remapped.
         std::map<int32_t /* fromKeyCode */, int32_t /* toKeyCode */> keyRemapping{};
+
+        // Displays which are non-interactive.
+        std::set<ui::LogicalDisplayId> nonInteractiveDisplays;
     } mLocked GUARDED_BY(mLock);
 
-    std::atomic<bool> mInteractive;
     void updateInactivityTimeoutLocked();
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
@@ -524,12 +528,13 @@ private:
     void forEachPointerControllerLocked(std::function<void(PointerController&)> apply)
             REQUIRES(mLock);
     PointerIcon loadPointerIcon(JNIEnv* env, ui::LogicalDisplayId displayId, PointerIconStyle type);
+    bool isDisplayInteractive(ui::LogicalDisplayId displayId);
 
     static inline JNIEnv* jniEnv() { return AndroidRuntime::getJNIEnv(); }
 };
 
 NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& looper)
-      : mLooper(looper), mInteractive(true) {
+      : mLooper(looper) {
     JNIEnv* env = jniEnv();
 
     mServiceObj = env->NewGlobalRef(serviceObj);
@@ -547,9 +552,13 @@ NativeInputManager::~NativeInputManager() {
 
 void NativeInputManager::dump(std::string& dump) {
     dump += "Input Manager State:\n";
-    dump += StringPrintf(INDENT "Interactive: %s\n", toString(mInteractive.load()));
     { // acquire lock
         std::scoped_lock _l(mLock);
+        auto logicalDisplayIdToString = [](const ui::LogicalDisplayId& displayId) {
+            return std::to_string(displayId.val());
+        };
+        dump += StringPrintf(INDENT "Display not interactive: %s\n",
+                             dumpSet(mLocked.nonInteractiveDisplays, streamableToString).c_str());
         dump += StringPrintf(INDENT "System UI Lights Out: %s\n",
                              toString(mLocked.systemUiLightsOut));
         dump += StringPrintf(INDENT "Pointer Speed: %" PRId32 "\n", mLocked.pointerSpeed);
@@ -1476,8 +1485,10 @@ void NativeInputManager::requestPointerCapture(const sp<IBinder>& windowToken, b
     mInputManager->getDispatcher().requestPointerCapture(windowToken, enabled);
 }
 
-void NativeInputManager::setInteractive(bool interactive) {
-    mInteractive = interactive;
+void NativeInputManager::setNonInteractiveDisplays(
+        const std::set<ui::LogicalDisplayId>& displayIds) {
+    std::scoped_lock _l(mLock);
+    mLocked.nonInteractiveDisplays = displayIds;
 }
 
 void NativeInputManager::reloadCalibration() {
@@ -1606,7 +1617,7 @@ void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
     // - Ignore untrusted events and pass them along.
     // - Ask the window manager what to do with normal events and trusted injected events.
     // - For normal events wake and brighten the screen if currently off or dim.
-    const bool interactive = mInteractive.load();
+    const bool interactive = isDisplayInteractive(keyEvent.getDisplayId());
     if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
@@ -1644,7 +1655,7 @@ void NativeInputManager::interceptMotionBeforeQueueing(ui::LogicalDisplayId disp
     // - No special filtering for injected events required at this time.
     // - Filter normal events based on screen state.
     // - For normal events brighten (but do not wake) the screen if currently dim.
-    const bool interactive = mInteractive.load();
+    const bool interactive = isDisplayInteractive(displayId);
     if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
@@ -1681,6 +1692,24 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
         ALOGD("handleInterceptActions: Not passing key to user.");
 #endif
     }
+}
+
+bool NativeInputManager::isDisplayInteractive(ui::LogicalDisplayId displayId) {
+    // If an input event doesn't have an associated id, use the default display id
+    if (displayId == ui::LogicalDisplayId::INVALID) {
+        displayId = ui::LogicalDisplayId::DEFAULT;
+    }
+
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        auto it = mLocked.nonInteractiveDisplays.find(displayId);
+        if (it != mLocked.nonInteractiveDisplays.end()) {
+            return false;
+        }
+    } // release lock
+
+    return true;
 }
 
 nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& token,
@@ -2372,10 +2401,17 @@ static void nativeSetShowTouches(JNIEnv* env, jobject nativeImplObj, jboolean en
     im->setShowTouches(enabled);
 }
 
-static void nativeSetInteractive(JNIEnv* env, jobject nativeImplObj, jboolean interactive) {
+static void nativeSetNonInteractiveDisplays(JNIEnv* env, jobject nativeImplObj,
+                                            jintArray displayIds) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    im->setInteractive(interactive);
+    const std::vector displayIdsVec = getIntArray(env, displayIds);
+    std::set<ui::LogicalDisplayId> logicalDisplayIds;
+    for (int displayId : displayIdsVec) {
+        logicalDisplayIds.emplace(ui::LogicalDisplayId{displayId});
+    }
+
+    im->setNonInteractiveDisplays(logicalDisplayIds);
 }
 
 static void nativeReloadCalibration(JNIEnv* env, jobject nativeImplObj) {
@@ -3021,7 +3057,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetShouldNotifyTouchpadHardwareState},
         {"setTouchpadRightClickZoneEnabled", "(Z)V", (void*)nativeSetTouchpadRightClickZoneEnabled},
         {"setShowTouches", "(Z)V", (void*)nativeSetShowTouches},
-        {"setInteractive", "(Z)V", (void*)nativeSetInteractive},
+        {"setNonInteractiveDisplays", "([I)V", (void*)nativeSetNonInteractiveDisplays},
         {"reloadCalibration", "()V", (void*)nativeReloadCalibration},
         {"vibrate", "(I[J[III)V", (void*)nativeVibrate},
         {"vibrateCombined", "(I[JLandroid/util/SparseArray;II)V", (void*)nativeVibrateCombined},

@@ -213,19 +213,17 @@ import java.util.function.Consumer;
  * <a href="{@docRoot}guide/topics/admin/device-admin.html">Device Administration</a>
  * developer guide.
  *
- * <p id="devicepolicycontroller">Through <a href="#managed_provisioning">Managed Provisioning</a>,
- * Device Administrator apps can also be recognised as <b>
- Device Policy Controllers</b>. Device Policy Controllers can be one of
+ * <p id="devicepolicycontroller">Device Administrator apps can also be recognised as <b>
+ * Device Policy Controllers</b>. Device Policy Controllers can be one of
  * two types:
  * <ul>
  * <li>A <i id="deviceowner">Device Owner</i>, which only ever exists on the
- * {@link UserManager#isSystemUser System User} or {@link UserManager#isMainUser Main User}, is
+ * {@link UserManager#isSystemUser System User} or Main User, is
  * the most powerful type of Device Policy Controller and can affect policy across the device.
  * <li>A <i id="profileowner">Profile Owner<i>, which can exist on any user, can
  * affect policy on the user it is on, and when it is running on
  * {@link UserManager#isProfile a profile} has
- * <a href="#profile-on-parent">limited</a> ability to affect policy on its
- * {@link UserManager#getProfileParent parent}.
+ * <a href="#profile-on-parent">limited</a> ability to affect policy on its parent.
  * </ul>
  *
  * <p>Additional capabilities can be provided to Device Policy Controllers in
@@ -233,7 +231,7 @@ import java.util.function.Consumer;
  * <ul>
  * <li>A Profile Owner on an <a href="#organization-owned">organization owned</a> device has access
  * to additional abilities, both <a href="#profile-on-parent-organization-owned">affecting policy on the profile's</a>
- * {@link UserManager#getProfileParent parent} and also the profile itself.
+ * parent and also the profile itself.
  * <li>A Profile Owner running on the {@link UserManager#isSystemUser System User} has access to
  * additional capabilities which affect the {@link UserManager#isSystemUser System User} and
  * also the whole device.
@@ -245,13 +243,12 @@ import java.util.function.Consumer;
  * Controller</a>.
  *
  * <p><a href="#permissions">Permissions</a> are generally only given to apps
- * fulfilling particular key roles on the device (such as managing {@link DeviceLockManager
-device locks}).
+ * fulfilling particular key roles on the device (such as managing
+ * {@link android.devicelock.DeviceLockManager device locks}).
  *
  * <p id="roleholder"><b>Device Policy Management Role Holder</b>
- * <p>One app on the device fulfills the {@link RoleManager#ROLE_DEVICE_POLICY_MANAGEMENT Device
-Policy Management Role} and is trusted with managing the overall state of
- * Device Policy. This has access to much more powerful methods than
+ * <p>One app on the device fulfills the Device Policy Management Role and is trusted with managing
+ * the overall state of Device Policy. This has access to much more powerful methods than
  * <a href="#managingapps">managing apps</a>.
  *
  * <p id="querying"><b>Querying Device Policy</b>
@@ -273,7 +270,7 @@ Policy Management Role} and is trusted with managing the overall state of
  *
  * <p id="managed_profile">A <b>Managed Profile</b> enables data separation. For example to use
  * a device both for personal and corporate usage. The managed profile and its
- * {@link UserManager#getProfileParent parent} share a launcher.
+ * parent share a launcher.
  *
  * <p id="affiliated"><b>Affiliation</b>
  * <p>Using the {@link #setAffiliationIds} method, a
@@ -6643,7 +6640,7 @@ public class DevicePolicyManager {
      * @param flags May be 0 or {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY}.
      * @throws SecurityException if the calling application does not own an active administrator
      *             that uses {@link DeviceAdminInfo#USES_POLICY_FORCE_LOCK} and the does not hold
-     *             the {@link android.Manifest.permission#LOCK_DEVICE} permission, or
+     *             the LOCK_DEVICE permission, or
      *             the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is passed by an
      *             application that is not a profile owner of a managed profile.
      * @throws IllegalArgumentException if the {@link #FLAG_EVICT_CREDENTIAL_ENCRYPTION_KEY} flag is
