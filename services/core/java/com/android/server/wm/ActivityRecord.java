@@ -6409,11 +6409,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // and the token could be null.
             return;
         }
-        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy
-                .getAppCompatCameraPolicy(r);
-        if (cameraPolicy != null) {
-            cameraPolicy.onActivityRefreshed(r);
-        }
+        AppCompatCameraPolicy.onActivityRefreshed(r);
     }
 
     static void splashScreenAttachedLocked(IBinder token) {
@@ -9456,11 +9452,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy.getAppCompatCameraPolicy(
-                this);
-        if (cameraPolicy != null) {
-            cameraPolicy.onActivityConfigurationChanging(this, newConfig, lastReportedConfig);
-        }
+        AppCompatCameraPolicy.onActivityConfigurationChanging(this, newConfig, lastReportedConfig);
     }
 
     /** Get process configuration, or global config if the process is not set. */
