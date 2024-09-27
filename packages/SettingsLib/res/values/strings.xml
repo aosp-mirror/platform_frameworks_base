@@ -1645,13 +1645,13 @@
     <string name="media_transfer_headphone_name">Headphone</string>
 
     <!-- Name of the usb audio device speaker, used in desktop devices. [CHAR LIMIT=50] -->
-    <string name="media_transfer_usb_speaker_name">USB speaker</string>
+    <string name="media_transfer_usb_audio_name">USB audio</string>
 
     <!-- Name of the 3.5mm audio device mic. [CHAR LIMIT=50] -->
     <string name="media_transfer_wired_device_mic_name">Mic jack</string>
 
     <!-- Name of the usb audio device mic. [CHAR LIMIT=50] -->
-    <string name="media_transfer_usb_device_mic_name">USB mic</string>
+    <string name="media_transfer_usb_device_mic_name">USB microphone</string>
 
     <!-- Label for Wifi hotspot switch on. Toggles hotspot on [CHAR LIMIT=30] -->
     <string name="wifi_hotspot_switch_on_text">On</string>
