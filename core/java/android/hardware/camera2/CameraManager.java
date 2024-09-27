@@ -181,7 +181,7 @@ public final class CameraManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public static final int ROTATION_OVERRIDE_NONE = ICameraService.ROTATION_OVERRIDE_NONE;
 
     /**
@@ -191,7 +191,7 @@ public final class CameraManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public static final int ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT =
             ICameraService.ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT;
 
@@ -201,7 +201,7 @@ public final class CameraManager {
      * @hide
      */
     @TestApi
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public static final int ROTATION_OVERRIDE_ROTATION_ONLY =
             ICameraService.ROTATION_OVERRIDE_ROTATION_ONLY;
 
@@ -1562,7 +1562,7 @@ public final class CameraManager {
      */
     public static int getRotationOverride(@Nullable Context context,
             @Nullable PackageManager packageManager, @Nullable String packageName) {
-        if (com.android.window.flags.Flags.cameraCompatForFreeform()) {
+        if (com.android.window.flags.Flags.enableCameraCompatForDesktopWindowing()) {
             return getRotationOverrideInternal(context, packageManager, packageName);
         } else {
             return shouldOverrideToPortrait(packageManager, packageName)
@@ -1574,7 +1574,7 @@ public final class CameraManager {
     /**
      * @hide
      */
-    @FlaggedApi(com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @TestApi
     public static int getRotationOverrideInternal(@Nullable Context context,
             @Nullable PackageManager packageManager, @Nullable String packageName) {
