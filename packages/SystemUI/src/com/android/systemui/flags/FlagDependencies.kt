@@ -34,6 +34,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment
 import com.android.systemui.statusbar.notification.collection.SortBySectionTimeFlag
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
@@ -73,6 +75,8 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         // Status bar chip dependencies
         statusBarCallChipNotificationIconToken dependsOn statusBarUseReposForCallChipToken
         statusBarCallChipNotificationIconToken dependsOn statusBarScreenSharingChipsToken
+
+        StatusBarConnectedDisplays.token dependsOn StatusBarSimpleFragment.token
     }
 
     private inline val politeNotifications
