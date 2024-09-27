@@ -193,6 +193,7 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.RemoteInput;
@@ -655,7 +656,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt()))
                 .thenReturn(INVALID_TASK_ID);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
-        when(mUm.getProfileIds(eq(mUserId), eq(false))).thenReturn(new int[] { mUserId });
+        when(mUm.getProfileIds(eq(mUserId), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mUmInternal.getProfileIds(eq(mUserId), anyBoolean())).thenReturn(new int[]{mUserId});
         when(mAmi.getCurrentUserId()).thenReturn(mUserId);
 
         when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(true);
@@ -15969,6 +15971,57 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         Map.Entry<String, AutomaticZenRule> updatedRule = getOnlyElement(
                 mBinderService.getAutomaticZenRules().entrySet());
         assertThat(updatedRule.getValue().isEnabled()).isFalse();
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    public void setNotificationPolicy_fromSystemApp_appliesPriorityChannelsAllowed()
+            throws Exception {
+        setUpRealZenTest();
+        // Start with hasPriorityChannels=true, allowPriorityChannels=true ("default").
+        mService.mZenModeHelper.setNotificationPolicy(new Policy(0, 0, 0, 0,
+                        Policy.policyState(true, true), 0),
+                ZenModeConfig.ORIGIN_SYSTEM, Process.SYSTEM_UID);
+
+        // The caller will supply states with "wrong" hasPriorityChannels.
+        int stateBlockingPriorityChannels = Policy.policyState(false, false);
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(1, 0, 0, 0, stateBlockingPriorityChannels, 0), false);
+
+        // hasPriorityChannels is untouched and allowPriorityChannels was updated.
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(1);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, false));
+
+        // Same but setting allowPriorityChannels to true.
+        int stateAllowingPriorityChannels = Policy.policyState(false, true);
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(2, 0, 0, 0, stateAllowingPriorityChannels, 0), false);
+
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(2);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, true));
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    @DisableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_fromRegularAppThatCanModifyPolicy_ignoresState()
+            throws Exception {
+        setUpRealZenTest();
+        // Start with hasPriorityChannels=true, allowPriorityChannels=true ("default").
+        mService.mZenModeHelper.setNotificationPolicy(new Policy(0, 0, 0, 0,
+                        Policy.policyState(true, true), 0),
+                ZenModeConfig.ORIGIN_SYSTEM, Process.SYSTEM_UID);
+        mService.setCallerIsNormalPackage();
+
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(1, 0, 0, 0, Policy.policyState(false, false), 0), false);
+
+        // Policy was updated but the attempt to change state was ignored (it's a @hide API).
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(1);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, true));
     }
 
     /** Prepares for a zen-related test that uses the real {@link ZenModeHelper}. */
