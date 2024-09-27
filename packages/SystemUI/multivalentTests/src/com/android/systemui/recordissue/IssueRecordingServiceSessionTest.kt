@@ -47,7 +47,7 @@ import org.mockito.kotlin.verify
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
+class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     private val kosmos = Kosmos().also { it.testCase = this }
     private val bgExecutor = kosmos.fakeExecutor
@@ -61,13 +61,13 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
     private val notificationManager = mock<NotificationManager>()
     private val panelInteractor = mock<PanelInteractor>()
 
-    private lateinit var underTest: IssueRecordingServiceCommandHandler
+    private lateinit var underTest: IssueRecordingServiceSession
 
     @Before
     fun setup() {
         traceurMessageSender = mock<TraceurMessageSender>()
         underTest =
-            IssueRecordingServiceCommandHandler(
+            IssueRecordingServiceSession(
                 bgExecutor,
                 dialogTransitionAnimator,
                 panelInteractor,
@@ -75,13 +75,13 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
                 issueRecordingState,
                 iActivityManager,
                 notificationManager,
-                userContextProvider
+                userContextProvider,
             )
     }
 
     @Test
     fun startsTracing_afterReceivingActionStartCommand() {
-        underTest.handleStartCommand()
+        underTest.start()
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isTrue()
@@ -90,7 +90,7 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
 
     @Test
     fun stopsTracing_afterReceivingStopTracingCommand() {
-        underTest.handleStopCommand(mContext.contentResolver)
+        underTest.stop(mContext.contentResolver)
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isFalse()
@@ -99,7 +99,7 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
 
     @Test
     fun cancelsNotification_afterReceivingShareCommand() {
-        underTest.handleShareCommand(0, null, mContext)
+        underTest.share(0, null, mContext)
         bgExecutor.runAllReady()
 
         verify(notificationManager).cancelAsUser(isNull(), anyInt(), any<UserHandle>())
@@ -110,7 +110,7 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
         issueRecordingState.takeBugreport = true
         val uri = mock<Uri>()
 
-        underTest.handleShareCommand(0, uri, mContext)
+        underTest.share(0, uri, mContext)
         bgExecutor.runAllReady()
 
         verify(iActivityManager).requestBugReportWithExtraAttachment(uri)
@@ -121,7 +121,7 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
         issueRecordingState.takeBugreport = false
         val uri = mock<Uri>()
 
-        underTest.handleShareCommand(0, uri, mContext)
+        underTest.share(0, uri, mContext)
         bgExecutor.runAllReady()
 
         verify(traceurMessageSender).shareTraces(mContext, uri)
@@ -131,7 +131,7 @@ class IssueRecordingServiceCommandHandlerTest : SysuiTestCase() {
     fun closesShade_afterReceivingShareCommand() {
         val uri = mock<Uri>()
 
-        underTest.handleShareCommand(0, uri, mContext)
+        underTest.share(0, uri, mContext)
         bgExecutor.runAllReady()
 
         verify(panelInteractor).collapsePanels()
