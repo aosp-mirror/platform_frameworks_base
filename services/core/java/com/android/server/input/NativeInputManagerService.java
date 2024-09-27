@@ -141,7 +141,7 @@ interface NativeInputManagerService {
 
     void setShowTouches(boolean enabled);
 
-    void setInteractive(boolean interactive);
+    void setNonInteractiveDisplays(int[] displayIds);
 
     void reloadCalibration();
 
@@ -409,7 +409,7 @@ interface NativeInputManagerService {
         public native void setShowTouches(boolean enabled);
 
         @Override
-        public native void setInteractive(boolean interactive);
+        public native void setNonInteractiveDisplays(int[] displayIds);
 
         @Override
         public native void reloadCalibration();

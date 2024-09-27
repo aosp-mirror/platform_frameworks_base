@@ -22,8 +22,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.Instant
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -80,18 +80,25 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isShadeEnabled() = shadeInteractor.isShadeEnabled.value
 
+    @Deprecated("Deprecated in Java")
     override fun isShadeFullyOpen(): Boolean = shadeInteractor.isAnyFullyExpanded.value
 
+    @Deprecated("Deprecated in Java")
     override fun isExpandingOrCollapsing(): Boolean = shadeInteractor.isUserInteracting.value
 
+    @Deprecated("Deprecated in Java")
     override fun instantExpandShade() {
         // Do nothing
     }
 
     override fun instantCollapseShade() {
-        sceneInteractor.snapToScene(SceneFamilies.Home, "hide shade")
+        shadeInteractor.collapseNotificationsShade(
+            loggingReason = "ShadeControllerSceneImpl.instantCollapseShade",
+            transitionKey = Instant,
+        )
     }
 
     override fun animateCollapseShade(
@@ -122,16 +129,17 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun collapseWithDuration(animationDuration: Int) {
         // TODO(b/300258424) inline this. The only caller uses the default duration.
         animateCollapseShade()
     }
 
     private fun animateCollapseShadeInternal() {
-        sceneInteractor.changeScene(
-            SceneFamilies.Home, // TODO(b/336581871): add sceneState?
-            "ShadeController.animateCollapseShade",
-            SlightlyFasterShadeCollapse,
+        // TODO(b/336581871): add sceneState?
+        shadeInteractor.collapseEitherShade(
+            loggingReason = "ShadeController.animateCollapseShade",
+            transitionKey = SlightlyFasterShadeCollapse,
         )
     }
 
@@ -140,6 +148,7 @@ constructor(
         animateCollapseShade()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun closeShadeIfOpen(): Boolean {
         if (shadeInteractor.isAnyExpanded.value) {
             commandQueue.animateCollapsePanels(
@@ -155,6 +164,7 @@ constructor(
         animateCollapseShadeForcedDelayed()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun collapseShade(animate: Boolean) {
         if (animate) {
             animateCollapseShade()
@@ -163,13 +173,14 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun collapseOnMainThread() {
         // TODO if this works with delegation alone, we can deprecate and delete
         collapseShade()
     }
 
     override fun expandToNotifications() {
-        shadeInteractor.expandNotificationShade("ShadeController.animateExpandShade")
+        shadeInteractor.expandNotificationsShade("ShadeController.animateExpandShade")
     }
 
     override fun expandToQs() {
@@ -193,14 +204,17 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun postAnimateCollapseShade() {
         animateCollapseShade()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun postAnimateForceCollapseShade() {
         animateCollapseShadeForced()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun postAnimateExpandQs() {
         expandToQs()
     }
@@ -214,18 +228,23 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun makeExpandedInvisible() {
         // Do nothing
     }
 
+    @Deprecated("Deprecated in Java")
     override fun makeExpandedVisible(force: Boolean) {
         // Do nothing
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isExpandedVisible(): Boolean {
-        return sceneInteractor.currentScene.value != Scenes.Gone
+        return sceneInteractor.currentScene.value != Scenes.Gone ||
+            sceneInteractor.currentOverlays.value.isNotEmpty()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onStatusBarTouch(event: MotionEvent) {
         // The only call to this doesn't happen with MigrateClocksToBlueprint.isEnabled enabled
         throw UnsupportedOperationException()

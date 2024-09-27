@@ -126,17 +126,18 @@ fun SceneContainer(
                     awaitFirstDown(false)
                     viewModel.onSceneContainerUserInputStarted()
                 }
-            },
+            }
     ) {
         SceneTransitionLayout(
             state = state,
             modifier = modifier.fillMaxSize(),
             swipeSourceDetector = viewModel.edgeDetector,
+            gestureFilter = viewModel::shouldFilterGesture,
         ) {
             sceneByKey.forEach { (sceneKey, scene) ->
                 scene(
                     key = sceneKey,
-                    userActions = userActionsByContentKey.getOrDefault(sceneKey, emptyMap())
+                    userActions = userActionsByContentKey.getOrDefault(sceneKey, emptyMap()),
                 ) {
                     // Activate the scene.
                     LaunchedEffect(scene) { scene.activate() }
@@ -144,7 +145,7 @@ fun SceneContainer(
                     // Render the scene.
                     with(scene) {
                         this@scene.Content(
-                            modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize(),
+                            modifier = Modifier.element(sceneKey.rootElementKey).fillMaxSize()
                         )
                     }
                 }
@@ -152,7 +153,7 @@ fun SceneContainer(
             overlayByKey.forEach { (overlayKey, overlay) ->
                 overlay(
                     key = overlayKey,
-                    userActions = userActionsByContentKey.getOrDefault(overlayKey, emptyMap())
+                    userActions = userActionsByContentKey.getOrDefault(overlayKey, emptyMap()),
                 ) {
                     // Activate the overlay.
                     LaunchedEffect(overlay) { overlay.activate() }
@@ -164,12 +165,7 @@ fun SceneContainer(
         }
 
         BottomRightCornerRibbon(
-            content = {
-                Text(
-                    text = "flexi\uD83E\uDD43",
-                    color = Color.White,
-                )
-            },
+            content = { Text(text = "flexi\uD83E\uDD43", color = Color.White) },
             modifier = Modifier.align(Alignment.BottomEnd),
         )
     }

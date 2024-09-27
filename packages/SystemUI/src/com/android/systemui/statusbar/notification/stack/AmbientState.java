@@ -88,6 +88,8 @@ public class AmbientState implements Dumpable {
     private ExpandableView mLastVisibleBackgroundChild;
     private float mCurrentScrollVelocity;
     private int mStatusBarState;
+    private boolean mShowingStackOnLockscreen;
+    private float mLockscreenStackFadeInProgress;
     private float mExpandingVelocity;
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
@@ -622,6 +624,26 @@ public class AmbientState implements Dumpable {
 
     public boolean isOnKeyguard() {
         return mStatusBarState == StatusBarState.KEYGUARD;
+    }
+
+    public boolean isShowingStackOnLockscreen() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return false;
+        return mShowingStackOnLockscreen;
+    }
+
+    public void setShowingStackOnLockscreen(boolean showingStackOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mShowingStackOnLockscreen = showingStackOnLockscreen;
+    }
+
+    public float getLockscreenStackFadeInProgress() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mLockscreenStackFadeInProgress;
+    }
+
+    public void setLockscreenStackFadeInProgress(float lockscreenStackFadeInProgress) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mLockscreenStackFadeInProgress = lockscreenStackFadeInProgress;
     }
 
     public void setStatusBarState(int statusBarState) {

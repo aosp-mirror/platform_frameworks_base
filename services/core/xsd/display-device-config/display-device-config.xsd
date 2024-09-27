@@ -512,8 +512,6 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
-        <!-- valid value of interpolation if specified: linear -->
-        <xs:attribute name="interpolation" type="xs:string" use="optional"/>
     </xs:complexType>
 
     <xs:complexType name="brightnessPoint">

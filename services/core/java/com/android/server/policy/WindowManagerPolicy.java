@@ -754,11 +754,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param focusedToken Client window token that currently has focus. This is where the key
      *            event will normally go.
      * @param event The key event.
-     * @param policyFlags The policy flags associated with the key.
-     * @return Returns an alternate key event to redispatch as a fallback, or null to give up.
-     * The caller is responsible for recycling the key event.
+     * @return true if the unhandled key is intercepted by the policy.
      */
-    KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags);
+    boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken);
 
     /**
      * Called when the top focused display is changed.

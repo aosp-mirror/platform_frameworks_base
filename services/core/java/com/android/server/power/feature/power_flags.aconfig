@@ -18,3 +18,11 @@ flag {
     bug: "339590565"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "per_display_wake_by_touch"
+    namespace: "power"
+    description: "Feature flag to enable per-display wake by touch"
+    bug: "343295183"
+    is_fixed_read_only: true
+}

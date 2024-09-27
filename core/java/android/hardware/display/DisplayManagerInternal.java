@@ -432,6 +432,11 @@ public abstract class DisplayManagerInternal {
     public abstract IntArray getDisplayGroupIds();
 
     /**
+     * Get all available display ids.
+     */
+    public abstract IntArray getDisplayIds();
+
+    /**
      * Called upon presentation started/ended on the display.
      * @param displayId the id of the display where presentation started.
      * @param isShown whether presentation is shown.

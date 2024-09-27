@@ -62,6 +62,7 @@ import static com.android.server.notification.Flags.FLAG_ALL_NOTIFS_NEED_TTL;
 import static com.android.server.notification.Flags.FLAG_PERSIST_INCOMPLETE_RESTORE_DATA;
 import static com.android.server.notification.NotificationChannelLogger.NotificationChannelEvent.NOTIFICATION_CHANNEL_UPDATED_BY_USER;
 import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
+import static com.android.server.notification.PreferencesHelper.LockableAppFields.USER_LOCKED_PROMOTABLE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_GROUP_COUNT_LIMIT;
 import static com.android.server.notification.PreferencesHelper.UNKNOWN_UID;
@@ -643,7 +644,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         mHelper.setShowBadge(PKG_N_MR1, UID_N_MR1, true);
         if (android.app.Flags.uiRichOngoing()) {
-            mHelper.setCanBePromoted(PKG_N_MR1, UID_N_MR1, true);
+            mHelper.setCanBePromoted(PKG_N_MR1, UID_N_MR1, true, true);
         }
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_N_MR1, UID_N_MR1, false,
@@ -657,6 +658,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertTrue(mXmlHelper.canShowBadge(PKG_N_MR1, UID_N_MR1));
         if (android.app.Flags.uiRichOngoing()) {
             assertThat(mXmlHelper.canBePromoted(PKG_N_MR1, UID_N_MR1)).isTrue();
+            assertThat(mXmlHelper.getAppLockedFields(PKG_N_MR1, UID_N_MR1) & USER_LOCKED_PROMOTABLE)
+                    .isNotEqualTo(0);
         }
         assertEquals(channel1,
                 mXmlHelper.getNotificationChannel(PKG_N_MR1, UID_N_MR1, channel1.getId(), false));
@@ -6311,20 +6314,30 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testNoAppHasPermissionToPromoteByDefault() {
         mHelper.setShowBadge(PKG_P, UID_P, true);
         assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted() {
-        mHelper.setCanBePromoted(PKG_P, UID_P, true);
+        mHelper.setCanBePromoted(PKG_P, UID_P, true, true);
         assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
 
-        mHelper.setCanBePromoted(PKG_P, UID_P, false);
+        mHelper.setCanBePromoted(PKG_P, UID_P, false, true);
         assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isFalse();
         verify(mHandler, never()).requestSort();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testSetCanBePromoted_allowlistNotOverrideUser() {
+        mHelper.setCanBePromoted(PKG_P, UID_P, true, true);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
+
+        mHelper.setCanBePromoted(PKG_P, UID_P, false, false);
+        assertThat(mHelper.canBePromoted(PKG_P, UID_P)).isTrue();
     }
 }

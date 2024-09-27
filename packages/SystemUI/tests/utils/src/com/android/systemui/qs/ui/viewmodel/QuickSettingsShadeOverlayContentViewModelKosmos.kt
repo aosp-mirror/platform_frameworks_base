@@ -17,13 +17,13 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 
 val Kosmos.quickSettingsShadeOverlayContentViewModel: QuickSettingsShadeOverlayContentViewModel by
     Kosmos.Fixture {
         QuickSettingsShadeOverlayContentViewModel(
-            sceneInteractor = sceneInteractor,
+            shadeInteractor = shadeInteractor,
             shadeHeaderViewModelFactory = shadeHeaderViewModelFactory,
             quickSettingsContainerViewModel = quickSettingsContainerViewModel,
         )

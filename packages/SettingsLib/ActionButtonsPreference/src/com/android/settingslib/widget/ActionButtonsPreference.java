@@ -548,15 +548,17 @@ public class ActionButtonsPreference extends Preference {
                 if (mButton instanceof MaterialButton) {
                     ((MaterialButton) mButton).setIcon(mIcon);
                 }
+                mButton.setEnabled(mIsEnabled);
+                mActionLayout.setOnClickListener(mListener);
+                mActionLayout.setEnabled(mIsEnabled);
+                mActionLayout.setContentDescription(mText);
             } else {
                 mButton.setText(mText);
                 mButton.setCompoundDrawablesWithIntrinsicBounds(
                         null /* left */, mIcon /* top */, null /* right */, null /* bottom */);
+                mButton.setOnClickListener(mListener);
+                mButton.setEnabled(mIsEnabled);
             }
-
-            mButton.setOnClickListener(mListener);
-            mButton.setEnabled(mIsEnabled);
-
 
             if (shouldBeVisible()) {
                 mButton.setVisibility(View.VISIBLE);

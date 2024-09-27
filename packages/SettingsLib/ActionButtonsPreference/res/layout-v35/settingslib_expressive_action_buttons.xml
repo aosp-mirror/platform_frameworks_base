@@ -35,11 +35,13 @@
             style="@style/SettingsLibActionButton.Expressive"
             android:layout_width="@dimen/settingslib_expressive_space_large3"
             android:layout_height="@dimen/settingslib_expressive_space_medium5"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/text1"
             style="@style/SettingsLibActionButton.Expressive.Label"
-            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"/>
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
 
     </LinearLayout>
 
@@ -55,11 +57,13 @@
             style="@style/SettingsLibActionButton.Expressive"
             android:layout_width="@dimen/settingslib_expressive_space_large3"
             android:layout_height="@dimen/settingslib_expressive_space_medium5"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/text2"
             style="@style/SettingsLibActionButton.Expressive.Label"
-            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"/>
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
 
     </LinearLayout>
 
@@ -75,11 +79,13 @@
             style="@style/SettingsLibActionButton.Expressive"
             android:layout_width="@dimen/settingslib_expressive_space_large3"
             android:layout_height="@dimen/settingslib_expressive_space_medium5"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/text3"
             style="@style/SettingsLibActionButton.Expressive.Label"
-            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"/>
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
 
     </LinearLayout>
 
@@ -95,10 +101,12 @@
             style="@style/SettingsLibActionButton.Expressive"
             android:layout_width="@dimen/settingslib_expressive_space_large3"
             android:layout_height="@dimen/settingslib_expressive_space_medium5"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/text4"
             style="@style/SettingsLibActionButton.Expressive.Label"
-            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"/>
+            android:layout_marginTop="@dimen/settingslib_expressive_space_extrasmall3"
+            android:importantForAccessibility="no"/>
     </LinearLayout>
 </LinearLayout>
