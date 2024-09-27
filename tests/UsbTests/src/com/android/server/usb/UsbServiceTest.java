@@ -71,6 +71,10 @@ public class UsbServiceTest {
 
     private static final int TEST_SECOND_CALLER_ID = 2000;
 
+    private static final int TEST_INTERNAL_REQUESTER_REASON_1 = 100;
+
+    private static final int TEST_INTERNAL_REQUESTER_REASON_2 = 200;
+
     private UsbService mUsbService;
 
     @Rule
@@ -79,6 +83,7 @@ public class UsbServiceTest {
     @Before
     public void setUp() {
         mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_USB_DATA_SIGNAL_STAKING_INTERNAL);
         MockitoAnnotations.initMocks(this);
 
         when(mUsbPortManager.enableUsbData(eq(TEST_PORT_ID), anyBoolean(), eq(TEST_TRANSACTION_ID),
@@ -88,9 +93,10 @@ public class UsbServiceTest {
                 mUserManager, mUsbSettingsManager);
     }
 
-    private void assertToggleUsbSuccessfully(int uid, boolean enable) {
+    private void assertToggleUsbSuccessfully(int requester, boolean enable,
+        boolean isInternalRequest) {
         assertTrue(mUsbService.enableUsbDataInternal(TEST_PORT_ID, enable,
-                TEST_TRANSACTION_ID, mCallback, uid));
+                TEST_TRANSACTION_ID, mCallback, requester, isInternalRequest));
 
         verify(mUsbPortManager).enableUsbData(TEST_PORT_ID,
                 enable, TEST_TRANSACTION_ID, mCallback, null);
@@ -100,9 +106,10 @@ public class UsbServiceTest {
         clearInvocations(mCallback);
     }
 
-    private void assertToggleUsbFailed(int uid, boolean enable) throws Exception {
+    private void assertToggleUsbFailed(int requester, boolean enable,
+        boolean isInternalRequest) throws Exception {
         assertFalse(mUsbService.enableUsbDataInternal(TEST_PORT_ID, enable,
-                TEST_TRANSACTION_ID, mCallback, uid));
+                TEST_TRANSACTION_ID, mCallback, requester, isInternalRequest));
 
         verifyZeroInteractions(mUsbPortManager);
         verify(mCallback).onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
@@ -116,7 +123,7 @@ public class UsbServiceTest {
      */
     @Test
     public void disableUsb_successfullyDisable() {
-        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false, false);
     }
 
     /**
@@ -124,7 +131,7 @@ public class UsbServiceTest {
      */
     @Test
     public void enableUsbWhenNoOtherStakers_successfullyEnable() {
-        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, true);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, true, false);
     }
 
     /**
@@ -132,9 +139,9 @@ public class UsbServiceTest {
      */
     @Test
     public void enableUsbPortWithOtherStakers_failsToEnable() throws Exception {
-        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false, false);
 
-        assertToggleUsbFailed(TEST_SECOND_CALLER_ID, true);
+        assertToggleUsbFailed(TEST_SECOND_CALLER_ID, true, false);
     }
 
     /**
@@ -142,9 +149,9 @@ public class UsbServiceTest {
      */
     @Test
     public void enableUsbByTheOnlyStaker_successfullyEnable() {
-        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false, false);
 
-        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, true);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, true, false);
     }
 
     /**
@@ -153,10 +160,10 @@ public class UsbServiceTest {
     @Test
     public void enableUsbWhileDockedWhenThereAreOtherStakers_failsToEnable()
             throws RemoteException {
-        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false);
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false, false);
 
         mUsbService.enableUsbDataWhileDockedInternal(TEST_PORT_ID, TEST_TRANSACTION_ID,
-                mCallback, TEST_SECOND_CALLER_ID);
+                mCallback, TEST_SECOND_CALLER_ID, false);
 
         verifyZeroInteractions(mUsbPortManager);
         verify(mCallback).onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
@@ -169,10 +176,58 @@ public class UsbServiceTest {
     @Test
     public void enableUsbWhileDockedWhenThereAreNoStakers_SuccessfullyEnable() {
         mUsbService.enableUsbDataWhileDockedInternal(TEST_PORT_ID, TEST_TRANSACTION_ID,
-                mCallback, TEST_SECOND_CALLER_ID);
+                mCallback, TEST_SECOND_CALLER_ID, false);
 
         verify(mUsbPortManager).enableUsbDataWhileDocked(TEST_PORT_ID, TEST_TRANSACTION_ID,
                         mCallback, null);
         verifyZeroInteractions(mCallback);
+    }
+
+    /**
+     * Verify enableUsbData successfully enables USB port without error given no other stakers for internal requests
+     */
+    @Test
+    public void enableUsbWhenNoOtherStakers_forInternalRequest_successfullyEnable() {
+        assertToggleUsbSuccessfully(TEST_INTERNAL_REQUESTER_REASON_1, true, true);
+    }
+
+    /**
+     * Verify enableUsbData does not enable USB port if other internal stakers are present for internal requests
+     */
+    @Test
+    public void enableUsbPortWithOtherInternalStakers_forInternalRequest_failsToEnable() throws Exception {
+        assertToggleUsbSuccessfully(TEST_INTERNAL_REQUESTER_REASON_1, false, true);
+
+        assertToggleUsbFailed(TEST_INTERNAL_REQUESTER_REASON_2, true, true);
+    }
+
+    /**
+     * Verify enableUsbData does not enable USB port if other external stakers are present for internal requests
+     */
+    @Test
+    public void enableUsbPortWithOtherExternalStakers_forInternalRequest_failsToEnable() throws Exception {
+        assertToggleUsbSuccessfully(TEST_FIRST_CALLER_ID, false, false);
+
+        assertToggleUsbFailed(TEST_INTERNAL_REQUESTER_REASON_2, true, true);
+    }
+
+    /**
+     * Verify enableUsbData does not enable USB port if other internal stakers are present for external requests
+     */
+    @Test
+    public void enableUsbPortWithOtherInternalStakers_forExternalRequest_failsToEnable() throws Exception {
+        assertToggleUsbSuccessfully(TEST_INTERNAL_REQUESTER_REASON_1, false, true);
+
+        assertToggleUsbFailed(TEST_FIRST_CALLER_ID, true, false);
+    }
+
+    /**
+     * Verify enableUsbData successfully enables USB port when the last staker is removed for internal requests
+     */
+    @Test
+    public void enableUsbByTheOnlyStaker_forInternalRequest_successfullyEnable() {
+        assertToggleUsbSuccessfully(TEST_INTERNAL_REQUESTER_REASON_1, false, false);
+
+        assertToggleUsbSuccessfully(TEST_INTERNAL_REQUESTER_REASON_1, true, false);
     }
 }
