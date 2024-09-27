@@ -24,21 +24,51 @@ public class TinyFrameworkForTextPolicy {
 
     public int stub = 1;
 
-    public int keep = 2;
-
     // Removed fields cannot have an initial value, because otherwise .ctor will fail to set it at
     // runtime.
     public int remove;
 
     public int addOne(int value) {
-        return addOneInner(value);
-    }
-
-    public int addOneInner(int value) {
         return value + 1;
     }
 
     public void toBeRemoved(String foo) {
+        throw new RuntimeException();
+    }
+
+    public String toBeIgnoredObj() {
+        throw new RuntimeException();
+    }
+
+    public void toBeIgnoredV() {
+        throw new RuntimeException();
+    }
+
+    public boolean toBeIgnoredZ() {
+        throw new RuntimeException();
+    }
+
+    public byte toBeIgnoredB() {
+        throw new RuntimeException();
+    }
+
+    public char toBeIgnoredC() {
+        throw new RuntimeException();
+    }
+
+    public short toBeIgnoredS() {
+        throw new RuntimeException();
+    }
+
+    public int toBeIgnoredI() {
+        throw new RuntimeException();
+    }
+
+    public float toBeIgnoredF() {
+        throw new RuntimeException();
+    }
+
+    public double toBeIgnoredD() {
         throw new RuntimeException();
     }
 
@@ -58,9 +88,5 @@ public class TinyFrameworkForTextPolicy {
 
     public String unsupportedMethod() {
         return "This value shouldn't be seen on the host side.";
-    }
-
-    public String visibleButUsesUnsupportedMethod() {
-        return unsupportedMethod();
     }
 }

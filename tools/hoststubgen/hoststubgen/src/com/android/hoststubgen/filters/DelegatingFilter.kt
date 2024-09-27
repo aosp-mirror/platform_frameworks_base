@@ -72,8 +72,8 @@ abstract class DelegatingFilter(
         return fallback.getRenameTo(className, methodName, descriptor)
     }
 
-    override fun getNativeSubstitutionClass(className: String): String? {
-        return fallback.getNativeSubstitutionClass(className)
+    override fun getRedirectionClass(className: String): String? {
+        return fallback.getRedirectionClass(className)
     }
 
     override fun getClassLoadHooks(className: String): List<String> {
@@ -86,5 +86,24 @@ abstract class DelegatingFilter(
         descriptor: String
     ): List<String> {
         return fallback.getMethodCallHooks(className, methodName, descriptor)
+    }
+
+    override fun remapType(className: String): String? {
+        return fallback.remapType(className)
+    }
+
+    override fun hasAnyMethodCallReplace(): Boolean {
+        return fallback.hasAnyMethodCallReplace()
+    }
+
+    override fun getMethodCallReplaceTo(
+        callerClassName: String,
+        callerMethodName: String,
+        className: String,
+        methodName: String,
+        descriptor: String,
+    ): MethodReplaceTarget? {
+        return fallback.getMethodCallReplaceTo(
+            callerClassName, callerMethodName, className, methodName, descriptor)
     }
 }

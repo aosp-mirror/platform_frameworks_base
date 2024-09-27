@@ -15,11 +15,11 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
 import java.util.function.Supplier;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkNestedClasses {
     public final Supplier<Integer> mSupplier = new Supplier<Integer>() {
         @Override
@@ -34,6 +34,7 @@ public class TinyFrameworkNestedClasses {
             return 2;
         }
     };
+
     public Supplier<Integer> getSupplier() {
         return new Supplier<Integer>() {
             @Override
@@ -52,12 +53,10 @@ public class TinyFrameworkNestedClasses {
         };
     }
 
-    @HostSideTestWholeClassStub
     public class InnerClass {
         public int value = 5;
     }
 
-    @HostSideTestWholeClassStub
     public static class StaticNestedClass {
         public int value = 6;
 
@@ -69,6 +68,10 @@ public class TinyFrameworkNestedClasses {
                     return 7;
                 }
             };
+        }
+
+        public static class Double$NestedClass {
+            public int value = 8;
         }
     }
 

@@ -21,11 +21,13 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
-import android.ravenwood.annotation.RavenwoodNativeSubstitutionClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
 import android.util.Log;
 import android.util.MutableInt;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -56,8 +58,7 @@ import java.util.function.Predicate;
  */
 @SystemApi
 @RavenwoodKeepWholeClass
-@RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.SystemProperties_host")
+@RavenwoodRedirectionClass("SystemProperties_host")
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
@@ -75,7 +76,7 @@ public class SystemProperties {
 
     @UnsupportedAppUsage
     @GuardedBy("sChangeCallbacks")
-    private static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
+    static final ArrayList<Runnable> sChangeCallbacks = new ArrayList<Runnable>();
 
     @GuardedBy("sRoReads")
     private static final HashMap<String, MutableInt> sRoReads =
@@ -102,29 +103,17 @@ public class SystemProperties {
     }
 
     /** @hide */
+    @RavenwoodRedirect
     public static void init$ravenwood(Map<String, String> values,
             Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate) {
-        native_init$ravenwood(values, keyReadablePredicate, keyWritablePredicate,
-                SystemProperties::callChangeCallbacks);
-        synchronized (sChangeCallbacks) {
-            sChangeCallbacks.clear();
-        }
+        throw RavenwoodEnvironment.notSupportedOnDevice();
     }
 
     /** @hide */
+    @RavenwoodRedirect
     public static void reset$ravenwood() {
-        native_reset$ravenwood();
-        synchronized (sChangeCallbacks) {
-            sChangeCallbacks.clear();
-        }
+        throw RavenwoodEnvironment.notSupportedOnDevice();
     }
-
-    // These native methods are currently only implemented by Ravenwood, as it's the only
-    // mechanism we have to jump to our RavenwoodNativeSubstitutionClass
-    private static native void native_init$ravenwood(Map<String, String> values,
-            Predicate<String> keyReadablePredicate, Predicate<String> keyWritablePredicate,
-            Runnable changeCallback);
-    private static native void native_reset$ravenwood();
 
     // The one-argument version of native_get used to be a regular native function. Nowadays,
     // we use the two-argument form of native_get all the time, but we can't just delete the
@@ -137,34 +126,46 @@ public class SystemProperties {
 
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @RavenwoodRedirect
     private static native String native_get(String key, String def);
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @RavenwoodRedirect
     private static native int native_get_int(String key, int def);
     @FastNative
     @UnsupportedAppUsage
+    @RavenwoodRedirect
     private static native long native_get_long(String key, long def);
     @FastNative
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @RavenwoodRedirect
     private static native boolean native_get_boolean(String key, boolean def);
 
     @FastNative
+    @RavenwoodRedirect
     private static native long native_find(String name);
     @FastNative
+    @RavenwoodRedirect
     private static native String native_get(long handle);
     @CriticalNative
+    @RavenwoodRedirect
     private static native int native_get_int(long handle, int def);
     @CriticalNative
+    @RavenwoodRedirect
     private static native long native_get_long(long handle, long def);
     @CriticalNative
+    @RavenwoodRedirect
     private static native boolean native_get_boolean(long handle, boolean def);
 
     // _NOT_ FastNative: native_set performs IPC and can block
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @RavenwoodRedirect
     private static native void native_set(String key, String def);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @RavenwoodRedirect
     private static native void native_add_change_callback();
+    @RavenwoodRedirect
     private static native void native_report_sysprop_change();
 
     /**
@@ -300,7 +301,7 @@ public class SystemProperties {
     }
 
     @SuppressWarnings("unused")  // Called from native code.
-    private static void callChangeCallbacks() {
+    static void callChangeCallbacks() {
         ArrayList<Runnable> callbacks = null;
         synchronized (sChangeCallbacks) {
             //Log.i("foo", "Calling " + sChangeCallbacks.size() + " change callbacks!");
