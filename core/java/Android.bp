@@ -21,50 +21,12 @@ filegroup {
         "**/*.aidl",
         ":framework-nfc-non-updatable-sources",
         ":messagequeue-gen",
-        ":ranging_stack_mock_initializer",
     ],
     // Exactly one MessageQueue.java will be added to srcs by messagequeue-gen
     exclude_srcs: [
         "android/os/*MessageQueue/**/*.java",
-        "android/ranging/**/*.java",
     ],
     visibility: ["//frameworks/base"],
-}
-
-//Mock to allow service registry for ranging stack.
-//TODO(b/331206299): Remove this after RELEASE_RANGING_STACK is ramped up to next.
-soong_config_module_type {
-    name: "ranging_stack_framework_mock_init",
-    module_type: "genrule",
-    config_namespace: "bootclasspath",
-    bool_variables: [
-        "release_ranging_stack",
-    ],
-    properties: [
-        "srcs",
-        "cmd",
-        "out",
-    ],
-}
-
-// The actual RangingFrameworkInitializer is present in packages/modules/Uwb/ranging/framework.
-// Mock RangingFrameworkInitializer does nothing and allows to successfully build
-// SystemServiceRegistry after registering for system service in SystemServiceRegistry both with
-// and without build flag RELEASE_RANGING_STACK enabled.
-ranging_stack_framework_mock_init {
-    name: "ranging_stack_mock_initializer",
-    soong_config_variables: {
-        release_ranging_stack: {
-            cmd: "touch $(out)",
-            // Adding an empty file as out is mandatory.
-            out: ["android/ranging/empty_ranging_fw.txt"],
-            conditions_default: {
-                srcs: ["android/ranging/mock/RangingFrameworkInitializer.java"],
-                cmd: "mkdir -p android/ranging/; cp $(in) $(out);",
-                out: ["android/ranging/RangingFrameworkInitializer.java"],
-            },
-        },
-    },
 }
 
 // Add selected MessageQueue.java implementation to srcs
