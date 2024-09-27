@@ -61,7 +61,8 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
                 cacheUpdater, groups);
     }
 
-    private ProcessedPerfettoProtoLogImpl(
+    @VisibleForTesting
+    public ProcessedPerfettoProtoLogImpl(
             @NonNull String viewerConfigFilePath,
             @NonNull ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @NonNull Runnable cacheUpdater,
