@@ -18,20 +18,18 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
-import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
-import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.shade.ui.viewmodel.dualShadeActions
+import com.android.systemui.shade.ui.viewmodel.singleShadeActions
+import com.android.systemui.shade.ui.viewmodel.splitShadeActions
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -79,45 +77,6 @@ constructor(
                 }
             }
             .collect { setActions(it) }
-    }
-
-    private fun singleShadeActions(): Array<Pair<UserAction, UserActionResult>> {
-        return arrayOf(
-            // Swiping down, not from the edge, always goes to shade.
-            Swipe.Down to Scenes.Shade,
-            swipeDown(pointerCount = 2) to Scenes.Shade,
-            // Swiping down from the top edge goes to QS.
-            swipeDownFromTop(pointerCount = 1) to Scenes.QuickSettings,
-            swipeDownFromTop(pointerCount = 2) to Scenes.QuickSettings,
-        )
-    }
-
-    private fun splitShadeActions(): Array<Pair<UserAction, UserActionResult>> {
-        val splitShadeSceneKey = UserActionResult(Scenes.Shade, ToSplitShade)
-        return arrayOf(
-            // Swiping down, not from the edge, always goes to shade.
-            Swipe.Down to splitShadeSceneKey,
-            swipeDown(pointerCount = 2) to splitShadeSceneKey,
-            // Swiping down from the top edge goes to QS.
-            swipeDownFromTop(pointerCount = 1) to splitShadeSceneKey,
-            swipeDownFromTop(pointerCount = 2) to splitShadeSceneKey,
-        )
-    }
-
-    private fun dualShadeActions(): Array<Pair<UserAction, UserActionResult>> {
-        return arrayOf(
-            Swipe.Down to Overlays.NotificationsShade,
-            Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
-                Overlays.QuickSettingsShade,
-        )
-    }
-
-    private fun swipeDownFromTop(pointerCount: Int): Swipe {
-        return Swipe(SwipeDirection.Down, fromSource = Edge.Top, pointerCount = pointerCount)
-    }
-
-    private fun swipeDown(pointerCount: Int): Swipe {
-        return Swipe(SwipeDirection.Down, pointerCount = pointerCount)
     }
 
     @AssistedFactory
