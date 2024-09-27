@@ -69,6 +69,20 @@ class ClassFilterTest {
         assertThat(f.matches("d/e/f")).isEqualTo(false)
         assertThat(f.matches("d/e/f/g")).isEqualTo(true)
         assertThat(f.matches("x")).isEqualTo(true)
+
+        assertThat(f.matches("ab/x")).isEqualTo(true)
+    }
+
+    @Test
+    fun testNestedClass() {
+        val f = ClassFilter.buildFromString("a.b.c\nm.n.o\$p\n", false, "X")
+        assertThat(f.matches("a/b/c")).isEqualTo(true)
+        assertThat(f.matches("a/b/c\$d")).isEqualTo(true)
+        assertThat(f.matches("a/b/c\$d\$e")).isEqualTo(true)
+        assertThat(f.matches("m/n/o")).isEqualTo(false)
+        assertThat(f.matches("m/n/o\$p")).isEqualTo(true)
+        assertThat(f.matches("m/n/o\$p\$r")).isEqualTo(true)
+        assertThat(f.matches("m/n/o\$p\$r\$")).isEqualTo(true)
     }
 
     @Test
@@ -83,5 +97,19 @@ class ClassFilterTest {
             assertThat(e.message).contains("FILENAME")
             assertThat(e.message).contains("line 1")
         }
+    }
+
+    @Test
+    fun testSuffix() {
+        val f = ClassFilter.buildFromString("""
+            *.Abc       # allow
+            !*          # Disallow by default
+            """.trimIndent(), true, "X")
+        assertThat(f.matches("a/b/c")).isEqualTo(false)
+        assertThat(f.matches("a/Abc")).isEqualTo(true)
+        assertThat(f.matches("a/b/c/Abc")).isEqualTo(true)
+        assertThat(f.matches("a/b/c/Abc\$Nested")).isEqualTo(true)
+
+        assertThat(f.matches("a/XyzAbc")).isEqualTo(false)
     }
 }

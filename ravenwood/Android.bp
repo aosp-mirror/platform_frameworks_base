@@ -5,6 +5,10 @@ package {
     // to get the below license kinds:
     //   SPDX-license-identifier-Apache-2.0
     default_applicable_licenses: ["frameworks_base_license"],
+
+    // OWNER: g/ravenwood
+    // Bug component: 25698
+    default_team: "trendy_team_framework_backstage_power",
 }
 
 filegroup {
@@ -94,6 +98,9 @@ java_library {
     libs: [
         "ravenwood-runtime-common-ravenwood",
     ],
+    static_libs: [
+        "framework-annotations-lib", // should it be "libs" instead?
+    ],
     visibility: ["//visibility:private"],
 }
 
@@ -126,8 +133,9 @@ java_library {
     ],
     libs: [
         "framework-minus-apex.ravenwood",
-        "ravenwood-junit",
+        "ravenwood-helper-libcore-runtime",
     ],
+    sdk_version: "core_current",
     visibility: ["//visibility:private"],
 }
 
@@ -160,9 +168,20 @@ java_library {
         "ravenwood-framework",
         "services.core.ravenwood",
         "junit",
+        "framework-annotations-lib",
+        "ravenwood-helper-framework-runtime",
+        "ravenwood-helper-libcore-runtime",
     ],
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
+}
+
+java_device_for_host {
+    name: "ravenwood-junit-impl-for-ravenizer",
+    libs: [
+        "ravenwood-junit-impl",
+    ],
+    visibility: [":__subpackages__"],
 }
 
 // Separated out from ravenwood-junit-impl since it needs to compile
@@ -202,6 +221,7 @@ java_library {
     libs: [
         "junit",
         "flag-junit",
+        "framework-annotations-lib",
     ],
     visibility: ["//visibility:public"],
 }
@@ -247,25 +267,39 @@ filegroup {
     visibility: ["//frameworks/base"],
 }
 
-cc_library_shared {
-    name: "libravenwood_runtime",
-    host_supported: true,
-
+cc_defaults {
+    name: "ravenwood_jni_defaults",
     cflags: [
         "-Wall",
         "-Werror",
         "-Wno-unused-parameter",
         "-Wthread-safety",
     ],
-
-    srcs: [
-        "runtime-jni/*.cpp",
+    static_libs: [
+        "libnativehelper_jvm",
     ],
+    shared_libs: [
+        "liblog",
+    ],
+}
 
+// We need this as a separate library because we need to overload the
+// sysprop symbols before libbase is loaded into the process
+cc_library_host_shared {
+    name: "libravenwood_sysprop",
+    defaults: ["ravenwood_jni_defaults"],
+    srcs: ["runtime-jni/ravenwood_sysprop.cpp"],
+}
+
+cc_library_host_shared {
+    name: "libravenwood_runtime",
+    defaults: ["ravenwood_jni_defaults"],
+    srcs: [
+        "runtime-jni/ravenwood_runtime.cpp",
+        "runtime-jni/ravenwood_os_constants.cpp",
+    ],
     shared_libs: [
         "libbase",
-        "liblog",
-        "libnativehelper",
         "libutils",
         "libcutils",
     ],
@@ -279,10 +313,10 @@ sh_test_host {
     src: "scripts/ravenwood-stats-checker.sh",
     test_suites: ["general-tests"],
     data: [
-        ":hoststubgen_framework-minus-apex_stats.csv",
-        ":hoststubgen_framework-minus-apex_apis.csv",
-        ":hoststubgen_framework-minus-apex_keep_all.txt",
-        ":hoststubgen_framework-minus-apex_dump.txt",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_stats.csv}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_apis.csv}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_keep_all.txt}",
+        ":framework-minus-apex.ravenwood-base_all{hoststubgen_framework-minus-apex_dump.txt}",
         ":services.core.ravenwood-base{hoststubgen_services.core_stats.csv}",
         ":services.core.ravenwood-base{hoststubgen_services.core_apis.csv}",
         ":services.core.ravenwood-base{hoststubgen_services.core_keep_all.txt}",
@@ -357,8 +391,10 @@ android_ravenwood_libgroup {
         "z00-all-updatable-modules-system-stubs",
     ],
     jni_libs: [
-        "libandroid_runtime",
+        // Libraries has to be loaded in the following order
+        "libravenwood_sysprop",
         "libravenwood_runtime",
+        "libandroid_runtime",
     ],
 }
 
