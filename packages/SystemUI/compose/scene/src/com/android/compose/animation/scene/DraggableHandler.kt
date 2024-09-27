@@ -188,7 +188,7 @@ internal class DraggableHandlerImpl(
         return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
     }
 
-    private fun resolveSwipeSource(startedPosition: Offset?): SwipeSource.Resolved? {
+    internal fun resolveSwipeSource(startedPosition: Offset?): SwipeSource.Resolved? {
         if (startedPosition == null) return null
         return layoutImpl.swipeSourceDetector.source(
             layoutSize = layoutImpl.lastSize,
@@ -198,7 +198,7 @@ internal class DraggableHandlerImpl(
         )
     }
 
-    private fun resolveSwipe(
+    internal fun resolveSwipe(
         pointersDown: Int,
         fromSource: SwipeSource.Resolved?,
         isUpOrLeft: Boolean,
@@ -558,6 +558,14 @@ internal class NestedScrollHandlerImpl(
 
     val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
+    private fun PointersInfo.resolveSwipe(isUpOrLeft: Boolean): Swipe.Resolved {
+        return draggableHandler.resolveSwipe(
+            pointersDown = pointersDown,
+            fromSource = draggableHandler.resolveSwipeSource(startedPosition),
+            isUpOrLeft = isUpOrLeft,
+        )
+    }
+
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
         // If we performed a long gesture before entering priority mode, we would have to avoid
         // moving on to the next scene.
@@ -574,35 +582,18 @@ internal class NestedScrollHandlerImpl(
             val transitionState = layoutState.transitionState
             val scene = transitionState.currentScene
             val fromScene = layoutImpl.scene(scene)
-            val nextScene =
+            val resolvedSwipe =
                 when {
-                    amount < 0f -> {
-                        val actionUpOrLeft =
-                            Swipe.Resolved(
-                                direction =
-                                    when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Resolved.Left
-                                        Orientation.Vertical -> SwipeDirection.Resolved.Up
-                                    },
-                                pointerCount = pointersInfo().pointersDown,
-                                fromSource = null,
-                            )
-                        fromScene.userActions[actionUpOrLeft]
-                    }
-                    amount > 0f -> {
-                        val actionDownOrRight =
-                            Swipe.Resolved(
-                                direction =
-                                    when (orientation) {
-                                        Orientation.Horizontal -> SwipeDirection.Resolved.Right
-                                        Orientation.Vertical -> SwipeDirection.Resolved.Down
-                                    },
-                                pointerCount = pointersInfo().pointersDown,
-                                fromSource = null,
-                            )
-                        fromScene.userActions[actionDownOrRight]
-                    }
+                    amount < 0f -> pointersInfo().resolveSwipe(isUpOrLeft = true)
+                    amount > 0f -> pointersInfo().resolveSwipe(isUpOrLeft = false)
                     else -> null
+                }
+            val nextScene =
+                resolvedSwipe?.let {
+                    fromScene.userActions[it]
+                        ?: if (it.fromSource != null) {
+                            fromScene.userActions[it.copy(fromSource = null)]
+                        } else null
                 }
             if (nextScene != null) return true
 

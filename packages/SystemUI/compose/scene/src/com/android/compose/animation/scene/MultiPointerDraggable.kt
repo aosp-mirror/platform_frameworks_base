@@ -213,8 +213,9 @@ internal class MultiPointerDraggableNode(
 
     internal fun pointersInfo(): PointersInfo {
         return PointersInfo(
+            // This may be null, i.e. when the user uses TalkBack
             startedPosition = startedPosition,
-            // Note: We could have 0 pointers during fling or for other reasons.
+            // We could have 0 pointers during fling or for other reasons.
             pointersDown = pointersDown.coerceAtLeast(1),
         )
     }
