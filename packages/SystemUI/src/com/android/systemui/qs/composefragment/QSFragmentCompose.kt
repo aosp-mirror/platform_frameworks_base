@@ -332,7 +332,7 @@ constructor(
     }
 
     override fun setOverscrolling(overscrolling: Boolean) {
-        viewModel.stackScrollerOverscrollingValue = overscrolling
+        viewModel.isStackScrollerOverscrolling = overscrolling
     }
 
     override fun setExpanded(qsExpanded: Boolean) {
@@ -411,7 +411,7 @@ constructor(
         qsTransitionFraction: Float,
         qsSquishinessFraction: Float,
     ) {
-        viewModel.transitioningToFullShadeValue = isTransitioningToFullShade
+        viewModel.isTransitioningToFullShade = isTransitioningToFullShade
         viewModel.lockscreenToShadeProgressValue = qsTransitionFraction
         if (isTransitioningToFullShade) {
             viewModel.squishinessFractionValue = qsSquishinessFraction

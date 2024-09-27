@@ -17,9 +17,9 @@
 package com.android.systemui.qs.panels.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
 @SysUISingleton
 class TileSquishinessRepository @Inject constructor() {

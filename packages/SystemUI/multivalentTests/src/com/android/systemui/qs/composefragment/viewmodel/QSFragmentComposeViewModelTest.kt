@@ -19,15 +19,10 @@ package com.android.systemui.qs.composefragment.viewmodel
 import android.app.StatusBarManager
 import android.content.testableContext
 import android.testing.TestableLooper.RunWithLooper
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.qs.fgsManagerController
 import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
@@ -37,48 +32,15 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.fakeDisableFlagsRepository
 import com.android.systemui.statusbar.sysuiStatusBarStateController
-import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.TestResult
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
-@OptIn(ExperimentalCoroutinesApi::class)
-class QSFragmentComposeViewModelTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
-
-    private val lifecycleOwner =
-        TestLifecycleOwner(
-            initialState = Lifecycle.State.CREATED,
-            coroutineDispatcher = kosmos.testDispatcher,
-        )
-
-    private val underTest by lazy {
-        kosmos.qsFragmentComposeViewModelFactory.create(lifecycleOwner.lifecycleScope)
-    }
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(kosmos.testDispatcher)
-    }
-
-    @After
-    fun teardown() {
-        Dispatchers.resetMain()
-    }
+class QSFragmentComposeViewModelTest : AbstractQSFragmentComposeViewModelTest() {
 
     @Test
     fun qsExpansionValueChanges_correctExpansionState() =
@@ -223,16 +185,6 @@ class QSFragmentComposeViewModelTest : SysuiTestCase() {
                 assertThat(squishiness).isWithin(epsilon).of(1f.constrainSquishiness())
             }
         }
-
-    private inline fun TestScope.testWithinLifecycle(
-        crossinline block: suspend TestScope.() -> TestResult
-    ): TestResult {
-        return runTest {
-            lifecycleOwner.setCurrentState(Lifecycle.State.RESUMED)
-            lifecycleOwner.lifecycleScope.launch { underTest.activate() }
-            block().also { lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED) }
-        }
-    }
 
     companion object {
         private const val QS_DISABLE_FLAG = StatusBarManager.DISABLE2_QUICK_SETTINGS

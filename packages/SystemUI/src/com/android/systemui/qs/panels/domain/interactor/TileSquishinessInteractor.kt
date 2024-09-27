@@ -23,9 +23,7 @@ import javax.inject.Inject
 @SysUISingleton
 class TileSquishinessInteractor
 @Inject
-constructor(
-    private val repository: TileSquishinessRepository
-) {
+constructor(private val repository: TileSquishinessRepository) {
     val squishiness = repository.squishiness
 
     fun setSquishinessValue(value: Float) {

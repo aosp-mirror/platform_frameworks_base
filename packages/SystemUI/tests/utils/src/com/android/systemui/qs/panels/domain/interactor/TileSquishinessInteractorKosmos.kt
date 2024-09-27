@@ -19,6 +19,5 @@ package com.android.systemui.qs.panels.domain.interactor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.data.repository.tileSquishinessRepository
 
-val Kosmos.tileSquishinessInteractor by Kosmos.Fixture {
-    TileSquishinessInteractor(tileSquishinessRepository)
-}
+val Kosmos.tileSquishinessInteractor by
+    Kosmos.Fixture { TileSquishinessInteractor(tileSquishinessRepository) }
