@@ -93,8 +93,7 @@ public class Utils {
                     os.write(TAG, tag);
                     break;
                 default:
-                    throw new RuntimeException(
-                            "Unexpected field id " + pis.getFieldNumber());
+                    Log.e(LOG_TAG, "Unexpected field id " + pis.getFieldNumber());
             }
         }
 
@@ -126,8 +125,7 @@ public class Utils {
                     os.write(LOCATION, pis.readString(LOCATION));
                     break;
                 default:
-                    throw new RuntimeException(
-                            "Unexpected field id " + pis.getFieldNumber());
+                    Log.e(LOG_TAG, "Unexpected field id " + pis.getFieldNumber());
             }
         }
 
