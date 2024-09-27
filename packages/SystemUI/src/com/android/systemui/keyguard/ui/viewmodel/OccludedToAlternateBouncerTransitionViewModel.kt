@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,34 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_ALTERNATE_BOUNCER_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
-import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
-import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Breaks down OCCLUDED->ALTERNATE_BOUNCER transition into discrete steps for corresponding views to
+ * consume.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
-class OffToLockscreenTransitionViewModel
+class OccludedToAlternateBouncerTransitionViewModel
 @Inject
 constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
-
-    private val startTime = 300.milliseconds
-    private val alphaDuration = 633.milliseconds
-    val alphaStartAt = startTime / (alphaDuration + startTime)
-
     private val transitionAnimation =
         animationFlow.setup(
-            duration = startTime + alphaDuration,
-            edge = Edge.create(from = OFF, to = LOCKSCREEN),
+            duration = TO_ALTERNATE_BOUNCER_DURATION,
+            edge = Edge.create(from = OCCLUDED, to = ALTERNATE_BOUNCER),
         )
 
-    val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
-            startTime = startTime,
-            duration = alphaDuration,
-            interpolator = EMPHASIZED_ACCELERATE,
-            onStep = { it },
-        )
+    val lockscreenAlpha: Flow<Float> = transitionAnimation.immediatelyTransitionTo(0f)
 
-    val shortcutsAlpha: Flow<Float> = lockscreenAlpha
-
-    override val deviceEntryParentViewAlpha: Flow<Float> = lockscreenAlpha
-
-    val deviceEntryBackgroundViewAlpha: Flow<Float> = lockscreenAlpha
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(0f)
 }

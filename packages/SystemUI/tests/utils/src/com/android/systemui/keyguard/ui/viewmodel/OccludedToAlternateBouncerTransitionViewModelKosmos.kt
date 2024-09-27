@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.os.fakeExecutorHandler
-import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.keyguardBlueprintViewModel by
-    Kosmos.Fixture {
-        KeyguardBlueprintViewModel(
-            fakeExecutorHandler,
-            keyguardBlueprintInteractor,
-            keyguardTransitionInteractor,
-        )
-    }
+val Kosmos.occludedToAlternateBouncerTransitionViewModel by Fixture {
+    OccludedToAlternateBouncerTransitionViewModel(animationFlow = keyguardTransitionAnimationFlow)
+}

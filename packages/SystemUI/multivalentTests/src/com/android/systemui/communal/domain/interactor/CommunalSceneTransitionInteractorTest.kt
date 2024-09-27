@@ -109,7 +109,9 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         underTest.start()
         kosmos.communalSceneRepository.setTransitionState(sceneTransitions)
-        testScope.launch { keyguardTransitionRepository.emitInitialStepsFromOff(LOCKSCREEN) }
+        testScope.launch {
+            keyguardTransitionRepository.emitInitialStepsFromOff(LOCKSCREEN, testSetup = true)
+        }
     }
 
     /** Transition from blank to glanceable hub. This is the default case. */

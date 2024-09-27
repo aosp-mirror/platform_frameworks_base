@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.os.fakeExecutorHandler
-import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteractor
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.keyguardBlueprintViewModel by
-    Kosmos.Fixture {
-        KeyguardBlueprintViewModel(
-            fakeExecutorHandler,
-            keyguardBlueprintInteractor,
-            keyguardTransitionInteractor,
-        )
-    }
+val Kosmos.offToLockscreenTransitionViewModel by Fixture {
+    OffToLockscreenTransitionViewModel(animationFlow = keyguardTransitionAnimationFlow)
+}
