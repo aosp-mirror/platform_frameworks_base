@@ -1113,6 +1113,12 @@ public final class SatelliteManager {
      * @hide
      */
     public static final int DATAGRAM_TYPE_SMS = 6;
+    /**
+     * Datagram type indicating that the message to be sent is an SMS checking
+     * for pending incoming SMS.
+     * @hide
+     */
+    public static final int DATAGRAM_TYPE_CHECK_PENDING_INCOMING_SMS = 7;
 
     /** @hide */
     @IntDef(prefix = "DATAGRAM_TYPE_", value = {
@@ -1122,7 +1128,8 @@ public final class SatelliteManager {
             DATAGRAM_TYPE_KEEP_ALIVE,
             DATAGRAM_TYPE_LAST_SOS_MESSAGE_STILL_NEED_HELP,
             DATAGRAM_TYPE_LAST_SOS_MESSAGE_NO_HELP_NEEDED,
-            DATAGRAM_TYPE_SMS
+            DATAGRAM_TYPE_SMS,
+            DATAGRAM_TYPE_CHECK_PENDING_INCOMING_SMS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatagramType {}
