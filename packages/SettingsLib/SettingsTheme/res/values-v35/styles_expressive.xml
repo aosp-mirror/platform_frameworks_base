@@ -193,4 +193,15 @@
         <item name="android:layout_gravity">center</item>
         <item name="trackTint">@color/settingslib_expressive_color_main_switch_track</item>
     </style>
+
+    <style name="SettingsLibCardStyle" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginHorizontal">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:layout_marginVertical">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="cardBackgroundColor">@color/settingslib_materialColorPrimary</item>
+        <item name="cardCornerRadius">@dimen/settingslib_expressive_radius_extralarge3</item>
+        <item name="cardElevation">0dp</item>
+        <item name="rippleColor">?android:attr/colorControlHighlight</item>
+    </style>
 </resources>
