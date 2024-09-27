@@ -1348,6 +1348,32 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  fun moveTaskToFront_backgroundTask_launchesTask() {
+    val task = createTaskInfo(1)
+    whenever(shellTaskOrganizer.getRunningTaskInfo(anyInt())).thenReturn(null)
+
+    controller.moveTaskToFront(task.taskId)
+
+    val wct = getLatestWct(type = TRANSIT_OPEN)
+    assertThat(wct.hierarchyOps).hasSize(1)
+    wct.assertLaunchTaskAt(0, task.taskId, WINDOWING_MODE_FREEFORM)
+  }
+
+  @Test
+  fun moveTaskToFront_backgroundTaskBringsTasksOverLimit_minimizesBackTask() {
+    val freeformTasks = (1..MAX_TASK_LIMIT).map { _ -> setUpFreeformTask() }
+    val task = createTaskInfo(1001)
+    whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(null)
+
+    controller.moveTaskToFront(task.taskId)
+
+    val wct = getLatestWct(type = TRANSIT_OPEN)
+    assertThat(wct.hierarchyOps.size).isEqualTo(2) // launch + minimize
+    wct.assertReorderAt(0, freeformTasks[0], toTop = false)
+    wct.assertLaunchTaskAt(1, task.taskId, WINDOWING_MODE_FREEFORM)
+  }
+
+  @Test
   fun moveToNextDisplay_noOtherDisplays() {
     whenever(rootTaskDisplayAreaOrganizer.displayIds).thenReturn(intArrayOf(DEFAULT_DISPLAY))
     val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)

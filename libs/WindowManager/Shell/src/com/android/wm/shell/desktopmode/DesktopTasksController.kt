@@ -543,7 +543,29 @@ class DesktopTasksController(
 
     /** Move a task to the front */
     fun moveTaskToFront(taskId: Int) {
-        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveTaskToFront(task) }
+        val task = shellTaskOrganizer.getRunningTaskInfo(taskId)
+        if (task == null) moveBackgroundTaskToFront(taskId) else moveTaskToFront(task)
+    }
+
+    /**
+     * Launch a background task in desktop. Note that this should be used when we are already in
+     * desktop. If outside of desktop and want to launch a background task in desktop, use
+     * [moveBackgroundTaskToDesktop] instead.
+     */
+    private fun moveBackgroundTaskToFront(taskId: Int) {
+        logV("moveBackgroundTaskToFront taskId=%s", taskId)
+        val wct = WindowContainerTransaction()
+        // TODO: b/342378842 - Instead of using default display, support multiple displays
+        val taskToMinimize: RunningTaskInfo? =
+            addAndGetMinimizeChangesIfNeeded(DEFAULT_DISPLAY, wct, taskId)
+        wct.startTask(
+            taskId,
+            ActivityOptions.makeBasic().apply {
+                launchWindowingMode = WINDOWING_MODE_FREEFORM
+            }.toBundle(),
+        )
+        val transition = transitions.startTransition(TRANSIT_OPEN, wct, null /* handler */)
+        addPendingMinimizeTransition(transition, taskToMinimize)
     }
 
     /** Move a task to the front */
@@ -551,7 +573,8 @@ class DesktopTasksController(
         logV("moveTaskToFront taskId=%s", taskInfo.taskId)
         val wct = WindowContainerTransaction()
         wct.reorder(taskInfo.token, true)
-        val taskToMinimize = addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo)
+        val taskToMinimize =
+            addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo.taskId)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             val transition = transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
             addPendingMinimizeTransition(transition, taskToMinimize)
@@ -1247,7 +1270,7 @@ class DesktopTasksController(
         }
         // Desktop Mode is showing and we're launching a new Task - we might need to minimize
         // a Task.
-        val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
+        val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task.taskId)
         if (taskToMinimize != null) {
             addPendingMinimizeTransition(transition, taskToMinimize)
             return wct
@@ -1273,7 +1296,8 @@ class DesktopTasksController(
 
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
-                val taskToMinimize = addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task)
+                val taskToMinimize =
+                    addAndGetMinimizeChangesIfNeeded(task.displayId, wct, task.taskId)
                 addPendingMinimizeTransition(transition, taskToMinimize)
             }
         }
@@ -1415,12 +1439,12 @@ class DesktopTasksController(
     private fun addAndGetMinimizeChangesIfNeeded(
         displayId: Int,
         wct: WindowContainerTransaction,
-        newTaskInfo: RunningTaskInfo
+        newTaskId: Int
     ): RunningTaskInfo? {
         if (!desktopTasksLimiter.isPresent) return null
         return desktopTasksLimiter
             .get()
-            .addAndGetMinimizeTaskChangesIfNeeded(displayId, wct, newTaskInfo)
+            .addAndGetMinimizeTaskChangesIfNeeded(displayId, wct, newTaskId)
     }
 
     private fun addPendingMinimizeTransition(
