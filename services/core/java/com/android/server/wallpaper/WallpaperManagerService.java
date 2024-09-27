@@ -3316,6 +3316,21 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return false;
     }
 
+    /*
+     * Attempt to bind the wallpaper given by `componentName`, returning true on success otherwise
+     * false.
+     *
+     * When called, `wallpaper` is in a deliberately inconsistent state. Most fields have been
+     * updated to describe the desired wallpaper, but the ComponentName is not updated until
+     * binding is successful. This is required for maybeDetachWallpapers() to work correctly.
+     *
+     * The late update of the component field should cause multi-threading headaches with
+     * WallpaperConnection#onServiceConnected, but doesn't because onServiceConnected required
+     * `mLock` and `bindWallpaperComponentLocked` is always called with that lock, which prevents a
+     * race condition.
+     *
+     * This is a major motivation for making WallpaperData immutable per b/267170056.
+     */
     boolean bindWallpaperComponentLocked(ComponentName componentName, boolean force,
             boolean fromUser, WallpaperData wallpaper, IRemoteCallback reply) {
         if (DEBUG_LIVE) {
