@@ -76,6 +76,9 @@ public final class ExecuteAppFunctionResponse {
     /** The operation was timed out. */
     public static final int RESULT_TIMED_OUT = 5;
 
+    /** The caller tried to execute a disabled app function. */
+    public static final int RESULT_DISABLED = 6;
+
     /** The result code of the app function execution. */
     @ResultCode private final int mResultCode;
 
@@ -234,6 +237,7 @@ public final class ExecuteAppFunctionResponse {
                     RESULT_INTERNAL_ERROR,
                     RESULT_INVALID_ARGUMENT,
                     RESULT_TIMED_OUT,
+                    RESULT_DISABLED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}
