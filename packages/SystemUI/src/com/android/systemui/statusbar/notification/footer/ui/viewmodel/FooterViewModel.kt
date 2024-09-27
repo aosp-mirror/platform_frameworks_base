@@ -16,12 +16,17 @@
 
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
+import android.content.Intent
+import android.provider.Settings
+import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
+import com.android.systemui.statusbar.notification.NotificationActivityStarter.SettingsIntent
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.util.kotlin.sample
@@ -80,7 +85,7 @@ class FooterViewModel(
                         combine(
                                 shadeInteractor.isShadeFullyExpanded,
                                 shadeInteractor.isShadeTouchable,
-                                ::Pair
+                                ::Pair,
                             )
                             .onStart { emit(Pair(false, false)) }
                     ) { clearAllButtonVisible, (isShadeFullyExpanded, animationsEnabled) ->
@@ -93,8 +98,28 @@ class FooterViewModel(
     val manageButtonShouldLaunchHistory =
         notificationSettingsInteractor.isNotificationHistoryEnabled
 
+    // TODO(b/366003631): When inlining the flag, consider adding this to FooterButtonViewModel.
+    val manageOrHistoryButtonClick: Flow<SettingsIntent> by lazy {
+        if (ModesEmptyShadeFix.isUnexpectedlyInLegacyMode()) {
+            flowOf(SettingsIntent(Intent(Settings.ACTION_NOTIFICATION_SETTINGS)))
+        } else {
+            notificationSettingsInteractor.isNotificationHistoryEnabled.map {
+                isNotificationHistoryEnabled ->
+                if (isNotificationHistoryEnabled) {
+                    SettingsIntent.forNotificationHistory(
+                        cujType = InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
+                    )
+                } else {
+                    SettingsIntent.forNotificationSettings(
+                        cujType = InteractionJankMonitor.CUJ_SHADE_APP_LAUNCH_FROM_HISTORY_BUTTON
+                    )
+                }
+            }
+        }
+    }
+
     private val manageOrHistoryButtonText: Flow<Int> =
-        manageButtonShouldLaunchHistory.map { shouldLaunchHistory ->
+        notificationSettingsInteractor.isNotificationHistoryEnabled.map { shouldLaunchHistory ->
             if (shouldLaunchHistory) R.string.manage_notifications_history_text
             else R.string.manage_notifications_text
         }
@@ -128,7 +153,7 @@ object FooterViewModelModule {
                     activeNotificationsInteractor.get(),
                     notificationSettingsInteractor.get(),
                     seenNotificationsInteractor.get(),
-                    shadeInteractor.get()
+                    shadeInteractor.get(),
                 )
             )
         } else {
