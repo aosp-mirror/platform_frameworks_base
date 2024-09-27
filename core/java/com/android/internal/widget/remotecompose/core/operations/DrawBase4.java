@@ -17,9 +17,7 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.operations.Utils.floatToString;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
-import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
@@ -32,14 +30,6 @@ import java.util.List;
  */
 public abstract class DrawBase4 extends PaintOperation
         implements VariableSupport {
-    public static final Companion COMPANION =
-            new Companion(Operations.DRAW_RECT) {
-                @Override
-                public Operation construct(float x1, float y1, float x2, float y2) {
-                    //   return new DrawRectBase(x1, y1, x2, y2);
-                    return null;
-                }
-            };
     protected String mName = "DrawRectBase";
     protected float mX1;
     protected float mY1;
@@ -96,7 +86,20 @@ public abstract class DrawBase4 extends PaintOperation
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mX1, mY1, mX2, mY2);
+        write(buffer, mX1, mY1, mX2, mY2);
+    }
+
+    protected abstract void write(WireBuffer buffer,
+                                  float v1,
+                                  float v2,
+                                  float v3,
+                                  float v4);
+
+    protected interface Maker {
+        DrawBase4 create(float v1,
+                         float v2,
+                         float v3,
+                         float v4);
     }
 
     @Override
@@ -105,67 +108,54 @@ public abstract class DrawBase4 extends PaintOperation
                 + " " + floatToString(mX2Value, mX2) + " " + floatToString(mY2Value, mY2);
     }
 
-    public static class Companion implements CompanionOperation {
-        public final int OP_CODE;
+    public static void read(Maker maker, WireBuffer buffer, List<Operation> operations) {
+        float v1 = buffer.readFloat();
+        float v2 = buffer.readFloat();
+        float v3 = buffer.readFloat();
+        float v4 = buffer.readFloat();
 
-        protected Companion(int code) {
-            OP_CODE = code;
-        }
+        Operation op = maker.create(v1, v2, v3, v4);
+        operations.add(op);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            float sLeft = buffer.readFloat();
-            float srcTop = buffer.readFloat();
-            float srcRight = buffer.readFloat();
-            float srcBottom = buffer.readFloat();
+    /**
+     * Construct and Operation from the 3 variables.
+     *
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return
+     */
+    public Operation construct(float x1,
+                               float y1,
+                               float x2,
+                               float y2) {
+        return null;
+    }
 
-            Operation op = construct(sLeft, srcTop, srcRight, srcBottom);
-            operations.add(op);
-        }
 
-        /**
-         * Construct and Operation from the 3 variables.
-         * @param x1
-         * @param y1
-         * @param x2
-         * @param y2
-         * @return
-         */
-        public Operation construct(float x1,
-                                   float y1,
-                                   float x2,
-                                   float y2) {
-            return null;
-        }
-
-        @Override
-        public String name() {
-            return "DrawRect";
-        }
-
-        @Override
-        public int id() {
-            return OP_CODE;
-        }
-
-        /**
-         * Writes out the operation to the buffer
-         * @param buffer
-         * @param x1
-         * @param y1
-         * @param x2
-         * @param y2
-         */
-        public void apply(WireBuffer buffer,
-                          float x1,
-                          float y1,
-                          float x2,
-                          float y2) {
-            buffer.start(OP_CODE);
-            buffer.writeFloat(x1);
-            buffer.writeFloat(y1);
-            buffer.writeFloat(x2);
-            buffer.writeFloat(y2);
-        }
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer
+     * @param opCode
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     */
+    protected static void write(WireBuffer buffer,
+                                int opCode,
+                                float x1,
+                                float y1,
+                                float x2,
+                                float y2) {
+        buffer.start(opCode);
+        buffer.writeFloat(x1);
+        buffer.writeFloat(y1);
+        buffer.writeFloat(x2);
+        buffer.writeFloat(y2);
     }
 }
+
