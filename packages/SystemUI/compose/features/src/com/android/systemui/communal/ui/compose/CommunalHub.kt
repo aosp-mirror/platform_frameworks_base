@@ -310,6 +310,9 @@ fun CommunalHub(
                                         it.changedToUp() || it.changedToUpIgnoreConsumed()
                                     }
                                 )
+
+                                // Reset state once touch ends.
+                                viewModel.onResetTouchState()
                             }
                         }
                     }
