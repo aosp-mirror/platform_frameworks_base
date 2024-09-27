@@ -59,6 +59,43 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
+    <style name="HorizontalProgressBar"
+        parent="@android:style/Widget.Material.ProgressBar.Horizontal">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
+        <item name="android:progress">100</item>
+        <item name="android:indeterminate">true</item>
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressTint">@color/border</item>
+        <item name="android:indeterminateDrawable">@drawable/indeterminate_progress_drawable</item>
+    </style>
+
+    <style name="DeviceListBorder">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
+        <item name="android:background">@color/border</item>
+    </style>
+
+    <style name="TimeoutMessage"
+           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">32dp</item>
+        <item name="android:layout_marginEnd">32dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingTop">18dp</item>
+        <item name="android:paddingBottom">18dp</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+    </style>
+
     <style name="VendorHelperBackButton"
            parent="@android:style/Widget.Material.Button.Borderless.Colored">
         <item name="android:layout_width">wrap_content</item>
@@ -109,22 +146,6 @@
         <item name="android:textSize">14sp</item>
         <item name="android:background">@drawable/btn_negative_multiple_devices</item>
         <item name="android:textAppearance">@android:style/TextAppearance.DeviceDefault.Medium</item>
-    </style>
-
-    <style name="DeviceListBorder">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">1dp</item>
-        <item name="android:layout_marginStart">32dp</item>
-        <item name="android:layout_marginEnd">32dp</item>
-        <item name="android:background">@android:color/system_neutral1_200</item>
-    </style>
-
-    <style name="Spinner"
-           parent="@android:style/Widget.Material.Light.ProgressBar.Large">
-        <item name="android:layout_width">56dp</item>
-        <item name="android:layout_height">56dp</item>
-        <item name="android:indeterminate">true</item>
-        <item name="android:layout_centerInParent">true</item>
     </style>
 
     <style name="ScrollViewStyle">
