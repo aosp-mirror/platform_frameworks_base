@@ -31,6 +31,7 @@ public class UnprocessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
     public UnprocessedPerfettoProtoLogImpl(@NonNull Runnable cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         super(cacheUpdater, groups);
+        readyToLogToLogcat();
     }
 
     @NonNull

@@ -113,6 +113,9 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     protected ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
+    // Set to true once this is ready to accept protolog to logcat requests.
+    private boolean mLogcatReady = false;
+
     protected PerfettoProtoLogImpl(
             @NonNull Runnable cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
@@ -288,6 +291,10 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
         }
     }
 
+    protected void readyToLogToLogcat() {
+        mLogcatReady = true;
+    }
+
     /**
      * Responds to a shell command.
      */
@@ -391,6 +398,13 @@ public abstract class PerfettoProtoLogImpl extends IProtoLogClient.Stub implemen
 
     private void logToLogcat(@NonNull String tag, @NonNull LogLevel level, @NonNull Message message,
             @Nullable Object[] args) {
+        if (!mLogcatReady) {
+            Log.w(LOG_TAG, "Trying to log a protolog message with hash "
+                    + message.getMessageHash() + " to logcat before the service is ready to accept "
+                    + "such requests.");
+            return;
+        }
+
         String messageString = getLogcatMessageString(message);
         logToLogcat(tag, level, messageString, args);
     }
