@@ -15,12 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
@@ -29,44 +28,41 @@ import java.util.List;
  */
 public class LayoutComponentContent extends Component implements ComponentStartOperation {
 
+    public static final LayoutComponentContent.Companion COMPANION =
+            new LayoutComponentContent.Companion();
+
     public LayoutComponentContent(int componentId, float x, float y,
                                   float width, float height, Component parent, int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
-    public static String name() {
-        return "LayoutContent";
-    }
+    public static class Companion implements DocumentedCompanionOperation {
+        @Override
+        public String name() {
+            return "LayoutContent";
+        }
 
-    public static int id() {
-        return Operations.LAYOUT_CONTENT;
-    }
+        @Override
+        public int id() {
+            return Operations.LAYOUT_CONTENT;
+        }
 
-    @Override protected String getSerializedName() {
-        return "CONTENT";
-    }
+        public void apply(WireBuffer buffer) {
+            buffer.start(Operations.LAYOUT_CONTENT);
+        }
 
-    public static void apply(WireBuffer buffer, int componentId) {
-        buffer.start(Operations.LAYOUT_CONTENT);
-        buffer.writeInt(componentId);
-    }
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            operations.add(new LayoutComponentContent(
+                    -1, 0, 0, 0, 0, null, -1));
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int componentId = buffer.readInt();
-        operations.add(new LayoutComponentContent(
-                componentId, 0, 0, 0, 0, null, -1));
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Layout Operations", id(), name())
-                .field(INT, "COMPONENT_ID", "unique id for this component")
-                .description("Container for components. BoxLayout, RowLayout and ColumnLayout "
-                        + "expects a LayoutComponentContent as a child, encapsulating the "
-                        + "components that needs to be laid out.");
-    }
-
-    @Override
-    public void write(WireBuffer buffer) {
-        apply(buffer, mComponentId);
+        @Override
+        public void documentation(DocumentationBuilder doc) {
+            doc.operation("Layout Operations", id(), name())
+                    .description("Container for components. BoxLayout, RowLayout and ColumnLayout "
+                           + "expects a LayoutComponentContent as a child, encapsulating the "
+                           + "components that needs to be laid out.");
+        }
     }
 }

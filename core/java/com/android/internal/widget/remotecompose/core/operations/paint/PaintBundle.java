@@ -714,7 +714,7 @@ public class PaintBundle {
      * @param a alpha (0.0 to 1.0)
      */
     public void setColor(float r, float g, float b, float a) {
-        setColor((int) (r * 255), (int) (g * 255), (int) (b * 255), (int) (a * 255));
+        setColor((int) r * 255, (int) g * 255, (int) b * 255, (int) a * 255);
     }
 
     /**

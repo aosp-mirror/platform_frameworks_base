@@ -15,14 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -32,8 +30,7 @@ import java.util.List;
  * TODO allow id 0 to mean null?
  */
 public class ClipPath extends PaintOperation {
-    private static final int OP_CODE = Operations.CLIP_PATH;
-    private static final String CLASS_NAME = "ClipPath";
+    public static final Companion COMPANION = new Companion();
     int mId;
     int mRegionOp;
 
@@ -42,25 +39,17 @@ public class ClipPath extends PaintOperation {
         mRegionOp = regionOp;
     }
 
-    public static final int PATH_CLIP_REPLACE = 0;
-    public static final int PATH_CLIP_DIFFERENCE = 1;
-    public static final int PATH_CLIP_INTERSECT = 2;
-    public static final int PATH_CLIP_UNION = 3;
-    public static final int PATH_CLIP_XOR = 4;
-    public static final int PATH_CLIP_REVERSE_DIFFERENCE = 5;
-    public static final int PATH_CLIP_UNDEFINED = 6;
-
-    public static final int REPLACE = PATH_CLIP_REPLACE;
-    public static final int DIFFERENCE = PATH_CLIP_DIFFERENCE;
-    public static final int INTERSECT = PATH_CLIP_INTERSECT;
-    public static final int UNION = PATH_CLIP_UNION;
-    public static final int XOR = PATH_CLIP_XOR;
-    public static final int REVERSE_DIFFERENCE = PATH_CLIP_REVERSE_DIFFERENCE;
-    public static final int UNDEFINED = PATH_CLIP_UNDEFINED;
+    public static final int REPLACE = Companion.PATH_CLIP_REPLACE;
+    public static final int DIFFERENCE = Companion.PATH_CLIP_DIFFERENCE;
+    public static final int INTERSECT = Companion.PATH_CLIP_INTERSECT;
+    public static final int UNION = Companion.PATH_CLIP_UNION;
+    public static final int XOR = Companion.PATH_CLIP_XOR;
+    public static final int REVERSE_DIFFERENCE = Companion.PATH_CLIP_REVERSE_DIFFERENCE;
+    public static final int UNDEFINED = Companion.PATH_CLIP_UNDEFINED;
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mId);
+        COMPANION.apply(buffer, mId);
     }
 
     @Override
@@ -68,39 +57,42 @@ public class ClipPath extends PaintOperation {
         return "ClipPath " + mId + ";";
     }
 
+    public static class Companion implements CompanionOperation {
+        public static final int PATH_CLIP_REPLACE = 0;
+        public static final int PATH_CLIP_DIFFERENCE = 1;
+        public static final int PATH_CLIP_INTERSECT = 2;
+        public static final int PATH_CLIP_UNION = 3;
+        public static final int PATH_CLIP_XOR = 4;
+        public static final int PATH_CLIP_REVERSE_DIFFERENCE = 5;
+        public static final int PATH_CLIP_UNDEFINED = 6;
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int pack = buffer.readInt();
-        int id = pack & 0xFFFFF;
-        int regionOp = pack >> 24;
-        ClipPath op = new ClipPath(id, regionOp);
-        operations.add(op);
+        private Companion() {
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int pack = buffer.readInt();
+            int id = pack & 0xFFFFF;
+            int regionOp = pack >> 24;
+            ClipPath op = new ClipPath(id, regionOp);
+            operations.add(op);
+        }
+
+        @Override
+        public String name() {
+            return "ClipPath";
+        }
+
+        @Override
+        public int id() {
+            return Operations.CLIP_PATH;
+        }
+
+        public void apply(WireBuffer buffer, int id) {
+            buffer.start(Operations.CLIP_PATH);
+            buffer.writeInt(id);
+        }
     }
-
-
-    public static String name() {
-        return CLASS_NAME;
-    }
-
-
-    public static int id() {
-        return OP_CODE;
-    }
-
-    public static void apply(WireBuffer buffer, int id) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(id);
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Intersect the current clip with the path")
-                .field(INT, "id",
-                        "id of the path");
-    }
-
 
     @Override
     public void paint(PaintContext context) {

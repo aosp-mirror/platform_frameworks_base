@@ -15,14 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
@@ -32,8 +30,9 @@ import java.util.List;
  * Component size-aware border draw
  */
 public class BorderModifierOperation extends DecoratorModifierOperation {
-    private static final int OP_CODE = Operations.MODIFIER_BORDER;
-    public static final String CLASS_NAME = "BorderModifierOperation";
+
+    public static final BorderModifierOperation.Companion COMPANION =
+            new BorderModifierOperation.Companion();
 
     float mX;
     float mY;
@@ -76,7 +75,7 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mX, mY, mWidth, mHeight, mBorderWidth, mRoundedCorner,
+        COMPANION.apply(buffer, mX, mY, mWidth, mHeight, mBorderWidth, mRoundedCorner,
                 mR, mG, mB, mA, mShapeType);
     }
 
@@ -93,51 +92,55 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
                 + "color(" + mR + "," + mG + "," + mB + "," + mA + ")";
     }
 
+    public static class Companion implements CompanionOperation {
 
-    public static String name() {
-        return CLASS_NAME;
+        @Override
+        public String name() {
+            return "BorderModifier";
+        }
+
+        @Override
+        public int id() {
+            return Operations.MODIFIER_BORDER;
+        }
+
+        public void apply(WireBuffer buffer, float x, float y, float width, float height,
+                                 float borderWidth, float roundedCorner,
+                                 float r, float g, float b, float a,
+                                 int shapeType) {
+            buffer.start(Operations.MODIFIER_BORDER);
+            buffer.writeFloat(x);
+            buffer.writeFloat(y);
+            buffer.writeFloat(width);
+            buffer.writeFloat(height);
+            buffer.writeFloat(borderWidth);
+            buffer.writeFloat(roundedCorner);
+            buffer.writeFloat(r);
+            buffer.writeFloat(g);
+            buffer.writeFloat(b);
+            buffer.writeFloat(a);
+            // shape type
+            buffer.writeInt(shapeType);
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float x = buffer.readFloat();
+            float y = buffer.readFloat();
+            float width = buffer.readFloat();
+            float height = buffer.readFloat();
+            float bw = buffer.readFloat();
+            float rc = buffer.readFloat();
+            float r = buffer.readFloat();
+            float g = buffer.readFloat();
+            float b = buffer.readFloat();
+            float a = buffer.readFloat();
+            // shape type
+            int shapeType = buffer.readInt();
+            operations.add(new BorderModifierOperation(x, y, width, height, bw,
+                    rc, r, g, b, a, shapeType));
+        }
     }
-
-    public static int id() {
-        return OP_CODE;
-    }
-
-    public static void apply(WireBuffer buffer, float x, float y, float width, float height,
-                             float borderWidth, float roundedCorner,
-                             float r, float g, float b, float a,
-                             int shapeType) {
-        buffer.start(OP_CODE);
-        buffer.writeFloat(x);
-        buffer.writeFloat(y);
-        buffer.writeFloat(width);
-        buffer.writeFloat(height);
-        buffer.writeFloat(borderWidth);
-        buffer.writeFloat(roundedCorner);
-        buffer.writeFloat(r);
-        buffer.writeFloat(g);
-        buffer.writeFloat(b);
-        buffer.writeFloat(a);
-        // shape type
-        buffer.writeInt(shapeType);
-    }
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        float x = buffer.readFloat();
-        float y = buffer.readFloat();
-        float width = buffer.readFloat();
-        float height = buffer.readFloat();
-        float bw = buffer.readFloat();
-        float rc = buffer.readFloat();
-        float r = buffer.readFloat();
-        float g = buffer.readFloat();
-        float b = buffer.readFloat();
-        float a = buffer.readFloat();
-        // shape type
-        int shapeType = buffer.readInt();
-        operations.add(new BorderModifierOperation(x, y, width, height, bw,
-                rc, r, g, b, a, shapeType));
-    }
-
 
     @Override
     public void paint(PaintContext context) {
@@ -157,23 +160,5 @@ public class BorderModifierOperation extends DecoratorModifierOperation {
             context.drawRoundRect(0f, 0f, mWidth, mHeight, size, size);
         }
         context.restorePaint();
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("define the Border Modifier")
-                .field(FLOAT, "x", "")
-                .field(FLOAT, "y", "")
-                .field(FLOAT, "width", "")
-                .field(FLOAT, "height", "")
-                .field(FLOAT, "borderWidth", "")
-                .field(FLOAT, "roundedCorner", "")
-                .field(FLOAT, "r", "")
-                .field(FLOAT, "g", "")
-                .field(FLOAT, "b", "")
-                .field(FLOAT, "a", "")
-                .field(FLOAT, "shapeType", "");
     }
 }

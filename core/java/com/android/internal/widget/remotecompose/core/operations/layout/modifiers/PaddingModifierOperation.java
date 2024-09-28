@@ -15,13 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
@@ -31,8 +29,10 @@ import java.util.List;
  * Padding modifiers can be chained and will impact following modifiers.
  */
 public class PaddingModifierOperation implements ModifierOperation {
-    private static final int OP_CODE = Operations.MODIFIER_PADDING;
-    public static final String CLASS_NAME = "PaddingModifierOperation";
+
+    public static final PaddingModifierOperation.Companion COMPANION =
+            new PaddingModifierOperation.Companion();
+
     float mLeft;
     float mTop;
     float mRight;
@@ -79,7 +79,7 @@ public class PaddingModifierOperation implements ModifierOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mLeft, mTop, mRight, mBottom);
+        COMPANION.apply(buffer, mLeft, mTop, mRight, mBottom);
     }
 
     @Override
@@ -103,39 +103,33 @@ public class PaddingModifierOperation implements ModifierOperation {
                 + ", " + mRight + ", " + mBottom + ")";
     }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+    public static class Companion implements CompanionOperation {
+        @Override
+        public String name() {
+            return "PaddingModifierOperation";
+        }
 
-    public static int id() {
-        return Operations.MODIFIER_PADDING;
-    }
+        @Override
+        public int id() {
+            return Operations.MODIFIER_PADDING;
+        }
 
-    public static void apply(WireBuffer buffer,
-                             float left, float top, float right, float bottom) {
-        buffer.start(Operations.MODIFIER_PADDING);
-        buffer.writeFloat(left);
-        buffer.writeFloat(top);
-        buffer.writeFloat(right);
-        buffer.writeFloat(bottom);
-    }
+        public void apply(WireBuffer buffer,
+                                 float left, float top, float right, float bottom) {
+            buffer.start(Operations.MODIFIER_PADDING);
+            buffer.writeFloat(left);
+            buffer.writeFloat(top);
+            buffer.writeFloat(right);
+            buffer.writeFloat(bottom);
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        float left = buffer.readFloat();
-        float top = buffer.readFloat();
-        float right = buffer.readFloat();
-        float bottom = buffer.readFloat();
-        operations.add(new PaddingModifierOperation(left, top, right, bottom));
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Modifier Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("define the Padding Modifier")
-                .field(FLOAT, "left", "")
-                .field(FLOAT, "top", "")
-                .field(FLOAT, "right", "")
-                .field(FLOAT, "bottom", "");
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float left = buffer.readFloat();
+            float top = buffer.readFloat();
+            float right = buffer.readFloat();
+            float bottom = buffer.readFloat();
+            operations.add(new PaddingModifierOperation(left, top, right, bottom));
+        }
     }
 }

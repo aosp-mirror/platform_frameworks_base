@@ -17,9 +17,6 @@ package com.android.internal.widget.remotecompose.core.operations.utilities;
 
 /**
  * High performance Integer expression evaluator
- *
- * The evaluation is based on int opMask, int[]exp
- * exp[i] is an operator if (opMask*(1 << i) != 0)
  */
 public class IntegerExpressionEvaluator {
     static IntMap<String> sNames = new IntMap<>();
@@ -67,11 +64,11 @@ public class IntegerExpressionEvaluator {
     }
 
     /**
-     * Evaluate an integer expression
-     * @param mask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param var variables if the expression is a function
-     * @return return the results of evaluating the expression
+     * Evaluate a float expression
+     *
+     * @param exp
+     * @param var
+     * @return
      */
     public int eval(int mask, int[] exp, int... var) {
         mStack = exp;
@@ -89,12 +86,12 @@ public class IntegerExpressionEvaluator {
     }
 
     /**
-     * Evaluate a integer expression
-     * @param mask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param len the number of values in the expression
-     * @param var variables if the expression is a function
-     * @return return the results of evaluating the expression
+     * Evaluate a int expression
+     *
+     * @param exp
+     * @param len
+     * @param var
+     * @return
      */
     public int eval(int mask, int[] exp, int len, int... var) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
@@ -114,18 +111,18 @@ public class IntegerExpressionEvaluator {
 
     /**
      * Evaluate a int expression
-     * @param opMask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param var variables if the expression is a function
-     * @return return the results of evaluating the expression
+     *
+     * @param exp
+     * @param var
+     * @return
      */
-    public int evalDB(int opMask, int[] exp, int... var) {
+    public int evalDB(int mask, int[] exp, int... var) {
         mStack = exp;
         mVar = var;
         int sp = -1;
         for (int i = 0; i < exp.length; i++) {
             int v = mStack[i];
-            if (((1 << i) & opMask) != 0) {
+            if (((1 << i) & mask) != 0) {
                 System.out.print(" " + sNames.get((v - OFFSET)));
                 sp = mOps[v - OFFSET].eval(sp);
             } else {
@@ -284,8 +281,8 @@ public class IntegerExpressionEvaluator {
     /**
      * given a int command return its math name (e.g sin, cos etc.)
      *
-     * @param f the numerical value of the function + offset
-     * @return the math name of the function
+     * @param f
+     * @return
      */
     public static String toMathName(int f) {
         int id = f - OFFSET;
@@ -293,19 +290,18 @@ public class IntegerExpressionEvaluator {
     }
 
     /**
-     * Convert an expression encoded as an array of ints int to a string
+     * Convert an expression encoded as an array of ints int ot a string
      *
-     * @param opMask bits that are operators
-     * @param exp rpn sequence of values and operators
-     * @param labels String that represent the variable names
+     * @param exp
+     * @param labels
      * @return
      */
-    public static String toString(int opMask, int[] exp, String[] labels) {
+    public static String toString(int mask, int[] exp, String[] labels) {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < exp.length; i++) {
             int v = exp[i];
 
-            if (((1 << i) & opMask) != 0) {
+            if (((1 << i) & mask) != 0) {
                 if (v < OFFSET) {
                     s.append(toMathName(v));
                 } else {
@@ -327,18 +323,18 @@ public class IntegerExpressionEvaluator {
     /**
      * Convert an expression encoded as an array of ints int ot a string
      *
-     * @param opMask bit mask of operators vs commands
-     * @param exp rpn sequence of values and operators
-     * @return string representation of the expression
+     * @param mask bit mask of operators vs commands
+     * @param exp
+     * @return
      */
-    public static String toString(int opMask, int[] exp) {
+    public static String toString(int mask, int[] exp) {
         StringBuilder s = new StringBuilder();
-        s.append(Integer.toBinaryString(opMask));
+        s.append(Integer.toBinaryString(mask));
         s.append(" : ");
         for (int i = 0; i < exp.length; i++) {
             int v = exp[i];
 
-            if (((1 << i) & opMask) != 0) {
+            if (((1 << i) & mask) != 0) {
                 if (v > OFFSET) {
                     s.append(" ");
                     s.append(toMathName(v));
@@ -357,15 +353,16 @@ public class IntegerExpressionEvaluator {
 
     /**
      * This creates an infix string expression
-     * @param opMask The bits that are operators
+     * @param mask The bits that are operators
      * @param exp the array of expressions
      * @return infix string
      */
-    public static String toStringInfix(int opMask, int[] exp) {
-        return toString(opMask, exp, exp.length - 1);
+    public static String toStringInfix(int mask, int[] exp) {
+        return toString(mask, exp, exp.length - 1);
     }
 
     static String toString(int mask, int[] exp, int sp) {
+        String[] str = new String[exp.length];
         if (((1 << sp) & mask) != 0) {
             int id = exp[sp] - OFFSET;
             switch (NO_OF_OPS[id]) {
@@ -421,11 +418,11 @@ public class IntegerExpressionEvaluator {
 
     /**
      * is it an id or operation
-     * @param opMask the bits that mark elements as an operation
+     * @param mask the bits that mark elements as an operation
      * @param i the bit to check
      * @return true if the bit is 1
      */
-    public static boolean isOperation(int opMask, int i) {
-        return ((1 << i) & opMask) != 0;
+    public static boolean isOperation(int mask, int i) {
+        return ((1 << i) & mask) != 0;
     }
 }

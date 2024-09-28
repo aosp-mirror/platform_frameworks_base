@@ -35,10 +35,6 @@ public class RemoteComposeDocument {
         mDocument.initFromBuffer(buffer);
     }
 
-    public RemoteComposeDocument(CoreDocument document) {
-        mDocument = document;
-    }
-
     public CoreDocument getDocument() {
         return mDocument;
     }
@@ -125,17 +121,6 @@ public class RemoteComposeDocument {
      */
     public Component getComponent(int id) {
         return mDocument.getComponent(id);
-    }
-
-    public void invalidate() {
-        mDocument.invalidateMeasure();
-    }
-
-    public String[] getStats() {
-        if (mDocument == null) {
-            return new String[0];
-        }
-        return mDocument.getStats();
     }
 }
 

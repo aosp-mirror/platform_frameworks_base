@@ -27,10 +27,6 @@ public class Operation {
     public static final int BYTE = 6;
     public static final int VALUE = 7;
     public static final int LONG = 8;
-    public static final int SHORT = 9;
-
-    public static final int FLOAT_ARRAY = 10;
-    public static final int INT_ARRAY = 11;
 
     String mCategory;
     int mId;
@@ -42,7 +38,7 @@ public class Operation {
 
     ArrayList<StringPair> mExamples = new ArrayList<>();
     ArrayList<OperationField> mFields = new ArrayList<>();
-    String mVarSize = "";
+
     int mExamplesWidth = 100;
     int mExamplesHeight = 100;
 
@@ -57,9 +53,6 @@ public class Operation {
             case (BYTE): return "BYTE";
             case (VALUE): return "VALUE";
             case (LONG): return "LONG";
-            case (SHORT): return "SHORT";
-            case (FLOAT_ARRAY): return "FLOAT[]";
-            case (INT_ARRAY): return "INT[]";
         }
         return "UNKNOWN";
     }
@@ -95,18 +88,10 @@ public class Operation {
         return mWIP;
     }
 
-    public String getVarSize() {
-        return mVarSize;
-    }
-
     public int getSizeFields() {
         int size = 0;
-        mVarSize = "";
         for (OperationField field : mFields) {
-            size += Math.max(0, field.getSize());
-            if (field.getSize() < 0) {
-                mVarSize += " + " + field.getVarSize() + " x 4";
-            }
+            size += field.getSize();
         }
         return size;
     }
@@ -133,11 +118,6 @@ public class Operation {
 
     public Operation field(int type, String name, String description) {
         mFields.add(new OperationField(type, name, description));
-        return this;
-    }
-
-    public Operation field(int type, String name, String varSize, String description) {
-        mFields.add(new OperationField(type, name, varSize, description));
         return this;
     }
 
