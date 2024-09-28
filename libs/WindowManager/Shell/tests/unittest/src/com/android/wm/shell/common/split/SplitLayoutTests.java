@@ -19,7 +19,7 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -136,7 +136,7 @@ public class SplitLayoutTests extends ShellTestCase {
     @Test
     public void testSetDivideRatio() {
         mSplitLayout.setDividerPosition(200, false /* applyLayoutChange */);
-        mSplitLayout.setDivideRatio(SNAP_TO_50_50);
+        mSplitLayout.setDivideRatio(SNAP_TO_2_50_50);
         assertThat(mSplitLayout.getDividerPosition()).isEqualTo(
                 mSplitLayout.mDividerSnapAlgorithm.getMiddleTarget().position);
     }

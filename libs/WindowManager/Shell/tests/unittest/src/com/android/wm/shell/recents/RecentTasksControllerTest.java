@@ -22,7 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -211,10 +211,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Verify only one update if the split info is the same
         SplitBounds bounds1 = new SplitBounds(new Rect(0, 0, 50, 50),
-                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId, SNAP_TO_50_50);
+                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId, SNAP_TO_2_50_50);
         mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, bounds1);
         SplitBounds bounds2 = new SplitBounds(new Rect(0, 0, 50, 50),
-                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId, SNAP_TO_50_50);
+                new Rect(50, 50, 100, 100), t1.taskId, t2.taskId, SNAP_TO_2_50_50);
         mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, bounds2);
         verify(mRecentTasksController, times(1)).notifyRecentTasksChanged();
     }
@@ -246,9 +246,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Mark a couple pairs [t2, t4], [t3, t5]
         SplitBounds pair1Bounds =
-                new SplitBounds(new Rect(), new Rect(), 2, 4, SNAP_TO_50_50);
+                new SplitBounds(new Rect(), new Rect(), 2, 4, SNAP_TO_2_50_50);
         SplitBounds pair2Bounds =
-                new SplitBounds(new Rect(), new Rect(), 3, 5, SNAP_TO_50_50);
+                new SplitBounds(new Rect(), new Rect(), 3, 5, SNAP_TO_2_50_50);
 
         mRecentTasksController.addSplitPair(t2.taskId, t4.taskId, pair1Bounds);
         mRecentTasksController.addSplitPair(t3.taskId, t5.taskId, pair2Bounds);
@@ -277,9 +277,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Mark a couple pairs [t2, t4], [t3, t5]
         SplitBounds pair1Bounds =
-                new SplitBounds(new Rect(), new Rect(), 2, 4, SNAP_TO_50_50);
+                new SplitBounds(new Rect(), new Rect(), 2, 4, SNAP_TO_2_50_50);
         SplitBounds pair2Bounds =
-                new SplitBounds(new Rect(), new Rect(), 3, 5, SNAP_TO_50_50);
+                new SplitBounds(new Rect(), new Rect(), 3, 5, SNAP_TO_2_50_50);
 
         mRecentTasksController.addSplitPair(t2.taskId, t4.taskId, pair1Bounds);
         mRecentTasksController.addSplitPair(t3.taskId, t5.taskId, pair2Bounds);
@@ -339,7 +339,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
         setRawList(t1, t2, t3, t4, t5);
 
         SplitBounds pair1Bounds =
-                new SplitBounds(new Rect(), new Rect(), 1, 2, SNAP_TO_50_50);
+                new SplitBounds(new Rect(), new Rect(), 1, 2, SNAP_TO_2_50_50);
         mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, pair1Bounds);
 
         when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
@@ -449,7 +449,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
 
         // Add a pair
         SplitBounds pair1Bounds =
-                new SplitBounds(new Rect(), new Rect(), 2, 3, SNAP_TO_50_50);
+                new SplitBounds(new Rect(), new Rect(), 2, 3, SNAP_TO_2_50_50);
         mRecentTasksController.addSplitPair(t2.taskId, t3.taskId, pair1Bounds);
         reset(mRecentTasksController);
 
