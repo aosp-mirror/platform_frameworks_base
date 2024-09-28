@@ -291,9 +291,7 @@ public class VibratorInfo implements Parcelable {
      * @return True if the hardware can control the frequency of the vibrations, otherwise false.
      */
     public boolean hasFrequencyControl() {
-        // We currently can only control frequency of the vibration using the compose PWLE method.
-        return hasCapability(
-                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
+        return hasCapability(IVibrator.CAP_FREQUENCY_CONTROL);
     }
 
     /**
@@ -456,7 +454,8 @@ public class VibratorInfo implements Parcelable {
      * @return True if the hardware supports creating envelope effects, false otherwise.
      */
     public boolean areEnvelopeEffectsSupported() {
-        return hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
+        return hasCapability(
+                IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2);
     }
 
     /**

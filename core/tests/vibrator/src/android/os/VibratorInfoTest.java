@@ -61,8 +61,7 @@ public class VibratorInfoTest {
         VibratorInfo noCapabilities = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         assertFalse(noCapabilities.hasFrequencyControl());
         VibratorInfo composeAndFrequencyControl = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
-                .setCapabilities(
-                        IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS)
+                .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .build();
         assertTrue(composeAndFrequencyControl.hasFrequencyControl());
     }
@@ -143,7 +142,8 @@ public class VibratorInfoTest {
         VibratorInfo noCapabilities = new VibratorInfo.Builder(TEST_VIBRATOR_ID).build();
         assertFalse(noCapabilities.areEnvelopeEffectsSupported());
         VibratorInfo envelopeEffectCapability = new VibratorInfo.Builder(TEST_VIBRATOR_ID)
-                .setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)
+                .setCapabilities(
+                        IVibrator.CAP_FREQUENCY_CONTROL | IVibrator.CAP_COMPOSE_PWLE_EFFECTS_V2)
                 .build();
         assertTrue(envelopeEffectCapability.areEnvelopeEffectsSupported());
     }
