@@ -15,13 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -40,7 +38,7 @@ public class IntegerConstant implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mId, mValue);
+        COMPANION.apply(buffer, mId, mValue);
     }
 
     @Override
@@ -58,42 +56,41 @@ public class IntegerConstant implements Operation {
         return "IntegerConstant[" + mId + "] = " + mValue + "";
     }
 
-    public static String name() {
-        return "IntegerConstant";
-    }
+    public static final Companion COMPANION = new Companion();
 
-    public static int id() {
-        return Operations.DATA_INT;
-    }
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
 
-    /**
-     * Writes out the operation to the buffer
-     *
-     * @param buffer
-     * @param textId
-     * @param value
-     */
-    public static void apply(WireBuffer buffer, int textId, int value) {
-        buffer.start(Operations.DATA_INT);
-        buffer.writeInt(textId);
-        buffer.writeInt(value);
-    }
+        @Override
+        public String name() {
+            return "IntegerConstant";
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int id = buffer.readInt();
+        @Override
+        public int id() {
+            return Operations.DATA_INT;
+        }
 
-        int value = buffer.readInt();
-        operations.add(new IntegerConstant(id, value));
-    }
+        /**
+         * Writes out the operation to the buffer
+         *
+         * @param buffer
+         * @param textId
+         * @param value
+         */
+        public void apply(WireBuffer buffer, int textId, int value) {
+            buffer.start(Operations.DATA_INT);
+            buffer.writeInt(textId);
+            buffer.writeInt(value);
+        }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        id(),
-                        "IntegerConstant")
-                .description("A integer and its associated id")
-                .field(INT, "id", "id of Int")
-                .field(INT, "value",
-                        "32-bit int value");
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int id = buffer.readInt();
 
+            int value = buffer.readInt();
+            operations.add(new IntegerConstant(id, value));
+        }
     }
 }

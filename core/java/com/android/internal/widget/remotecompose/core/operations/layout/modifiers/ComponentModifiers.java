@@ -15,15 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
 import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
@@ -37,23 +34,6 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
 
     public ArrayList<ModifierOperation> getList() {
         return mList;
-    }
-
-    @Override
-    public void apply(RemoteContext context) {
-        super.apply(context);
-        for (ModifierOperation op : mList) {
-            op.apply(context);
-        }
-    }
-
-    @Override
-    public String toString() {
-        String str =  "ComponentModifiers \n";
-        for (ModifierOperation modifierOperation : mList) {
-            str += "    " + modifierOperation.toString() + "\n";
-        }
-        return str;
     }
 
     @Override
@@ -90,11 +70,7 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
             if (op instanceof MatrixSave || op instanceof MatrixRestore) {
                 continue;
             }
-            if (op instanceof ClickModifierOperation) {
-                context.translate(-tx, -ty);
-                ((ClickModifierOperation) op).paint(context);
-                context.translate(tx, ty);
-            } else if (op instanceof PaintOperation) {
+            if (op instanceof PaintOperation) {
                 ((PaintOperation) op).paint(context);
             }
         }
@@ -113,9 +89,7 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
                 w -= pop.getLeft() + pop.getRight();
                 h -= pop.getTop() + pop.getBottom();
             }
-            if (op instanceof ClickModifierOperation) {
-                ((DecoratorComponent) op).layout(context, width, height);
-            } else if (op instanceof DecoratorComponent) {
+            if (op instanceof DecoratorComponent) {
                 ((DecoratorComponent) op).layout(context, w, h);
             }
         }
@@ -125,11 +99,10 @@ public class ComponentModifiers extends PaintOperation implements DecoratorCompo
         mList.addAll(operations);
     }
 
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(float x, float y) {
         for (ModifierOperation op : mList) {
             if (op instanceof DecoratorComponent) {
-                ((DecoratorComponent) op).onClick(context, document, component, x, y);
+                ((DecoratorComponent) op).onClick(x, y);
             }
         }
     }

@@ -15,14 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
-import com.android.internal.widget.remotecompose.core.CoreDocument;
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
@@ -31,10 +29,13 @@ import java.util.List;
  * Support modifier clip with a rectangle
  */
 public class ClipRectModifierOperation extends DecoratorModifierOperation {
-    public static final String CLASS_NAME = "ClipRectModifierOperation";
-    private static final int OP_CODE = Operations.MODIFIER_CLIP_RECT;
+
+    public static final ClipRectModifierOperation.Companion COMPANION =
+            new ClipRectModifierOperation.Companion();
+
     float mWidth;
     float mHeight;
+
 
     @Override
     public void paint(PaintContext context) {
@@ -48,8 +49,7 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
     }
 
     @Override
-    public void onClick(RemoteContext context, CoreDocument document,
-                        Component component, float x, float y) {
+    public void onClick(float x, float y) {
         // nothing
     }
 
@@ -61,32 +61,28 @@ public class ClipRectModifierOperation extends DecoratorModifierOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer);
+        COMPANION.apply(buffer);
     }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+    public static class Companion implements CompanionOperation {
 
+        @Override
+        public String name() {
+            return "ClipRectModifier";
+        }
 
-    public static int id() {
-        return OP_CODE;
-    }
+        @Override
+        public int id() {
+            return Operations.MODIFIER_CLIP_RECT;
+        }
 
-    public static void apply(WireBuffer buffer) {
-        buffer.start(OP_CODE);
-    }
+        public void apply(WireBuffer buffer) {
+            buffer.start(Operations.MODIFIER_CLIP_RECT);
+        }
 
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        operations.add(new ClipRectModifierOperation());
-    }
-
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Draw the specified round-rect");
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            operations.add(new ClipRectModifierOperation());
+        }
     }
 }

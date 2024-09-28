@@ -15,15 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntegerExpressionEvaluator;
 
 import java.util.Arrays;
@@ -37,14 +34,13 @@ import java.util.List;
  * The floats represent a RPN style calculator
  */
 public class IntegerExpression implements Operation, VariableSupport {
-    private static final int OP_CODE = Operations.INTEGER_EXPRESSION;
-    private static final String CLASS_NAME = "IntegerExpression";
     public int mId;
     private int mMask;
     private int mPreMask;
     public int[] mSrcValue;
     public int[] mPreCalcValue;
     private float mLastChange = Float.NaN;
+    public static final Companion COMPANION = new Companion();
     public static final int MAX_STRING_SIZE = 4000;
     IntegerExpressionEvaluator mExp = new IntegerExpressionEvaluator();
 
@@ -93,7 +89,7 @@ public class IntegerExpression implements Operation, VariableSupport {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mId, mMask, mSrcValue);
+        COMPANION.apply(buffer, mId, mMask, mSrcValue);
     }
 
     @Override
@@ -116,57 +112,51 @@ public class IntegerExpression implements Operation, VariableSupport {
         return "IntegerExpression[" + mId + "] = (" + s + ")";
     }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
-
-    public static int id() {
-        return OP_CODE;
-    }
-
-    /**
-     * Writes out the operation to the buffer
-     *
-     * @param buffer buffer to write to
-     * @param id     the id of the integer
-     * @param mask   the mask bits of ints & operators or variables
-     * @param value  array of integers to be evaluated
-     */
-    public static void apply(WireBuffer buffer, int id, int mask, int[] value) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(id);
-        buffer.writeInt(mask);
-        buffer.writeInt(value.length);
-        for (int opMask : value) {
-            buffer.writeInt(opMask);
-        }
-    }
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int id = buffer.readInt();
-        int mask = buffer.readInt();
-        int len = buffer.readInt();
-
-        int[] values = new int[len];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = buffer.readInt();
+    public static class Companion implements CompanionOperation {
+        private Companion() {
         }
 
-        operations.add(new IntegerExpression(id, mask, values));
-    }
+        @Override
+        public String name() {
+            return "FloatExpression";
+        }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Data Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Expression that computes an integer")
-                .field(INT, "id", "id of integer")
-                .field(INT, "mask",
-                        "bits representing operators or other id's")
-                .field(INT, "length",
-                        "length of array")
-                .field(INT_ARRAY, "values", "length",
-                        "Array of ints");
+        @Override
+        public int id() {
+            return Operations.INTEGER_EXPRESSION;
+        }
+
+        /**
+         * Writes out the operation to the buffer
+         *
+         * @param buffer
+         * @param id
+         * @param mask
+         * @param value
+         */
+        public void apply(WireBuffer buffer, int id, int mask, int[] value) {
+            buffer.start(Operations.INTEGER_EXPRESSION);
+            buffer.writeInt(id);
+            buffer.writeInt(mask);
+            buffer.writeInt(value.length);
+            for (int i = 0; i < value.length; i++) {
+                buffer.writeInt(value[i]);
+            }
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int id = buffer.readInt();
+            int mask = buffer.readInt();
+            int len = buffer.readInt();
+
+            int[] values = new int[len];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = buffer.readInt();
+            }
+
+            operations.add(new IntegerExpression(id, mask, values));
+        }
     }
 
     @Override
@@ -176,9 +166,8 @@ public class IntegerExpression implements Operation, VariableSupport {
 
     /**
      * given the "i" position in the mask is this an ID
-     *
-     * @param mask  32 bit mask used for defining numbers vs other
-     * @param i     the bit in question
+     * @param mask 32 bit mask used for defining numbers vs other
+     * @param i the bit in question
      * @param value the value
      * @return true if this is an ID
      */

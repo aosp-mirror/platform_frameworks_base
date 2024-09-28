@@ -23,7 +23,6 @@ import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.ShaderData;
-import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
 
 import java.util.HashMap;
 
@@ -53,7 +52,7 @@ class AndroidRemoteContext extends RemoteContext {
     @Override
     public void loadPathData(int instanceId, float[] floatPath) {
         if (!mRemoteComposeState.containsId(instanceId)) {
-            mRemoteComposeState.cacheData(instanceId, floatPath);
+            mRemoteComposeState.cache(instanceId, floatPath);
         }
     }
 
@@ -76,40 +75,6 @@ class AndroidRemoteContext extends RemoteContext {
         mVarNameHashMap.put(varName, new VarName(varName, varId, varType));
     }
 
-    @Override
-    public void setNamedStringOverride(String stringName, String value) {
-        if (mVarNameHashMap.get(stringName) != null) {
-            int id = mVarNameHashMap.get(stringName).mId;
-            overrideText(id, value);
-        }
-    }
-
-    @Override
-    public void clearNamedStringOverride(String stringName) {
-        if (mVarNameHashMap.get(stringName) != null) {
-            int id = mVarNameHashMap.get(stringName).mId;
-            clearDataOverride(id);
-        }
-        mVarNameHashMap.put(stringName, null);
-    }
-
-    @Override
-    public void setNamedIntegerOverride(String stringName, int value) {
-        if (mVarNameHashMap.get(stringName) != null) {
-            int id = mVarNameHashMap.get(stringName).mId;
-            overrideInt(id, value);
-        }
-    }
-
-    @Override
-    public void clearNamedIntegerOverride(String integerName) {
-        if (mVarNameHashMap.get(integerName) != null) {
-            int id = mVarNameHashMap.get(integerName).mId;
-            clearIntegerOverride(id);
-        }
-        mVarNameHashMap.put(integerName, null);
-    }
-
     /**
      * Override a color to force it to be the color provided
      *
@@ -120,23 +85,6 @@ class AndroidRemoteContext extends RemoteContext {
         int id = mVarNameHashMap.get(colorName).mId;
         mRemoteComposeState.overrideColor(id, color);
     }
-
-    @Override
-    public void addCollection(int id, ArrayAccess collection) {
-        mRemoteComposeState.addCollection(id, collection);
-    }
-
-    @Override
-    public void runAction(int id, String metadata) {
-        mDocument.performClick(id);
-    }
-
-    @Override
-    public void runNamedAction(int id) {
-        String text = getText(id);
-        mDocument.runNamedAction(text);
-    }
-
     /**
      * Decode a byte array into an image and cache it using the given imageId
      *
@@ -149,33 +97,17 @@ class AndroidRemoteContext extends RemoteContext {
     public void loadBitmap(int imageId, int width, int height, byte[] bitmap) {
         if (!mRemoteComposeState.containsId(imageId)) {
             Bitmap image = BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length);
-            mRemoteComposeState.cacheData(imageId, image);
+            mRemoteComposeState.cache(imageId, image);
         }
     }
 
     @Override
     public void loadText(int id, String text) {
         if (!mRemoteComposeState.containsId(id)) {
-            mRemoteComposeState.cacheData(id, text);
+            mRemoteComposeState.cache(id, text);
         } else {
-            mRemoteComposeState.updateData(id, text);
+            mRemoteComposeState.update(id, text);
         }
-    }
-
-    public void overrideText(int id, String text) {
-        mRemoteComposeState.overrideData(id, text);
-    }
-
-    public void overrideInt(int id, int value) {
-        mRemoteComposeState.overrideInteger(id, value);
-    }
-
-    public void clearDataOverride(int id) {
-        mRemoteComposeState.clearDataOverride(id);
-    }
-
-    public void clearIntegerOverride(int id) {
-        mRemoteComposeState.clearIntegerOverride(id);
     }
 
     @Override
@@ -193,14 +125,6 @@ class AndroidRemoteContext extends RemoteContext {
         mRemoteComposeState.updateInteger(id, value);
     }
 
-    public void overrideInteger(int id, int value) {
-        mRemoteComposeState.overrideInteger(id, value);
-    }
-
-    public void overrideText(int id, int valueId) {
-        String text = getText(valueId);
-        overrideText(id, text);
-    }
 
     @Override
     public void loadColor(int id, int color) {
@@ -209,12 +133,12 @@ class AndroidRemoteContext extends RemoteContext {
 
     @Override
     public void loadAnimatedFloat(int id, FloatExpression animatedFloat) {
-        mRemoteComposeState.cacheData(id, animatedFloat);
+        mRemoteComposeState.cache(id, animatedFloat);
     }
 
     @Override
     public void loadShader(int id, ShaderData value) {
-        mRemoteComposeState.cacheData(id, value);
+        mRemoteComposeState.cache(id, value);
     }
 
     @Override
@@ -263,6 +187,5 @@ class AndroidRemoteContext extends RemoteContext {
         String metadata = (String) mRemoteComposeState.getFromId(metadataId);
         mDocument.addClickArea(id, contentDescription, left, top, right, bottom, metadata);
     }
-
 }
 

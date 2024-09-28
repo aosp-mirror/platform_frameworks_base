@@ -19,6 +19,7 @@ import static com.android.internal.widget.remotecompose.core.operations.Utils.id
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
+import android.os.Build;
 
 import com.android.internal.widget.remotecompose.core.operations.PathData;
 
@@ -57,11 +58,13 @@ public class FloatsToPath {
                 break;
                 case PathData.CONIC: {
                     i += 3;
-                    path.conicTo(
-                            floatPath[i + 0], floatPath[i + 1],
-                            floatPath[i + 2], floatPath[i + 3],
-                            floatPath[i + 4]
-                    );
+                    if (Build.VERSION.SDK_INT >= 34) { // REMOVE IN PLATFORM
+                        path.conicTo(
+                                floatPath[i + 0], floatPath[i + 1],
+                                floatPath[i + 2], floatPath[i + 3],
+                                floatPath[i + 4]
+                        );
+                    }
                     i += 5;
                 }
                 break;

@@ -51,7 +51,6 @@ public class FloatAnimation extends Easing {
     }
 
     public FloatAnimation() {
-        mEasingCurve = new CubicEasing(mType);
     }
 
     public FloatAnimation(float... description) {
@@ -87,24 +86,19 @@ public class FloatAnimation extends Easing {
             count++;
         }
         if (spec != null) {
-
             count++;
         }
         if (spec != null || type != CUBIC_STANDARD) {
             count++;
             count += (spec == null) ? 0 : spec.length;
         }
-
+        if (duration != 1 || count > 0) {
+            count++;
+        }
         if (!Float.isNaN(initialValue)) {
             count++;
         }
         if (!Float.isNaN(wrap)) {
-            count++;
-        }
-        if (duration != 1 || count > 0) {
-            count++;
-        }
-        if  (!Float.isNaN(wrap) || !Float.isNaN(initialValue)) {
             count++;
         }
         float[] ret = new float[count];

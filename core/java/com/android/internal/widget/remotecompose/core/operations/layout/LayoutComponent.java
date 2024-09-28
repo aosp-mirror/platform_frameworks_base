@@ -17,13 +17,7 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.PaintContext;
-import com.android.internal.widget.remotecompose.core.operations.BitmapData;
-import com.android.internal.widget.remotecompose.core.operations.MatrixRestore;
-import com.android.internal.widget.remotecompose.core.operations.MatrixSave;
-import com.android.internal.widget.remotecompose.core.operations.MatrixTranslate;
-import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.DimensionModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
@@ -62,101 +56,40 @@ public class LayoutComponent extends Component {
     public float getMarginLeft() {
         return mMarginLeft;
     }
-
     public float getMarginRight() {
         return mMarginRight;
     }
-
     public float getMarginTop() {
         return mMarginTop;
     }
-
     public float getMarginBottom() {
         return mMarginBottom;
     }
 
-    public float getPaddingLeft() {
-        return mPaddingLeft;
-    }
-
-    public float getPaddingTop() {
-        return mPaddingTop;
-    }
-
-    public float getPaddingRight() {
-        return mPaddingRight;
-    }
-
-    public float getPaddingBottom() {
-        return mPaddingBottom;
-    }
-
-
     public WidthModifierOperation getWidthModifier() {
         return mWidthModifier;
     }
-
     public HeightModifierOperation getHeightModifier() {
         return mHeightModifier;
     }
 
-    protected LayoutComponentContent mContent = null;
-
-    // Should be removed after ImageLayout is in
-    private static final boolean USE_IMAGE_TEMP_FIX = true;
-
     public void inflate() {
-        ArrayList<TextData> data = new ArrayList<>();
         for (Operation op : mList) {
             if (op instanceof LayoutComponentContent) {
-                mContent = (LayoutComponentContent) op;
-                mContent.mParent = this;
+                ((LayoutComponentContent) op).mParent = this;
                 mChildrenComponents.clear();
-                LayoutComponentContent content = (LayoutComponentContent) op;
-                content.getComponents(mChildrenComponents);
-                if (USE_IMAGE_TEMP_FIX) {
-                    if (mChildrenComponents.isEmpty() && !mContent.mList.isEmpty()) {
-                        CanvasContent canvasContent =
-                                new CanvasContent(-1, 0f, 0f, 0f, 0f, this, -1);
-                        for (Operation opc : mContent.mList) {
-                            if (opc instanceof BitmapData) {
-                                canvasContent.mList.add(opc);
-                                int w = ((BitmapData) opc).getWidth();
-                                int h = ((BitmapData) opc).getHeight();
-                                canvasContent.setWidth(w);
-                                canvasContent.setHeight(h);
-                            } else {
-                                if (!((opc instanceof MatrixTranslate)
-                                        || (opc instanceof MatrixSave)
-                                        || (opc instanceof MatrixRestore))) {
-                                    canvasContent.mList.add(opc);
-                                }
-                            }
-                        }
-                        if (!canvasContent.mList.isEmpty()) {
-                            mContent.mList.clear();
-                            mChildrenComponents.add(canvasContent);
-                        }
-                    } else {
-                        content.getData(data);
-                    }
-                } else {
-                    content.getData(data);
+                ((LayoutComponentContent) op).getComponents(mChildrenComponents);
+                if (mChildrenComponents.isEmpty()) {
+                    mChildrenComponents.add((Component) op);
                 }
             } else if (op instanceof ModifierOperation) {
-                if (op instanceof ComponentVisibilityOperation) {
-                    ((ComponentVisibilityOperation) op).setParent(this);
-                }
                 mComponentModifiers.add((ModifierOperation) op);
-            } else if (op instanceof TextData) {
-                data.add((TextData) op);
             } else {
                 // nothing
             }
         }
 
         mList.clear();
-        mList.addAll(data);
         mList.add(mComponentModifiers);
         for (Component c : mChildrenComponents) {
             c.mParent = this;
@@ -213,8 +146,8 @@ public class LayoutComponent extends Component {
         if (mHeightModifier == null) {
             mHeightModifier = new HeightModifierOperation(DimensionModifierOperation.Type.WRAP);
         }
-        setWidth(computeModifierDefinedWidth());
-        setHeight(computeModifierDefinedHeight());
+        mWidth = computeModifierDefinedWidth();
+        mHeight = computeModifierDefinedHeight();
     }
 
     @Override
@@ -236,7 +169,6 @@ public class LayoutComponent extends Component {
         context.translate(-tx, -ty);
         context.restore();
     }
-
 
     /**
      * Traverse the modifiers to compute indicated dimension
@@ -263,27 +195,6 @@ public class LayoutComponent extends Component {
     }
 
     /**
-     * Traverse the modifiers to compute padding width
-     *
-     * @param padding output start and end padding values
-     * @return padding width
-     */
-    public float computeModifierDefinedPaddingWidth(float[] padding) {
-        float s = 0f;
-        float e = 0f;
-        for (Operation c : mComponentModifiers.getList()) {
-            if (c instanceof PaddingModifierOperation) {
-                PaddingModifierOperation pop = (PaddingModifierOperation) c;
-                s += pop.getLeft();
-                e += pop.getRight();
-            }
-        }
-        padding[0] = s;
-        padding[1] = e;
-        return s + e;
-    }
-
-    /**
      * Traverse the modifiers to compute indicated dimension
      */
     public float computeModifierDefinedHeight() {
@@ -306,26 +217,4 @@ public class LayoutComponent extends Component {
         }
         return t + h + b;
     }
-
-    /**
-     * Traverse the modifiers to compute padding height
-     *
-     * @param padding output top and bottom padding values
-     * @return padding height
-     */
-    public float computeModifierDefinedPaddingHeight(float[] padding) {
-        float t = 0f;
-        float b = 0f;
-        for (Operation c : mComponentModifiers.getList()) {
-            if (c instanceof PaddingModifierOperation) {
-                PaddingModifierOperation pop = (PaddingModifierOperation) c;
-                t += pop.getTop();
-                b += pop.getBottom();
-            }
-        }
-        padding[0] = t;
-        padding[1] = b;
-        return t + b;
-    }
-
 }

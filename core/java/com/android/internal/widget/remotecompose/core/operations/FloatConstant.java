@@ -15,14 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -30,10 +27,10 @@ import java.util.List;
  * Operation to deal with Text data
  */
 public class FloatConstant implements Operation {
-    private static final int OP_CODE = Operations.DATA_FLOAT;
-    private static final String CLASS_NAME = "FloatConstant";
     public int mTextId;
     public float mValue;
+    public static final Companion COMPANION = new Companion();
+    public static final int MAX_STRING_SIZE = 4000;
 
     public FloatConstant(int textId, float value) {
         this.mTextId = textId;
@@ -42,52 +39,46 @@ public class FloatConstant implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mTextId, mValue);
+        COMPANION.apply(buffer, mTextId, mValue);
     }
 
     @Override
     public String toString() {
-        return "FloatConstant[" + mTextId + "] = " + mValue;
+        return "FloatConstant[" + mTextId + "] = " + mValue + "";
     }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+    public static class Companion implements CompanionOperation {
+        private Companion() {}
 
+        @Override
+        public String name() {
+            return "FloatExpression";
+        }
 
-    public static int id() {
-        return OP_CODE;
-    }
+        @Override
+        public int id() {
+            return Operations.DATA_FLOAT;
+        }
 
-    /**
-     * Writes out the operation to the buffer
-     *
-     * @param buffer write command to this buffer
-     * @param id     the id
-     * @param value  the value of the float
-     */
-    public static void apply(WireBuffer buffer, int id, float value) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(id);
-        buffer.writeFloat(value);
-    }
+        /**
+         * Writes out the operation to the buffer
+         * @param buffer
+         * @param textId
+         * @param value
+         */
+        public void apply(WireBuffer buffer, int textId, float value) {
+            buffer.start(Operations.DATA_FLOAT);
+            buffer.writeInt(textId);
+            buffer.writeFloat(value);
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int textId = buffer.readInt();
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int textId = buffer.readInt();
 
-        float value = buffer.readFloat();
-        operations.add(new FloatConstant(textId, value));
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("A float and its associated id")
-                .field(INT, "id", "id of float")
-                .field(FLOAT, "value",
-                        "32-bit float value");
-
+            float value = buffer.readFloat();
+            operations.add(new FloatConstant(textId, value));
+        }
     }
 
     @Override
