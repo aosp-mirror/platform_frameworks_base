@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.shortcut.ui.view
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.Configuration
 import android.os.Bundle
 import android.provider.Settings
@@ -125,7 +126,7 @@ constructor(private val userTracker: UserTracker, private val viewModel: Shortcu
     private fun onKeyboardSettingsClicked() {
         try {
             startActivityAsUser(
-                Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS),
+                Intent(Settings.ACTION_HARD_KEYBOARD_SETTINGS).addFlags(FLAG_ACTIVITY_NEW_TASK),
                 userTracker.userHandle,
             )
         } catch (e: ActivityNotFoundException) {

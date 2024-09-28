@@ -274,7 +274,7 @@ fun CommunalHub(
                                     if (layoutDirection == LayoutDirection.Rtl)
                                         screenWidth - offset.x
                                     else offset.x,
-                                    offset.y
+                                    offset.y,
                                 ) - contentOffset
                             val index = firstIndexAtOffset(gridState, adjustedOffset)
                             val key =
@@ -310,6 +310,9 @@ fun CommunalHub(
                                         it.changedToUp() || it.changedToUpIgnoreConsumed()
                                     }
                                 )
+
+                                // Reset state once touch ends.
+                                viewModel.onResetTouchState()
                             }
                         }
                     }
@@ -330,7 +333,7 @@ fun CommunalHub(
                                         if (layoutDirection == LayoutDirection.Rtl)
                                             screenWidth - offset.x
                                         else offset.x,
-                                        offset.y
+                                        offset.y,
                                     ) - it.positionInWindow() - contentOffset
                                 }
                             val index = adjustedOffset?.let { firstIndexAtOffset(gridState, it) }
@@ -344,14 +347,11 @@ fun CommunalHub(
                             }
                         }
                     }
-                },
+                }
     ) {
         AccessibilityContainer(viewModel) {
             if (!viewModel.isEditMode && isEmptyState) {
-                EmptyStateCta(
-                    contentPadding = contentPadding,
-                    viewModel = viewModel,
-                )
+                EmptyStateCta(contentPadding = contentPadding, viewModel = viewModel)
             } else {
                 val slideOffsetInPx =
                     with(LocalDensity.current) { Dimensions.SlideOffsetY.toPx().toInt() }
@@ -364,7 +364,7 @@ fun CommunalHub(
                         ) +
                             slideInVertically(
                                 animationSpec = tween(durationMillis = 1000, easing = Emphasized),
-                                initialOffsetY = { -slideOffsetInPx }
+                                initialOffsetY = { -slideOffsetInPx },
                             ),
                     exit =
                         fadeOut(
@@ -372,7 +372,7 @@ fun CommunalHub(
                         ) +
                             slideOutVertically(
                                 animationSpec = tween(durationMillis = 1000, easing = Emphasized),
-                                targetOffsetY = { -slideOffsetInPx }
+                                targetOffsetY = { -slideOffsetInPx },
                             ),
                     modifier = Modifier.fillMaxSize(),
                 ) {
@@ -389,7 +389,7 @@ fun CommunalHub(
                                     removeEnabled = removeButtonEnabled,
                                     offset =
                                         gridCoordinates?.let { it.positionInWindow() + offset },
-                                    containerToCheck = removeButtonCoordinates
+                                    containerToCheck = removeButtonCoordinates,
                                 )
                             },
                             gridState = gridState,
@@ -410,7 +410,7 @@ fun CommunalHub(
                 enter =
                     fadeIn(animationSpec = tween(durationMillis = 250, easing = LinearEasing)) +
                         slideInVertically(
-                            animationSpec = tween(durationMillis = 1000, easing = Emphasized),
+                            animationSpec = tween(durationMillis = 1000, easing = Emphasized)
                         ),
                 exit =
                     fadeOut(animationSpec = tween(durationMillis = 167, easing = LinearEasing)) +
@@ -434,7 +434,7 @@ fun CommunalHub(
                             viewModel.setSelectedKey(null)
                         }
                     },
-                    removeEnabled = removeButtonEnabled
+                    removeEnabled = removeButtonEnabled,
                 )
             }
         }
@@ -451,7 +451,7 @@ fun CommunalHub(
                 title = stringResource(id = R.string.dialog_title_to_allow_any_widget),
                 positiveButtonText = stringResource(id = R.string.button_text_to_open_settings),
                 onConfirm = viewModel::onEnableWidgetDialogConfirm,
-                onCancel = viewModel::onEnableWidgetDialogCancel
+                onCancel = viewModel::onEnableWidgetDialogCancel,
             )
 
             EnableWidgetDialog(
@@ -460,7 +460,7 @@ fun CommunalHub(
                 title = stringResource(id = R.string.work_mode_off_title),
                 positiveButtonText = stringResource(id = R.string.work_mode_turn_on),
                 onConfirm = viewModel::onEnableWorkProfileDialogConfirm,
-                onCancel = viewModel::onEnableWorkProfileDialogCancel
+                onCancel = viewModel::onEnableWorkProfileDialogCancel,
             )
         }
 
@@ -509,7 +509,7 @@ private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
             imageVector = Icons.Outlined.Widgets,
             contentDescription = null,
             tint = colors.primary,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(32.dp),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -527,7 +527,7 @@ private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
                 Modifier.padding(horizontal = 26.dp, vertical = 16.dp)
                     .widthIn(min = 200.dp)
                     .heightIn(min = 56.dp),
-            onClick = { onButtonClicked() }
+            onClick = { onButtonClicked() },
         ) {
             Text(
                 stringResource(R.string.communal_widgets_disclaimer_button),
@@ -540,7 +540,7 @@ private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
 @Composable
 private fun ObserveScrollEffect(
     gridState: LazyGridState,
-    communalViewModel: BaseCommunalViewModel
+    communalViewModel: BaseCommunalViewModel,
 ) {
 
     LaunchedEffect(gridState) {
@@ -667,7 +667,7 @@ private fun BoxScope.CommunalHubLazyGrid(
             rememberGridDragDropState(
                 gridState = gridState,
                 contentListState = contentListState,
-                updateDragPositionForRemove = updateDragPositionForRemove
+                updateDragPositionForRemove = updateDragPositionForRemove,
             )
         gridModifier =
             gridModifier
@@ -677,7 +677,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     LocalLayoutDirection.current,
                     screenWidth,
                     contentOffset,
-                    viewModel
+                    viewModel,
                 )
         // for widgets dropped from other activities
         val dragAndDropTargetState =
@@ -709,11 +709,7 @@ private fun BoxScope.CommunalHubLazyGrid(
             contentType = { _, item -> item.key },
             span = { _, item -> GridItemSpan(item.size.span) },
         ) { index, item ->
-            val size =
-                SizeF(
-                    Dimensions.CardWidth.value,
-                    item.size.dp().value,
-                )
+            val size = SizeF(Dimensions.CardWidth.value, item.size.dp().value)
             val cardModifier = Modifier.requiredSize(width = size.width.dp, height = size.height.dp)
             if (viewModel.isEditMode && dragDropState != null) {
                 val selected = item.key == selectedKey.value
@@ -765,16 +761,13 @@ private fun BoxScope.CommunalHubLazyGrid(
  * The empty state displays a fullscreen call-to-action (CTA) tile when no widgets are available.
  */
 @Composable
-private fun EmptyStateCta(
-    contentPadding: PaddingValues,
-    viewModel: BaseCommunalViewModel,
-) {
+private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunalViewModel) {
     val colors = LocalAndroidColorScheme.current
     Card(
         modifier = Modifier.height(hubDimensions.GridHeight).padding(contentPadding),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         border = BorderStroke(3.adjustedDp, colors.secondary),
-        shape = RoundedCornerShape(size = 80.adjustedDp)
+        shape = RoundedCornerShape(size = 80.adjustedDp),
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 110.adjustedDp),
@@ -788,10 +781,7 @@ private fun EmptyStateCta(
                 textAlign = TextAlign.Center,
                 color = colors.secondary,
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(
                     modifier = Modifier.height(56.dp),
                     colors =
@@ -799,17 +789,13 @@ private fun EmptyStateCta(
                             containerColor = colors.primary,
                             contentColor = colors.onPrimary,
                         ),
-                    onClick = {
-                        viewModel.onOpenWidgetEditor(
-                            shouldOpenWidgetPickerOnStart = true,
-                        )
-                    },
+                    onClick = { viewModel.onOpenWidgetEditor(shouldOpenWidgetPickerOnStart = true) },
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription =
                             stringResource(R.string.label_for_button_in_empty_state_cta),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.width(ButtonDefaults.IconSpacing))
                     Text(
@@ -835,7 +821,7 @@ private fun Toolbar(
     setToolbarSize: (toolbarSize: IntSize) -> Unit,
     setRemoveButtonCoordinates: (coordinates: LayoutCoordinates?) -> Unit,
     onOpenWidgetPicker: () -> Unit,
-    onEditDone: () -> Unit
+    onEditDone: () -> Unit,
 ) {
     if (!removeEnabled) {
         // Clear any existing coordinates when remove is not enabled.
@@ -844,7 +830,7 @@ private fun Toolbar(
     val removeButtonAlpha: Float by
         animateFloatAsState(
             targetValue = if (removeEnabled) 1f else 0.5f,
-            label = "RemoveButtonAlphaAnimation"
+            label = "RemoveButtonAlphaAnimation",
         )
 
     Box(
@@ -855,7 +841,7 @@ private fun Toolbar(
                     start = Dimensions.ToolbarPaddingHorizontal,
                     end = Dimensions.ToolbarPaddingHorizontal,
                 )
-                .onSizeChanged { setToolbarSize(it) },
+                .onSizeChanged { setToolbarSize(it) }
     ) {
         val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
         ToolbarButton(
@@ -864,16 +850,14 @@ private fun Toolbar(
             onClick = onOpenWidgetPicker,
         ) {
             Icon(Icons.Default.Add, null)
-            Text(
-                text = addWidgetText,
-            )
+            Text(text = addWidgetText)
         }
 
         AnimatedVisibility(
             modifier = Modifier.align(Alignment.Center),
             visible = removeEnabled,
             enter = fadeIn(),
-            exit = fadeOut()
+            exit = fadeOut(),
         ) {
             Button(
                 onClick = onRemoveClicked,
@@ -887,20 +871,18 @@ private fun Toolbar(
                             if (removeEnabled) {
                                 setRemoveButtonCoordinates(it)
                             }
-                        }
+                        },
             ) {
                 Row(
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             ButtonDefaults.IconSpacing,
-                            Alignment.CenterHorizontally
+                            Alignment.CenterHorizontally,
                         ),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(Icons.Default.Close, contentDescription = null)
-                    Text(
-                        text = stringResource(R.string.button_to_remove_widget),
-                    )
+                    Text(text = stringResource(R.string.button_to_remove_widget))
                 }
             }
         }
@@ -911,9 +893,7 @@ private fun Toolbar(
             onClick = onEditDone,
         ) {
             Icon(Icons.Default.Check, contentDescription = null)
-            Text(
-                text = stringResource(R.string.hub_mode_editing_exit_button_text),
-            )
+            Text(text = stringResource(R.string.hub_mode_editing_exit_button_text))
         }
     }
 }
@@ -926,14 +906,14 @@ private fun ToolbarButton(
     isPrimary: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable RowScope.() -> Unit,
 ) {
     val colors = LocalAndroidColorScheme.current
     AnimatedVisibility(
         visible = isPrimary,
         modifier = modifier,
         enter = fadeIn(),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         Button(
             onClick = onClick,
@@ -943,7 +923,7 @@ private fun ToolbarButton(
             Row(
                 horizontalArrangement =
                     Arrangement.spacedBy(ButtonDefaults.IconSpacing, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 content()
             }
@@ -954,21 +934,18 @@ private fun ToolbarButton(
         visible = !isPrimary,
         modifier = modifier,
         enter = fadeIn(),
-        exit = fadeOut()
+        exit = fadeOut(),
     ) {
         OutlinedButton(
             onClick = onClick,
-            colors =
-                ButtonDefaults.outlinedButtonColors(
-                    contentColor = colors.onPrimaryContainer,
-                ),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.onPrimaryContainer),
             border = BorderStroke(width = 2.0.dp, color = colors.primary),
             contentPadding = Dimensions.ButtonPadding,
         ) {
             Row(
                 horizontalArrangement =
                     Arrangement.spacedBy(ButtonDefaults.IconSpacing, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 content()
             }
@@ -1041,7 +1018,7 @@ fun HighlightedItem(modifier: Modifier = Modifier, alpha: Float = 1.0f) {
                     size =
                         Size(width = size.width + padding * 2, height = size.height + padding * 2),
                     cornerRadius = CornerRadius(37.adjustedDp.toPx()),
-                    style = Stroke(width = 3.adjustedDp.toPx())
+                    style = Stroke(width = 3.adjustedDp.toPx()),
                 )
             }
     )
@@ -1061,7 +1038,7 @@ private fun CtaTileInViewModeContent(
                 containerColor = colors.primary,
                 contentColor = colors.onPrimary,
             ),
-        shape = RoundedCornerShape(68.adjustedDp, 34.adjustedDp, 68.adjustedDp, 34.adjustedDp)
+        shape = RoundedCornerShape(68.adjustedDp, 34.adjustedDp, 68.adjustedDp, 34.adjustedDp),
     ) {
         Column(
             modifier =
@@ -1081,7 +1058,7 @@ private fun CtaTileInViewModeContent(
                 style = MaterialTheme.typography.titleLarge,
                 fontSize = nonScalableTextSize(22.dp),
                 lineHeight = nonScalableTextSize(28.dp),
-                modifier = Modifier.verticalScroll(rememberScrollState()).weight(1F)
+                modifier = Modifier.verticalScroll(rememberScrollState()).weight(1F),
             )
             Spacer(modifier = Modifier.size(16.adjustedDp))
             Row(
@@ -1093,15 +1070,12 @@ private fun CtaTileInViewModeContent(
                     LocalDensity provides
                         Density(
                             LocalDensity.current.density,
-                            LocalDensity.current.fontScale.coerceIn(0f, 1.25f)
+                            LocalDensity.current.fontScale.coerceIn(0f, 1.25f),
                         )
                 ) {
                     OutlinedButton(
                         modifier = Modifier.fillMaxHeight().weight(1F),
-                        colors =
-                            ButtonDefaults.buttonColors(
-                                contentColor = colors.onPrimary,
-                            ),
+                        colors = ButtonDefaults.buttonColors(contentColor = colors.onPrimary),
                         border = BorderStroke(width = 1.0.dp, color = colors.primaryContainer),
                         onClick = viewModel::onDismissCtaTile,
                         contentPadding = PaddingValues(0.dp, 0.dp, 0.dp, 0.dp),
@@ -1259,7 +1233,7 @@ private fun WidgetContent(
                 visible = selected,
                 model = model,
                 widgetConfigurator = widgetConfigurator,
-                modifier = Modifier.align(Alignment.BottomEnd)
+                modifier = Modifier.align(Alignment.BottomEnd),
             )
         }
     }
@@ -1289,14 +1263,14 @@ fun WidgetConfigureButton(
                     containerColor = colors.primary,
                     contentColor = colors.onPrimary,
                     disabledContainerColor = Color.Transparent,
-                    disabledContentColor = Color.Transparent
+                    disabledContentColor = Color.Transparent,
                 ),
             onClick = { scope.launch { widgetConfigurator.configureWidget(model.appWidgetId) } },
         ) {
             Icon(
                 imageVector = Icons.Outlined.Edit,
                 contentDescription = stringResource(id = R.string.edit_widget),
-                modifier = Modifier.padding(12.adjustedDp)
+                modifier = Modifier.padding(12.adjustedDp),
             )
         }
     }
@@ -1323,13 +1297,13 @@ fun DisabledWidgetPlaceholder(
                 .background(
                     color = MaterialTheme.colorScheme.surfaceVariant,
                     shape =
-                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius)),
                 )
                 .clickable(
                     enabled = !viewModel.isEditMode,
                     interactionSource = null,
                     indication = null,
-                    onClick = viewModel::onOpenEnableWidgetDialog
+                    onClick = viewModel::onOpenEnableWidgetDialog,
                 ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1360,7 +1334,7 @@ fun PendingWidgetPlaceholder(
         modifier =
             modifier.background(
                 color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                shape = RoundedCornerShape(dimensionResource(system_app_widget_background_radius)),
             ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -1418,7 +1392,7 @@ private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier)
                             MotionEvent.ACTION_MOVE,
                             change.position.x,
                             change.position.y,
-                            0
+                            0,
                         )
                     viewModel.mediaHost.hostView.dispatchTouchEvent(event)
                     event.recycle()
@@ -1429,12 +1403,12 @@ private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier)
                 layoutParams =
                     FrameLayout.LayoutParams(
                         FrameLayout.LayoutParams.MATCH_PARENT,
-                        FrameLayout.LayoutParams.MATCH_PARENT
+                        FrameLayout.LayoutParams.MATCH_PARENT,
                     )
             }
             viewModel.mediaHost.hostView
         },
-        onReset = {}
+        onReset = {},
     )
 }
 
@@ -1462,7 +1436,7 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
                             ) {
                                 viewModel.changeScene(
                                     CommunalScenes.Blank,
-                                    "closed by accessibility"
+                                    "closed by accessibility",
                                 )
                                 true
                             },
@@ -1471,7 +1445,7 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
                             ) {
                                 viewModel.onOpenWidgetEditor()
                                 true
-                            }
+                            },
                         )
                 }
             }
@@ -1514,7 +1488,7 @@ private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): Padd
         start = Dimensions.ToolbarPaddingHorizontal,
         end = Dimensions.ToolbarPaddingHorizontal,
         top = verticalPadding + toolbarHeight,
-        bottom = verticalPadding
+        bottom = verticalPadding,
     )
 }
 
@@ -1523,7 +1497,7 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
     return with(LocalDensity.current) {
         ContentPaddingInPx(
             start = paddingValues.calculateStartPadding(LocalLayoutDirection.current).toPx(),
-            top = paddingValues.calculateTopPadding().toPx()
+            top = paddingValues.calculateTopPadding().toPx(),
         )
     }
 }
@@ -1536,7 +1510,7 @@ private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingIn
 fun isPointerWithinEnabledRemoveButton(
     removeEnabled: Boolean,
     offset: Offset?,
-    containerToCheck: LayoutCoordinates?
+    containerToCheck: LayoutCoordinates?,
 ): Boolean {
     if (!removeEnabled || offset == null || containerToCheck == null) {
         return false

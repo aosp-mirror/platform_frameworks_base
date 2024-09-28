@@ -240,6 +240,9 @@ message Entry {
 
   // The staged resource ID of this finalized resource.
   StagedId staged_id = 7;
+
+  // The set of values defined for this entry which are behind disabled flags
+  repeated ConfigValue flag_disabled_config_value = 8;
 }
 
 // A Configuration/Value pair.
@@ -283,6 +286,8 @@ message Item {
 
   // The status of the flag the value is behind if any
   uint32 flag_status = 8;
+  bool flag_negated = 9;
+  string flag_name = 10;
 }
 
 // A CompoundValue is an abstract type. It represents a value that is a made of other values.

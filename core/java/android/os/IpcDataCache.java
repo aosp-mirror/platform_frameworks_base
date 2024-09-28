@@ -48,6 +48,20 @@ import java.util.concurrent.atomic.AtomicLong;
  * LRU cache that's invalidated when an opaque value in a property changes. Self-synchronizing,
  * but doesn't hold a lock across data fetches on query misses.
  *
+ * Clients should be aware of the following commonly-seen issues:
+ * <ul>
+ *
+ * <li>Client calls will not go through the cache before the first invalidation signal is
+ * received. Therefore, servers should signal an invalidation as soon as they have data to offer to
+ * clients.
+ *
+ * <li>Cache invalidation is restricted to well-known processes, which means that test code cannot
+ * invalidate a cache.  {@link #disableForTestMode()} and {@link #testPropertyName} must be used in
+ * test processes that attempt cache invalidation.  See
+ * {@link PropertyInvalidatedCacheTest#testBasicCache()} for an example.
+ *
+ * </ul>
+ *
  * The intended use case is caching frequently-read, seldom-changed information normally retrieved
  * across interprocess communication. Imagine that you've written a user birthday information
  * daemon called "birthdayd" that exposes an {@code IUserBirthdayService} interface over
@@ -136,20 +150,20 @@ import java.util.concurrent.atomic.AtomicLong;
  * string is permitted.  The third parameters is the name of the API being cached; this, too, can
  * any value.  The fourth is the name of the cache.  The cache is usually named after th API.
  * Some things you must know about the three strings:
- * <list>
- * <ul> The system property that controls the cache is named {@code cache_key.<module>.<api>}.
+ * <ul>
+ * <li> The system property that controls the cache is named {@code cache_key.<module>.<api>}.
  * Usually, the SELinux rules permit a process to write a system property (and therefore
  * invalidate a cache) based on the wildcard {@code cache_key.<module>.*}.  This means that
  * although the cache can be constructed with any module string, whatever string is chosen must be
  * consistent with the SELinux configuration.
- * <ul> The API name can be any string of alphanumeric characters.  All caches with the same API
+ * <li> The API name can be any string of alphanumeric characters.  All caches with the same API
  * are invalidated at the same time.  If a server supports several caches and all are invalidated
  * in common, then it is most efficient to assign the same API string to every cache.
- * <ul> The cache name can be any string.  In debug output, the name is used to distiguish between
+ * <li> The cache name can be any string.  In debug output, the name is used to distiguish between
  * caches with the same API name.  The cache name is also used when disabling caches in the
  * current process.  So, invalidation is based on the module+api but disabling (which is generally
  * a once-per-process operation) is based on the cache name.
- * </list>
+ * </ul>
  *
  * User birthdays do occasionally change, so we have to modify the server to invalidate this
  * cache when necessary. That invalidation code looks like this:

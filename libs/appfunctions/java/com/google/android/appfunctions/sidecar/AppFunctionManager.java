@@ -19,11 +19,11 @@ package com.google.android.appfunctions.sidecar;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.CancellationSignal;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
-
 
 /**
  * Provides app functions related functionalities.
@@ -45,7 +45,7 @@ public final class AppFunctionManager {
      *
      * @param context A {@link Context}.
      * @throws java.lang.IllegalStateException if the underlying {@link
-     *   android.app.appfunctions.AppFunctionManager} is not found.
+     *     android.app.appfunctions.AppFunctionManager} is not found.
      */
     public AppFunctionManager(Context context) {
         mContext = Objects.requireNonNull(context);
@@ -66,6 +66,7 @@ public final class AppFunctionManager {
     public void executeAppFunction(
             @NonNull ExecuteAppFunctionRequest sidecarRequest,
             @NonNull @CallbackExecutor Executor executor,
+            @NonNull CancellationSignal cancellationSignal,
             @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
         Objects.requireNonNull(sidecarRequest);
         Objects.requireNonNull(executor);
@@ -74,9 +75,40 @@ public final class AppFunctionManager {
         android.app.appfunctions.ExecuteAppFunctionRequest platformRequest =
                 SidecarConverter.getPlatformExecuteAppFunctionRequest(sidecarRequest);
         mManager.executeAppFunction(
-                platformRequest, executor, (platformResponse) -> {
-                    callback.accept(SidecarConverter.getSidecarExecuteAppFunctionResponse(
-                            platformResponse));
+                platformRequest,
+                executor,
+                cancellationSignal,
+                (platformResponse) -> {
+                    callback.accept(
+                            SidecarConverter.getSidecarExecuteAppFunctionResponse(
+                                    platformResponse));
                 });
+    }
+
+    /**
+     * Executes the app function.
+     *
+     * <p>Proxies request and response to the underlying {@link
+     * android.app.appfunctions.AppFunctionManager#executeAppFunction}, converting the request and
+     * response in the appropriate type required by the function.
+     *
+     * @deprecated Use {@link #executeAppFunction(ExecuteAppFunctionRequest, Executor,
+     *     CancellationSignal, Consumer)} instead. This method will be removed once usage references
+     *     are updated.
+     */
+    @Deprecated
+    public void executeAppFunction(
+            @NonNull ExecuteAppFunctionRequest sidecarRequest,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
+        Objects.requireNonNull(sidecarRequest);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        executeAppFunction(
+                sidecarRequest,
+                executor,
+                new CancellationSignal(),
+                callback);
     }
 }

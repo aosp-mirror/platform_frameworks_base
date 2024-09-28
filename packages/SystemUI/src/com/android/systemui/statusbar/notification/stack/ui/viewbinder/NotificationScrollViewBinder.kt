@@ -88,6 +88,14 @@ constructor(
                 viewModel.expandFraction.collect { view.setExpandFraction(it.coerceIn(0f, 1f)) }
             }
             launch { viewModel.qsExpandFraction.collect { view.setQsExpandFraction(it) } }
+            launch {
+                viewModel.isShowingStackOnLockscreen.collect {
+                    view.setShowingStackOnLockscreen(it)
+                }
+            }
+            launch {
+                viewModel.alphaForLockscreenFadeIn.collect { view.setAlphaForLockscreenFadeIn(it) }
+            }
             launch { viewModel.isScrollable.collect { view.setScrollingEnabled(it) } }
             launch { viewModel.isDozing.collect { isDozing -> view.setDozing(isDozing) } }
             launch {
@@ -103,6 +111,7 @@ constructor(
             launch {
                 viewModel.shouldCloseGuts.filter { it }.collect { view.closeGutsOnSceneTouch() }
             }
+            launch { viewModel.suppressHeightUpdates.collect { view.suppressHeightUpdates(it) } }
 
             launchAndDispose {
                 view.setSyntheticScrollConsumer(viewModel.syntheticScrollConsumer)

@@ -107,4 +107,27 @@ class AdditionalSystemViewContainer(
         }
         windowManagerWrapper.updateViewLayout(view, lp)
     }
+
+    class Factory {
+        fun create(
+            windowManagerWrapper: WindowManagerWrapper,
+            taskId: Int,
+            x: Int,
+            y: Int,
+            width: Int,
+            height: Int,
+            flags: Int,
+            view: View,
+        ): AdditionalSystemViewContainer =
+            AdditionalSystemViewContainer(
+                windowManagerWrapper = windowManagerWrapper,
+                taskId = taskId,
+                x = x,
+                y = y,
+                width = width,
+                height = height,
+                flags = flags,
+                view = view
+            )
+    }
 }

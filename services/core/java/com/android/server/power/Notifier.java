@@ -53,6 +53,7 @@ import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -512,8 +513,17 @@ public class Notifier {
             }
 
             // Start input as soon as we start waking up or going to sleep.
-            mInputManagerInternal.setInteractive(interactive);
             mInputMethodManagerInternal.setInteractive(interactive);
+            if (!mFlags.isPerDisplayWakeByTouchEnabled()) {
+                // Since wakefulness is a global property in original logic, all displays should
+                // be set to the same interactive state, matching system's global wakefulness
+                SparseBooleanArray displayInteractivities = new SparseBooleanArray();
+                int[] displayIds = mDisplayManagerInternal.getDisplayIds().toArray();
+                for (int displayId : displayIds) {
+                    displayInteractivities.put(displayId, interactive);
+                }
+                mInputManagerInternal.setDisplayInteractivities(displayInteractivities);
+            }
 
             // Notify battery stats.
             try {

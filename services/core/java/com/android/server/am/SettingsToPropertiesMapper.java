@@ -40,6 +40,7 @@ import android.aconfigd.Aconfigd.StorageRequestMessages;
 import android.aconfigd.Aconfigd.StorageReturnMessage;
 import android.aconfigd.Aconfigd.StorageReturnMessages;
 import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
+import static com.android.aconfig_new_storage.Flags.supportImmediateLocalOverrides;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -491,14 +492,18 @@ public class SettingsToPropertiesMapper {
     static void writeFlagOverrideRequest(
         ProtoOutputStream proto, String packageName, String flagName, String flagValue,
         boolean isLocal) {
+      int localOverrideTag = supportImmediateLocalOverrides()
+          ? StorageRequestMessage.LOCAL_IMMEDIATE
+          : StorageRequestMessage.LOCAL_ON_REBOOT;
+
       long msgsToken = proto.start(StorageRequestMessages.MSGS);
       long msgToken = proto.start(StorageRequestMessage.FLAG_OVERRIDE_MESSAGE);
       proto.write(StorageRequestMessage.FlagOverrideMessage.PACKAGE_NAME, packageName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_NAME, flagName);
       proto.write(StorageRequestMessage.FlagOverrideMessage.FLAG_VALUE, flagValue);
       proto.write(StorageRequestMessage.FlagOverrideMessage.OVERRIDE_TYPE, isLocal
-                ? StorageRequestMessage.LOCAL_ON_REBOOT
-                : StorageRequestMessage.SERVER_ON_REBOOT);
+            ? localOverrideTag
+            : StorageRequestMessage.SERVER_ON_REBOOT);
       proto.end(msgToken);
       proto.end(msgsToken);
     }

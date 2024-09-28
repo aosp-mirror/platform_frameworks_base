@@ -84,10 +84,10 @@ public class RavenwoodTestStats {
         try {
             mOutputWriter = new PrintWriter(mOutputFile);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to crete logfile. File=" + mOutputFile, e);
+            throw new RuntimeException("Failed to create logfile. File=" + mOutputFile, e);
         }
 
-        // Crete the "latest" symlink.
+        // Create the "latest" symlink.
         Path symlink = Paths.get(tmpdir, basename + "latest.csv");
         try {
             if (Files.exists(symlink)) {
@@ -96,7 +96,7 @@ public class RavenwoodTestStats {
             Files.createSymbolicLink(symlink, Paths.get(mOutputFile.getName()));
 
         } catch (IOException e) {
-            throw new RuntimeException("Failed to crete logfile. File=" + mOutputFile, e);
+            throw new RuntimeException("Failed to create logfile. File=" + mOutputFile, e);
         }
 
         Log.i(TAG, "Test result stats file: " + mOutputFile);

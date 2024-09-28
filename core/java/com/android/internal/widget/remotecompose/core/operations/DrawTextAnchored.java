@@ -15,7 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -23,6 +25,7 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -30,7 +33,8 @@ import java.util.List;
  * Draw Text in Anchored to a point
  */
 public class DrawTextAnchored extends PaintOperation implements VariableSupport {
-    public static final Companion COMPANION = new Companion();
+    private static final int OP_CODE = Operations.DRAW_TEXT_ANCHOR;
+    private static final String CLASS_NAME = "DrawTextAnchored";
     int mTextID;
     float mX;
     float mY;
@@ -91,7 +95,7 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mTextID, mX,
+        apply(buffer, mTextID, mX,
                 mY,
                 mPanX,
                 mPanY,
@@ -113,63 +117,76 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
         return Float.toString(v);
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int textID = buffer.readInt();
+        float x = buffer.readFloat();
+        float y = buffer.readFloat();
+        float panX = buffer.readFloat();
+        float panY = buffer.readFloat();
+        int flags = buffer.readInt();
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int textID = buffer.readInt();
-            float x = buffer.readFloat();
-            float y = buffer.readFloat();
-            float panX = buffer.readFloat();
-            float panY = buffer.readFloat();
-            int flags = buffer.readInt();
+        DrawTextAnchored op = new DrawTextAnchored(textID,
+                x, y,
+                panX, panY,
+                flags);
 
-            DrawTextAnchored op = new DrawTextAnchored(textID,
-                    x, y,
-                    panX, panY,
-                    flags);
-
-            operations.add(op);
-        }
-
-        @Override
-        public String name() {
-            return "";
-        }
-
-        @Override
-        public int id() {
-            return 0;
-        }
-
-        /**
-         * Writes out the operation to the buffer
-         * @param buffer
-         * @param textID
-         * @param x
-         * @param y
-         * @param panX
-         * @param panY
-         * @param flags
-         */
-        public void apply(WireBuffer buffer,
-                          int textID,
-                          float x,
-                          float y,
-                          float panX,
-                          float panY,
-                          int flags) {
-            buffer.start(Operations.DRAW_TEXT_ANCHOR);
-            buffer.writeInt(textID);
-            buffer.writeFloat(x);
-            buffer.writeFloat(y);
-            buffer.writeFloat(panX);
-            buffer.writeFloat(panY);
-            buffer.writeInt(flags);
-        }
+        operations.add(op);
     }
+
+    public static String name() {
+        return CLASS_NAME;
+    }
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer The buffer to write to
+     * @param textID The id of the text data
+     * @param x The x-position of the anchor point
+     * @param y The y-position of the anchor point
+     * @param panX The pan from left(-1) to right(1) 0 being centered
+     * @param panY The pan from top(-1) to bottom(1) 0 being centered
+     * @param flags Change the behaviour
+     */
+    public static void apply(WireBuffer buffer,
+                             int textID,
+                             float x,
+                             float y,
+                             float panX,
+                             float panY,
+                             int flags) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(textID);
+        buffer.writeFloat(x);
+        buffer.writeFloat(y);
+        buffer.writeFloat(panX);
+        buffer.writeFloat(panY);
+        buffer.writeInt(flags);
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Draw Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Draw text centered about an anchor point")
+                .field(INT, "textId", "id of bitmap")
+                .field(FLOAT, "x",
+                        "The x-position of the anchor point")
+                .field(FLOAT, "y",
+                        "The y-position of the anchor point")
+                .field(FLOAT, "panX",
+                        "The pan from left(-1) to right(1) 0 being centered")
+                .field(FLOAT, "panY",
+                        "The pan from top(-1) to bottom(1) 0 being centered")
+                .field(INT, "flags",
+                        "Change the behaviour");
+
+    }
+
 
     float[] mBounds = new float[4];
 
@@ -194,8 +211,9 @@ public class DrawTextAnchored extends PaintOperation implements VariableSupport 
 
     @Override
     public void paint(PaintContext context) {
-        context.getTextBounds(mTextID, 0, -1,
-                (mFlags & ANCHOR_MONOSPACE_MEASURE) != 0, mBounds);
+        int flags = ((mFlags & ANCHOR_MONOSPACE_MEASURE) != 0)
+                ? PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH : 0;
+        context.getTextBounds(mTextID, 0, -1, flags, mBounds);
         float x = mOutX + getHorizontalOffset();
         float y = (Float.isNaN(mOutPanY)) ? mOutY : mOutY + getVerticalOffset();
         context.drawTextRun(mTextID, 0, -1, 0, 1, x, y,

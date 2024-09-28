@@ -129,3 +129,13 @@ flag {
   description: "APIs that expose gainmap metadata corresponding to those defined in ISO 21496-1"
   bug: "349357636"
 }
+
+flag {
+  name: "query_global_priority"
+  namespace: "core_graphics"
+  description: "Attempt to query whether the vulkan driver supports the requested global priority before queue creation."
+  bug: "343986434"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

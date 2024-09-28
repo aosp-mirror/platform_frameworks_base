@@ -31,6 +31,8 @@ import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSched
 import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.Companion.TAG
 import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.TutorialType
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_KEY
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_BOTH
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEY
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEYBOARD
@@ -48,7 +50,7 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     @Application private val context: Context,
     private val tutorialSchedulerInteractor: TutorialSchedulerInteractor,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
 ) {
     fun start() {
         backgroundScope.launch {
@@ -68,7 +70,7 @@ constructor(
         val extras = Bundle()
         extras.putString(
             Notification.EXTRA_SUBSTITUTE_APP_NAME,
-            context.getString(com.android.internal.R.string.android_system_label)
+            context.getString(com.android.internal.R.string.android_system_label),
         )
 
         val info = getNotificationInfo(tutorialType)!!
@@ -91,7 +93,7 @@ constructor(
             NotificationChannel(
                 CHANNEL_ID,
                 context.getString(com.android.internal.R.string.android_system_label),
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_DEFAULT,
             )
         notificationManager.createNotificationChannel(channel)
     }
@@ -100,13 +102,14 @@ constructor(
         val intent =
             Intent(context, KeyboardTouchpadTutorialActivity::class.java).apply {
                 putExtra(INTENT_TUTORIAL_TYPE_KEY, tutorialType)
+                putExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY, INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
         return PendingIntent.getActivity(
             context,
             /* requestCode= */ 0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE,
         )
     }
 
@@ -118,13 +121,13 @@ constructor(
                 NotificationInfo(
                     context.getString(R.string.launch_keyboard_tutorial_notification_title),
                     context.getString(R.string.launch_keyboard_tutorial_notification_content),
-                    INTENT_TUTORIAL_TYPE_KEYBOARD
+                    INTENT_TUTORIAL_TYPE_KEYBOARD,
                 )
             TutorialType.TOUCHPAD ->
                 NotificationInfo(
                     context.getString(R.string.launch_touchpad_tutorial_notification_title),
                     context.getString(R.string.launch_touchpad_tutorial_notification_content),
-                    INTENT_TUTORIAL_TYPE_TOUCHPAD
+                    INTENT_TUTORIAL_TYPE_TOUCHPAD,
                 )
             TutorialType.BOTH ->
                 NotificationInfo(
@@ -134,7 +137,7 @@ constructor(
                     context.getString(
                         R.string.launch_keyboard_touchpad_tutorial_notification_content
                     ),
-                    INTENT_TUTORIAL_TYPE_BOTH
+                    INTENT_TUTORIAL_TYPE_BOTH,
                 )
             TutorialType.NONE -> null
         }

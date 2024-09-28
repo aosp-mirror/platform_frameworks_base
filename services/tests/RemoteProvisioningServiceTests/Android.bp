@@ -31,7 +31,6 @@ android_test {
         "service-rkp.impl",
         "services.core",
         "truth",
-        "truth-java8-extension",
     ],
     test_suites: [
         "device-tests",

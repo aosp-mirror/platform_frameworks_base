@@ -16,11 +16,18 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 /**
  * Models UI state used to render the content of the quick settings shade overlay.
@@ -31,15 +38,43 @@ import dagger.assisted.AssistedInject
 class QuickSettingsShadeOverlayContentViewModel
 @AssistedInject
 constructor(
+    val shadeInteractor: ShadeInteractor,
     val sceneInteractor: SceneInteractor,
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
-) {
+) : ExclusiveActivatable() {
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                sceneInteractor.currentScene.collect { currentScene ->
+                    when (currentScene) {
+                        // TODO(b/369513770): The ShadeSession should be preserved in this scenario.
+                        Scenes.Bouncer ->
+                            shadeInteractor.collapseQuickSettingsShade(
+                                loggingReason = "bouncer shown while shade is open"
+                            )
+                    }
+                }
+            }
+
+            launch {
+                shadeInteractor.isShadeTouchable
+                    .distinctUntilChanged()
+                    .filter { !it }
+                    .collect {
+                        shadeInteractor.collapseQuickSettingsShade(
+                            loggingReason = "device became non-interactive"
+                        )
+                    }
+            }
+        }
+
+        awaitCancellation()
+    }
+
     fun onScrimClicked() {
-        sceneInteractor.hideOverlay(
-            overlay = Overlays.QuickSettingsShade,
-            loggingReason = "Shade scrim clicked",
-        )
+        shadeInteractor.collapseQuickSettingsShade(loggingReason = "shade scrim clicked")
     }
 
     @AssistedFactory

@@ -97,7 +97,6 @@ import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
 import android.text.style.TextAppearanceSpan;
 import android.util.Pair;
-import android.util.Slog;
 import android.widget.RemoteViews;
 
 import androidx.test.InstrumentationRegistry;
@@ -118,6 +117,7 @@ import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -2114,6 +2114,300 @@ public class NotificationTest {
         assertThat(n.getWhen()).isEqualTo(9);
     }
 
+    @Test
+    public void getNotificationStyleClass_forPlatformClassName_returnsPlatformClass() {
+        final List<Class<? extends Notification.Style>> platformStyleClasses = List.of(
+                Notification.BigTextStyle.class, Notification.BigPictureStyle.class,
+                Notification.MessagingStyle.class, Notification.CallStyle.class,
+                Notification.InboxStyle.class, Notification.MediaStyle.class,
+                Notification.DecoratedCustomViewStyle.class,
+                Notification.DecoratedMediaCustomViewStyle.class
+        );
+
+        for (Class<? extends Notification.Style> platformStyleClass : platformStyleClasses) {
+            assertThat(Notification.getNotificationStyleClass(platformStyleClass.getName()))
+                    .isEqualTo(platformStyleClass);
+        }
+    }
+
+    @Test
+    public void getNotificationStyleClass_forNotPlatformClassName_returnsNull() {
+        assertThat(Notification.getNotificationStyleClass(NotAPlatformStyle.class.getName()))
+                .isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_richOngoingEnabled_platformClass() {
+        assertThat(
+                Notification.getNotificationStyleClass(Notification.ProgressStyle.class.getName()))
+                .isEqualTo(Notification.ProgressStyle.class);
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_richOngoingDisabled_notPlatformClass() {
+        assertThat(
+                Notification.getNotificationStyleClass(Notification.ProgressStyle.class.getName()))
+                .isNull();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onSegmentChange_visiblyDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(100))
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(50)
+                                .setColor(Color.RED)));
+
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(100))
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(50)
+                                .setColor(Color.BLUE)));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void indeterminateProgressStyle_onSegmentChange_visiblyNotDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(100))
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(50)
+                                .setColor(Color.RED)));
+
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(100))
+                        .addProgressSegment(new Notification.ProgressStyle.Segment(50)
+                                .setColor(Color.BLUE)));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onStartIconChange_visiblyDifferent() {
+        final Icon icon1 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));
+
+        final Icon icon2 = Icon.createWithBitmap(
+                Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressStartIcon(icon1));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressStartIcon(icon2));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onEndIconChange_visiblyDifferent() {
+        final Icon icon1 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));
+
+        final Icon icon2 = Icon.createWithBitmap(
+                Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressEndIcon(icon1));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressEndIcon(icon2));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onProgressChange_visiblyDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgress(20));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgress(21));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void indeterminateProgressStyle_onProgressChange_visiblyNotDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .setProgressIndeterminate(true).setProgress(20));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .setProgressIndeterminate(true).setProgress(21));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onIsStyledByProgressChange_visiblyDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setStyledByProgress(true));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setStyledByProgress(false));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void indeterminateProgressStyle_onIsStyledByProgressChange_visiblyNotDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .setProgressIndeterminate(true).setStyledByProgress(true));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .setProgressIndeterminate(true).setStyledByProgress(false));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onProgressStepChange_visiblyDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .addProgressStep(new Notification.ProgressStyle.Step(10)));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .addProgressStep(new Notification.ProgressStyle.Step(12)));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void indeterminateProgressStyle_onProgressStepChange_visiblyNotDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
+                        .addProgressStep(new Notification.ProgressStyle.Step(10)));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
+                        .addProgressStep(new Notification.ProgressStyle.Step(12)));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onTrackerIconChange_visiblyDifferent() {
+        final Icon icon1 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));
+
+        final Icon icon2 = Icon.createWithBitmap(
+                Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressTrackerIcon(icon1));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressTrackerIcon(icon2));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void indeterminateProgressStyle_onTrackerIconChange_visiblyNotDifferent() {
+        final Icon icon1 = Icon.createWithBitmap(BitmapFactory.decodeResource(
+                mContext.getResources(), com.android.frameworks.coretests.R.drawable.test128x96));
+
+        final Icon icon2 = Icon.createWithBitmap(
+                Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888));
+
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
+                        .setProgressTrackerIcon(icon1));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle()
+                        .setProgressIndeterminate(true).setProgressTrackerIcon(icon2));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_onIndeterminateChange_visiblyDifferent() {
+        final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true));
+        final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
+                .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(false));
+
+        assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
+                .isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_getProgressMax_default100() {
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        assertThat(progressStyle.getProgressMax()).isEqualTo(100);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_getProgressMax_nooSegments_returnsDefault() {
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        progressStyle.setProgressSegments(Collections.emptyList());
+        assertThat(progressStyle.getProgressMax()).isEqualTo(100);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_getProgressMax_returnsSumOfSegmentLength() {
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        progressStyle
+                .addProgressSegment(new Notification.ProgressStyle.Segment(10))
+                .addProgressSegment(new Notification.ProgressStyle.Segment(20));
+
+        assertThat(progressStyle.getProgressMax()).isEqualTo(30);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_getProgressMax_onSegmentOverflow_returnsDefault() {
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        progressStyle
+                .addProgressSegment(new Notification.ProgressStyle.Segment(Integer.MAX_VALUE))
+                .addProgressSegment(new Notification.ProgressStyle.Segment(10));
+
+        assertThat(progressStyle.getProgressMax()).isEqualTo(100);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_indeterminate_defaultValueFalse() {
+        final Notification.ProgressStyle progressStyle1 = new Notification.ProgressStyle();
+
+        assertThat(progressStyle1.isProgressIndeterminate()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_styledByProgress_defaultValueTrue() {
+        final Notification.ProgressStyle progressStyle1 = new Notification.ProgressStyle();
+
+        assertThat(progressStyle1.isStyledByProgress()).isTrue();
+    }
     private void assertValid(Notification.Colors c) {
         // Assert that all colors are populated
         assertThat(c.getBackgroundColor()).isNotEqualTo(Notification.COLOR_INVALID);
@@ -2213,5 +2507,12 @@ public class NotificationTest {
         return PendingIntent.getActivity(mContext, 0,
                 new Intent(action).setPackage(mContext.getPackageName()),
                 PendingIntent.FLAG_MUTABLE);
+    }
+
+    private static class NotAPlatformStyle extends Notification.Style {
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Notification.Style other) {
+            return false;
+        }
     }
 }
