@@ -137,7 +137,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             MediaTestUtils.emptyMediaData.copy(
                 app = PACKAGE,
                 packageName = PACKAGE,
-                token = session.sessionToken
+                token = session.sessionToken,
             )
 
         resumeData = mediaData.copy(token = null, active = false, resumption = true)
@@ -237,7 +237,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // Assuming we're registered
         testOnMediaDataLoaded_registersPlaybackListener()
 
-        mediaCallbackCaptor.value.onPlaybackStateChanged(
+        onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
         )
         assertThat(mainExecutor.numPending()).isEqualTo(1)
@@ -249,7 +249,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // Assuming we have a pending timeout
         testOnPlaybackStateChanged_schedulesTimeout_whenPaused()
 
-        mediaCallbackCaptor.value.onPlaybackStateChanged(
+        onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 0f).build()
         )
         assertThat(mainExecutor.numPending()).isEqualTo(0)
@@ -261,7 +261,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // Assuming we have a pending timeout
         testOnPlaybackStateChanged_schedulesTimeout_whenPaused()
 
-        mediaCallbackCaptor.value.onPlaybackStateChanged(
+        onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_STOPPED, 0L, 0f).build()
         )
         assertThat(mainExecutor.numPending()).isEqualTo(1)
@@ -435,7 +435,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
         // When the playback state changes, and has different actions
         val playingState = PlaybackState.Builder().setActions(PlaybackState.ACTION_PLAY).build()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+        onPlaybackStateChanged(playingState)
         assertThat(uiExecutor.runAllReady()).isEqualTo(1)
 
         // Then the callback is invoked
@@ -448,7 +448,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             PlaybackState.CustomAction.Builder(
                     "ACTION_1",
                     "custom action 1",
-                    android.R.drawable.ic_media_ff
+                    android.R.drawable.ic_media_ff,
                 )
                 .build()
         val pausedState =
@@ -463,7 +463,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
             PlaybackState.CustomAction.Builder(
                     "ACTION_2",
                     "custom action 2",
-                    android.R.drawable.ic_media_rew
+                    android.R.drawable.ic_media_rew,
                 )
                 .build()
         val pausedStateTwoActions =
@@ -472,7 +472,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
                 .addCustomAction(customOne)
                 .addCustomAction(customTwo)
                 .build()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(pausedStateTwoActions)
+        onPlaybackStateChanged(pausedStateTwoActions)
         assertThat(uiExecutor.runAllReady()).isEqualTo(1)
 
         // Then the callback is invoked
@@ -485,7 +485,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         loadMediaDataWithPlaybackState(stateWithActions)
 
         // When the playback state updates with the same actions
-        mediaCallbackCaptor.value.onPlaybackStateChanged(stateWithActions)
+        onPlaybackStateChanged(stateWithActions)
 
         // Then the callback is not invoked again
         verify(stateCallback, never()).invoke(eq(KEY), any())
@@ -512,7 +512,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
                 .setActions(PlaybackState.ACTION_PAUSE)
                 .addCustomAction(customTwo)
                 .build()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(stateTwo)
+        onPlaybackStateChanged(stateTwo)
 
         // Then the callback is not invoked
         verify(stateCallback, never()).invoke(eq(KEY), any())
@@ -544,7 +544,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // When the playback state changes to playing
         val playingState =
             PlaybackState.Builder().setState(PlaybackState.STATE_PLAYING, 0L, 1f).build()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+        onPlaybackStateChanged(playingState)
         uiExecutor.runAllReady()
 
         // Then the callback is invoked
@@ -561,7 +561,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         // When the playback state is updated, but still not playing
         val playingState =
             PlaybackState.Builder().setState(PlaybackState.STATE_STOPPED, 0L, 0f).build()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(playingState)
+        onPlaybackStateChanged(playingState)
 
         // Then the callback is not invoked
         verify(stateCallback, never()).invoke(eq(KEY), eq(playingState!!))
@@ -571,7 +571,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     fun testTimeoutCallback_dozedPastTimeout_invokedOnWakeup() {
         // When paused media is loaded
         testOnMediaDataLoaded_registersPlaybackListener()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(
+        onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
         )
         verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
@@ -597,7 +597,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         val time = clock.currentTimeMillis()
         clock.setElapsedRealtime(time)
         testOnMediaDataLoaded_registersPlaybackListener()
-        mediaCallbackCaptor.value.onPlaybackStateChanged(
+        onPlaybackStateChanged(
             PlaybackState.Builder().setState(PlaybackState.STATE_PAUSED, 0L, 0f).build()
         )
         verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
@@ -705,5 +705,10 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         mediaTimeoutListener.onMediaDataLoaded(key, oldKey, data)
         bgExecutor.runAllReady()
         uiExecutor.runAllReady()
+    }
+
+    private fun onPlaybackStateChanged(state: PlaybackState) {
+        mediaCallbackCaptor.value.onPlaybackStateChanged(state)
+        bgExecutor.runAllReady()
     }
 }

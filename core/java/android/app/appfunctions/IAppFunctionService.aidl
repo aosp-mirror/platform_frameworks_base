@@ -16,7 +16,7 @@
 
 package android.app.appfunctions;
 
-import android.os.Bundle;
+import android.app.appfunctions.ICancellationCallback;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.ExecuteAppFunctionRequest;
 
@@ -34,10 +34,12 @@ oneway interface IAppFunctionService {
      * Called by the system to execute a specific app function.
      *
      * @param request  the function execution request.
+     * @param cancellationCallback a callback to send back the cancellation transport.
      * @param callback a callback to report back the result.
      */
     void executeAppFunction(
         in ExecuteAppFunctionRequest request,
+        in ICancellationCallback cancellationCallback,
         in IExecuteAppFunctionCallback callback
     );
 }

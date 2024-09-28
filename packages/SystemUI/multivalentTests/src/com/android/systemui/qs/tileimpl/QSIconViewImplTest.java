@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.systemui.Flags.FLAG_QS_NEW_TILES;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,11 +23,16 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.service.quicksettings.Tile;
 import android.testing.UiThreadTest;
 import android.widget.ImageView;
@@ -47,7 +54,6 @@ import org.mockito.Mockito;
 @UiThreadTest
 @SmallTest
 public class QSIconViewImplTest extends SysuiTestCase {
-
     private QSIconViewImpl mIconView;
 
     @Before
@@ -104,6 +110,34 @@ public class QSIconViewImplTest extends SysuiTestCase {
 
         mIconView.setIcon(iv, s, true);
         verify(iv).setImageTintList(argThat(stateList -> stateList.getColors()[0] == desiredColor));
+    }
+
+
+    @EnableFlags(FLAG_QS_NEW_TILES)
+    @Test
+    public void testIconPreloaded_withFlagOn_immediatelyLoadsAll3TintColors() {
+        Context ctx = spy(mContext);
+
+        QSIconViewImpl iconView = new QSIconViewImpl(ctx);
+
+        verify(ctx, times(3)).obtainStyledAttributes(any());
+
+        iconView.getColor(new State()); // this should not increase the call count
+
+        verify(ctx, times(3)).obtainStyledAttributes(any());
+    }
+
+    @DisableFlags(FLAG_QS_NEW_TILES)
+    @Test
+    public void testIconPreloaded_withFlagOff_loadsOneTintColorAfterIconColorIsRead() {
+        Context ctx = spy(mContext);
+        QSIconViewImpl iconView = new QSIconViewImpl(ctx);
+
+        verify(ctx, never()).obtainStyledAttributes(any()); // none of the colors are preloaded
+
+        iconView.getColor(new State());
+
+        verify(ctx, times(1)).obtainStyledAttributes(any());
     }
 
     @Test

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.emptyshade.ui.viewbinder
 
 import android.view.View
+import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
 import com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel.EmptyShadeViewModel
 import kotlinx.coroutines.coroutineScope
@@ -26,18 +27,16 @@ object EmptyShadeViewBinder {
     suspend fun bind(
         view: EmptyShadeView,
         viewModel: EmptyShadeViewModel,
-        launchNotificationSettings: View.OnClickListener,
-        launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch { viewModel.text.collect { view.setText(it) } }
 
         launch {
-            viewModel.tappingShouldLaunchHistory.collect { shouldLaunchHistory ->
-                if (shouldLaunchHistory) {
-                    view.setOnClickListener(launchNotificationHistory)
-                } else {
-                    view.setOnClickListener(launchNotificationSettings)
+            viewModel.onClick.collect { settingsIntent ->
+                val onClickListener = { view: View ->
+                    notificationActivityStarter.startSettingsIntent(view, settingsIntent)
                 }
+                view.setOnClickListener(onClickListener)
             }
         }
 

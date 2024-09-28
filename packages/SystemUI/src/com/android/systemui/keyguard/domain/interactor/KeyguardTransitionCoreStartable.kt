@@ -27,7 +27,6 @@ class KeyguardTransitionCoreStartable
 constructor(
     private val interactors: Set<TransitionInteractor>,
     private val auditLogger: KeyguardTransitionAuditLogger,
-    private val bootInteractor: KeyguardTransitionBootInteractor,
     private val statusBarDisableFlagsInteractor: StatusBarDisableFlagsInteractor,
     private val keyguardStateCallbackInteractor: KeyguardStateCallbackInteractor,
 ) : CoreStartable {
@@ -54,7 +53,6 @@ constructor(
             it.start()
         }
         auditLogger.start()
-        bootInteractor.start()
         statusBarDisableFlagsInteractor.start()
         keyguardStateCallbackInteractor.start()
     }

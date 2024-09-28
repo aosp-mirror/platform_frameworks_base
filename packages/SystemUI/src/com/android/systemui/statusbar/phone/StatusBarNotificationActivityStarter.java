@@ -43,6 +43,7 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -74,6 +75,7 @@ import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorCon
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowDragController;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
@@ -249,7 +251,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
      * Called when a notification is clicked.
      *
      * @param entry notification that was clicked
-     * @param row row for that notification
+     * @param row   row for that notification
      */
     @Override
     public void onNotificationClicked(NotificationEntry entry, ExpandableNotificationRow row) {
@@ -547,8 +549,8 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                             (adapter) -> TaskStackBuilder.create(mContext)
                                     .addNextIntentWithParentStack(intent)
                                     .startActivities(getActivityOptions(
-                                            mDisplayId,
-                                            adapter),
+                                                    mDisplayId,
+                                                    adapter),
                                             new UserHandle(UserHandle.getUserId(appUid))));
                 });
                 return true;
@@ -565,6 +567,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
 
     @Override
     public void startHistoryIntent(View view, boolean showHistory) {
+        ModesEmptyShadeFix.assertInLegacyMode();
         boolean animate = mActivityStarter.shouldAnimateLaunch(true /* isActivityIntent */);
         ActivityStarter.OnDismissAction onDismissAction = new ActivityStarter.OnDismissAction() {
             @Override
@@ -585,17 +588,62 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                             );
                     ActivityTransitionAnimator.Controller animationController =
                             viewController == null ? null
-                                : new StatusBarTransitionAnimatorController(
-                                        viewController,
-                                        mShadeAnimationInteractor,
-                                        mShadeController,
-                                        mNotificationShadeWindowController,
-                                        mCommandQueue,
-                                        mDisplayId,
-                                        true /* isActivityIntent */);
+                                    : new StatusBarTransitionAnimatorController(
+                                            viewController,
+                                            mShadeAnimationInteractor,
+                                            mShadeController,
+                                            mNotificationShadeWindowController,
+                                            mCommandQueue,
+                                            mDisplayId,
+                                            true /* isActivityIntent */);
 
                     mActivityTransitionAnimator.startIntentWithAnimation(
                             animationController, animate, intent.getPackage(),
+                            (adapter) -> tsb.startActivities(
+                                    getActivityOptions(mDisplayId, adapter),
+                                    mUserTracker.getUserHandle()));
+                });
+                return true;
+            }
+
+            @Override
+            public boolean willRunAnimationOnKeyguard() {
+                return animate;
+            }
+        };
+        mActivityStarter.dismissKeyguardThenExecute(onDismissAction, null,
+                false /* afterKeyguardGone */);
+    }
+
+    @Override
+    public void startSettingsIntent(@NonNull View view, @NonNull SettingsIntent intentInfo) {
+        boolean animate = mActivityStarter.shouldAnimateLaunch(true /* isActivityIntent */);
+        ActivityStarter.OnDismissAction onDismissAction = new ActivityStarter.OnDismissAction() {
+            @Override
+            public boolean onDismiss() {
+                AsyncTask.execute(() -> {
+                    TaskStackBuilder tsb = TaskStackBuilder.create(mContext);
+                    for (Intent intent : intentInfo.getBackStack()) {
+                        tsb.addNextIntent(intent);
+                    }
+                    tsb.addNextIntent(intentInfo.getTargetIntent());
+
+                    ActivityTransitionAnimator.Controller viewController =
+                            ActivityTransitionAnimator.Controller.fromView(view,
+                                    intentInfo.getCujType());
+                    ActivityTransitionAnimator.Controller animationController =
+                            viewController == null ? null
+                                    : new StatusBarTransitionAnimatorController(
+                                            viewController,
+                                            mShadeAnimationInteractor,
+                                            mShadeController,
+                                            mNotificationShadeWindowController,
+                                            mCommandQueue,
+                                            mDisplayId,
+                                            true /* isActivityIntent */);
+
+                    mActivityTransitionAnimator.startIntentWithAnimation(
+                            animationController, animate, intentInfo.getTargetIntent().getPackage(),
                             (adapter) -> tsb.startActivities(
                                     getActivityOptions(mDisplayId, adapter),
                                     mUserTracker.getUserHandle()));

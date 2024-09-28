@@ -4457,6 +4457,11 @@
     <!-- Bytes that the PinnerService will pin for WebView -->
     <integer name="config_pinnerWebviewPinBytes">0</integer>
 
+    <!-- Maximum memory that PinnerService will pin for apps expressed
+         as a percentage of total device memory [0,100].
+         Example: 10, means 10% of total memory will be the maximum pinned memory -->
+    <integer name="config_pinnerMaxPinnedMemoryPercentage">10</integer>
+
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
     <integer name="config_keepPreloadsMinDays">7</integer>
