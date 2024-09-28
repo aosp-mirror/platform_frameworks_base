@@ -643,7 +643,6 @@ constructor(
     }
 
     // HANDLE STATE CHANGES RELATED METHODS
-
     protected open fun handleStateChanged(state: QSTile.State) {
         val allowAnimations = animationsEnabled()
         isClickable = state.state != Tile.STATE_UNAVAILABLE

@@ -61,11 +61,11 @@ constructor(
         uiEventLogger,
         notificationManager,
         userContextProvider,
-        keyguardDismissUtil
+        keyguardDismissUtil,
     ) {
 
-    private val commandHandler =
-        IssueRecordingServiceCommandHandler(
+    private val session =
+        IssueRecordingServiceSession(
             bgExecutor,
             dialogTransitionAnimator,
             panelInteractor,
@@ -86,7 +86,7 @@ constructor(
         Log.d(getTag(), "handling action: ${intent?.action}")
         when (intent?.action) {
             ACTION_START -> {
-                commandHandler.handleStartCommand()
+                session.start()
                 if (!issueRecordingState.recordScreen) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
@@ -94,12 +94,12 @@ constructor(
                 }
             }
             ACTION_STOP,
-            ACTION_STOP_NOTIF -> commandHandler.handleStopCommand(contentResolver)
+            ACTION_STOP_NOTIF -> session.stop(contentResolver)
             ACTION_SHARE -> {
-                commandHandler.handleShareCommand(
+                session.share(
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
                     intent.getParcelableExtra(EXTRA_PATH, Uri::class.java),
-                    this
+                    this,
                 )
                 // Unlike all other actions, action_share has different behavior for the screen
                 // recording qs tile than it does for the record issue qs tile. Return sticky to

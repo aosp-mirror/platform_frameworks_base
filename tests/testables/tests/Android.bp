@@ -34,6 +34,7 @@ android_test {
         "androidx.core_core-animation",
         "androidx.core_core-ktx",
         "androidx.test.rules",
+        "androidx.test.ext.junit",
         "hamcrest-library",
         "mockito-target-inline-minus-junit4",
         "testables",

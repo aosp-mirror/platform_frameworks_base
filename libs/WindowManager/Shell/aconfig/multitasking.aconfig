@@ -156,6 +156,13 @@ flag {
 }
 
 flag {
+    name: "enable_flexible_two_app_split"
+    namespace: "multitasking"
+    description: "Enables only 2 app 90:10 split"
+    bug: "349828130"
+}
+
+flag {
     name: "enable_flexible_split"
     namespace: "multitasking"
     description: "Enables flexibile split feature for split screen"

@@ -34,9 +34,11 @@ private const val DISABLED = 0
 /**
  * This class exists to unit test the business logic encapsulated in IssueRecordingService. Android
  * specifically calls out that there is no supported way to test IntentServices here:
- * https://developer.android.com/training/testing/other-components/services
+ * https://developer.android.com/training/testing/other-components/services, and mentions that the
+ * best way to add unit tests, is to introduce a separate class containing the business logic of
+ * that service, and test the functionality via that class.
  */
-class IssueRecordingServiceCommandHandler(
+class IssueRecordingServiceSession(
     private val bgExecutor: Executor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
@@ -47,12 +49,12 @@ class IssueRecordingServiceCommandHandler(
     private val userContextProvider: UserContextProvider,
 ) {
 
-    fun handleStartCommand() {
+    fun start() {
         bgExecutor.execute { traceurMessageSender.startTracing(issueRecordingState.traceConfig) }
         issueRecordingState.isRecording = true
     }
 
-    fun handleStopCommand(contentResolver: ContentResolver) {
+    fun stop(contentResolver: ContentResolver) {
         bgExecutor.execute {
             if (issueRecordingState.traceConfig.longTrace) {
                 Settings.Global.putInt(contentResolver, NOTIFY_SESSION_ENDED_SETTING, DISABLED)
@@ -62,12 +64,12 @@ class IssueRecordingServiceCommandHandler(
         issueRecordingState.isRecording = false
     }
 
-    fun handleShareCommand(notificationId: Int, screenRecording: Uri?, context: Context) {
+    fun share(notificationId: Int, screenRecording: Uri?, context: Context) {
         bgExecutor.execute {
             notificationManager.cancelAsUser(
                 null,
                 notificationId,
-                UserHandle(userContextProvider.userContext.userId)
+                UserHandle(userContextProvider.userContext.userId),
             )
 
             if (issueRecordingState.takeBugreport) {

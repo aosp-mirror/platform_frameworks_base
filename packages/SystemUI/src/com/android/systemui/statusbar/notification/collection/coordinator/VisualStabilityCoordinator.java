@@ -41,7 +41,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype;
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.kotlin.BooleanFlowOperators;
@@ -170,7 +170,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                     if (entry == null) {
                         return false;
                     }
-                    boolean isTopUnseen = NotificationMinimalismPrototype.isEnabled()
+                    boolean isTopUnseen = NotificationMinimalism.isEnabled()
                             && (mSeenNotificationsInteractor.isTopUnseenNotification(entry)
                                 || mSeenNotificationsInteractor.isTopOngoingNotification(entry));
                     if (isTopUnseen || mHeadsUpManager.isHeadsUpEntry(entry.getKey())) {
