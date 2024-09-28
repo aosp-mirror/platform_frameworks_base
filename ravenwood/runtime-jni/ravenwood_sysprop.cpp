@@ -56,7 +56,7 @@ static bool property_set(const char* key, const char* value) {
     if (key == nullptr || *key == '\0') return false;
     if (value == nullptr) value = "";
     bool read_only = !strncmp(key, "ro.", 3);
-    if (!read_only && strlen(value) >= PROP_VALUE_MAX) return -1;
+    if (!read_only && strlen(value) >= PROP_VALUE_MAX) return false;
 
     std::lock_guard lock(g_properties_lock);
     auto [it, success] = g_properties.emplace(key, value);
