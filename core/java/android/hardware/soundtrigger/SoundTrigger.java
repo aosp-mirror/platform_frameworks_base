@@ -1529,6 +1529,8 @@ public class SoundTrigger {
          * config that can be used by
          * {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)}
          *
+         * @deprecated should use builder-based constructor instead.
+         *             TODO(b/368042125): remove this method.
          * @param captureRequested Whether the DSP should capture the trigger sound.
          * @param allowMultipleTriggers Whether the service should restart listening after the DSP
          *                              triggers.
@@ -1539,6 +1541,8 @@ public class SoundTrigger {
          *
          * @hide
          */
+        @Deprecated
+        @SuppressWarnings("Todo")
         @TestApi
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
                 @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
@@ -1695,6 +1699,89 @@ public class SoundTrigger {
             result = prime * result + mAudioCapabilities;
             return result;
         }
+
+        /**
+         * Builder class for {@link RecognitionConfig} objects.
+         */
+        public static final class Builder {
+            private boolean mCaptureRequested;
+            private boolean mAllowMultipleTriggers;
+            @Nullable private KeyphraseRecognitionExtra[] mKeyphrases;
+            @Nullable private byte[] mData;
+            private int mAudioCapabilities;
+
+            /**
+             * Constructs a new Builder with the default values.
+             */
+            public Builder() {
+            }
+
+            /**
+             * Sets capture requested state.
+             * @param captureRequested The new requested state.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setCaptureRequested(boolean captureRequested) {
+                mCaptureRequested = captureRequested;
+                return this;
+            }
+
+            /**
+             * Sets allow multiple triggers state.
+             * @param allowMultipleTriggers The new allow multiple triggers state.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setAllowMultipleTriggers(boolean allowMultipleTriggers) {
+                mAllowMultipleTriggers = allowMultipleTriggers;
+                return this;
+            }
+
+            /**
+             * Sets the keyphrases field.
+             * @param keyphrases The new keyphrases.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setKeyphrases(
+                    @NonNull Collection<KeyphraseRecognitionExtra> keyphrases) {
+                mKeyphrases = keyphrases.toArray(new KeyphraseRecognitionExtra[keyphrases.size()]);
+                return this;
+            }
+
+            /**
+             * Sets the data field.
+             * @param data The new data.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setData(@Nullable byte[] data) {
+                mData = data;
+                return this;
+            }
+
+            /**
+             * Sets the audio capabilities field.
+             * @param audioCapabilities The new audio capabilities.
+             * @return the same Builder instance.
+             */
+            public @NonNull Builder setAudioCapabilities(int audioCapabilities) {
+                mAudioCapabilities = audioCapabilities;
+                return this;
+            }
+
+            /**
+             * Combines all of the parameters that have been set and return a new
+             * {@link RecognitionConfig} object.
+             * @return a new {@link RecognitionConfig} object
+             */
+            public @NonNull RecognitionConfig build() {
+                RecognitionConfig config = new RecognitionConfig(
+                        /* captureRequested= */ mCaptureRequested,
+                        /* allowMultipleTriggers= */ mAllowMultipleTriggers,
+                        /* keyphrases= */ mKeyphrases,
+                        /* data= */ mData,
+                        /* audioCapabilities= */ mAudioCapabilities);
+                return config;
+            }
+        };
     }
 
     /**

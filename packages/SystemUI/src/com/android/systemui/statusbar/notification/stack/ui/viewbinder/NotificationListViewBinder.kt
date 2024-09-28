@@ -187,6 +187,7 @@ constructor(
                 },
                 launchNotificationSettings,
                 launchNotificationHistory,
+                notificationActivityStarter.get(),
             )
         if (SceneContainerFlag.isEnabled) {
             launch {
@@ -266,8 +267,7 @@ constructor(
                 EmptyShadeViewBinder.bind(
                     emptyShadeView,
                     emptyShadeViewModel,
-                    launchNotificationSettings,
-                    launchNotificationHistory,
+                    notificationActivityStarter.get(),
                 )
             }
         }

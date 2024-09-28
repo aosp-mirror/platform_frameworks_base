@@ -76,6 +76,10 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTable) {
 
   std::string output;
   DumpResourceTableToString(loaded_apk.get(), &output);
+  ASSERT_EQ(output.find("bool4"), std::string::npos);
+  ASSERT_EQ(output.find("str1"), std::string::npos);
+  ASSERT_EQ(output.find("layout2"), std::string::npos);
+  ASSERT_EQ(output.find("removedpng"), std::string::npos);
 }
 
 TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTableChunks) {
@@ -87,6 +91,8 @@ TEST_F(FlaggedResourcesTest, DisabledResourcesRemovedFromTableChunks) {
 
   ASSERT_EQ(output.find("bool4"), std::string::npos);
   ASSERT_EQ(output.find("str1"), std::string::npos);
+  ASSERT_EQ(output.find("layout2"), std::string::npos);
+  ASSERT_EQ(output.find("removedpng"), std::string::npos);
 }
 
 TEST_F(FlaggedResourcesTest, DisabledResourcesInRJava) {

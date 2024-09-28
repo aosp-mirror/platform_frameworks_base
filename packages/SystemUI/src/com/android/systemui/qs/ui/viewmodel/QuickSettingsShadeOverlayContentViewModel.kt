@@ -16,8 +16,7 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -31,15 +30,12 @@ import dagger.assisted.AssistedInject
 class QuickSettingsShadeOverlayContentViewModel
 @AssistedInject
 constructor(
-    val sceneInteractor: SceneInteractor,
+    val shadeInteractor: ShadeInteractor,
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
 ) {
     fun onScrimClicked() {
-        sceneInteractor.hideOverlay(
-            overlay = Overlays.QuickSettingsShade,
-            loggingReason = "Shade scrim clicked",
-        )
+        shadeInteractor.collapseQuickSettingsShade(loggingReason = "Shade scrim clicked")
     }
 
     @AssistedFactory

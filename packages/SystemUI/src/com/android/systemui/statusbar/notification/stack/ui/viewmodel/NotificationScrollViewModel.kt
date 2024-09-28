@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.ObservableTransitionState.Idle
 import com.android.compose.animation.scene.ObservableTransitionState.Transition
 import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeScene
@@ -48,6 +49,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
@@ -128,6 +130,14 @@ constructor(
             0f
         }
     }
+
+    /** Are notification stack height updates suppressed? */
+    val suppressHeightUpdates: Flow<Boolean> =
+        sceneInteractor.transitionState.map { transition: ObservableTransitionState ->
+            transition is Transition &&
+                transition.fromContent == Scenes.Lockscreen &&
+                (transition.toContent == Scenes.Bouncer || transition.toContent == Scenes.Gone)
+        }
 
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning

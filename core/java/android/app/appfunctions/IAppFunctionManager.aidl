@@ -18,6 +18,7 @@ package android.app.appfunctions;
 
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
+import android.os.ICancellationSignal;
 
 /**
  * Defines the interface for apps to interact with the app function execution service
@@ -32,7 +33,7 @@ interface IAppFunctionManager {
     * @param callback the callback to report the result.
     */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(anyOf = {android.Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,android.Manifest.permission.EXECUTE_APP_FUNCTIONS}, conditional = true)")
-    void executeAppFunction(
+    ICancellationSignal executeAppFunction(
         in ExecuteAppFunctionAidlRequest request,
         in IExecuteAppFunctionCallback callback
     );

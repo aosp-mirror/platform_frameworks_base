@@ -1439,6 +1439,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     public void setPanelFlinging(boolean flinging) {
+        SceneContainerFlag.assertInLegacyMode();
         mView.setPanelFlinging(flinging);
     }
 

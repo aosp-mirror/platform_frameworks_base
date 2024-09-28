@@ -22,6 +22,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.res.R
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
+import com.android.systemui.statusbar.notification.NotificationActivityStarter.SettingsIntent
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
@@ -34,6 +35,7 @@ import java.util.Locale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
@@ -80,8 +82,7 @@ constructor(
             if (ModesUi.isEnabled) {
                 zenModeInteractor.modesHidingNotifications.map { modes ->
                     // Create a string that is either "No notifications" if no modes are filtering
-                    // them
-                    // out, or something like "Notifications paused by SomeMode" otherwise.
+                    // them out, or something like "Notifications paused by SomeMode" otherwise.
                     val msgFormat =
                         MessageFormat(
                             context.getString(R.string.modes_suppressing_shade_text),
@@ -116,9 +117,26 @@ constructor(
         )
     }
 
-    val tappingShouldLaunchHistory by lazy {
+    val onClick: Flow<SettingsIntent> by lazy {
         ModesEmptyShadeFix.assertInNewMode()
-        notificationSettingsInteractor.isNotificationHistoryEnabled
+        combine(
+            zenModeInteractor.modesHidingNotifications,
+            notificationSettingsInteractor.isNotificationHistoryEnabled,
+        ) { modes, isNotificationHistoryEnabled ->
+            if (modes.isNotEmpty()) {
+                if (modes.size == 1) {
+                    SettingsIntent.forModeSettings(modes[0].id)
+                } else {
+                    SettingsIntent.forModesSettings()
+                }
+            } else {
+                if (isNotificationHistoryEnabled) {
+                    SettingsIntent.forNotificationHistory()
+                } else {
+                    SettingsIntent.forNotificationSettings()
+                }
+            }
+        }
     }
 
     @AssistedFactory

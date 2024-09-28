@@ -546,15 +546,25 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
       {"symbol", std::mem_fn(&ResourceParser::ParseSymbol)},
   });
 
-  std::string resource_type = parser->element_name();
-  out_resource->flag = GetFlag(parser);
-  std::string error;
-  auto flag_status = GetFlagStatus(out_resource->flag, options_.feature_flag_values, &error);
-  if (flag_status) {
-    out_resource->flag_status = flag_status.value();
-  } else {
-    diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number())) << error);
-    return false;
+  std::string_view resource_type = parser->element_name();
+  if (auto flag = ParseFlag(xml::FindAttribute(parser, xml::kSchemaAndroid, "featureFlag"))) {
+    if (options_.flag) {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
+                   << "Resource flag are not allowed both in the path and in the file");
+      return false;
+    }
+    out_resource->flag = std::move(flag);
+    std::string error;
+    auto flag_status = GetFlagStatus(out_resource->flag, options_.feature_flag_values, &error);
+    if (flag_status) {
+      out_resource->flag_status = flag_status.value();
+    } else {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number())) << error);
+      return false;
+    }
+  } else if (options_.flag) {
+    out_resource->flag = options_.flag;
+    out_resource->flag_status = options_.flag_status;
   }
 
   // The value format accepted for this resource.
@@ -571,7 +581,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
 
     // Items have their type encoded in the type attribute.
     if (std::optional<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type")) {
-      resource_type = std::string(maybe_type.value());
+      resource_type = maybe_type.value();
     } else {
       diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
                    << "<item> must have a 'type' attribute");
@@ -594,7 +604,7 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
 
     // Bags have their type encoded in the type attribute.
     if (std::optional<StringPiece> maybe_type = xml::FindNonEmptyAttribute(parser, "type")) {
-      resource_type = std::string(maybe_type.value());
+      resource_type = maybe_type.value();
     } else {
       diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
                    << "<bag> must have a 'type' attribute");
@@ -735,22 +745,6 @@ bool ResourceParser::ParseResource(xml::XmlPullParser* parser,
   diag_->Error(android::DiagMessage(out_resource->source)
                << "unknown resource type '" << resource_type << "'");
   return false;
-}
-
-std::optional<FeatureFlagAttribute> ResourceParser::GetFlag(xml::XmlPullParser* parser) {
-  auto name = xml::FindAttribute(parser, xml::kSchemaAndroid, "featureFlag");
-  if (name) {
-    FeatureFlagAttribute flag;
-    if (name->starts_with('!')) {
-      flag.negated = true;
-      flag.name = name->substr(1);
-    } else {
-      flag.name = name.value();
-    }
-    return flag;
-  } else {
-    return {};
-  }
 }
 
 bool ResourceParser::ParseItem(xml::XmlPullParser* parser,
@@ -1659,7 +1653,7 @@ bool ResourceParser::ParseArrayImpl(xml::XmlPullParser* parser,
     const std::string& element_namespace = parser->element_namespace();
     const std::string& element_name = parser->element_name();
     if (element_namespace.empty() && element_name == "item") {
-      auto flag = GetFlag(parser);
+      auto flag = ParseFlag(xml::FindAttribute(parser, xml::kSchemaAndroid, "featureFlag"));
       std::unique_ptr<Item> item = ParseXml(parser, typeMask, kNoRawString);
       if (!item) {
         diag_->Error(android::DiagMessage(item_source) << "could not parse array item");

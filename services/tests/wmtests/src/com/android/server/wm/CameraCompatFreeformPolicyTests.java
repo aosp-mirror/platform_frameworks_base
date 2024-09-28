@@ -35,7 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,6 +60,7 @@ import android.content.res.Configuration.Orientation;
 import android.graphics.Rect;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -135,7 +136,6 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 });
 
         mActivityRefresher = new ActivityRefresher(mDisplayContent.mWmService, mMockHandler);
-        mSetFlagsRule.enableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM);
         CameraStateMonitor cameraStateMonitor =
                 new CameraStateMonitor(mDisplayContent, mMockHandler);
         mCameraCompatFreeformPolicy =
@@ -147,6 +147,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         cameraStateMonitor.startListeningToCameraState();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testFullscreen_doesNotActivateCameraCompatMode() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT, WINDOWING_MODE_FULLSCREEN);
@@ -157,6 +158,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         assertNotInCameraCompatMode();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testOrientationUnspecified_doesNotActivateCameraCompatMode() {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
@@ -164,12 +166,14 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         assertNotInCameraCompatMode();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testNoCameraConnection_doesNotActivateCameraCompatMode() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         assertNotInCameraCompatMode();
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testCameraConnected_deviceInPortrait_portraitCameraCompatMode() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -210,6 +214,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         assertActivityRefreshRequested(/* refreshRequested */ false);
     }
 
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void testCameraReconnected_cameraCompatModeAndRefresh() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -235,6 +240,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT})
     public void testShouldApplyCameraCompatFreeformTreatment_overrideEnabled_returnsFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -246,6 +252,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
@@ -254,6 +261,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testOnActivityConfigurationChanging_refreshDisabledViaFlag_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
@@ -268,6 +276,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabled() throws Exception {
         when(mAppCompatConfiguration.isCameraCompatRefreshCycleThroughStopEnabled())
                 .thenReturn(false);
@@ -281,6 +290,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);

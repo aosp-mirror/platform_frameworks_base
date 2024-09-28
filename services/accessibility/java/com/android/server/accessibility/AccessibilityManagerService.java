@@ -1435,8 +1435,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 interfacesToInterrupt = new ArrayList<>(services.size());
                 for (int i = 0; i < services.size(); i++) {
                     AccessibilityServiceConnection service = services.get(i);
-                    IBinder a11yServiceBinder = service.mService;
-                    IAccessibilityServiceClient a11yServiceInterface = service.mServiceInterface;
+                    IBinder a11yServiceBinder = service.mClientBinder;
+                    IAccessibilityServiceClient a11yServiceInterface = service.mClient;
                     if ((a11yServiceBinder != null) && (a11yServiceInterface != null)) {
                         interfacesToInterrupt.add(a11yServiceInterface);
                     }
