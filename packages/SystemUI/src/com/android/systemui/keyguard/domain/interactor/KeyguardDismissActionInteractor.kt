@@ -28,7 +28,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -60,7 +59,6 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
-    sceneInteractor: Lazy<SceneInteractor>,
     deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
     powerInteractor: PowerInteractor,
     alternateBouncerInteractor: AlternateBouncerInteractor,
@@ -102,20 +100,20 @@ constructor(
     private val isOnShadeWhileUnlocked: Flow<Boolean> =
         if (SceneContainerFlag.isEnabled) {
             combine(
-                    sceneInteractor.get().currentScene,
+                    shadeInteractor.get().isAnyExpanded,
                     deviceUnlockedInteractor.get().deviceUnlockStatus,
-                ) { scene, unlockStatus ->
-                    unlockStatus.isUnlocked &&
-                        (scene == Scenes.QuickSettings || scene == Scenes.Shade)
+                ) { isAnyExpanded, unlockStatus ->
+                    isAnyExpanded && unlockStatus.isUnlocked
                 }
                 .distinctUntilChanged()
         } else if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
             combine(
-                shadeInteractor.get().isAnyExpanded,
-                keyguardInteractor.get().isKeyguardDismissible,
-            ) { isAnyExpanded, keyguardDismissible ->
-                isAnyExpanded && keyguardDismissible
-            }
+                    shadeInteractor.get().isAnyExpanded,
+                    keyguardInteractor.get().isKeyguardDismissible,
+                ) { isAnyExpanded, keyguardDismissible ->
+                    isAnyExpanded && keyguardDismissible
+                }
+                .distinctUntilChanged()
         } else {
             flow {
                 error(

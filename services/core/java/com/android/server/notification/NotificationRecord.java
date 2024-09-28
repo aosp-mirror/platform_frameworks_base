@@ -1493,14 +1493,23 @@ public final class NotificationRecord {
 
             final Notification notification = getNotification();
             notification.visitUris((uri) -> {
-                visitGrantableUri(uri, false, false);
+                if (com.android.server.notification.Flags.notificationVerifyChannelSoundUri()) {
+                    visitGrantableUri(uri, false, false);
+                } else {
+                    oldVisitGrantableUri(uri, false, false);
+                }
             });
 
             if (notification.getChannelId() != null) {
                 NotificationChannel channel = getChannel();
                 if (channel != null) {
-                    visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                            & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                    if (com.android.server.notification.Flags.notificationVerifyChannelSoundUri()) {
+                        visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                                & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                    } else {
+                        oldVisitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                                & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                    }
                 }
             }
         } finally {
@@ -1516,7 +1525,7 @@ public final class NotificationRecord {
      * {@link #mGrantableUris}. Otherwise, this will either log or throw
      * {@link SecurityException} depending on target SDK of enqueuing app.
      */
-    private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
+    private void oldVisitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         if (mGrantableUris != null && mGrantableUris.contains(uri)) {
@@ -1552,6 +1561,45 @@ public final class NotificationRecord {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Note the presence of a {@link Uri} that should have permission granted to
+     * whoever will be rendering it.
+     * <p>
+     * If the enqueuing app has the ability to grant access, it will be added to
+     * {@link #mGrantableUris}. Otherwise, this will either log or throw
+     * {@link SecurityException} depending on target SDK of enqueuing app.
+     */
+    private void visitGrantableUri(Uri uri, boolean userOverriddenUri,
+            boolean isSound) {
+        if (mGrantableUris != null && mGrantableUris.contains(uri)) {
+            return; // already verified this URI
+        }
+
+        final int sourceUid = getSbn().getUid();
+        try {
+            PermissionHelper.grantUriPermission(mUgmInternal, uri, sourceUid);
+
+            if (mGrantableUris == null) {
+                mGrantableUris = new ArraySet<>();
+            }
+            mGrantableUris.add(uri);
+        } catch (SecurityException e) {
+            if (!userOverriddenUri) {
+                if (isSound) {
+                    mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
+                    Log.w(TAG, "Replacing " + uri + " from " + sourceUid + ": " + e.getMessage());
+                } else {
+                    if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                        throw e;
+                    } else {
+                        Log.w(TAG,
+                                "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                    }
+                }
+            }
         }
     }
 

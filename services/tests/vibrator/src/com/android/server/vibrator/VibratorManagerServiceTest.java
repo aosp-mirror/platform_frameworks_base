@@ -266,12 +266,13 @@ public class VibratorManagerServiceTest {
     @After
     public void tearDown() throws Exception {
         if (mService != null) {
-            if (!mPendingVibrations.stream().allMatch(HalVibration::hasEnded)) {
-                // Cancel any pending vibration from tests.
-                cancelVibrate(mService);
-                for (HalVibration vibration : mPendingVibrations) {
-                    vibration.waitForEnd();
-                }
+            // Make sure we have permission to cancel test vibrations, even if the test denied them.
+            grantPermission(android.Manifest.permission.VIBRATE);
+            // Cancel any pending vibration from tests, including external vibrations.
+            cancelVibrate(mService);
+            // Wait until pending vibrations end asynchronously.
+            for (HalVibration vibration : mPendingVibrations) {
+                vibration.waitForEnd();
             }
             // Wait until all vibrators have stopped vibrating, waiting for ramp-down.
             // Note: if a test is flaky here something is wrong with the vibration finalization.
@@ -2242,7 +2243,7 @@ public class VibratorManagerServiceTest {
         VibratorManagerService service = createSystemReadyService();
 
         VibrationEffect effect = VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100);
-        vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
+        HalVibration vibration = vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
 
         // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
@@ -2255,7 +2256,8 @@ public class VibratorManagerServiceTest {
         assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, scale.scaleLevel);
 
         // Vibration is cancelled.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        vibration.waitForEnd();
+        assertThat(vibration.getStatus()).isEqualTo(Status.CANCELLED_SUPERSEDED);
         assertEquals(Arrays.asList(false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
     }
@@ -2296,7 +2298,7 @@ public class VibratorManagerServiceTest {
 
         VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
                 new long[]{100, 200, 300}, new int[]{128, 255, 255}, 1);
-        vibrate(service, repeatingEffect, ALARM_ATTRS);
+        HalVibration repeatingVibration = vibrate(service, repeatingEffect, ALARM_ATTRS);
 
         // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
@@ -2308,7 +2310,8 @@ public class VibratorManagerServiceTest {
         assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, scale.scaleLevel);
 
         // Vibration is cancelled.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        repeatingVibration.waitForEnd();
+        assertThat(repeatingVibration.getStatus()).isEqualTo(Status.CANCELLED_SUPERSEDED);
         assertEquals(Arrays.asList(false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
     }

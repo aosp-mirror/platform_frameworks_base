@@ -14,39 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.shared
+package com.android.systemui.statusbar.core
 
-import android.os.SystemProperties
 import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
 
-/** Helper for reading or using the minimalism prototype flag state. */
+/** Helper for reading or using the status bar connected displays flag state. */
 @Suppress("NOTHING_TO_INLINE")
-object NotificationMinimalismPrototype {
-    const val FLAG_NAME = Flags.FLAG_NOTIFICATION_MINIMALISM_PROTOTYPE
+object StatusBarConnectedDisplays {
+    /** The aconfig flag name */
+    const val FLAG_NAME = Flags.FLAG_STATUS_BAR_CONNECTED_DISPLAYS
 
     /** A token used for dependency declaration */
     val token: FlagToken
         get() = FlagToken(FLAG_NAME, isEnabled)
 
-    /** Is the heads-up cycling animation enabled */
+    /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.notificationMinimalismPrototype()
-
-    /**
-     * The prototype will (by default) use a promoter to ensure that the top unseen notification is
-     * not grouped, but this property read allows that behavior to be disabled.
-     */
-    val ungroupTopUnseen: Boolean
-        get() =
-            if (isUnexpectedlyInLegacyMode()) false
-            else
-                SystemProperties.getBoolean(
-                    "persist.notification_minimalism_prototype.ungroup_top_unseen",
-                    false
-                )
+        get() = Flags.statusBarConnectedDisplays()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
@@ -56,6 +43,14 @@ object NotificationMinimalismPrototype {
     @JvmStatic
     inline fun isUnexpectedlyInLegacyMode() =
         RefactorFlagUtils.isUnexpectedlyInLegacyMode(isEnabled, FLAG_NAME)
+
+    /**
+     * Called to ensure code is only run when the flag is enabled. This will throw an exception if
+     * the flag is not enabled to ensure that the refactor author catches issues in testing.
+     * Caution!! Using this check incorrectly will cause crashes in nextfood builds!
+     */
+    @JvmStatic
+    inline fun assertInNewMode() = RefactorFlagUtils.assertInNewMode(isEnabled, FLAG_NAME)
 
     /**
      * Called to ensure code is only run when the flag is disabled. This will throw an exception if

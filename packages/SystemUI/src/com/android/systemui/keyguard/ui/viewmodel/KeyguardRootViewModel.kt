@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
-import com.android.app.tracing.coroutines.launch
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +34,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
@@ -88,6 +88,8 @@ constructor(
         AlternateBouncerToGoneTransitionViewModel,
     private val alternateBouncerToLockscreenTransitionViewModel:
         AlternateBouncerToLockscreenTransitionViewModel,
+    private val alternateBouncerToOccludedTransitionViewModel:
+        AlternateBouncerToOccludedTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
@@ -112,9 +114,12 @@ constructor(
     private val lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
     private val lockscreenToPrimaryBouncerTransitionViewModel:
         LockscreenToPrimaryBouncerTransitionViewModel,
+    private val occludedToAlternateBouncerTransitionViewModel:
+        OccludedToAlternateBouncerTransitionViewModel,
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
     private val occludedToDozingTransitionViewModel: OccludedToDozingTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    private val offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
     private val primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
@@ -201,6 +206,10 @@ constructor(
             notificationShadeWindowModel.isKeyguardOccluded,
             communalInteractor.isIdleOnCommunal,
             keyguardTransitionInteractor
+                .transitionValue(OFF)
+                .map { it > 1f - offToLockscreenTransitionViewModel.alphaStartAt }
+                .onStart { emit(false) },
+            keyguardTransitionInteractor
                 .transitionValue(scene = Scenes.Gone, stateWithoutSceneContainer = GONE)
                 .map { it == 1f }
                 .onStart { emit(false) },
@@ -227,6 +236,7 @@ constructor(
                         alternateBouncerToAodTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+                        alternateBouncerToOccludedTransitionViewModel.lockscreenAlpha,
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                         aodToOccludedTransitionViewModel.lockscreenAlpha(viewState),
@@ -249,14 +259,16 @@ constructor(
                         lockscreenToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
                         lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+                        occludedToAlternateBouncerTransitionViewModel.lockscreenAlpha,
                         occludedToAodTransitionViewModel.lockscreenAlpha,
                         occludedToDozingTransitionViewModel.lockscreenAlpha,
                         occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+                        offToLockscreenTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToAodTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToGoneTransitionViewModel.lockscreenAlpha,
                         primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
                     )
-                    .onStart { emit(1f) },
+                    .onStart { emit(0f) },
             ) { hideKeyguard, alpha ->
                 if (hideKeyguard) {
                     0f

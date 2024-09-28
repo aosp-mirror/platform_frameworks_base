@@ -127,13 +127,13 @@ public class VibratorControllerTest {
     public void setExternalControl_withCapability_enablesExternalControl() {
         mockVibratorCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
         VibratorController controller = createController();
-        assertFalse(controller.isUnderExternalControl());
+        assertFalse(controller.isVibrating());
 
         controller.setExternalControl(true);
-        assertTrue(controller.isUnderExternalControl());
+        assertTrue(controller.isVibrating());
 
         controller.setExternalControl(false);
-        assertFalse(controller.isUnderExternalControl());
+        assertFalse(controller.isVibrating());
 
         InOrder inOrderVerifier = inOrder(mNativeWrapperMock);
         inOrderVerifier.verify(mNativeWrapperMock).setExternalControl(eq(true));
@@ -143,10 +143,10 @@ public class VibratorControllerTest {
     @Test
     public void setExternalControl_withNoCapability_ignoresExternalControl() {
         VibratorController controller = createController();
-        assertFalse(controller.isUnderExternalControl());
+        assertFalse(controller.isVibrating());
 
         controller.setExternalControl(true);
-        assertFalse(controller.isUnderExternalControl());
+        assertFalse(controller.isVibrating());
 
         verify(mNativeWrapperMock, never()).setExternalControl(anyBoolean());
     }
@@ -178,6 +178,38 @@ public class VibratorControllerTest {
 
         verify(mNativeWrapperMock, never()).alwaysOnDisable(anyLong());
         verify(mNativeWrapperMock, never()).alwaysOnEnable(anyLong(), anyLong(), anyLong());
+    }
+
+    @Test
+    public void setAmplitude_vibratorIdle_ignoresAmplitude() {
+        VibratorController controller = createController();
+        assertFalse(controller.isVibrating());
+
+        controller.setAmplitude(1);
+        assertEquals(0, controller.getCurrentAmplitude(), /* delta= */ 0);
+    }
+
+    @Test
+    public void setAmplitude_vibratorUnderExternalControl_ignoresAmplitude() {
+        mockVibratorCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        VibratorController controller = createController();
+        controller.setExternalControl(true);
+        assertTrue(controller.isVibrating());
+
+        controller.setAmplitude(1);
+        assertEquals(0, controller.getCurrentAmplitude(), /* delta= */ 0);
+    }
+
+    @Test
+    public void setAmplitude_vibratorVibrating_setsAmplitude() {
+        when(mNativeWrapperMock.on(anyLong(), anyLong())).thenAnswer(args -> args.getArgument(0));
+        VibratorController controller = createController();
+        controller.on(100, /* vibrationId= */ 1);
+        assertTrue(controller.isVibrating());
+        assertEquals(-1, controller.getCurrentAmplitude(), /* delta= */ 0);
+
+        controller.setAmplitude(1);
+        assertEquals(1, controller.getCurrentAmplitude(), /* delta= */ 0);
     }
 
     @Test

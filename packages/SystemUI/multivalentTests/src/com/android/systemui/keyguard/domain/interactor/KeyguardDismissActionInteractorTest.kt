@@ -38,7 +38,6 @@ import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.scene.data.repository.Idle
 import com.android.systemui.scene.data.repository.Transition
 import com.android.systemui.scene.data.repository.setSceneTransition
-import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
@@ -76,7 +75,6 @@ class KeyguardDismissActionInteractorTest : SysuiTestCase() {
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 dismissInteractor = dismissInteractor,
                 applicationScope = testScope.backgroundScope,
-                sceneInteractor = { kosmos.sceneInteractor },
                 deviceUnlockedInteractor = { kosmos.deviceUnlockedInteractor },
                 powerInteractor = kosmos.powerInteractor,
                 alternateBouncerInteractor = kosmos.alternateBouncerInteractor,

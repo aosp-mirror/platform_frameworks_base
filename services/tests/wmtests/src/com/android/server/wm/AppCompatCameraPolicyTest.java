@@ -20,7 +20,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_ONLY_FOR
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -85,7 +85,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_presentWhenEnabledAndDW() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(/* isAllowed= */ true);
@@ -95,7 +95,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_notPresentWhenNoDW() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(/* isAllowed= */ false);
@@ -105,7 +105,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_notPresentWhenNoFlag() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(/* isAllowed= */ true);
@@ -115,7 +115,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_notPresentWhenNoFlagAndNoDW() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(/* isAllowed= */ false);
@@ -125,7 +125,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraCompatFreeformPolicy_startedWhenEnabledAndDW() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(/* isAllowed= */ true);
@@ -136,7 +136,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraStateManager_existsWhenCameraCompatFreeformExists() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(true);
@@ -147,7 +147,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraStateManager_startedWhenCameraCompatFreeformExists() {
         runTestScenario((robot) -> {
             robot.allowEnterDesktopMode(true);
@@ -180,7 +180,7 @@ public class AppCompatCameraPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void testCameraStateManager_doesNotExistWhenNoPolicyExists() {
         runTestScenario((robot) -> {
             robot.conf().enableCameraCompatTreatmentAtBuildTime(/* enabled= */ false);
