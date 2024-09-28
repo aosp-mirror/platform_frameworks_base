@@ -60,6 +60,7 @@ import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BACKUP;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_INSTRUMENTATION;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_PERSISTENT;
 import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_SYSTEM;
+import static android.content.Intent.isPreventIntentRedirectEnabled;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -130,7 +131,6 @@ import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
-import static android.security.Flags.preventIntentRedirect;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -19267,7 +19267,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @hide
      */
     public void addCreatorToken(@Nullable Intent intent, String creatorPackage) {
-        if (!preventIntentRedirect()) return;
+        if (!isPreventIntentRedirectEnabled()) return;
 
         if (intent == null || intent.getExtraIntentKeys() == null) return;
         for (String key : intent.getExtraIntentKeys()) {
@@ -19278,7 +19278,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "} does not correspond to an intent in the extra bundle.");
                     continue;
                 }
-                Slog.wtf(TAG, "A creator token is added to an intent.");
+                Slog.wtf(TAG,
+                        "A creator token is added to an intent. creatorPackage: " + creatorPackage
+                                + "; intent: " + intent);
                 IBinder creatorToken = createIntentCreatorToken(extraIntent, creatorPackage);
                 if (creatorToken != null) {
                     extraIntent.setCreatorToken(creatorToken);
