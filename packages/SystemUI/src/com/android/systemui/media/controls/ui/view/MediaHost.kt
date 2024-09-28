@@ -20,6 +20,7 @@ import android.graphics.Rect
 import android.util.ArraySet
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
+import com.android.systemui.Flags.mediaControlsUmoInflationInBackground
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.SmartspaceMediaData
@@ -91,8 +92,10 @@ class MediaHost(
                 data: MediaData,
                 immediately: Boolean,
                 receivedSmartspaceCardLatency: Int,
-                isSsReactivated: Boolean
+                isSsReactivated: Boolean,
             ) {
+                if (mediaControlsUmoInflationInBackground()) return
+
                 if (immediately) {
                     updateViewVisibility()
                 }
@@ -101,7 +104,7 @@ class MediaHost(
             override fun onSmartspaceMediaDataLoaded(
                 key: String,
                 data: SmartspaceMediaData,
-                shouldPrioritize: Boolean
+                shouldPrioritize: Boolean,
             ) {
                 updateViewVisibility()
             }
@@ -171,7 +174,7 @@ class MediaHost(
                         input.widthMeasureSpec =
                             View.MeasureSpec.makeMeasureSpec(
                                 View.MeasureSpec.getSize(input.widthMeasureSpec),
-                                View.MeasureSpec.EXACTLY
+                                View.MeasureSpec.EXACTLY,
                             )
                     }
                     // This will trigger a state change that ensures that we now have a state

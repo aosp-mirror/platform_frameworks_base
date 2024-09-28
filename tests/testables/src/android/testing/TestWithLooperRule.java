@@ -34,13 +34,13 @@ import java.util.List;
  * Looper for the Statement.
  */
 public class TestWithLooperRule implements MethodRule {
-
     /*
      * This rule requires to be the inner most Rule, so the next statement is RunAfters
      * instead of another rule. You can set it by '@Rule(order = Integer.MAX_VALUE)'
      */
     @Override
     public Statement apply(Statement base, FrameworkMethod method, Object target) {
+
         // getting testRunner check, if AndroidTestingRunning then we skip this rule
         RunWith runWithAnnotation = target.getClass().getAnnotation(RunWith.class);
         if (runWithAnnotation != null) {
@@ -97,6 +97,9 @@ public class TestWithLooperRule implements MethodRule {
                     case "InvokeParameterizedMethod":
                         this.wrapFieldMethodFor(next, "frameworkMethod", method, target);
                         return;
+                    case "ExpectException":
+                        next = this.getNextStatement(next, "next");
+                        break;
                     default:
                         throw new Exception(
                                 String.format("Unexpected Statement received: [%s]",

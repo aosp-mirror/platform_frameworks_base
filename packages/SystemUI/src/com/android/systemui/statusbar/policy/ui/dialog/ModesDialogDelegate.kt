@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -102,7 +103,13 @@ constructor(
         val cachedDarkTheme = remember { isCurrentlyInDarkTheme }
         PlatformTheme(isDarkTheme = cachedDarkTheme) {
             AlertDialogContent(
-                modifier = Modifier.semantics { testTagsAsResourceId = true },
+                modifier =
+                    Modifier.semantics {
+                        testTagsAsResourceId = true
+                        paneTitle = dialog.context.getString(
+                            R.string.accessibility_desc_quick_settings
+                        )
+                    },
                 title = {
                     Text(
                         modifier = Modifier.testTag("modes_title"),
@@ -137,7 +144,7 @@ constructor(
         }
         activityStarter.startActivity(
             ZEN_MODE_SETTINGS_INTENT,
-            true /* dismissShade */,
+            /* dismissShade= */ true,
             animationController,
         )
     }
@@ -181,7 +188,7 @@ constructor(
         if (animationController == null) {
             currentDialog?.dismiss()
         }
-        activityStarter.startActivity(intent, true, /* dismissShade */ animationController)
+        activityStarter.startActivity(intent, /* dismissShade= */ true, animationController)
     }
 
     companion object {

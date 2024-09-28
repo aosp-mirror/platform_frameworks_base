@@ -19426,4 +19426,48 @@ public class TelephonyManager {
                 return "UNKNOWN(" + state + ")";
         }
     }
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing. {@code null} to reset.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setTestEuiccUiComponent(@Nullable ComponentName componentName) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                Rlog.e(TAG, "setTestEuiccUiComponent(): ITelephony instance is NULL");
+                throw new IllegalStateException("Telephony service not available.");
+            }
+            telephony.setTestEuiccUiComponent(componentName);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setTestEuiccUiComponent() RemoteException : " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return The Euicc UI component for testing. {@code null} if not available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @Nullable
+    public ComponentName getTestEuiccUiComponent() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                Rlog.e(TAG, "getTestEuiccUiComponent(): ITelephony instance is NULL");
+                throw new IllegalStateException("Telephony service not available.");
+            }
+            return telephony.getTestEuiccUiComponent();
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getTestEuiccUiComponent() RemoteException : " + ex);
+            throw ex.rethrowAsRuntimeException();
+        }
+    }
 }
