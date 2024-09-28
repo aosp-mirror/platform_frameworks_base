@@ -43,6 +43,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
@@ -1061,7 +1062,10 @@ class DesktopTasksController(
                     // Check if freeform task launch during recents should be handled
                     shouldHandleMidRecentsFreeformLaunch -> handleMidRecentsFreeformTaskLaunch(task)
                     // Check if the closing task needs to be handled
-                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(task)
+                    TransitionUtil.isClosingType(request.type) -> handleTaskClosing(
+                        task,
+                        request.type
+                    )
                     // Check if the top task shouldn't be allowed to enter desktop mode
                     isIncompatibleTask(task) -> handleIncompatibleTaskLaunch(task)
                     // Check if fullscreen task should be updated
@@ -1288,7 +1292,10 @@ class DesktopTasksController(
     }
 
     /** Handle task closing by removing wallpaper activity if it's the last active task */
-    private fun handleTaskClosing(task: RunningTaskInfo): WindowContainerTransaction? {
+    private fun handleTaskClosing(
+        task: RunningTaskInfo,
+        transitionType: Int
+    ): WindowContainerTransaction? {
         logV("handleTaskClosing")
         if (!isDesktopModeShowing(task.displayId))
             return null
@@ -1301,9 +1308,10 @@ class DesktopTasksController(
             removeWallpaperActivity(wct)
         }
         taskRepository.addClosingTask(task.displayId, task.taskId)
-        // If a CLOSE or TO_BACK is triggered on a desktop task, remove the task.
+        // If a CLOSE is triggered on a desktop task, remove the task.
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue() &&
-            taskRepository.isVisibleTask(task.taskId)
+            taskRepository.isVisibleTask(task.taskId) &&
+            transitionType == TRANSIT_CLOSE
         ) {
             wct.removeTask(task.token)
         }

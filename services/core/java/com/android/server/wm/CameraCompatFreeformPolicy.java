@@ -124,7 +124,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
      */
     @VisibleForTesting
     boolean shouldApplyFreeformTreatmentForCameraCompat(@NonNull ActivityRecord activity) {
-        return Flags.cameraCompatForFreeform() && !activity.info.isChangeEnabled(
+        return Flags.enableCameraCompatForDesktopWindowing() && !activity.info.isChangeEnabled(
                 ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
     }
 

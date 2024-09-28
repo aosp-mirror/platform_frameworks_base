@@ -123,6 +123,7 @@ import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.taskview.TaskViewFactoryController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
@@ -742,14 +743,15 @@ public abstract class WMShellBaseModule {
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            HomeTransitionObserver homeTransitionObserver) {
+            HomeTransitionObserver homeTransitionObserver,
+            FocusTransitionObserver focusTransitionObserver) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellCommandHandler, shellController, organizer,
                 pool, displayController, mainExecutor, mainHandler, animExecutor,
-                rootTaskDisplayAreaOrganizer, homeTransitionObserver);
+                rootTaskDisplayAreaOrganizer, homeTransitionObserver, focusTransitionObserver);
     }
 
     @WMSingleton
@@ -757,6 +759,12 @@ public abstract class WMShellBaseModule {
     static HomeTransitionObserver provideHomeTransitionObserver(Context context,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new HomeTransitionObserver(context, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static FocusTransitionObserver provideFocusTransitionObserver() {
+        return new FocusTransitionObserver();
     }
 
     @WMSingleton

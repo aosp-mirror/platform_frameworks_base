@@ -799,7 +799,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         } finally {
             if (deferTransitionReady) {
-                chain.mTransition.continueTransitionReady();
+                if (chain.mTransition.isCollecting()) {
+                    chain.mTransition.continueTransitionReady();
+                } else {
+                    Slog.wtf(TAG, "Too late, transition : " + chain.mTransition.getSyncId()
+                            + " state: " + chain.mTransition.getState() + " is not collecting");
+                }
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             if (deferResume) {

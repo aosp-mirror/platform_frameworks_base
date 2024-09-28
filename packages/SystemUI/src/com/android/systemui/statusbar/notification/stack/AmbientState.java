@@ -88,6 +88,8 @@ public class AmbientState implements Dumpable {
     private ExpandableView mLastVisibleBackgroundChild;
     private float mCurrentScrollVelocity;
     private int mStatusBarState;
+    private boolean mShowingStackOnLockscreen;
+    private float mLockscreenStackFadeInProgress;
     private float mExpandingVelocity;
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
@@ -222,6 +224,7 @@ public class AmbientState implements Dumpable {
      * @param isSwipingUp Whether we are swiping up.
      */
     public void setSwipingUp(boolean isSwipingUp) {
+        SceneContainerFlag.assertInLegacyMode();
         if (!isSwipingUp && mIsSwipingUp) {
             // Just stopped swiping up.
             mIsFlingRequiredAfterLockScreenSwipeUp = true;
@@ -240,6 +243,7 @@ public class AmbientState implements Dumpable {
      * @param isFlinging Whether we are flinging the shade open or closed.
      */
     public void setFlinging(boolean isFlinging) {
+        SceneContainerFlag.assertInLegacyMode();
         if (isOnKeyguard() && !isFlinging && mIsFlinging) {
             // Just stopped flinging.
             mIsFlingRequiredAfterLockScreenSwipeUp = false;
@@ -624,6 +628,26 @@ public class AmbientState implements Dumpable {
         return mStatusBarState == StatusBarState.KEYGUARD;
     }
 
+    public boolean isShowingStackOnLockscreen() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return false;
+        return mShowingStackOnLockscreen;
+    }
+
+    public void setShowingStackOnLockscreen(boolean showingStackOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mShowingStackOnLockscreen = showingStackOnLockscreen;
+    }
+
+    public float getLockscreenStackFadeInProgress() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mLockscreenStackFadeInProgress;
+    }
+
+    public void setLockscreenStackFadeInProgress(float lockscreenStackFadeInProgress) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mLockscreenStackFadeInProgress = lockscreenStackFadeInProgress;
+    }
+
     public void setStatusBarState(int statusBarState) {
         if (mStatusBarState != StatusBarState.KEYGUARD) {
             mIsFlingRequiredAfterLockScreenSwipeUp = false;
@@ -695,6 +719,7 @@ public class AmbientState implements Dumpable {
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
     public boolean isFlingingAfterSwipeUpOnLockscreen() {
+        SceneContainerFlag.assertInLegacyMode();
         return mIsFlinging && mIsFlingRequiredAfterLockScreenSwipeUp;
     }
 

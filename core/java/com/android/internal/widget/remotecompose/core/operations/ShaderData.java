@@ -15,12 +15,19 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.BYTE;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT_ARRAY;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.SHORT;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.UTF8;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,16 +39,14 @@ import java.util.List;
  * in playback the image is decompressed
  */
 public class ShaderData implements Operation, VariableSupport {
+    private static final int OP_CODE = Operations.DATA_SHADER;
+    private static final String CLASS_NAME = "ShaderData";
     int mShaderTextId; // the actual text of a shader
     int mShaderID; // allows shaders to be referenced by number
     HashMap<String, float[]> mUniformRawFloatMap = null;
     HashMap<String, float[]> mUniformFloatMap = null;
     HashMap<String, int[]> mUniformIntMap = null;
     HashMap<String, Integer> mUniformBitmapMap = null;
-
-    public static final int MAX_IMAGE_DIMENSION = 8000;
-
-    public static final Companion COMPANION = new Companion();
 
     public ShaderData(int shaderID,
                       int shaderTextId,
@@ -81,7 +86,8 @@ public class ShaderData implements Operation, VariableSupport {
 
     /**
      * get names of all known floats
-     * @return
+     *
+     * @return Names of all uniform floats or empty array
      */
     public String[] getUniformFloatNames() {
         if (mUniformFloatMap == null) return new String[0];
@@ -90,8 +96,9 @@ public class ShaderData implements Operation, VariableSupport {
 
     /**
      * Get float values associated with the name
-     * @param name
-     * @return
+     *
+     * @param name name of uniform
+     * @return value of uniform
      */
     public float[] getUniformFloats(String name) {
         return mUniformFloatMap.get(name);
@@ -99,7 +106,8 @@ public class ShaderData implements Operation, VariableSupport {
 
     /**
      * get the name of all know uniform integers
-     * @return
+     *
+     * @return  Name of all integer uniforms
      */
     public String[] getUniformIntegerNames() {
         if (mUniformIntMap == null) return new String[0];
@@ -108,8 +116,9 @@ public class ShaderData implements Operation, VariableSupport {
 
     /**
      * Get Int value associated with the name
-     * @param name
-     * @return
+     *
+     * @param name Name of uniform
+     * @return value of uniform
      */
     public int[] getUniformInts(String name) {
         return mUniformIntMap.get(name);
@@ -117,7 +126,8 @@ public class ShaderData implements Operation, VariableSupport {
 
     /**
      * get list of uniform Bitmaps
-     * @return
+     *
+     * @return Name of all bitmap uniforms
      */
     public String[] getUniformBitmapNames() {
         if (mUniformBitmapMap == null) return new String[0];
@@ -126,8 +136,9 @@ public class ShaderData implements Operation, VariableSupport {
 
     /**
      * Get a bitmap stored under that name
-     * @param name
-     * @return
+     *
+     * @param name Name of bitmap uniform
+     * @return Bitmap ID
      */
     public int getUniformBitmapId(String name) {
         return mUniformBitmapMap.get(name);
@@ -135,7 +146,7 @@ public class ShaderData implements Operation, VariableSupport {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mShaderID, mShaderTextId,
+        apply(buffer, mShaderID, mShaderTextId,
                 mUniformFloatMap, mUniformIntMap, mUniformBitmapMap);
     }
 
@@ -165,136 +176,150 @@ public class ShaderData implements Operation, VariableSupport {
     public void registerListening(RemoteContext context) {
         for (String name : mUniformRawFloatMap.keySet()) {
             float[] value = mUniformRawFloatMap.get(name);
-            for (int i = 0; i < value.length; i++) {
-                if (Float.isNaN(value[i])) {
-                    context.listensTo(Utils.idFromNan(value[i]), this);
+            for (float v : value) {
+                if (Float.isNaN(v)) {
+                    context.listensTo(Utils.idFromNan(v), this);
                 }
             }
         }
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "BitmapData";
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public int id() {
-            return Operations.DATA_SHADER;
-        }
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer buffer to write into
+     * @param shaderID id of shader
+     * @param shaderTextId id of text of shader
+     * @param floatMap the map of float uniforms
+     * @param intMap the map of int uniforms
+     * @param bitmapMap the map of bitmap uniforms
+     */
+    public static void apply(WireBuffer buffer, int shaderID, int shaderTextId,
+                             HashMap<String, float[]> floatMap,
+                             HashMap<String, int[]> intMap,
+                             HashMap<String, Integer> bitmapMap) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(shaderID);
 
-        /**
-         * Writes out the operation to the buffer
-         * @param buffer
-         * @param shaderID
-         * @param shaderTextId
-         * @param floatMap
-         * @param intMap
-         * @param bitmapMap
-         */
-        public void apply(WireBuffer buffer, int shaderID, int shaderTextId,
-                          HashMap<String, float[]> floatMap,
-                          HashMap<String, int[]> intMap,
-                          HashMap<String, Integer> bitmapMap) {
-            buffer.start(Operations.DATA_SHADER);
-            buffer.writeInt(shaderID);
+        buffer.writeInt(shaderTextId);
+        int floatSize = (floatMap == null) ? 0 : floatMap.size();
+        int intSize = (intMap == null) ? 0 : intMap.size();
+        int bitmapSize = (bitmapMap == null) ? 0 : bitmapMap.size();
+        int sizes = floatSize | (intSize << 8) | (bitmapSize << 16);
+        buffer.writeInt(sizes);
 
-            buffer.writeInt(shaderTextId);
-            int floatSize = (floatMap == null) ? 0 : floatMap.size();
-            int intSize = (intMap == null) ? 0 : intMap.size();
-            int bitmapSize = (bitmapMap == null) ? 0 : bitmapMap.size();
-            int sizes = floatSize | (intSize << 8) | (bitmapSize << 16);
-            buffer.writeInt(sizes);
+        if (floatSize > 0) {
 
-            if (floatSize > 0) {
+            for (String name : floatMap.keySet()) {
+                buffer.writeUTF8(name);
+                float[] values = floatMap.get(name);
+                buffer.writeInt(values.length);
 
-                for (String name : floatMap.keySet()) {
-                    buffer.writeUTF8(name);
-                    float[] values = floatMap.get(name);
-                    buffer.writeInt(values.length);
-
-                    for (int i = 0; i < values.length; i++) {
-                        buffer.writeFloat(values[i]);
-                    }
+                for (float value : values) {
+                    buffer.writeFloat(value);
                 }
             }
+        }
 
-            if (intSize > 0) {
-                for (String name : intMap.keySet()) {
-                    buffer.writeUTF8(name);
-                    int[] values = intMap.get(name);
-                    buffer.writeInt(values.length);
-                    for (int i = 0; i < values.length; i++) {
-                        buffer.writeInt(values[i]);
-                    }
-                }
-            }
-            if (bitmapSize > 0) {
-                for (String name : bitmapMap.keySet()) {
-                    buffer.writeUTF8(name);
-                    int value = bitmapMap.get(name);
+        if (intSize > 0) {
+            for (String name : intMap.keySet()) {
+                buffer.writeUTF8(name);
+                int[] values = intMap.get(name);
+                buffer.writeInt(values.length);
+                for (int value : values) {
                     buffer.writeInt(value);
                 }
             }
         }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int shaderID = buffer.readInt();
-            int shaderTextId = buffer.readInt();
-            HashMap<String, float[]> floatMap = null;
-            HashMap<String, int[]> intMap = null;
-            HashMap<String, Integer> bitmapMap = null;
-
-            int sizes = buffer.readInt();
-
-            int floatMapSize = sizes & 0xFF;
-            if (floatMapSize > 0) {
-                floatMap = new HashMap<>();
-                for (int i = 0; i < floatMapSize; i++) {
-                    String name = buffer.readUTF8();
-                    int len = buffer.readInt();
-                    float[] val = new float[len];
-
-                    for (int j = 0; j < len; j++) {
-                        val[j] = buffer.readFloat();
-                    }
-
-                    floatMap.put(name, val);
-                }
+        if (bitmapSize > 0) {
+            for (String name : bitmapMap.keySet()) {
+                buffer.writeUTF8(name);
+                int value = bitmapMap.get(name);
+                buffer.writeInt(value);
             }
-            int intMapSize = (sizes >> 8) & 0xFF;
-
-            if (intMapSize > 0) {
-
-                intMap = new HashMap<>();
-                for (int i = 0; i < intMapSize; i++) {
-                    String name = buffer.readUTF8();
-                    int len = buffer.readInt();
-                    int[] val = new int[len];
-                    for (int j = 0; j < len; j++) {
-                        val[j] = buffer.readInt();
-                    }
-                    intMap.put(name, val);
-                }
-            }
-            int bitmapMapSize = (sizes >> 16) & 0xFF;
-
-            if (bitmapMapSize > 0) {
-                bitmapMap = new HashMap<>();
-                for (int i = 0; i < bitmapMapSize; i++) {
-                    String name = buffer.readUTF8();
-                    int val = buffer.readInt();
-                    bitmapMap.put(name, val);
-                }
-            }
-            operations.add(new ShaderData(shaderID, shaderTextId,
-                    floatMap, intMap, bitmapMap));
         }
+    }
+
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int shaderID = buffer.readInt();
+        int shaderTextId = buffer.readInt();
+        HashMap<String, float[]> floatMap = null;
+        HashMap<String, int[]> intMap = null;
+        HashMap<String, Integer> bitmapMap = null;
+
+        int sizes = buffer.readInt();
+
+        int floatMapSize = sizes & 0xFF;
+        if (floatMapSize > 0) {
+            floatMap = new HashMap<>();
+            for (int i = 0; i < floatMapSize; i++) {
+                String name = buffer.readUTF8();
+                int len = buffer.readInt();
+                float[] val = new float[len];
+
+                for (int j = 0; j < len; j++) {
+                    val[j] = buffer.readFloat();
+                }
+
+                floatMap.put(name, val);
+            }
+        }
+        int intMapSize = (sizes >> 8) & 0xFF;
+
+        if (intMapSize > 0) {
+
+            intMap = new HashMap<>();
+            for (int i = 0; i < intMapSize; i++) {
+                String name = buffer.readUTF8();
+                int len = buffer.readInt();
+                int[] val = new int[len];
+                for (int j = 0; j < len; j++) {
+                    val[j] = buffer.readInt();
+                }
+                intMap.put(name, val);
+            }
+        }
+        int bitmapMapSize = (sizes >> 16) & 0xFF;
+
+        if (bitmapMapSize > 0) {
+            bitmapMap = new HashMap<>();
+            for (int i = 0; i < bitmapMapSize; i++) {
+                String name = buffer.readUTF8();
+                int val = buffer.readInt();
+                bitmapMap.put(name, val);
+            }
+        }
+        operations.add(new ShaderData(shaderID, shaderTextId,
+                floatMap, intMap, bitmapMap));
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Data Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Shader")
+                .field(INT, "shaderID", "id of shader")
+                .field(BYTE, " floatSize", "number of float uniforms")
+                .field(BYTE, " intSize", "number of int uniform")
+                .field(SHORT, " intSize", "number of int uniform")
+                .field(UTF8, "floatName", "name of float uniform")
+                .field(INT, "length", "length")
+                .field(FLOAT_ARRAY, "VALUE", "float uniform (max 4)")
+                .field(UTF8, "IntName", "id of shader text")
+                .field(INT, "length", "length of uniform")
+                .field(INT_ARRAY, "VALUE", "int uniform (max 4)")
+                .field(UTF8, "bitmapName", "name of bitmap")
+                .field(INT, "VALUE", "id of bitmap");
+
     }
 
     @Override

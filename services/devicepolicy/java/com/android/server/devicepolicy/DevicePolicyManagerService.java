@@ -4152,8 +4152,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     private void checkAllUsersAreAffiliatedWithDevice() {
-        Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked(),
-                "operation not allowed when device has unaffiliated users");
+        synchronized (getLockObject()) {
+            Preconditions.checkCallAuthorization(areAllUsersAffiliatedWithDeviceLocked(),
+                    "operation not allowed when device has unaffiliated users");
+        }
     }
 
     @Override
@@ -11362,7 +11364,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (mOwners.hasDeviceOwner()) {
             return false;
         }
-        
+
         final ComponentName profileOwner = getProfileOwnerAsUser(userId);
         if (profileOwner == null) {
             return false;
@@ -11371,7 +11373,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (isManagedProfile(userId)) {
             return false;
         }
-        
+
         return true;
     }
     private void enforceCanQueryLockTaskLocked(ComponentName who, String callerPackageName) {
@@ -18213,6 +18215,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
+    @GuardedBy("getLockObject()")
     private boolean areAllUsersAffiliatedWithDeviceLocked() {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             final List<UserInfo> userInfos = mUserManager.getAliveUsers();
@@ -18310,10 +18313,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final CallerIdentity caller = getCallerIdentity(admin, packageName);
         if (isPermissionCheckFlagEnabled()) {
-            Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
-                    || areAllUsersAffiliatedWithDeviceLocked());
-            enforcePermission(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, caller.getPackageName(),
-                    UserHandle.USER_ALL);
+            synchronized (getLockObject()) {
+                Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
+                        || areAllUsersAffiliatedWithDeviceLocked());
+                enforcePermission(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, caller.getPackageName(),
+                        UserHandle.USER_ALL);
+            }
         } else {
             if (admin != null) {
                 Preconditions.checkCallAuthorization(
@@ -18325,8 +18330,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         isCallerDelegate(caller, DELEGATION_SECURITY_LOGGING));
             }
 
-            Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
-                    || areAllUsersAffiliatedWithDeviceLocked());
+            synchronized (getLockObject()) {
+                Preconditions.checkCallAuthorization(isOrganizationOwnedDeviceWithManagedProfile()
+                        || areAllUsersAffiliatedWithDeviceLocked());
+            }
         }
 
         DevicePolicyEventLogger
@@ -24540,7 +24547,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         });
     }
-    
+
+    @GuardedBy("getLockObject()")
     private void migrateUserControlDisabledPackagesLocked() {
         Binder.withCleanCallingIdentity(() -> {
             List<UserInfo> users = mUserManager.getUsers();

@@ -136,7 +136,7 @@ public class PhoneMediaDeviceTest {
         when(mInfo.getType()).thenReturn(TYPE_USB_DEVICE);
 
         assertThat(mPhoneMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_usb_speaker_name));
+                .isEqualTo(mContext.getString(R.string.media_transfer_usb_audio_name));
 
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 

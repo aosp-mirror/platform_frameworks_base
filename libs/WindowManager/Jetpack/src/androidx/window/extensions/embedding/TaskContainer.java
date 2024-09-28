@@ -377,8 +377,16 @@ class TaskContainer {
 
     @Nullable
     TaskFragmentContainer getContainerWithActivity(@NonNull IBinder activityToken) {
-        return getContainer(container -> container.hasAppearedActivity(activityToken)
-                || container.hasPendingAppearedActivity(activityToken));
+        // When the new activity is launched to the topmost TF because the source activity
+        // was in that TF, and the source activity is finished before resolving the new activity,
+        // we will try to see if the new activity match a rule with the split activities below.
+        // If matched, it can be reparented.
+        final TaskFragmentContainer taskFragmentContainer
+                = getContainer(container -> container.hasPendingAppearedActivity(activityToken));
+        if (taskFragmentContainer != null) {
+            return taskFragmentContainer;
+        }
+        return getContainer(container -> container.hasAppearedActivity(activityToken));
     }
 
     @Nullable

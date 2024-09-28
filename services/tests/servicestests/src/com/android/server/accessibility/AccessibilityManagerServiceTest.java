@@ -63,8 +63,11 @@ import static org.mockito.Mockito.when;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.annotation.NonNull;
 import android.app.PendingIntent;
 import android.app.RemoteAction;
+import android.app.admin.DevicePolicyManager;
+import android.app.ecm.EnhancedConfirmationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -212,6 +215,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
+    @Mock private DevicePolicyManager mDevicePolicyManager;
     @Spy private IUserInitializationCompleteCallback mUserInitializationCompleteCallback;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     private IAccessibilityManager mA11yManagerServiceOnDevice;
@@ -241,6 +245,7 @@ public class AccessibilityManagerServiceTest {
                 UserManagerInternal.class, mMockUserManagerInternal);
         LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
         mInputFilter = mock(FakeInputFilter.class);
+        mTestableContext.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
 
         when(mMockMagnificationController.getMagnificationConnectionManager()).thenReturn(
                 mMockMagnificationConnectionManager);
@@ -2160,6 +2165,24 @@ public class AccessibilityManagerServiceTest {
                 .isEqualTo(SOFTWARE);
     }
 
+    @Test
+    @EnableFlags({android.permission.flags.Flags.FLAG_ENHANCED_CONFIRMATION_MODE_APIS_ENABLED,
+            android.security.Flags.FLAG_EXTEND_ECM_TO_ALL_SETTINGS})
+    public void isAccessibilityTargetAllowed_nonSystemUserId_useEcmWithNonSystemUserId() {
+        String fakePackageName = "FAKE_PACKAGE_NAME";
+        int uid = 0; // uid is not used in the actual implementation when flags are on
+        int userId = mTestableContext.getUserId() + 1234;
+        when(mDevicePolicyManager.getPermittedAccessibilityServices(userId)).thenReturn(
+                List.of(fakePackageName));
+        Context mockUserContext = mock(Context.class);
+        mTestableContext.addMockUserContext(userId, mockUserContext);
+
+        mA11yms.isAccessibilityTargetAllowed(fakePackageName, uid, userId);
+
+        verify(mockUserContext).getSystemService(EnhancedConfirmationManager.class);
+    }
+
+
     private Set<String> readStringsFromSetting(String setting) {
         final Set<String> result = new ArraySet<>();
         mA11yms.readColonDelimitedSettingToSet(
@@ -2280,6 +2303,7 @@ public class AccessibilityManagerServiceTest {
 
         private final Context mMockContext;
         private final Map<String, List<BroadcastReceiver>> mBroadcastReceivers = new ArrayMap<>();
+        private ArrayMap<Integer, Context> mMockUserContexts = new ArrayMap<>();
 
         A11yTestableContext(Context base) {
             super(base);
@@ -2315,6 +2339,19 @@ public class AccessibilityManagerServiceTest {
 
         Context getMockContext() {
             return mMockContext;
+        }
+
+        public void addMockUserContext(int userId, Context context) {
+            mMockUserContexts.put(userId, context);
+        }
+
+        @Override
+        @NonNull
+        public Context createContextAsUser(UserHandle user, int flags) {
+            if (mMockUserContexts.containsKey(user.getIdentifier())) {
+                return mMockUserContexts.get(user.getIdentifier());
+            }
+            return super.createContextAsUser(user, flags);
         }
 
         Map<String, List<BroadcastReceiver>> getBroadcastReceivers() {

@@ -32,9 +32,9 @@ import android.os.Parcelable
  */
 data class DeviceSettingItem(
     @DeviceSettingId val settingId: Int,
-    val packageName: String,
-    val className: String,
-    val intentAction: String,
+    val packageName: String? = null,
+    val className: String? = null,
+    val intentAction: String? = null,
     val preferenceKey: String? = null,
     val highlighted: Boolean = false,
     val extras: Bundle = Bundle.EMPTY,
@@ -62,11 +62,11 @@ data class DeviceSettingItem(
                     parcel.run {
                         DeviceSettingItem(
                             settingId = readInt(),
-                            packageName = readString() ?: "",
-                            className = readString() ?: "",
-                            intentAction = readString() ?: "",
+                            packageName = readString(),
+                            className = readString(),
+                            intentAction = readString(),
                             highlighted = readBoolean(),
-                            preferenceKey = readString() ?: "",
+                            preferenceKey = readString(),
                             extras = readBundle((Bundle::class.java.classLoader)) ?: Bundle.EMPTY,
                         )
                     }

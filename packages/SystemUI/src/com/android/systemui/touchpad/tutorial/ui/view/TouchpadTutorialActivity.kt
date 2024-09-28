@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
+import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialMetricsLogger
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
@@ -45,6 +46,7 @@ class TouchpadTutorialActivity
 constructor(
     private val viewModelFactory: TouchpadTutorialViewModel.Factory,
     private val logger: InputDeviceTutorialLogger,
+    private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
 ) : ComponentActivity() {
 
     private val vm by viewModels<TouchpadTutorialViewModel>(factoryProducer = { viewModelFactory })
@@ -57,6 +59,7 @@ constructor(
         }
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        metricsLogger.logPeripheralTutorialLaunchedFromSettings()
         logger.logOpenTutorial(TutorialContext.TOUCHPAD_TUTORIAL)
     }
 
@@ -85,7 +88,7 @@ fun TouchpadTutorialScreen(vm: TouchpadTutorialViewModel, closeTutorial: () -> U
                 onBackTutorialClicked = { vm.goTo(BACK_GESTURE) },
                 onHomeTutorialClicked = { vm.goTo(HOME_GESTURE) },
                 onRecentAppsTutorialClicked = { vm.goTo(RECENT_APPS_GESTURE) },
-                onDoneButtonClicked = closeTutorial
+                onDoneButtonClicked = closeTutorial,
             )
         BACK_GESTURE ->
             BackGestureTutorialScreen(

@@ -1120,7 +1120,9 @@ public class BackgroundActivityStartController {
             @Nullable Task targetTask, int launchFlags, int balCode, int callingUid,
             int realCallingUid, TaskDisplayArea preferredTaskDisplayArea) {
         // BAL Exception allowed in all cases
-        if (balCode == BAL_ALLOW_ALLOWLISTED_UID) {
+        if (balCode == BAL_ALLOW_ALLOWLISTED_UID
+                || (android.security.Flags.asmReintroduceGracePeriod()
+                    && balCode == BAL_ALLOW_GRACE_PERIOD)) {
             return true;
         }
 
@@ -1173,10 +1175,15 @@ public class BackgroundActivityStartController {
                 ArrayList<Task> visibleTasks = displayArea.getVisibleTasks();
                 for (int i = 0; i < visibleTasks.size(); i++) {
                     Task task = visibleTasks.get(i);
-                    if (visibleTasks.size() == 1 && task.isActivityTypeHomeOrRecents()) {
-                        bas.optedIn(task.getTopMostActivity());
-                    } else {
+                    if (android.security.Flags.asmReintroduceGracePeriod()) {
                         bas = checkTopActivityForAsm(task, callingUid, /*sourceRecord*/null, bas);
+                    } else {
+                        if (visibleTasks.size() == 1 && task.isActivityTypeHomeOrRecents()) {
+                            bas.optedIn(task.getTopMostActivity());
+                        } else {
+                            bas = checkTopActivityForAsm(
+                                task, callingUid, /*sourceRecord*/null, bas);
+                        }
                     }
                 }
             }

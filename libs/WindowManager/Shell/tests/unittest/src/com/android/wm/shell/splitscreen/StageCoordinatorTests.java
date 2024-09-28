@@ -74,6 +74,7 @@ import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.DefaultMixedHandler;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
@@ -429,7 +430,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         ShellInit shellInit = new ShellInit(mMainExecutor);
         final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
                 mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
-                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
+                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class),
+                mock(FocusTransitionObserver.class));
         shellInit.init();
         return t;
     }

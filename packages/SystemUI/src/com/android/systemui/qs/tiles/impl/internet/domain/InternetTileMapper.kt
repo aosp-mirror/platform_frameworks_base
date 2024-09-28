@@ -18,7 +18,9 @@ package com.android.systemui.qs.tiles.impl.internet.domain
 
 import android.content.Context
 import android.content.res.Resources
+import android.os.Handler
 import android.widget.Switch
+import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text.Companion.loadText
@@ -28,6 +30,7 @@ import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileMode
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileIconModel
 import javax.inject.Inject
 
 /** Maps [InternetTileModel] to [QSTileState]. */
@@ -37,6 +40,7 @@ constructor(
     @Main private val resources: Resources,
     private val theme: Resources.Theme,
     private val context: Context,
+    @Main private val handler: Handler,
 ) : QSTileDataToStateMapper<InternetTileModel> {
 
     override fun map(config: QSTileConfig, data: InternetTileModel): QSTileState =
@@ -44,25 +48,42 @@ constructor(
             label = resources.getString(R.string.quick_settings_internet_label)
             expandedAccessibilityClass = Switch::class
 
-            if (data.secondaryLabel != null) {
-                secondaryLabel = data.secondaryLabel.loadText(context)
-            } else {
-                secondaryLabel = data.secondaryTitle
-            }
+            secondaryLabel =
+                if (data.secondaryLabel != null) {
+                    data.secondaryLabel.loadText(context)
+                } else {
+                    data.secondaryTitle
+                }
 
             stateDescription = data.stateDescription.loadContentDescription(context)
             contentDescription = data.contentDescription.loadContentDescription(context)
 
-            iconRes = data.iconId
-            if (data.icon != null) {
-                this.icon = { data.icon }
-            } else if (data.iconId != null) {
-                val loadedIcon =
-                    Icon.Loaded(
-                        resources.getDrawable(data.iconId!!, theme),
-                        contentDescription = null
-                    )
-                this.icon = { loadedIcon }
+            when (val dataIcon = data.icon) {
+                is InternetTileIconModel.ResourceId -> {
+                    iconRes = dataIcon.resId
+                    icon = {
+                        Icon.Loaded(
+                            resources.getDrawable(dataIcon.resId, theme),
+                            contentDescription = null,
+                        )
+                    }
+                }
+
+                is InternetTileIconModel.Cellular -> {
+                    val signalDrawable = SignalDrawable(context, handler)
+                    signalDrawable.setLevel(dataIcon.level)
+                    icon = { Icon.Loaded(signalDrawable, contentDescription = null) }
+                }
+
+                is InternetTileIconModel.Satellite -> {
+                    iconRes = dataIcon.resourceIcon.res // level is inferred from res
+                    icon = {
+                        Icon.Loaded(
+                            resources.getDrawable(dataIcon.resourceIcon.res, theme),
+                            contentDescription = null,
+                        )
+                    }
+                }
             }
 
             sideViewIcon = QSTileState.SideViewIcon.Chevron
@@ -75,7 +96,7 @@ constructor(
                 setOf(
                     QSTileState.UserAction.CLICK,
                     QSTileState.UserAction.TOGGLE_CLICK,
-                    QSTileState.UserAction.LONG_CLICK
+                    QSTileState.UserAction.LONG_CLICK,
                 )
         }
 }

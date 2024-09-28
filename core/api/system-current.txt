@@ -6833,6 +6833,16 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
   }
 
+  public static final class SoundTrigger.RecognitionConfig.Builder {
+    ctor public SoundTrigger.RecognitionConfig.Builder();
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig build();
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAllowMultipleTriggers(boolean);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAudioCapabilities(int);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setCaptureRequested(boolean);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@Nullable byte[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setKeyphrases(@NonNull java.util.Collection<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+  }
+
   public static class SoundTrigger.RecognitionEvent {
     method @Nullable public android.media.AudioFormat getCaptureFormat();
     method public int getCaptureSession();
@@ -15878,6 +15888,8 @@ package android.telephony.data {
     field public static final String TYPE_IMS_STRING = "ims";
     field public static final String TYPE_MCX_STRING = "mcx";
     field public static final String TYPE_MMS_STRING = "mms";
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_paid_private") public static final String TYPE_OEM_PAID_STRING = "oem_paid";
+    field @FlaggedApi("com.android.internal.telephony.flags.oem_paid_private") public static final String TYPE_OEM_PRIVATE_STRING = "oem_private";
     field @FlaggedApi("com.android.internal.telephony.flags.carrier_enabled_satellite_flag") public static final String TYPE_RCS_STRING = "rcs";
     field public static final String TYPE_SUPL_STRING = "supl";
     field public static final String TYPE_VSIM_STRING = "vsim";

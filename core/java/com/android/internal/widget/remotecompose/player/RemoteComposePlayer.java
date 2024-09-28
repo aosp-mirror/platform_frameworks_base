@@ -66,6 +66,10 @@ public class RemoteComposePlayer extends FrameLayout {
         }
     }
 
+    public RemoteComposeDocument getDocument() {
+        return mInner.getDocument();
+    }
+
     public void setDocument(RemoteComposeDocument value) {
         if (value != null) {
             if (value.canBeDisplayed(
@@ -149,6 +153,84 @@ public class RemoteComposePlayer extends FrameLayout {
         mInner = new RemoteComposeCanvas(context, attrs, defStyleAttr);
         mInner.setBackgroundColor(Color.TRANSPARENT);
         addView(mInner, layoutParams);
+    }
+
+    /**
+     * Set an override for a string resource
+     *
+     * @param domain domain (SYSTEM or USER)
+     * @param name name of the string
+     * @param content content of the string
+     */
+    public void setLocalString(String domain, String name, String content) {
+        mInner.setLocalString(domain + ":" + name, content);
+    }
+
+    /**
+     * Clear the override of the given string
+     *
+     * @param domain domain (SYSTEM or USER)
+     * @param name name of the string
+     */
+    public void clearLocalString(String domain, String name) {
+        mInner.clearLocalString(domain + ":" + name);
+    }
+
+    /**
+     * Set an override for a user domain string resource
+     *
+     * @param name name of the string
+     * @param content content of the string
+     */
+    public void setUserLocalString(String name, String content) {
+        mInner.setLocalString("USER:" + name, content);
+    }
+
+    /**
+     * Set an override for a user domain int resource
+     *
+     * @param name name of the int
+     * @param value value of the int
+     */
+    public void setUserLocalInt(String name, int value) {
+        mInner.setLocalInt("USER:" + name, value);
+    }
+
+    /**
+     * Clear the override of the given user string
+     *
+     * @param name name of the string
+     */
+    public void clearUserLocalString(String name) {
+        mInner.clearLocalString("USER:" + name);
+    }
+
+    /**
+     * Clear the override of the given user int
+     *
+     * @param name name of the int
+     */
+    public void clearUserLocalInt(String name) {
+        mInner.clearLocalInt("USER:" + name);
+    }
+
+    /**
+     * Set an override for a system domain string resource
+     *
+     * @param name name of the string
+     * @param content content of the string
+     */
+    public void setSystemLocalString(String name, String content) {
+        mInner.setLocalString("SYSTEM:" + name, content);
+    }
+
+    /**
+     * Clear the override of the given system string
+     *
+     * @param name name of the string
+     */
+    public void clearSystemLocalString(String name) {
+        mInner.clearLocalString("SYSTEM:" + name);
     }
 
     public interface ClickCallbacks {
@@ -410,3 +492,4 @@ public class RemoteComposePlayer extends FrameLayout {
         }
     }
 }
+
