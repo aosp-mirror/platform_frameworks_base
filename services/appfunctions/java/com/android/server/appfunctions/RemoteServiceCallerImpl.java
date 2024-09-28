@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -63,9 +64,17 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             @NonNull Intent intent,
             int bindFlags,
             @NonNull UserHandle userHandle,
+            long cancellationTimeoutMillis,
+            @NonNull CancellationSignal cancellationSignal,
             @NonNull RunServiceCallCallback<T> callback) {
         OneOffServiceConnection serviceConnection =
-                new OneOffServiceConnection(intent, bindFlags, userHandle, callback);
+                new OneOffServiceConnection(
+                        intent,
+                        bindFlags,
+                        userHandle,
+                        cancellationTimeoutMillis,
+                        cancellationSignal,
+                        callback);
 
         return serviceConnection.bindAndRun();
     }
@@ -76,23 +85,38 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
         private final int mFlags;
         private final UserHandle mUserHandle;
         private final RunServiceCallCallback<T> mCallback;
+        private final long mCancellationTimeoutMillis;
+        private final CancellationSignal mCancellationSignal;
+        private final Runnable mCancellationTimeoutRunnable;
 
         OneOffServiceConnection(
                 @NonNull Intent intent,
                 int flags,
                 @NonNull UserHandle userHandle,
+                long cancellationTimeoutMillis,
+                @NonNull CancellationSignal cancellationSignal,
                 @NonNull RunServiceCallCallback<T> callback) {
             mIntent = intent;
             mFlags = flags;
             mCallback = callback;
             mUserHandle = userHandle;
+            mCancellationTimeoutMillis = cancellationTimeoutMillis;
+            mCancellationSignal = cancellationSignal;
+            mCancellationTimeoutRunnable = this::safeUnbind;
         }
 
         public boolean bindAndRun() {
             boolean bindServiceResult =
                     mContext.bindServiceAsUser(mIntent, this, mFlags, mUserHandle);
 
-            if (!bindServiceResult) {
+            if (bindServiceResult) {
+                mCancellationSignal.setOnCancelListener(
+                        () -> {
+                            mCallback.onCancelled();
+                            mHandler.postDelayed(
+                                    mCancellationTimeoutRunnable, mCancellationTimeoutMillis);
+                        });
+            } else {
                 safeUnbind();
             }
 
@@ -126,6 +150,7 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
 
         private void safeUnbind() {
             try {
+                mHandler.removeCallbacks(mCancellationTimeoutRunnable);
                 mContext.unbindService(this);
             } catch (Exception ex) {
                 Log.w(TAG, "Failed to unbind", ex);

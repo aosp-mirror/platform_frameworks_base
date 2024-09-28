@@ -20,15 +20,16 @@ import android.provider.DeviceConfig;
 
 /** Implementation of {@link ServiceConfig} */
 public class ServiceConfigImpl implements ServiceConfig {
-    static final String DEVICE_CONFIG_PROPERTY_EXECUTION_TIMEOUT =
-            "execute_app_function_timeout_millis";
-    static final long DEFAULT_EXECUTE_APP_FUNCTION_TIMEOUT_MS = 5000L;
+    static final String DEVICE_CONFIG_PROPERTY_EXECUTION_CANCELLATION_TIMEOUT =
+            "execute_app_function_cancellation_timeout_millis";
+    static final long DEFAULT_EXECUTE_APP_FUNCTION_CANCELLATION_TIMEOUT_MS = 5000L;
+
 
     @Override
-    public long getExecuteAppFunctionTimeoutMillis() {
+    public long getExecuteAppFunctionCancellationTimeoutMillis() {
         return DeviceConfig.getLong(
                 NAMESPACE_APP_FUNCTIONS,
-                DEVICE_CONFIG_PROPERTY_EXECUTION_TIMEOUT,
-                DEFAULT_EXECUTE_APP_FUNCTION_TIMEOUT_MS);
+                DEVICE_CONFIG_PROPERTY_EXECUTION_CANCELLATION_TIMEOUT,
+                DEFAULT_EXECUTE_APP_FUNCTION_CANCELLATION_TIMEOUT_MS);
     }
 }
