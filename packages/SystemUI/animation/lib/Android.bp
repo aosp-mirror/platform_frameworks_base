@@ -33,6 +33,20 @@ java_library {
     ],
 }
 
+// This is the core animation library written in java and can be depended by java sdk libraries.
+// Please don't introduce kotlin code in this target since kotlin is incompatible with sdk
+// libraries.
+java_library {
+    name: "PlatformAnimationLib-core",
+    srcs: [
+        "src/com/android/systemui/animation/*.java",
+        ":PlatformAnimationLib-aidl",
+    ],
+    static_libs: [
+        "WindowManager-Shell-shared",
+    ],
+}
+
 filegroup {
     name: "PlatformAnimationLib-aidl",
     srcs: [

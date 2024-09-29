@@ -47,6 +47,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.kotlin.VerificationKt.times;
 
 import android.app.ActivityManager;
 import android.app.assist.AssistContent;
@@ -106,8 +107,6 @@ import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.windowdecor.WindowDecoration.RelayoutParams;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
-import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHost;
-import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
@@ -177,10 +176,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private AttachedSurfaceControl mMockRootSurfaceControl;
     @Mock
     private WindowDecoration.SurfaceControlViewHostFactory mMockSurfaceControlViewHostFactory;
-    @Mock
-    private WindowDecorViewHostSupplier mMockWindowDecorViewHostSupplier;
-    @Mock
-    private WindowDecorViewHost mMockWindowDecorViewHost;
     @Mock
     private TypedArray mMockRoundedCornersRadiusArray;
     @Mock
@@ -257,9 +252,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 anyBoolean(), anyBoolean(), anyBoolean(), any(), anyInt(), anyInt(), anyInt()))
                 .thenReturn(mMockHandleMenu);
         when(mMockMultiInstanceHelper.supportsMultiInstanceSplit(any())).thenReturn(false);
-        when(mMockWindowDecorViewHostSupplier.acquire(any(), eq(defaultDisplay)))
-                .thenReturn(mMockWindowDecorViewHost);
-        when(mMockWindowDecorViewHost.getSurfaceControl()).thenReturn(mock(SurfaceControl.class));
         when(mMockAppHeaderViewHolderFactory.create(any(), any(), any(), any(), any(), any(), any(),
                 any())).thenReturn(mMockAppHeaderViewHolder);
     }
@@ -533,42 +525,6 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void updateRelayoutParams_handle_requestsAsyncViewHostRendering() {
-        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        // Make the task fullscreen so that its decoration is an App Handle.
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        final RelayoutParams relayoutParams = new RelayoutParams();
-
-        DesktopModeWindowDecoration.updateRelayoutParams(
-                relayoutParams,
-                mTestableContext,
-                taskInfo,
-                /* applyStartTransactionOnDraw= */ true,
-                /* shouldSetTaskPositionAndCrop */ false);
-
-        // App Handles don't need to be rendered in sync with the task animation, per UX.
-        assertThat(relayoutParams.mAsyncViewHost).isTrue();
-    }
-
-    @Test
-    public void updateRelayoutParams_header_requestsSyncViewHostRendering() {
-        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
-        // Make the task freeform so that its decoration is an App Header.
-        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        final RelayoutParams relayoutParams = new RelayoutParams();
-
-        DesktopModeWindowDecoration.updateRelayoutParams(
-                relayoutParams,
-                mTestableContext,
-                taskInfo,
-                /* applyStartTransactionOnDraw= */ true,
-                /* shouldSetTaskPositionAndCrop */ false);
-
-        // App Headers must be rendered in sync with the task animation, so it cannot be delayed.
-        assertThat(relayoutParams.mAsyncViewHost).isFalse();
-    }
-
-    @Test
     public void relayout_fullscreenTask_appliesTransactionImmediately() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
         final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
@@ -592,7 +548,78 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         spyWindowDecor.relayout(taskInfo);
 
         verify(mMockTransaction, never()).apply();
-        verify(mMockWindowDecorViewHost).updateView(any(), any(), any(), eq(mMockTransaction));
+        verify(mMockRootSurfaceControl).applyTransactionOnDraw(mMockTransaction);
+    }
+
+    @Test
+    public void relayout_fullscreenTask_doesNotCreateViewHostImmediately() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        spyWindowDecor.relayout(taskInfo);
+
+        verify(mMockSurfaceControlViewHostFactory, never()).create(any(), any(), any());
+    }
+
+    @Test
+    public void relayout_fullscreenTask_postsViewHostCreation() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
+        spyWindowDecor.relayout(taskInfo);
+
+        // Once for view host, the other for the AppHandle input layer.
+        verify(mMockHandler, times(2)).post(runnableArgument.capture());
+        runnableArgument.getValue().run();
+        verify(mMockSurfaceControlViewHostFactory).create(any(), any(), any());
+    }
+
+    @Test
+    @Ignore("TODO(b/367235906): Due to MONITOR_INPUT permission error")
+    public void relayout_freeformTask_createsViewHostImmediately() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        // Make non-resizable to avoid dealing with input-permissions (MONITOR_INPUT)
+        taskInfo.isResizeable = false;
+
+        spyWindowDecor.relayout(taskInfo);
+
+        verify(mMockSurfaceControlViewHostFactory).create(any(), any(), any());
+        verify(mMockHandler, never()).post(any());
+    }
+
+    @Test
+    public void relayout_removesExistingHandlerCallback() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
+        spyWindowDecor.relayout(taskInfo);
+        // Once for view host, the other for the AppHandle input layer.
+        verify(mMockHandler, times(2)).post(runnableArgument.capture());
+
+        spyWindowDecor.relayout(taskInfo);
+
+        verify(mMockHandler).removeCallbacks(runnableArgument.getValue());
+    }
+
+    @Test
+    public void close_removesExistingHandlerCallback() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        final DesktopModeWindowDecoration spyWindowDecor = spy(createWindowDecoration(taskInfo));
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        ArgumentCaptor<Runnable> runnableArgument = ArgumentCaptor.forClass(Runnable.class);
+        spyWindowDecor.relayout(taskInfo);
+        // Once for view host, the other for the AppHandle input layer.
+        verify(mMockHandler, times(2)).post(runnableArgument.capture());
+
+        spyWindowDecor.close();
+
+        verify(mMockHandler).removeCallbacks(runnableArgument.getValue());
     }
 
     @Test
@@ -623,7 +650,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .postDelayed(mCloseMaxMenuRunnable.capture(), eq(CLOSE_MAXIMIZE_MENU_DELAY_MS));
 
         mCloseMaxMenuRunnable.getValue().run();
-        verify(menu).close();
+        verify(menu).close(any());
         assertFalse(decoration.isMaximizeMenuActive());
     }
 
@@ -642,7 +669,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 .postDelayed(mCloseMaxMenuRunnable.capture(), eq(CLOSE_MAXIMIZE_MENU_DELAY_MS));
 
         mCloseMaxMenuRunnable.getValue().run();
-        verify(menu).close();
+        verify(menu).close(any());
         assertFalse(decoration.isMaximizeMenuActive());
     }
 
@@ -1065,7 +1092,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 mMockGenericLinksParser, mMockAssistContentRequester, SurfaceControl.Builder::new,
                 mMockTransactionSupplier, WindowContainerTransaction::new, SurfaceControl::new,
                 new WindowManagerWrapper(mMockWindowManager), mMockSurfaceControlViewHostFactory,
-                mMockWindowDecorViewHostSupplier, maximizeMenuFactory, mMockHandleMenuFactory,
+                maximizeMenuFactory, mMockHandleMenuFactory,
                 mMockMultiInstanceHelper, mMockCaptionHandleRepository);
         windowDecor.setCaptionListeners(mMockTouchEventListener, mMockTouchEventListener,
                 mMockTouchEventListener, mMockTouchEventListener);

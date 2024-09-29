@@ -1468,7 +1468,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         || change == PACKAGE_TEMPORARY_CHANGE) {
                     changed = true;
                     if (doit) {
-                        Slog.w(TAG, "Wallpaper uninstalled, removing: "
+                        Slog.e(TAG, "Wallpaper uninstalled, removing: "
                                 + wallpaper.getComponent());
                         clearWallpaperLocked(wallpaper.mWhich, wallpaper.userId, false, null);
                     }
@@ -1491,7 +1491,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
                 } catch (NameNotFoundException e) {
-                    Slog.w(TAG, "Wallpaper component gone, removing: "
+                    Slog.e(TAG, "Wallpaper component gone, removing: "
                             + wallpaper.getComponent());
                     clearWallpaperLocked(wallpaper.mWhich, wallpaper.userId, false, null);
                 }

@@ -41,9 +41,7 @@ import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
 internal fun NavigateBack() {
     val navController = LocalNavController.current
     val contentDescription = stringResource(R.string.abc_action_bar_up_description)
-    BackAction(contentDescription) {
-        navController.navigateBack()
-    }
+    BackAction(contentDescription) { navController.navigateBack() }
 }
 
 /** Action that collapses the search bar. */
@@ -55,15 +53,35 @@ internal fun CollapseAction(onClick: () -> Unit) {
 
 @Composable
 private fun BackAction(contentDescription: String, onClick: () -> Unit) {
-    IconButton(onClick) {
+    IconButton(
+        onClick = onClick,
+        modifier =
+        if (isSpaExpressiveEnabled)
+            Modifier
+                .padding(
+                    start = SettingsDimension.paddingLarge,
+                    end = SettingsDimension.paddingSmall,
+                    top = SettingsDimension.paddingExtraSmall,
+                    bottom = SettingsDimension.paddingExtraSmall,
+                )
+                .size(SettingsDimension.actionIconWidth, SettingsDimension.actionIconHeight)
+                .clip(SettingsShape.CornerExtraLarge)
+        else Modifier,
+    ) {
         Icon(
             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = contentDescription,
-            modifier = if (isSpaExpressiveEnabled) Modifier
-                .size(SettingsDimension.actionIconWidth, SettingsDimension.actionIconHeight)
-                .clip(SettingsShape.CornerExtraLarge)
-                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                .padding(SettingsDimension.actionIconPadding) else Modifier
+            modifier =
+            if (isSpaExpressiveEnabled)
+                Modifier
+                    .size(
+                        SettingsDimension.actionIconWidth,
+                        SettingsDimension.actionIconHeight,
+                    )
+                    .clip(SettingsShape.CornerExtraLarge)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .padding(SettingsDimension.actionIconPadding)
+            else Modifier,
         )
     }
 }

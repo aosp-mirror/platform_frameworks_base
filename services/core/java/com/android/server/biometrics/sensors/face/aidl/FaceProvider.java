@@ -16,6 +16,9 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
+import static android.hardware.face.FaceSensorConfigurations.getIFace;
+import static android.hardware.face.FaceSensorConfigurations.remapFqName;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -32,6 +35,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.ITestSessionCallback;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
+import android.hardware.biometrics.face.virtualhal.IVirtualHal;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
 import android.hardware.face.FaceEnrollOptions;
@@ -54,6 +58,7 @@ import com.android.server.biometrics.AuthenticationStatsBroadcastReceiver;
 import com.android.server.biometrics.AuthenticationStatsCollector;
 import com.android.server.biometrics.BiometricDanglingReceiver;
 import com.android.server.biometrics.BiometricHandlerProvider;
+import com.android.server.biometrics.Flags;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
@@ -130,6 +135,11 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     private AuthenticationStatsCollector mAuthenticationStatsCollector;
     @Nullable
     private IFace mDaemon;
+    @Nullable
+    private IVirtualHal mVhal;
+    @Nullable
+    private String mHalInstanceNameCurrent;
+
 
     private final class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -286,14 +296,37 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         if (mTestHalEnabled) {
             return true;
         }
-        return ServiceManager.checkService(IFace.DESCRIPTOR + "/" + mHalInstanceName) != null;
+        return ServiceManager.checkService(
+                remapFqName(IFace.DESCRIPTOR + "/" + mHalInstanceName)) != null;
     }
 
     @Nullable
     @VisibleForTesting
     synchronized IFace getHalInstance() {
         if (mTestHalEnabled) {
-            return new TestHal();
+            if (Flags.useVhalForTesting()) {
+                if (!mHalInstanceNameCurrent.contains("virtual")) {
+                    Slog.i(getTag(), "Switching face hal from " + mHalInstanceName
+                            + " to virtual hal");
+                    mHalInstanceNameCurrent = "virtual";
+                    mDaemon = null;
+                }
+            } else {
+                // Enabling the test HAL for a single sensor in a multi-sensor HAL currently enables
+                // the test HAL for all sensors under that HAL. This can be updated in the future if
+                // necessary.
+                return new TestHal();
+            }
+        } else {
+            if (mHalInstanceNameCurrent == null) {
+                mHalInstanceNameCurrent = mHalInstanceName;
+            } else if (mHalInstanceNameCurrent.contains("virtual")
+                    && mHalInstanceNameCurrent != mHalInstanceName) {
+                Slog.i(getTag(), "Switching face from virtual hal " + "to "
+                        + mHalInstanceName);
+                mHalInstanceNameCurrent = mHalInstanceName;
+                mDaemon = null;
+            }
         }
 
         if (mDaemon != null) {
@@ -302,10 +335,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
         Slog.d(getTag(), "Daemon was null, reconnecting");
 
-        mDaemon = IFace.Stub.asInterface(
-                Binder.allowBlocking(
-                        ServiceManager.waitForDeclaredService(
-                                IFace.DESCRIPTOR + "/" + mHalInstanceName)));
+        mDaemon = getIFace(IFace.DESCRIPTOR + "/" + mHalInstanceNameCurrent);
         if (mDaemon == null) {
             Slog.e(getTag(), "Unable to get daemon");
             return null;
@@ -833,7 +863,13 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     void setTestHalEnabled(boolean enabled) {
+        final boolean changed = enabled != mTestHalEnabled;
         mTestHalEnabled = enabled;
+        Slog.i(getTag(), "setTestHalEnabled(): isVhalForTestingFlags=" + Flags.useVhalForTesting()
+                + " mTestHalEnabled=" + mTestHalEnabled + " changed=" + changed);
+        if (changed && isVhalForTesting()) {
+            getHalInstance();
+        }
     }
 
     @Override
@@ -851,9 +887,40 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     /**
+     * Return true if vhal_for_testing feature is enabled and test is active
+     */
+    public boolean isVhalForTesting() {
+        return (Flags.useVhalForTesting() && mTestHalEnabled);
+    }
+
+
+    /**
      * Sends a face re enroll notification.
      */
     public void sendFaceReEnrollNotification() {
         mAuthenticationStatsCollector.sendFaceReEnrollNotification();
+    }
+
+    /**
+     * Sends a fingerprint enroll notification.
+     */
+    public void sendFingerprintReEnrollNotification() {
+        mAuthenticationStatsCollector.sendFingerprintReEnrollNotification();
+    }
+
+    /**
+     * Return virtual hal AIDL interface if it is used for testing
+     *
+     */
+    public IVirtualHal getVhal() throws RemoteException {
+        if (mVhal == null && isVhalForTesting()) {
+            mVhal = IVirtualHal.Stub.asInterface(
+                    Binder.allowBlocking(
+                            ServiceManager.waitForService(
+                                    IVirtualHal.DESCRIPTOR + "/"
+                                            + mHalInstanceNameCurrent)));
+            Slog.d(getTag(), "getVhal " + mHalInstanceNameCurrent);
+        }
+        return mVhal;
     }
 }

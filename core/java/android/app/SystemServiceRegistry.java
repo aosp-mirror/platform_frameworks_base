@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
@@ -74,6 +75,7 @@ import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
@@ -228,6 +230,7 @@ import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.provider.E2eeContactKeysManager;
 import android.provider.ProviderFrameworkInitializer;
+import android.ranging.RangingFrameworkInitializer;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -307,6 +310,16 @@ public final class SystemServiceRegistry {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
+
+    /**
+     * After {@link Build.VERSION_CODES.VANILLA_ICE_CREAM}, Wear devices will be allowed to publish
+     * no {@link GameManager} instance. This is because the respective system service is no longer
+     * started for Wear devices given that the applications of the service do not currently apply to
+     * Wear.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long NULL_GAME_MANAGER_IN_WEAR = 340929737;
 
     /**
      * The corresponding vendor API for Android V
@@ -1624,8 +1637,24 @@ public final class SystemServiceRegistry {
                     @Override
                     public GameManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new GameManager(ctx.getOuterContext(),
-                                ctx.mMainThread.getHandler());
+                        final PackageManager pm = ctx.getPackageManager();
+                        final boolean isWatch = pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
+                        final IBinder binder =
+                                // Allow a potentially absent GameManagerService only for
+                                // Wear devices. For non-Wear devices, throw a
+                                // ServiceNotFoundException when the service is missing.
+                                (removeGameManagerServiceFromWear() && isWatch)
+                                        ? ServiceManager.getService(Context.GAME_SERVICE)
+                                        : ServiceManager.getServiceOrThrow(Context.GAME_SERVICE);
+
+                        if (binder == null
+                                && Compatibility.isChangeEnabled(NULL_GAME_MANAGER_IN_WEAR)) {
+                            return null;
+                        }
+
+                        return new GameManager(
+                                ctx.getOuterContext(),
+                                IGameManagerService.Stub.asInterface(binder));
                     }
                 });
 
@@ -1797,6 +1826,12 @@ public final class SystemServiceRegistry {
             if (android.webkit.Flags.updateServiceIpcWrapper()) {
                 WebViewBootstrapFrameworkInitializer.registerServiceWrappers();
             }
+            // This is guarded by aconfig flag "com.android.ranging.flags.ranging_stack_enabled"
+            // when the build flag RELEASE_RANGING_STACK is enabled. When disabled, this calls the
+            // mock RangingFrameworkInitializer#registerServiceWrappers which is no-op. As the
+            // aconfig lib for ranging module is built only if  RELEASE_RANGING_STACK is enabled,
+            // flagcannot be added here.
+            RangingFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

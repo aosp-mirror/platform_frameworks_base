@@ -21,11 +21,13 @@ import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_E
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.appfunctions.AppFunctionService;
 import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.ExecuteAppFunctionResponse;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
+import android.app.appfunctions.ICancellationCallback;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
 import android.app.appsearch.AppSearchManager;
@@ -37,11 +39,15 @@ import android.app.appsearch.observer.SchemaChangeInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.CancellationSignal;
+import android.os.IBinder;
+import android.os.ICancellationSignal;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.infra.AndroidFuture;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
 import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
@@ -95,16 +101,11 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     public void onUserStopping(@NonNull TargetUser user) {
         Objects.requireNonNull(user);
 
-        try {
-            AppFunctionExecutors.shutDownAndRemoveUserExecutor(user.getUserHandle());
-            MetadataSyncPerUser.removeUserSyncAdapter(user.getUserHandle());
-        } catch (InterruptedException e) {
-            Slog.e(TAG, "Unable to remove data for: " + user.getUserHandle(), e);
-        }
+        MetadataSyncPerUser.removeUserSyncAdapter(user.getUserHandle());
     }
 
     @Override
-    public void executeAppFunction(
+    public ICancellationSignal executeAppFunction(
             @NonNull ExecuteAppFunctionAidlRequest requestInternal,
             @NonNull IExecuteAppFunctionCallback executeAppFunctionCallback) {
         Objects.requireNonNull(requestInternal);
@@ -125,11 +126,14 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                             ExecuteAppFunctionResponse.RESULT_DENIED,
                             exception.getMessage(),
                             /* extras= */ null));
-            return;
+            return null;
         }
 
         int callingUid = Binder.getCallingUid();
-        int callingPid = Binder.getCallingUid();
+        int callingPid = Binder.getCallingPid();
+
+        ICancellationSignal localCancelTransport = CancellationSignal.createTransport();
+
         THREAD_POOL_EXECUTOR.execute(
                 () -> {
                     try {
@@ -137,12 +141,14 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                 requestInternal,
                                 callingUid,
                                 callingPid,
+                                localCancelTransport,
                                 safeExecuteAppFunctionCallback);
                     } catch (Exception e) {
                         safeExecuteAppFunctionCallback.onResult(
                                 mapExceptionToExecuteAppFunctionResponse(e));
                     }
                 });
+        return localCancelTransport;
     }
 
     @WorkerThread
@@ -150,6 +156,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             ExecuteAppFunctionAidlRequest requestInternal,
             int callingUid,
             int callingPid,
+            ICancellationSignal localCancelTransport,
             SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
         UserHandle targetUser = requestInternal.getUserHandle();
         // TODO(b/354956319): Add and honor the new enterprise policies.
@@ -208,8 +215,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                             requestInternal,
                                             serviceIntent,
                                             targetUser,
+                                            localCancelTransport,
                                             safeExecuteAppFunctionCallback,
-                                            /* bindFlags= */ Context.BIND_AUTO_CREATE);
+                                            /* bindFlags= */ Context.BIND_AUTO_CREATE
+                                                    | Context.BIND_FOREGROUND_SERVICE);
                                 })
                         .exceptionally(
                                 ex -> {
@@ -223,8 +232,19 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull ExecuteAppFunctionAidlRequest requestInternal,
             @NonNull Intent serviceIntent,
             @NonNull UserHandle targetUser,
+            @NonNull ICancellationSignal cancellationSignalTransport,
             @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
             int bindFlags) {
+        CancellationSignal cancellationSignal =
+                CancellationSignal.fromTransport(cancellationSignalTransport);
+        ICancellationCallback cancellationCallback =
+                new ICancellationCallback.Stub() {
+                    @Override
+                    public void sendCancellationTransport(
+                            @NonNull ICancellationSignal cancellationTransport) {
+                        cancellationSignal.setRemote(cancellationTransport);
+                    }
+                };
         boolean bindServiceResult =
                 mRemoteServiceCaller.runServiceCall(
                         serviceIntent,
@@ -240,6 +260,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                 try {
                                     service.executeAppFunction(
                                             requestInternal.getClientRequest(),
+                                            cancellationCallback,
                                             new IExecuteAppFunctionCallback.Stub() {
                                                 @Override
                                                 public void onResult(

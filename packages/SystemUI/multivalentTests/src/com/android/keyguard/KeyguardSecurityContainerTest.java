@@ -62,7 +62,9 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.user.data.source.UserRecord;
+import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -96,6 +98,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private FalsingA11yDelegate mFalsingA11yDelegate;
 
     private KeyguardSecurityContainer mKeyguardSecurityContainer;
+    private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() {
@@ -106,6 +109,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         mSecurityViewFlipper = new KeyguardSecurityViewFlipper(getContext());
         mSecurityViewFlipper.setId(View.generateViewId());
         mKeyguardSecurityContainer = new KeyguardSecurityContainer(getContext());
+        mKeyguardSecurityContainer.setBackgroundExecutor(mExecutor);
         mKeyguardSecurityContainer.setRight(VIEW_WIDTH);
         mKeyguardSecurityContainer.setLeft(0);
         mKeyguardSecurityContainer.setTop(0);
@@ -342,7 +346,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
 
     @Test
     public void testTwoOrMoreUsersDoesAllowDropDown() {
-        // GIVEN one user has been setup
+        // GIVEN two users have been setup
         ArrayList<UserRecord> records = buildUserRecords(2);
         when(mUserSwitcherController.getCurrentUserRecord()).thenReturn(records.get(0));
         when(mUserSwitcherController.getUsers()).thenReturn(records);
@@ -350,7 +354,7 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         // WHEN UserSwitcherViewMode is initialized
         setupUserSwitcher();
 
-        // THEN the UserSwitcher anchor should not be clickable
+        // THEN the UserSwitcher anchor should be clickable
         ViewGroup anchor = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_anchor);
         assertThat(anchor.isClickable()).isTrue();
     }

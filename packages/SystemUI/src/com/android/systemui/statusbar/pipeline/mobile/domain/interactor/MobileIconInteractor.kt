@@ -149,7 +149,7 @@ class MobileIconInteractorImpl(
     override val isForceHidden: Flow<Boolean>,
     connectionRepository: MobileConnectionRepository,
     private val context: Context,
-    val carrierIdOverrides: MobileIconCarrierIdOverrides = MobileIconCarrierIdOverridesImpl()
+    val carrierIdOverrides: MobileIconCarrierIdOverrides = MobileIconCarrierIdOverridesImpl(),
 ) : MobileIconInteractor {
     override val tableLogBuffer: TableLogBuffer = connectionRepository.tableLogBuffer
 
@@ -182,7 +182,7 @@ class MobileIconInteractorImpl(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                connectionRepository.networkName.value
+                connectionRepository.networkName.value,
             )
 
     override val carrierName =
@@ -198,7 +198,7 @@ class MobileIconInteractorImpl(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                connectionRepository.carrierName.value.name
+                connectionRepository.carrierName.value.name,
             )
 
     /** What the mobile icon would be before carrierId overrides */
@@ -219,10 +219,7 @@ class MobileIconInteractorImpl(
             .stateIn(scope, SharingStarted.WhileSubscribed(), defaultMobileIconGroup.value)
 
     override val networkTypeIconGroup =
-        combine(
-                defaultNetworkType,
-                carrierIdIconOverrideExists,
-            ) { networkType, overrideExists ->
+        combine(defaultNetworkType, carrierIdIconOverrideExists) { networkType, overrideExists ->
                 // DefaultIcon comes out of the icongroup lookup, we check for overrides here
                 if (overrideExists) {
                     val iconOverride =
@@ -316,30 +313,30 @@ class MobileIconInteractorImpl(
 
     /** Whether or not to show the error state of [SignalDrawable] */
     private val showExclamationMark: StateFlow<Boolean> =
-        combine(
-                defaultSubscriptionHasDataEnabled,
+        combine(defaultSubscriptionHasDataEnabled, isDefaultConnectionFailed, isInService) {
+                isDefaultDataEnabled,
                 isDefaultConnectionFailed,
-                isInService,
-            ) { isDefaultDataEnabled, isDefaultConnectionFailed, isInService ->
+                isInService ->
                 !isDefaultDataEnabled || isDefaultConnectionFailed || !isInService
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
 
     private val cellularShownLevel: StateFlow<Int> =
-        combine(
+        combine(level, isInService, connectionRepository.inflateSignalStrength) {
                 level,
                 isInService,
-                connectionRepository.inflateSignalStrength,
-            ) { level, isInService, inflate ->
+                inflate ->
                 if (isInService) {
                     if (inflate) level + 1 else level
                 } else 0
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
-    // Satellite level is unaffected by the isInService or inflateSignalStrength properties
+    // Satellite level is unaffected by the inflateSignalStrength property
     // See b/346904529 for details
-    private val satelliteShownLevel: StateFlow<Int> = level
+    private val satelliteShownLevel: StateFlow<Int> =
+        combine(level, isInService) { level, isInService -> if (isInService) level else 0 }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), 0)
 
     private val cellularIcon: Flow<SignalIconModel.Cellular> =
         combine(
@@ -362,7 +359,7 @@ class MobileIconInteractorImpl(
                 level = it,
                 icon =
                     SatelliteIconModel.fromSignalStrength(it)
-                        ?: SatelliteIconModel.fromSignalStrength(0)!!
+                        ?: SatelliteIconModel.fromSignalStrength(0)!!,
             )
         }
 
@@ -383,11 +380,7 @@ class MobileIconInteractorImpl(
                 }
             }
             .distinctUntilChanged()
-            .logDiffsForTable(
-                tableLogBuffer,
-                columnPrefix = "icon",
-                initialValue = initial,
-            )
+            .logDiffsForTable(tableLogBuffer, columnPrefix = "icon", initialValue = initial)
             .stateIn(scope, SharingStarted.WhileSubscribed(), initial)
     }
 }

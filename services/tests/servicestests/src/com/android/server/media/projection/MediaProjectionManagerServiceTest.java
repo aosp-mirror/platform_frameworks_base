@@ -38,6 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -91,6 +92,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -174,8 +176,8 @@ public class MediaProjectionManagerServiceTest {
     private PackageManager mPackageManager;
     @Mock
     private KeyguardManager mKeyguardManager;
-    @Mock
-    AppOpsManager mAppOpsManager;
+
+    private AppOpsManager mAppOpsManager;
     @Mock
     private IMediaProjectionWatcherCallback mWatcherCallback;
     @Mock
@@ -193,6 +195,7 @@ public class MediaProjectionManagerServiceTest {
         LocalServices.removeServiceForTest(WindowManagerInternal.class);
         LocalServices.addService(WindowManagerInternal.class, mWindowManagerInternal);
 
+        mAppOpsManager = mockAppOpsManager();
         mContext.addMockSystemService(AppOpsManager.class, mAppOpsManager);
         mContext.addMockSystemService(KeyguardManager.class, mKeyguardManager);
         mContext.setMockPackageManager(mPackageManager);
@@ -204,6 +207,17 @@ public class MediaProjectionManagerServiceTest {
         mAppInfo.targetSdkVersion = 32;
 
         mService = new MediaProjectionManagerService(mContext);
+    }
+
+    private static AppOpsManager mockAppOpsManager() {
+        return mock(AppOpsManager.class, invocationOnMock -> {
+            if (invocationOnMock.getMethod().getName().startsWith("noteOp")) {
+                // Mockito will return 0 for non-stubbed method which corresponds to MODE_ALLOWED
+                // and is not what we want.
+                return AppOpsManager.MODE_IGNORED;
+            }
+            return Answers.RETURNS_DEFAULTS.answer(invocationOnMock);
+        });
     }
 
     @After
@@ -305,8 +319,10 @@ public class MediaProjectionManagerServiceTest {
     public void testCreateProjection_keyguardLocked_AppOpMediaProjection()
             throws NameNotFoundException {
         MediaProjectionManagerService.MediaProjection projection = startProjectionPreconditions();
-        doReturn(true).when(mAppOpsManager).isOperationActive(eq(AppOpsManager.OP_PROJECT_MEDIA),
-                eq(projection.uid), eq(projection.packageName));
+        doReturn(AppOpsManager.MODE_ALLOWED).when(mAppOpsManager)
+                .noteOpNoThrow(eq(AppOpsManager.OP_PROJECT_MEDIA),
+                        eq(projection.uid), eq(projection.packageName), nullable(String.class),
+                        nullable(String.class));
         doReturn(true).when(mKeyguardManager).isKeyguardLocked();
 
         doReturn(PackageManager.PERMISSION_DENIED).when(mPackageManager).checkPermission(
@@ -1159,7 +1175,7 @@ public class MediaProjectionManagerServiceTest {
         doReturn(mAppInfo).when(mPackageManager).getApplicationInfoAsUser(anyString(),
                 any(ApplicationInfoFlags.class), any(UserHandle.class));
         return service.createProjectionInternal(UID, PACKAGE_NAME,
-                TYPE_MIRRORING, /* isPermanentGrant= */ true, UserHandle.CURRENT);
+                TYPE_MIRRORING, /* isPermanentGrant= */ false, UserHandle.CURRENT);
     }
 
     // Set up preconditions for starting a projection, with no foreground service requirements.

@@ -224,3 +224,11 @@ flag {
      is_exported: true
      bug: "366598445"
 }
+
+flag {
+    name: "network_time_uses_shared_memory"
+    namespace: "system_performance"
+    description: "SystemClock.currentNetworkTimeMillis() reads network time offset from shared memory"
+    bug: "361329788"
+    is_exported: true
+}

@@ -16,10 +16,14 @@
 
 package com.android.server.wm;
 
+import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.Mockito.when;
 
+import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
+import android.app.TaskInfo;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.annotation.NonNull;
@@ -114,6 +118,72 @@ public class AppCompatUtilsTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testTopActivityEligibleForUserAspectRatioButton_eligible() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.setIgnoreOrientationRequest(true);
+            });
+            robot.conf().enableUserAppAspectRatioSettings(true);
+
+            robot.checkTaskInfoEligibleForUserAspectRatioButton(true);
+        });
+    }
+
+    @Test
+    public void testTopActivityEligibleForUserAspectRatioButton_disabled_notEligible() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.setIgnoreOrientationRequest(true);
+            });
+            robot.conf().enableUserAppAspectRatioSettings(false);
+
+            robot.checkTaskInfoEligibleForUserAspectRatioButton(false);
+        });
+    }
+
+    @Test
+    public void testTopActivityEligibleForUserAspectRatioButton_inSizeCompatMode_notEligible() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponentInNewTask();
+                a.setIgnoreOrientationRequest(true);
+                a.setTopActivityOrganizedTask();
+                a.setTopActivityInSizeCompatMode(true);
+                a.setTopActivityVisible(true);
+            });
+            robot.conf().enableUserAppAspectRatioSettings(true);
+
+            robot.checkTaskInfoEligibleForUserAspectRatioButton(false);
+        });
+    }
+
+    @Test
+    public void testTopActivityEligibleForUserAspectRatioButton_transparentTop_notEligible() {
+        runTestScenario((robot) -> {
+            robot.transparentActivity((ta) -> {
+                ta.launchTransparentActivityInTask();
+                ta.activity().setIgnoreOrientationRequest(true);
+            });
+            robot.conf().enableUserAppAspectRatioSettings(true);
+
+            robot.checkTaskInfoEligibleForUserAspectRatioButton(false);
+        });
+    }
+
+    @Test
+    public void getTaskInfoPropagatesCameraCompatMode() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity(AppCompatActivityRobot::createActivityWithComponentInNewTask);
+
+            robot.setFreeformCameraCompatMode(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
+            robot.checkTaskInfoFreeformCameraCompatMode(
+                    CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
+        });
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
@@ -125,11 +195,14 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     private static class AppCompatUtilsRobotTest extends AppCompatRobotBase {
 
         private final WindowState mWindowState;
+        @NonNull
+        private final AppCompatTransparentActivityRobot mTransparentActivityRobot;
 
         AppCompatUtilsRobotTest(@NonNull WindowManagerService wm,
                 @NonNull ActivityTaskManagerService atm,
                 @NonNull ActivityTaskSupervisor supervisor) {
             super(wm, atm, supervisor);
+            mTransparentActivityRobot = new AppCompatTransparentActivityRobot(activity());
             mWindowState = Mockito.mock(WindowState.class);
         }
 
@@ -137,6 +210,12 @@ public class AppCompatUtilsTest extends WindowTestsBase {
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
             spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+        }
+
+        void transparentActivity(@NonNull Consumer<AppCompatTransparentActivityRobot> consumer) {
+            // We always create at least an opaque activity in a Task.
+            activity().createNewTaskWithBaseActivity();
+            consumer.accept(mTransparentActivityRobot);
         }
 
         void setIsLetterboxedForFixedOrientationAndAspectRatio(
@@ -155,11 +234,30 @@ public class AppCompatUtilsTest extends WindowTestsBase {
             when(mWindowState.isLetterboxedForDisplayCutout()).thenReturn(displayCutout);
         }
 
+        void setFreeformCameraCompatMode(@FreeformCameraCompatMode int mode) {
+            activity().top().mAppCompatController.getAppCompatCameraOverrides()
+                    .setFreeformCameraCompatMode(mode);
+        }
+
         void checkTopActivityLetterboxReason(@NonNull String expected) {
             Assert.assertEquals(expected,
                     AppCompatUtils.getLetterboxReasonString(activity().top(), mWindowState));
         }
 
+        @NonNull
+        TaskInfo getTopTaskInfo() {
+            return activity().top().getTask().getTaskInfo();
+        }
+
+        void checkTaskInfoEligibleForUserAspectRatioButton(boolean eligible) {
+            Assert.assertEquals(eligible, getTopTaskInfo().appCompatTaskInfo
+                    .eligibleForUserAspectRatioButton());
+        }
+
+        void checkTaskInfoFreeformCameraCompatMode(@FreeformCameraCompatMode int mode) {
+            Assert.assertEquals(mode, getTopTaskInfo().appCompatTaskInfo
+                    .cameraCompatTaskInfo.freeformCameraCompatMode);
+        }
     }
 
 }

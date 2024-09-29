@@ -4380,7 +4380,7 @@
              modes dimensions {@link config_minPercentageMultiWindowSupportWidth} the device
              supports to determine if the activity can be shown in multi windowing modes.
     -->
-    <integer name="config_respectsActivityMinWidthHeightMultiWindow">0</integer>
+    <integer name="config_respectsActivityMinWidthHeightMultiWindow">-1</integer>
 
     <!-- This value is only used when the device checks activity min height to determine if it
          can be shown in multi windowing modes.
@@ -4456,6 +4456,11 @@
 
     <!-- Bytes that the PinnerService will pin for WebView -->
     <integer name="config_pinnerWebviewPinBytes">0</integer>
+
+    <!-- Maximum memory that PinnerService will pin for apps expressed
+         as a percentage of total device memory [0,100].
+         Example: 10, means 10% of total memory will be the maximum pinned memory -->
+    <integer name="config_pinnerMaxPinnedMemoryPercentage">10</integer>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->

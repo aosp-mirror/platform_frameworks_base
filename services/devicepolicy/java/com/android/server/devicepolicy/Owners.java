@@ -669,6 +669,19 @@ class Owners {
         }
     }
 
+    void markResetPasswordWithTokenMigrated() {
+        synchronized (mData) {
+            mData.mResetPasswordWithTokenMigrated = true;
+            mData.writeDeviceOwner();
+        }
+    }
+
+    boolean isResetPasswordWithTokenMigrated() {
+        synchronized (mData) {
+            return mData.mResetPasswordWithTokenMigrated;
+        }
+    }
+
     @GuardedBy("mData")
     void pushToAppOpsLocked() {
         if (!mSystemReady) {

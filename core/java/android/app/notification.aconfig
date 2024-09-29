@@ -31,6 +31,16 @@ flag {
 }
 
 flag {
+  name: "modes_ui_empty_shade"
+  namespace: "systemui"
+  description: "Shows mode that is currently blocking notifications in the empty shade; dependent on flags modes_api and modes_ui"
+  bug: "366003631"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "modes_ui_test"
   namespace: "systemui"
   description: "Guards new CTS tests for Modes; dependent on flags modes_api and modes_ui"
@@ -102,6 +112,13 @@ flag {
   namespace: "systemui"
   description: "Experiment to restore the pre-S behavior where standard notifications are not expandable unless they have actions."
   bug: "339523906"
+}
+
+flag {
+  name: "notification_no_custom_view_conversations"
+  namespace: "systemui"
+  description: "Ensures that conversations are not allowed to use Custom Views."
+  bug: "368817201"
 }
 
 flag {

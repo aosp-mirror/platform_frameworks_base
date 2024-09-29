@@ -99,6 +99,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     private final @InsetsType int mTypes;
     private @InsetsType int mControllingTypes;
     private final InsetsAnimationControlCallbacks mController;
+    private final SurfaceParamsApplier mSurfaceParamsApplier;
     private final WindowInsetsAnimation mAnimation;
     private final long mDurationMs;
     private final Interpolator mInterpolator;
@@ -123,6 +124,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls,
             @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types, InsetsAnimationControlCallbacks controller,
+            SurfaceParamsApplier surfaceParamsApplier,
             InsetsAnimationSpec insetsAnimationSpec, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             CompatibilityInfo.Translator translator, @Nullable ImeTracker.Token statsToken) {
@@ -131,6 +133,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         mTypes = types;
         mControllingTypes = types;
         mController = controller;
+        mSurfaceParamsApplier = surfaceParamsApplier;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         if (frame != null) {
             final SparseIntArray idSideMap = new SparseIntArray();
@@ -258,6 +261,11 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
     }
 
     @Override
+    public SurfaceParamsApplier getSurfaceParamsApplier() {
+        return mSurfaceParamsApplier;
+    }
+
+    @Override
     @Nullable
     public ImeTracker.Token getStatsToken() {
         return mStatsToken;
@@ -305,7 +313,7 @@ public class InsetsAnimationControlImpl implements InternalInsetsAnimationContro
         updateLeashesForSide(SIDE_RIGHT, offset.right, params, outState, mPendingAlpha);
         updateLeashesForSide(SIDE_BOTTOM, offset.bottom, params, outState, mPendingAlpha);
 
-        mController.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
+        mSurfaceParamsApplier.applySurfaceParams(params.toArray(new SurfaceParams[params.size()]));
         mCurrentInsets = mPendingInsets;
         mAnimation.setFraction(mPendingFraction);
         mCurrentAlpha = mPendingAlpha;

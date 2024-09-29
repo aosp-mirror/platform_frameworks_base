@@ -48,6 +48,7 @@
     <dimen name="settingslib_expressive_space_medium2">36dp</dimen>
     <dimen name="settingslib_expressive_space_medium3">40dp</dimen>
     <dimen name="settingslib_expressive_space_medium4">48dp</dimen>
+    <dimen name="settingslib_expressive_space_medium5">56dp</dimen>
     <dimen name="settingslib_expressive_space_large1">60dp</dimen>
     <dimen name="settingslib_expressive_space_large2">64dp</dimen>
     <dimen name="settingslib_expressive_space_large3">72dp</dimen>

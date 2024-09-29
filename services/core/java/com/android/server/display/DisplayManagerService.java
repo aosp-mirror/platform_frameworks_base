@@ -571,6 +571,10 @@ public final class DisplayManagerService extends SystemService {
     private final DisplayNotificationManager mDisplayNotificationManager;
     private final ExternalDisplayStatsService mExternalDisplayStatsService;
 
+    // Manages the relative placement of extended displays
+    @Nullable
+    private final DisplayTopologyCoordinator mDisplayTopologyCoordinator;
+
     /**
      * Applications use {@link android.view.Display#getRefreshRate} and
      * {@link android.view.Display.Mode#getRefreshRate} to know what is the display refresh rate.
@@ -644,6 +648,11 @@ public final class DisplayManagerService extends SystemService {
         mDisplayNotificationManager = new DisplayNotificationManager(mFlags, mContext,
                 mExternalDisplayStatsService);
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
+        if (mFlags.isDisplayTopologyEnabled()) {
+            mDisplayTopologyCoordinator = new DisplayTopologyCoordinator();
+        } else {
+            mDisplayTopologyCoordinator = null;
+        }
     }
 
     public void setupSchedulerPolicies() {
@@ -3368,9 +3377,17 @@ public final class DisplayManagerService extends SystemService {
     private void dumpInternal(PrintWriter pw) {
         pw.println("DISPLAY MANAGER (dumpsys display)");
         BrightnessTracker brightnessTrackerLocal;
+        SparseArray<DisplayPowerController> displayPowerControllersLocal = new SparseArray<>();
+        int displayPowerControllerCount;
 
         synchronized (mSyncRoot) {
             brightnessTrackerLocal = mBrightnessTracker;
+
+            displayPowerControllerCount = mDisplayPowerControllers.size();
+            for (int i = 0; i < displayPowerControllerCount; i++) {
+                displayPowerControllersLocal.put(
+                        mDisplayPowerControllers.keyAt(i), mDisplayPowerControllers.valueAt(i));
+            }
 
             pw.println("  mSafeMode=" + mSafeMode);
             pw.println("  mPendingTraversal=" + mPendingTraversal);
@@ -3442,13 +3459,6 @@ public final class DisplayManagerService extends SystemService {
                         + ", mWifiDisplayScanRequested=" + callback.mWifiDisplayScanRequested);
             }
 
-            final int displayPowerControllerCount = mDisplayPowerControllers.size();
-            pw.println();
-            pw.println("Display Power Controllers: size=" + displayPowerControllerCount);
-            for (int i = 0; i < displayPowerControllerCount; i++) {
-                mDisplayPowerControllers.valueAt(i).dump(pw);
-            }
-
             pw.println();
             mPersistentDataStore.dump(pw);
 
@@ -3461,6 +3471,12 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayWindowPolicyControllers.valueAt(i).second.dump("  ", pw);
             }
         }
+        pw.println();
+        pw.println("Display Power Controllers: size=" + displayPowerControllerCount);
+        for (int i = 0; i < displayPowerControllerCount; i++) {
+            displayPowerControllersLocal.valueAt(i).dump(pw);
+        }
+
         if (brightnessTrackerLocal != null) {
             pw.println();
             brightnessTrackerLocal.dump(pw);
@@ -3474,9 +3490,13 @@ public final class DisplayManagerService extends SystemService {
             mSmallAreaDetectionController.dump(pw);
         }
 
+        if (mDisplayTopologyCoordinator != null) {
+            pw.println();
+            mDisplayTopologyCoordinator.dump(pw);
+        }
+
         pw.println();
         mFlags.dump(pw);
-
     }
 
     private static float[] getFloatArray(TypedArray array) {
@@ -5277,6 +5297,17 @@ public final class DisplayManagerService extends SystemService {
                 });
             }
             return displayGroupIds;
+        }
+
+        @Override
+        public IntArray getDisplayIds() {
+            IntArray displayIds = new IntArray();
+            synchronized (mSyncRoot) {
+                mLogicalDisplayMapper.forEachLocked((logicalDisplay -> {
+                    displayIds.add(logicalDisplay.getDisplayIdLocked());
+                }), /* includeDisabled= */ false);
+            }
+            return displayIds;
         }
 
         @Override

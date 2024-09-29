@@ -287,6 +287,11 @@
     <string name="config_satellite_demo_mode_sos_intent_action" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_demo_mode_sos_intent_action" />
 
+    <!-- The action of the intent that hidden menu sends to the app to launch esp loopback test mode
+     for sos emergency messaging via satellite. -->
+    <string name="config_satellite_test_with_esp_replies_intent_action" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_test_with_esp_replies_intent_action" />
+
     <!-- Whether outgoing satellite datagrams should be sent to modem in demo mode. When satellite
          is enabled for demo mode, if this config is enabled, outgoing datagrams will be sent to
          modem; otherwise, success results will be returned. If demo mode is disabled, outgoing

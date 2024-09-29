@@ -43,7 +43,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -78,7 +77,6 @@ import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
-import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
@@ -89,6 +87,7 @@ import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.composable.MediaContentPicker
+import com.android.systemui.media.controls.ui.composable.isLandscape
 import com.android.systemui.media.controls.ui.composable.shouldElevateMedia
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
@@ -197,6 +196,8 @@ constructor(
             qsMediaHost = qsMediaHost,
             modifier = modifier,
             shadeSession = shadeSession,
+            usingCollapsedLandscapeMedia =
+                Utils.useCollapsedMediaInLandscape(LocalContext.current.resources),
         )
 
     init {
@@ -223,6 +224,7 @@ private fun SceneScope.ShadeScene(
     qsMediaHost: MediaHost,
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
+    usingCollapsedLandscapeMedia: Boolean,
 ) {
     val view = LocalView.current
     LaunchedEffect(Unit) {
@@ -245,6 +247,7 @@ private fun SceneScope.ShadeScene(
                 mediaHost = qqsMediaHost,
                 modifier = modifier,
                 shadeSession = shadeSession,
+                usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
             )
         is ShadeMode.Split ->
             SplitShade(
@@ -275,14 +278,11 @@ private fun SceneScope.SingleShade(
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
+    usingCollapsedLandscapeMedia: Boolean,
 ) {
     val cutoutLocation = LocalDisplayCutout.current.location
     val cutoutInsets = WindowInsets.Companion.displayCutout
-    val isLandscape = LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
-    val usingCollapsedLandscapeMedia =
-        Utils.useCollapsedMediaInLandscape(LocalContext.current.resources)
-    val isExpanded = !usingCollapsedLandscapeMedia || !isLandscape
-    mediaHost.expansion = if (isExpanded) EXPANDED else COLLAPSED
+    mediaHost.expansion = if (usingCollapsedLandscapeMedia && isLandscape()) COLLAPSED else EXPANDED
 
     var maxNotifScrimTop by remember { mutableIntStateOf(0) }
     val tileSquishiness by
@@ -296,9 +296,9 @@ private fun SceneScope.SingleShade(
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
-            layoutState.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade)
+            layoutState.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade)
     // Media is visible and we are in landscape on a small height screen
-    val mediaInRow = isMediaVisible && isLandscape
+    val mediaInRow = isMediaVisible && isLandscape()
     val mediaOffset by
         animateSceneDpAsState(value = InQQS, key = MediaLandscapeTopOffset, canOverflow = false)
 
@@ -380,6 +380,7 @@ private fun SceneScope.SingleShade(
                     mediaOffsetProvider = mediaOffsetProvider,
                     carouselController = mediaCarouselController,
                     modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media),
+                    usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
                 )
 
                 NotificationScrollingStack(
@@ -636,6 +637,7 @@ private fun SceneScope.ShadeMediaCarousel(
     carouselController: MediaCarouselController,
     mediaOffsetProvider: ShadeMediaOffsetProvider,
     modifier: Modifier = Modifier,
+    usingCollapsedLandscapeMedia: Boolean = false,
 ) {
     MediaCarousel(
         modifier = modifier.fillMaxWidth(),
@@ -648,5 +650,6 @@ private fun SceneScope.ShadeMediaCarousel(
             } else {
                 { mediaOffsetProvider.offset }
             },
+        usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
     )
 }

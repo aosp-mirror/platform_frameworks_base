@@ -267,25 +267,39 @@ filegroup {
     visibility: ["//frameworks/base"],
 }
 
-cc_library_shared {
-    name: "libravenwood_runtime",
-    host_supported: true,
-
+cc_defaults {
+    name: "ravenwood_jni_defaults",
     cflags: [
         "-Wall",
         "-Werror",
         "-Wno-unused-parameter",
         "-Wthread-safety",
     ],
-
-    srcs: [
-        "runtime-jni/*.cpp",
+    static_libs: [
+        "libnativehelper_jvm",
     ],
+    shared_libs: [
+        "liblog",
+    ],
+}
 
+// We need this as a separate library because we need to overload the
+// sysprop symbols before libbase is loaded into the process
+cc_library_host_shared {
+    name: "libravenwood_sysprop",
+    defaults: ["ravenwood_jni_defaults"],
+    srcs: ["runtime-jni/ravenwood_sysprop.cpp"],
+}
+
+cc_library_host_shared {
+    name: "libravenwood_runtime",
+    defaults: ["ravenwood_jni_defaults"],
+    srcs: [
+        "runtime-jni/ravenwood_runtime.cpp",
+        "runtime-jni/ravenwood_os_constants.cpp",
+    ],
     shared_libs: [
         "libbase",
-        "liblog",
-        "libnativehelper",
         "libutils",
         "libcutils",
     ],
@@ -377,8 +391,10 @@ android_ravenwood_libgroup {
         "z00-all-updatable-modules-system-stubs",
     ],
     jni_libs: [
-        "libandroid_runtime",
+        // Libraries has to be loaded in the following order
+        "libravenwood_sysprop",
         "libravenwood_runtime",
+        "libandroid_runtime",
     ],
 }
 

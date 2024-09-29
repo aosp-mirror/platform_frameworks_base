@@ -39,6 +39,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 import com.android.settingslib.collapsingtoolbar.R;
+import com.android.settingslib.widget.SettingsThemeHelper;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -105,7 +106,10 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
     }
 
     private void init() {
-        inflate(getContext(), R.layout.collapsing_toolbar_content_layout, this);
+        int resId = SettingsThemeHelper.isExpressiveTheme(getContext())
+                ? R.layout.settingslib_expressive_collapsing_toolbar_content_layout
+                : R.layout.collapsing_toolbar_content_layout;
+        inflate(getContext(), resId, this);
         mCollapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
         mAppBarLayout = findViewById(R.id.app_bar);
         if (mCollapsingToolbarLayout != null) {
@@ -172,6 +176,9 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayShowTitleEnabled(true);
+            if (SettingsThemeHelper.isExpressiveTheme(getContext())) {
+                actionBar.setHomeAsUpIndicator(R.drawable.settingslib_expressive_icon_back);
+            }
         }
     }
 
@@ -202,6 +209,9 @@ public class CollapsingCoordinatorLayout extends CoordinatorLayout {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayShowTitleEnabled(true);
+            if (SettingsThemeHelper.isExpressiveTheme(getContext())) {
+                actionBar.setHomeAsUpIndicator(R.drawable.settingslib_expressive_icon_back);
+            }
         }
     }
 

@@ -35,6 +35,7 @@ import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
@@ -107,6 +108,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
                     uiEventLogger,
                     { kosmos.interactionJankMonitor },
                     JavaAdapter(testScope.backgroundScope),
+                    { kosmos.keyguardInteractor },
                     { kosmos.keyguardTransitionInteractor },
                     { kosmos.shadeInteractor },
                     { kosmos.deviceUnlockedInteractor },
@@ -139,6 +141,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
     }
 
     @Test
+    @DisableSceneContainer
     fun testSetDozeAmountInternal_onlySetsOnce() {
         val listener = mock(StatusBarStateController.StateListener::class.java)
         underTest.addCallback(listener)
@@ -190,6 +193,7 @@ class StatusBarStateControllerImplTest(flags: FlagsParameterization) : SysuiTest
     }
 
     @Test
+    @DisableSceneContainer
     fun testSetDozeAmount_immediatelyChangesDozeAmount_lockscreenTransitionFromAod() {
         // Put controller in AOD state
         underTest.setAndInstrumentDozeAmount(null, 1f, false)

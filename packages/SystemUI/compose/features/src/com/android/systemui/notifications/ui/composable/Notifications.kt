@@ -86,6 +86,8 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.SceneTransitionLayoutState
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.res.R
@@ -101,7 +103,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewmodel.Notificati
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationTransitionThresholds.EXPANSION_FOR_MAX_SCRIM_ALPHA
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import kotlin.math.roundToInt
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 object Notifications {
@@ -130,8 +132,8 @@ object Notifications {
 fun SceneScope.HeadsUpNotificationSpace(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
+    useHunBounds: () -> Boolean = { true },
     modifier: Modifier = Modifier,
-    isPeekFromBottom: Boolean = false,
 ) {
     Box(
         modifier =
@@ -141,17 +143,25 @@ fun SceneScope.HeadsUpNotificationSpace(
                 .notificationHeadsUpHeight(stackScrollView)
                 .debugBackground(viewModel, DEBUG_HUN_COLOR)
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
-                    val positionInWindow = coordinates.positionInWindow()
-                    val boundsInWindow = coordinates.boundsInWindow()
-                    debugLog(viewModel) {
-                        "HUNS onGloballyPositioned:" +
-                            " size=${coordinates.size}" +
-                            " bounds=$boundsInWindow"
+                    // This element is sometimes opted out of the shared element system, so there
+                    // can be multiple instances of it during a transition. Thus we need to
+                    // determine which instance should feed its bounds to NSSL to avoid providing
+                    // conflicting values
+                    val useBounds = useHunBounds()
+                    if (useBounds) {
+                        val positionInWindow = coordinates.positionInWindow()
+                        val boundsInWindow = coordinates.boundsInWindow()
+                        debugLog(viewModel) {
+                            "HUNS onGloballyPositioned:" +
+                                " size=${coordinates.size}" +
+                                " bounds=$boundsInWindow"
+                        }
+                        // Note: boundsInWindow doesn't scroll off the screen, so use
+                        // positionInWindow
+                        // for top bound, which can scroll off screen while snoozing
+                        stackScrollView.setHeadsUpTop(positionInWindow.y)
+                        stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                     }
-                    // Note: boundsInWindow doesn't scroll off the screen, so use positionInWindow
-                    // for top bound, which can scroll off screen while snoozing
-                    stackScrollView.setHeadsUpTop(positionInWindow.y)
-                    stackScrollView.setHeadsUpBottom(boundsInWindow.bottom)
                 }
     )
 }
@@ -243,6 +253,7 @@ fun SceneScope.ConstrainedNotificationStack(
         NotificationPlaceholder(
             stackScrollView = stackScrollView,
             viewModel = viewModel,
+            useStackBounds = { shouldUseLockscreenStackBounds(layoutState.transitionState) },
             modifier = Modifier.fillMaxSize(),
         )
         HeadsUpNotificationSpace(
@@ -355,7 +366,6 @@ fun SceneScope.NotificationScrollingStack(
         snapshotFlow { syntheticScroll.value }
             .collect { delta ->
                 scrollNotificationStack(
-                    scope = coroutineScope,
                     delta = delta,
                     animate = false,
                     scrimOffset = scrimOffset,
@@ -375,7 +385,6 @@ fun SceneScope.NotificationScrollingStack(
                 // composed at least once), and our remote input row overlaps with the ime bounds.
                 if (isRemoteInputActive && imeTopValue > 0f && remoteInputRowBottom > imeTopValue) {
                     scrollNotificationStack(
-                        scope = coroutineScope,
                         delta = remoteInputRowBottom - imeTopValue,
                         animate = true,
                         scrimOffset = scrimOffset,
@@ -442,7 +451,10 @@ fun SceneScope.NotificationScrollingStack(
                                 scrimCornerRadius,
                                 screenCornerRadius,
                                 { expansionFraction },
-                                shouldPunchHoleBehindScrim,
+                                shouldAnimateScrimCornerRadius(
+                                    layoutState,
+                                    shouldPunchHoleBehindScrim,
+                                ),
                             )
                             .let { scrimRounding.value.toRoundedCornerShape(it) }
                     clip = true
@@ -506,6 +518,9 @@ fun SceneScope.NotificationScrollingStack(
                 NotificationPlaceholder(
                     stackScrollView = stackScrollView,
                     viewModel = viewModel,
+                    useStackBounds = {
+                        !shouldUseLockscreenStackBounds(layoutState.transitionState)
+                    },
                     modifier =
                         Modifier.notificationStackHeight(
                                 view = stackScrollView,
@@ -592,6 +607,7 @@ fun SceneScope.NotificationStackCutoffGuideline(
 private fun SceneScope.NotificationPlaceholder(
     stackScrollView: NotificationScrollView,
     viewModel: NotificationsPlaceholderViewModel,
+    useStackBounds: () -> Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -601,21 +617,26 @@ private fun SceneScope.NotificationPlaceholder(
                 .debugBackground(viewModel, DEBUG_STACK_COLOR)
                 .onSizeChanged { size -> debugLog(viewModel) { "STACK onSizeChanged: size=$size" } }
                 .onGloballyPositioned { coordinates: LayoutCoordinates ->
-                    val positionInWindow = coordinates.positionInWindow()
-                    debugLog(viewModel) {
-                        "STACK onGloballyPositioned:" +
-                            " size=${coordinates.size}" +
-                            " position=$positionInWindow" +
-                            " bounds=${coordinates.boundsInWindow()}"
+                    // This element is opted out of the shared element system, so there can be
+                    // multiple instances of it during a transition. Thus we need to determine which
+                    // instance should feed its bounds to NSSL to avoid providing conflicting values
+                    val useBounds = useStackBounds()
+                    if (useBounds) {
+                        // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top won't
+                        val positionInWindow = coordinates.positionInWindow()
+                        debugLog(viewModel) {
+                            "STACK onGloballyPositioned:" +
+                                " size=${coordinates.size}" +
+                                " position=$positionInWindow" +
+                                " bounds=${coordinates.boundsInWindow()}"
+                        }
+                        stackScrollView.setStackTop(positionInWindow.y)
                     }
-                    // NOTE: positionInWindow.y scrolls off screen, but boundsInWindow.top will not
-                    stackScrollView.setStackTop(positionInWindow.y)
                 }
     )
 }
 
 private suspend fun scrollNotificationStack(
-    scope: CoroutineScope,
     delta: Float,
     animate: Boolean,
     scrimOffset: Animatable<Float, AnimationVector1D>,
@@ -630,7 +651,7 @@ private suspend fun scrollNotificationStack(
             if (animate) {
                 // launch a new coroutine for the remainder animation so that it doesn't suspend the
                 // scrim animation, allowing both to play simultaneously.
-                scope.launch { scrollState.animateScrollTo(remainingDelta) }
+                coroutineScope { launch { scrollState.animateScrollTo(remainingDelta) } }
             } else {
                 scrollState.scrollTo(remainingDelta)
             }
@@ -648,6 +669,18 @@ private suspend fun scrollNotificationStack(
             scrollState.scrollBy(delta)
         }
     }
+}
+
+private fun shouldUseLockscreenStackBounds(state: TransitionState): Boolean {
+    return state is TransitionState.Idle && state.currentScene == Scenes.Lockscreen
+}
+
+private fun shouldAnimateScrimCornerRadius(
+    state: SceneTransitionLayoutState,
+    shouldPunchHoleBehindScrim: Boolean,
+): Boolean {
+    return shouldPunchHoleBehindScrim ||
+        state.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)
 }
 
 private fun calculateCornerRadius(

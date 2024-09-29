@@ -24,6 +24,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -38,6 +40,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
@@ -1493,12 +1496,20 @@ class RecentTasks {
             if (isExcludeFromRecents) {
                 if (DEBUG_RECENTS_TRIM_TASKS) {
                     Slog.d(TAG,
-                            "\texcludeFromRecents=true, taskIndex = " + taskIndex
-                                    + ", isOnHomeDisplay: " + task.isOnHomeDisplay());
+                            "\texcludeFromRecents=true,"
+                                + " taskIndex: " + taskIndex
+                                + " getTopVisibleActivity: " + task.getTopVisibleActivity()
+                                + " isOnHomeDisplay: " + task.isOnHomeDisplay());
                 }
                 // The Recents is only supported on default display now, we should only keep the
                 // most recent task of home display.
-                return (task.isOnHomeDisplay() && taskIndex == 0);
+                boolean isMostRecentTask;
+                if (enableRefactorTaskThumbnail()) {
+                    isMostRecentTask = task.getTopVisibleActivity() != null;
+                } else {
+                    isMostRecentTask = taskIndex == 0;
+                }
+                return (task.isOnHomeDisplay() && isMostRecentTask);
             }
         }
 
@@ -2031,10 +2042,15 @@ class RecentTasks {
         final boolean isOtherUndefinedMode = otherWindowingMode == WINDOWING_MODE_UNDEFINED;
 
         // An activity type and windowing mode is compatible if they are the exact same type/mode,
-        // or if one of the type/modes is undefined
+        // or if one of the type/modes is undefined. This is with the exception of
+        // freeform/fullscreen where both modes are assumed to be compatible with each other.
         final boolean isCompatibleType = activityType == otherActivityType
                 || isUndefinedType || isOtherUndefinedType;
         final boolean isCompatibleMode = windowingMode == otherWindowingMode
+                || (windowingMode == WINDOWING_MODE_FREEFORM
+                && otherWindowingMode == WINDOWING_MODE_FULLSCREEN)
+                || (windowingMode == WINDOWING_MODE_FULLSCREEN
+                && otherWindowingMode == WINDOWING_MODE_FREEFORM)
                 || isUndefinedMode || isOtherUndefinedMode;
 
         return isCompatibleType && isCompatibleMode;

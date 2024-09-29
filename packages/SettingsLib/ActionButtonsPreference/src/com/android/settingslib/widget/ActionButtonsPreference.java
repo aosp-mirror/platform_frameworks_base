@@ -26,6 +26,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.StringRes;
@@ -33,6 +35,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.preference.actionbuttons.R;
+
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +102,10 @@ public class ActionButtonsPreference extends Preference {
     }
 
     private void init() {
-        setLayoutResource(R.layout.settingslib_action_buttons);
+        int resId = SettingsThemeHelper.isExpressiveTheme(getContext())
+                ? R.layout.settingslib_expressive_action_buttons
+                : R.layout.settingslib_action_buttons;
+        setLayoutResource(resId);
         setSelectable(false);
 
         final Resources res = getContext().getResources();
@@ -126,6 +133,21 @@ public class ActionButtonsPreference extends Preference {
         mButton2Info.mButton = (Button) holder.findViewById(R.id.button2);
         mButton3Info.mButton = (Button) holder.findViewById(R.id.button3);
         mButton4Info.mButton = (Button) holder.findViewById(R.id.button4);
+
+        if (SettingsThemeHelper.isExpressiveTheme(getContext())) {
+            mButton1Info.mIsExpressive = true;
+            mButton1Info.mTextView = (TextView) holder.findViewById(R.id.text1);
+            mButton1Info.mActionLayout = (LinearLayout) holder.findViewById(R.id.action1);
+            mButton2Info.mIsExpressive = true;
+            mButton2Info.mTextView = (TextView) holder.findViewById(R.id.text2);
+            mButton2Info.mActionLayout = (LinearLayout) holder.findViewById(R.id.action2);
+            mButton3Info.mIsExpressive = true;
+            mButton3Info.mTextView = (TextView) holder.findViewById(R.id.text3);
+            mButton3Info.mActionLayout = (LinearLayout) holder.findViewById(R.id.action3);
+            mButton4Info.mIsExpressive = true;
+            mButton4Info.mTextView = (TextView) holder.findViewById(R.id.text4);
+            mButton4Info.mActionLayout = (LinearLayout) holder.findViewById(R.id.action4);
+        }
 
         mDivider1 = holder.findViewById(R.id.divider1);
         mDivider2 = holder.findViewById(R.id.divider2);
@@ -169,45 +191,47 @@ public class ActionButtonsPreference extends Preference {
             mVisibleButtonInfos.add(mButton4Info);
         }
 
-        final boolean isRtl = getContext().getResources().getConfiguration()
-                .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        switch (mVisibleButtonInfos.size()) {
-            case SINGLE_BUTTON_STYLE :
-                if (isRtl) {
-                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle1);
-                } else {
-                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle1);
-                }
-                break;
-            case TWO_BUTTONS_STYLE :
-                if (isRtl) {
-                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle2);
-                } else {
-                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle2);
-                }
-                break;
-            case THREE_BUTTONS_STYLE :
-                if (isRtl) {
-                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle3);
-                } else {
-                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle3);
-                }
-                break;
-            case FOUR_BUTTONS_STYLE :
-                if (isRtl) {
-                    setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle4);
-                } else {
-                    setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle4);
-                }
-                break;
-            default:
-                Log.e(TAG, "No visible buttons info, skip background settings.");
-                break;
-        }
+        if (!SettingsThemeHelper.isExpressiveTheme(getContext())) {
+            final boolean isRtl = getContext().getResources().getConfiguration()
+                    .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+            switch (mVisibleButtonInfos.size()) {
+                case SINGLE_BUTTON_STYLE :
+                    if (isRtl) {
+                        setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle1);
+                    } else {
+                        setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle1);
+                    }
+                    break;
+                case TWO_BUTTONS_STYLE :
+                    if (isRtl) {
+                        setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle2);
+                    } else {
+                        setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle2);
+                    }
+                    break;
+                case THREE_BUTTONS_STYLE :
+                    if (isRtl) {
+                        setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle3);
+                    } else {
+                        setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle3);
+                    }
+                    break;
+                case FOUR_BUTTONS_STYLE :
+                    if (isRtl) {
+                        setupRtlBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle4);
+                    } else {
+                        setupBackgrounds(mVisibleButtonInfos, mBtnBackgroundStyle4);
+                    }
+                    break;
+                default:
+                    Log.e(TAG, "No visible buttons info, skip background settings.");
+                    break;
+            }
 
-        setupDivider1();
-        setupDivider2();
-        setupDivider3();
+            setupDivider1();
+            setupDivider2();
+            setupDivider3();
+        }
     }
 
     private void setupBackgrounds(
@@ -509,23 +533,45 @@ public class ActionButtonsPreference extends Preference {
 
     static class ButtonInfo {
         private Button mButton;
+        private TextView mTextView;
+        private LinearLayout mActionLayout;
         private CharSequence mText;
         private Drawable mIcon;
         private View.OnClickListener mListener;
         private boolean mIsEnabled = true;
         private boolean mIsVisible = true;
+        private boolean mIsExpressive = false;
 
         void setUpButton() {
-            mButton.setText(mText);
-            mButton.setOnClickListener(mListener);
-            mButton.setEnabled(mIsEnabled);
-            mButton.setCompoundDrawablesWithIntrinsicBounds(
-                    null /* left */, mIcon /* top */, null /* right */, null /* bottom */);
+            if (mIsExpressive) {
+                mTextView.setText(mText);
+                if (mButton instanceof MaterialButton) {
+                    ((MaterialButton) mButton).setIcon(mIcon);
+                }
+                mButton.setEnabled(mIsEnabled);
+                mActionLayout.setOnClickListener(mListener);
+                mActionLayout.setEnabled(mIsEnabled);
+                mActionLayout.setContentDescription(mText);
+            } else {
+                mButton.setText(mText);
+                mButton.setCompoundDrawablesWithIntrinsicBounds(
+                        null /* left */, mIcon /* top */, null /* right */, null /* bottom */);
+                mButton.setOnClickListener(mListener);
+                mButton.setEnabled(mIsEnabled);
+            }
 
             if (shouldBeVisible()) {
                 mButton.setVisibility(View.VISIBLE);
+                if (mIsExpressive) {
+                    mTextView.setVisibility(View.VISIBLE);
+                    mActionLayout.setVisibility(View.VISIBLE);
+                }
             } else {
                 mButton.setVisibility(View.GONE);
+                if (mIsExpressive) {
+                    mTextView.setVisibility(View.GONE);
+                    mActionLayout.setVisibility(View.GONE);
+                }
             }
         }
 

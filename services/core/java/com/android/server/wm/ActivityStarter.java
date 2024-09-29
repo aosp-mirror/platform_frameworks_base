@@ -100,6 +100,7 @@ import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.WindowConfiguration;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledSince;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -182,7 +183,7 @@ class ActivityStarter {
      * Feature flag for go/activity-security rules
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @Disabled
     static final long ASM_RESTRICTIONS = 230590090L;
 
     private final ActivityTaskManagerService mService;
@@ -1749,12 +1750,13 @@ class ActivityStarter {
         mIntent.setFlags(mLaunchFlags);
 
         boolean dreamStopping = false;
-
-        for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
-            if (stoppingActivity.getActivityType()
-                    == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
-                dreamStopping = true;
-                break;
+        if (!com.android.window.flags.Flags.removeActivityStarterDreamCallback()) {
+            for (ActivityRecord stoppingActivity : mSupervisor.mStoppingActivities) {
+                if (stoppingActivity.getActivityType()
+                        == WindowConfiguration.ACTIVITY_TYPE_DREAM) {
+                    dreamStopping = true;
+                    break;
+                }
             }
         }
 
@@ -1878,8 +1880,21 @@ class ActivityStarter {
         if (mDoResume) {
             if (!avoidMoveToFront()) {
                 mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-                if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.isDreaming()
-                        && !dreamStopping) {
+
+                final boolean launchBehindDream;
+                if (com.android.window.flags.Flags.removeActivityStarterDreamCallback()) {
+                    final TaskDisplayArea tda = mTargetRootTask.getTaskDisplayArea();
+                    final Task top = (tda != null ? tda.getTopRootTask() : null);
+                    launchBehindDream = (top != null && top != mTargetRootTask)
+                            && top.getActivityType() == WindowConfiguration.ACTIVITY_TYPE_DREAM
+                            && top.getTopNonFinishingActivity() != null;
+                } else {
+                    launchBehindDream = !mTargetRootTask.isTopRootTaskInDisplayArea()
+                            && mService.isDreaming()
+                            && !dreamStopping;
+                }
+
+                if (launchBehindDream) {
                     // Launching underneath dream activity (fullscreen, always-on-top). Run the
                     // launch--behind transition so the Activity gets created and starts
                     // in visible state.

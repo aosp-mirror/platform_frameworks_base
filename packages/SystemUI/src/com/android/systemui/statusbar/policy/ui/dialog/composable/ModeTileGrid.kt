@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.systemui.Flags
 import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModesDialogViewModel
 
 @Composable
@@ -34,8 +33,8 @@ fun ModeTileGrid(viewModel: ModesDialogViewModel) {
     val tiles by viewModel.tiles.collectAsStateWithLifecycle(initialValue = emptyList())
 
     LazyVerticalGrid(
-        columns = GridCells.Fixed(if (Flags.modesDialogSingleRows()) 1 else 2),
-        modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp),
+        columns = GridCells.Fixed(1),
+        modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

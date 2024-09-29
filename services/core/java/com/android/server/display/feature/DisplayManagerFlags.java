@@ -69,6 +69,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
 
+    private final FlagState mDisplayTopology = new FlagState(
+            Flags.FLAG_DISPLAY_TOPOLOGY,
+            Flags::displayTopology);
+
     private final FlagState mConnectedDisplayErrorHandlingFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_ERROR_HANDLING,
             Flags::enableConnectedDisplayErrorHandling);
@@ -266,6 +270,10 @@ public class DisplayManagerFlags {
         return mExternalDisplayLimitModeState.isEnabled();
     }
 
+    public boolean isDisplayTopologyEnabled() {
+        return mDisplayTopology.isEnabled();
+    }
+
     /**
      * @return Whether displays refresh rate synchronization is enabled.
      */
@@ -441,6 +449,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mConnectedDisplayManagementFlagState);
         pw.println(" " + mDisplayOffloadFlagState);
         pw.println(" " + mExternalDisplayLimitModeState);
+        pw.println(" " + mDisplayTopology);
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);

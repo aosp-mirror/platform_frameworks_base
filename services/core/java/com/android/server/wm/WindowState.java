@@ -1969,6 +1969,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isReadyForDisplay() {
         final boolean parentAndClientVisible = !isParentWindowHidden()
                 && mViewVisibility == View.VISIBLE;
+        // TODO(b/338426357): Remove this once the last target using legacy transitions is moved to
+        // shell transitions
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            return mHasSurface && isVisibleByPolicy() && !mDestroying
+                    && ((parentAndClientVisible && mToken.isVisible())
+                    || isAnimating(TRANSITION | PARENTS));
+        }
         return mHasSurface && isVisibleByPolicy() && !mDestroying && mToken.isVisible()
                 && (parentAndClientVisible || isAnimating(TRANSITION | PARENTS));
     }
@@ -3856,16 +3863,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         fillInsetsState(mLastReportedInsetsState, false /* copySources */);
         fillInsetsSourceControls(mLastReportedActiveControls, false /* copyControls */);
-        if (Flags.insetsControlChangedItem()) {
-            getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
-                    mClient, mLastReportedInsetsState, mLastReportedActiveControls));
-        } else {
-            try {
-                mClient.insetsControlChanged(mLastReportedInsetsState, mLastReportedActiveControls);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to deliver inset control state change to w=" + this, e);
-            }
-        }
+        getProcess().scheduleClientTransactionItem(new WindowStateInsetsControlChangeItem(
+                mClient, mLastReportedInsetsState, mLastReportedActiveControls));
     }
 
     @Override

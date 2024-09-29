@@ -29,9 +29,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
-import com.android.systemui.scene.shared.model.TransitionKeys
+import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.domain.interactor.PrivacyChipInteractor
 import com.android.systemui.shade.domain.interactor.ShadeHeaderClockInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -55,9 +53,8 @@ import kotlinx.coroutines.launch
 class ShadeHeaderViewModel
 @AssistedInject
 constructor(
-    private val context: Context,
+    context: Context,
     private val activityStarter: ActivityStarter,
-    private val sceneInteractor: SceneInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val mobileIconsInteractor: MobileIconsInteractor,
     val mobileIconsViewModel: MobileIconsViewModel,
@@ -120,7 +117,7 @@ constructor(
                         map = { intent, _ ->
                             intent.action == Intent.ACTION_TIMEZONE_CHANGED ||
                                 intent.action == Intent.ACTION_LOCALE_CHANGED
-                        }
+                        },
                     )
                     .onEach { invalidateFormats -> updateDateTexts(invalidateFormats) }
                     .launchIn(this)
@@ -152,10 +149,9 @@ constructor(
 
     /** Notifies that the system icons container was clicked. */
     fun onSystemIconContainerClicked() {
-        sceneInteractor.changeScene(
-            SceneFamilies.Home,
-            "ShadeHeaderViewModel.onSystemIconContainerClicked",
-            TransitionKeys.SlightlyFasterShadeCollapse,
+        shadeInteractor.collapseEitherShade(
+            loggingReason = "ShadeHeaderViewModel.onSystemIconContainerClicked",
+            transitionKey = SlightlyFasterShadeCollapse,
         )
     }
 
@@ -163,7 +159,7 @@ constructor(
     fun onShadeCarrierGroupClicked() {
         activityStarter.postStartActivityDismissingKeyguard(
             Intent(Settings.ACTION_WIRELESS_SETTINGS),
-            0
+            0,
         )
     }
 

@@ -150,7 +150,9 @@ constructor(
                         if (!SceneContainerFlag.isEnabled) {
                             startTransitionTo(KeyguardState.GLANCEABLE_HUB)
                         }
-                    } else if (isCommunalAvailable && dreamManager.canStartDreaming(true)) {
+                    } else if (isCommunalAvailable && dreamManager.canStartDreaming(false)) {
+                        // Using false for isScreenOn as canStartDreaming returns false if any
+                        // dream, including doze, is active.
                         // This case handles tapping the power button to transition through
                         // dream -> off -> hub.
                         if (!SceneContainerFlag.isEnabled) {

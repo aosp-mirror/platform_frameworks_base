@@ -34,11 +34,11 @@ val Kosmos.keyguardDismissActionInteractor by
             transitionInteractor = keyguardTransitionInteractor,
             dismissInteractor = keyguardDismissInteractor,
             applicationScope = testScope.backgroundScope,
-            sceneInteractor = { sceneInteractor },
             deviceUnlockedInteractor = { deviceUnlockedInteractor },
             powerInteractor = powerInteractor,
             alternateBouncerInteractor = alternateBouncerInteractor,
             shadeInteractor = { shadeInteractor },
             keyguardInteractor = { keyguardInteractor },
+            sceneInteractor = { sceneInteractor },
         )
     }
