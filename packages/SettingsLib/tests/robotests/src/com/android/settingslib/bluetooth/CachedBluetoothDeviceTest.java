@@ -1977,12 +1977,12 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
-    public void getConnectionSummary_isBroadcastPrimary_returnActive() {
+    public void getConnectionSummary_isBroadcastPrimary_fallbackDevice_returnActive() {
         when(mBroadcast.isEnabled(any())).thenReturn(true);
         when(mCachedDevice.getDevice()).thenReturn(mDevice);
         Settings.Secure.putInt(
                 mContext.getContentResolver(),
-                "bluetooth_le_broadcast_fallback_active_group_id",
+                BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
                 1);
 
         List<Long> bisSyncState = new ArrayList<>();
@@ -1992,12 +1992,30 @@ public class CachedBluetoothDeviceTest {
         sourceList.add(mLeBroadcastReceiveState);
         when(mAssistant.getAllSources(any())).thenReturn(sourceList);
 
-        when(mCachedDevice.getGroupId())
-                .thenReturn(
-                        Settings.Secure.getInt(
-                                mContext.getContentResolver(),
-                                "bluetooth_le_broadcast_fallback_active_group_id",
-                                BluetoothCsipSetCoordinator.GROUP_ID_INVALID));
+        when(mCachedDevice.getGroupId()).thenReturn(1);
+
+        assertThat(mCachedDevice.getConnectionSummary(false))
+                .isEqualTo(mContext.getString(R.string.bluetooth_active_no_battery_level));
+    }
+
+    @Test
+    public void getConnectionSummary_isBroadcastPrimary_activeDevice_returnActive() {
+        when(mBroadcast.isEnabled(any())).thenReturn(true);
+        when(mCachedDevice.getDevice()).thenReturn(mDevice);
+        Settings.Secure.putInt(
+                mContext.getContentResolver(),
+                BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
+
+        List<Long> bisSyncState = new ArrayList<>();
+        bisSyncState.add(1L);
+        when(mLeBroadcastReceiveState.getBisSyncState()).thenReturn(bisSyncState);
+        List<BluetoothLeBroadcastReceiveState> sourceList = new ArrayList<>();
+        sourceList.add(mLeBroadcastReceiveState);
+        when(mAssistant.getAllSources(any())).thenReturn(sourceList);
+
+        when(mCachedDevice.getGroupId()).thenReturn(1);
+        when(mCachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO)).thenReturn(true);
 
         assertThat(mCachedDevice.getConnectionSummary(false))
                 .isEqualTo(mContext.getString(R.string.bluetooth_active_no_battery_level));
@@ -2009,7 +2027,7 @@ public class CachedBluetoothDeviceTest {
         when(mCachedDevice.getDevice()).thenReturn(mDevice);
         Settings.Secure.putInt(
                 mContext.getContentResolver(),
-                "bluetooth_le_broadcast_fallback_active_group_id",
+                BluetoothUtils.getPrimaryGroupIdUriForBroadcast(),
                 1);
 
         List<Long> bisSyncState = new ArrayList<>();

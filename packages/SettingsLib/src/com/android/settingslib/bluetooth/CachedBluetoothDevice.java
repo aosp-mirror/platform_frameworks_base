@@ -38,7 +38,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelUuid;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
@@ -1291,12 +1290,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (BluetoothUtils.hasConnectedBroadcastSource(this, mBluetoothManager)) {
             // Gets summary for the buds which are in the audio sharing.
             int groupId = BluetoothUtils.getGroupId(this);
-            if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
-                    && groupId
-                            == Settings.Secure.getInt(
-                                    mContext.getContentResolver(),
-                                    "bluetooth_le_broadcast_fallback_active_group_id",
-                                    BluetoothCsipSetCoordinator.GROUP_ID_INVALID)) {
+            int primaryGroupId = BluetoothUtils.getPrimaryGroupIdForBroadcast(
+                    mContext.getContentResolver());
+            if ((primaryGroupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
+                    ? (groupId == primaryGroupId) : isActiveDevice(BluetoothProfile.LE_AUDIO)) {
                 // The buds are primary buds
                 return getSummaryWithBatteryInfo(
                         R.string.bluetooth_active_battery_level_untethered,
