@@ -3017,6 +3017,14 @@ interface ITelephony {
     boolean setSatelliteListeningTimeoutDuration(in long timeoutMillis);
 
     /**
+     * This API can be used by only CTS to control ingoring cellular service state event.
+     *
+     * @param enabled Whether to enable boolean config.
+     * @return {@code true} if the value is set successfully, {@code false} otherwise.
+     */
+    boolean setSatelliteIgnoreCellularServiceState(in boolean enabled);
+
+    /**
      * This API can be used by only CTS to update satellite pointing UI app package and class names.
      *
      * @param packageName The package name of the satellite pointing UI app.
@@ -3409,4 +3417,20 @@ interface ITelephony {
      * @hide
      */
     boolean setSatelliteSubscriberIdListChangedIntentComponent(in String name);
+
+    /**
+     * This API can be used by only CTS to override the Euicc UI component.
+     *
+     * @param componentName ui component to be launched for testing
+     * @hide
+     */
+    void setTestEuiccUiComponent(in ComponentName componentName);
+
+    /**
+     * This API can be used by only CTS to retrieve the Euicc UI component.
+     *
+     * @return The Euicc UI component for testing.
+     * @hide
+     */
+    ComponentName getTestEuiccUiComponent();
 }

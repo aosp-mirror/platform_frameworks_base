@@ -16,10 +16,10 @@
 
 package com.android.systemui.education.domain.ui.view
 
+import android.app.Dialog
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.applicationContext
-import android.widget.Toast
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -34,11 +34,13 @@ import com.android.systemui.education.ui.viewmodel.ContextualEduViewModel
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -51,6 +53,7 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -63,10 +66,12 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     private val minDurationForNextEdu =
         KeyboardTouchpadEduInteractor.minIntervalBetweenEdu + 1.seconds
     private lateinit var underTest: ContextualEduUiCoordinator
-    @Mock private lateinit var toast: Toast
+    @Mock private lateinit var dialog: Dialog
     @Mock private lateinit var notificationManager: NotificationManager
+    @Mock private lateinit var accessibilityManagerWrapper: AccessibilityManagerWrapper
     @get:Rule val mockitoRule = MockitoJUnit.rule()
     private var toastContent = ""
+    private val timeoutMillis = 3500L
 
     @Before
     fun setUp() {
@@ -75,30 +80,35 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
             interactor.updateTouchpadFirstConnectionTime()
         }
 
+        whenever(accessibilityManagerWrapper.getRecommendedTimeoutMillis(any(), any()))
+            .thenReturn(timeoutMillis.toInt())
+
         val viewModel =
             ContextualEduViewModel(
                 kosmos.applicationContext.resources,
-                kosmos.keyboardTouchpadEduInteractor
+                kosmos.keyboardTouchpadEduInteractor,
+                accessibilityManagerWrapper,
             )
+
         underTest =
             ContextualEduUiCoordinator(
                 kosmos.applicationCoroutineScope,
                 viewModel,
                 kosmos.applicationContext,
                 notificationManager
-            ) { content ->
-                toastContent = content
-                toast
+            ) { model ->
+                toastContent = model.message
+                dialog
             }
         underTest.start()
         kosmos.keyboardTouchpadEduInteractor.start()
     }
 
     @Test
-    fun showToastOnNewEdu() =
+    fun showDialogOnNewEdu() =
         testScope.runTest {
             triggerEducation(BACK)
-            verify(toast).show()
+            verify(dialog).show()
         }
 
     @Test
@@ -108,6 +118,14 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
             eduClock.offset(minDurationForNextEdu)
             triggerEducation(BACK)
             verify(notificationManager).notifyAsUser(any(), anyInt(), any(), any())
+        }
+
+    @Test
+    fun dismissDialogAfterTimeout() =
+        testScope.runTest {
+            triggerEducation(BACK)
+            advanceTimeBy(timeoutMillis + 1)
+            verify(dialog).dismiss()
         }
 
     @Test
