@@ -21,10 +21,6 @@ import com.android.internal.widget.remotecompose.core.operations.ClipPath;
 import com.android.internal.widget.remotecompose.core.operations.ClipRect;
 import com.android.internal.widget.remotecompose.core.operations.ColorConstant;
 import com.android.internal.widget.remotecompose.core.operations.ColorExpression;
-import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
-import com.android.internal.widget.remotecompose.core.operations.DataListFloat;
-import com.android.internal.widget.remotecompose.core.operations.DataListIds;
-import com.android.internal.widget.remotecompose.core.operations.DataMapIds;
 import com.android.internal.widget.remotecompose.core.operations.DrawArc;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmap;
 import com.android.internal.widget.remotecompose.core.operations.DrawBitmapInt;
@@ -58,35 +54,24 @@ import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.TextFromFloat;
 import com.android.internal.widget.remotecompose.core.operations.TextMerge;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
-import com.android.internal.widget.remotecompose.core.operations.layout.CanvasContent;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierEnd;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStart;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponentContent;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
-import com.android.internal.widget.remotecompose.core.operations.layout.managers.CanvasLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.ColumnLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.RowLayout;
-import com.android.internal.widget.remotecompose.core.operations.layout.managers.TextLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BackgroundModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.BorderModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostActionOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostNamedActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.RoundedClipRectModifierOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerChangeActionOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueStringChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
 import com.android.internal.widget.remotecompose.core.types.BooleanConstant;
 import com.android.internal.widget.remotecompose.core.types.IntegerConstant;
-import com.android.internal.widget.remotecompose.core.types.LongConstant;
 
 /**
  * List of operations supported in a RemoteCompose document
@@ -145,10 +130,6 @@ public class Operations {
     public static final int DATA_INT = 140;
     public static final int DATA_BOOLEAN = 143;
     public static final int INTEGER_EXPRESSION = 144;
-    public static final int ID_MAP = 145;
-    public static final int ID_LIST = 146;
-    public static final int FLOAT_LIST = 147;
-    public static final int DATA_LONG = 148;
 
     /////////////////////////////////////////======================
 
@@ -161,10 +142,6 @@ public class Operations {
     public static final int LAYOUT_BOX = 202;
     public static final int LAYOUT_ROW = 203;
     public static final int LAYOUT_COLUMN = 204;
-    public static final int LAYOUT_CANVAS = 205;
-    public static final int LAYOUT_CANVAS_CONTENT = 207;
-
-    public static final int LAYOUT_TEXT = 208;
     public static final int COMPONENT_START = 2;
     public static final int COMPONENT_END = 3;
     public static final int MODIFIER_WIDTH = 16;
@@ -174,110 +151,73 @@ public class Operations {
     public static final int MODIFIER_PADDING = 58;
     public static final int MODIFIER_CLIP_RECT = 108;
     public static final int MODIFIER_ROUNDED_CLIP_RECT = 54;
-
-    public static final int MODIFIER_CLICK = 59;
-
-    public static final int MODIFIER_CLICK_END = 214;
-
-    public static final int MODIFIER_VISIBILITY = 211;
-    public static final int HOST_ACTION = 209;
-    public static final int HOST_NAMED_ACTION = 210;
-
-    public static final int VALUE_INTEGER_CHANGE_ACTION = 212;
-    public static final int VALUE_STRING_CHANGE_ACTION = 213;
-
     public static final int ANIMATION_SPEC = 14;
 
-    public static final int COMPONENT_VALUE = 150;
-
-    public static UniqueIntMap<CompanionOperation> map = new UniqueIntMap<>();
-
-    static class UniqueIntMap<T> extends IntMap<T> {
-        @Override
-        public T put(int key,  T value)  {
-            assert null == get(key) : "Opcode " + key + " already used in Operations !";
-            return super.put(key, value);
-        }
-    }
+    public static IntMap<CompanionOperation> map = new IntMap<>();
 
     static {
-        map.put(HEADER, Header::read);
-        map.put(DRAW_BITMAP_INT, DrawBitmapInt::read);
-        map.put(DATA_BITMAP, BitmapData::read);
-        map.put(DATA_TEXT, TextData::read);
-        map.put(THEME, Theme::read);
-        map.put(CLICK_AREA, ClickArea::read);
-        map.put(ROOT_CONTENT_BEHAVIOR, RootContentBehavior::read);
-        map.put(ROOT_CONTENT_DESCRIPTION, RootContentDescription::read);
+        map.put(HEADER, Header.COMPANION);
+        map.put(DRAW_BITMAP_INT, DrawBitmapInt.COMPANION);
+        map.put(DATA_BITMAP, BitmapData.COMPANION);
+        map.put(DATA_TEXT, TextData.COMPANION);
+        map.put(THEME, Theme.COMPANION);
+        map.put(CLICK_AREA, ClickArea.COMPANION);
+        map.put(ROOT_CONTENT_BEHAVIOR, RootContentBehavior.COMPANION);
+        map.put(ROOT_CONTENT_DESCRIPTION, RootContentDescription.COMPANION);
 
-        map.put(DRAW_ARC, DrawArc::read);
-        map.put(DRAW_BITMAP, DrawBitmap::read);
-        map.put(DRAW_CIRCLE, DrawCircle::read);
-        map.put(DRAW_LINE, DrawLine::read);
-        map.put(DRAW_OVAL, DrawOval::read);
-        map.put(DRAW_PATH, DrawPath::read);
-        map.put(DRAW_RECT, DrawRect::read);
-        map.put(DRAW_ROUND_RECT, DrawRoundRect::read);
-        map.put(DRAW_TEXT_ON_PATH, DrawTextOnPath::read);
-        map.put(DRAW_TEXT_RUN, DrawText::read);
-        map.put(DRAW_TWEEN_PATH, DrawTweenPath::read);
-        map.put(DATA_PATH, PathData::read);
-        map.put(PAINT_VALUES, PaintData::read);
-        map.put(MATRIX_RESTORE, MatrixRestore::read);
-        map.put(MATRIX_ROTATE, MatrixRotate::read);
-        map.put(MATRIX_SAVE, MatrixSave::read);
-        map.put(MATRIX_SCALE, MatrixScale::read);
-        map.put(MATRIX_SKEW, MatrixSkew::read);
-        map.put(MATRIX_TRANSLATE, MatrixTranslate::read);
-        map.put(CLIP_PATH, ClipPath::read);
-        map.put(CLIP_RECT, ClipRect::read);
-        map.put(DATA_SHADER, ShaderData::read);
-        map.put(DATA_FLOAT, FloatConstant::read);
-        map.put(ANIMATED_FLOAT, FloatExpression::read);
-        map.put(DRAW_TEXT_ANCHOR, DrawTextAnchored::read);
-        map.put(COLOR_EXPRESSIONS, ColorExpression::read);
-        map.put(TEXT_FROM_FLOAT, TextFromFloat::read);
-        map.put(TEXT_MERGE, TextMerge::read);
-        map.put(NAMED_VARIABLE, NamedVariable::read);
-        map.put(COLOR_CONSTANT, ColorConstant::read);
-        map.put(DATA_INT, IntegerConstant::read);
-        map.put(INTEGER_EXPRESSION, IntegerExpression::read);
-        map.put(DATA_BOOLEAN, BooleanConstant::read);
-        map.put(ID_MAP, DataMapIds::read);
-        map.put(ID_LIST, DataListIds::read);
-        map.put(FLOAT_LIST, DataListFloat::read);
-        map.put(DATA_LONG, LongConstant::read);
+        map.put(DRAW_ARC, DrawArc.COMPANION);
+        map.put(DRAW_BITMAP, DrawBitmap.COMPANION);
+        map.put(DRAW_CIRCLE, DrawCircle.COMPANION);
+        map.put(DRAW_LINE, DrawLine.COMPANION);
+        map.put(DRAW_OVAL, DrawOval.COMPANION);
+        map.put(DRAW_PATH, DrawPath.COMPANION);
+        map.put(DRAW_RECT, DrawRect.COMPANION);
+        map.put(DRAW_ROUND_RECT, DrawRoundRect.COMPANION);
+        map.put(DRAW_TEXT_ON_PATH, DrawTextOnPath.COMPANION);
+        map.put(DRAW_TEXT_RUN, DrawText.COMPANION);
+        map.put(DRAW_TWEEN_PATH, DrawTweenPath.COMPANION);
+        map.put(DATA_PATH, PathData.COMPANION);
+        map.put(PAINT_VALUES, PaintData.COMPANION);
+        map.put(MATRIX_RESTORE, MatrixRestore.COMPANION);
+        map.put(MATRIX_ROTATE, MatrixRotate.COMPANION);
+        map.put(MATRIX_SAVE, MatrixSave.COMPANION);
+        map.put(MATRIX_SCALE, MatrixScale.COMPANION);
+        map.put(MATRIX_SKEW, MatrixSkew.COMPANION);
+        map.put(MATRIX_TRANSLATE, MatrixTranslate.COMPANION);
+        map.put(CLIP_PATH, ClipPath.COMPANION);
+        map.put(CLIP_RECT, ClipRect.COMPANION);
+        map.put(DATA_SHADER, ShaderData.COMPANION);
+        map.put(DATA_FLOAT, FloatConstant.COMPANION);
+        map.put(ANIMATED_FLOAT, FloatExpression.COMPANION);
+        map.put(DRAW_TEXT_ANCHOR, DrawTextAnchored.COMPANION);
+        map.put(COLOR_EXPRESSIONS, ColorExpression.COMPANION);
+        map.put(TEXT_FROM_FLOAT, TextFromFloat.COMPANION);
+        map.put(TEXT_MERGE, TextMerge.COMPANION);
+        map.put(NAMED_VARIABLE, NamedVariable.COMPANION);
+        map.put(COLOR_CONSTANT, ColorConstant.COMPANION);
+        map.put(DATA_INT, IntegerConstant.COMPANION);
+        map.put(INTEGER_EXPRESSION, IntegerExpression.COMPANION);
+        map.put(DATA_BOOLEAN, BooleanConstant.COMPANION);
 
         // Layout
 
-        map.put(COMPONENT_START, ComponentStart::read);
-        map.put(COMPONENT_END, ComponentEnd::read);
-        map.put(ANIMATION_SPEC, AnimationSpec::read);
+        map.put(COMPONENT_START, ComponentStart.COMPANION);
+        map.put(COMPONENT_END, ComponentEnd.COMPANION);
+        map.put(ANIMATION_SPEC, AnimationSpec.COMPANION);
 
-        map.put(MODIFIER_WIDTH, WidthModifierOperation::read);
-        map.put(MODIFIER_HEIGHT, HeightModifierOperation::read);
-        map.put(MODIFIER_PADDING, PaddingModifierOperation::read);
-        map.put(MODIFIER_BACKGROUND, BackgroundModifierOperation::read);
-        map.put(MODIFIER_BORDER, BorderModifierOperation::read);
-        map.put(MODIFIER_ROUNDED_CLIP_RECT, RoundedClipRectModifierOperation::read);
-        map.put(MODIFIER_CLIP_RECT, ClipRectModifierOperation::read);
-        map.put(MODIFIER_CLICK, ClickModifierOperation::read);
-        map.put(MODIFIER_CLICK_END, ClickModifierEnd::read);
-        map.put(MODIFIER_VISIBILITY, ComponentVisibilityOperation::read);
-        map.put(HOST_ACTION, HostActionOperation::read);
-        map.put(HOST_NAMED_ACTION, HostNamedActionOperation::read);
-        map.put(VALUE_INTEGER_CHANGE_ACTION, ValueIntegerChangeActionOperation::read);
-        map.put(VALUE_STRING_CHANGE_ACTION, ValueStringChangeActionOperation::read);
+        map.put(MODIFIER_WIDTH, WidthModifierOperation.COMPANION);
+        map.put(MODIFIER_HEIGHT, HeightModifierOperation.COMPANION);
+        map.put(MODIFIER_PADDING, PaddingModifierOperation.COMPANION);
+        map.put(MODIFIER_BACKGROUND, BackgroundModifierOperation.COMPANION);
+        map.put(MODIFIER_BORDER, BorderModifierOperation.COMPANION);
+        map.put(MODIFIER_ROUNDED_CLIP_RECT, RoundedClipRectModifierOperation.COMPANION);
+        map.put(MODIFIER_CLIP_RECT, ClipRectModifierOperation.COMPANION);
 
-        map.put(LAYOUT_ROOT, RootLayoutComponent::read);
-        map.put(LAYOUT_CONTENT, LayoutComponentContent::read);
-        map.put(LAYOUT_BOX, BoxLayout::read);
-        map.put(LAYOUT_COLUMN, ColumnLayout::read);
-        map.put(LAYOUT_ROW, RowLayout::read);
-        map.put(LAYOUT_CANVAS, CanvasLayout::read);
-        map.put(LAYOUT_CANVAS_CONTENT, CanvasContent::read);
-        map.put(LAYOUT_TEXT, TextLayout::read);
-
-        map.put(COMPONENT_VALUE, ComponentValue::read);
+        map.put(LAYOUT_ROOT, RootLayoutComponent.COMPANION);
+        map.put(LAYOUT_CONTENT, LayoutComponentContent.COMPANION);
+        map.put(LAYOUT_BOX, BoxLayout.COMPANION);
+        map.put(LAYOUT_COLUMN, ColumnLayout.COMPANION);
+        map.put(LAYOUT_ROW, RowLayout.COMPANION);
     }
+
 }

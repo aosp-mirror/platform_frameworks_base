@@ -69,7 +69,7 @@ class BouncerHapticPlayer @Inject constructor(private val msdlPlayer: dagger.Laz
                 HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
             )
         } else {
-            msdlPlayer.get().playToken(MSDLToken.DRAG_INDICATOR)
+            msdlPlayer.get().playToken(MSDLToken.DRAG_INDICATOR_DISCRETE)
         }
     }
 

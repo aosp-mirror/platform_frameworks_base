@@ -15,23 +15,16 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
-import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierEnd;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
-import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
-import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,8 +33,6 @@ import java.util.Set;
  * containing RemoteCompose operations + state
  */
 public class CoreDocument {
-
-    private static final boolean DEBUG = false;
 
     ArrayList<Operation> mOperations;
 
@@ -65,8 +56,6 @@ public class CoreDocument {
     int mContentAlignment = RootContentBehavior.ALIGNMENT_CENTER;
 
     RemoteComposeBuffer mBuffer = new RemoteComposeBuffer(mRemoteComposeState);
-
-    private int mLastId = 1; // last component id when inflating the file
 
     public String getContentDescription() {
         return mContentDescription;
@@ -314,59 +303,6 @@ public class CoreDocument {
         return null;
     }
 
-    /**
-     * Returns a string representation of the component hierarchy of the document
-     *
-     * @return a standardized string representation of the component hierarchy
-     */
-    public String displayHierarchy() {
-        StringSerializer serializer = new StringSerializer();
-        for (Operation op : mOperations) {
-            if (op instanceof RootLayoutComponent) {
-                ((RootLayoutComponent) op).displayHierarchy((Component) op, 0, serializer);
-            } else if (op instanceof SerializableToString) {
-                ((SerializableToString) op).serializeToString(0, serializer);
-            }
-        }
-        return serializer.toString();
-    }
-
-    /**
-     * Callback interface for host actions
-     */
-    public interface ActionCallback {
-        // TODO: add payload support
-        void onAction(String name);
-    }
-
-    HashSet<ActionCallback> mActionListeners = new HashSet<ActionCallback>();
-
-    /**
-     * Warn action listeners for the given named action
-     * @param name the action name
-     */
-    public void runNamedAction(String name) {
-        for (ActionCallback callback : mActionListeners) {
-            callback.onAction(name);
-        }
-    }
-
-    /**
-     * Add a callback for handling the named host actions
-     *
-     * @param callback
-     */
-    public void addActionCallback(ActionCallback callback) {
-        mActionListeners.add(callback);
-    }
-
-    /**
-     * Clear existing callbacks for named host actions
-     */
-    public void clearActionCallbacks() {
-        mActionListeners.clear();
-    }
-
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
@@ -467,7 +403,7 @@ public class CoreDocument {
             }
         }
         if (mRootLayoutComponent != null) {
-            mRootLayoutComponent.assignIds(mLastId);
+            mRootLayoutComponent.assignIds();
         }
     }
 
@@ -481,9 +417,7 @@ public class CoreDocument {
         ArrayList<Component> components = new ArrayList<>();
         ArrayList<Operation> finalOperationsList = new ArrayList<>();
         ArrayList<Operation> ops = finalOperationsList;
-        ClickModifierOperation currentClickModifier = null;
 
-        mLastId = -1;
         for (Operation o : operations) {
             if (o instanceof ComponentStartOperation) {
                 Component component = (Component) o;
@@ -492,9 +426,6 @@ public class CoreDocument {
                 currentComponent = component;
                 ops.add(currentComponent);
                 ops = currentComponent.getList();
-                if (component.getComponentId() < mLastId) {
-                    mLastId = component.getComponentId();
-                }
             } else if (o instanceof ComponentEnd) {
                 if (currentComponent instanceof LayoutComponent) {
                     ((LayoutComponent) currentComponent).inflate();
@@ -506,52 +437,11 @@ public class CoreDocument {
                 } else {
                     ops = finalOperationsList;
                 }
-            } else if (o instanceof ClickModifierOperation) {
-                // TODO: refactor to add container <- component...
-                currentClickModifier = (ClickModifierOperation) o;
-                ops = ((ClickModifierOperation) o).getList();
-            } else if (o instanceof ClickModifierEnd) {
-                ops = currentComponent.getList();
-                ops.add(currentClickModifier);
-                currentClickModifier = null;
             } else {
                 ops.add(o);
             }
         }
         return ops;
-    }
-
-    private HashMap<Integer, Component> mComponentMap = new HashMap<Integer, Component>();
-
-    private void registerVariables(RemoteContext context, ArrayList<Operation> list) {
-        for (Operation op : list) {
-            if (op instanceof VariableSupport) {
-                ((VariableSupport) op).updateVariables(context);
-                ((VariableSupport) op).registerListening(context);
-            }
-            if (op instanceof Component) {
-                mComponentMap.put(((Component) op).getComponentId(), (Component) op);
-                registerVariables(context, ((Component) op).getList());
-            }
-            if (op instanceof ComponentValue) {
-                ComponentValue v = (ComponentValue) op;
-                Component component = mComponentMap.get(v.getComponentId());
-                if (component != null) {
-                    component.addComponentValue(v);
-                } else {
-                    System.out.println("=> Component not found for id " + v.getComponentId());
-                }
-            }
-            if (op instanceof ComponentModifiers) {
-                for (ModifierOperation modifier : ((ComponentModifiers) op).getList()) {
-                    if (modifier instanceof VariableSupport) {
-                        ((VariableSupport) modifier).updateVariables(context);
-                        ((VariableSupport) modifier).registerListening(context);
-                    }
-                }
-            }
-            op.apply(context);
-        }
     }
 
     /**
@@ -560,7 +450,6 @@ public class CoreDocument {
      */
     public void initializeContext(RemoteContext context) {
         mRemoteComposeState.reset();
-        mRemoteComposeState.setContext(context);
         mClickAreas.clear();
         mRemoteComposeState.setNextId(RemoteComposeState.START_ID);
         context.mDocument = this;
@@ -569,8 +458,15 @@ public class CoreDocument {
         context.mMode = RemoteContext.ContextMode.DATA;
         mTimeVariables.updateTime(context);
 
-        registerVariables(context, mOperations);
+        for (Operation op : mOperations) {
+            if (op instanceof VariableSupport) {
+                ((VariableSupport) op).updateVariables(context);
+                ((VariableSupport) op).registerListening(context);
+            }
+            op.apply(context);
+        }
         context.mMode = RemoteContext.ContextMode.UNSET;
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -633,26 +529,14 @@ public class CoreDocument {
     }
 
     /**
-     * Returns the list of set click listeners
-     *
-     * @return set of click listeners
-     */
-    public HashSet<CoreDocument.ClickCallbacks> getClickListeners() {
-        return mClickListeners;
-    }
-
-    /**
      * Passing a click event to the document. This will possibly result in calling the click
      * listeners.
      */
-    public void onClick(RemoteContext context, float x, float y) {
+    public void onClick(float x, float y) {
         for (ClickAreaRepresentation clickArea : mClickAreas) {
             if (clickArea.contains(x, y)) {
                 warnClickListeners(clickArea);
             }
-        }
-        if (mRootLayoutComponent != null) {
-            mRootLayoutComponent.onClick(context, this, x, y);
         }
     }
 
@@ -666,9 +550,6 @@ public class CoreDocument {
             if (clickArea.mId == id) {
                 warnClickListeners(clickArea);
             }
-        }
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(id, "");
         }
     }
 
@@ -746,17 +627,13 @@ public class CoreDocument {
      * @param theme   the theme we want to use for this document.
      */
     public void paint(RemoteContext context, int theme) {
-        long time = System.nanoTime();
-        context.getPaintContext().clearNeedsRepaint();
-        context.mMode = RemoteContext.ContextMode.UNSET;
+        context.mMode = RemoteContext.ContextMode.PAINT;
 
         // current theme starts as UNSPECIFIED, until a Theme setter
         // operation gets executed and modify it.
         context.setTheme(Theme.UNSPECIFIED);
 
         context.mRemoteComposeState = mRemoteComposeState;
-        context.mRemoteComposeState.setContext(context);
-
         if (mContentSizing == RootContentBehavior.SIZING_SCALE) {
             // we need to add canvas transforms ops here
             computeScale(context.mWidth, context.mHeight, mScaleOutput);
@@ -777,19 +654,10 @@ public class CoreDocument {
             if (mRootLayoutComponent.needsMeasure()) {
                 mRootLayoutComponent.layout(context);
             }
-            // TODO -- this should be specifically about applying animation, not paint
-            mRootLayoutComponent.paint(context.getPaintContext());
-            // TODO -- should be able to remove this
-            mRootLayoutComponent.updateVariables(context);
-            if (DEBUG) {
-                String hierarchy = mRootLayoutComponent.displayHierarchy();
-                System.out.println(hierarchy);
-            }
             if (mRootLayoutComponent.doesNeedsRepaint()) {
                 mRepaintNext = 1;
             }
         }
-        context.mMode = RemoteContext.ContextMode.PAINT;
         for (Operation op : mOperations) {
             // operations will only be executed if no theme is set (ie UNSPECIFIED)
             // or the theme is equal as the one passed in argument to paint.
@@ -803,95 +671,8 @@ public class CoreDocument {
                 op.apply(context);
             }
         }
-        if (context.getPaintContext().doesNeedsRepaint()
-                || (mRootLayoutComponent != null && mRootLayoutComponent.doesNeedsRepaint())) {
-            mRepaintNext = 1;
-        }
         context.mMode = RemoteContext.ContextMode.UNSET;
-       // System.out.println(">>   " + (  System.nanoTime() - time)*1E-6f+" ms");
     }
 
-    public String[] getStats() {
-        ArrayList<String> ret = new ArrayList<>();
-        WireBuffer buffer = new WireBuffer();
-        int count = mOperations.size();
-        HashMap<String, int[]> map = new HashMap<>();
-        for (Operation mOperation : mOperations) {
-            Class<? extends Operation> c = mOperation.getClass();
-            int[] values;
-            if (map.containsKey(c.getSimpleName())) {
-                values = map.get(c.getSimpleName());
-            } else {
-                values = new int[2];
-                map.put(c.getSimpleName(), values);
-            }
-
-            values[0] += 1;
-            values[1] += sizeOfComponent(mOperation, buffer);
-            if (mOperation instanceof Component) {
-                Component com = (Component) mOperation;
-                count += addChildren(com, map, buffer);
-
-            }
-        }
-
-        ret.add(0, "number of operations : " + count);
-
-        for (String s : map.keySet()) {
-            int[] v = map.get(s);
-            ret.add(s + " : " + v[0] + ":" + v[1]);
-        }
-        return ret.toArray(new String[0]);
-    }
-
-    private int sizeOfComponent(Operation com, WireBuffer tmp) {
-        tmp.reset(100);
-        com.write(tmp);
-        int size = tmp.getSize();
-        tmp.reset(100);
-        return size;
-    }
-
-    private int addChildren(Component base, HashMap<String, int[]> map, WireBuffer tmp) {
-        int count = base.mList.size();
-        for (Operation mOperation : base.mList) {
-            Class<? extends Operation> c = mOperation.getClass();
-            int[] values;
-            if (map.containsKey(c.getSimpleName())) {
-                values = map.get(c.getSimpleName());
-            } else {
-                values = new int[2];
-                map.put(c.getSimpleName(), values);
-            }
-            values[0] += 1;
-            values[1] += sizeOfComponent(mOperation, tmp);
-            if (mOperation instanceof Component) {
-                count += addChildren((Component) mOperation, map, tmp);
-            }
-        }
-        return count;
-    }
-
-    public String toNestedString() {
-        StringBuilder ret = new StringBuilder();
-        for (Operation mOperation : mOperations) {
-            ret.append(mOperation.toString());
-            ret.append("\n");
-            if (mOperation instanceof Component) {
-                toNestedString((Component) mOperation, ret, "  ");
-            }
-        }
-        return ret.toString();
-    }
-
-    private void toNestedString(Component base, StringBuilder ret, String indent) {
-        for (Operation mOperation : base.mList) {
-            ret.append(mOperation.toString());
-            ret.append("\n");
-            if (mOperation instanceof Component) {
-                toNestedString((Component) mOperation, ret, indent + "  ");
-            }
-        }
-    }
 }
 

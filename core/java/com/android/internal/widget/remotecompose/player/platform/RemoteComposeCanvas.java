@@ -133,38 +133,6 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mARContext.setNamedColorOverride(colorName, colorValue);
     }
 
-    public RemoteComposeDocument getDocument() {
-        return mDocument;
-    }
-
-    public void setLocalString(String name, String content) {
-        mARContext.setNamedStringOverride(name, content);
-        if (mDocument != null) {
-            mDocument.invalidate();
-        }
-    }
-
-    public void clearLocalString(String name) {
-        mARContext.clearNamedStringOverride(name);
-        if (mDocument != null) {
-            mDocument.invalidate();
-        }
-    }
-
-    public void setLocalInt(String name, int content) {
-        mARContext.setNamedIntegerOverride(name, content);
-        if (mDocument != null) {
-            mDocument.invalidate();
-        }
-    }
-
-    public void clearLocalInt(String name) {
-        mARContext.clearNamedIntegerOverride(name);
-        if (mDocument != null) {
-            mDocument.invalidate();
-        }
-    }
-
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
@@ -186,9 +154,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     public boolean onTouchEvent(MotionEvent event) {
         if (USE_VIEW_AREA_CLICK) {
-            if (super.onTouchEvent(event)) {
-                return true;
-            }
+            return super.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
@@ -215,14 +181,10 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     @Override
     public boolean performClick() {
         if (USE_VIEW_AREA_CLICK) {
-            if (super.performClick()) {
-                return true;
-            }
+            return super.performClick();
         }
-        mDocument.getDocument().onClick(mARContext,
-                 (float) mActionDownPoint.x, (float) mActionDownPoint.y);
+        mDocument.getDocument().onClick((float) mActionDownPoint.x, (float) mActionDownPoint.y);
         super.performClick();
-        invalidate();
         return true;
     }
 
@@ -251,10 +213,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
-        int preWidth = getWidth();
-        int preHeight = getHeight();
         int w = measureDimension(widthMeasureSpec, mDocument.getWidth());
         int h = measureDimension(heightMeasureSpec, mDocument.getHeight());
+        mDocument.getDocument().invalidateMeasure();
 
         if (!USE_VIEW_AREA_CLICK) {
             if (mDocument.getDocument().getContentSizing() == RootContentBehavior.SIZING_SCALE) {
@@ -264,9 +225,6 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             }
         }
         setMeasuredDimension(w, h);
-        if (preWidth != w || preHeight != h) {
-            mDocument.getDocument().invalidateMeasure();
-        }
     }
 
     private int mCount;

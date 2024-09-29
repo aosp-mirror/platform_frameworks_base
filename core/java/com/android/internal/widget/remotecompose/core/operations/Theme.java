@@ -23,6 +23,7 @@ import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
@@ -33,12 +34,12 @@ import java.util.List;
  *
  */
 public class Theme implements RemoteComposeOperation {
-    private static final int OP_CODE = Operations.THEME;
-    private static final String CLASS_NAME = "Theme";
     int mTheme;
     public static final int UNSPECIFIED = -1;
     public static final int DARK = -2;
     public static final int LIGHT = -3;
+
+    public static final Companion COMPANION = new Companion();
 
     /**
      * we can then filter operations depending on the chosen theme.
@@ -54,7 +55,7 @@ public class Theme implements RemoteComposeOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mTheme);
+        COMPANION.apply(buffer, mTheme);
     }
 
     @Override
@@ -72,32 +73,38 @@ public class Theme implements RemoteComposeOperation {
         return indent + toString();
     }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+    public static class Companion implements DocumentedCompanionOperation {
+        private Companion() {}
 
+        @Override
+        public String name() {
+            return "Theme";
+        }
 
-    public static int id() {
-        return OP_CODE;
-    }
+        @Override
+        public int id() {
+            return Operations.THEME;
+        }
 
-    public static void apply(WireBuffer buffer, int theme) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(theme);
-    }
+        public void apply(WireBuffer buffer, int theme) {
+            buffer.start(Operations.THEME);
+            buffer.writeInt(theme);
+        }
 
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int theme = buffer.readInt();
+            operations.add(new Theme(theme));
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int theme = buffer.readInt();
-        operations.add(new Theme(theme));
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
-                .description("Set a theme")
-                .field(INT, "THEME", "theme id")
-                .possibleValues("UNSPECIFIED", Theme.UNSPECIFIED)
-                .possibleValues("DARK", Theme.DARK)
-                .possibleValues("LIGHT", Theme.LIGHT);
+        @Override
+        public void documentation(DocumentationBuilder doc) {
+            doc.operation("Protocol Operations", id(), name())
+                    .description("Set a theme")
+                    .field(INT, "THEME", "theme id")
+                    .possibleValues("UNSPECIFIED", Theme.UNSPECIFIED)
+                    .possibleValues("DARK", Theme.DARK)
+                    .possibleValues("LIGHT", Theme.LIGHT);
+        }
     }
 }

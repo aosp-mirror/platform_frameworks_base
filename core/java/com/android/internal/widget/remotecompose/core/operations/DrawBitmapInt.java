@@ -15,14 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -30,8 +28,6 @@ import java.util.List;
  * Operation to draw a given cached bitmap
  */
 public class DrawBitmapInt extends PaintOperation {
-    private static final int OP_CODE = Operations.DRAW_BITMAP_INT;
-    private static final String CLASS_NAME = "DrawBitmapInt";
     int mImageId;
     int mSrcLeft;
     int mSrcTop;
@@ -42,6 +38,7 @@ public class DrawBitmapInt extends PaintOperation {
     int mDstRight;
     int mDstBottom;
     int mContentDescId = 0;
+    public static final Companion COMPANION = new Companion();
 
     public DrawBitmapInt(int imageId,
                          int srcLeft,
@@ -67,7 +64,7 @@ public class DrawBitmapInt extends PaintOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mImageId, mSrcLeft, mSrcTop, mSrcRight, mSrcBottom,
+        COMPANION.apply(buffer, mImageId, mSrcLeft, mSrcTop, mSrcRight, mSrcBottom,
                 mDstLeft, mDstTop, mDstRight, mDstBottom, mContentDescId);
     }
 
@@ -78,73 +75,54 @@ public class DrawBitmapInt extends PaintOperation {
                 + "- " + mDstLeft + " " + mDstTop + " " + mDstRight + " " + mDstBottom + ";";
     }
 
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+        @Override
+        public String name() {
+            return "DrawBitmapInt";
+        }
 
-    public static int id() {
-        return OP_CODE;
-    }
+        @Override
+        public int id() {
+            return Operations.DRAW_BITMAP;
+        }
 
-    public static void apply(WireBuffer buffer, int imageId,
-                             int srcLeft, int srcTop, int srcRight, int srcBottom,
-                             int dstLeft, int dstTop, int dstRight, int dstBottom,
-                             int cdId) {
-        buffer.start(Operations.DRAW_BITMAP_INT);
-        buffer.writeInt(imageId);
-        buffer.writeInt(srcLeft);
-        buffer.writeInt(srcTop);
-        buffer.writeInt(srcRight);
-        buffer.writeInt(srcBottom);
-        buffer.writeInt(dstLeft);
-        buffer.writeInt(dstTop);
-        buffer.writeInt(dstRight);
-        buffer.writeInt(dstBottom);
-        buffer.writeInt(cdId);
-    }
+        public void apply(WireBuffer buffer, int imageId,
+                          int srcLeft, int srcTop, int srcRight, int srcBottom,
+                          int dstLeft, int dstTop, int dstRight, int dstBottom,
+                          int cdId) {
+            buffer.start(Operations.DRAW_BITMAP_INT);
+            buffer.writeInt(imageId);
+            buffer.writeInt(srcLeft);
+            buffer.writeInt(srcTop);
+            buffer.writeInt(srcRight);
+            buffer.writeInt(srcBottom);
+            buffer.writeInt(dstLeft);
+            buffer.writeInt(dstTop);
+            buffer.writeInt(dstRight);
+            buffer.writeInt(dstBottom);
+            buffer.writeInt(cdId);
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int imageId = buffer.readInt();
-        int sLeft = buffer.readInt();
-        int srcTop = buffer.readInt();
-        int srcRight = buffer.readInt();
-        int srcBottom = buffer.readInt();
-        int dstLeft = buffer.readInt();
-        int dstTop = buffer.readInt();
-        int dstRight = buffer.readInt();
-        int dstBottom = buffer.readInt();
-        int cdId = buffer.readInt();
-        DrawBitmapInt op = new DrawBitmapInt(imageId, sLeft, srcTop, srcRight, srcBottom,
-                dstLeft, dstTop, dstRight, dstBottom, cdId);
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int imageId = buffer.readInt();
+            int sLeft = buffer.readInt();
+            int srcTop = buffer.readInt();
+            int srcRight = buffer.readInt();
+            int srcBottom = buffer.readInt();
+            int dstLeft = buffer.readInt();
+            int dstTop = buffer.readInt();
+            int dstRight = buffer.readInt();
+            int dstBottom = buffer.readInt();
+            int cdId = buffer.readInt();
+            DrawBitmapInt op = new DrawBitmapInt(imageId, sLeft, srcTop, srcRight, srcBottom,
+                    dstLeft, dstTop, dstRight, dstBottom, cdId);
 
-        operations.add(op);
-    }
-
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Draw Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Draw a bitmap using integer coordinates")
-                .field(INT, "id", "id of bitmap")
-                .field(INT, "srcLeft",
-                        "The left side of the image")
-                .field(INT, "srcTop",
-                        "The top of the image")
-                .field(INT, "srcRight",
-                        "The right side of the image")
-                .field(INT, "srcBottom",
-                        "The bottom of the image")
-                .field(INT, "dstLeft",
-                        "The left side of the image")
-                .field(INT, "dstTop",
-                        "The top of the image")
-                .field(INT, "dstRight",
-                        "The right side of the image")
-                .field(INT, "dstBottom",
-                        "The bottom of the image")
-                .field(INT, "cdId", "id of string");
+            operations.add(op);
+        }
     }
 
     @Override

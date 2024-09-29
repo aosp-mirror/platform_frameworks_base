@@ -15,14 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.types;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.BYTE;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -30,7 +27,6 @@ import java.util.List;
  * Used to represent a boolean
  */
 public class BooleanConstant implements Operation {
-    private static final int OP_CODE = Operations.DATA_BOOLEAN;
     boolean mValue = false;
     private int mId;
 
@@ -41,7 +37,7 @@ public class BooleanConstant implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mId, mValue);
+        COMPANION.apply(buffer, mId, mValue);
     }
 
     @Override
@@ -59,43 +55,42 @@ public class BooleanConstant implements Operation {
         return "BooleanConstant[" + mId + "] = " + mValue + "";
     }
 
-    public static String name() {
-        return "OrigamiBoolean";
-    }
+    public static final Companion COMPANION = new Companion();
 
-    public static int id() {
-        return Operations.DATA_BOOLEAN;
-    }
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
 
-    /**
-     * Writes out the operation to the buffer
-     *
-     * @param buffer
-     * @param id
-     * @param value
-     */
-    public static void apply(WireBuffer buffer, int id, boolean value) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(id);
-        buffer.writeBoolean(value);
-    }
+        @Override
+        public String name() {
+            return "OrigamiBoolean";
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int id = buffer.readInt();
+        @Override
+        public int id() {
+            return Operations.DATA_BOOLEAN;
+        }
 
-        boolean value = buffer.readBoolean();
-        operations.add(new BooleanConstant(id, value));
-    }
+        /**
+         * Writes out the operation to the buffer
+         *
+         * @param buffer
+         * @param id
+         * @param value
+         */
+        public void apply(WireBuffer buffer, int id, boolean value) {
+            buffer.start(Operations.DATA_BOOLEAN);
+            buffer.writeInt(id);
+            buffer.writeBoolean(value);
+        }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        "BooleanConstant")
-                .description("A boolean and its associated id")
-                .field(INT, "id", "id of Int")
-                .field(BYTE, "value",
-                        "8-bit 0 or 1");
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int id = buffer.readInt();
 
+            boolean value = buffer.readBoolean();
+            operations.add(new BooleanConstant(id, value));
+        }
     }
 
 }

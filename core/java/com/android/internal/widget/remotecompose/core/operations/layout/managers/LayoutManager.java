@@ -109,22 +109,12 @@ public abstract class LayoutManager extends LayoutComponent implements Measurabl
         if (!hasWrap) {
             computeSize(context, 0f, measuredWidth, 0f, measuredHeight, measure);
         }
-
-        if (mContent != null) {
-            ComponentMeasure cm = measure.get(mContent);
-            cm.setX(0f);
-            cm.setY(0f);
-            cm.setW(measuredWidth);
-            cm.setH(measuredHeight);
-        }
-
         measuredWidth += mMarginLeft + mMarginRight;
         measuredHeight += mMarginTop + mMarginBottom;
 
         ComponentMeasure m = measure.get(this);
         m.setW(measuredWidth);
         m.setH(measuredHeight);
-        m.setVisibility(mScheduledVisibility);
 
         internalLayoutMeasure(context, measure);
     }

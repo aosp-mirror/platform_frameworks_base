@@ -15,33 +15,33 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
-import com.android.internal.widget.remotecompose.core.VariableSupport;
-import com.android.internal.widget.remotecompose.core.operations.Utils;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
+
+import java.util.List;
 
 /**
  * Base class for dimension modifiers
  */
-public abstract class DimensionModifierOperation implements ModifierOperation, VariableSupport {
+public class DimensionModifierOperation implements ModifierOperation {
+
+    public static final DimensionModifierOperation.Companion COMPANION =
+            new DimensionModifierOperation.Companion(0, "DIMENSION");
 
     public enum Type {
         EXACT, FILL, WRAP, WEIGHT, INTRINSIC_MIN, INTRINSIC_MAX;
 
         static Type fromInt(int value) {
             switch (value) {
-                case 0:
-                    return EXACT;
-                case 1:
-                    return FILL;
-                case 2:
-                    return WRAP;
-                case 3:
-                    return WEIGHT;
-                case 4:
-                    return INTRINSIC_MIN;
-                case 5:
-                    return INTRINSIC_MAX;
+                case 0: return EXACT;
+                case 1: return FILL;
+                case 2: return WRAP;
+                case 3: return WEIGHT;
+                case 4: return INTRINSIC_MIN;
+                case 5: return INTRINSIC_MAX;
             }
             return EXACT;
         }
@@ -49,11 +49,10 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
 
     Type mType = Type.EXACT;
     float mValue = Float.NaN;
-    float mOutValue = Float.NaN;
 
     public DimensionModifierOperation(Type type, float value) {
         mType = type;
-        mOutValue = mValue = value;
+        mValue = value;
     }
 
     public DimensionModifierOperation(Type type) {
@@ -62,25 +61,6 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
 
     public DimensionModifierOperation(float value) {
         this(Type.EXACT, value);
-    }
-
-    @Override
-    public void updateVariables(RemoteContext context) {
-        if (mType == Type.EXACT) {
-            mOutValue = (Float.isNaN(mValue))
-                    ? context.getFloat(Utils.idFromNan(mValue)) : mValue;
-        }
-
-    }
-
-    @Override
-    public void registerListening(RemoteContext context) {
-        if (mType == Type.EXACT) {
-            if (Float.isNaN(mValue)) {
-                context.listensTo(Utils.idFromNan(mValue), this);
-            }
-        }
-
     }
 
 
@@ -101,13 +81,17 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
     }
 
     public float getValue() {
-        return mOutValue;
+        return mValue;
     }
 
     public void setValue(float value) {
-        mOutValue = mValue = value;
+        this.mValue = value;
     }
 
+    @Override
+    public void write(WireBuffer buffer) {
+        COMPANION.apply(buffer, mType.ordinal(), mValue);
+    }
 
     public String serializedName() {
         return "DIMENSION";
@@ -132,5 +116,44 @@ public abstract class DimensionModifierOperation implements ModifierOperation, V
     @Override
     public String toString() {
         return "DimensionModifierOperation(" + mValue + ")";
+    }
+
+    public static class Companion implements CompanionOperation {
+
+        int mOperation;
+        String mName;
+
+        public Companion(int operation, String name) {
+            mOperation = operation;
+            mName = name;
+        }
+
+        @Override
+        public String name() {
+            return mName;
+        }
+
+        @Override
+        public int id() {
+            return mOperation;
+        }
+
+        public void apply(WireBuffer buffer, int type, float value) {
+            buffer.start(mOperation);
+            buffer.writeInt(type);
+            buffer.writeFloat(value);
+        }
+
+        public Operation construct(Type type, float value) {
+            return null;
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            Type type = Type.fromInt(buffer.readInt());
+            float value = buffer.readFloat();
+            Operation op = construct(type, value);
+            operations.add(op);
+        }
     }
 }

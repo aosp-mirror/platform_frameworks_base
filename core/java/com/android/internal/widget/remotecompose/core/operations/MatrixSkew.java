@@ -15,74 +15,65 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
-public class MatrixSkew extends DrawBase2 {
-    public static final int OP_CODE = Operations.MATRIX_SKEW;
-    public static final String CLASS_NAME = "MatrixSkew";
-
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        Maker m = MatrixSkew::new;
-        read(m, buffer, operations);
-    }
-
-    public static int id() {
-        return OP_CODE;
-    }
-
-    public static String name() {
-        return CLASS_NAME;
-    }
-
-
-    protected void write(WireBuffer buffer,
-                         float v1,
-                         float v2) {
-        apply(buffer, v1, v2);
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Current matrix with the specified skew.")
-                .field(FLOAT, "skewX",
-                        "The amount to skew in X")
-                .field(FLOAT, "skewY",
-                        "The amount to skew in Y");
-    }
-
+public class MatrixSkew extends PaintOperation {
+    public static final Companion COMPANION = new Companion();
+    float mSkewX, mSkewY;
 
     public MatrixSkew(float skewX, float skewY) {
-        super(skewX, skewY);
-        mName = CLASS_NAME;
+        mSkewX = skewX;
+        mSkewY = skewY;
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        COMPANION.apply(buffer, mSkewX, mSkewY);
+    }
+
+    @Override
+    public String toString() {
+        return "DrawArc " + mSkewY + ", " + mSkewY + ";";
+    }
+
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float skewX = buffer.readFloat();
+            float skewY = buffer.readFloat();
+            MatrixSkew op = new MatrixSkew(skewX, skewY);
+            operations.add(op);
+        }
+
+        @Override
+        public String name() {
+            return "Matrix";
+        }
+
+        @Override
+        public int id() {
+            return Operations.MATRIX_SKEW;
+        }
+
+        public void apply(WireBuffer buffer, float skewX, float skewY) {
+            buffer.start(Operations.MATRIX_SKEW);
+            buffer.writeFloat(skewX);
+            buffer.writeFloat(skewY);
+        }
     }
 
     @Override
     public void paint(PaintContext context) {
-        context.matrixSkew(mV1, mV2);
-    }
-
-    /**
-     * Writes out the DrawOval to the buffer
-     *
-     * @param buffer buffer to write to
-     * @param x1     start x of DrawOval
-     * @param y1     start y of the DrawOval
-     */
-    public static void apply(WireBuffer buffer,
-                             float x1,
-                             float y1
-    ) {
-        write(buffer, OP_CODE, x1, y1);
+        context.matrixSkew(mSkewX, mSkewY);
     }
 }

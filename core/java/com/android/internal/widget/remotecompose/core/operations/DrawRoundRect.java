@@ -15,89 +15,26 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
-import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-
-import java.util.List;
 
 /**
  * Draw a rounded rectangle
  */
 public class DrawRoundRect extends DrawBase6 {
-    private static final int OP_CODE = Operations.DRAW_ROUND_RECT;
-    private static final String CLASS_NAME = "DrawRoundRect";
-
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        Maker m = DrawRoundRect::new;
-        read(m, buffer, operations);
-    }
-
-    public static int id() {
-        return OP_CODE;
-    }
-
-    /**
-     * Writes out the operation to the buffer
-     *
-     * @param buffer The buffer to write to
-     * @param v1 The left side of the rect
-     * @param v2 The top of the rect
-     * @param v3 The right side of the rect
-     * @param v4 The bottom of the rect
-     * @param v5 The x-radius of the oval used to round the corners
-     * @param v6 The y-radius of the oval used to round the corners
-     */
-    public static void apply(WireBuffer buffer,
-                             float v1,
-                             float v2,
-                             float v3,
-                             float v4,
-                             float v5,
-                             float v6) {
-        buffer.start(OP_CODE);
-        buffer.writeFloat(v1);
-        buffer.writeFloat(v2);
-        buffer.writeFloat(v3);
-        buffer.writeFloat(v4);
-        buffer.writeFloat(v5);
-        buffer.writeFloat(v6);
-    }
-
-    protected void write(WireBuffer buffer,
-                         float v1,
-                         float v2,
-                         float v3,
-                         float v4,
-                         float v5,
-                         float v6) {
-        apply(buffer, v1, v2, v3, v4, v5, v6);
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Canvas Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Draw the specified round-rect")
-                .field(FLOAT, "left",
-                        "The left side of the rect")
-                .field(FLOAT, "top",
-                        "The top of the rect")
-                .field(FLOAT, "right",
-                        "The right side of the rect")
-                .field(FLOAT, "bottom",
-                        "The bottom of the rect")
-                .field(FLOAT, "rx",
-                        "The x-radius of the oval used to round the corners")
-                .field(FLOAT, "sweepAngle",
-                        "The y-radius of the oval used to round the corners");
-    }
-
+    public static final Companion COMPANION =
+            new Companion(Operations.DRAW_ROUND_RECT) {
+                @Override
+                public Operation construct(float v1,
+                                           float v2,
+                                           float v3,
+                                           float v4,
+                                           float v5,
+                                           float v6) {
+                    return new DrawRoundRect(v1, v2, v3, v4, v5, v6);
+                }
+            };
 
     public DrawRoundRect(float v1,
                          float v2,
@@ -106,7 +43,7 @@ public class DrawRoundRect extends DrawBase6 {
                          float v5,
                          float v6) {
         super(v1, v2, v3, v4, v5, v6);
-        mName = CLASS_NAME;
+        mName = "ClipRect";
     }
 
     @Override
