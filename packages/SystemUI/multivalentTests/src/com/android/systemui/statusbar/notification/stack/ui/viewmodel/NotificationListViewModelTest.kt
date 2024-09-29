@@ -18,12 +18,9 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import android.app.NotificationManager.Policy
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
-import android.provider.Settings
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.DisableSceneContainer
@@ -46,7 +43,6 @@ import com.android.systemui.statusbar.notification.data.repository.setActiveNoti
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
-import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
@@ -79,7 +75,6 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     private val fakeRemoteInputRepository = kosmos.fakeRemoteInputRepository
     private val fakeUserSetupRepository = kosmos.fakeUserSetupRepository
     private val headsUpRepository = kosmos.headsUpNotificationRepository
-    private val zenModeRepository = kosmos.zenModeRepository
 
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
 
@@ -263,56 +258,6 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
 
             // THEN empty shade is not visible
             assertThat(shouldShow).isFalse()
-        }
-
-    @Test
-    fun areNotificationsHiddenInShade_true() =
-        testScope.runTest {
-            val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
-
-            zenModeRepository.updateNotificationPolicy(
-                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
-            )
-            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
-            runCurrent()
-
-            assertThat(hidden).isTrue()
-        }
-
-    @Test
-    fun areNotificationsHiddenInShade_false() =
-        testScope.runTest {
-            val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
-
-            zenModeRepository.updateNotificationPolicy(
-                suppressedVisualEffects = Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST
-            )
-            zenModeRepository.updateZenMode(Settings.Global.ZEN_MODE_OFF)
-            runCurrent()
-
-            assertThat(hidden).isFalse()
-        }
-
-    @Test
-    fun hasFilteredOutSeenNotifications_true() =
-        testScope.runTest {
-            val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
-
-            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
-            runCurrent()
-
-            assertThat(hasFilteredNotifs).isTrue()
-        }
-
-    @Test
-    fun hasFilteredOutSeenNotifications_false() =
-        testScope.runTest {
-            val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
-
-            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
-            runCurrent()
-
-            assertThat(hasFilteredNotifs).isFalse()
         }
 
     @Test

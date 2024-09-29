@@ -28,11 +28,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.android.compose.theme.LocalAndroidColorScheme
 
 @Composable
 fun PlatformButton(
@@ -100,12 +100,7 @@ fun PlatformIconButton(
     @DrawableRes iconResource: Int,
     contentDescription: String?,
 ) {
-    IconButton(
-        modifier = modifier,
-        onClick = onClick,
-        enabled = enabled,
-        colors = colors,
-    ) {
+    IconButton(modifier = modifier, onClick = onClick, enabled = enabled, colors = colors) {
         Icon(
             painter = painterResource(id = iconResource),
             contentDescription = contentDescription,
@@ -118,7 +113,7 @@ private val ButtonPaddings = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 
 @Composable
 private fun filledButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     return ButtonDefaults.buttonColors(
         containerColor = colors.primary,
         contentColor = colors.onPrimary,
@@ -127,27 +122,22 @@ private fun filledButtonColors(): ButtonColors {
 
 @Composable
 private fun outlineButtonColors(): ButtonColors {
-    return ButtonDefaults.outlinedButtonColors(
-        contentColor = LocalAndroidColorScheme.current.onSurface,
-    )
+    return ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
 }
 
 @Composable
 private fun iconButtonColors(): IconButtonColors {
     return IconButtonDefaults.filledIconButtonColors(
-        contentColor = LocalAndroidColorScheme.current.onSurface,
+        contentColor = MaterialTheme.colorScheme.onSurface
     )
 }
 
 @Composable
 private fun outlineButtonBorder(): BorderStroke {
-    return BorderStroke(
-        width = 1.dp,
-        color = LocalAndroidColorScheme.current.primary,
-    )
+    return BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary)
 }
 
 @Composable
 private fun textButtonColors(): ButtonColors {
-    return ButtonDefaults.textButtonColors(contentColor = LocalAndroidColorScheme.current.primary)
+    return ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)
 }

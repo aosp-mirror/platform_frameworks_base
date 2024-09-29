@@ -30,6 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
+import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialMetricsLogger
 import com.android.systemui.inputdevice.tutorial.TouchpadTutorialScreensProvider
 import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel
@@ -51,6 +52,7 @@ constructor(
     private val viewModelFactoryAssistedProvider: ViewModelFactoryAssistedProvider,
     private val touchpadTutorialScreensProvider: Optional<TouchpadTutorialScreensProvider>,
     private val logger: InputDeviceTutorialLogger,
+    private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
 ) : ComponentActivity() {
 
     companion object {
@@ -58,6 +60,9 @@ constructor(
         const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
         const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
         const val INTENT_TUTORIAL_TYPE_BOTH = "both"
+        const val INTENT_TUTORIAL_ENTRY_POINT_KEY = "entry_point"
+        const val INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER = "scheduler"
+        const val INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU = "contextual_edu"
     }
 
     private val vm by
@@ -86,6 +91,10 @@ constructor(
             PlatformTheme { KeyboardTouchpadTutorialContainer(vm, touchpadTutorialScreensProvider) }
         }
         if (savedInstanceState == null) {
+            metricsLogger.logPeripheralTutorialLaunched(
+                intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY),
+                intent.getStringExtra(INTENT_TUTORIAL_TYPE_KEY),
+            )
             logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
         }
     }
@@ -109,7 +118,7 @@ fun KeyboardTouchpadTutorialContainer(
         ACTION_KEY ->
             ActionKeyTutorialScreen(
                 onDoneButtonClicked = vm::onDoneButtonClicked,
-                onBack = vm::onBack
+                onBack = vm::onBack,
             )
     }
 }

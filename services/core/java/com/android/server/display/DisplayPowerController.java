@@ -22,6 +22,7 @@ import static android.hardware.display.DisplayManagerInternal.DisplayPowerReques
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_IDLE;
+import static com.android.server.display.brightness.BrightnessEvent.FLAG_EVEN_DIMMER;
 import static com.android.server.display.config.DisplayBrightnessMappingConfig.autoBrightnessPresetToString;
 
 import android.animation.Animator;
@@ -1357,6 +1358,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayStateController.shouldPerformScreenOffTransition());
         state = mPowerState.getScreenState();
 
+        // Use doze brightness if one of following is true:
+        // 1. The target `state` isDozeState.
+        // 2. Doze power request(POLICY_DOZE) if there's no exception(useNormalBrightnessForDoze).
+        final boolean useDozeBrightness = mFlags.isNormalBrightnessForDozeParameterEnabled()
+                ? (!mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE)
+                        || Display.isDozeState(state) : Display.isDozeState(state);
+
         DisplayBrightnessState displayBrightnessState = mDisplayBrightnessController
                 .updateBrightness(mPowerRequest, state, mDisplayOffloadSession);
         float brightnessState = displayBrightnessState.getBrightness();
@@ -1399,7 +1407,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     && !mAutomaticBrightnessController.isInIdleMode()) {
                 // Set sendUpdate to false, we're already in updatePowerState() so there's no need
                 // to trigger it again
-                mAutomaticBrightnessController.switchMode(Display.isDozeState(state)
+                mAutomaticBrightnessController.switchMode(useDozeBrightness
                         ? AUTO_BRIGHTNESS_MODE_DOZE : AUTO_BRIGHTNESS_MODE_DEFAULT,
                         /* sendUpdate= */ false);
             }
@@ -1472,9 +1480,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessState = clampScreenBrightness(brightnessState);
         }
 
-        if (mFlags.isNormalBrightnessForDozeParameterEnabled()
-                ? !mPowerRequest.useNormalBrightnessForDoze && mPowerRequest.policy == POLICY_DOZE
-                : Display.isDozeState(state)) {
+        if (useDozeBrightness) {
             // TODO(b/329676661): Introduce a config property to choose between this brightness
             //  strategy and DOZE_DEFAULT
             // On some devices, when auto-brightness is disabled and the device is dozing, we use
@@ -1750,6 +1756,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final float brightnessOnAvailableScale = MathUtils.constrainedMap(0.0f, 1.0f,
                 clampedState.getMinBrightness(), clampedMax,
                 brightnessState);
+        final boolean evenDimmerModeOn =
+                mCdsi != null && mCdsi.getReduceBrightColorsActivatedForEvenDimmer();
         mTempBrightnessEvent.setPercent(Math.round(
                 1000.0f * com.android.internal.display.BrightnessUtils.convertLinearToGamma(
                         brightnessOnAvailableScale) / 10)); // rounded to one dp
@@ -1764,7 +1772,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mTempBrightnessEvent.setHbmMode(mBrightnessRangeController.getHighBrightnessMode());
         mTempBrightnessEvent.setFlags(mTempBrightnessEvent.getFlags()
                 | (mIsRbcActive ? BrightnessEvent.FLAG_RBC : 0)
-                | (mPowerRequest.lowPowerMode ? BrightnessEvent.FLAG_LOW_POWER_MODE : 0));
+                | (mPowerRequest.lowPowerMode ? BrightnessEvent.FLAG_LOW_POWER_MODE : 0)
+                | (evenDimmerModeOn ? FLAG_EVEN_DIMMER : 0));
         mTempBrightnessEvent.setRbcStrength(mCdsi != null
                 ? mCdsi.getReduceBrightColorsStrength() : -1);
         mTempBrightnessEvent.setPowerFactor(mPowerRequest.screenLowPowerBrightnessFactor);

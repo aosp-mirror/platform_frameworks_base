@@ -36,3 +36,11 @@ flag {
     description: "Allow NetworkTimeUpdateService on Wear"
     bug: "327508176"
 }
+
+flag {
+     name: "remove_game_manager_service_from_wear"
+     namespace: "wear_frameworks"
+     description: "Remove GameManagerService from Wear"
+     bug: "340929737"
+     is_fixed_read_only: true
+}

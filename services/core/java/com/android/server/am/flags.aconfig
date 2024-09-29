@@ -195,3 +195,22 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "logcat_longer_timeout"
+    namespace: "backstage_power"
+    description: "Wait longer during the logcat gathering operation"
+    bug: "292533246"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "defer_display_events_when_frozen"
+    namespace: "system_performance"
+    is_fixed_read_only: true
+    description: "Defer submitting display events to frozen processes."
+    bug: "326315985"
+}

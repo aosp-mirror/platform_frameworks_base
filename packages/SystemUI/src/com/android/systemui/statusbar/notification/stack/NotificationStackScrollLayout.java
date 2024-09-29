@@ -22,7 +22,6 @@ import static android.view.MotionEvent.ACTION_UP;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SHADE_CLEAR_ALL;
-import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.Flags.notificationOverExpansionClippingFix;
 import static com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt.BUCKET_SILENT;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_SWIPE;
@@ -94,7 +93,6 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.QSHeaderBoundsProvider;
 import com.android.systemui.shade.TouchLogger;
-import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
@@ -106,6 +104,8 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
+import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -568,6 +568,7 @@ public class NotificationStackScrollLayout
     private boolean mHasFilteredOutSeenNotifications;
     @Nullable private SplitShadeStateController mSplitShadeStateController = null;
     private boolean mIsSmallLandscapeLockscreenEnabled = false;
+    private boolean mSuppressHeightUpdates;
 
     /** Pass splitShadeStateController to view and update split shade */
     public void passSplitShadeStateController(SplitShadeStateController splitShadeStateController) {
@@ -687,7 +688,9 @@ public class NotificationStackScrollLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        inflateEmptyShadeView();
+        if (!ModesEmptyShadeFix.isEnabled()) {
+            inflateEmptyShadeView();
+        }
         if (!FooterViewRefactor.isEnabled()) {
             inflateFooterView();
         }
@@ -730,7 +733,9 @@ public class NotificationStackScrollLayout
             inflateFooterView();
             updateFooter();
         }
-        inflateEmptyShadeView();
+        if (!ModesEmptyShadeFix.isEnabled()) {
+            inflateEmptyShadeView();
+        }
         mSectionsManager.reinflateViews();
     }
 
@@ -1454,9 +1459,13 @@ public class NotificationStackScrollLayout
      * 2) Swiping up on lockscreen or flinging down after swipe up
      */
     private boolean shouldSkipHeightUpdate() {
-        return mAmbientState.isOnKeyguard()
-                && (mAmbientState.isSwipingUp()
-                || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
+        if (SceneContainerFlag.isEnabled()) {
+            return mSuppressHeightUpdates;
+        } else {
+            return mAmbientState.isOnKeyguard()
+                    && (mAmbientState.isSwipingUp()
+                    || mAmbientState.isFlingingAfterSwipeUpOnLockscreen());
+        }
     }
 
     /**
@@ -1549,15 +1558,6 @@ public class NotificationStackScrollLayout
 
     @VisibleForTesting
     public void updateInterpolatedStackHeight(float endHeight, float fraction) {
-        if (!newAodTransition()) {
-            // During the (AOD<=>LS) transition where dozeAmount is changing,
-            // apply dozeAmount to stack height instead of expansionFraction
-            // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
-            final float dozeAmount = mAmbientState.getDozeAmount();
-            if (0f < dozeAmount && dozeAmount < 1f) {
-                fraction = 1f - dozeAmount;
-            }
-        }
         mAmbientState.setInterpolatedStackHeight(
                 MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,
                         endHeight, fraction));
@@ -4845,6 +4845,8 @@ public class NotificationStackScrollLayout
     /** Trigger an update for the empty shade resources and visibility. */
     public void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade,
             boolean hasFilteredOutSeenNotifications) {
+        ModesEmptyShadeFix.assertInLegacyMode();
+
         mEmptyShadeView.setVisible(visible, mIsExpanded && mAnimationsEnabled);
 
         if (areNotificationsHiddenInShade) {
@@ -4863,6 +4865,8 @@ public class NotificationStackScrollLayout
             @StringRes int newTextRes,
             @StringRes int newFooterTextRes,
             @DrawableRes int newFooterIconRes) {
+        ModesEmptyShadeFix.assertInLegacyMode();
+
         int oldTextRes = mEmptyShadeView.getTextResource();
         if (oldTextRes != newTextRes) {
             mEmptyShadeView.setText(newTextRes);
@@ -4884,6 +4888,9 @@ public class NotificationStackScrollLayout
 
     public boolean isEmptyShadeViewVisible() {
         SceneContainerFlag.assertInLegacyMode();
+        if (mEmptyShadeView == null) {
+            return false;
+        }
         return mEmptyShadeView.isVisible();
     }
 
@@ -5340,6 +5347,19 @@ public class NotificationStackScrollLayout
         updateDismissBehavior();
     }
 
+    @Override
+    public void setShowingStackOnLockscreen(boolean showingStackOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setShowingStackOnLockscreen(showingStackOnLockscreen);
+    }
+
+    @Override
+    public void setAlphaForLockscreenFadeIn(float alphaForLockscreenFadeIn) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mAmbientState.setLockscreenStackFadeInProgress(alphaForLockscreenFadeIn);
+        requestChildrenUpdate();
+    }
+
     void setUpcomingStatusBarState(int upcomingStatusBarState) {
         FooterViewRefactor.assertInLegacyMode();
         mUpcomingStatusBarState = upcomingStatusBarState;
@@ -5371,7 +5391,7 @@ public class NotificationStackScrollLayout
 
     public float getOpeningHeight() {
         SceneContainerFlag.assertInLegacyMode();
-        if (mEmptyShadeView.getVisibility() == GONE) {
+        if (mEmptyShadeView == null || mEmptyShadeView.getVisibility() == GONE) {
             return getMinExpansionHeight();
         } else {
             return FooterViewRefactor.isEnabled() ? getAppearEndPosition()
@@ -5384,11 +5404,18 @@ public class NotificationStackScrollLayout
     }
 
     public void setPanelFlinging(boolean flinging) {
+        SceneContainerFlag.assertInLegacyMode();
         mAmbientState.setFlinging(flinging);
         if (!flinging) {
             // re-calculate the stack height which was frozen while flinging
             updateStackPosition();
         }
+    }
+
+    @Override
+    public void suppressHeightUpdates(boolean suppress) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mSuppressHeightUpdates = suppress;
     }
 
     public void setHeadsUpGoingAwayAnimationsAllowed(boolean headsUpGoingAwayAnimationsAllowed) {
@@ -5720,6 +5747,8 @@ public class NotificationStackScrollLayout
     }
 
     private void inflateEmptyShadeView() {
+        ModesEmptyShadeFix.assertInLegacyMode();
+
         EmptyShadeView oldView = mEmptyShadeView;
         EmptyShadeView view = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, this, false);

@@ -456,6 +456,7 @@ class DesktopModeTaskRepository (
             pw.println(
                 "${innerPrefix}freeformTasksInZOrder=${data.freeformTasksInZOrder.toDumpString()}"
             )
+            pw.println("${innerPrefix}minimizedTasks=${data.minimizedTasks.toDumpString()}")
         }
     }
 

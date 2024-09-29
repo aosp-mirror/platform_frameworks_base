@@ -2579,6 +2579,7 @@ public class NotificationManagerService extends SystemService {
                 mNotificationChannelLogger,
                 mAppOps,
                 mUserProfiles,
+                mUgmInternal,
                 mShowReviewPermissionsNotification,
                 Clock.systemUTC());
         mRankingHelper = new RankingHelper(getContext(), mRankingHandler, mPreferencesHelper,
@@ -4116,23 +4117,38 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
-        public boolean canBePromoted(String pkg, int uid) {
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+        public boolean appCanBePromoted(String pkg, int uid) {
             checkCallerIsSystemOrSystemUiOrShell();
-            if (!android.app.Flags.uiRichOngoing()) {
+            if (!android.app.Flags.apiRichOngoing()) {
                 return false;
             }
             return mPreferencesHelper.canBePromoted(pkg, uid);
         }
 
         @Override
-        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
-        public void setCanBePromoted(String pkg, int uid, boolean promote) {
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+        public boolean canBePromoted(String callingPkg) {
+            checkCallerIsSameApp(callingPkg);
+            if (!android.app.Flags.apiRichOngoing()) {
+                return false;
+            }
+            return mPreferencesHelper.canBePromoted(callingPkg, Binder.getCallingUid());
+        }
+
+
+        /**
+         * Any changes from SystemUI or Settings should be fromUser == true. Any changes the
+         * allowlist should be fromUser == false.
+         */
+        @Override
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+        public void setCanBePromoted(String pkg, int uid, boolean promote, boolean fromUser) {
             checkCallerIsSystemOrSystemUiOrShell();
-            if (!android.app.Flags.uiRichOngoing()) {
+            if (!android.app.Flags.apiRichOngoing()) {
                 return;
             }
-            boolean changed = mPreferencesHelper.setCanBePromoted(pkg, uid, promote);
+            boolean changed = mPreferencesHelper.setCanBePromoted(pkg, uid, promote, fromUser);
             if (changed) {
                 // check for pending/posted notifs from this app and update the flag
                 synchronized (mNotificationLock) {
@@ -6232,6 +6248,7 @@ public class NotificationManagerService extends SystemService {
             int callingUid = Binder.getCallingUid();
             @ZenModeConfig.ConfigOrigin int origin = computeZenOrigin(fromUser);
 
+            boolean isSystemCaller = isCallerSystemOrSystemUiOrShell();
             boolean shouldApplyAsImplicitRule = android.app.Flags.modesApi()
                     && !canManageGlobalZenPolicy(pkg, callingUid);
 
@@ -6268,11 +6285,33 @@ public class NotificationManagerService extends SystemService {
                             policy.priorityCallSenders, policy.priorityMessageSenders,
                             policy.suppressedVisualEffects, currPolicy.priorityConversationSenders);
                 }
+
                 int newVisualEffects = calculateSuppressedVisualEffects(
                             policy, currPolicy, applicationInfo.targetSdkVersion);
-                policy = new Policy(policy.priorityCategories,
-                        policy.priorityCallSenders, policy.priorityMessageSenders,
-                        newVisualEffects, policy.priorityConversationSenders);
+
+                if (android.app.Flags.modesUi()) {
+                    // 1. Callers should not modify STATE_CHANNELS_BYPASSING_DND, which is
+                    // internally calculated and only indicates whether channels that want to bypass
+                    // DND _exist_.
+                    // 2. Only system callers should modify STATE_PRIORITY_CHANNELS_BLOCKED because
+                    // it is @hide.
+                    // 3. If the policy has been modified by the targetSdkVersion checks above then
+                    // it has lost its state flags and that's fine (STATE_PRIORITY_CHANNELS_BLOCKED
+                    // didn't exist until V).
+                    int newState = Policy.STATE_UNSET;
+                    if (isSystemCaller && policy.state != Policy.STATE_UNSET) {
+                        newState = Policy.policyState(
+                                currPolicy.hasPriorityChannels(),
+                                policy.allowPriorityChannels());
+                    }
+                    policy = new Policy(policy.priorityCategories,
+                            policy.priorityCallSenders, policy.priorityMessageSenders,
+                            newVisualEffects, newState, policy.priorityConversationSenders);
+                } else {
+                    policy = new Policy(policy.priorityCategories,
+                            policy.priorityCallSenders, policy.priorityMessageSenders,
+                            newVisualEffects, policy.priorityConversationSenders);
+                }
 
                 if (shouldApplyAsImplicitRule) {
                     mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(pkg, callingUid, policy);
@@ -6657,13 +6696,7 @@ public class NotificationManagerService extends SystemService {
             final Uri originalSoundUri =
                     (originalChannel != null) ? originalChannel.getSound() : null;
             if (soundUri != null && !Objects.equals(originalSoundUri, soundUri)) {
-                Binder.withCleanCallingIdentity(() -> {
-                    mUgmInternal.checkGrantUriPermission(sourceUid, null,
-                            ContentProvider.getUriWithoutUserId(soundUri),
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION,
-                            ContentProvider.getUserIdFromUri(soundUri,
-                            UserHandle.getUserId(sourceUid)));
-                });
+                PermissionHelper.grantUriPermission(mUgmInternal, soundUri, sourceUid);
             }
         }
 
@@ -6866,6 +6899,9 @@ public class NotificationManagerService extends SystemService {
             if (notificationForceGrouping()) {
                 if (r.getSbn().isAppGroup()) {
                     mListeners.notifyPostedLocked(r, r);
+
+                    mNotificationRecordLogger.log(
+                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_FORCE_GROUP, r);
                 }
             }
         }
@@ -7046,6 +7082,10 @@ public class NotificationManagerService extends SystemService {
             // Clear summary flag
             StatusBarNotification sbn = r.getSbn();
             sbn.getNotification().flags = (r.mOriginalFlags & ~FLAG_GROUP_SUMMARY);
+
+            EventLogTags.writeNotificationSummaryConverted(key);
+            mNotificationRecordLogger.log(
+                NotificationRecordLogger.NotificationEvent.NOTIFICATION_FORCE_GROUP_SUMMARY, r);
             return true;
         }
         return false;
@@ -7769,7 +7809,7 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
-        if (android.app.Flags.uiRichOngoing()) {
+        if (android.app.Flags.apiRichOngoing()) {
             // This would normally be done in fixNotification(), but we need the channel info so
             // it's done a little late
             if (mPreferencesHelper.canBePromoted(pkg, notificationUid)
@@ -10733,7 +10773,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @GuardedBy("mNotificationLock")
-    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     private @NonNull List<NotificationRecord> findAppNotificationByListLocked(
             ArrayList<NotificationRecord> list, String pkg, int userId) {
         List<NotificationRecord> records = new ArrayList<>();

@@ -76,6 +76,7 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
@@ -102,6 +103,7 @@ import kotlinx.coroutines.Job;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -426,6 +428,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final Provider<JavaAdapter> mJavaAdapter;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Lazy<PrimaryBouncerInteractor> mPrimaryBouncerInteractor;
+    private final Executor mBgExecutor;
     @Nullable
     private Job mSceneTransitionCollectionJob;
 
@@ -459,6 +462,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             DevicePolicyManager devicePolicyManager,
             KeyguardDismissTransitionInteractor keyguardDismissTransitionInteractor,
             Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
+            @Background Executor bgExecutor,
             Provider<DeviceEntryInteractor> deviceEntryInteractor
     ) {
         super(view);
@@ -493,11 +497,13 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mDeviceProvisionedController = deviceProvisionedController;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mDevicePolicyManager = devicePolicyManager;
+        mBgExecutor = bgExecutor;
     }
 
     @Override
     public void onInit() {
         mSecurityViewFlipperController.init();
+        mView.setBackgroundExecutor(mBgExecutor);
         updateResources();
         configureMode();
     }

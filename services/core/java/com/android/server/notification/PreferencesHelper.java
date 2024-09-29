@@ -40,6 +40,7 @@ import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_P
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
+import static com.android.server.notification.PreferencesHelper.LockableAppFields.USER_LOCKED_PROMOTABLE;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -93,6 +94,7 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.notification.PermissionHelper.PackagePermission;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -192,10 +194,13 @@ public class PreferencesHelper implements RankingConfig {
     /**
      * All user-lockable fields for a given application.
      */
-    @IntDef({LockableAppFields.USER_LOCKED_IMPORTANCE})
+    @IntDef({LockableAppFields.USER_LOCKED_IMPORTANCE,
+            LockableAppFields.USER_LOCKED_BUBBLE,
+            LockableAppFields.USER_LOCKED_PROMOTABLE})
     public @interface LockableAppFields {
         int USER_LOCKED_IMPORTANCE = 0x00000001;
         int USER_LOCKED_BUBBLE = 0x00000002;
+        int USER_LOCKED_PROMOTABLE = 0x00000004;
     }
 
     private final Object mLock = new Object();
@@ -215,6 +220,7 @@ public class PreferencesHelper implements RankingConfig {
     private final NotificationChannelLogger mNotificationChannelLogger;
     private final AppOpsManager mAppOps;
     private final ManagedServices.UserProfiles mUserProfiles;
+    private final UriGrantsManagerInternal mUgmInternal;
 
     private SparseBooleanArray mBadgingEnabled;
     private SparseBooleanArray mBubblesEnabled;
@@ -235,6 +241,7 @@ public class PreferencesHelper implements RankingConfig {
             ZenModeHelper zenHelper, PermissionHelper permHelper, PermissionManager permManager,
             NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager, ManagedServices.UserProfiles userProfiles,
+            UriGrantsManagerInternal ugmInternal,
             boolean showReviewPermissionsNotification, Clock clock) {
         mContext = context;
         mZenModeHelper = zenHelper;
@@ -245,6 +252,7 @@ public class PreferencesHelper implements RankingConfig {
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
         mUserProfiles = userProfiles;
+        mUgmInternal = ugmInternal;
         mShowReviewPermissionsNotification = showReviewPermissionsNotification;
         mIsMediaNotificationFilteringEnabled = context.getResources()
                 .getBoolean(R.bool.config_quickSettingsShowMediaPlayer);
@@ -850,21 +858,27 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
-    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     public boolean canBePromoted(String packageName, int uid) {
         synchronized (mLock) {
             return getOrCreatePackagePreferencesLocked(packageName, uid).canHavePromotedNotifs;
         }
     }
 
-    @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
-    public boolean setCanBePromoted(String packageName, int uid, boolean promote) {
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public boolean setCanBePromoted(String packageName, int uid, boolean promote,
+            boolean fromUser) {
         boolean changed = false;
         synchronized (mLock) {
             PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
-            if (pkgPrefs.canHavePromotedNotifs != promote) {
-                pkgPrefs.canHavePromotedNotifs = promote;
-                changed = true;
+            if (fromUser || ((pkgPrefs.lockedAppFields & USER_LOCKED_PROMOTABLE) == 0)) {
+                if (pkgPrefs.canHavePromotedNotifs != promote) {
+                    pkgPrefs.canHavePromotedNotifs = promote;
+                    if (fromUser) {
+                        pkgPrefs.lockedAppFields |= USER_LOCKED_PROMOTABLE;
+                    }
+                    changed = true;
+                }
             }
         }
         // no need to send a ranking update because we need to update the flag value on all pending
@@ -1158,6 +1172,13 @@ public class PreferencesHelper implements RankingConfig {
                     channel.setImportantConversation(false);
                 }
                 clearLockedFieldsLocked(channel);
+
+                // Verify that the app has permission to read the sound Uri
+                // Only check for new channels, as regular apps can only set sound
+                // before creating. See: {@link NotificationChannel#setSound}
+                if (Flags.notificationVerifyChannelSoundUri()) {
+                    PermissionHelper.grantUriPermission(mUgmInternal, channel.getSound(), uid);
+                }
 
                 channel.setImportanceLockedByCriticalDeviceFunction(
                         r.defaultAppLockedImportance || r.fixedImportance);
@@ -3065,7 +3086,7 @@ public class PreferencesHelper implements RankingConfig {
         boolean migrateToPm = false;
         long creationTime;
 
-        @FlaggedApi(android.app.Flags.FLAG_UI_RICH_ONGOING)
+        @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
         boolean canHavePromotedNotifs = false;
 
         @UserIdInt int userId;

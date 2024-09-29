@@ -170,7 +170,7 @@ class AppCompatCameraOverrides {
      * </ul>
      */
     boolean shouldApplyFreeformTreatmentForCameraCompat() {
-        return Flags.cameraCompatForFreeform() && !isChangeEnabled(mActivityRecord,
+        return Flags.enableCameraCompatForDesktopWindowing() && !isChangeEnabled(mActivityRecord,
                 OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
     }
 

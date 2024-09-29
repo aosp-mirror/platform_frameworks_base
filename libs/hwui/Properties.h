@@ -346,6 +346,7 @@ public:
     static bool hdr10bitPlus;
     static bool skipTelemetry;
     static bool resampleGainmapRegions;
+    static bool queryGlobalPriority;
 
     static int timeoutMultiplier;
 

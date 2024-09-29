@@ -25,7 +25,10 @@ package {
 
 java_library {
     name: "testables",
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
     libs: [
         "android.test.runner.stubs.system",
         "android.test.mock.stubs.system",

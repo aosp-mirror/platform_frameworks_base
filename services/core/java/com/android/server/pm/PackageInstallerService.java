@@ -50,6 +50,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -200,6 +201,9 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public static final Set<String> INSTALLER_CHANGEABLE_APP_OP_PERMISSIONS = Set.of(
             Manifest.permission.USE_FULL_SCREEN_INTENT
     );
+
+    private static final String ROLE_SYSTEM_APP_PROTECTION_SERVICE =
+            "android.app.role.SYSTEM_APP_PROTECTION_SERVICE";
 
     final PackageArchiver mPackageArchiver;
 
@@ -1454,6 +1458,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     .createEvent(DevicePolicyEnums.UNINSTALL_PACKAGE)
                     .setAdmin(callerPackageName)
                     .write();
+        } else if (isSystemAppProtectionRoleHolder(snapshot, userId, callingUid)) {
+            // Allow the SYSTEM_APP_PROTECTION_SERVICE role holder to silently uninstall, with a
+            // clean calling identity to get DELETE_PACKAGES permission
+            Binder.withCleanCallingIdentity(() ->
+                    mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags)
+            );
         } else {
             ApplicationInfo appInfo = snapshot.getApplicationInfo(callerPackageName, 0, userId);
             if (appInfo.targetSdkVersion >= Build.VERSION_CODES.P) {
@@ -1473,6 +1483,29 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
             adapter.onUserActionRequired(intent);
         }
+    }
+
+    private Boolean isSystemAppProtectionRoleHolder(
+            @NonNull Computer snapshot, int userId, int callingUid) {
+        if (!Flags.deletePackagesSilentlyBackport()) {
+            return false;
+        }
+        String holderPackageName = Binder.withCleanCallingIdentity(() -> {
+            RoleManager roleManager = mPm.mContext.getSystemService(RoleManager.class);
+            if (roleManager == null) {
+                return null;
+            }
+            List<String> holders = roleManager.getRoleHoldersAsUser(
+                    ROLE_SYSTEM_APP_PROTECTION_SERVICE, UserHandle.of(userId));
+            if (holders.isEmpty()) {
+                return null;
+            }
+            return holders.get(0);
+        });
+        if (holderPackageName == null) {
+            return false;
+        }
+        return snapshot.getPackageUid(holderPackageName, /* flags= */ 0, userId) == callingUid;
     }
 
     @Override

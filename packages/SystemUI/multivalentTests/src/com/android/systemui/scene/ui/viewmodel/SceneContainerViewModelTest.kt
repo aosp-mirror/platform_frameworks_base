@@ -36,10 +36,12 @@ import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.fakeOverlaysByKeys
 import com.android.systemui.scene.sceneContainerConfig
+import com.android.systemui.scene.sceneContainerGestureFilterFactory
 import com.android.systemui.scene.shared.logger.sceneLogger
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
+import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
@@ -86,6 +88,8 @@ class SceneContainerViewModelTest : SysuiTestCase() {
                 shadeInteractor = kosmos.shadeInteractor,
                 splitEdgeDetector = kosmos.splitEdgeDetector,
                 logger = kosmos.sceneLogger,
+                gestureFilterFactory = kosmos.sceneContainerGestureFilterFactory,
+                displayId = kosmos.displayTracker.defaultDisplayId,
                 motionEventHandlerReceiver = { motionEventHandler ->
                     this@SceneContainerViewModelTest.motionEventHandler = motionEventHandler
                 },
@@ -283,10 +287,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             fakeSceneDataSource.showOverlay(Overlays.NotificationsShade)
             assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
             assertThat(currentOverlays)
-                .containsExactly(
-                    Overlays.QuickSettingsShade,
-                    Overlays.NotificationsShade,
-                )
+                .containsExactly(Overlays.QuickSettingsShade, Overlays.NotificationsShade)
 
             val actionableContentKey =
                 underTest.getActionableContentKey(

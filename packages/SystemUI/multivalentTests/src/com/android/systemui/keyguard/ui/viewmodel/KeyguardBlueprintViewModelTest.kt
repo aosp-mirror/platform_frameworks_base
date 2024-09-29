@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.testKosmos
 import org.junit.Before
 import org.junit.Test
@@ -44,6 +45,7 @@ class KeyguardBlueprintViewModelTest : SysuiTestCase() {
             KeyguardBlueprintViewModel(
                 handler = kosmos.fakeExecutorHandler,
                 keyguardBlueprintInteractor = keyguardBlueprintInteractor,
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
             )
     }
 

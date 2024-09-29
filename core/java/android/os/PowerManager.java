@@ -1567,27 +1567,9 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
-     * to turn on.
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
      *
-     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
-     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
-     * the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is already
-     * on then nothing will happen.
-     *
-     * <p>
-     * This is what happens when the power key is pressed to turn on the screen.
-     * </p><p>
-     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
-     * </p>
-     *
-     * @param time The time when the request to wake up was issued, in the
-     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
-     * order the wake up request with other power management functions.  It should be set
-     * to the timestamp of the input event that caused the request to wake up.
-     *
-     * @see #userActivity
-     * @see #goToSleep
+     * @see #wakeUp(long, int, String, int)
      *
      * @deprecated Use {@link #wakeUp(long, int, String)} instead.
      * @removed Requires signature permission.
@@ -1598,30 +1580,9 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
-     * to turn on.
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
      *
-     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
-     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
-     * the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is already
-     * on then nothing will happen.
-     *
-     * <p>
-     * This is what happens when the power key is pressed to turn on the screen.
-     * </p><p>
-     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
-     * </p>
-     *
-     * @param time The time when the request to wake up was issued, in the
-     * {@link SystemClock#uptimeMillis()} time base.  This timestamp is used to correctly
-     * order the wake up request with other power management functions.  It should be set
-     * to the timestamp of the input event that caused the request to wake up.
-     *
-     * @param details A free form string to explain the specific details behind the wake up for
-     *                debugging purposes.
-     *
-     * @see #userActivity
-     * @see #goToSleep
+     * @see #wakeUp(long, int, String, int)
      *
      * @deprecated Use {@link #wakeUp(long, int, String)} instead.
      * @hide
@@ -1635,9 +1596,23 @@ public final class PowerManager {
     /**
      * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
      *
-     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY default display} is turned off it will
-     * be turned on. Additionally, if the device is asleep it will be awoken. If the {@link
-     * android.view.Display#DEFAULT_DISPLAY default display} is already on then nothing will happen.
+     * @see #wakeUp(long, int, String, int)
+     * @hide
+     */
+    public void wakeUp(long time, @WakeReason int reason, String details) {
+        try {
+            mService.wakeUp(time, reason, details, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Forces the display with the supplied displayId to turn on.
+     *
+     * <p>If the corresponding display is turned off, it will be turned on. Additionally, if the
+     * device is asleep it will be awoken. If the corresponding display is already on then nothing
+     * will happen. If the corresponding display does not exist, then nothing will happen.
      *
      * <p>If the device is an Android TV playback device, it will attempt to turn on the
      * HDMI-connected TV and become the current active source via the HDMI-CEC One Touch Play
@@ -1658,14 +1633,16 @@ public final class PowerManager {
      *
      * @param details A free form string to explain the specific details behind the wake up for
      *                debugging purposes.
+     * @param displayId The displayId of the display to be woken up.
      *
      * @see #userActivity
      * @see #goToSleep
      * @hide
      */
-    public void wakeUp(long time, @WakeReason int reason, String details) {
+    public void wakeUp(long time, @WakeReason int reason, String details, int displayId) {
         try {
-            mService.wakeUp(time, reason, details, mContext.getOpPackageName());
+            mService.wakeUpWithDisplayId(time, reason, details, mContext.getOpPackageName(),
+                    displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

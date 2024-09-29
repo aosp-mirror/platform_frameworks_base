@@ -193,6 +193,7 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.RemoteInput;
@@ -655,7 +656,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt()))
                 .thenReturn(INVALID_TASK_ID);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
-        when(mUm.getProfileIds(eq(mUserId), eq(false))).thenReturn(new int[] { mUserId });
+        when(mUm.getProfileIds(eq(mUserId), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mUmInternal.getProfileIds(eq(mUserId), anyBoolean())).thenReturn(new int[]{mUserId});
         when(mAmi.getCurrentUserId()).thenReturn(mUserId);
 
         when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(true);
@@ -4652,7 +4654,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         doThrow(new SecurityException("no access")).when(mUgmInternal)
                 .checkGrantUriPermission(eq(Process.myUid()), any(), eq(soundUri),
-                    anyInt(), eq(Process.myUserHandle().getIdentifier()));
+                anyInt(), eq(Process.myUserHandle().getIdentifier()));
+
+        mBinderService.updateNotificationChannelFromPrivilegedListener(
+                null, mPkg, Process.myUserHandle(), updatedNotificationChannel);
+
+        verify(mPreferencesHelper, times(1)).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
+
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(mPkg),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    public void
+        testUpdateNotificationChannelFromPrivilegedListener_oldSoundNoUriPerm_newSoundHasUriPerm()
+            throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mCompanionMgr.getAssociations(mPkg, mUserId))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        when(mPreferencesHelper.getNotificationChannel(eq(mPkg), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        // Missing Uri permissions for the old channel sound
+        final Uri oldSoundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+        doThrow(new SecurityException("no access")).when(mUgmInternal)
+                .checkGrantUriPermission(eq(Process.myUid()), any(), eq(oldSoundUri),
+                anyInt(), eq(Process.myUserHandle().getIdentifier()));
+
+        // Has Uri permissions for the old channel sound
+        final Uri newSoundUri = Uri.parse("content://media/test/sound/uri");
+        final NotificationChannel updatedNotificationChannel = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+        updatedNotificationChannel.setSound(newSoundUri,
+                updatedNotificationChannel.getAudioAttributes());
 
         mBinderService.updateNotificationChannelFromPrivilegedListener(
                 null, mPkg, Process.myUserHandle(), updatedNotificationChannel);
@@ -15936,6 +15973,57 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(updatedRule.getValue().isEnabled()).isFalse();
     }
 
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    public void setNotificationPolicy_fromSystemApp_appliesPriorityChannelsAllowed()
+            throws Exception {
+        setUpRealZenTest();
+        // Start with hasPriorityChannels=true, allowPriorityChannels=true ("default").
+        mService.mZenModeHelper.setNotificationPolicy(new Policy(0, 0, 0, 0,
+                        Policy.policyState(true, true), 0),
+                ZenModeConfig.ORIGIN_SYSTEM, Process.SYSTEM_UID);
+
+        // The caller will supply states with "wrong" hasPriorityChannels.
+        int stateBlockingPriorityChannels = Policy.policyState(false, false);
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(1, 0, 0, 0, stateBlockingPriorityChannels, 0), false);
+
+        // hasPriorityChannels is untouched and allowPriorityChannels was updated.
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(1);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, false));
+
+        // Same but setting allowPriorityChannels to true.
+        int stateAllowingPriorityChannels = Policy.policyState(false, true);
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(2, 0, 0, 0, stateAllowingPriorityChannels, 0), false);
+
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(2);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, true));
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    @DisableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_fromRegularAppThatCanModifyPolicy_ignoresState()
+            throws Exception {
+        setUpRealZenTest();
+        // Start with hasPriorityChannels=true, allowPriorityChannels=true ("default").
+        mService.mZenModeHelper.setNotificationPolicy(new Policy(0, 0, 0, 0,
+                        Policy.policyState(true, true), 0),
+                ZenModeConfig.ORIGIN_SYSTEM, Process.SYSTEM_UID);
+        mService.setCallerIsNormalPackage();
+
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(1, 0, 0, 0, Policy.policyState(false, false), 0), false);
+
+        // Policy was updated but the attempt to change state was ignored (it's a @hide API).
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(1);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, true));
+    }
+
     /** Prepares for a zen-related test that uses the real {@link ZenModeHelper}. */
     private void setUpRealZenTest() throws Exception {
         when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
@@ -16556,7 +16644,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_granted() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16611,7 +16699,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
         mService.addEnqueuedNotification(r1);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         waitForIdle();
 
@@ -16632,7 +16720,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16651,9 +16739,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.addNotification(r);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         waitForIdle();
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         waitForIdle();
 
         ArgumentCaptor<NotificationRecord> captor =
@@ -16663,12 +16751,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_revoked() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // start from true state
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
@@ -16709,7 +16797,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addNotification(r);
         mService.addEnqueuedNotification(r1);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, false);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
 
         waitForIdle();
 
@@ -16728,12 +16816,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testSetCanBePromoted_revoked_onlyNotifiesOnce() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         // start from true state
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
 
         // qualifying posted notification
         Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
@@ -16751,9 +16839,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         mService.addNotification(r);
 
-        mBinderService.setCanBePromoted(mPkg, mUid, false);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
         waitForIdle();
-        mBinderService.setCanBePromoted(mPkg, mUid, false);
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
         waitForIdle();
 
         ArgumentCaptor<NotificationRecord> captor =
@@ -16763,10 +16851,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification() throws Exception {
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
-        assertThat(mBinderService.canBePromoted(mPkg, mUid)).isTrue();
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+        assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isTrue();
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
 
@@ -16776,7 +16864,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setColor(Color.WHITE)
                 .setColorized(true)
                 .build();
-        //assertThat(n.hasPromotableCharacteristics()).isTrue();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
                 n, UserHandle.getUserHandleForUid(mUid), null, 0);
 
@@ -16794,7 +16881,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_noPermission() throws Exception {
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
@@ -16822,9 +16909,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(android.app.Flags.FLAG_UI_RICH_ONGOING)
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void testPostPromotableNotification_unimportantNotification() throws Exception {
-        mBinderService.setCanBePromoted(mPkg, mUid, true);
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
         mContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
         Notification n = new Notification.Builder(mContext, mMinChannel.getId())

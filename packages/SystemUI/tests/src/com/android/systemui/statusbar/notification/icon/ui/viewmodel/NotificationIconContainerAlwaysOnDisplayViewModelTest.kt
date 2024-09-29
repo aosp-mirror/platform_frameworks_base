@@ -21,7 +21,6 @@ import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR
-import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -85,7 +84,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
             lastWakeReason = WakeSleepReason.OTHER,
             lastSleepReason = WakeSleepReason.OTHER,
         )
-        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
     }
 
     @Test
@@ -97,14 +95,10 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    to = DozeStateModel.DOZE_AOD,
-                )
+                DozeTransitionModel(to = DozeStateModel.DOZE_AOD)
             )
             val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
@@ -120,14 +114,10 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    to = DozeStateModel.DOZE_PULSING,
-                )
+                DozeTransitionModel(to = DozeStateModel.DOZE_PULSING)
             )
             val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
@@ -186,9 +176,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()
@@ -200,9 +188,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
     fun animationsEnabled_isTrue_whenKeyguardIsShowing() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             val animationsEnabled by collectLastValue(underTest.areContainerChangesAnimated)
             runCurrent()

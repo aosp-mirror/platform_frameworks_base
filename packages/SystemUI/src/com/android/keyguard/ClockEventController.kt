@@ -15,12 +15,15 @@
  */
 package com.android.keyguard
 
+import android.app.NotificationManager.zenModeFromInterruptionFilter
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
 import android.os.Trace
+import android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+import android.provider.Settings.Global.ZEN_MODE_OFF
 import android.text.format.DateFormat
 import android.util.Log
 import android.util.TypedValue
@@ -49,6 +52,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.core.Logger
+import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceController
@@ -63,6 +67,7 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ZenModeController
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.Locale
 import java.util.TimeZone
@@ -97,12 +102,13 @@ constructor(
     private val clockBuffers: ClockMessageBuffers,
     private val featureFlags: FeatureFlagsClassic,
     private val zenModeController: ZenModeController,
+    private val zenModeInteractor: ZenModeInteractor,
 ) {
     var loggers =
         listOf(
                 clockBuffers.infraMessageBuffer,
                 clockBuffers.smallClockMessageBuffer,
-                clockBuffers.largeClockMessageBuffer
+                clockBuffers.largeClockMessageBuffer,
             )
             .map { Logger(it, TAG) }
 
@@ -146,7 +152,7 @@ constructor(
                         bgExecutor,
                         regionSamplingEnabled,
                         isLockscreen = true,
-                        ::updateColors
+                        ::updateColors,
                     )
                     .apply { startRegionSampler() }
 
@@ -157,7 +163,7 @@ constructor(
                         bgExecutor,
                         regionSamplingEnabled,
                         isLockscreen = true,
-                        ::updateColors
+                        ::updateColors,
                     )
                     .apply { startRegionSampler() }
 
@@ -271,7 +277,7 @@ constructor(
         bgExecutor: Executor?,
         regionSamplingEnabled: Boolean,
         isLockscreen: Boolean,
-        updateColors: () -> Unit
+        updateColors: () -> Unit,
     ): RegionSampler {
         return RegionSampler(
             sampledView,
@@ -384,24 +390,30 @@ constructor(
             }
         }
 
+    @VisibleForTesting
+    internal fun listenForDnd(scope: CoroutineScope): Job {
+        ModesUi.assertInNewMode()
+        return scope.launch {
+            zenModeInteractor.dndMode.collect {
+                val zenMode =
+                    if (it != null && it.isActive)
+                        zenModeFromInterruptionFilter(
+                            it.interruptionFilter,
+                            ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        )
+                    else ZEN_MODE_OFF
+
+                handleZenMode(zenMode)
+            }
+        }
+    }
+
     private val zenModeCallback =
         object : ZenModeController.Callback {
             override fun onZenChanged(zen: Int) {
-                var mode = ZenMode.fromInt(zen)
-                if (mode == null) {
-                    Log.e(TAG, "Failed to get zen mode from int: $zen")
-                    return
+                if (!ModesUi.isEnabled) {
+                    handleZenMode(zen)
                 }
-
-                zenData =
-                    ZenData(
-                            mode,
-                            if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
-                            else SysuiR.string::dnd_is_on.name
-                        )
-                        .also { data ->
-                            mainExecutor.execute { clock?.run { events.onZenDataChanged(data) } }
-                        }
             }
 
             override fun onNextAlarmChanged() {
@@ -409,13 +421,31 @@ constructor(
                 alarmData =
                     AlarmData(
                             if (nextAlarmMillis > 0) nextAlarmMillis else null,
-                            SysuiR.string::status_bar_alarm.name
+                            SysuiR.string::status_bar_alarm.name,
                         )
                         .also { data ->
                             mainExecutor.execute { clock?.run { events.onAlarmDataChanged(data) } }
                         }
             }
         }
+
+    private fun handleZenMode(zen: Int) {
+        val mode = ZenMode.fromInt(zen)
+        if (mode == null) {
+            Log.e(TAG, "Failed to get zen mode from int: $zen")
+            return
+        }
+
+        zenData =
+            ZenData(
+                    mode,
+                    if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
+                    else SysuiR.string::dnd_is_on.name,
+                )
+                .also { data ->
+                    mainExecutor.execute { clock?.run { events.onZenDataChanged(data) } }
+                }
+    }
 
     fun registerListeners(parent: View) {
         if (isRegistered) {
@@ -424,7 +454,7 @@ constructor(
         isRegistered = true
         broadcastDispatcher.registerReceiver(
             localeBroadcastReceiver,
-            IntentFilter(Intent.ACTION_LOCALE_CHANGED)
+            IntentFilter(Intent.ACTION_LOCALE_CHANGED),
         )
         configurationController.addCallback(configListener)
         batteryController.addCallback(batteryCallback)
@@ -434,6 +464,9 @@ constructor(
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     listenForDozing(this)
+                    if (ModesUi.isEnabled) {
+                        listenForDnd(this)
+                    }
                     if (MigrateClocksToBlueprint.isEnabled) {
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
@@ -449,7 +482,9 @@ constructor(
 
         bgExecutor.execute {
             // Query ZenMode data
-            zenModeCallback.onZenChanged(zenModeController.zen)
+            if (!ModesUi.isEnabled) {
+                zenModeCallback.onZenChanged(zenModeController.zen)
+            }
             zenModeCallback.onNextAlarmChanged()
         }
     }
@@ -605,10 +640,9 @@ constructor(
     @VisibleForTesting
     internal fun listenForDozing(scope: CoroutineScope): Job {
         return scope.launch {
-            combine(
-                    keyguardInteractor.dozeAmount,
-                    keyguardInteractor.isDozing,
-                ) { localDozeAmount, localIsDozing ->
+            combine(keyguardInteractor.dozeAmount, keyguardInteractor.isDozing) {
+                    localDozeAmount,
+                    localIsDozing ->
                     localDozeAmount > dozeAmount || localIsDozing
                 }
                 .collect { localIsDozing -> isDozing = localIsDozing }
