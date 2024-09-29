@@ -16,6 +16,7 @@
 
 package com.android.server.vibrator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.ExternalVibration;
@@ -24,6 +25,7 @@ import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.vibrator.Flags;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 
 /**
@@ -32,14 +34,16 @@ import com.android.internal.util.FrameworkStatsLog;
 final class ExternalVibrationSession extends Vibration
         implements VibrationSession, IBinder.DeathRecipient {
 
+    private final Object mLock = new Object();
     private final ExternalVibration mExternalVibration;
     private final ExternalVibrationScale mScale = new ExternalVibrationScale();
 
+    @GuardedBy("mLock")
     @Nullable
     private Runnable mBinderDeathCallback;
 
     ExternalVibrationSession(ExternalVibration externalVibration) {
-        super(externalVibration.getToken(), new CallerInfo(
+        super(new CallerInfo(
                 externalVibration.getVibrationAttributes(), externalVibration.getUid(),
                 // TODO(b/249785241): Find a way to link ExternalVibration to a VirtualDevice
                 // instead of using DEVICE_ID_INVALID here and relying on the UID checks.
@@ -82,24 +86,25 @@ final class ExternalVibrationSession extends Vibration
     }
 
     @Override
-    public void linkToDeath(Runnable callback) {
-        synchronized (this) {
+    public boolean linkToDeath(Runnable callback) {
+        synchronized (mLock) {
             mBinderDeathCallback = callback;
         }
         mExternalVibration.linkToDeath(this);
+        return true;
     }
 
     @Override
     public void unlinkToDeath() {
         mExternalVibration.unlinkToDeath(this);
-        synchronized (this) {
+        synchronized (mLock) {
             mBinderDeathCallback = null;
         }
     }
 
     @Override
     public void binderDied() {
-        synchronized (this) {
+        synchronized (mLock) {
             if (mBinderDeathCallback != null) {
                 mBinderDeathCallback.run();
             }
@@ -119,9 +124,11 @@ final class ExternalVibrationSession extends Vibration
     }
 
     @Override
-    public void notifyEnded() {
+    public void requestEnd(@NonNull Status status, @Nullable CallerInfo endedBy,
+            boolean immediate) {
         // Notify external client that this vibration should stop sending data to the vibrator.
         mExternalVibration.mute();
+        end(new EndInfo(status, endedBy));
     }
 
     boolean isHoldingSameVibration(ExternalVibration vib) {

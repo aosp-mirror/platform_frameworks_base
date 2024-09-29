@@ -444,11 +444,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 if (onFinishedRunnable != null) {
                     onFinishedRunnable.run();
                 }
-                if (mRunWithoutInterruptions) {
-                    enableAppearDrawing(false);
-                }
 
                 // We need to reset the View state, even if the animation was cancelled
+                enableAppearDrawing(false);
                 onAppearAnimationFinished(isAppearing);
 
                 if (mRunWithoutInterruptions) {

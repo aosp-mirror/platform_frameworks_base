@@ -17,6 +17,7 @@
 package android.view;
 
 import static com.android.text.flags.Flags.handwritingCursorPosition;
+import static com.android.text.flags.Flags.handwritingTrackDisabled;
 import static com.android.text.flags.Flags.handwritingUnsupportedMessage;
 
 import android.annotation.FlaggedApi;
@@ -352,7 +353,7 @@ public class HandwritingInitiator {
 
         final View focusedView = getFocusedView();
 
-        if (!view.isAutoHandwritingEnabled()) {
+        if (!handwritingTrackDisabled() && !view.isAutoHandwritingEnabled()) {
             clearFocusedView(focusedView);
             return;
         }
@@ -363,7 +364,8 @@ public class HandwritingInitiator {
         updateFocusedView(view);
 
         if (mState != null && mState.mPendingFocusedView != null
-                && mState.mPendingFocusedView.get() == view) {
+                && mState.mPendingFocusedView.get() == view
+                && (!handwritingTrackDisabled() || view.isAutoHandwritingEnabled())) {
             startHandwriting(view);
         }
     }
@@ -416,7 +418,7 @@ public class HandwritingInitiator {
      */
     @VisibleForTesting
     public boolean updateFocusedView(@NonNull View view) {
-        if (!view.shouldInitiateHandwriting()) {
+        if (!handwritingTrackDisabled() && !view.shouldInitiateHandwriting()) {
             mFocusedView = null;
             return false;
         }
@@ -424,8 +426,10 @@ public class HandwritingInitiator {
         final View focusedView = getFocusedView();
         if (focusedView != view) {
             mFocusedView = new WeakReference<>(view);
-            // A new view just gain focus. By default, we should show hover icon for it.
-            mShowHoverIconForConnectedView = true;
+            if (!handwritingTrackDisabled() || view.shouldInitiateHandwriting()) {
+                // A new view just gain focus. By default, we should show hover icon for it.
+                mShowHoverIconForConnectedView = true;
+            }
         }
 
         return true;

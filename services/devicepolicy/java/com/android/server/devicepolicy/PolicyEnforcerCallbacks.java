@@ -78,7 +78,7 @@ final class PolicyEnforcerCallbacks {
     }
 
     static boolean setAutoTimezoneEnabled(@Nullable Boolean enabled, @NonNull Context context) {
-        if (!DevicePolicyManagerService.isUnicornFlagEnabled()) {
+        if (!Flags.setAutoTimeZoneEnabledCoexistence()) {
             Slogf.w(LOG_TAG, "Trying to enforce setAutoTimezoneEnabled while flag is off.");
             return true;
         }
@@ -95,7 +95,7 @@ final class PolicyEnforcerCallbacks {
     static boolean setPermissionGrantState(
             @Nullable Integer grantState, @NonNull Context context, int userId,
             @NonNull PolicyKey policyKey) {
-        if (!DevicePolicyManagerService.isUnicornFlagEnabled()) {
+        if (!Flags.setPermissionGrantStateCoexistence()) {
             Slogf.w(LOG_TAG, "Trying to enforce setPermissionGrantState while flag is off.");
             return true;
         }

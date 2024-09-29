@@ -1356,6 +1356,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         mController.mAtm.setLastResumedActivityUncheckLocked(ar,
                                 "transitionFinished");
                     }
+
+                    // Prevent spurious background app switches.
+                    if (ar.mDisplayContent.mFocusedApp == ar) {
+                        mController.mAtm.stopAppSwitches();
+                    }
                 }
                 continue;
             }
@@ -1410,8 +1415,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (enterAutoPip) {
                 mController.mAtm.getTaskChangeNotificationController().notifyTaskStackChanged();
             }
-            // Prevent spurious background app switches.
-            mController.mAtm.stopAppSwitches();
             // The end of transient launch may not reorder task, so make sure to compute the latest
             // task rank according to the current visibility.
             mController.mAtm.mRootWindowContainer.rankTaskLayers();
@@ -3498,14 +3501,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
 
         boolean hasChanged() {
+            final boolean currVisible = mContainer.isVisibleRequested();
             // the task including transient launch must promote to root task
-            if ((mFlags & ChangeInfo.FLAG_TRANSIENT_LAUNCH) != 0
-                    || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
+            if (currVisible && ((mFlags & ChangeInfo.FLAG_TRANSIENT_LAUNCH) != 0
+                    || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0)) {
                 return true;
             }
             // If it's invisible and hasn't changed visibility, always return false since even if
             // something changed, it wouldn't be a visible change.
-            final boolean currVisible = mContainer.isVisibleRequested();
             if (currVisible == mVisible && !mVisible) return false;
             return currVisible != mVisible
                     || mKnownConfigChanges != 0

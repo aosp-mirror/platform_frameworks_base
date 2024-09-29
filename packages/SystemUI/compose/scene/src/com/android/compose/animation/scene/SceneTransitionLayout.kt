@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.LayoutDirection
  * @param state the state of this layout.
  * @param swipeSourceDetector the edge detector used to detect which edge a swipe is started from,
  *   if any.
+ * @param gestureFilter decides whether a drag gesture that started at the given start position
+ *   should be filtered. If the lambda returns `true`, the drag gesture will be ignored. If it
+ *   returns `false`, the drag gesture will be handled.
  * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
  *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param builder the configuration of the different scenes and overlays of this layout.
@@ -57,6 +60,7 @@ fun SceneTransitionLayout(
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    gestureFilter: (startedPosition: Offset) -> Boolean = DefaultGestureFilter,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
     builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
@@ -65,6 +69,7 @@ fun SceneTransitionLayout(
         modifier,
         swipeSourceDetector,
         swipeDetector,
+        gestureFilter,
         transitionInterceptionThreshold,
         onLayoutImpl = null,
         builder,
@@ -616,6 +621,7 @@ internal fun SceneTransitionLayoutForTesting(
     modifier: Modifier = Modifier,
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
+    gestureFilter: (startedPosition: Offset) -> Boolean = DefaultGestureFilter,
     transitionInterceptionThreshold: Float = 0f,
     onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)? = null,
     builder: SceneTransitionLayoutScope.() -> Unit,
@@ -632,6 +638,7 @@ internal fun SceneTransitionLayoutForTesting(
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
                 animationScope = animationScope,
+                gestureFilter = gestureFilter,
             )
             .also { onLayoutImpl?.invoke(it) }
     }

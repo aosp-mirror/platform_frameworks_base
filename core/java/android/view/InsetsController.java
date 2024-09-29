@@ -29,7 +29,6 @@ import static android.view.WindowInsets.Type.captionBar;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
-import static com.android.window.flags.Flags.insetsControlSeq;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -55,7 +54,6 @@ import android.util.Pair;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsSourceConsumer.ShowResult;
-import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -85,7 +83,8 @@ import java.util.Objects;
  * Implements {@link WindowInsetsController} on the client.
  * @hide
  */
-public class InsetsController implements WindowInsetsController, InsetsAnimationControlCallbacks {
+public class InsetsController implements WindowInsetsController, InsetsAnimationControlCallbacks,
+        InsetsAnimationControlRunner.SurfaceParamsApplier {
 
     private int mTypesBeingCancelled;
 
@@ -307,7 +306,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     /** Not running an animation. */
-    @VisibleForTesting
     public static final int ANIMATION_TYPE_NONE = -1;
 
     /** Running animation will show insets */
@@ -317,11 +315,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public static final int ANIMATION_TYPE_HIDE = 1;
 
     /** Running animation is controlled by user via {@link #controlWindowInsetsAnimation} */
-    @VisibleForTesting(visibility = PACKAGE)
     public static final int ANIMATION_TYPE_USER = 2;
 
     /** Running animation will resize insets */
-    @VisibleForTesting
     public static final int ANIMATION_TYPE_RESIZE = 3;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -757,11 +753,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public InsetsController(Host host) {
         this(host, (controller, id, type) -> {
             if (!Flags.refactorInsetsController() &&  type == ime()) {
-                return new ImeInsetsSourceConsumer(id, controller.mState,
-                        Transaction::new, controller);
+                return new ImeInsetsSourceConsumer(id, controller.mState, controller);
             } else {
-                return new InsetsSourceConsumer(id, type, controller.mState,
-                        Transaction::new, controller);
+                return new InsetsSourceConsumer(id, type, controller.mState, controller);
             }
         }, host.getHandler());
     }
@@ -882,9 +876,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @InsetsType int visibleTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
         for (int i = 0, size = newState.sourceSize(); i < size; i++) {
-            final InsetsSource source = insetsControlSeq()
-                    ? new InsetsSource(newState.sourceAt(i))
-                    : newState.sourceAt(i);
+            final InsetsSource source = new InsetsSource(newState.sourceAt(i));
             @InsetsType int type = source.getType();
             @AnimationType int animationType = getAnimationType(type);
             final InsetsSourceConsumer consumer = mSourceConsumers.get(source.getId());
@@ -1525,9 +1517,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         insetsAnimationSpec, animationType, layoutInsetsDuringAnimation,
                         mHost.getTranslator(), mHost.getHandler(), statsToken)
                 : new InsetsAnimationControlImpl(controls,
-                        frame, mState, listener, typesReady, this, insetsAnimationSpec,
+                        frame, mState, listener, typesReady, this, this, insetsAnimationSpec,
                         animationType, layoutInsetsDuringAnimation, mHost.getTranslator(),
                         statsToken);
+        for (int i = controls.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.get(controls.keyAt(i));
+            if (consumer != null) {
+                consumer.setSurfaceParamsApplier(runner.getSurfaceParamsApplier());
+            }
+        }
         if ((typesReady & WindowInsets.Type.ime()) != 0) {
             ImeTracing.getInstance().triggerClientDump("InsetsAnimationControlImpl",
                     mHost.getInputMethodManager(), null /* icProto */);

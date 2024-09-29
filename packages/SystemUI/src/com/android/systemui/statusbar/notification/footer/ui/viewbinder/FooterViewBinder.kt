@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.footer.ui.viewbinder
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.notification.NotificationActivityStarter
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.util.ui.isAnimating
@@ -36,6 +38,7 @@ object FooterViewBinder {
         clearAllNotifications: View.OnClickListener,
         launchNotificationSettings: View.OnClickListener,
         launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ): DisposableHandle {
         return footer.repeatWhenAttached {
             lifecycleScope.launch {
@@ -45,6 +48,7 @@ object FooterViewBinder {
                     clearAllNotifications,
                     launchNotificationSettings,
                     launchNotificationHistory,
+                    notificationActivityStarter,
                 )
             }
         }
@@ -56,6 +60,7 @@ object FooterViewBinder {
         clearAllNotifications: View.OnClickListener,
         launchNotificationSettings: View.OnClickListener,
         launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch { bindClearAllButton(footer, viewModel, clearAllNotifications) }
         launch {
@@ -64,6 +69,7 @@ object FooterViewBinder {
                 viewModel,
                 launchNotificationSettings,
                 launchNotificationHistory,
+                notificationActivityStarter,
             )
         }
         launch { bindMessage(footer, viewModel) }
@@ -113,13 +119,23 @@ object FooterViewBinder {
         viewModel: FooterViewModel,
         launchNotificationSettings: View.OnClickListener,
         launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch {
-            viewModel.manageButtonShouldLaunchHistory.collect { shouldLaunchHistory ->
-                if (shouldLaunchHistory) {
-                    footer.setManageButtonClickListener(launchNotificationHistory)
-                } else {
-                    footer.setManageButtonClickListener(launchNotificationSettings)
+            if (ModesEmptyShadeFix.isEnabled) {
+                viewModel.manageOrHistoryButtonClick.collect { settingsIntent ->
+                    val onClickListener = { view: View ->
+                        notificationActivityStarter.startSettingsIntent(view, settingsIntent)
+                    }
+                    footer.setManageButtonClickListener(onClickListener)
+                }
+            } else {
+                viewModel.manageButtonShouldLaunchHistory.collect { shouldLaunchHistory ->
+                    if (shouldLaunchHistory) {
+                        footer.setManageButtonClickListener(launchNotificationHistory)
+                    } else {
+                        footer.setManageButtonClickListener(launchNotificationSettings)
+                    }
                 }
             }
         }

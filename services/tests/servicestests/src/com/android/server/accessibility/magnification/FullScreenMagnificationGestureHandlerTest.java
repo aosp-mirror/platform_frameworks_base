@@ -32,6 +32,7 @@ import static com.android.server.testutils.TestUtils.strictMock;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -64,6 +65,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -105,6 +107,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -697,6 +700,15 @@ public class FullScreenMagnificationGestureHandlerTest {
         assertActionsInOrder(eventCaptor.mEvents, expectedActions);
 
         returnToNormalFrom(STATE_ACTIVATED);
+    }
+
+    @Test
+    public void testIntervalsOf_sendMotionEventInfo_returnMatchIntervals() {
+        FullScreenMagnificationGestureHandler.MotionEventInfo upEventQueue =
+                createEventQueue(ACTION_UP, 0, 100, 300);
+
+        List<Long> upIntervals = mMgh.mDetectingState.intervalsOf(upEventQueue, ACTION_UP);
+        assertEquals(Arrays.asList(100L, 200L), upIntervals);
     }
 
     @Test
@@ -2294,6 +2306,31 @@ public class FullScreenMagnificationGestureHandlerTest {
         return event;
     }
 
+    private FullScreenMagnificationGestureHandler.MotionEventInfo createEventQueue(
+            int eventType, long... delays) {
+        FullScreenMagnificationGestureHandler.MotionEventInfo eventQueue = null;
+        long currentTime = SystemClock.uptimeMillis();
+
+        for (int i = 0; i < delays.length; i++) {
+            MotionEvent event = MotionEvent.obtain(currentTime + delays[i],
+                    currentTime + delays[i], eventType, 0, 0, 0);
+
+            FullScreenMagnificationGestureHandler.MotionEventInfo info =
+                    FullScreenMagnificationGestureHandler.MotionEventInfo
+                    .obtain(event, MotionEvent.obtain(event), 0);
+
+            if (eventQueue == null) {
+                eventQueue = info;
+            } else {
+                FullScreenMagnificationGestureHandler.MotionEventInfo tail = eventQueue;
+                while (tail.getNext() != null) {
+                    tail = tail.getNext();
+                }
+                tail.setNext(info);
+            }
+        }
+        return eventQueue;
+    }
 
     private String stateDump() {
         return "\nCurrent state dump:\n" + mMgh + "\n" + mHandler.getPendingMessages();

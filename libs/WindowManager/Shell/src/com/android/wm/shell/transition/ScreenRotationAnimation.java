@@ -25,9 +25,12 @@ import static com.android.wm.shell.transition.DefaultTransitionHandler.buildSurf
 import static com.android.wm.shell.transition.Transitions.TAG;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -35,7 +38,6 @@ import android.util.Slog;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.window.ScreenCapture;
@@ -72,9 +74,6 @@ import java.util.ArrayList;
  */
 class ScreenRotationAnimation {
     static final int MAX_ANIMATION_DURATION = 10 * 1000;
-    static final int ANIMATION_HINT_HAS_WALLPAPER = 1 << 8;
-    /** It must cover all WindowManager#ROTATION_ANIMATION_*. */
-    private static final int ANIMATION_TYPE_MASK = 0xff;
 
     private final Context mContext;
     private final TransactionPool mTransactionPool;
@@ -82,7 +81,7 @@ class ScreenRotationAnimation {
     /** The leash of the changing window container. */
     private final SurfaceControl mSurfaceControl;
 
-    private final int mAnimType;
+    private final int mAnimHint;
     private final int mStartWidth;
     private final int mStartHeight;
     private final int mEndWidth;
@@ -99,12 +98,6 @@ class ScreenRotationAnimation {
     private SurfaceControl mBackColorSurface;
     /** The leash using to animate screenshot layer. */
     private final SurfaceControl mAnimLeash;
-    /**
-     * The container with background color for {@link #mSurfaceControl}. It is only created if
-     * {@link #mSurfaceControl} may be translucent. E.g. visible wallpaper with alpha < 1 (dimmed).
-     * That prevents flickering of alpha blending.
-     */
-    private SurfaceControl mBackEffectSurface;
 
     // The current active animation to move from the old to the new rotated
     // state.  Which animation is run here will depend on the old and new
@@ -122,7 +115,7 @@ class ScreenRotationAnimation {
             Transaction t, TransitionInfo.Change change, SurfaceControl rootLeash, int animHint) {
         mContext = context;
         mTransactionPool = pool;
-        mAnimType = animHint & ANIMATION_TYPE_MASK;
+        mAnimHint = animHint;
 
         mSurfaceControl = change.getLeash();
         mStartWidth = change.getStartAbsBounds().width();
@@ -177,20 +170,11 @@ class ScreenRotationAnimation {
                 }
                 hardwareBuffer.close();
             }
-            if ((animHint & ANIMATION_HINT_HAS_WALLPAPER) != 0) {
-                mBackEffectSurface = new SurfaceControl.Builder()
-                        .setCallsite("ShellRotationAnimation").setParent(rootLeash)
-                        .setEffectLayer().setOpaque(true).setName("BackEffect").build();
-                t.reparent(mSurfaceControl, mBackEffectSurface)
-                        .setColor(mBackEffectSurface,
-                                new float[] {mStartLuma, mStartLuma, mStartLuma})
-                        .show(mBackEffectSurface);
-            }
 
             t.setLayer(mAnimLeash, SCREEN_FREEZE_LAYER_BASE);
             t.show(mAnimLeash);
             // Crop the real content in case it contains a larger child layer, e.g. wallpaper.
-            t.setCrop(getEnterSurface(), new Rect(0, 0, mEndWidth, mEndHeight));
+            t.setCrop(mSurfaceControl, new Rect(0, 0, mEndWidth, mEndHeight));
 
             if (!isCustomRotate()) {
                 mBackColorSurface = new SurfaceControl.Builder()
@@ -215,12 +199,7 @@ class ScreenRotationAnimation {
     }
 
     private boolean isCustomRotate() {
-        return mAnimType == ROTATION_ANIMATION_CROSSFADE || mAnimType == ROTATION_ANIMATION_JUMPCUT;
-    }
-
-    /** Returns the surface which contains the real content to animate enter. */
-    private SurfaceControl getEnterSurface() {
-        return mBackEffectSurface != null ? mBackEffectSurface : mSurfaceControl;
+        return mAnimHint == ROTATION_ANIMATION_CROSSFADE || mAnimHint == ROTATION_ANIMATION_JUMPCUT;
     }
 
     private void setScreenshotTransform(SurfaceControl.Transaction t) {
@@ -281,7 +260,7 @@ class ScreenRotationAnimation {
         final boolean customRotate = isCustomRotate();
         if (customRotate) {
             mRotateExitAnimation = AnimationUtils.loadAnimation(mContext,
-                    mAnimType == ROTATION_ANIMATION_JUMPCUT ? R.anim.rotation_animation_jump_exit
+                    mAnimHint == ROTATION_ANIMATION_JUMPCUT ? R.anim.rotation_animation_jump_exit
                             : R.anim.rotation_animation_xfade_exit);
             mRotateEnterAnimation = AnimationUtils.loadAnimation(mContext,
                     R.anim.rotation_animation_enter);
@@ -335,11 +314,7 @@ class ScreenRotationAnimation {
         } else {
             startDisplayRotation(animations, finishCallback, mainExecutor);
             startScreenshotRotationAnimation(animations, finishCallback, mainExecutor);
-            if (mBackEffectSurface != null && mStartLuma > 0.1f) {
-                // Animate from the color of background to black for smooth alpha blending.
-                buildLumaAnimation(animations, mStartLuma, 0f /* endLuma */, mBackEffectSurface,
-                        animationScale, finishCallback, mainExecutor);
-            }
+            //startColorAnimation(mTransaction, animationScale);
         }
 
         return true;
@@ -347,7 +322,7 @@ class ScreenRotationAnimation {
 
     private void startDisplayRotation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
-        buildSurfaceAnimation(animations, mRotateEnterAnimation, getEnterSurface(), finishCallback,
+        buildSurfaceAnimation(animations, mRotateEnterAnimation, mSurfaceControl, finishCallback,
                 mTransactionPool, mainExecutor, null /* position */, 0 /* cornerRadius */,
                 null /* clipRect */, false /* isActivity */);
     }
@@ -366,17 +341,40 @@ class ScreenRotationAnimation {
                 null /* clipRect */, false /* isActivity */);
     }
 
-    private void buildLumaAnimation(@NonNull ArrayList<Animator> animations,
-            float startLuma, float endLuma, SurfaceControl surface, float animationScale,
-            @NonNull Runnable finishCallback, @NonNull ShellExecutor mainExecutor) {
-        final long durationMillis = (long) (mContext.getResources().getInteger(
-                R.integer.config_screen_rotation_color_transition) * animationScale);
-        final LumaAnimation animation = new LumaAnimation(durationMillis);
-        // Align the end with the enter animation.
-        animation.setStartOffset(mRotateEnterAnimation.getDuration() - durationMillis);
-        final LumaAnimationAdapter adapter = new LumaAnimationAdapter(surface, startLuma, endLuma);
-        buildSurfaceAnimation(animations, animation, finishCallback, mTransactionPool,
-                mainExecutor, adapter);
+    private void startColorAnimation(float animationScale, @NonNull ShellExecutor animExecutor) {
+        int colorTransitionMs = mContext.getResources().getInteger(
+                R.integer.config_screen_rotation_color_transition);
+        final float[] rgbTmpFloat = new float[3];
+        final int startColor = Color.rgb(mStartLuma, mStartLuma, mStartLuma);
+        final int endColor = Color.rgb(mEndLuma, mEndLuma, mEndLuma);
+        final long duration = colorTransitionMs * (long) animationScale;
+        final Transaction t = mTransactionPool.acquire();
+
+        final ValueAnimator va = ValueAnimator.ofFloat(0f, 1f);
+        // Animation length is already expected to be scaled.
+        va.overrideDurationScale(1.0f);
+        va.setDuration(duration);
+        va.addUpdateListener(animation -> {
+            final long currentPlayTime = Math.min(va.getDuration(), va.getCurrentPlayTime());
+            final float fraction = currentPlayTime / va.getDuration();
+            applyColor(startColor, endColor, rgbTmpFloat, fraction, mBackColorSurface, t);
+        });
+        va.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                applyColor(startColor, endColor, rgbTmpFloat, 1f /* fraction */, mBackColorSurface,
+                        t);
+                mTransactionPool.release(t);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                applyColor(startColor, endColor, rgbTmpFloat, 1f /* fraction */, mBackColorSurface,
+                        t);
+                mTransactionPool.release(t);
+            }
+        });
+        animExecutor.execute(va::start);
     }
 
     public void kill() {
@@ -391,47 +389,21 @@ class ScreenRotationAnimation {
         if (mBackColorSurface != null && mBackColorSurface.isValid()) {
             t.remove(mBackColorSurface);
         }
-        if (mBackEffectSurface != null && mBackEffectSurface.isValid()) {
-            t.remove(mBackEffectSurface);
-        }
         t.apply();
         mTransactionPool.release(t);
     }
 
-    /** A no-op wrapper to provide animation duration. */
-    private static class LumaAnimation extends Animation {
-        LumaAnimation(long durationMillis) {
-            setDuration(durationMillis);
+    private static void applyColor(int startColor, int endColor, float[] rgbFloat,
+            float fraction, SurfaceControl surface, SurfaceControl.Transaction t) {
+        final int color = (Integer) ArgbEvaluator.getInstance().evaluate(fraction, startColor,
+                endColor);
+        Color middleColor = Color.valueOf(color);
+        rgbFloat[0] = middleColor.red();
+        rgbFloat[1] = middleColor.green();
+        rgbFloat[2] = middleColor.blue();
+        if (surface.isValid()) {
+            t.setColor(surface, rgbFloat);
         }
-    }
-
-    private static class LumaAnimationAdapter extends DefaultTransitionHandler.AnimationAdapter {
-        final float[] mColorArray = new float[3];
-        final float mStartLuma;
-        final float mEndLuma;
-        final AccelerateInterpolator mInterpolation;
-
-        LumaAnimationAdapter(@NonNull SurfaceControl leash, float startLuma, float endLuma) {
-            super(leash);
-            mStartLuma = startLuma;
-            mEndLuma = endLuma;
-            // Make the initial progress color lighter if the background is light. That avoids
-            // darker content when fading into the entering surface.
-            final float factor = Math.min(3f, (Math.max(0.5f, mStartLuma) - 0.5f) * 10);
-            Slog.d(TAG, "Luma=" + mStartLuma + " factor=" + factor);
-            mInterpolation = factor > 0.5f ? new AccelerateInterpolator(factor) : null;
-        }
-
-        @Override
-        void applyTransformation(ValueAnimator animator) {
-            final float fraction = mInterpolation != null
-                    ? mInterpolation.getInterpolation(animator.getAnimatedFraction())
-                    : animator.getAnimatedFraction();
-            final float luma = mStartLuma + fraction * (mEndLuma - mStartLuma);
-            mColorArray[0] = luma;
-            mColorArray[1] = luma;
-            mColorArray[2] = luma;
-            mTransaction.setColor(mLeash, mColorArray);
-        }
+        t.apply();
     }
 }

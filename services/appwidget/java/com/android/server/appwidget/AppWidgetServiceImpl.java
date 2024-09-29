@@ -18,6 +18,7 @@ package com.android.server.appwidget;
 
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
+import static android.appwidget.flags.Flags.securityPolicyInteractAcrossUsers;
 import static android.appwidget.flags.Flags.supportResumeRestoreAfterReboot;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -32,6 +33,7 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.PermissionName;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -1442,7 +1444,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
      * in {@link #allocateAppWidgetId}.
      *
      * @param callingPackage The package that calls this method.
-     * @param appWidgetId The id of theapp widget to bind.
+     * @param appWidgetId The id of the widget to bind.
      * @param providerProfileId The user/profile id of the provider.
      * @param providerComponent The {@link ComponentName} that provides the widget.
      * @param options The options to pass to the provider.
@@ -1463,13 +1465,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mSecurityPolicy.enforceCallFromPackage(callingPackage);
 
         // Check that if a cross-profile binding is attempted, it is allowed.
-        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)) {
+        // Cross-profile binding is also allowed if the caller has interact across users permission.
+        if (!mSecurityPolicy.isEnabledGroupProfile(providerProfileId)
+                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
             return false;
         }
 
-        // If the provider is not under the calling user, make sure this
-        // provider is allowlisted for access from the parent.
-        if (!mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+        // If the provider is not under the calling user, make sure this provider is allowlisted for
+        // access from the parent, or that the caller has permission to interact across users.
+        if (!mSecurityPolicy.canAccessProvider(
                 providerComponent.getPackageName(), providerProfileId)) {
             return false;
         }
@@ -1734,6 +1738,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return false;
     }
 
+    /**
+     * Called by a {@link AppWidgetHost} to remove all records (i.e. {@link Host}
+     * and all {@link Widget} associated with the host) from a specified host.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param hostId id of the {@link Host}.
+     * @see AppWidgetHost#deleteHost()
+     */
     @Override
     public void deleteHost(String callingPackage, int hostId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1767,6 +1779,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Called by a host process to remove all records (i.e. {@link Host}
+     * and all {@link Widget} associated with the host) from all hosts associated
+     * with the calling process.
+     *
+     * Typically used in clean up after test execution.
+     *
+     * @see AppWidgetHost#deleteAllHosts()
+     */
     @Override
     public void deleteAllHosts() {
         final int userId = UserHandle.getCallingUserId();
@@ -1801,6 +1822,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Returns the {@link AppWidgetProviderInfo} for the specified AppWidget.
+     *
+     * Typically used by launcher during the restore of an AppWidget, the binding
+     * of new AppWidget, and during grid size migration.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId   Id of the widget.
+     * @return The {@link AppWidgetProviderInfo} for the specified widget.
+     *
+     * @see AppWidgetManager#getAppWidgetInfo(int)
+     */
     @Override
     public AppWidgetProviderInfo getAppWidgetInfo(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1855,6 +1888,17 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Returns the most recent {@link RemoteViews} of the specified AppWidget.
+     * Typically serves as a cache of the content of the AppWidget.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId   Id of the widget.
+     * @return The {@link RemoteViews} of the specified widget.
+     *
+     * @see AppWidgetHost#updateAppWidgetDeferred(String, int)
+     * @see AppWidgetHost#setListener(int, AppWidgetHostListener)
+     */
     @Override
     public RemoteViews getAppWidgetViews(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1882,6 +1926,29 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Update the extras for a given widget instance.
+     * <p>
+     * The extras can be used to embed additional information about this widget to be accessed
+     * by the associated widget's AppWidgetProvider.
+     *
+     * <p>
+     * The new options are merged into existing options using {@link Bundle#putAll} semantics.
+     *
+     * <p>
+     * Typically called by a {@link AppWidgetHost} (e.g. Launcher) to notify
+     * {@link AppWidgetProvider} regarding contextual changes (e.g. sizes) when rendering the
+     * widget.
+     * Calling this method would trigger onAppWidgetOptionsChanged() callback on the provider's
+     * side.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId Id of the widget.
+     * @param options New options associate with this widget.
+     *
+     * @see AppWidgetManager#getAppWidgetOptions(int, Bundle)
+     * @see AppWidgetProvider#onAppWidgetOptionsChanged(Context, AppWidgetManager, int, Bundle)
+     */
     @Override
     public void updateAppWidgetOptions(String callingPackage, int appWidgetId, Bundle options) {
         final int userId = UserHandle.getCallingUserId();
@@ -1915,6 +1982,21 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Get the extras associated with a given widget instance.
+     * <p>
+     * The extras can be used to embed additional information about this widget to be accessed
+     * by the associated widget's AppWidgetProvider.
+     *
+     * Typically called by a host process (e.g. Launcher) to determine if they need to update the
+     * options of the widget.
+     *
+     * @see #updateAppWidgetOptions(String, int, Bundle)
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetId Id of the widget.
+     * @return The options associated with the specified widget instance.
+     */
     @Override
     public Bundle getAppWidgetOptions(String callingPackage, int appWidgetId) {
         final int userId = UserHandle.getCallingUserId();
@@ -1942,6 +2024,28 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the content of the widgets (as specified by appWidgetIds) using the provided
+     * {@link RemoteViews}.
+     *
+     * Typically called by the provider's process. Either in response to the invocation of
+     * {@link AppWidgetProvider#onUpdate} or upon receiving the
+     * {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} broadcast.
+     *
+     * <p>
+     * Note that the RemoteViews parameter will be cached by the AppWidgetService, and hence should
+     * contain a complete representation of the widget. For performing partial widget updates, see
+     * {@link #partiallyUpdateAppWidgetIds(String, int[], RemoteViews)}.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetIds Ids of the widgets to be updated.
+     * @param views The RemoteViews object containing the update.
+     *
+     * @see AppWidgetProvider#onUpdate(Context, AppWidgetManager, int[])
+     * @see AppWidgetManager#ACTION_APPWIDGET_UPDATE
+     * @see AppWidgetManager#updateAppWidget(int, RemoteViews)
+     * @see AppWidgetManager#updateAppWidget(int[], RemoteViews)
+     */
     @Override
     public void updateAppWidgetIds(String callingPackage, int[] appWidgetIds,
             RemoteViews views) {
@@ -1952,6 +2056,27 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         updateAppWidgetIds(callingPackage, appWidgetIds, views, false);
     }
 
+    /**
+     * Perform an incremental update or command on the widget(s) specified by appWidgetIds.
+     * <p>
+     * This update  differs from {@link #updateAppWidgetIds(int[], RemoteViews)} in that the
+     * RemoteViews object which is passed is understood to be an incomplete representation of the
+     * widget, and hence does not replace the cached representation of the widget. As of API
+     * level 17, the new properties set within the views objects will be appended to the cached
+     * representation of the widget, and hence will persist.
+     *
+     * <p>
+     * This method will be ignored if a widget has not received a full update via
+     * {@link #updateAppWidget(int[], RemoteViews)}.
+     *
+     * @param callingPackage   The package that calls this method.
+     * @param appWidgetIds     Ids of the widgets to be updated.
+     * @param views            The RemoteViews object containing the incremental update / command.
+     *
+     * @see AppWidgetManager#partiallyUpdateAppWidget(int[], RemoteViews)
+     * @see RemoteViews#setDisplayedChild(int, int)
+     * @see RemoteViews#setScrollPosition(int, int)
+     */
     @Override
     public void partiallyUpdateAppWidgetIds(String callingPackage, int[] appWidgetIds,
             RemoteViews views) {
@@ -1962,6 +2087,24 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         updateAppWidgetIds(callingPackage, appWidgetIds, views, true);
     }
 
+    /**
+     * Callback function which marks specified providers as extended from AppWidgetProvider.
+     *
+     * This information is used to determine if the system can combine
+     * {@link AppWidgetManager#ACTION_APPWIDGET_ENABLED} and
+     * {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} into a single broadcast.
+     *
+     * Note: The system can only combine the two broadcasts if the provider is extended from
+     * AppWidgetProvider. When they do, they are expected to override the
+     * {@link AppWidgetProvider#onUpdate} callback function to provide updates, as opposed to
+     * listening for {@link AppWidgetManager#ACTION_APPWIDGET_UPDATE} broadcasts directly.
+     *
+     * @see AppWidgetManager#ACTION_APPWIDGET_ENABLED
+     * @see AppWidgetManager#ACTION_APPWIDGET_UPDATE
+     * @see AppWidgetManager#ACTION_APPWIDGET_ENABLE_AND_UPDATE
+     * @see AppWidgetProvider#onReceive(Context, Intent)
+     * @see #sendEnableAndUpdateIntentLocked
+     */
     @Override
     public void notifyProviderInheritance(@Nullable final ComponentName[] componentNames) {
         final int userId = UserHandle.getCallingUserId();
@@ -1996,6 +2139,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Notifies the specified collection view in all the specified AppWidget instances
+     * to invalidate their data.
+     *
+     * This method is effectively deprecated since
+     * {@link RemoteViews#setRemoteAdapter(int, Intent)} has been deprecated.
+     *
+     * @see AppWidgetManager#notifyAppWidgetViewDataChanged(int[], int)
+     */
     @Override
     public void notifyAppWidgetViewDataChanged(String callingPackage, int[] appWidgetIds,
             int viewId) {
@@ -2031,6 +2183,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the content of all widgets associated with given provider (as specified by
+     * componentName) using the provided {@link RemoteViews}.
+     *
+     * Typically called by the provider's process when there's an update that needs to be supplied
+     * to all instances of the widgets.
+     *
+     * @param componentName The component name of the provider.
+     * @param views The RemoteViews object containing the update.
+     *
+     * @see AppWidgetManager#updateAppWidget(ComponentName, RemoteViews)
+     */
     @Override
     public void updateAppWidgetProvider(ComponentName componentName, RemoteViews views) {
         final int userId = UserHandle.getCallingUserId();
@@ -2064,6 +2228,27 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the info for the supplied AppWidget provider. Apps can use this to change the default
+     * behavior of the widget based on the state of the app (e.g., if the user is logged in
+     * or not). Calling this API completely replaces the previous definition.
+     *
+     * <p>
+     * The manifest entry of the provider should contain an additional meta-data tag similar to
+     * {@link AppWidgetManager#META_DATA_APPWIDGET_PROVIDER} which should point to any alternative
+     * definitions for the provider.
+     *
+     * <p>
+     * This is persisted across device reboots and app updates. If this meta-data key is not
+     * present in the manifest entry, the info reverts to default.
+     *
+     * @param provider {@link ComponentName} for the {@link
+     *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param metaDataKey key for the meta-data tag pointing to the new provider info. Use null
+     *    to reset any previously set info.
+     *
+     * @see AppWidgetManager#updateAppWidgetProviderInfo(ComponentName, String)
+     */
     @Override
     public void updateAppWidgetProviderInfo(ComponentName componentName, String metadataKey) {
         final int userId = UserHandle.getCallingUserId();
@@ -2115,6 +2300,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Returns true if the default launcher app on the device (the one that currently
+     * holds the android.app.role.HOME role) can support pinning widgets
+     * (typically means adding widgets into home screen).
+     */
     @Override
     public boolean isRequestPinAppWidgetSupported() {
         synchronized (mLock) {
@@ -2129,6 +2319,44 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         LauncherApps.PinItemRequest.REQUEST_TYPE_APPWIDGET);
     }
 
+    /**
+     * Request to pin an app widget on the current launcher. It's up to the launcher to accept this
+     * request (optionally showing a user confirmation). If the request is accepted, the caller will
+     * get a confirmation with extra {@link #EXTRA_APPWIDGET_ID}.
+     *
+     * <p>When a request is denied by the user, the caller app will not get any response.
+     *
+     * <p>Only apps with a foreground activity or a foreground service can call it.  Otherwise
+     * it'll throw {@link IllegalStateException}.
+     *
+     * <p>It's up to the launcher how to handle previous pending requests when the same package
+     * calls this API multiple times in a row.  It may ignore the previous requests,
+     * for example.
+     *
+     * <p>Launcher will not show the configuration activity associated with the provider in this
+     * case. The app could either show the configuration activity as a response to the callback,
+     * or show if before calling the API (various configurations can be encapsulated in
+     * {@code successCallback} to avoid persisting them before the widgetId is known).
+     *
+     * @param provider The {@link ComponentName} for the {@link
+     *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.
+     * @param extras If not null, this is passed to the launcher app. For eg {@link
+     *    #EXTRA_APPWIDGET_PREVIEW} can be used for a custom preview.
+     * @param successCallback If not null, this intent will be sent when the widget is created.
+     *
+     * @return {@code TRUE} if the launcher supports this feature. Note the API will return without
+     *    waiting for the user to respond, so getting {@code TRUE} from this API does *not* mean
+     *    the shortcut is pinned. {@code FALSE} if the launcher doesn't support this feature or if
+     *    calling app belongs to a user-profile with items restricted on home screen.
+     *
+     * @see android.content.pm.ShortcutManager#isRequestPinShortcutSupported()
+     * @see android.content.pm.ShortcutManager#requestPinShortcut(ShortcutInfo, IntentSender)
+     * @see AppWidgetManager#isRequestPinAppWidgetSupported()
+     * @see AppWidgetManager#requestPinAppWidget(ComponentName, Bundle, PendingIntent)
+     *
+     * @throws IllegalStateException The caller doesn't have a foreground activity or a foreground
+     * service or when the user is locked.
+     */
     @Override
     public boolean requestPinAppWidget(String callingPackage, ComponentName componentName,
             Bundle extras, IntentSender resultSender) {
@@ -2180,6 +2408,24 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 callingPid, callingUid) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Gets the AppWidget providers for the given user profile. User profile can only
+     * be the current user or a profile of the current user. For example, the current
+     * user may have a corporate profile. In this case the parent user profile has a
+     * child profile, the corporate one.
+     *
+     * @param categoryFilter Will only return providers which register as any of the specified
+     *        specified categories. See {@link AppWidgetProviderInfo#widgetCategory}.
+     * @param profile A profile of the current user which to be queried. The user
+     *        is itself also a profile. If null, the providers only for the current user
+     *        are returned.
+     * @param packageName If specified, will only return providers from the given package.
+     * @return The installed providers.
+     *
+     * @see android.os.Process#myUserHandle()
+     * @see android.os.UserManager#getUserProfiles()
+     * @see AppWidgetManager#getInstalledProvidersForProfile(int, UserHandle, String)
+     */
     @Override
     public ParceledListSlice<AppWidgetProviderInfo> getInstalledProvidersForProfile(int categoryFilter,
             int profileId, String packageName) {
@@ -2190,8 +2436,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.i(TAG, "getInstalledProvidersForProfiles() " + userId);
         }
 
-        // Ensure the profile is in the group and enabled.
-        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)) {
+        // Ensure the profile is in the group and enabled, or that the caller has permission to
+        // interact across users.
+        if (!mSecurityPolicy.isEnabledGroupProfile(profileId)
+                && !mSecurityPolicy.hasCallerInteractAcrossUsersPermission()) {
             return null;
         }
 
@@ -2226,7 +2474,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Add providers only for the requested profile that are allowlisted.
                 final int providerProfileId = info.getProfile().getIdentifier();
                 if (providerProfileId == profileId
-                        && mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                        && mSecurityPolicy.canAccessProvider(
                         providerPackageName, providerProfileId)
                         && !mPackageManagerInternal.filterAppAccess(providerPackageName, callingUid,
                         profileId)) {
@@ -2238,6 +2486,26 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Updates the content of the widgets (as specified by appWidgetIds) using the provided
+     * {@link RemoteViews}.
+     *
+     * If performing a partial update, the given RemoteViews object is merged into existing
+     * RemoteViews object.
+     *
+     * Fails silently if appWidgetIds is null or empty, or cannot found a widget with the given
+     * appWidgetId.
+     *
+     * @param callingPackage The package that calls this method.
+     * @param appWidgetIds Ids of the widgets to be updated.
+     * @param views The RemoteViews object containing the update.
+     * @param partially Whether it was a partial update.
+     *
+     * @see AppWidgetProvider#onUpdate(Context, AppWidgetManager, int[])
+     * @see AppWidgetManager#ACTION_APPWIDGET_UPDATE
+     * @see AppWidgetManager#updateAppWidget(int, RemoteViews)
+     * @see AppWidgetManager#updateAppWidget(int[], RemoteViews)
+     */
     private void updateAppWidgetIds(String callingPackage, int[] appWidgetIds,
             RemoteViews views, boolean partially) {
         final int userId = UserHandle.getCallingUserId();
@@ -2267,12 +2535,29 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    /**
+     * Increment the counter of widget ids and return the new id.
+     *
+     * Typically called by {@link #allocateAppWidgetId} when a instance of widget is created,
+     * either as a result of being pinned by launcher or added during a restore.
+     *
+     * Note: A widget id is a monotonically increasing integer that uniquely identifies the widget
+     * instance.
+     *
+     * TODO: Revisit this method and determine whether we need to alter the widget id during
+     *       the restore since widget id mismatch potentially leads to some issues in the past.
+     */
     private int incrementAndGetAppWidgetIdLocked(int userId) {
         final int appWidgetId = peekNextAppWidgetIdLocked(userId) + 1;
         mNextAppWidgetIds.put(userId, appWidgetId);
         return appWidgetId;
     }
 
+    /**
+     * Called by {@link #readProfileStateFromFileLocked} when widgets/providers/hosts are loaded
+     * from disk, which ensures mNextAppWidgetIds is larger than any existing widget id for given
+     * user.
+     */
     private void setMinAppWidgetIdLocked(int userId, int minWidgetId) {
         final int nextAppWidgetId = peekNextAppWidgetIdLocked(userId);
         if (nextAppWidgetId < minWidgetId) {
@@ -4620,7 +4905,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 final int callingUid = Binder.getCallingUid();
                 final String providerPackageName = componentName.getPackageName();
                 final boolean providerIsInCallerProfile =
-                        mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                        mSecurityPolicy.canAccessProvider(
                                 providerPackageName, providerProfileId);
                 final boolean shouldFilterAppAccess = mPackageManagerInternal.filterAppAccess(
                         providerPackageName, callingUid, providerProfileId);
@@ -4948,8 +5233,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             final int userId = UserHandle.getUserId(uid);
             if ((widget.host.getUserId() == userId || (widget.provider != null
                     && widget.provider.getUserId() == userId))
-                && mContext.checkCallingPermission(android.Manifest.permission.BIND_APPWIDGET)
-                    == PackageManager.PERMISSION_GRANTED) {
+                    && callerHasPermission(android.Manifest.permission.BIND_APPWIDGET)) {
                 // Apps that run in the same user as either the host or the provider and
                 // have the bind widget permission have access to the widget.
                 return true;
@@ -4968,10 +5252,18 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return getProfileParent(profileId) == parentId;
         }
 
-        public boolean isProviderInCallerOrInProfileAndWhitelListed(String packageName,
-                int profileId) {
+        /**
+         * The provider is accessible by the caller if any of the following is true:
+         * - The provider belongs to the caller
+         * - The provider belongs to a profile of the caller and is allowlisted
+         * - The caller has permission to interact across users
+         */
+        public boolean canAccessProvider(String packageName, int profileId) {
             final int callerId = UserHandle.getCallingUserId();
             if (profileId == callerId) {
+                return true;
+            }
+            if (hasCallerInteractAcrossUsersPermission()) {
                 return true;
             }
             final int parentId = getProfileParent(profileId);
@@ -5040,6 +5332,20 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 Binder.restoreCallingIdentity(identity);
             }
             return true;
+        }
+
+        /** Returns true if the caller has permission to interact across users. */
+        public boolean hasCallerInteractAcrossUsersPermission() {
+            if (!securityPolicyInteractAcrossUsers()) {
+                return false;
+            }
+
+            return callerHasPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+                    || callerHasPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+        }
+
+        private boolean callerHasPermission(@NonNull @PermissionName String permission) {
+            return mContext.checkCallingPermission(permission) == PackageManager.PERMISSION_GRANTED;
         }
     }
 

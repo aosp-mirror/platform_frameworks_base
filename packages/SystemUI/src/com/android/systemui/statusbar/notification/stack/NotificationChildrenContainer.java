@@ -634,8 +634,10 @@ public class NotificationChildrenContainer extends ViewGroup
     }
 
     private View inflateDivider() {
-        return LayoutInflater.from(mContext).inflate(
+        View divider = LayoutInflater.from(mContext).inflate(
                 R.layout.notification_children_divider, this, false);
+        divider.setAlpha(0f);
+        return divider;
     }
 
     /**

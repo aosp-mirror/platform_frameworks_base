@@ -17,13 +17,17 @@
 package com.android.systemui.qs.tiles.impl.internet.domain
 
 import android.graphics.drawable.TestStubDrawable
+import android.os.fakeExecutorHandler
 import android.widget.Switch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.graph.SignalDrawable
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
+import com.android.systemui.common.shared.model.ContentDescription.Companion.loadContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
+import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.tiles.impl.custom.QSTileStateSubject
 import com.android.systemui.qs.tiles.impl.internet.domain.model.InternetTileModel
@@ -31,6 +35,9 @@ import com.android.systemui.qs.tiles.impl.internet.qsInternetTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.connectivity.WifiIcons.WIFI_FULL_ICONS
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconModel
+import com.android.systemui.statusbar.pipeline.shared.ui.model.InternetTileIconModel
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -39,25 +46,93 @@ import org.junit.runner.RunWith
 class InternetTileMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val internetTileConfig = kosmos.qsInternetTileConfig
+    private val handler = kosmos.fakeExecutorHandler
     private val mapper by lazy {
         InternetTileMapper(
             context.orCreateTestableResources
                 .apply {
                     addOverride(R.drawable.ic_qs_no_internet_unavailable, TestStubDrawable())
+                    addOverride(R.drawable.ic_satellite_connected_2, TestStubDrawable())
                     addOverride(wifiRes, TestStubDrawable())
                 }
                 .resources,
             context.theme,
-            context
+            context,
+            handler,
         )
     }
 
     @Test
-    fun withActiveModel_mappedStateMatchesDataModel() {
+    fun withActiveCellularModel_mappedStateMatchesDataModel() {
         val inputModel =
             InternetTileModel.Active(
                 secondaryLabel = Text.Resource(R.string.quick_settings_networks_available),
-                iconId = wifiRes,
+                icon = InternetTileIconModel.Cellular(3),
+                stateDescription = null,
+                contentDescription =
+                    ContentDescription.Resource(R.string.quick_settings_internet_label),
+            )
+
+        val outputState = mapper.map(internetTileConfig, inputModel)
+
+        val signalDrawable = SignalDrawable(context, handler)
+        signalDrawable.setLevel(3)
+        val expectedState =
+            createInternetTileState(
+                QSTileState.ActivationState.ACTIVE,
+                context.getString(R.string.quick_settings_networks_available),
+                Icon.Loaded(signalDrawable, null),
+                null,
+                context.getString(R.string.quick_settings_internet_label),
+            )
+        QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun withActiveSatelliteModel_mappedStateMatchesDataModel() {
+        val inputIcon =
+            SignalIconModel.Satellite(
+                3,
+                Icon.Resource(
+                    res = R.drawable.ic_satellite_connected_2,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            R.string.accessibility_status_bar_satellite_good_connection
+                        ),
+                ),
+            )
+        val inputModel =
+            InternetTileModel.Active(
+                secondaryLabel = Text.Resource(R.string.quick_settings_networks_available),
+                icon = InternetTileIconModel.Satellite(inputIcon.icon),
+                stateDescription = null,
+                contentDescription =
+                    ContentDescription.Resource(
+                        R.string.accessibility_status_bar_satellite_good_connection
+                    ),
+            )
+
+        val outputState = mapper.map(internetTileConfig, inputModel)
+
+        val expectedSatIcon = SatelliteIconModel.fromSignalStrength(3)
+
+        val expectedState =
+            createInternetTileState(
+                QSTileState.ActivationState.ACTIVE,
+                inputModel.secondaryLabel.loadText(context).toString(),
+                Icon.Loaded(context.getDrawable(expectedSatIcon!!.res)!!, null),
+                expectedSatIcon.res,
+                expectedSatIcon.contentDescription.loadContentDescription(context).toString(),
+            )
+        QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
+    }
+
+    @Test
+    fun withActiveWifiModel_mappedStateMatchesDataModel() {
+        val inputModel =
+            InternetTileModel.Active(
+                secondaryLabel = Text.Resource(R.string.quick_settings_networks_available),
+                icon = InternetTileIconModel.ResourceId(wifiRes),
                 stateDescription = null,
                 contentDescription =
                     ContentDescription.Resource(R.string.quick_settings_internet_label),
@@ -71,7 +146,7 @@ class InternetTileMapperTest : SysuiTestCase() {
                 context.getString(R.string.quick_settings_networks_available),
                 Icon.Loaded(context.getDrawable(wifiRes)!!, contentDescription = null),
                 wifiRes,
-                context.getString(R.string.quick_settings_internet_label)
+                context.getString(R.string.quick_settings_internet_label),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -81,7 +156,7 @@ class InternetTileMapperTest : SysuiTestCase() {
         val inputModel =
             InternetTileModel.Inactive(
                 secondaryLabel = Text.Resource(R.string.quick_settings_networks_unavailable),
-                iconId = R.drawable.ic_qs_no_internet_unavailable,
+                icon = InternetTileIconModel.ResourceId(R.drawable.ic_qs_no_internet_unavailable),
                 stateDescription = null,
                 contentDescription =
                     ContentDescription.Resource(R.string.quick_settings_networks_unavailable),
@@ -95,10 +170,10 @@ class InternetTileMapperTest : SysuiTestCase() {
                 context.getString(R.string.quick_settings_networks_unavailable),
                 Icon.Loaded(
                     context.getDrawable(R.drawable.ic_qs_no_internet_unavailable)!!,
-                    contentDescription = null
+                    contentDescription = null,
                 ),
                 R.drawable.ic_qs_no_internet_unavailable,
-                context.getString(R.string.quick_settings_networks_unavailable)
+                context.getString(R.string.quick_settings_networks_unavailable),
             )
         QSTileStateSubject.assertThat(outputState).isEqualTo(expectedState)
     }
@@ -107,7 +182,7 @@ class InternetTileMapperTest : SysuiTestCase() {
         activationState: QSTileState.ActivationState,
         secondaryLabel: String,
         icon: Icon,
-        iconRes: Int,
+        iconRes: Int? = null,
         contentDescription: String,
     ): QSTileState {
         val label = context.getString(R.string.quick_settings_internet_label)
@@ -120,13 +195,13 @@ class InternetTileMapperTest : SysuiTestCase() {
             setOf(
                 QSTileState.UserAction.CLICK,
                 QSTileState.UserAction.TOGGLE_CLICK,
-                QSTileState.UserAction.LONG_CLICK
+                QSTileState.UserAction.LONG_CLICK,
             ),
             contentDescription,
             null,
             QSTileState.SideViewIcon.Chevron,
             QSTileState.EnabledState.ENABLED,
-            Switch::class.qualifiedName
+            Switch::class.qualifiedName,
         )
     }
 

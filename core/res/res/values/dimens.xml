@@ -808,6 +808,12 @@
          This is bigger than displayed because listeners can use it for other displays
          e.g. wearables. -->
     <dimen name="notification_person_icon_max_size">144dp</dimen>
+    <!-- The size of the progress bar icon -->
+    <dimen name="notification_progress_icon_size">20dp</dimen>
+    <!-- The size of the progress tracker width -->
+    <dimen name="notification_progress_tracker_width">40dp</dimen>
+    <!-- The size of the progress tracker height -->
+    <dimen name="notification_progress_tracker_height">20dp</dimen>
 
     <!-- The maximum size of the small notification icon on low memory devices. -->
     <dimen name="notification_small_icon_size_low_ram">@dimen/notification_small_icon_size</dimen>

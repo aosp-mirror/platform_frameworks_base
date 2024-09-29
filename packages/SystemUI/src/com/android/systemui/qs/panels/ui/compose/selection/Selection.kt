@@ -20,14 +20,18 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import com.android.systemui.qs.panels.ui.compose.selection.SelectionDefaults.ResizingDotSize
 
 /**
@@ -45,7 +49,6 @@ fun ResizingHandle(
     selectionState: MutableSelectionState,
     transition: () -> Float,
     tileWidths: () -> TileWidths? = { null },
-    onResize: () -> Unit = {},
 ) {
     if (enabled) {
         // Manually creating the touch target around the resizing dot to ensure that the next tile
@@ -53,16 +56,18 @@ fun ResizingHandle(
         // not receive the touch input accidentally.
         val minTouchTargetSize = LocalMinimumInteractiveComponentSize.current
         Box(
-            Modifier.size(minTouchTargetSize).pointerInput(Unit) {
-                detectHorizontalDragGestures(
-                    onHorizontalDrag = { _, offset -> selectionState.onResizingDrag(offset) },
-                    onDragStart = {
-                        tileWidths()?.let { selectionState.onResizingDragStart(it, onResize) }
-                    },
-                    onDragEnd = selectionState::onResizingDragEnd,
-                    onDragCancel = selectionState::onResizingDragEnd,
-                )
-            }
+            Modifier.size(minTouchTargetSize)
+                .systemGestureExclusion { Rect(Offset.Zero, it.size.toSize()) }
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { _, offset -> selectionState.onResizingDrag(offset) },
+                        onDragStart = {
+                            tileWidths()?.let { selectionState.onResizingDragStart(it) }
+                        },
+                        onDragEnd = selectionState::onResizingDragEnd,
+                        onDragCancel = selectionState::onResizingDragEnd,
+                    )
+                }
         ) {
             ResizingDot(transition = transition, modifier = Modifier.align(Alignment.Center))
         }

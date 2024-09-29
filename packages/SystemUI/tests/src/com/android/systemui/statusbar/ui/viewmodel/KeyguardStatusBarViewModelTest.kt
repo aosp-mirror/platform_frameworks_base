@@ -133,7 +133,10 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
 
             // WHEN HUN displayed on the bypass lock screen
             headsUpRepository.setNotifications(FakeHeadsUpRowRepository("key 0", isPinned = true))
-            keyguardTransitionRepository.emitInitialStepsFromOff(KeyguardState.LOCKSCREEN)
+            keyguardTransitionRepository.emitInitialStepsFromOff(
+                KeyguardState.LOCKSCREEN,
+                testSetup = true,
+            )
             kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
             faceAuthRepository.isBypassEnabled.value = true
 

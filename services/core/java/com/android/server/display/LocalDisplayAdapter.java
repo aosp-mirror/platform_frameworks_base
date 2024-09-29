@@ -37,9 +37,9 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.DisplayUtils;
 import android.util.LongSparseArray;
-import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
@@ -81,10 +81,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private static final String UNIQUE_ID_PREFIX = "local:";
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
-    // Min and max strengths for even dimmer feature.
-    private static final float EVEN_DIMMER_MIN_STRENGTH = 0.0f;
-    private static final float EVEN_DIMMER_MAX_STRENGTH = 90.0f;
-    private static final float BRIGHTNESS_MIN = 0.0f;
 
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
@@ -99,7 +95,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     private Context mOverlayContext;
 
     private int mEvenDimmerStrength = -1;
+    private boolean mEvenDimmerEnabled = false;
     private ColorDisplayService.ColorDisplayServiceInternal mCdsi;
+    private Spline mNitsToEvenDimmerStrength;
 
     // Called with SyncRoot lock held.
     LocalDisplayAdapter(DisplayManagerService.SyncRoot syncRoot, Context context,
@@ -279,7 +277,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mIsFirstDisplay = isFirstDisplay;
             updateDisplayPropertiesLocked(staticDisplayInfo, dynamicInfo, modeSpecs);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
-            mBacklightAdapter = new BacklightAdapter(displayToken, isFirstDisplay,
+            mBacklightAdapter = mInjector.getBacklightAdapter(displayToken, isFirstDisplay,
                     mSurfaceControlProxy);
             mActiveSfDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
         }
@@ -998,26 +996,36 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                     }
 
                     private void applyColorMatrixBasedDimming(float brightnessState) {
-                        int strength = (int) (MathUtils.constrainedMap(
-                                // to this range:
-                                EVEN_DIMMER_MAX_STRENGTH, EVEN_DIMMER_MIN_STRENGTH,
-                                // from this range:
-                                BRIGHTNESS_MIN, mDisplayDeviceConfig.getEvenDimmerTransitionPoint(),
-                                // map this (+ rounded up):
-                                brightnessState) + 0.5);
-
-                        if (mEvenDimmerStrength < 0 // uninitialised
-                                || MathUtils.abs(mEvenDimmerStrength - strength) > 1
-                                || strength <= 1) {
-                            mEvenDimmerStrength = strength;
-                        }
-                        boolean enabled = mEvenDimmerStrength > 0.0f;
-
                         if (mCdsi == null) {
                             mCdsi = LocalServices.getService(
                                     ColorDisplayService.ColorDisplayServiceInternal.class);
                         }
-                        if (mCdsi != null) {
+                        if (mCdsi == null) {
+                            return;
+                        }
+
+                        final float minHardwareNits = backlightToNits(brightnessToBacklight(
+                                mDisplayDeviceConfig.getEvenDimmerTransitionPoint()));
+                        final float requestedNits =
+                                backlightToNits(brightnessToBacklight(brightnessState));
+                        mNitsToEvenDimmerStrength =
+                                mCdsi.fetchEvenDimmerSpline(minHardwareNits);
+
+                        if (mNitsToEvenDimmerStrength == null) {
+                            return;
+                        }
+
+                        // Find required dimming strength, rounded up.
+                        int strength = Math.round(mNitsToEvenDimmerStrength
+                                .interpolate(requestedNits));
+                        boolean enabled = strength > 0.0f;
+                        if (mEvenDimmerEnabled != enabled) {
+                            Slog.i(TAG, "Setting Extra Dim; strength: " + strength
+                                    + ", " + (enabled ? "enabled" : "disabled"));
+                        }
+                        if (mEvenDimmerStrength != strength || mEvenDimmerEnabled != enabled) {
+                            mEvenDimmerEnabled = enabled;
+                            mEvenDimmerStrength = strength;
                             mCdsi.applyEvenDimmerColorChanges(enabled, strength);
                         }
                     }
@@ -1290,6 +1298,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("DisplayDeviceConfig: ");
             pw.println("---------------------");
             pw.println(mDisplayDeviceConfig);
+            pw.println("mEvenDimmerEnabled=" + mEvenDimmerEnabled);
+            pw.println("mEvenDimmerStrength=" + mEvenDimmerStrength);
+            pw.println("mNitsToEvenDimmerStrength=" + mNitsToEvenDimmerStrength);
         }
 
         private int findSfDisplayModeIdLocked(int displayModeId, int modeGroup) {
@@ -1460,6 +1471,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         public DisplayDeviceConfig createDisplayDeviceConfig(Context context,
                 long physicalDisplayId, boolean isFirstDisplay, DisplayManagerFlags flags) {
             return DisplayDeviceConfig.create(context, physicalDisplayId, isFirstDisplay, flags);
+        }
+
+        public BacklightAdapter getBacklightAdapter(IBinder displayToken, boolean isFirstDisplay,
+                SurfaceControlProxy surfaceControlProxy) {
+            return new BacklightAdapter(displayToken, isFirstDisplay, surfaceControlProxy);
+
         }
     }
 

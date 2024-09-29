@@ -16,16 +16,19 @@
 
 package com.android.wm.shell.desktopmode
 
+import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.content.Context
 import android.os.IBinder
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
+import android.window.flags.DesktopModeFlags
+import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
-import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -64,6 +67,30 @@ class DesktopTasksTransitionObserver(
     ) {
         // TODO: b/332682201 Update repository state
         updateWallpaperToken(info)
+
+        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
+            handleBackNavigation(info)
+        }
+    }
+
+    private fun handleBackNavigation(info: TransitionInfo) {
+        // When default back navigation happens, transition type is TO_BACK and the change is
+        // TO_BACK. Mark the task going to back as minimized.
+        if (info.type == TRANSIT_TO_BACK) {
+            for (change in info.changes) {
+                val taskInfo = change.taskInfo
+                if (taskInfo == null || taskInfo.taskId == -1) {
+                    continue
+                }
+
+                if (desktopModeTaskRepository.getVisibleTaskCount(taskInfo.displayId) > 0 &&
+                    change.mode == TRANSIT_TO_BACK &&
+                    taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
+                ) {
+                    desktopModeTaskRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
+                }
+            }
+        }
     }
 
     override fun onTransitionStarting(transition: IBinder) {

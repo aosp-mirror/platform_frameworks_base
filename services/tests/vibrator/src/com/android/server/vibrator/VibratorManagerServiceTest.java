@@ -266,12 +266,13 @@ public class VibratorManagerServiceTest {
     @After
     public void tearDown() throws Exception {
         if (mService != null) {
-            if (!mPendingVibrations.stream().allMatch(HalVibration::hasEnded)) {
-                // Cancel any pending vibration from tests.
-                cancelVibrate(mService);
-                for (HalVibration vibration : mPendingVibrations) {
-                    vibration.waitForEnd();
-                }
+            // Make sure we have permission to cancel test vibrations, even if the test denied them.
+            grantPermission(android.Manifest.permission.VIBRATE);
+            // Cancel any pending vibration from tests, including external vibrations.
+            cancelVibrate(mService);
+            // Wait until pending vibrations end asynchronously.
+            for (HalVibration vibration : mPendingVibrations) {
+                vibration.waitForEnd();
             }
             // Wait until all vibrators have stopped vibrating, waiting for ramp-down.
             // Note: if a test is flaky here something is wrong with the vibration finalization.
@@ -1538,7 +1539,6 @@ public class VibratorManagerServiceTest {
         PrebakedSegment segment = (PrebakedSegment) playedSegments.get(0);
         assertEquals(VibrationEffect.EFFECT_CLICK, segment.getEffectId());
         VibrationAttributes attrs = vibration.callerInfo.attrs;
-        assertEquals(VibrationAttributes.USAGE_HARDWARE_FEEDBACK, attrs.getUsage());
         assertTrue(attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
         assertTrue(attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
@@ -1560,11 +1560,11 @@ public class VibratorManagerServiceTest {
                 HapticFeedbackConstants.SCROLL_TICK,
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK));
         mHapticFeedbackVibrationMapSourceTouchScreen.put(
-                HapticFeedbackConstants.DRAG_START,
-                VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK));
+                HapticFeedbackConstants.SCROLL_ITEM_FOCUS,
+                VibrationEffect.createPredefined(VibrationEffect.EFFECT_THUD));
         mockVibrators(1);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(1);
-        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_TICK);
+        fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK, VibrationEffect.EFFECT_THUD);
         VibratorManagerService service = createSystemReadyService();
 
         HalVibration vibrationByRotary =
@@ -1573,7 +1573,7 @@ public class VibratorManagerServiceTest {
                         InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
         HalVibration vibrationByTouchScreen =
                 performHapticFeedbackForInputDeviceAndWaitUntilFinished(
-                        service, HapticFeedbackConstants.DRAG_START, /* inputDeviceId= */ 0,
+                        service, HapticFeedbackConstants.SCROLL_ITEM_FOCUS, /* inputDeviceId= */ 0,
                         InputDevice.SOURCE_TOUCHSCREEN, /* always= */ true);
 
         List<VibrationEffectSegment> playedSegments = fakeVibrator.getAllEffectSegments();
@@ -1583,18 +1583,17 @@ public class VibratorManagerServiceTest {
         PrebakedSegment segmentByRotary = (PrebakedSegment) playedSegments.get(0);
         assertEquals(VibrationEffect.EFFECT_CLICK, segmentByRotary.getEffectId());
         VibrationAttributes attrsByRotary = vibrationByRotary.callerInfo.attrs;
-        assertEquals(VibrationAttributes.USAGE_HARDWARE_FEEDBACK, attrsByRotary.getUsage());
         assertTrue(attrsByRotary.isFlagSet(
                 VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
         assertTrue(attrsByRotary.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
         // Verify feedback by touch screen input
         PrebakedSegment segmentByTouchScreen = (PrebakedSegment) playedSegments.get(1);
-        assertEquals(VibrationEffect.EFFECT_TICK, segmentByTouchScreen.getEffectId());
+        assertEquals(VibrationEffect.EFFECT_THUD, segmentByTouchScreen.getEffectId());
         VibrationAttributes attrsByTouchScreen = vibrationByTouchScreen.callerInfo.attrs;
-        assertEquals(VibrationAttributes.USAGE_TOUCH, attrsByTouchScreen.getUsage());
-        assertTrue(attrsByRotary.isFlagSet(
+        assertTrue(attrsByTouchScreen.isFlagSet(
                 VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF));
-        assertTrue(attrsByRotary.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
+        assertTrue(
+                attrsByTouchScreen.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY));
     }
 
     @Test
@@ -2244,7 +2243,7 @@ public class VibratorManagerServiceTest {
         VibratorManagerService service = createSystemReadyService();
 
         VibrationEffect effect = VibrationEffect.createOneShot(10 * TEST_TIMEOUT_MILLIS, 100);
-        vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
+        HalVibration vibration = vibrate(service, effect, HAPTIC_FEEDBACK_ATTRS);
 
         // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
@@ -2257,7 +2256,8 @@ public class VibratorManagerServiceTest {
         assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, scale.scaleLevel);
 
         // Vibration is cancelled.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        vibration.waitForEnd();
+        assertThat(vibration.getStatus()).isEqualTo(Status.CANCELLED_SUPERSEDED);
         assertEquals(Arrays.asList(false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
     }
@@ -2298,7 +2298,7 @@ public class VibratorManagerServiceTest {
 
         VibrationEffect repeatingEffect = VibrationEffect.createWaveform(
                 new long[]{100, 200, 300}, new int[]{128, 255, 255}, 1);
-        vibrate(service, repeatingEffect, ALARM_ATTRS);
+        HalVibration repeatingVibration = vibrate(service, repeatingEffect, ALARM_ATTRS);
 
         // VibrationThread will start this vibration async, so wait until vibration is triggered.
         assertTrue(waitUntil(s -> s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
@@ -2310,7 +2310,8 @@ public class VibratorManagerServiceTest {
         assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, scale.scaleLevel);
 
         // Vibration is cancelled.
-        assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+        repeatingVibration.waitForEnd();
+        assertThat(repeatingVibration.getStatus()).isEqualTo(Status.CANCELLED_SUPERSEDED);
         assertEquals(Arrays.asList(false, true),
                 mVibratorProviders.get(1).getExternalControlStates());
     }

@@ -21,23 +21,6 @@ using android::ConfigDescription;
 namespace aapt {
 namespace test {
 
-struct TestDiagnosticsImpl : public android::IDiagnostics {
-  void Log(Level level, android::DiagMessageActual& actual_msg) override {
-    switch (level) {
-      case Level::Note:
-        return;
-
-      case Level::Warn:
-        std::cerr << actual_msg.source << ": warn: " << actual_msg.message << "." << std::endl;
-        break;
-
-      case Level::Error:
-        std::cerr << actual_msg.source << ": error: " << actual_msg.message << "." << std::endl;
-        break;
-    }
-  }
-};
-
 android::IDiagnostics* GetDiagnostics() {
   static TestDiagnosticsImpl diag;
   return &diag;

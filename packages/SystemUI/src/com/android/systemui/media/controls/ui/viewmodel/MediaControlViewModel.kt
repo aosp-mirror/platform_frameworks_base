@@ -33,6 +33,8 @@ import com.android.systemui.media.controls.domain.pipeline.interactor.MediaContr
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaControlModel
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.MediaLocation
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_CLICK_EVENT
 import com.android.systemui.media.controls.util.MediaSmartspaceLogger.Companion.SMARTSPACE_CARD_DISMISS_EVENT
 import com.android.systemui.media.controls.util.MediaUiEventLogger
@@ -70,7 +72,7 @@ class MediaControlViewModel(
 
     private var isPlaying = false
     private var isAnyButtonClicked = false
-    private var location = -1
+    @MediaLocation private var location = MediaHierarchyManager.LOCATION_UNKNOWN
     private var playerViewModel: MediaPlayerViewModel? = null
 
     fun isNewPlayer(viewModel: MediaPlayerViewModel): Boolean {

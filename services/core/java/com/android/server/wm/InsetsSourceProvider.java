@@ -71,11 +71,12 @@ class InsetsSourceProvider {
     protected @Nullable WindowContainer mWindowContainer;
     protected @Nullable InsetsSourceControl mControl;
     protected @Nullable InsetsControlTarget mControlTarget;
-    protected boolean mIsLeashReadyForDispatching;
+    protected boolean mIsLeashInitialized;
 
     private final Rect mTmpRect = new Rect();
     private final InsetsSourceControl mFakeControl;
-    private final Consumer<Transaction> mSetLeashPositionConsumer;
+    private final Point mPosition = new Point();
+    private final Consumer<Transaction> mSetControlPositionConsumer;
     private @Nullable InsetsControlTarget mPendingControlTarget;
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
@@ -126,13 +127,14 @@ class InsetsSourceProvider {
                 source.getId(), source.getType(), null /* leash */, false /* initialVisible */,
                 new Point(), Insets.NONE);
         mControllable = (InsetsPolicy.CONTROLLABLE_TYPES & source.getType()) != 0;
-        mSetLeashPositionConsumer = t -> {
-            if (mControl != null) {
-                final SurfaceControl leash = mControl.getLeash();
-                if (leash != null) {
-                    final Point position = mControl.getSurfacePosition();
-                    t.setPosition(leash, position.x, position.y);
-                }
+        mSetControlPositionConsumer = t -> {
+            if (mControl == null || mControlTarget == null) {
+                return;
+            }
+            boolean changed = mControl.setSurfacePosition(mPosition.x, mPosition.y);
+            final SurfaceControl leash = mControl.getLeash();
+            if (changed && leash != null) {
+                t.setPosition(leash, mPosition.x, mPosition.y);
             }
             if (mHasPendingPosition) {
                 mHasPendingPosition = false;
@@ -140,7 +142,20 @@ class InsetsSourceProvider {
                     mStateController.notifyControlTargetChanged(mPendingControlTarget, this);
                 }
             }
+            changed |= updateInsetsHint();
+            if (changed) {
+                mStateController.notifyControlChanged(mControlTarget, this);
+            }
         };
+    }
+
+    private boolean updateInsetsHint() {
+        final Insets insetsHint = getInsetsHint();
+        if (!mControl.getInsetsHint().equals(insetsHint)) {
+            mControl.setInsetsHint(insetsHint);
+            return true;
+        }
+        return false;
     }
 
     InsetsSource getSource() {
@@ -363,26 +378,32 @@ class InsetsSourceProvider {
         }
         final boolean serverVisibleChanged = mServerVisible != isServerVisible;
         setServerVisible(isServerVisible);
-        updateInsetsControlPosition(windowState, serverVisibleChanged);
-    }
-
-    void updateInsetsControlPosition(WindowState windowState) {
-        updateInsetsControlPosition(windowState, false);
-    }
-
-    private void updateInsetsControlPosition(WindowState windowState,
-            boolean serverVisibleChanged) {
-        if (mControl == null) {
-            return;
+        final boolean positionChanged = updateInsetsControlPosition(windowState);
+        if (mControl != null && !positionChanged
+                // The insets hint would be updated if the position is changed. Here updates it for
+                // the possible change of the bounds or the server visibility.
+                && (updateInsetsHint()
+                        || serverVisibleChanged
+                                && android.view.inputmethod.Flags.refactorInsetsController())) {
+            // Only call notifyControlChanged here when the position is not changed. Otherwise, it
+            // is called or is scheduled to be called during updateInsetsControlPosition.
+            mStateController.notifyControlChanged(mControlTarget, this);
         }
-        boolean changed = false;
+    }
+
+    /**
+     * @return {#code true} if the surface position of the control is changed.
+     */
+    boolean updateInsetsControlPosition(WindowState windowState) {
+        if (mControl == null) {
+            return false;
+        }
         final Point position = getWindowFrameSurfacePosition();
-        if (mControl.setSurfacePosition(position.x, position.y) && mControlTarget != null) {
-            changed = true;
+        if (!mPosition.equals(position)) {
+            mPosition.set(position.x, position.y);
             if (windowState != null && windowState.getWindowFrames().didFrameSizeChange()
                     && windowState.mWinAnimator.getShown() && mWindowContainer.okToDisplay()) {
-                mHasPendingPosition = true;
-                windowState.applyWithNextDraw(mSetLeashPositionConsumer);
+                windowState.applyWithNextDraw(mSetControlPositionConsumer);
             } else {
                 Transaction t = mWindowContainer.getSyncTransaction();
                 if (windowState != null) {
@@ -399,20 +420,11 @@ class InsetsSourceProvider {
                         }
                     }
                 }
-                mSetLeashPositionConsumer.accept(t);
+                mSetControlPositionConsumer.accept(t);
             }
+            return true;
         }
-        final Insets insetsHint = getInsetsHint();
-        if (!mControl.getInsetsHint().equals(insetsHint)) {
-            mControl.setInsetsHint(insetsHint);
-            changed = true;
-        }
-        if (android.view.inputmethod.Flags.refactorInsetsController() && serverVisibleChanged) {
-            changed = true;
-        }
-        if (changed) {
-            mStateController.notifyControlChanged(mControlTarget, this);
-        }
+        return false;
     }
 
     private Point getWindowFrameSurfacePosition() {
@@ -553,8 +565,8 @@ class InsetsSourceProvider {
                 ANIMATION_TYPE_INSETS_CONTROL);
 
         // The leash was just created. We cannot dispatch it until its surface transaction is
-        // applied. Otherwise, the client's operation to the leash might be overwritten by us.
-        mIsLeashReadyForDispatching = false;
+        // committed. Otherwise, the client's operation to the leash might be overwritten by us.
+        mIsLeashInitialized = false;
 
         final SurfaceControl leash = mAdapter.mCapturedLeash;
         mControlTarget = target;
@@ -590,7 +602,7 @@ class InsetsSourceProvider {
      * @param id Indicates which transaction is committed so that stale callbacks can be dropped.
      */
     void onSurfaceTransactionCommitted(long id) {
-        if (mIsLeashReadyForDispatching) {
+        if (mIsLeashInitialized) {
             return;
         }
         if (mControl == null) {
@@ -599,7 +611,7 @@ class InsetsSourceProvider {
         if (id != getSurfaceTransactionId(mControl.getLeash())) {
             return;
         }
-        mIsLeashReadyForDispatching = true;
+        mIsLeashInitialized = true;
         mStateController.notifySurfaceTransactionReady(this, 0, false);
     }
 
@@ -650,9 +662,12 @@ class InsetsSourceProvider {
                 mServerVisible, mClientVisible);
     }
 
-    protected boolean isLeashReadyForDispatching(InsetsControlTarget target) {
-        // If the target is not the control target, we are ready for dispatching a null-leash to it.
-        return target != mControlTarget || mIsLeashReadyForDispatching;
+    protected boolean isLeashReadyForDispatching() {
+        return isLeashInitialized();
+    }
+
+    boolean isLeashInitialized() {
+        return mIsLeashInitialized;
     }
 
     /**
@@ -665,7 +680,7 @@ class InsetsSourceProvider {
     @Nullable
     InsetsSourceControl getControl(InsetsControlTarget target) {
         if (target == mControlTarget) {
-            if (!isLeashReadyForDispatching(target) && mControl != null) {
+            if (!isLeashReadyForDispatching() && mControl != null) {
                 // The surface transaction of preparing leash is not applied yet. We don't send it
                 // to the client in case that the client applies its transaction sooner than ours
                 // that we could unexpectedly overwrite the surface state.
@@ -690,7 +705,7 @@ class InsetsSourceProvider {
      */
     @Nullable
     protected SurfaceControl getLeash(@NonNull InsetsControlTarget target) {
-        return target == mControlTarget && mIsLeashReadyForDispatching && mControl != null
+        return target == mControlTarget && mIsLeashInitialized && mControl != null
                 ? mControl.getLeash() : null;
     }
 
@@ -739,7 +754,7 @@ class InsetsSourceProvider {
             pw.println();
         }
         pw.print(prefix);
-        pw.print("mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
+        pw.print("mIsLeashInitialized="); pw.print(mIsLeashInitialized);
         pw.print(" mHasPendingPosition="); pw.print(mHasPendingPosition);
         pw.println();
         if (mWindowContainer != null) {
@@ -785,7 +800,7 @@ class InsetsSourceProvider {
         if (mAdapter != null && mAdapter.mCapturedLeash != null) {
             mAdapter.mCapturedLeash.dumpDebug(proto, CAPTURED_LEASH);
         }
-        proto.write(IS_LEASH_READY_FOR_DISPATCHING, mIsLeashReadyForDispatching);
+        proto.write(IS_LEASH_READY_FOR_DISPATCHING, isLeashReadyForDispatching());
         proto.write(CLIENT_VISIBLE, mClientVisible);
         proto.write(SERVER_VISIBLE, mServerVisible);
         proto.write(SEAMLESS_ROTATING, mSeamlessRotating);

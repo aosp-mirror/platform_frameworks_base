@@ -17,17 +17,21 @@
 package com.android.settingslib.media;
 
 import static com.android.settingslib.media.InputRouteManager.INPUT_ATTRIBUTES;
+import static com.android.settingslib.media.InputRouteManager.PRESETS;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.MediaRecorder;
 
 import com.android.settingslib.testutils.shadow.ShadowRouter2Manager;
 
@@ -51,6 +55,9 @@ public class InputRouteManagerTest {
     private static final int INPUT_USB_DEVICE_ID = 3;
     private static final int INPUT_USB_HEADSET_ID = 4;
     private static final int INPUT_USB_ACCESSORY_ID = 5;
+    private static final int MAX_VOLUME = 1;
+    private static final int CURRENT_VOLUME = 0;
+    private static final boolean VOLUME_FIXED_TRUE = true;
 
     private final Context mContext = spy(RuntimeEnvironment.application);
     private InputRouteManager mInputRouteManager;
@@ -219,6 +226,31 @@ public class InputRouteManagerTest {
                 (InputMediaDevice) inputRouteManager.getSelectedInputDevice();
         assertThat(selectedInputDevice.getAudioDeviceInfoType())
                 .isEqualTo(AudioDeviceInfo.TYPE_BUILTIN_MIC);
+    }
+
+    @Test
+    public void selectDevice() {
+        final AudioManager audioManager = mock(AudioManager.class);
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+        final MediaDevice inputMediaDevice =
+                InputMediaDevice.create(
+                        mContext,
+                        String.valueOf(BUILTIN_MIC_ID),
+                        AudioDeviceInfo.TYPE_BUILTIN_MIC,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        VOLUME_FIXED_TRUE);
+        inputRouteManager.selectDevice(inputMediaDevice);
+
+        AudioDeviceAttributes deviceAttributes =
+                new AudioDeviceAttributes(
+                        AudioDeviceAttributes.ROLE_INPUT,
+                        AudioDeviceInfo.TYPE_BUILTIN_MIC,
+                        /* address= */ "");
+        for (@MediaRecorder.Source int preset : PRESETS) {
+            verify(audioManager, atLeastOnce())
+                    .setPreferredDeviceForCapturePreset(preset, deviceAttributes);
+        }
     }
 
     @Test

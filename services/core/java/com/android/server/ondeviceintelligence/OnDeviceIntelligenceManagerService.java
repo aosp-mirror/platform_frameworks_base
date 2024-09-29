@@ -87,6 +87,7 @@ import com.android.internal.infra.ServiceConnector;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemService.TargetUser;
 import com.android.server.ondeviceintelligence.callbacks.ListenableDownloadCallback;
 
 import java.io.FileDescriptor;
@@ -194,9 +195,13 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
 
             mIsServiceEnabled = isServiceEnabled();
         }
+    }
 
-        //connect to remote services(if available) during boot phase.
-        if (phase == SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+    @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        Slog.d(TAG, "onUserUnlocked: " + user.getUserHandle());
+        //connect to remote services(if available) during boot.
+        if(user.getUserHandle().equals(UserHandle.SYSTEM)) {
             try {
                 ensureRemoteInferenceServiceInitialized();
                 ensureRemoteIntelligenceServiceInitialized();

@@ -54,7 +54,6 @@ import com.android.systemui.biometrics.data.repository.biometricStatusRepository
 import com.android.systemui.biometrics.data.repository.fakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor
 import com.android.systemui.biometrics.domain.interactor.promptSelectorInteractor
-import com.android.systemui.biometrics.domain.interactor.sideFpsOverlayInteractor
 import com.android.systemui.biometrics.domain.interactor.udfpsOverlayInteractor
 import com.android.systemui.biometrics.extractAuthenticatorTypes
 import com.android.systemui.biometrics.faceSensorPropertiesInternal
@@ -1454,15 +1453,11 @@ internal class PromptViewModelTest(private val testCase: TestCase) : SysuiTestCa
     @Test
     fun switch_to_credential_fallback() = runGenericTest {
         val size by collectLastValue(kosmos.promptViewModel.size)
-        val isShowingSfpsIndicator by collectLastValue(kosmos.sideFpsOverlayInteractor.isShowing)
 
         // TODO(b/251476085): remove Spaghetti, migrate logic, and update this test
         kosmos.promptViewModel.onSwitchToCredential()
 
         assertThat(size).isEqualTo(PromptSize.LARGE)
-        if (testCase.modalities.hasSfps) {
-            assertThat(isShowingSfpsIndicator).isFalse()
-        }
     }
 
     @Test

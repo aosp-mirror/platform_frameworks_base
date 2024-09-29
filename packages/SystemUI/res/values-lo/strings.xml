@@ -1398,6 +1398,8 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ໄອຄອນຫຍໍ້ລົງ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ໄອຄອນຂະຫຍາຍ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ຫຼື"</string>
+    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
+    <skip />
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ນຳທາງໂດຍໃຊ້ແປ້ນພິມຂອງທ່ານ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ສຶກສາຄີລັດ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ນຳທາງໂດຍໃຊ້ແຜ່ນສຳຜັດຂອງທ່ານ"</string>

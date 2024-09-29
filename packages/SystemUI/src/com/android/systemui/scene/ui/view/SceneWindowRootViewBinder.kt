@@ -107,7 +107,9 @@ object SceneWindowRootViewBinder {
             view.viewModel(
                 traceName = "SceneWindowRootViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { viewModelFactory.create(motionEventHandlerReceiver) },
+                factory = {
+                    viewModelFactory.create(view.context.displayId, motionEventHandlerReceiver)
+                },
             ) { viewModel ->
                 try {
                     view.setViewTreeOnBackPressedDispatcherOwner(
@@ -184,7 +186,7 @@ object SceneWindowRootViewBinder {
                 PlatformTheme {
                     ScreenDecorProvider(
                         displayCutout = displayCutoutFromWindowInsets(scope, context, windowInsets),
-                        screenCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context)
+                        screenCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context),
                     ) {
                         SceneContainer(
                             viewModel = viewModel,
@@ -205,9 +207,7 @@ object SceneWindowRootViewBinder {
     ): ComposeView {
         return ComposeView(context).apply {
             setContent {
-                AlternateBouncer(
-                    alternateBouncerDependencies = alternateBouncerDependencies,
-                )
+                AlternateBouncer(alternateBouncerDependencies = alternateBouncerDependencies)
             }
         }
     }
@@ -234,14 +234,7 @@ object SceneWindowRootViewBinder {
                         else -> CutoutLocation.CENTER
                     }
                 val viewDisplayCutout = it?.displayCutout
-                DisplayCutout(
-                    left,
-                    top,
-                    right,
-                    bottom,
-                    location,
-                    viewDisplayCutout,
-                )
+                DisplayCutout(left, top, right, bottom, location, viewDisplayCutout)
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), DisplayCutout())
 

@@ -437,7 +437,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context,
                 mPowerAttributor, mPowerProfile, mCpuScalingPolicies,
                 mPowerStatsStore, Clock.SYSTEM_CLOCK);
-        mStats.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider, mPowerStatsStore);
         mDumpHelper = new BatteryStatsDumpHelperImpl(mBatteryUsageStatsProvider);
         mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
         mConfigFile = new AtomicFile(new File(systemDir, "battery_usage_stats_config"));
@@ -504,6 +503,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
+        mStats.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider, mPowerStatsStore,
+                Flags.accumulateBatteryUsageStats());
+
         MultiStatePowerAttributor attributor = (MultiStatePowerAttributor) mPowerAttributor;
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_CPU,
                 Flags.streamlinedBatteryStats());
@@ -662,6 +664,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             } else if (nc.hasTransport(TRANSPORT_CELLULAR)) {
                 return CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
             }
+            // For TRANSPORT_BLUETOOTH, we have a separate channel to catch Bluetooth wakeups.
+            // See noteCpuWakingSysproxyPacket method.
             return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
         }
 
@@ -681,6 +685,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 return;
             }
             noteCpuWakingActivity(subsystem, elapsedMillis, uid);
+        }
+
+        @Override
+        public void noteCpuWakingBluetoothProxyPacket(int uid, long elapsedMillis) {
+            if (uid < 0) {
+                Slog.e(TAG, "Invalid uid for waking bluetooth proxy packet: " + uid);
+                return;
+            }
+            noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_BLUETOOTH, elapsedMillis, uid);
         }
 
         @Override
@@ -1100,14 +1113,17 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                     DEVICE_CONFIG_NAMESPACE,
                                     MIN_CONSUMED_POWER_THRESHOLD_KEY,
                                     0);
-                    final BatteryUsageStatsQuery query =
-                            new BatteryUsageStatsQuery.Builder()
-                                    .setMaxStatsAgeMs(0)
-                                    .includeProcessStateData()
-                                    .includeVirtualUids()
-                                    .setMinConsumedPowerThreshold(minConsumedPowerThreshold)
-                                    .build();
-                    bus = getBatteryUsageStats(List.of(query)).get(0);
+                    BatteryUsageStatsQuery.Builder query = new BatteryUsageStatsQuery.Builder()
+                            .setMaxStatsAgeMs(0)
+                            .includeProcessStateData()
+                            .includeVirtualUids()
+                            .setMinConsumedPowerThreshold(minConsumedPowerThreshold);
+
+                    if (Flags.accumulateBatteryUsageStats()) {
+                        query.accumulated();
+                    }
+
+                    bus = getBatteryUsageStats(List.of(query.build())).get(0);
                     final int pullResult =
                             new StatsPerUidLogger(new FrameworkStatsLogger()).logStats(bus, data);
                     try {
@@ -3016,6 +3032,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (Flags.streamlinedBatteryStats()) {
             pw.println("  --sample: collect and dump a sample of stats for debugging purpose");
         }
+        if (Flags.accumulateBatteryUsageStats()) {
+            pw.println("  --accumulated: continuously accumulated since setup or reset-all");
+        }
         pw.println("  <package.name>: optional name of package to filter output by.");
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
@@ -3083,7 +3102,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     private void dumpUsageStats(FileDescriptor fd, PrintWriter pw, int model,
-            boolean proto) {
+            boolean proto, boolean accumulated) {
         awaitCompletion();
         syncStats("dump", BatteryExternalStatsWorker.UPDATE_ALL);
 
@@ -3096,6 +3115,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         if (model == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
             builder.powerProfileModeledOnly();
+        }
+        if (accumulated) {
+            builder.accumulated();
         }
         BatteryUsageStatsQuery query = builder.build();
         synchronized (mStats) {
@@ -3287,6 +3309,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 } else if ("--usage".equals(arg)) {
                     int model = BatteryConsumer.POWER_MODEL_UNDEFINED;
                     boolean proto = false;
+                    boolean accumulated = false;
                     for (int j = i + 1; j < args.length; j++) {
                         switch (args[j]) {
                             case "--proto":
@@ -3309,9 +3332,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 }
                                 break;
                             }
+                            case "--accumulated":
+                                accumulated = true;
+                                break;
                         }
                     }
-                    dumpUsageStats(fd, pw, model, proto);
+                    dumpUsageStats(fd, pw, model, proto, accumulated);
                     return;
                 } else if ("--wakeups".equals(arg)) {
                     mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "),

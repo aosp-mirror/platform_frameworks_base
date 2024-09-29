@@ -716,7 +716,7 @@ public class LauncherAppsService extends SystemService {
                     visiblePackages.add(info.getActivityInfo().packageName);
                 }
                 final List<ApplicationInfo> installedPackages =
-                        mPackageManagerInternal.getInstalledApplications(
+                        mPackageManagerInternal.getInstalledApplicationsCrossUser(
                                 /* flags= */ 0, user.getIdentifier(), callingUid);
                 for (ApplicationInfo applicationInfo : installedPackages) {
                     if (!visiblePackages.contains(applicationInfo.packageName)) {
@@ -1674,18 +1674,32 @@ public class LauncherAppsService extends SystemService {
         @Override
         public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
+            try {
+                Log.d(TAG,
+                        "getActivityLaunchIntent callingPackage=" + callingPackage + " component="
+                                + component + " user=" + user);
+            } catch (Exception e) {
+                Log.e(TAG, "getActivityLaunchIntent is called and error occurred when"
+                        + " printing the logs", e);
+            }
             if (mContext.checkPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS,
                     injectBinderCallingPid(), injectBinderCallingUid())
                             != PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "getActivityLaunchIntent no permission callingPid="
+                        + injectBinderCallingPid() + " callingUid=" + injectBinderCallingUid());
                 throw new SecurityException("Permission START_TASKS_FROM_RECENTS required");
             }
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
+                Log.d(TAG, "getActivityLaunchIntent cannot access profile user="
+                        + user.getIdentifier());
                 throw new ActivityNotFoundException("Activity could not be found");
             }
 
             final Intent launchIntent = getMainActivityLaunchIntent(component, user,
                     false /* includeArchivedApps */);
             if (launchIntent == null) {
+                Log.d(TAG, "getActivityLaunchIntent cannot access profile user="
+                        + user.getIdentifier() + " component=" + component);
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
             }
@@ -1965,6 +1979,17 @@ public class LauncherAppsService extends SystemService {
                     canLaunch = true;
                 }
                 if (!canLaunch) {
+                    try {
+                        Log.w(TAG, "getMainActivityLaunchIntent return null because it can't launch"
+                                + " component=" + component + " user=" + user + " appsSize=" + size
+                                + " includeArchivedApps=" + includeArchivedApps
+                                + " isArchivingEnabled=" + isArchivingEnabled()
+                                + " matchingArchivedAppActivityInfo="
+                                + getMatchingArchivedAppActivityInfo(component, user));
+                    } catch (Exception e) {
+                        Log.e(TAG, "getMainActivityLaunchIntent return null and error occurred when"
+                                + " printing the logs", e);
+                    }
                     return null;
                 }
             } finally {

@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -72,6 +73,14 @@ interface DisplayRepository {
 
     /** Whether the default display is currently off. */
     val defaultDisplayOff: Flow<Boolean>
+
+    /**
+     * Given a display ID int, return the corresponding Display object, or null if none exist.
+     *
+     * This method is guaranteed to not result in any binder call.
+     */
+    suspend fun getDisplay(displayId: Int): Display? =
+        displays.first().firstOrNull { it.displayId == displayId }
 
     /** Represents a connected display that has not been enabled yet. */
     interface PendingDisplay {
@@ -135,7 +144,9 @@ constructor(
         allDisplayEvents.filterIsInstance<DisplayEvent.Changed>().map { event -> event.displayId }
 
     override val displayAdditionEvent: Flow<Display?> =
-        allDisplayEvents.filterIsInstance<DisplayEvent.Added>().map { getDisplay(it.displayId) }
+        allDisplayEvents.filterIsInstance<DisplayEvent.Added>().map {
+            getDisplayFromDisplayManager(it.displayId)
+        }
 
     // This is necessary because there might be multiple displays, and we could
     // have missed events for those added before this process or flow started.
@@ -160,7 +171,8 @@ constructor(
             .debugLog("enabledDisplayIds")
 
     private val defaultDisplay by lazy {
-        getDisplay(Display.DEFAULT_DISPLAY) ?: error("Unable to get default display.")
+        getDisplayFromDisplayManager(Display.DEFAULT_DISPLAY)
+            ?: error("Unable to get default display.")
     }
 
     /**
@@ -170,7 +182,7 @@ constructor(
      */
     private val enabledDisplays: Flow<Set<Display>> =
         enabledDisplayIds
-            .mapElementsLazily { displayId -> getDisplay(displayId) }
+            .mapElementsLazily { displayId -> getDisplayFromDisplayManager(displayId) }
             .onEach {
                 if (it.isEmpty()) Log.wtf(TAG, "No enabled displays. This should never happen.")
             }
@@ -269,7 +281,7 @@ constructor(
     private fun getDisplayType(displayId: Int): Int? =
         traceSection("$TAG#getDisplayType") { displayManager.getDisplay(displayId)?.type }
 
-    private fun getDisplay(displayId: Int): Display? =
+    private fun getDisplayFromDisplayManager(displayId: Int): Display? =
         traceSection("$TAG#getDisplay") { displayManager.getDisplay(displayId) }
 
     /**
@@ -354,8 +366,8 @@ constructor(
      * Maps a set of T to a set of V, minimizing the number of `createValue` calls taking into
      * account the diff between each root flow emission.
      *
-     * This is needed to minimize the number of [getDisplay] in this class. Note that if the
-     * [createValue] returns a null element, it will not be added in the output set.
+     * This is needed to minimize the number of [getDisplayFromDisplayManager] in this class. Note
+     * that if the [createValue] returns a null element, it will not be added in the output set.
      */
     private fun <T, V> Flow<Set<T>>.mapElementsLazily(createValue: (T) -> V?): Flow<Set<V>> {
         data class State<T, V>(

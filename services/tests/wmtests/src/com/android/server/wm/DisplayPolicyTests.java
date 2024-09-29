@@ -413,15 +413,25 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testUpdateDisplayConfigurationByDecor() {
-        if (Flags.insetsDecoupledConfiguration()) {
-            // No configuration update when flag enables.
-            return;
-        }
         doReturn(NO_CUTOUT).when(mDisplayContent).calculateDisplayCutoutForRotation(anyInt());
         final WindowState navbar = createNavBarWithProvidedInsets(mDisplayContent);
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
         final int prevScreenHeightDp = mDisplayContent.getConfiguration().screenHeightDp;
+        if (Flags.insetsDecoupledConfiguration()) {
+            // No configuration update when flag enables.
+            assertFalse(displayPolicy.updateDecorInsetsInfo());
+            assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalHeight, di.logicalWidth).mOverrideConfigInsets.bottom);
+
+            final int barHeight = 2 * NAV_BAR_HEIGHT;
+            navbar.mAttrs.providedInsets[0].setInsetsSize(Insets.of(0, 0, 0, barHeight));
+            assertFalse(displayPolicy.updateDecorInsetsInfo());
+            assertEquals(barHeight, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalHeight, di.logicalWidth).mOverrideConfigInsets.bottom);
+            return;
+        }
+
         assertTrue(navbar.providesDisplayDecorInsets() && displayPolicy.updateDecorInsetsInfo());
         assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
                 di.logicalWidth, di.logicalHeight).mConfigInsets.bottom);

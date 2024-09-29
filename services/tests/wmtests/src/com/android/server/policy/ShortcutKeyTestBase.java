@@ -241,6 +241,13 @@ class ShortcutKeyTestBase {
                         KeyGestureEvent.ACTION_GESTURE_COMPLETE).build());
     }
 
+    boolean sendKeyGestureEventCancel(int gestureType) {
+        return mPhoneWindowManager.sendKeyGestureEvent(
+                new KeyGestureEvent.Builder().setKeyGestureType(gestureType).setAction(
+                        KeyGestureEvent.ACTION_GESTURE_COMPLETE).setFlags(
+                        KeyGestureEvent.FLAG_CANCELLED).build());
+    }
+
     boolean sendKeyGestureEventComplete(int gestureType, int modifierState) {
         return mPhoneWindowManager.sendKeyGestureEvent(
                 new KeyGestureEvent.Builder().setModifierState(modifierState).setKeyGestureType(
@@ -276,7 +283,7 @@ class ShortcutKeyTestBase {
         if ((actions & ACTION_PASS_TO_USER) != 0) {
             if (0 == mPhoneWindowManager.interceptKeyBeforeDispatching(keyEvent)) {
                 if (!mDispatchedKeyHandler.onKeyDispatched(keyEvent)) {
-                    mPhoneWindowManager.dispatchUnhandledKey(keyEvent);
+                    mPhoneWindowManager.interceptUnhandledKey(keyEvent);
                 }
             }
         }

@@ -165,16 +165,27 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     protected final AccessibilitySecurityPolicy mSecurityPolicy;
     protected final AccessibilityTrace mTrace;
 
-    // The attribution tag set by the service that is bound to this instance
+    /** The attribution tag set by the client that is bound to this instance */
     protected String mAttributionTag;
 
     protected int mDisplayTypes = DISPLAY_TYPE_DEFAULT;
 
-    // The service that's bound to this instance. Whenever this value is non-null, this
-    // object is registered as a death recipient
-    IBinder mService;
+    /**
+     * Binder of the {@link #mClient}.
+     *
+     * <p>Whenever this value is non-null, it should be registered as a {@link
+     * IBinder.DeathRecipient}
+     */
+    @Nullable IBinder mClientBinder;
 
-    IAccessibilityServiceClient mServiceInterface;
+    /**
+     * The accessibility client this class represents.
+     *
+     * <p>The client is in the application process, i.e., it's a client of system_server. Depending
+     * on the use case, the client can be an {@link AccessibilityService}, a {@code UiAutomation},
+     * etc.
+     */
+    @Nullable IAccessibilityServiceClient mClient;
 
     int mEventTypes;
 
@@ -218,10 +229,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     int mGenericMotionEventSources;
     int mObservedMotionEventSources;
 
-    // the events pending events to be dispatched to this service
+    /** Pending events to be dispatched to the client */
     final SparseArray<AccessibilityEvent> mPendingEvents = new SparseArray<>();
 
-    /** Whether this service relies on its {@link AccessibilityCache} being up to date */
+    /** Whether the client relies on its {@link AccessibilityCache} being up to date */
     boolean mUsesAccessibilityCache = false;
 
     // Handler only for dispatching accessibility events since we use event
@@ -230,7 +241,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     final SparseArray<IBinder> mOverlayWindowTokens = new SparseArray();
 
-    // All the embedded accessibility overlays that have been added by this service.
+    /** All the embedded accessibility overlays that have been added by the client. */
     private List<SurfaceControl> mOverlays = new ArrayList<>();
 
     /** The timestamp of requesting to take screenshot in milliseconds */
@@ -274,7 +285,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         /**
          * Called back to notify system that the client has changed
-         * @param serviceInfoChanged True if the service's AccessibilityServiceInfo changed.
+         *
+         * @param serviceInfoChanged True if the client's AccessibilityServiceInfo changed.
          */
         void onClientChangeLocked(boolean serviceInfoChanged);
 
@@ -360,21 +372,22 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mIPlatformCompat = IPlatformCompat.Stub.asInterface(
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
-        mEventDispatchHandler = new Handler(mainHandler.getLooper()) {
-            @Override
-            public void handleMessage(Message message) {
-                final int eventType =  message.what;
-                AccessibilityEvent event = (AccessibilityEvent) message.obj;
-                boolean serviceWantsEvent = message.arg1 != 0;
-                notifyAccessibilityEventInternal(eventType, event, serviceWantsEvent);
-            }
-        };
+        mEventDispatchHandler =
+                new Handler(mainHandler.getLooper()) {
+                    @Override
+                    public void handleMessage(Message message) {
+                        final int eventType = message.what;
+                        AccessibilityEvent event = (AccessibilityEvent) message.obj;
+                        boolean clientWantsEvent = message.arg1 != 0;
+                        notifyAccessibilityEventInternal(eventType, event, clientWantsEvent);
+                    }
+                };
         setDynamicallyConfigurableProperties(accessibilityServiceInfo);
     }
 
     @Override
     public boolean onKeyEvent(KeyEvent keyEvent, int sequenceNumber) {
-        if (!mRequestFilterKeyEvents || (mServiceInterface == null)) {
+        if (!mRequestFilterKeyEvents || (mClient == null)) {
             return false;
         }
         if((mAccessibilityServiceInfo.getCapabilities()
@@ -388,7 +401,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             if (svcClientTracingEnabled()) {
                 logTraceSvcClient("onKeyEvent", keyEvent + ", " + sequenceNumber);
             }
-            mServiceInterface.onKeyEvent(keyEvent, sequenceNumber);
+            mClient.onKeyEvent(keyEvent, sequenceNumber);
         } catch (RemoteException e) {
             return false;
         }
@@ -470,7 +483,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     public boolean canReceiveEventsLocked() {
-        return (mEventTypes != 0 && mService != null);
+        return (mEventTypes != 0 && mClientBinder != null);
     }
 
     @RequiresNoPermission
@@ -520,7 +533,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                // If the XML manifest had data to configure the service its info
+                // If the XML manifest had data to configure the AccessibilityService, its info
                 // should be already set. In such a case update only the dynamically
                 // configurable properties.
                 boolean oldRequestIme = mRequestImeApis;
@@ -1733,40 +1746,40 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         try {
             // Clear the proxy in the other process so this
             // IAccessibilityServiceConnection can be garbage collected.
-            if (mServiceInterface != null) {
+            if (mClient != null) {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("init", "null, " + mId + ", null");
                 }
-                mServiceInterface.init(null, mId, null);
+                mClient.init(null, mId, null);
             }
         } catch (RemoteException re) {
                 /* ignore */
         }
-        if (mService != null) {
+        if (mClientBinder != null) {
             try {
-                mService.unlinkToDeath(this, 0);
+                mClientBinder.unlinkToDeath(this, 0);
             } catch (NoSuchElementException e) {
                 Slog.e(LOG_TAG, "Failed unregistering death link");
             }
-            mService = null;
+            mClientBinder = null;
         }
 
-        mServiceInterface = null;
+        mClient = null;
         mReceivedAccessibilityButtonCallbackSinceBind = false;
     }
 
     public boolean isConnectedLocked() {
-        return (mService != null);
+        return (mClientBinder != null);
     }
 
     public void notifyAccessibilityEvent(AccessibilityEvent event) {
         synchronized (mLock) {
             final int eventType = event.getEventType();
 
-            final boolean serviceWantsEvent = wantsEventLocked(event);
+            final boolean clientWantsEvent = clientWantsEventLocked(event);
             final boolean requiredForCacheConsistency = mUsesAccessibilityCache
                     && ((AccessibilityCache.CACHE_CRITICAL_EVENTS_MASK & eventType) != 0);
-            if (!serviceWantsEvent && !requiredForCacheConsistency) {
+            if (!clientWantsEvent && !requiredForCacheConsistency) {
                 return;
             }
 
@@ -1774,7 +1787,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 return;
             }
             // Make a copy since during dispatch it is possible the event to
-            // be modified to remove its source if the receiving service does
+            // be modified to remove its source if the receiving client does
             // not have permission to access the window content.
             AccessibilityEvent newEvent = AccessibilityEvent.obtain(event);
             Message message;
@@ -1792,22 +1805,20 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 // Send all messages, bypassing mPendingEvents
                 message = mEventDispatchHandler.obtainMessage(eventType, newEvent);
             }
-            message.arg1 = serviceWantsEvent ? 1 : 0;
+            message.arg1 = clientWantsEvent ? 1 : 0;
 
             mEventDispatchHandler.sendMessageDelayed(message, mNotificationTimeout);
         }
     }
 
     /**
-     * Determines if given event can be dispatched to a service based on the package of the
-     * event source. Specifically, a service is notified if it is interested in events from the
-     * package.
+     * Determines if given event can be dispatched to a client based on the package of the event
+     * source. Specifically, a client is notified if it is interested in events from the package.
      *
      * @param event The event.
-     * @return True if the listener should be notified, false otherwise.
+     * @return True if the client should be notified, false otherwise.
      */
-    private boolean wantsEventLocked(AccessibilityEvent event) {
-
+    private boolean clientWantsEventLocked(AccessibilityEvent event) {
         if (!canReceiveEventsLocked()) {
             return false;
         }
@@ -1838,22 +1849,20 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     /**
-     * Notifies an accessibility service client for a scheduled event given the event type.
+     * Notifies a client for a scheduled event given the event type.
      *
      * @param eventType The type of the event to dispatch.
      */
     private void notifyAccessibilityEventInternal(
-            int eventType,
-            AccessibilityEvent event,
-            boolean serviceWantsEvent) {
-        IAccessibilityServiceClient listener;
+            int eventType, AccessibilityEvent event, boolean clientWantsEvent) {
+        IAccessibilityServiceClient client;
 
         synchronized (mLock) {
-            listener = mServiceInterface;
+            client = mClient;
 
-            // If the service died/was disabled while the message for dispatching
-            // the accessibility event was propagating the listener may be null.
-            if (listener == null) {
+            // If the client (in the application process) died/was disabled while the message for
+            // dispatching the accessibility event was propagating, "client" may be null.
+            if (client == null) {
                 return;
             }
 
@@ -1868,7 +1877,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 //   1) A binder thread calls notifyAccessibilityServiceDelayedLocked
                 //      which posts a message for dispatching an event and stores the event
                 //      in mPendingEvents.
-                //   2) The message is pulled from the queue by the handler on the service
+                //   2) The message is pulled from the queue by the handler on the client
                 //      thread and this method is just about to acquire the lock.
                 //   3) Another binder thread acquires the lock in notifyAccessibilityEvent
                 //   4) notifyAccessibilityEvent recycles the event that this method was about
@@ -1876,7 +1885,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 //   5) This method grabs the new event, processes it, and removes it from
                 //      mPendingEvents
                 //   6) The second message dispatched in (4) arrives, but the event has been
-                //      remvoved in (5).
+                //      removed in (5).
                 event = mPendingEvents.get(eventType);
                 if (event == null) {
                     return;
@@ -1893,14 +1902,14 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         try {
             if (svcClientTracingEnabled()) {
-                logTraceSvcClient("onAccessibilityEvent", event + ";" + serviceWantsEvent);
+                logTraceSvcClient("onAccessibilityEvent", event + ";" + clientWantsEvent);
             }
-            listener.onAccessibilityEvent(event, serviceWantsEvent);
+            client.onAccessibilityEvent(event, clientWantsEvent);
             if (DEBUG) {
-                Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
+                Slog.i(LOG_TAG, "Event " + event + " sent to " + client);
             }
         } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error during sending " + event + " to " + listener, re);
+            Slog.e(LOG_TAG, "Error during sending " + event + " to " + client, re);
         } finally {
             event.recycle();
         }
@@ -1978,122 +1987,126 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         return (mGenericMotionEventSources & eventSourceWithoutClass) != 0;
     }
 
-
     /**
-     * Called by the invocation handler to notify the service that the
-     * state of magnification has changed.
+     * Called by the invocation handler to notify the client that the state of magnification has
+     * changed.
      */
-    private void notifyMagnificationChangedInternal(int displayId, @NonNull Region region,
-            @NonNull MagnificationConfig config) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+    private void notifyMagnificationChangedInternal(
+            int displayId, @NonNull Region region, @NonNull MagnificationConfig config) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onMagnificationChanged", displayId + ", " + region + ", "
                             + config.toString());
                 }
-                listener.onMagnificationChanged(displayId, region, config);
+                client.onMagnificationChanged(displayId, region, config);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error sending magnification changes to " + mService, re);
+                Slog.e(LOG_TAG, "Error sending magnification changes to " + mClientBinder, re);
             }
         }
     }
 
     /**
-     * Called by the invocation handler to notify the service that the state of the soft
-     * keyboard show mode has changed.
+     * Called by the invocation handler to notify the client that the state of the soft keyboard
+     * show mode has changed.
      */
     private void notifySoftKeyboardShowModeChangedInternal(int showState) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onSoftKeyboardShowModeChanged", String.valueOf(showState));
                 }
-                listener.onSoftKeyboardShowModeChanged(showState);
+                client.onSoftKeyboardShowModeChanged(showState);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error sending soft keyboard show mode changes to " + mService,
+                Slog.e(
+                        LOG_TAG,
+                        "Error sending soft keyboard show mode changes to " + mClientBinder,
                         re);
             }
         }
     }
 
     private void notifyAccessibilityButtonClickedInternal(int displayId) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onAccessibilityButtonClicked", String.valueOf(displayId));
                 }
-                listener.onAccessibilityButtonClicked(displayId);
+                client.onAccessibilityButtonClicked(displayId);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error sending accessibility button click to " + mService, re);
+                Slog.e(LOG_TAG, "Error sending accessibility button click to " + mClientBinder, re);
             }
         }
     }
 
     private void notifyAccessibilityButtonAvailabilityChangedInternal(boolean available) {
-        // Only notify the service if it's not been notified or the state has changed
+        // Only notify the client if it's not been notified or the state has changed
         if (mReceivedAccessibilityButtonCallbackSinceBind
                 && (mLastAccessibilityButtonCallbackState == available)) {
             return;
         }
         mReceivedAccessibilityButtonCallbackSinceBind = true;
         mLastAccessibilityButtonCallbackState = available;
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onAccessibilityButtonAvailabilityChanged",
                             String.valueOf(available));
                 }
-                listener.onAccessibilityButtonAvailabilityChanged(available);
+                client.onAccessibilityButtonAvailabilityChanged(available);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error sending accessibility button availability change to " + mService,
+                Slog.e(
+                        LOG_TAG,
+                        "Error sending accessibility button availability change to "
+                                + mClientBinder,
                         re);
             }
         }
     }
 
     private void notifyGestureInternal(AccessibilityGestureEvent gestureInfo) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("onGesture", gestureInfo.toString());
                 }
-                listener.onGesture(gestureInfo);
+                client.onGesture(gestureInfo);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error during sending gesture " + gestureInfo
-                        + " to " + mService, re);
-            }
-        }
-    }
-
-    private void notifySystemActionsChangedInternal() {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
-            try {
-                if (svcClientTracingEnabled()) {
-                    logTraceSvcClient("onSystemActionsChanged", "");
-                }
-                listener.onSystemActionsChanged();
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error sending system actions change to " + mService,
+                Slog.e(
+                        LOG_TAG,
+                        "Error during sending gesture " + gestureInfo + " to " + mClientBinder,
                         re);
             }
         }
     }
 
+    private void notifySystemActionsChangedInternal() {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("onSystemActionsChanged", "");
+                }
+                client.onSystemActionsChanged();
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error sending system actions change to " + mClientBinder, re);
+            }
+        }
+    }
+
     private void notifyClearAccessibilityCacheInternal() {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("clearAccessibilityCache", "");
                 }
-                listener.clearAccessibilityCache();
+                client.clearAccessibilityCache();
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error during requesting accessibility info cache"
                         + " to be cleared.", re);
@@ -2106,70 +2119,66 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private void setImeSessionEnabledInternal(IAccessibilityInputMethodSession session,
             boolean enabled) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null && session != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null && session != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("createImeSession", "");
                 }
-                listener.setImeSessionEnabled(session, enabled);
+                client.setImeSessionEnabled(session, enabled);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error requesting IME session from " + mService, re);
+                Slog.e(LOG_TAG, "Error requesting IME session from " + mClientBinder, re);
             }
         }
     }
 
     private void bindInputInternal() {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("bindInput", "");
                 }
-                listener.bindInput();
+                client.bindInput();
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error binding input to " + mService, re);
+                Slog.e(LOG_TAG, "Error binding input to " + mClientBinder, re);
             }
         }
     }
 
     private void unbindInputInternal() {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("unbindInput", "");
                 }
-                listener.unbindInput();
+                client.unbindInput();
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error unbinding input to " + mService, re);
+                Slog.e(LOG_TAG, "Error unbinding input to " + mClientBinder, re);
             }
         }
     }
 
     private void startInputInternal(IRemoteAccessibilityInputConnection connection,
             EditorInfo editorInfo, boolean restarting) {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
+        final IAccessibilityServiceClient client = getClientSafely();
+        if (client != null) {
             try {
                 if (svcClientTracingEnabled()) {
                     logTraceSvcClient("startInput", "editorInfo=" + editorInfo
                             + " restarting=" + restarting);
                 }
-                listener.startInput(connection, editorInfo, restarting);
+                client.startInput(connection, editorInfo, restarting);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error starting input to " + mService, re);
+                Slog.e(LOG_TAG, "Error starting input to " + mClientBinder, re);
             }
         }
     }
 
-    protected IAccessibilityServiceClient getServiceInterfaceSafely() {
+    protected IAccessibilityServiceClient getClientSafely() {
         synchronized (mLock) {
-            return mServiceInterface;
+            return mClient;
         }
     }
 

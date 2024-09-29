@@ -71,7 +71,7 @@ fun ModeTile(viewModel: ModeTileViewModel) {
                         .semantics { stateDescription = viewModel.stateDescription },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement =
-                    Arrangement.spacedBy(space = 8.dp, alignment = Alignment.Start),
+                    Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
             ) {
                 Icon(icon = viewModel.icon, modifier = Modifier.size(24.dp))
                 Column {

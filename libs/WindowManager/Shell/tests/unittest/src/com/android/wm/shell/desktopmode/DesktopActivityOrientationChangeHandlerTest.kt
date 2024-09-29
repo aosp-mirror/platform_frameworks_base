@@ -41,12 +41,22 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.TaskStackListenerImpl
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFreeformTask
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.Companion.createFullscreenTask
+import com.android.wm.shell.desktopmode.persistence.Desktop
+import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlin.test.assertNotNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -73,6 +83,7 @@ import org.mockito.quality.Strictness
  */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
+@ExperimentalCoroutinesApi
 @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE, FLAG_RESPECT_ORIENTATION_CHANGE_FOR_UNRESIZEABLE)
 class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
@@ -82,16 +93,19 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     @Mock lateinit var transitions: Transitions
     @Mock lateinit var resizeTransitionHandler: ToggleResizeDesktopTaskTransitionHandler
     @Mock lateinit var taskStackListener: TaskStackListenerImpl
+    @Mock lateinit var persistentRepository: DesktopPersistentRepository
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var handler: DesktopActivityOrientationChangeHandler
     private lateinit var shellInit: ShellInit
     private lateinit var taskRepository: DesktopModeTaskRepository
+    private lateinit var testScope: CoroutineScope
     // Mock running tasks are registered here so we can get the list from mock shell task organizer.
     private val runningTasks = mutableListOf<RunningTaskInfo>()
 
     @Before
     fun setUp() {
+        Dispatchers.setMain(StandardTestDispatcher())
         mockitoSession =
             mockitoSession()
                 .strictness(Strictness.LENIENT)
@@ -99,10 +113,15 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
                 .startMocking()
         doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
+        testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
-        taskRepository = DesktopModeTaskRepository()
+        taskRepository =
+            DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
+        whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
+            Desktop.getDefaultInstance()
+        )
 
         handler = DesktopActivityOrientationChangeHandler(context, shellInit, shellTaskOrganizer,
             taskStackListener, resizeTransitionHandler, taskRepository)
@@ -115,6 +134,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         mockitoSession.finishMocking()
 
         runningTasks.clear()
+        testScope.cancel()
     }
 
     @Test

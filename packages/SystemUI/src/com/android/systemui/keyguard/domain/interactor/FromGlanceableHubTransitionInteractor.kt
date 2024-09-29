@@ -202,15 +202,15 @@ constructor(
             scope.launch {
                 combine(
                         keyguardInteractor.isKeyguardOccluded,
-                        keyguardInteractor.isAbleToDream
-                            // Debounce the dreaming signal since there is a race condition between
-                            // the occluded and dreaming signals. We therefore add a small delay
-                            // to give enough time for occluded to flip to false when the dream
-                            // ends, to avoid transitioning to OCCLUDED erroneously when exiting
-                            // the dream.
-                            .debounce(100.milliseconds),
+                        keyguardInteractor.isDreaming,
                         ::Pair,
                     )
+                    // Debounce signals since there is a race condition between the occluded and
+                    // dreaming signals when starting or stopping dreaming. We therefore add a small
+                    // delay to give enough time for occluded to flip to false when the dream
+                    // ends, to avoid transitioning to OCCLUDED erroneously when exiting the dream
+                    // or when the dream starts underneath the hub.
+                    .debounce(200.milliseconds)
                     .sampleFilter(
                         // When launching activities from widgets on the hub, we have a
                         // custom occlusion animation.

@@ -77,19 +77,40 @@ val SceneContainerTransitions = transitions {
     }
     from(Scenes.Lockscreen, to = Scenes.QuickSettings) { lockscreenToQuickSettingsTransition() }
     from(Scenes.Lockscreen, to = Scenes.Gone) { lockscreenToGoneTransition() }
+    from(Scenes.QuickSettings, to = Scenes.Shade) {
+        reversed { shadeToQuickSettingsTransition() }
+        sharedElement(Notifications.Elements.HeadsUpNotificationPlaceholder, enabled = false)
+    }
     from(Scenes.Shade, to = Scenes.QuickSettings) { shadeToQuickSettingsTransition() }
+    from(Scenes.Shade, to = Scenes.Lockscreen) {
+        reversed { lockscreenToShadeTransition() }
+        sharedElement(Notifications.Elements.NotificationStackPlaceholder, enabled = false)
+    }
 
     // Overlay transitions
 
     to(Overlays.NotificationsShade) { toNotificationsShadeTransition() }
     to(Overlays.QuickSettingsShade) { toQuickSettingsShadeTransition() }
-    from(Overlays.NotificationsShade, Overlays.QuickSettingsShade) {
+    from(Overlays.NotificationsShade, to = Overlays.QuickSettingsShade) {
         notificationsShadeToQuickSettingsShadeTransition()
+    }
+    from(Scenes.Gone, to = Overlays.NotificationsShade, key = SlightlyFasterShadeCollapse) {
+        toNotificationsShadeTransition(durationScale = 0.9)
+    }
+    from(Scenes.Gone, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
+        toQuickSettingsShadeTransition(durationScale = 0.9)
+    }
+    from(Scenes.Lockscreen, to = Overlays.NotificationsShade, key = SlightlyFasterShadeCollapse) {
+        toNotificationsShadeTransition(durationScale = 0.9)
+    }
+    from(Scenes.Lockscreen, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
+        toQuickSettingsShadeTransition(durationScale = 0.9)
     }
 
     // Scene overscroll
 
     overscrollDisabled(Scenes.Gone, Orientation.Vertical)
+    overscrollDisabled(Scenes.Lockscreen, Orientation.Vertical)
     overscroll(Scenes.Bouncer, Orientation.Vertical) {
         translate(Bouncer.Elements.Content, y = { absoluteDistance })
     }

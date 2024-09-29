@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.ObservableTransitionState.Idle
 import com.android.compose.animation.scene.ObservableTransitionState.Transition
 import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeScene
@@ -48,6 +49,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
@@ -82,8 +84,13 @@ constructor(
     private fun fullyExpandedDuringSceneChange(change: ChangeScene): Boolean {
         // The lockscreen stack is visible during all transitions away from the lockscreen, so keep
         // the stack expanded until those transitions finish.
-        return (expandedInScene(change.fromScene) && expandedInScene(change.toScene)) ||
-            change.isBetween({ it == Scenes.Lockscreen }, { true })
+        return if (change.isFrom({ it == Scenes.Lockscreen }, to = { true })) {
+            true
+        } else if (change.isFrom({ it == Scenes.Shade }, to = { it == Scenes.Lockscreen })) {
+            false
+        } else {
+            (expandedInScene(change.fromScene) && expandedInScene(change.toScene))
+        }
     }
 
     private fun expandFractionDuringSceneChange(
@@ -93,7 +100,10 @@ constructor(
     ): Float {
         return if (fullyExpandedDuringSceneChange(change)) {
             1f
-        } else if (change.isBetween({ it == Scenes.Gone }, { it == Scenes.Shade })) {
+        } else if (
+            change.isBetween({ it == Scenes.Gone }, { it == Scenes.Shade }) ||
+                change.isFrom({ it == Scenes.Shade }, to = { it == Scenes.Lockscreen })
+        ) {
             shadeExpansion
         } else if (change.isBetween({ it == Scenes.Gone }, { it == Scenes.QuickSettings })) {
             // during QS expansion, increase fraction at same rate as scrim alpha,
@@ -120,6 +130,14 @@ constructor(
             0f
         }
     }
+
+    /** Are notification stack height updates suppressed? */
+    val suppressHeightUpdates: Flow<Boolean> =
+        sceneInteractor.transitionState.map { transition: ObservableTransitionState ->
+            transition is Transition &&
+                transition.fromContent == Scenes.Lockscreen &&
+                (transition.toContent == Scenes.Bouncer || transition.toContent == Scenes.Gone)
+        }
 
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
@@ -177,6 +195,18 @@ constructor(
             .mapNotNull { state -> state is Idle && state.currentScene == Scenes.Gone }
             .distinctUntilChanged()
             .dumpWhileCollecting("shouldResetStackTop")
+
+    /** Whether the Notification Stack is visibly on the lockscreen scene. */
+    val isShowingStackOnLockscreen: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .mapNotNull { state ->
+                state.isIdle(Scenes.Lockscreen) ||
+                    state.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade)
+            }
+            .distinctUntilChanged()
+
+    /** The alpha of the Notification Stack for lockscreen fade-in */
+    val alphaForLockscreenFadeIn = stackAppearanceInteractor.alphaForLockscreenFadeIn
 
     private operator fun SceneKey.contains(scene: SceneKey) =
         sceneInteractor.isSceneInFamily(scene, this)
@@ -298,3 +328,6 @@ constructor(
 
 private fun ChangeScene.isBetween(a: (SceneKey) -> Boolean, b: (SceneKey) -> Boolean): Boolean =
     (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))
+
+private fun ChangeScene.isFrom(from: (SceneKey) -> Boolean, to: (SceneKey) -> Boolean): Boolean =
+    from(fromScene) && to(toScene)

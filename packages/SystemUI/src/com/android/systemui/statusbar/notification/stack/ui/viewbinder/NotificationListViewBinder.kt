@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
 import android.view.LayoutInflater
+import android.view.View
 import androidx.lifecycle.lifecycleScope
 import com.android.app.tracing.TraceUtils.traceAsync
 import com.android.internal.logging.MetricsLogger
@@ -25,6 +26,7 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.common.ui.view.setImportantForAccessibilityYesNo
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.lifecycle.repeatWhenAttachedToWindow
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -32,6 +34,10 @@ import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.NotificationActivityStarter
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController
 import com.android.systemui.statusbar.notification.dagger.SilentHeader
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
+import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
+import com.android.systemui.statusbar.notification.emptyshade.ui.viewbinder.EmptyShadeViewBinder
+import com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel.EmptyShadeViewModel
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
@@ -49,6 +55,7 @@ import com.android.systemui.statusbar.notification.ui.viewbinder.HeadsUpNotifica
 import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.util.kotlin.getOrNull
 import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import java.util.Optional
 import javax.inject.Inject
@@ -84,7 +91,7 @@ constructor(
 
     fun bindWhileAttached(
         view: NotificationStackScrollLayout,
-        viewController: NotificationStackScrollLayoutController
+        viewController: NotificationStackScrollLayoutController,
     ) {
         val shelf =
             LayoutInflater.from(view.context)
@@ -103,7 +110,13 @@ constructor(
                     val hasNonClearableSilentNotifications: StateFlow<Boolean> =
                         viewModel.hasNonClearableSilentNotifications.stateIn(this)
                     launch { reinflateAndBindFooter(view, hasNonClearableSilentNotifications) }
-                    launch { bindEmptyShade(view) }
+                    launch {
+                        if (ModesEmptyShadeFix.isEnabled) {
+                            reinflateAndBindEmptyShade(view)
+                        } else {
+                            bindEmptyShadeLegacy(viewModel.emptyShadeViewFactory.create(), view)
+                        }
+                    }
                     launch {
                         bindSilentHeaderClickListener(view, hasNonClearableSilentNotifications)
                     }
@@ -121,17 +134,12 @@ constructor(
     }
 
     private suspend fun bindShelf(shelf: NotificationShelf) {
-        NotificationShelfViewBinder.bind(
-            shelf,
-            viewModel.shelf,
-            falsingManager,
-            nicBinder,
-        )
+        NotificationShelfViewBinder.bind(shelf, viewModel.shelf, falsingManager, nicBinder)
     }
 
     private suspend fun reinflateAndBindFooter(
         parentView: NotificationStackScrollLayout,
-        hasNonClearableSilentNotifications: StateFlow<Boolean>
+        hasNonClearableSilentNotifications: StateFlow<Boolean>,
     ) {
         viewModel.footer.getOrNull()?.let { footerViewModel ->
             // The footer needs to be re-inflated every time the theme or the font size changes.
@@ -149,7 +157,7 @@ constructor(
                             footerView,
                             footerViewModel,
                             parentView,
-                            hasNonClearableSilentNotifications
+                            hasNonClearableSilentNotifications,
                         )
                     }
                 }
@@ -163,13 +171,13 @@ constructor(
         footerView: FooterView,
         footerViewModel: FooterViewModel,
         parentView: NotificationStackScrollLayout,
-        hasNonClearableSilentNotifications: StateFlow<Boolean>
+        hasNonClearableSilentNotifications: StateFlow<Boolean>,
     ): Unit = coroutineScope {
         val disposableHandle =
             FooterViewBinder.bindWhileAttached(
                 footerView,
                 footerViewModel,
-                clearAllNotifications = {
+                {
                     clearAllNotifications(
                         parentView,
                         // Hide the silent section header (if present) if there will be
@@ -177,16 +185,9 @@ constructor(
                         hideSilentSection = !hasNonClearableSilentNotifications.value,
                     )
                 },
-                launchNotificationSettings = { view ->
-                    notificationActivityStarter
-                        .get()
-                        .startHistoryIntent(view, /* showHistory= */ false)
-                },
-                launchNotificationHistory = { view ->
-                    notificationActivityStarter
-                        .get()
-                        .startHistoryIntent(view, /* showHistory= */ true)
-                },
+                launchNotificationSettings,
+                launchNotificationHistory,
+                notificationActivityStarter.get(),
             )
         if (SceneContainerFlag.isEnabled) {
             launch {
@@ -194,7 +195,9 @@ constructor(
                     footerView.setVisible(
                         /* visible = */ animatedVisibility.value,
                         /* animate = */ animatedVisibility.isAnimating,
-                    )
+                    ) {
+                        animatedVisibility.stopAnimating()
+                    }
                 }
             }
         } else {
@@ -211,20 +214,70 @@ constructor(
         disposableHandle.awaitCancellationThenDispose()
     }
 
-    private suspend fun bindEmptyShade(parentView: NotificationStackScrollLayout) {
+    private val launchNotificationSettings: (View) -> Unit = { view: View ->
+        notificationActivityStarter.get().startHistoryIntent(view, /* showHistory= */ false)
+    }
+
+    private val launchNotificationHistory: (View) -> Unit = { view ->
+        notificationActivityStarter.get().startHistoryIntent(view, /* showHistory= */ true)
+    }
+
+    private suspend fun reinflateAndBindEmptyShade(parentView: NotificationStackScrollLayout) {
+        ModesEmptyShadeFix.assertInNewMode()
+        // The empty shade needs to be re-inflated every time the theme or the font size
+        // changes.
+        configuration
+            .inflateLayout<EmptyShadeView>(
+                R.layout.status_bar_no_notifications,
+                parentView,
+                attachToRoot = false,
+            )
+            .flowOn(backgroundDispatcher)
+            .collectLatest { emptyShadeView: EmptyShadeView ->
+                traceAsync("bind EmptyShadeView") {
+                    parentView.setEmptyShadeView(emptyShadeView)
+                    bindEmptyShade(emptyShadeView, viewModel.emptyShadeViewFactory.create())
+                }
+            }
+    }
+
+    private suspend fun bindEmptyShadeLegacy(
+        emptyShadeViewModel: EmptyShadeViewModel,
+        parentView: NotificationStackScrollLayout,
+    ) {
+        ModesEmptyShadeFix.assertInLegacyMode()
         combine(
                 viewModel.shouldShowEmptyShadeView,
-                viewModel.areNotificationsHiddenInShade,
-                viewModel.hasFilteredOutSeenNotifications,
-                ::Triple
+                emptyShadeViewModel.areNotificationsHiddenInShade,
+                emptyShadeViewModel.hasFilteredOutSeenNotifications,
+                ::Triple,
             )
             .collect { (shouldShow, areNotifsHidden, hasFilteredNotifs) ->
-                parentView.updateEmptyShadeView(
-                    shouldShow,
-                    areNotifsHidden,
-                    hasFilteredNotifs,
+                parentView.updateEmptyShadeView(shouldShow, areNotifsHidden, hasFilteredNotifs)
+            }
+    }
+
+    private suspend fun bindEmptyShade(
+        emptyShadeView: EmptyShadeView,
+        emptyShadeViewModel: EmptyShadeViewModel,
+    ): Unit = coroutineScope {
+        ModesEmptyShadeFix.assertInNewMode()
+        launch {
+            emptyShadeView.repeatWhenAttachedToWindow {
+                EmptyShadeViewBinder.bind(
+                    emptyShadeView,
+                    emptyShadeViewModel,
+                    notificationActivityStarter.get(),
                 )
             }
+        }
+        launch {
+            viewModel.shouldShowEmptyShadeViewAnimated.collect { shouldShow ->
+                emptyShadeView.setVisible(shouldShow.value, shouldShow.isAnimating) {
+                    shouldShow.stopAnimating()
+                }
+            }
+        }
     }
 
     private suspend fun bindSilentHeaderClickListener(
@@ -261,7 +314,7 @@ constructor(
     private fun clearSilentNotifications(
         view: NotificationStackScrollLayout,
         closeShade: Boolean,
-        hideSilentSection: Boolean
+        hideSilentSection: Boolean,
     ) {
         view.clearSilentNotifications(closeShade, hideSilentSection)
     }
@@ -270,11 +323,7 @@ constructor(
         if (NotificationsLiveDataStoreRefactor.isEnabled) {
             viewModel.logger.getOrNull()?.let { viewModel ->
                 loggerOptional.getOrNull()?.let { logger ->
-                    NotificationStatsLoggerBinder.bindLogger(
-                        view,
-                        logger,
-                        viewModel,
-                    )
+                    NotificationStatsLoggerBinder.bindLogger(view, logger, viewModel)
                 }
             }
         }

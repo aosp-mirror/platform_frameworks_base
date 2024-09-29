@@ -56,3 +56,11 @@ flag {
     description: "Enhance HDMI-CEC power state and activeness transitions"
     bug: "332780751"
 }
+
+flag {
+    name: "media_quality_fw"
+    is_exported: true
+    namespace: "media_tv"
+    description: "Media Quality V1.0 APIs for Android W"
+    bug: "348412562"
+}
