@@ -15,13 +15,11 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.animation;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.GeneralEasing;
 
 import java.util.List;
@@ -30,6 +28,9 @@ import java.util.List;
  * Basic component animation spec
  */
 public class AnimationSpec implements Operation {
+
+    public static final AnimationSpec.Companion COMPANION = new AnimationSpec.Companion();
+
     int mAnimationId = -1;
     int mMotionDuration = 300;
     int mMotionEasingType = GeneralEasing.CUBIC_STANDARD;
@@ -102,7 +103,7 @@ public class AnimationSpec implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mAnimationId, mMotionDuration, mMotionEasingType,
+        Companion.apply(buffer, mAnimationId, mMotionDuration, mMotionEasingType,
                 mVisibilityDuration, mVisibilityEasingType, mEnterAnimation, mExitAnimation);
     }
 
@@ -116,77 +117,70 @@ public class AnimationSpec implements Operation {
         return (indent != null ? indent : "") + toString();
     }
 
-    public static String name() {
-        return "AnimationSpec";
-    }
-
-    public static int id() {
-        return Operations.ANIMATION_SPEC;
-    }
-
-    public static int animationToInt(ANIMATION animation) {
-        return animation.ordinal();
-    }
-
-    public static ANIMATION intToAnimation(int value) {
-        switch (value) {
-            case 0:
-                return ANIMATION.FADE_IN;
-            case 1:
-                return ANIMATION.FADE_OUT;
-            case 2:
-                return ANIMATION.SLIDE_LEFT;
-            case 3:
-                return ANIMATION.SLIDE_RIGHT;
-            case 4:
-                return ANIMATION.SLIDE_TOP;
-            case 5:
-                return ANIMATION.SLIDE_BOTTOM;
-            case 6:
-                return ANIMATION.ROTATE;
-            case 7:
-                return ANIMATION.PARTICLE;
-            default:
-                return ANIMATION.FADE_IN;
+    public static class Companion implements CompanionOperation {
+        @Override
+        public String name() {
+            return "AnimationSpec";
         }
-    }
 
-    public static void apply(WireBuffer buffer, int animationId, int motionDuration,
-                             int motionEasingType, int visibilityDuration,
-                             int visibilityEasingType, ANIMATION enterAnimation,
-                             ANIMATION exitAnimation) {
-        buffer.start(Operations.ANIMATION_SPEC);
-        buffer.writeInt(animationId);
-        buffer.writeInt(motionDuration);
-        buffer.writeInt(motionEasingType);
-        buffer.writeInt(visibilityDuration);
-        buffer.writeInt(visibilityEasingType);
-        buffer.writeInt(animationToInt(enterAnimation));
-        buffer.writeInt(animationToInt(exitAnimation));
-    }
+        @Override
+        public int id() {
+            return Operations.ANIMATION_SPEC;
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int animationId = buffer.readInt();
-        int motionDuration = buffer.readInt();
-        int motionEasingType = buffer.readInt();
-        int visibilityDuration = buffer.readInt();
-        int visibilityEasingType = buffer.readInt();
-        ANIMATION enterAnimation = intToAnimation(buffer.readInt());
-        ANIMATION exitAnimation = intToAnimation(buffer.readInt());
-        AnimationSpec op = new AnimationSpec(animationId, motionDuration, motionEasingType,
-                visibilityDuration, visibilityEasingType, enterAnimation, exitAnimation);
-        operations.add(op);
-    }
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Layout Operations",
-                        id(),
-                        name())
-                .description("define the animation")
-                .field(INT, "animationId", "")
-                .field(INT, "motionDuration", "")
-                .field(INT, "motionEasingType", "")
-                .field(INT, "visibilityDuration", "")
-                .field(INT, "visibilityEasingType", "");
+        public static int animationToInt(ANIMATION animation) {
+            return animation.ordinal();
+        }
 
+        public static ANIMATION intToAnimation(int value) {
+            switch (value) {
+                case 0:
+                    return ANIMATION.FADE_IN;
+                case 1:
+                    return ANIMATION.FADE_OUT;
+                case 2:
+                    return ANIMATION.SLIDE_LEFT;
+                case 3:
+                    return ANIMATION.SLIDE_RIGHT;
+                case 4:
+                    return ANIMATION.SLIDE_TOP;
+                case 5:
+                    return ANIMATION.SLIDE_BOTTOM;
+                case 6:
+                    return ANIMATION.ROTATE;
+                case 7:
+                    return ANIMATION.PARTICLE;
+                default:
+                    return ANIMATION.FADE_IN;
+            }
+        }
+
+        public static void apply(WireBuffer buffer, int animationId, int motionDuration,
+                                 int motionEasingType, int visibilityDuration,
+                                 int visibilityEasingType, ANIMATION enterAnimation,
+                                 ANIMATION exitAnimation) {
+            buffer.start(Operations.ANIMATION_SPEC);
+            buffer.writeInt(animationId);
+            buffer.writeInt(motionDuration);
+            buffer.writeInt(motionEasingType);
+            buffer.writeInt(visibilityDuration);
+            buffer.writeInt(visibilityEasingType);
+            buffer.writeInt(animationToInt(enterAnimation));
+            buffer.writeInt(animationToInt(exitAnimation));
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int animationId = buffer.readInt();
+            int motionDuration = buffer.readInt();
+            int motionEasingType = buffer.readInt();
+            int visibilityDuration = buffer.readInt();
+            int visibilityEasingType = buffer.readInt();
+            ANIMATION enterAnimation = intToAnimation(buffer.readInt());
+            ANIMATION exitAnimation = intToAnimation(buffer.readInt());
+            AnimationSpec op = new AnimationSpec(animationId, motionDuration, motionEasingType,
+                    visibilityDuration, visibilityEasingType, enterAnimation, exitAnimation);
+            operations.add(op);
+        }
     }
 }

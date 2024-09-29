@@ -20,13 +20,6 @@ import com.android.internal.widget.remotecompose.core.operations.ShaderData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.core.operations.Utils;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.utilities.ArrayAccess;
-import com.android.internal.widget.remotecompose.core.operations.utilities.CollectionsAccess;
-
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 
 /**
  * Specify an abstract context used to playback RemoteCompose documents
@@ -64,18 +57,8 @@ public abstract class RemoteContext {
     }
 
     /**
-     * Provide access to the table of collections
-     *
-     * @return the CollectionsAccess implementation
-     */
-    public CollectionsAccess getCollectionsAccess() {
-        return mRemoteComposeState;
-    }
-
-    /**
      * Load a path under an id.
      * Paths can be use in clip drawPath and drawTweenPath
-     *
      * @param instanceId
      * @param floatPath
      */
@@ -84,24 +67,22 @@ public abstract class RemoteContext {
     /**
      * Associate a name with a give id.
      *
-     * @param varName the name
-     * @param varId   the id (color,integer,float etc.)
-     * @param varType thetype
+     * @param varName
+     * @param varId
+     * @param varType
      */
     public abstract void loadVariableName(String varName, int varId, int varType);
 
     /**
      * Save a color under a given id
-     *
-     * @param id    the id of the color
-     * @param color the color to set
+     * @param id
+     * @param color
      */
     public abstract void loadColor(int id, int color);
 
     /**
      * Set the animation time allowing the creator to control animation rates
-     *
-     * @param time the animation time in seconds
+     * @param time
      */
     public void setAnimationTime(float time) {
         mAnimationTime = time;
@@ -109,7 +90,6 @@ public abstract class RemoteContext {
 
     /**
      * gets the time animation clock as float in seconds
-     *
      * @return a monotonic time in seconds (arbitrary zero point)
      */
     public float getAnimationTime() {
@@ -120,59 +100,10 @@ public abstract class RemoteContext {
     /**
      * Set the value of a named Color.
      * This overrides the color in the document
-     *
-     * @param colorName the name of the color to override
-     * @param color     Override the default color
+     * @param colorName
+     * @param color
      */
     public abstract void setNamedColorOverride(String colorName, int color);
-
-    /**
-     * Set the value of a named String.
-     * This overrides the string in the document
-     * @param stringName the name of the string to override
-     * @param value Override the default string
-     */
-    public abstract void setNamedStringOverride(String stringName, String value);
-
-
-    /**
-     * Allows to clear a named String.
-     *
-     * If an override exists, we revert back to the default value in the document.
-     *
-     * @param stringName the name of the string to override
-     */
-    public abstract void clearNamedStringOverride(String stringName);
-
-    /**
-     * Set the value of a named Integer.
-     * This overrides the integer in the document
-     * @param integerName the name of the integer to override
-     * @param value Override the default integer
-     */
-    public abstract void setNamedIntegerOverride(String integerName, int value);
-
-    /**
-     * Allows to clear a named Integer.
-     *
-     * If an override exists, we revert back to the default value in the document.
-     *
-     * @param integerName the name of the integer to override
-     */
-    public abstract void clearNamedIntegerOverride(String integerName);
-
-
-    /**
-     * Support Collections by registering this collection
-     *
-     * @param id         id of the collection
-     * @param collection the collection under this id
-     */
-    public abstract void addCollection(int id, ArrayAccess collection);
-
-    public abstract void runAction(int id, String metadata);
-
-    public abstract void runNamedAction(int textId);
 
 
     /**
@@ -181,7 +112,7 @@ public abstract class RemoteContext {
      * - DATA : only operations dealing with DATA (eg loading a bitmap) should execute
      * - PAINT : only operations painting should execute
      */
-    public enum ContextMode {
+    public enum  ContextMode {
         UNSET, DATA, PAINT
     }
 
@@ -243,21 +174,21 @@ public abstract class RemoteContext {
     /**
      * Sets the way the player handles the content
      *
-     * @param scroll    set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
+     * @param scroll set the horizontal behavior (NONE|SCROLL_HORIZONTAL|SCROLL_VERTICAL)
      * @param alignment set the alignment of the content (TOP|CENTER|BOTTOM|START|END)
-     * @param sizing    set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
-     * @param mode      set the mode of sizing, either LAYOUT modes or SCALE modes
-     *                  the LAYOUT modes are:
-     *                  - LAYOUT_MATCH_PARENT
-     *                  - LAYOUT_WRAP_CONTENT
-     *                  or adding an horizontal mode and a vertical mode:
-     *                  - LAYOUT_HORIZONTAL_MATCH_PARENT
-     *                  - LAYOUT_HORIZONTAL_WRAP_CONTENT
-     *                  - LAYOUT_HORIZONTAL_FIXED
-     *                  - LAYOUT_VERTICAL_MATCH_PARENT
-     *                  - LAYOUT_VERTICAL_WRAP_CONTENT
-     *                  - LAYOUT_VERTICAL_FIXED
-     *                  The LAYOUT_*_FIXED modes will use the intrinsic document size
+     * @param sizing set the type of sizing for the content (NONE|SIZING_LAYOUT|SIZING_SCALE)
+     * @param mode set the mode of sizing, either LAYOUT modes or SCALE modes
+     *             the LAYOUT modes are:
+     *             - LAYOUT_MATCH_PARENT
+     *             - LAYOUT_WRAP_CONTENT
+     *             or adding an horizontal mode and a vertical mode:
+     *             - LAYOUT_HORIZONTAL_MATCH_PARENT
+     *             - LAYOUT_HORIZONTAL_WRAP_CONTENT
+     *             - LAYOUT_HORIZONTAL_FIXED
+     *             - LAYOUT_VERTICAL_MATCH_PARENT
+     *             - LAYOUT_VERTICAL_WRAP_CONTENT
+     *             - LAYOUT_VERTICAL_FIXED
+     *             The LAYOUT_*_FIXED modes will use the intrinsic document size
      */
     public void setRootContentBehavior(int scroll, int alignment, int sizing, int mode) {
         mDocument.setRootContentBehavior(scroll, alignment, sizing, mode);
@@ -265,7 +196,6 @@ public abstract class RemoteContext {
 
     /**
      * Set a content description for the document
-     *
      * @param contentDescriptionId the text id pointing at the description
      */
     public void setDocumentContentDescription(int contentDescriptionId) {
@@ -279,112 +209,94 @@ public abstract class RemoteContext {
 
     /**
      * Save a bitmap under an imageId
-     *
-     * @param imageId the id of the image
-     * @param width   the width of the image
-     * @param height  the height of the image
-     * @param bitmap  the bytes that represent the image
+     * @param imageId
+     * @param width
+     * @param height
+     * @param bitmap
      */
     public abstract void loadBitmap(int imageId, int width, int height, byte[] bitmap);
 
     /**
      * Save a string under a given id
-     *
-     * @param id   the id of the string
-     * @param text the value to set
+     * @param id
+     * @param text
      */
     public abstract void loadText(int id, String text);
 
     /**
      * Get a string given an id
-     *
-     * @param id the id of the string
+     * @param id
      * @return
      */
     public abstract String getText(int id);
 
     /**
      * Load a float
-     *
-     * @param id    id of the float
-     * @param value the value to set
+     * @param id
+     * @param value
      */
     public abstract void loadFloat(int id, float value);
 
     /**
-     * Load a integer
-     *
-     * @param id    id of the integer
-     * @param value the value to set
+     * Load a float
+     * @param id
+     * @param value
      */
     public abstract void loadInteger(int id, int value);
-
-
-    public abstract void overrideInteger(int id, int value);
-
-    public abstract void overrideText(int id, int valueId);
 
     /**
      * Load an animated float associated with an id
      * Todo: Remove?
-     *
-     * @param id            the id of the float
-     * @param animatedFloat The animated float
+     * @param id
+     * @param animatedFloat
      */
     public abstract void loadAnimatedFloat(int id, FloatExpression animatedFloat);
 
     /**
      * Save a shader under and ID
-     *
-     * @param id    the id of the Shader
-     * @param value the shader
+     * @param id
+     * @param value
      */
     public abstract void loadShader(int id, ShaderData value);
 
     /**
      * Get a float given an id
-     *
-     * @param id the id of the float
-     * @return the value of the float
+     * @param id
+     * @return
      */
     public abstract float getFloat(int id);
 
     /**
-     * Get a Integer given an id
-     *
-     * @param id of the integer
-     * @return the value
+     * Get a float given an id
+     * @param id
+     * @return
      */
     public abstract int getInteger(int id);
 
     /**
      * Get the color given and ID
-     *
-     * @param id of the color
-     * @return the color
+     * @param id
+     * @return
      */
     public abstract int getColor(int id);
 
     /**
      * called to notify system that a command is interested in a variable
-     *
-     * @param id              track when this id changes value
-     * @param variableSupport call back when value changes
+     * @param id
+     * @param variableSupport
      */
     public abstract void listensTo(int id, VariableSupport variableSupport);
 
     /**
      * Notify commands with variables have changed
-     *
-     * @return the number of ms to next update
+     * @return
      */
     public abstract int updateOps();
 
     /**
      * Get a shader given the id
-     *
-     * @param id get a shader given the id
-     * @return The shader
+     * @param id
+     * @return
      */
     public abstract ShaderData getShader(int id);
 
@@ -440,55 +352,6 @@ public abstract class RemoteContext {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Click handling
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    public static boolean isTime(float fl) {
-        int value = Utils.idFromNan(fl);
-        return value >= ID_CONTINUOUS_SEC && value <= ID_DAY_OF_MONTH;
-    }
-
-    public static float getTime(float fl) {
-        LocalDateTime dateTime = LocalDateTime.now();
-        // This define the time in the format
-        // seconds run from Midnight=0 quantized to seconds hour 0..3599
-        // minutes run from Midnight=0 quantized to minutes 0..1439
-        // hours run from Midnight=0 quantized to Hours 0-23
-        // CONTINUOUS_SEC is seconds from midnight looping every hour 0-3600
-        // CONTINUOUS_SEC is accurate to milliseconds due to float precession
-        // ID_OFFSET_TO_UTC is the offset from UTC in sec (typically / 3600f)
-        int value = Utils.idFromNan(fl);
-        int month = dateTime.getMonth().getValue();
-        int hour = dateTime.getHour();
-        int minute = dateTime.getMinute();
-        int seconds = dateTime.getSecond();
-        int currentMinute = hour * 60 + minute;
-        int currentSeconds = minute * 60 + seconds;
-        float sec = currentSeconds + dateTime.getNano() * 1E-9f;
-        int day_week = dateTime.getDayOfWeek().getValue();
-
-
-        ZoneId zone = ZoneId.systemDefault();
-        OffsetDateTime offsetDateTime = dateTime.atZone(zone).toOffsetDateTime();
-        ZoneOffset offset = offsetDateTime.getOffset();
-        switch (value) {
-            case ID_OFFSET_TO_UTC:
-                return offset.getTotalSeconds();
-            case ID_CONTINUOUS_SEC:
-                return sec;
-            case ID_TIME_IN_SEC:
-                return currentSeconds;
-            case ID_TIME_IN_MIN:
-                return currentMinute;
-            case ID_TIME_IN_HR:
-                return hour;
-            case ID_CALENDAR_MONTH:
-            case ID_DAY_OF_MONTH:
-                return month;
-            case ID_WEEK_DAY:
-                return day_week;
-        }
-        return fl;
-    }
-
-
 
     public abstract void addClickArea(
             int id,

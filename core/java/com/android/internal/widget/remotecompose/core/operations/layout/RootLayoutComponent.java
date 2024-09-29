@@ -15,16 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
-import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Measurable;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
@@ -36,6 +34,10 @@ import java.util.List;
  * Represents the root layout component. Entry point to the component tree layout/paint.
  */
 public class RootLayoutComponent extends Component implements ComponentStartOperation {
+
+    public static final RootLayoutComponent.Companion COMPANION =
+            new RootLayoutComponent.Companion();
+
     int mCurrentId = -1;
 
     public RootLayoutComponent(int componentId, float x, float y,
@@ -50,8 +52,7 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
 
     @Override
     public String toString() {
-        return "ROOT " + mComponentId + " (" + mX + ", " + mY + " - "
-                + mWidth + " x " + mHeight + ") " + mVisibility;
+        return "ROOT (" + mX + ", " + mY + " - " + mWidth + " x " + mHeight + ") " + mVisibility;
     }
 
     @Override
@@ -60,22 +61,18 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
                 + "] = [" + mX + ", " + mY + ", " + mWidth + ", " + mHeight + "] " + mVisibility);
     }
 
-    /**
-     * Traverse the hierarchy and assign generated ids to component without ids.
-     * Most components would already have ids assigned during the document creation, but this
-     * allow us to take care of any components added during the inflation.
-     *
-     * @param lastId the last known generated id
-     */
-    public void assignIds(int lastId) {
-        mCurrentId = lastId;
+    public int getNextId() {
+        mCurrentId--;
+        return mCurrentId;
+    }
+
+    public void assignIds() {
         assignId(this);
     }
 
-    private void assignId(Component component) {
+    void assignId(Component component) {
         if (component.mComponentId == -1) {
-            mCurrentId--;
-            component.mComponentId = mCurrentId;
+            component.mComponentId = getNextId();
         }
         for (Operation op : component.mList) {
             if (op instanceof Component) {
@@ -138,42 +135,39 @@ public class RootLayoutComponent extends Component implements ComponentStartOper
         for (Operation c : component.mList) {
             if (c instanceof ComponentModifiers) {
                 ((ComponentModifiers) c).serializeToString(indent + 1, serializer);
-            } else if (c instanceof Component) {
+            }
+            if (c instanceof Component) {
                 displayHierarchy((Component) c, indent + 1, serializer);
-            } else if (c instanceof SerializableToString) {
-                ((SerializableToString) c).serializeToString(indent + 1, serializer);
             }
         }
     }
 
-    public static String name() {
-        return "RootLayout";
-    }
+    public static class Companion implements DocumentedCompanionOperation {
+        @Override
+        public String name() {
+            return "RootLayout";
+        }
 
-    public static int id() {
-        return Operations.LAYOUT_ROOT;
-    }
+        @Override
+        public int id() {
+            return Operations.LAYOUT_ROOT;
+        }
 
-    public static void apply(WireBuffer buffer, int componentId) {
-        buffer.start(Operations.LAYOUT_ROOT);
-        buffer.writeInt(componentId);
-    }
+        public void apply(WireBuffer buffer) {
+            buffer.start(Operations.LAYOUT_ROOT);
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int componentId = buffer.readInt();
-        operations.add(new RootLayoutComponent(
-                componentId, 0, 0, 0, 0, null, -1));
-    }
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            operations.add(new RootLayoutComponent(
+                    -1, 0, 0, 0, 0, null, -1));
+        }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Layout Operations", id(), name())
-                .field(INT, "COMPONENT_ID", "unique id for this component")
-                .description("Root element for a document. Other components / layout managers "
-                        + "are children in the component tree starting from this Root component.");
-    }
-
-    @Override
-    public void write(WireBuffer buffer) {
-        apply(buffer, mComponentId);
+        @Override
+        public void documentation(DocumentationBuilder doc) {
+            doc.operation("Layout Operations", id(), name())
+                    .description("Root element for a document. Other components / layout managers "
+                         + "are children in the component tree starting from this Root component.");
+        }
     }
 }

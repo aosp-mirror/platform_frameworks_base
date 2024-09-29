@@ -15,15 +15,12 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
-
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -37,8 +34,6 @@ import java.util.List;
  * mMode = 4  H S V mode
  */
 public class ColorExpression implements Operation, VariableSupport {
-    private static final int OP_CODE = Operations.COLOR_EXPRESSIONS;
-    private static final String CLASS_NAME = "ColorExpression";
     public int mId;
     int mMode;
     public int mColor1;
@@ -57,8 +52,8 @@ public class ColorExpression implements Operation, VariableSupport {
     public float mOutTween = 0.0f;
     public int mOutColor1;
     public int mOutColor2;
+    public static final Companion COMPANION = new Companion();
     public static final int HSV_MODE = 4;
-
     public ColorExpression(int id, float hue, float sat, float value) {
         mMode = HSV_MODE;
         mAlpha = 0xFF;
@@ -69,7 +64,6 @@ public class ColorExpression implements Operation, VariableSupport {
         mColor2 = Float.floatToRawIntBits(sat);
         mTween = value;
     }
-
     public ColorExpression(int id, int alpha, float hue, float sat, float value) {
         mMode = HSV_MODE;
         mAlpha = alpha;
@@ -96,6 +90,7 @@ public class ColorExpression implements Operation, VariableSupport {
         this.mOutTween = tween;
         this.mOutColor1 = color1;
         this.mOutColor2 = color2;
+
     }
 
     @Override
@@ -168,12 +163,13 @@ public class ColorExpression implements Operation, VariableSupport {
             context.loadColor(mId,
                     Utils.interpolateColor(mOutColor1, mOutColor2, mOutTween));
         }
+
     }
 
     @Override
     public void write(WireBuffer buffer) {
         int mode = mMode | (mAlpha << 16);
-        apply(buffer, mId, mode, mColor1, mColor2, mTween);
+        COMPANION.apply(buffer, mId, mode, mColor1, mColor2, mTween);
     }
 
     @Override
@@ -191,66 +187,51 @@ public class ColorExpression implements Operation, VariableSupport {
                 + Utils.floatToString(mTween) + ")";
     }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
 
+        @Override
+        public String name() {
+            return "ColorExpression";
+        }
 
-    public static int id() {
-        return OP_CODE;
-    }
+        @Override
+        public int id() {
+            return Operations.COLOR_EXPRESSIONS;
+        }
 
-    /**
-     * Call to write a ColorExpression object on the buffer
-     *
-     * @param buffer
-     * @param id     of the ColorExpression object
-     * @param mode   if colors are id or actual values
-     * @param color1
-     * @param color2
-     * @param tween
-     */
-    public static void apply(WireBuffer buffer,
-                             int id, int mode,
-                             int color1, int color2, float tween) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(id);
-        buffer.writeInt(mode);
-        buffer.writeInt(color1);
-        buffer.writeInt(color2);
-        buffer.writeFloat(tween);
+        /**
+         * Call to write a ColorExpression object on the buffer
+         * @param buffer
+         * @param id of the ColorExpression object
+         * @param mode if colors are id or actual values
+         * @param color1
+         * @param color2
+         * @param tween
+         */
+        public void apply(WireBuffer buffer,
+                          int id, int mode,
+                          int color1, int color2, float tween) {
+            buffer.start(Operations.COLOR_EXPRESSIONS);
+            buffer.writeInt(id);
+            buffer.writeInt(mode);
+            buffer.writeInt(color1);
+            buffer.writeInt(color2);
+            buffer.writeFloat(tween);
 
-    }
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int id = buffer.readInt();
-        int mode = buffer.readInt();
-        int color1 = buffer.readInt();
-        int color2 = buffer.readInt();
-        float tween = buffer.readFloat();
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int id = buffer.readInt();
+            int mode = buffer.readInt();
+            int color1 = buffer.readInt();
+            int color2 = buffer.readInt();
+            float tween = buffer.readFloat();
 
-        operations.add(new ColorExpression(id, mode, color1, color2, tween));
-    }
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Expressions Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("A Color defined by an expression")
-                .field(INT, "id", "Id of the color")
-                .field(INT, "mode", "The use of the next 3 fields")
-                .possibleValues("COLOR_COLOR_INTERPOLATE", 0)
-                .possibleValues("COLOR_ID_INTERPOLATE", 1)
-                .possibleValues("ID_COLOR_INTERPOLATE", 2)
-                .possibleValues("ID_ID_INTERPOLATE", 3)
-                .possibleValues("HSV", 4)
-                .field(INT, "color1",
-                        "32 bit ARGB color")
-                .field(INT, "color2",
-                        "32 bit ARGB color")
-                .field(FLOAT, "tween",
-                        "32 bit ARGB color");
-
+            operations.add(new ColorExpression(id, mode, color1, color2, tween));
+        }
     }
 
     @Override

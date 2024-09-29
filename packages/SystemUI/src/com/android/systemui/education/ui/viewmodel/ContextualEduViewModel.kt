@@ -17,6 +17,7 @@
 package com.android.systemui.education.ui.viewmodel
 
 import android.content.res.Resources
+import android.view.accessibility.AccessibilityManager
 import com.android.systemui.contextualeducation.GestureType.ALL_APPS
 import com.android.systemui.contextualeducation.GestureType.BACK
 import com.android.systemui.contextualeducation.GestureType.HOME
@@ -27,23 +28,63 @@ import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInter
 import com.android.systemui.education.shared.model.EducationInfo
 import com.android.systemui.education.shared.model.EducationUiType
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import javax.inject.Inject
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ContextualEduViewModel
 @Inject
-constructor(@Main private val resources: Resources, interactor: KeyboardTouchpadEduInteractor) {
-    val eduContent: Flow<ContextualEduContentViewModel> =
-        interactor.educationTriggered.filterNotNull().map {
-            if (it.educationUiType == EducationUiType.Notification) {
-                ContextualEduNotificationViewModel(getEduTitle(it), getEduContent(it), it.userId)
-            } else {
-                ContextualEduToastViewModel(getEduContent(it), it.userId)
+constructor(
+    @Main private val resources: Resources,
+    interactor: KeyboardTouchpadEduInteractor,
+    private val accessibilityManagerWrapper: AccessibilityManagerWrapper,
+) {
+
+    companion object {
+        const val DEFAULT_DIALOG_TIMEOUT_MILLIS = 3500
+    }
+
+    private val timeoutMillis: Long
+        get() =
+            accessibilityManagerWrapper
+                .getRecommendedTimeoutMillis(
+                    DEFAULT_DIALOG_TIMEOUT_MILLIS,
+                    AccessibilityManager.FLAG_CONTENT_TEXT,
+                )
+                .toLong()
+
+    val eduContent: Flow<ContextualEduContentViewModel?> =
+        interactor.educationTriggered
+            .filterNotNull()
+            .map {
+                if (it.educationUiType == EducationUiType.Notification) {
+                    ContextualEduNotificationViewModel(
+                        getEduTitle(it),
+                        getEduContent(it),
+                        it.userId,
+                    )
+                } else {
+                    ContextualEduToastViewModel(getEduContent(it), it.userId)
+                }
+            }
+            .timeout(timeoutMillis, emitAfterTimeout = null)
+
+    private fun <T> Flow<T>.timeout(timeoutMillis: Long, emitAfterTimeout: T): Flow<T> {
+        return flatMapLatest {
+            flow {
+                emit(it)
+                delay(timeoutMillis)
+                emit(emitAfterTimeout)
             }
         }
+    }
 
     private fun getEduContent(educationInfo: EducationInfo): String {
         val resourceId =

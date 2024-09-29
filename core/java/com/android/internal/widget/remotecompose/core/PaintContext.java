@@ -21,21 +21,10 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintBund
  * Specify an abstract paint context used by RemoteCompose commands to draw
  */
 public abstract class PaintContext {
-    public static final int TEXT_MEASURE_MONOSPACE_WIDTH = 0x01;
-    public static final int TEXT_MEASURE_FONT_HEIGHT = 0x02;
-
     protected RemoteContext mContext;
-    private boolean mNeedsRepaint = false;
+
     public RemoteContext getContext() {
         return mContext;
-    }
-
-    public boolean doesNeedsRepaint() {
-        return mNeedsRepaint;
-    }
-
-    public void clearNeedsRepaint() {
-        mNeedsRepaint = false;
     }
 
     public PaintContext(RemoteContext context) {
@@ -122,16 +111,13 @@ public abstract class PaintContext {
      * @param textId
      * @param start
      * @param end    if end is -1 it means the whole string
-     * @param flags how to measure:
-     *              TEXT_MEASURE_MONOSPACE_WIDTH - measure as a monospace font
-     *              TEXT_MEASURE_FULL_HEIGHT - measure bounds of the given string using the
-     *                max ascend and descent of the font (not just of the measured text)
+     * @param monospace measure with better support for monospace
      * @param bounds the bounds (left, top, right, bottom)
      */
     public abstract void getTextBounds(int textId,
                                        int start,
                                        int end,
-                                       int flags,
+                                       boolean monospace,
                                        float[]bounds);
 
     /**
@@ -281,8 +267,5 @@ public abstract class PaintContext {
         System.out.println("[LOG] " + content);
     }
 
-    public void needsRepaint() {
-        mNeedsRepaint = true;
-    }
 }
 

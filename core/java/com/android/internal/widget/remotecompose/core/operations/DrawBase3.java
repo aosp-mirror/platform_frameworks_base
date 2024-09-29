@@ -17,7 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.operations.Utils.floatToString;
 
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
+import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
@@ -30,7 +32,14 @@ import java.util.List;
  */
 public abstract class DrawBase3 extends PaintOperation
         implements VariableSupport {
-
+    public static final Companion COMPANION =
+            new Companion(Operations.DRAW_CIRCLE) {
+                @Override
+                public Operation construct(float x1, float y1, float x2) {
+                    // subclass should return new DrawX(x1, y1, x2, y2);
+                    return null;
+                }
+            };
     protected String mName = "DrawRectBase";
     float mV1;
     float mV2;
@@ -77,18 +86,7 @@ public abstract class DrawBase3 extends PaintOperation
 
     @Override
     public void write(WireBuffer buffer) {
-        write(buffer, mV1, mV2, mV3);
-    }
-
-    protected abstract void write(WireBuffer buffer,
-                                  float v1,
-                                  float v2,
-                                  float v3);
-
-    interface Maker {
-        DrawBase3 create(float v1,
-                         float v2,
-                         float v3);
+        COMPANION.apply(buffer, mV1, mV2, mV3);
     }
 
     @Override
@@ -97,26 +95,63 @@ public abstract class DrawBase3 extends PaintOperation
                 + " " + floatToString(mV3);
     }
 
-    public static void read(Maker maker, WireBuffer buffer, List<Operation> operations) {
-        float v1 = buffer.readFloat();
-        float v2 = buffer.readFloat();
-        float v3 = buffer.readFloat();
-        Operation op = maker.create(v1, v2, v3);
-        operations.add(op);
-    }
+    public static class Companion implements CompanionOperation {
+        public final int OP_CODE;
 
-    /**
-     * Construct and Operation from the 3 variables.
-     * This must be overridden by subclasses
-     *
-     * @param x1
-     * @param y1
-     * @param x2
-     * @return
-     */
-    public Operation construct(float x1,
-                               float y1,
-                               float x2) {
-        return null;
+        protected Companion(int code) {
+            OP_CODE = code;
+        }
+
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            float v1 = buffer.readFloat();
+            float v2 = buffer.readFloat();
+            float v3 = buffer.readFloat();
+
+            Operation op = construct(v1, v2, v3);
+            operations.add(op);
+        }
+
+        /**
+         * Construct and Operation from the 3 variables.
+         * This must be overridden by subclasses
+         * @param x1
+         * @param y1
+         * @param x2
+         * @return
+         */
+        public Operation construct(float x1,
+                                   float y1,
+                                   float x2) {
+            return null;
+        }
+
+        @Override
+        public String name() {
+            return "DrawRect";
+        }
+
+        @Override
+        public int id() {
+            return OP_CODE;
+        }
+
+        /**
+         * Writes out the operation to the buffer
+         * @param buffer
+         * @param x1
+         * @param y1
+         * @param x2
+         */
+        public void apply(WireBuffer buffer,
+                          float x1,
+                          float y1,
+                          float x2) {
+            buffer.start(OP_CODE);
+            buffer.writeFloat(x1);
+            buffer.writeFloat(y1);
+            buffer.writeFloat(x2);
+
+        }
     }
 }

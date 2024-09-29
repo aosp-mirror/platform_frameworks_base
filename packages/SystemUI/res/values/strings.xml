@@ -3818,6 +3818,8 @@ Action + ESC for this.</string>
     <!-- Main text of the one line view of a redacted notification -->
     <string name="redacted_notification_single_line_text">Unlock to view</string>
 
+    <!-- Content description for contextual education dialog [CHAR LIMIT=NONE] -->
+    <string name="contextual_education_dialog_title">Contextual education</string>
     <!-- Education notification title for Back [CHAR_LIMIT=100] -->
     <string name="back_edu_notification_title">Use your touchpad to go back</string>
     <!-- Education notification text for Back [CHAR_LIMIT=100] -->

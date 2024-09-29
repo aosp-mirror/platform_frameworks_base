@@ -15,14 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import android.util.Log;
 
+import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -33,8 +33,7 @@ import java.util.List;
  * as the dimensions of the document in pixels.
  */
 public class RootContentBehavior implements RemoteComposeOperation {
-    private static final int OP_CODE = Operations.ROOT_CONTENT_BEHAVIOR;
-    private static final String CLASS_NAME = "RootContentBehavior";
+
     int mScroll = NONE;
     int mSizing = NONE;
 
@@ -95,6 +94,8 @@ public class RootContentBehavior implements RemoteComposeOperation {
     public static final int SCALE_CROP = 5;
     public static final int SCALE_FILL_BOUNDS = 6;
 
+    public static final Companion COMPANION = new Companion();
+
     /**
      * Sets the way the player handles the content
      *
@@ -122,7 +123,7 @@ public class RootContentBehavior implements RemoteComposeOperation {
                 mScroll = scroll;
                 break;
             default: {
-                System.out.println(TAG + "incorrect scroll value " + scroll);
+                Log.e(TAG, "incorrect scroll value " + scroll);
             }
         }
         if (alignment == ALIGNMENT_CENTER) {
@@ -139,14 +140,14 @@ public class RootContentBehavior implements RemoteComposeOperation {
             if (validHorizontalAlignment && validVerticalAlignment) {
                 mAlignment = alignment;
             } else {
-                System.out.println(TAG + "incorrect alignment "
+                Log.e(TAG, "incorrect alignment "
                         + " h: " + horizontalContentAlignment
                         + " v: " + verticalContentAlignment);
             }
         }
         switch (sizing) {
             case SIZING_LAYOUT: {
-                System.out.println(TAG + "sizing_layout is not yet supported");
+                Log.e(TAG, "sizing_layout is not yet supported");
             }
             break;
             case SIZING_SCALE: {
@@ -154,12 +155,12 @@ public class RootContentBehavior implements RemoteComposeOperation {
             }
             break;
             default: {
-                System.out.println(TAG + "incorrect sizing value " + sizing);
+                Log.e(TAG, "incorrect sizing value " + sizing);
             }
         }
         if (mSizing == SIZING_LAYOUT) {
             if (mode != NONE) {
-                System.out.println(TAG + "mode for sizing layout is not yet supported");
+                Log.e(TAG, "mode for sizing layout is not yet supported");
             }
         } else if (mSizing == SIZING_SCALE) {
             switch (mode) {
@@ -172,7 +173,7 @@ public class RootContentBehavior implements RemoteComposeOperation {
                     mMode = mode;
                     break;
                 default: {
-                    System.out.println(TAG + "incorrect mode for scale sizing, mode: " + mode);
+                    Log.e(TAG, "incorrect mode for scale sizing, mode: " + mode);
                 }
             }
         }
@@ -180,7 +181,7 @@ public class RootContentBehavior implements RemoteComposeOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mScroll, mAlignment, mSizing, mMode);
+        COMPANION.apply(buffer, mScroll, mAlignment, mSizing, mMode);
     }
 
     @Override
@@ -199,67 +200,37 @@ public class RootContentBehavior implements RemoteComposeOperation {
         return toString();
     }
 
+    public static class Companion implements CompanionOperation {
+        private Companion() {
+        }
 
-    public static String name() {
-        return CLASS_NAME;
-    }
+        @Override
+        public String name() {
+            return "RootContentBehavior";
+        }
 
+        @Override
+        public int id() {
+            return Operations.ROOT_CONTENT_BEHAVIOR;
+        }
 
-    public static int id() {
-        return OP_CODE;
-    }
+        public void apply(WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
+            buffer.start(Operations.ROOT_CONTENT_BEHAVIOR);
+            buffer.writeInt(scroll);
+            buffer.writeInt(alignment);
+            buffer.writeInt(sizing);
+            buffer.writeInt(mode);
+        }
 
-    public static void apply(WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
-        buffer.start(OP_CODE);
-        buffer.writeInt(scroll);
-        buffer.writeInt(alignment);
-        buffer.writeInt(sizing);
-        buffer.writeInt(mode);
-    }
-
-
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int scroll = buffer.readInt();
-        int alignment = buffer.readInt();
-        int sizing = buffer.readInt();
-        int mode = buffer.readInt();
-        RootContentBehavior rootContentBehavior =
-                new RootContentBehavior(scroll, alignment, sizing, mode);
-        operations.add(rootContentBehavior);
-    }
-
-
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Protocol Operations",
-                        OP_CODE,
-                        CLASS_NAME)
-                .description("Describes the behaviour of the root")
-                .field(INT, "scroll", "scroll")
-                .possibleValues("SCROLL_HORIZONTAL", SCROLL_HORIZONTAL)
-                .possibleValues("SCROLL_VERTICAL", SCROLL_VERTICAL)
-                .field(INT, "alignment", "alignment")
-                .possibleValues("ALIGNMENT_TOP", ALIGNMENT_TOP)
-                .possibleValues("ALIGNMENT_VERTICAL_CENTER", ALIGNMENT_VERTICAL_CENTER)
-                .possibleValues("ALIGNMENT_BOTTOM", ALIGNMENT_BOTTOM)
-                .possibleValues("ALIGNMENT_START", ALIGNMENT_START)
-                .possibleValues("ALIGNMENT_START", ALIGNMENT_START)
-                .possibleValues("ALIGNMENT_END", ALIGNMENT_END)
-                .field(INT, "sizing", "sizing")
-                .possibleValues("SCALE_INSIDE", SCALE_INSIDE)
-                .possibleValues("SCALE_FIT", SCALE_FIT)
-                .possibleValues("SCALE_FILL_WIDTH", SCALE_FILL_WIDTH)
-                .possibleValues("SCALE_FILL_HEIGHT", SCALE_FILL_HEIGHT)
-                .possibleValues("SCALE_CROP", SCALE_CROP)
-                .possibleValues("SCALE_FILL_BOUNDS", SCALE_FILL_BOUNDS)
-                .field(INT, "mode", "mode")
-                .possibleValues("LAYOUT_HORIZONTAL_MATCH_PARENT", LAYOUT_HORIZONTAL_MATCH_PARENT)
-                .possibleValues("LAYOUT_HORIZONTAL_WRAP_CONTENT", LAYOUT_HORIZONTAL_WRAP_CONTENT)
-                .possibleValues("LAYOUT_HORIZONTAL_FIXED", LAYOUT_HORIZONTAL_FIXED)
-                .possibleValues("LAYOUT_VERTICAL_MATCH_PARENT", LAYOUT_VERTICAL_MATCH_PARENT)
-                .possibleValues("LAYOUT_VERTICAL_WRAP_CONTENT", LAYOUT_VERTICAL_WRAP_CONTENT)
-                .possibleValues("LAYOUT_VERTICAL_FIXED", LAYOUT_VERTICAL_FIXED)
-                .possibleValues("LAYOUT_MATCH_PARENT", LAYOUT_MATCH_PARENT)
-                .possibleValues("LAYOUT_WRAP_CONTENT", LAYOUT_WRAP_CONTENT);
-
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int scroll = buffer.readInt();
+            int alignment = buffer.readInt();
+            int sizing = buffer.readInt();
+            int mode = buffer.readInt();
+            RootContentBehavior rootContentBehavior =
+                    new RootContentBehavior(scroll, alignment, sizing, mode);
+            operations.add(rootContentBehavior);
+        }
     }
 }

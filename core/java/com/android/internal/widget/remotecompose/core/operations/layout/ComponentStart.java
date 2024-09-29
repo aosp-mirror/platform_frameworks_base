@@ -23,10 +23,13 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
 public class ComponentStart implements ComponentStartOperation {
+
+    public static final ComponentStart.Companion COMPANION = new ComponentStart.Companion();
 
     int mType = DEFAULT;
     float mX;
@@ -70,12 +73,12 @@ public class ComponentStart implements ComponentStartOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        apply(buffer, mType, mComponentId, mWidth, mHeight);
+        Companion.apply(buffer, mType, mComponentId, mWidth, mHeight);
     }
 
     @Override
     public String toString() {
-        return "COMPONENT_START (type " + mType + " " + typeDescription(mType)
+        return "COMPONENT_START (type " + mType + " " + Companion.typeDescription(mType)
                 + ") - (" + mX + ", " + mY + " - " + mWidth + " x " + mHeight + ")";
     }
 
@@ -108,75 +111,83 @@ public class ComponentStart implements ComponentStartOperation {
     public static final int LAYOUT_ROW = 15;
     public static final int LAYOUT_COLUMN = 16;
 
-    public static String typeDescription(int type) {
-        switch (type) {
-            case DEFAULT:
-                return "DEFAULT";
-            case ROOT_LAYOUT:
-                return "ROOT_LAYOUT";
-            case LAYOUT:
-                return "LAYOUT";
-            case LAYOUT_CONTENT:
-                return "CONTENT";
-            case SCROLL_CONTENT:
-                return "SCROLL_CONTENT";
-            case BUTTON:
-                return "BUTTON";
-            case CHECKBOX:
-                return "CHECKBOX";
-            case TEXT:
-                return "TEXT";
-            case CURVED_TEXT:
-                return "CURVED_TEXT";
-            case STATE_HOST:
-                return "STATE_HOST";
-            case LOTTIE:
-                return "LOTTIE";
-            case CUSTOM:
-                return "CUSTOM";
-            case IMAGE:
-                return "IMAGE";
-            default:
-                return "UNKNOWN";
+    public static class Companion implements DocumentedCompanionOperation {
+
+
+        public static String typeDescription(int type) {
+            switch (type) {
+                case DEFAULT:
+                    return "DEFAULT";
+                case ROOT_LAYOUT:
+                    return "ROOT_LAYOUT";
+                case LAYOUT:
+                    return "LAYOUT";
+                case LAYOUT_CONTENT:
+                    return "CONTENT";
+                case SCROLL_CONTENT:
+                    return "SCROLL_CONTENT";
+                case BUTTON:
+                    return "BUTTON";
+                case CHECKBOX:
+                    return "CHECKBOX";
+                case TEXT:
+                    return "TEXT";
+                case CURVED_TEXT:
+                    return "CURVED_TEXT";
+                case STATE_HOST:
+                    return "STATE_HOST";
+                case LOTTIE:
+                    return "LOTTIE";
+                case CUSTOM:
+                    return "CUSTOM";
+                case IMAGE:
+                    return "IMAGE";
+                default:
+                    return "UNKNOWN";
+            }
         }
-    }
 
-    public static String name() {
-        return "ComponentStart";
-    }
+        @Override
+        public String name() {
+            return "ComponentStart";
+        }
 
-    public static int id() {
-        return Operations.COMPONENT_START;
-    }
+        @Override
+        public int id() {
+            return Operations.COMPONENT_START;
+        }
 
-    public static void apply(WireBuffer buffer, int type, int componentId,
-                             float width, float height) {
-        buffer.start(Operations.COMPONENT_START);
-        buffer.writeInt(type);
-        buffer.writeInt(componentId);
-        buffer.writeFloat(width);
-        buffer.writeFloat(height);
-    }
+        public static void apply(WireBuffer buffer, int type, int componentId,
+                                 float width, float height) {
+            buffer.start(Operations.COMPONENT_START);
+            buffer.writeInt(type);
+            buffer.writeInt(componentId);
+            buffer.writeFloat(width);
+            buffer.writeFloat(height);
+        }
 
-    public static int size() {
-        return 1 + 4 + 4 + 4;
-    }
+        public static int size() {
+            return 1 + 4 + 4 + 4;
+        }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
-        int type = buffer.readInt();
-        int componentId = buffer.readInt();
-        float width = buffer.readFloat();
-        float height = buffer.readFloat();
-        operations.add(new ComponentStart(type, componentId, width, height));
-    }
+        @Override
+        public void read(WireBuffer buffer, List<Operation> operations) {
+            int type = buffer.readInt();
+            int componentId = buffer.readInt();
+            float width = buffer.readFloat();
+            float height = buffer.readFloat();
+            operations.add(new ComponentStart(type, componentId, width, height));
+        }
 
-    public static void documentation(DocumentationBuilder doc) {
-        doc.operation("Layout Operations", id(), name())
-                .description("Basic component encapsulating draw commands."
-                        + "This is not resizable.")
-                .field(INT, "TYPE", "Type of components")
-                .field(INT, "COMPONENT_ID", "unique id for this component")
-                .field(FLOAT, "WIDTH", "width of the component")
-                .field(FLOAT, "HEIGHT", "height of the component");
+        @Override
+        public void documentation(DocumentationBuilder doc) {
+            doc.operation("Layout Operations", id(), name())
+                    .description("Basic component encapsulating draw commands."
+                           + "This is not resizable.")
+                    .field(INT, "TYPE", "Type of components")
+                    .field(INT, "COMPONENT_ID", "unique id for this component")
+                    .field(FLOAT, "WIDTH", "width of the component")
+                    .field(FLOAT, "HEIGHT", "height of the component");
+        }
     }
 }
