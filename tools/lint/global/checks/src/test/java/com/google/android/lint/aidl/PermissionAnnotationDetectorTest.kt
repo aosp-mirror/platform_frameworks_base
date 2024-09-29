@@ -73,7 +73,7 @@ class PermissionAnnotationDetectorTest : LintDetectorTest() {
             .run()
             .expect(
                 """
-                src/frameworks/base/services/java/com/android/server/Bar.java:3: Error: The method testMethod is not permission-annotated. [MissingPermissionAnnotation]
+                src/frameworks/base/services/java/com/android/server/Bar.java:3: Error: testMethod should be annotated with either @EnforcePermission, @RequiresNoPermission or @PermissionManuallyEnforced. [MissingPermissionAnnotation]
                     public void testMethod(int parameter1, int parameter2) { }
                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 1 errors, 0 warnings

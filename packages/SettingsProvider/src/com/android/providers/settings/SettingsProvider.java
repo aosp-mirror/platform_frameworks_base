@@ -1993,8 +1993,6 @@ public class SettingsProvider extends ContentProvider {
             if (!isValidMediaUri(name, value)) {
                 return false;
             }
-            // Invalidate any relevant cache files
-            cacheFile.delete();
         }
 
         final boolean success;
@@ -2030,6 +2028,11 @@ public class SettingsProvider extends ContentProvider {
 
         if (!success) {
             return false;
+        }
+
+        if (cacheFile != null) {
+            // Invalidate any relevant cache files
+            cacheFile.delete();
         }
 
         if ((operation == MUTATION_OPERATION_INSERT || operation == MUTATION_OPERATION_UPDATE)
@@ -3262,6 +3265,24 @@ public class SettingsProvider extends ContentProvider {
 
             if (forceNotify || success) {
                 notifyForSettingsChange(key, name);
+
+                // If this is an aconfig flag, it will be written as a staged flag.
+                // Notify that its staged flag value will be updated.
+                if (Flags.notifyIndividualAconfigSyspropChanged() && type == SETTINGS_TYPE_CONFIG) {
+                    int slashIndex = name.indexOf('/');
+                    boolean validSlashIndex = slashIndex != -1
+                            && slashIndex != 0
+                            && slashIndex != name.length();
+                    if (validSlashIndex) {
+                        String namespace = name.substring(0, slashIndex);
+                        String flagName = name.substring(slashIndex + 1);
+                        if (settingsState.getAconfigDefaultFlags().containsKey(flagName)) {
+                            String stagedName = "staged/" + namespace + "*" + flagName;
+                            notifyForSettingsChange(key, stagedName);
+                        }
+                    }
+                }
+
                 if (wasUnsetNonPredefinedSetting) {
                     // Increment the generation number for all non-predefined, unset settings,
                     // because a new non-predefined setting has been inserted

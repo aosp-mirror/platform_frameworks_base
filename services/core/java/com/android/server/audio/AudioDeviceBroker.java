@@ -332,8 +332,8 @@ public class AudioDeviceBroker {
             Log.v(TAG, "setCommunicationDevice, device: " + device + ", uid: " + uid);
         }
 
-        synchronized (mDeviceStateLock) {
-            if (device == null) {
+        if (device == null) {
+            synchronized (mDeviceStateLock) {
                 CommunicationRouteClient client = getCommunicationRouteClientForUid(uid);
                 if (client == null) {
                     return false;
@@ -1483,38 +1483,6 @@ public class AudioDeviceBroker {
         sendLMsgNoDelay(MSG_L_COMMUNICATION_ROUTE_CLIENT_DIED, SENDMSG_QUEUE, client);
     }
 
-    /*package*/ void postSaveSetPreferredDevicesForStrategy(int strategy,
-                                                            List<AudioDeviceAttributes> devices)
-    {
-        sendILMsgNoDelay(MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_QUEUE, strategy, devices);
-    }
-
-    /*package*/ void postSaveRemovePreferredDevicesForStrategy(int strategy) {
-        sendIMsgNoDelay(MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY, SENDMSG_QUEUE, strategy);
-    }
-
-    /*package*/ void postSaveSetDeviceAsNonDefaultForStrategy(
-            int strategy, AudioDeviceAttributes device) {
-        sendILMsgNoDelay(MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy, device);
-    }
-
-    /*package*/ void postSaveRemoveDeviceAsNonDefaultForStrategy(
-            int strategy, AudioDeviceAttributes device) {
-        sendILMsgNoDelay(
-                MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY, SENDMSG_QUEUE, strategy, device);
-    }
-
-    /*package*/ void postSaveSetPreferredDevicesForCapturePreset(
-            int capturePreset, List<AudioDeviceAttributes> devices) {
-        sendILMsgNoDelay(
-                MSG_IL_SAVE_PREF_DEVICES_FOR_CAPTURE_PRESET, SENDMSG_QUEUE, capturePreset, devices);
-    }
-
-    /*package*/ void postSaveClearPreferredDevicesForCapturePreset(int capturePreset) {
-        sendIMsgNoDelay(
-                MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET, SENDMSG_QUEUE, capturePreset);
-    }
-
     /*package*/ void postUpdateCommunicationRouteClient(
             boolean wasBtScoRequested, String eventSource) {
         sendILMsgNoDelay(MSG_IL_UPDATE_COMMUNICATION_ROUTE_CLIENT, SENDMSG_QUEUE,
@@ -2025,40 +1993,9 @@ public class AudioDeviceBroker {
                         mDeviceInventory.setBluetoothActiveDevice(btInfo);
                     }
                 } break;
-                case MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    final List<AudioDeviceAttributes> devices =
-                            (List<AudioDeviceAttributes>) msg.obj;
-                    mDeviceInventory.onSaveSetPreferredDevices(strategy, devices);
-                } break;
-                case MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    mDeviceInventory.onSaveRemovePreferredDevices(strategy);
-                } break;
-                case MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    final AudioDeviceAttributes device = (AudioDeviceAttributes) msg.obj;
-                    mDeviceInventory.onSaveSetDeviceAsNonDefault(strategy, device);
-                } break;
-                case MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY: {
-                    final int strategy = msg.arg1;
-                    final AudioDeviceAttributes device = (AudioDeviceAttributes) msg.obj;
-                    mDeviceInventory.onSaveRemoveDeviceAsNonDefault(strategy, device);
-                } break;
                 case MSG_CHECK_MUTE_MUSIC:
                     checkMessagesMuteMusic(0);
                     break;
-                case MSG_IL_SAVE_PREF_DEVICES_FOR_CAPTURE_PRESET: {
-                    final int capturePreset = msg.arg1;
-                    final List<AudioDeviceAttributes> devices =
-                            (List<AudioDeviceAttributes>) msg.obj;
-                    mDeviceInventory.onSaveSetPreferredDevicesForCapturePreset(
-                            capturePreset, devices);
-                } break;
-                case MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET: {
-                    final int capturePreset = msg.arg1;
-                    mDeviceInventory.onSaveClearPreferredDevicesForCapturePreset(capturePreset);
-                } break;
                 case MSG_L_NOTIFY_PREFERRED_AUDIOPROFILE_APPLIED: {
                     final BluetoothDevice btDevice = (BluetoothDevice) msg.obj;
                     BtHelper.onNotifyPreferredAudioProfileApplied(btDevice);
@@ -2151,15 +2088,9 @@ public class AudioDeviceBroker {
     // process external command to (dis)connect a hearing aid device
     private static final int MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT = 31;
 
-    private static final int MSG_IL_SAVE_PREF_DEVICES_FOR_STRATEGY = 32;
-    private static final int MSG_I_SAVE_REMOVE_PREF_DEVICES_FOR_STRATEGY = 33;
-
     private static final int MSG_L_COMMUNICATION_ROUTE_CLIENT_DIED = 34;
     private static final int MSG_CHECK_MUTE_MUSIC = 35;
     private static final int MSG_REPORT_NEW_ROUTES_A2DP = 36;
-
-    private static final int MSG_IL_SAVE_PREF_DEVICES_FOR_CAPTURE_PRESET = 37;
-    private static final int MSG_I_SAVE_CLEAR_PREF_DEVICES_FOR_CAPTURE_PRESET = 38;
 
     private static final int MSG_L_SET_COMMUNICATION_DEVICE_FOR_CLIENT = 42;
     private static final int MSG_IL_UPDATE_COMMUNICATION_ROUTE_CLIENT = 43;
@@ -2169,8 +2100,6 @@ public class AudioDeviceBroker {
     // process set volume for Le Audio, obj is BleVolumeInfo
     private static final int MSG_II_SET_LE_AUDIO_OUT_VOLUME = 46;
 
-    private static final int MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY = 47;
-    private static final int MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY = 48;
     private static final int MSG_IIL_BTLEAUDIO_TIMEOUT = 49;
 
     private static final int MSG_L_NOTIFY_PREFERRED_AUDIOPROFILE_APPLIED = 52;
