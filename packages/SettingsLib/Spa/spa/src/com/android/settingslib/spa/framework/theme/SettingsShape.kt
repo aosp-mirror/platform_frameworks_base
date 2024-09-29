@@ -24,5 +24,7 @@ object SettingsShape {
 
     val CornerMedium = RoundedCornerShape(12.dp)
 
+    val categoryCorner = RoundedCornerShape(20.dp)
+
     val CornerExtraLarge = RoundedCornerShape(28.dp)
 }

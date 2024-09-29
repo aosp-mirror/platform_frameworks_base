@@ -31,7 +31,6 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Category
-import com.android.settingslib.spa.widget.ui.CategoryTitle
 
 private const val TITLE = "Sample Category"
 
@@ -42,10 +41,12 @@ object CategoryPageProvider : SettingsPageProvider {
     fun buildInjectEntry(): SettingsEntryBuilder {
         return SettingsEntryBuilder.createInject(owner)
             .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
+                Preference(
+                    object : PreferenceModel {
+                        override val title = TITLE
+                        override val onClick = navigator(name)
+                    }
+                )
             }
             .setSearchDataFn { EntrySearchData(title = TITLE) }
     }
@@ -70,7 +71,6 @@ object CategoryPageProvider : SettingsPageProvider {
             SettingsEntryBuilder.create("Preference 3", owner)
                 .setMacro { SimplePreferenceMacro(title = "Preference 2", summary = "Summary 3") }
                 .build()
-
         )
         entryList.add(
             SettingsEntryBuilder.create("Preference 4", owner)
@@ -84,11 +84,11 @@ object CategoryPageProvider : SettingsPageProvider {
     override fun Page(arguments: Bundle?) {
         val entries = buildEntry(arguments)
         RegularScaffold(title = getTitle(arguments)) {
-            CategoryTitle("Category A")
-            entries[0].UiLayout()
-            entries[1].UiLayout()
-
-            Category("Category B") {
+            Category("Category A") {
+                entries[0].UiLayout()
+                entries[1].UiLayout()
+            }
+            Category {
                 entries[2].UiLayout()
                 entries[3].UiLayout()
             }
@@ -99,7 +99,5 @@ object CategoryPageProvider : SettingsPageProvider {
 @Preview(showBackground = true)
 @Composable
 private fun SpinnerPagePreview() {
-    SettingsTheme {
-        SpinnerPageProvider.Page(null)
-    }
+    SettingsTheme { CategoryPageProvider.Page(null) }
 }
