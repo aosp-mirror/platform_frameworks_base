@@ -90,7 +90,7 @@ private fun IntroIcon(imageVector: ImageVector?) {
                 imageVector = imageVector,
                 contentDescription = null,
                 modifier = Modifier.size(SettingsDimension.introIconSize),
-                tint = MaterialTheme.colorScheme.onSecondary,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
             )
         }
     }
