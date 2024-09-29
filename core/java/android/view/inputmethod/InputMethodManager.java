@@ -465,13 +465,6 @@ public final class InputMethodManager {
     private static final long USE_ASYNC_SHOW_HIDE_METHOD = 352594277L; // This is a bug id.
 
     /**
-     * Version-gating is guarded by bug-fix flag.
-     */
-    private static final boolean ASYNC_SHOW_HIDE_METHOD_ENABLED =
-            !Flags.compatchangeForZerojankproxy()
-                || CompatChanges.isChangeEnabled(USE_ASYNC_SHOW_HIDE_METHOD);
-
-    /**
      * If {@code true}, avoid calling the
      * {@link com.android.server.inputmethod.InputMethodManagerService InputMethodManagerService}
      * by skipping the call to {@link IInputMethodManager#startInputOrWindowGainedFocus}
@@ -613,6 +606,15 @@ public final class InputMethodManager {
     @GuardedBy("mH")
     @UnsupportedAppUsage
     Rect mCursorRect = new Rect();
+
+    /**
+     * Version-gating is guarded by bug-fix flag.
+     */
+    // Note: this is non-static so that it only gets initialized once CompatChanges has
+    // access to the correct application context.
+    private final boolean mAsyncShowHideMethodEnabled =
+            !Flags.compatchangeForZerojankproxy()
+                    || CompatChanges.isChangeEnabled(USE_ASYNC_SHOW_HIDE_METHOD);
 
     /** Cached value for {@link #isStylusHandwritingAvailable} for userId. */
     @GuardedBy("mH")
@@ -2419,7 +2421,7 @@ public final class InputMethodManager {
                         mCurRootView.getLastClickToolType(),
                         resultReceiver,
                         reason,
-                        ASYNC_SHOW_HIDE_METHOD_ENABLED);
+                        mAsyncShowHideMethodEnabled);
             }
         }
     }
@@ -2463,7 +2465,7 @@ public final class InputMethodManager {
                     mCurRootView.getLastClickToolType(),
                     resultReceiver,
                     reason,
-                    ASYNC_SHOW_HIDE_METHOD_ENABLED);
+                    mAsyncShowHideMethodEnabled);
         }
     }
 
@@ -2572,7 +2574,7 @@ public final class InputMethodManager {
                 return true;
             } else {
                 return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, windowToken,
-                        statsToken, flags, resultReceiver, reason, ASYNC_SHOW_HIDE_METHOD_ENABLED);
+                        statsToken, flags, resultReceiver, reason, mAsyncShowHideMethodEnabled);
             }
         }
     }
@@ -2615,7 +2617,7 @@ public final class InputMethodManager {
             ImeTracker.forLogging().onProgress(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
 
             return IInputMethodManagerGlobalInvoker.hideSoftInput(mClient, view.getWindowToken(),
-                    statsToken, flags, null, reason, ASYNC_SHOW_HIDE_METHOD_ENABLED);
+                    statsToken, flags, null, reason, mAsyncShowHideMethodEnabled);
         }
     }
 
@@ -3392,7 +3394,7 @@ public final class InputMethodManager {
                         servedInputConnection == null ? null
                                 : servedInputConnection.asIRemoteAccessibilityInputConnection(),
                         view.getContext().getApplicationInfo().targetSdkVersion, targetUserId,
-                        mImeDispatcher, ASYNC_SHOW_HIDE_METHOD_ENABLED);
+                        mImeDispatcher, mAsyncShowHideMethodEnabled);
             } else {
                 res = IInputMethodManagerGlobalInvoker.startInputOrWindowGainedFocus(
                         startInputReason, mClient, windowGainingFocus, startInputFlags,

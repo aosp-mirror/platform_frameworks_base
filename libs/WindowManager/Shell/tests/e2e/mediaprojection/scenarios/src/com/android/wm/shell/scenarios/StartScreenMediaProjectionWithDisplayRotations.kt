@@ -25,7 +25,6 @@ import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
 import com.android.server.wm.flicker.helpers.StartMediaProjectionAppHelper
 import com.android.wm.shell.Utils
 import org.junit.After
@@ -45,8 +44,7 @@ open class StartScreenMediaProjectionWithDisplayRotations {
     val device = UiDevice.getInstance(instrumentation)
 
     private val initialRotation = Rotation.ROTATION_0
-    private val mediaProjectionAppHelper = StartMediaProjectionAppHelper(instrumentation)
-    private val testApp = DesktopModeAppHelper(mediaProjectionAppHelper)
+    private val testApp = StartMediaProjectionAppHelper(instrumentation)
 
     @Rule
     @JvmField
@@ -60,7 +58,7 @@ open class StartScreenMediaProjectionWithDisplayRotations {
 
     @Test
     open fun startMediaProjectionAndRotate() {
-        mediaProjectionAppHelper.startEntireScreenMediaProjection(wmHelper)
+        testApp.startEntireScreenMediaProjection(wmHelper)
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
 
         ChangeDisplayOrientationRule.setRotation(Rotation.ROTATION_90)

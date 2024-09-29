@@ -41,6 +41,5 @@ val Kosmos.keyguardDismissInteractor by
             trustRepository = trustRepository,
             alternateBouncerInteractor = alternateBouncerInteractor,
             powerInteractor = powerInteractor,
-            keyguardTransitionInteractor = keyguardTransitionInteractor,
         )
     }

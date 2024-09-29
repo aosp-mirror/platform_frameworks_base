@@ -1344,6 +1344,9 @@ public class PipTransition extends PipTransitionController {
         final SurfaceControl leash = pipChange.getLeash();
         final Rect destBounds = mPipOrganizer.getCurrentOrAnimatingBounds();
         final boolean isInPip = mPipTransitionState.isInPip();
+        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                "%s: Update pip for unhandled transition, change=%s, destBounds=%s, isInPip=%b",
+                TAG, pipChange, destBounds, isInPip);
         mSurfaceTransactionHelper
                 .crop(startTransaction, leash, destBounds)
                 .round(startTransaction, leash, isInPip)

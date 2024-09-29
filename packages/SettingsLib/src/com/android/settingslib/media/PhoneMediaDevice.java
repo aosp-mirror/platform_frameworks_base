@@ -97,7 +97,7 @@ public class PhoneMediaDevice extends MediaDevice {
             case TYPE_USB_ACCESSORY:
                 name =
                         inputRoutingEnabledAndIsDesktop()
-                                ? context.getString(R.string.media_transfer_usb_speaker_name)
+                                ? context.getString(R.string.media_transfer_usb_audio_name)
                                 : context.getString(R.string.media_transfer_wired_headphone_name);
                 break;
             case TYPE_DOCK:

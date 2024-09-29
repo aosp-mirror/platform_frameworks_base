@@ -37,12 +37,14 @@ import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.ApplicationSharedMemory;
 import com.android.server.SystemClockTime;
 import com.android.server.SystemClockTime.TimeConfidence;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
@@ -315,6 +317,17 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         // detected time if, for example, the age of all suggestions are considered.
         NetworkTimeSuggestion lastNetworkSuggestion = mLastNetworkSuggestion.get();
         if (lastNetworkSuggestion == null || !lastNetworkSuggestion.equals(suggestion)) {
+            if (com.android.internal.os.Flags.applicationSharedMemoryEnabled()
+                    && android.os.Flags.networkTimeUsesSharedMemory()) {
+                UnixEpochTime networkUnixEpochTime = suggestion.getUnixEpochTime();
+                long lastNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis =
+                        networkUnixEpochTime.getUnixEpochTimeMillis()
+                                - networkUnixEpochTime.getElapsedRealtimeMillis();
+                ApplicationSharedMemory.getInstance()
+                        .setLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis(
+                                lastNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis);
+            }
+
             mLastNetworkSuggestion.set(suggestion);
             notifyNetworkTimeUpdateListenersAsynchronously();
         }
@@ -347,8 +360,12 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     @Override
     public synchronized void clearLatestNetworkSuggestion() {
+        if (com.android.internal.os.Flags.applicationSharedMemoryEnabled()
+                && android.os.Flags.networkTimeUsesSharedMemory()) {
+            ApplicationSharedMemory.getInstance()
+                    .clearLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis();
+        }
         mLastNetworkSuggestion.set(null);
-
         notifyNetworkTimeUpdateListenersAsynchronously();
 
         // The loss of network time may change the time signal to use to set the system clock.

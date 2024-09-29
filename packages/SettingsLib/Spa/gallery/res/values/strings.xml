@@ -26,6 +26,8 @@
     <string name="single_line_summary_preference_summary" translatable="false">A very long summary to show case a preference which only shows a single line summary.</string>
     <!-- Footer text with two links. [DO NOT TRANSLATE] -->
     <string name="footer_with_two_links" translatable="false">Annotated string with <a href="https://www.android.com/">link 1</a> and <a href="https://source.android.com/">link 2</a>.</string>
+    <!-- TopIntroPreference preview text. [DO NOT TRANSLATE] -->
+    <string name="label_with_two_links" translatable="false"><a href="https://www.android.com/">Label</a></string>
 
     <!-- Sample title -->
     <string name="sample_title" translatable="false">Lorem ipsum</string>

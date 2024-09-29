@@ -27,6 +27,7 @@ import com.android.systemui.qs.shared.model.CategoryAndName
 sealed interface GridCell {
     val row: Int
     val span: GridItemSpan
+    val s: String
 }
 
 /**
@@ -39,6 +40,7 @@ data class TileGridCell(
     override val row: Int,
     override val width: Int,
     override val span: GridItemSpan = GridItemSpan(width),
+    override val s: String = "${tile.tileSpec.spec}-$row-$width",
 ) : GridCell, SizedTile<EditTileViewModel>, CategoryAndName by tile {
     val key: String = "${tile.tileSpec.spec}-$row"
 
@@ -53,22 +55,30 @@ data class TileGridCell(
 data class SpacerGridCell(
     override val row: Int,
     override val span: GridItemSpan = GridItemSpan(1),
+    override val s: String = "spacer",
 ) : GridCell
 
+/**
+ * Generates a list of [GridCell] from a list of [SizedTile]
+ *
+ * Builds rows based on the tiles' widths, and fill each hole with a [SpacerGridCell]
+ *
+ * @param startingRow The row index the grid is built from, used in cases where only end rows need
+ *   to be regenerated
+ */
 fun List<SizedTile<EditTileViewModel>>.toGridCells(
     columns: Int,
-    includeSpacers: Boolean = false,
+    startingRow: Int = 0,
 ): List<GridCell> {
     return splitInRowsSequence(this, columns)
         .flatMapIndexed { rowIndex, sizedTiles ->
-            val row: List<GridCell> = sizedTiles.map { TileGridCell(it, rowIndex) }
+            val correctedRowIndex = rowIndex + startingRow
+            val row: List<GridCell> = sizedTiles.map { TileGridCell(it, correctedRowIndex) }
 
-            if (includeSpacers) {
-                // Fill the incomplete rows with spacers
-                val numSpacers = columns - sizedTiles.sumOf { it.width }
-                row.toMutableList().apply { repeat(numSpacers) { add(SpacerGridCell(rowIndex)) } }
-            } else {
-                row
+            // Fill the incomplete rows with spacers
+            val numSpacers = columns - sizedTiles.sumOf { it.width }
+            row.toMutableList().apply {
+                repeat(numSpacers) { add(SpacerGridCell(correctedRowIndex)) }
             }
         }
         .toList()

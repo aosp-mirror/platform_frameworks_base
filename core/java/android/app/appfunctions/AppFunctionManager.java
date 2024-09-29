@@ -27,6 +27,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.UserHandleAware;
 import android.content.Context;
+import android.os.CancellationSignal;
+import android.os.ICancellationSignal;
 import android.os.RemoteException;
 
 import java.util.Objects;
@@ -73,7 +75,43 @@ public final class AppFunctionManager {
      *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
      *     ExecuteAppFunctionResponse.RESULT_DENIED}.
+     * @deprecated Use {@link #executeAppFunction(ExecuteAppFunctionRequest, Executor,
+     *     CancellationSignal, Consumer)} instead. This method will be removed once usage references
+     *     are updated.
      */
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.EXECUTE_APP_FUNCTIONS_TRUSTED,
+                Manifest.permission.EXECUTE_APP_FUNCTIONS
+            },
+            conditional = true)
+    @UserHandleAware
+    @Deprecated
+    public void executeAppFunction(
+            @NonNull ExecuteAppFunctionRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
+        executeAppFunction(request, executor, new CancellationSignal(), callback);
+    }
+
+    /**
+     * Executes the app function.
+     *
+     * <p>Note: Applications can execute functions they define. To execute functions defined in
+     * another component, apps would need to have {@code
+     * android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
+     * android.permission.EXECUTE_APP_FUNCTIONS}.
+     *
+     * @param request the request to execute the app function
+     * @param executor the executor to run the callback
+     * @param cancellationSignal the cancellation signal to cancel the execution.
+     * @param callback the callback to receive the function execution result. if the calling app
+     *     does not own the app function or does not have {@code
+     *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
+     *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
+     *     ExecuteAppFunctionResponse.RESULT_DENIED}.
+     */
+    // TODO(b/357551503): Document the behavior when the cancellation signal is issued.
     // TODO(b/360864791): Document that apps can opt-out from being executed by callers with
     //   EXECUTE_APP_FUNCTIONS and how a caller knows whether a function is opted out.
     // TODO(b/357551503): Update documentation when get / set APIs are implemented that this will
@@ -88,6 +126,7 @@ public final class AppFunctionManager {
     public void executeAppFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull @CallbackExecutor Executor executor,
+            @NonNull CancellationSignal cancellationSignal,
             @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
@@ -96,25 +135,31 @@ public final class AppFunctionManager {
         ExecuteAppFunctionAidlRequest aidlRequest =
                 new ExecuteAppFunctionAidlRequest(
                         request, mContext.getUser(), mContext.getPackageName());
+
         try {
-            mService.executeAppFunction(
-                    aidlRequest,
-                    new IExecuteAppFunctionCallback.Stub() {
-                        @Override
-                        public void onResult(ExecuteAppFunctionResponse result) {
-                            try {
-                                executor.execute(() -> callback.accept(result));
-                            } catch (RuntimeException e) {
-                                // Ideally shouldn't happen since errors are wrapped into the
-                                // response, but we catch it here for additional safety.
-                                callback.accept(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                getResultCode(e),
-                                                e.getMessage(),
-                                                /* extras= */ null));
-                            }
-                        }
-                    });
+            ICancellationSignal cancellationTransport =
+                    mService.executeAppFunction(
+                            aidlRequest,
+                            new IExecuteAppFunctionCallback.Stub() {
+                                @Override
+                                public void onResult(ExecuteAppFunctionResponse result) {
+                                    try {
+                                        executor.execute(() -> callback.accept(result));
+                                    } catch (RuntimeException e) {
+                                        // Ideally shouldn't happen since errors are wrapped into
+                                        // the
+                                        // response, but we catch it here for additional safety.
+                                        callback.accept(
+                                                ExecuteAppFunctionResponse.newFailure(
+                                                        getResultCode(e),
+                                                        e.getMessage(),
+                                                        /* extras= */ null));
+                                    }
+                                }
+                            });
+            if (cancellationTransport != null) {
+                cancellationSignal.setRemote(cancellationTransport);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

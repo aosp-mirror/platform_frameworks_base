@@ -21,10 +21,9 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.TransitionKeys.Instant
 import com.android.systemui.shade.data.repository.ShadeRepository
-import com.android.systemui.shade.shared.model.ShadeMode
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +47,7 @@ constructor(
 
     @Deprecated("Use ShadeInteractor instead")
     override fun expandToNotifications() {
-        shadeInteractor.expandNotificationShade(
+        shadeInteractor.expandNotificationsShade(
             loggingReason = "ShadeLockscreenInteractorImpl.expandToNotifications"
         )
     }
@@ -71,17 +70,11 @@ constructor(
     }
 
     override fun resetViews(animate: Boolean) {
-        val loggingReason = "ShadeLockscreenInteractorImpl.resetViews"
         // The existing comment to the only call to this claims it only calls it to collapse QS
-        if (shadeInteractor.shadeMode.value == ShadeMode.Dual) {
-            // TODO(b/356596436): Hide without animation if !animate.
-            sceneInteractor.hideOverlay(
-                overlay = Overlays.QuickSettingsShade,
-                loggingReason = loggingReason,
-            )
-        } else {
-            shadeInteractor.expandNotificationShade(loggingReason)
-        }
+        shadeInteractor.collapseQuickSettingsShade(
+            loggingReason = "ShadeLockscreenInteractorImpl.resetViews",
+            transitionKey = Instant.takeIf { !animate },
+        )
     }
 
     @Deprecated("Not supported by scenes")
@@ -93,7 +86,7 @@ constructor(
         backgroundScope.launch {
             delay(delay)
             withContext(mainDispatcher) {
-                shadeInteractor.expandNotificationShade(
+                shadeInteractor.expandNotificationsShade(
                     "ShadeLockscreenInteractorImpl.transitionToExpandedShade"
                 )
             }

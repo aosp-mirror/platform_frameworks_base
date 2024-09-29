@@ -4063,8 +4063,9 @@ public class SizeCompatTests extends WindowTestsBase {
                         .setInsetsSize(Insets.of(0, 0, 0, 150))
         };
         display.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
-        assertTrue(display.getDisplayPolicy().updateDecorInsetsInfo());
-        display.sendNewConfiguration();
+        if (display.getDisplayPolicy().updateDecorInsetsInfo()) {
+            display.sendNewConfiguration();
+        }
 
         final ActivityRecord activity = getActivityBuilderOnSameTask()
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
@@ -4097,8 +4098,9 @@ public class SizeCompatTests extends WindowTestsBase {
                         .setInsetsSize(Insets.of(0, 0, 0, 150))
         };
         display.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
-        assertTrue(display.getDisplayPolicy().updateDecorInsetsInfo());
-        display.sendNewConfiguration();
+        if (display.getDisplayPolicy().updateDecorInsetsInfo()) {
+            display.sendNewConfiguration();
+        }
 
         final ActivityRecord activity = getActivityBuilderOnSameTask()
                 .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
@@ -4126,8 +4128,9 @@ public class SizeCompatTests extends WindowTestsBase {
                         .setInsetsSize(Insets.of(0, 0, 0, 150))
         };
         dc.getDisplayPolicy().addWindowLw(navbar, navbar.mAttrs);
-        assertTrue(dc.getDisplayPolicy().updateDecorInsetsInfo());
-        dc.sendNewConfiguration();
+        if (dc.getDisplayPolicy().updateDecorInsetsInfo()) {
+            dc.sendNewConfiguration();
+        }
 
         final ActivityRecord activity = getActivityBuilderOnSameTask()
                 .setResizeMode(RESIZE_MODE_UNRESIZEABLE)

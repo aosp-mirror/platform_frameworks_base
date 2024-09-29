@@ -423,7 +423,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /** Hands the definition of foreground and uid states */
     @GuardedBy("this")
-    public AppOpsUidStateTracker getUidStateTracker() {
+    private AppOpsUidStateTracker getUidStateTracker() {
         if (mUidStateTracker == null) {
             mUidStateTracker = new AppOpsUidStateTrackerImpl(
                     LocalServices.getService(ActivityManagerInternal.class),
@@ -1031,6 +1031,9 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
             String pkgName = intent.getData().getEncodedSchemeSpecificPart().intern();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
@@ -2895,21 +2898,28 @@ public class AppOpsService extends IAppOpsService.Stub {
                         uidState.uid, getPersistentId(virtualDeviceId), code);
 
                 if (rawUidMode != AppOpsManager.opToDefaultMode(code)) {
-                    return raw ? rawUidMode : uidState.evalMode(code, rawUidMode);
+                    return raw ? rawUidMode :
+                        evaluateForegroundMode(/* uid= */ uid, /* op= */ code,
+                        /* rawUidMode= */ rawUidMode);
                 }
             }
 
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
-                return AppOpsManager.opToDefaultMode(code);
+                return evaluateForegroundMode(
+                        /* uid= */ uid,
+                        /* op= */ code,
+                        /* rawUidMode= */ AppOpsManager.opToDefaultMode(code));
             }
-            return raw
-                    ? mAppOpsCheckingService.getPackageMode(
-                            op.packageName, op.op, UserHandle.getUserId(op.uid))
-                    : op.uidState.evalMode(
-                            op.op,
-                            mAppOpsCheckingService.getPackageMode(
-                                    op.packageName, op.op, UserHandle.getUserId(op.uid)));
+            var packageMode = mAppOpsCheckingService.getPackageMode(
+                    op.packageName,
+                    op.op,
+                    UserHandle.getUserId(op.uid));
+            return raw ? packageMode :
+                    evaluateForegroundMode(
+                        /* uid= */ uid,
+                        /* op= */op.op,
+                        /* rawUidMode= */ packageMode);
         }
     }
 
@@ -7001,6 +7011,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         throw new IllegalStateException(
                 "Requested persistentId for invalid virtualDeviceId: " + virtualDeviceId);
+    }
+
+    @GuardedBy("this")
+    private int evaluateForegroundMode(int uid, int op, int rawUidMode) {
+        return getUidStateTracker().evalMode(uid, op, rawUidMode);
     }
 
     private final class ClientUserRestrictionState implements DeathRecipient {

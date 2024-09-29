@@ -219,6 +219,15 @@
          compatibility control. [CHAR LIMIT=NONE] -->
     <string name="camera_compat_dismiss_button_description">No camera issues? Tap to dismiss.</string>
 
+    <!-- App handle education tooltip text for tooltip pointing to app handle -->
+    <string name="windowing_app_handle_education_tooltip">Tap to open the app menu</string>
+
+    <!-- App handle education tooltip text for tooltip pointing to windowing image button -->
+    <string name="windowing_desktop_mode_image_button_education_tooltip">Tap to show multiple apps together</string>
+
+    <!-- App handle education tooltip text for tooltip pointing to app chip -->
+    <string name="windowing_desktop_mode_exit_education_tooltip">Return to fullscreen from the app menu</string>
+
     <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_dialog_title">See and do more</string>
 
@@ -300,12 +309,18 @@
     <string name="close_text">Close</string>
     <!-- Accessibility text for the handle menu close menu button [CHAR LIMIT=NONE] -->
     <string name="collapse_menu_text">Close Menu</string>
-    <!-- Accessibility text for the handle menu open menu button [CHAR LIMIT=NONE] -->
-    <string name="expand_menu_text">Open Menu</string>
+    <!-- Accessibility text for the App Header's App Chip [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_app_header_chip_text">Open Menu</string>
     <!-- Maximize menu maximize button string. -->
     <string name="desktop_mode_maximize_menu_maximize_text">Maximize Screen</string>
     <!-- Maximize menu snap buttons string. -->
     <string name="desktop_mode_maximize_menu_snap_text">Snap Screen</string>
     <!-- Snap resizing non-resizable string. -->
-    <string name="desktop_mode_non_resizable_snap_text">This app can\'t be resized</string>
+    <string name="desktop_mode_non_resizable_snap_text">App can\'t be moved here</string>
+    <!-- Accessibility text for the Maximize Menu's maximize button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_maximize_button_text">Maximize</string>
+    <!-- Accessibility text for the Maximize Menu's snap left button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_snap_left_button_text">Snap left</string>
+    <!-- Accessibility text for the Maximize Menu's snap right button [CHAR LIMIT=NONE] -->
+    <string name="desktop_mode_maximize_menu_snap_right_button_text">Snap right</string>
 </resources>

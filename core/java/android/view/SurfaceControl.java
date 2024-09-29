@@ -4525,6 +4525,21 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * TODO(b/366484871): To be removed once we have some logging in native
+         * This is called when BlastBufferQueue.mergeWithNextTransaction() is called from java, and
+         * for the purposes of logging that path.
+         */
+        void onMergeWithNextTransaction(CharSequence windowName) {
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "merge", this, null, "window=" + windowName);
+                if (mCalls != null) {
+                    mCalls.clear();
+                }
+            }
+        }
+
+        /**
          * Equivalent to reparent with a null parent, in that it removes
          * the SurfaceControl from the scene, but it also releases
          * the local resources (by calling {@link SurfaceControl#release})

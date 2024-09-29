@@ -398,6 +398,7 @@ package android.app {
     method public android.content.ComponentName getEffectsSuppressor();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method @FlaggedApi("android.app.modes_api") public boolean removeAutomaticZenRule(@NonNull String, boolean);
+    method @FlaggedApi("android.app.api_rich_ongoing") public void setCanPostPromotedNotifications(@NonNull String, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING) public void setToastRateLimitingEnabled(boolean);
     method @FlaggedApi("android.app.modes_api") public boolean updateAutomaticZenRule(@NonNull String, @NonNull android.app.AutomaticZenRule, boolean);
@@ -1613,15 +1614,15 @@ package android.hardware.camera2 {
   public final class CameraManager {
     method @NonNull public android.hardware.camera2.CameraCharacteristics getCameraCharacteristics(@NonNull String, boolean) throws android.hardware.camera2.CameraAccessException;
     method public String[] getCameraIdListNoLazy() throws android.hardware.camera2.CameraAccessException;
-    method @FlaggedApi("com.android.window.flags.camera_compat_for_freeform") public static int getRotationOverrideInternal(@Nullable android.content.Context, @Nullable android.content.pm.PackageManager, @Nullable String);
+    method @FlaggedApi("com.android.window.flags.enable_camera_compat_for_desktop_windowing") public static int getRotationOverrideInternal(@Nullable android.content.Context, @Nullable android.content.pm.PackageManager, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.CAMERA) public void openCamera(@NonNull String, boolean, @Nullable android.os.Handler, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(allOf={android.Manifest.permission.SYSTEM_CAMERA, android.Manifest.permission.CAMERA}) public void openCamera(@NonNull String, int, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraDevice.StateCallback) throws android.hardware.camera2.CameraAccessException;
     method public static boolean shouldOverrideToPortrait(@Nullable android.content.pm.PackageManager, @Nullable String);
     field public static final String LANDSCAPE_TO_PORTRAIT_PROP = "camera.enable_landscape_to_portrait";
     field public static final long OVERRIDE_CAMERA_LANDSCAPE_TO_PORTRAIT = 250678880L; // 0xef10e60L
-    field @FlaggedApi("com.android.window.flags.camera_compat_for_freeform") public static final int ROTATION_OVERRIDE_NONE = 0; // 0x0
-    field @FlaggedApi("com.android.window.flags.camera_compat_for_freeform") public static final int ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT = 1; // 0x1
-    field @FlaggedApi("com.android.window.flags.camera_compat_for_freeform") public static final int ROTATION_OVERRIDE_ROTATION_ONLY = 2; // 0x2
+    field @FlaggedApi("com.android.window.flags.enable_camera_compat_for_desktop_windowing") public static final int ROTATION_OVERRIDE_NONE = 0; // 0x0
+    field @FlaggedApi("com.android.window.flags.enable_camera_compat_for_desktop_windowing") public static final int ROTATION_OVERRIDE_OVERRIDE_TO_PORTRAIT = 1; // 0x1
+    field @FlaggedApi("com.android.window.flags.enable_camera_compat_for_desktop_windowing") public static final int ROTATION_OVERRIDE_ROTATION_ONLY = 2; // 0x2
   }
 
   public abstract static class CameraManager.AvailabilityCallback {
@@ -1885,17 +1886,9 @@ package android.hardware.soundtrigger {
     ctor public SoundTrigger.ModuleProperties(int, @NonNull String, @NonNull String, @NonNull String, int, @NonNull String, int, int, int, int, boolean, int, boolean, int, boolean, int);
   }
 
-  public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
-    ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
+  @FlaggedApi("android.media.soundtrigger.manager_api") public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
+    ctor @Deprecated public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
     ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[]);
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
-    field public final boolean allowMultipleTriggers;
-    field public final int audioCapabilities;
-    field public final boolean captureRequested;
-    field @NonNull public final byte[] data;
-    field @NonNull public final android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[] keyphrases;
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -2216,7 +2209,7 @@ package android.media.soundtrigger {
   public class SoundTriggerInstrumentation.RecognitionSession {
     method public void clearRecognitionCallback();
     method public int getAudioSession();
-    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig getRecognitionConfig();
+    method @FlaggedApi("android.media.soundtrigger.manager_api") @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig getRecognitionConfig();
     method public void setRecognitionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.RecognitionCallback);
     method public void triggerAbortRecognition();
     method public void triggerRecognitionEvent(@NonNull byte[], @Nullable java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
@@ -2227,7 +2220,6 @@ package android.media.soundtrigger {
     method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForModule(@NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties);
     method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForTestModule();
     method @NonNull public static java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
   }
 
   public static class SoundTriggerManager.Model {

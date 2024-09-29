@@ -103,15 +103,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
     private int mCallbackInfoCalls = 0;
 
-    private final BackMotionEvent mBackEvent = new BackMotionEvent(
-            /* touchX = */ 0,
-            /* touchY = */ 0,
-            /* progress = */ 0,
-            /* velocityX = */ 0,
-            /* velocityY = */ 0,
-            /* triggerBack = */ false,
-            /* swipeEdge = */ BackEvent.EDGE_LEFT,
-            /* departingAnimationTarget = */ null);
+    private final BackMotionEvent mBackEvent = backMotionEventFrom(/* progress */ 0f);
     private final MotionEvent mMotionEvent =
             MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, 100, 100, 0);
 
@@ -558,6 +550,7 @@ public class WindowOnBackInvokedDispatcherTest {
         OnBackInvokedCallbackInfo callbackInfo = assertSetCallbackInfo();
 
         callbackInfo.getCallback().onBackStarted(mBackEvent);
+        callbackInfo.getCallback().onBackProgressed(backMotionEventFrom(/* progress */ 0.5f));
         waitForIdle();
         assertTrue(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
 
@@ -573,6 +566,18 @@ public class WindowOnBackInvokedDispatcherTest {
         assertEquals(0, onBackInvokedCalled.get());
         verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), isNull());
         assertFalse(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
+    }
+
+    private BackMotionEvent backMotionEventFrom(float progress) {
+        return new BackMotionEvent(
+                /* touchX = */ 0,
+                /* touchY = */ 0,
+                /* progress = */ progress,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* triggerBack = */ false,
+                /* swipeEdge = */ BackEvent.EDGE_LEFT,
+                /* departingAnimationTarget = */ null);
     }
 
     private void verifyImeCallackRegistrations() throws RemoteException {

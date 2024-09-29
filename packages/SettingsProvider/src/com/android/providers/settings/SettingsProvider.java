@@ -967,7 +967,7 @@ public class SettingsProvider extends ContentProvider {
         for (int i = 0; i < nameCount; i++) {
             String name = names.get(i);
             Setting setting = settingsState.getSettingLocked(name);
-            pw.print("_id:"); pw.print(toDumpString(setting.getId()));
+            pw.print("_id:"); pw.print(toDumpString(String.valueOf(setting.getId())));
             pw.print(" name:"); pw.print(toDumpString(name));
             if (setting.getPackageName() != null) {
                 pw.print(" pkg:"); pw.print(setting.getPackageName());
@@ -2785,7 +2785,7 @@ public class SettingsProvider extends ContentProvider {
 
             switch (column) {
                 case Settings.NameValueTable._ID -> {
-                    values[i] = setting.getId();
+                    values[i] = String.valueOf(setting.getId());
                 }
                 case Settings.NameValueTable.NAME -> {
                     values[i] = setting.getName();

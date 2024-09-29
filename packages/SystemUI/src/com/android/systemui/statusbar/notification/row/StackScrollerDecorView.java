@@ -72,14 +72,24 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     /**
+     * See {@link #setVisible(boolean, boolean, Consumer)}.
+     */
+    public void setVisible(boolean visible, boolean animate) {
+        setVisible(visible, animate, null /* onAnimationEnded */);
+    }
+
+    /**
      * Make this view visible. If {@code false} is passed, the view will fade out its content
      * and set the view Visibility to GONE. If only the content should be changed,
      * {@link #setContentVisibleAnimated(boolean)} can be used.
      *
      * @param visible True if the contents should be visible.
      * @param animate True if we should fade to new visibility.
+     * @param onAnimationEnded Callback to run after visibility updates, takes a boolean as a
+     *                         parameter that represents whether the animation was cancelled.
      */
-    public void setVisible(boolean visible, boolean animate) {
+    public void setVisible(boolean visible, boolean animate,
+            Consumer<Boolean> onAnimationEnded) {
         if (mIsVisible != visible) {
             mIsVisible = visible;
             if (animate) {
@@ -90,10 +100,10 @@ public abstract class StackScrollerDecorView extends ExpandableView {
                 } else {
                     setWillBeGone(true);
                 }
-                setContentVisible(visible, true /* animate */, null /* onAnimationEnded */);
+                setContentVisible(visible, true /* animate */, onAnimationEnded);
             } else {
                 setVisibility(visible ? VISIBLE : GONE);
-                setContentVisible(visible, false /* animate */, null /* onAnimationEnded */);
+                setContentVisible(visible, false /* animate */, onAnimationEnded);
                 setWillBeGone(false);
                 notifyHeightChanged(false /* needsAnimation */);
             }

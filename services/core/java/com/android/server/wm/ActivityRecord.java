@@ -2154,7 +2154,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
-        mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
+        final boolean appOptInTouchPassThrough =
+                options != null && options.isAllowPassThroughOnTouchOutside();
+        mActivityRecordInputSink = new ActivityRecordInputSink(
+                this, sourceRecord, appOptInTouchPassThrough);
 
         mAppActivityEmbeddingSplitsEnabled = isAppActivityEmbeddingSplitsEnabled();
         mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
@@ -2641,9 +2644,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
         // Only do transfer after transaction has done when starting window exist.
-        if (mStartingData != null && mStartingData.mWaitForSyncTransactionCommit) {
-            mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_COPY_TO_CLIENT;
-            return true;
+        if (mStartingData != null) {
+            final boolean isWaitingForSyncTransactionCommit =
+                    Flags.removeStartingWindowWaitForMultiTransitions()
+                            ? getSyncTransactionCommitCallbackDepth() > 0
+                            : mStartingData.mWaitForSyncTransactionCommit;
+            if (isWaitingForSyncTransactionCommit) {
+                mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_COPY_TO_CLIENT;
+                return true;
+            }
         }
         requestCopySplashScreen();
         return isTransferringSplashScreen();
@@ -2847,7 +2856,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean animate;
         final boolean hasImeSurface;
         if (mStartingData != null) {
-            if (mStartingData.mWaitForSyncTransactionCommit
+            final boolean isWaitingForSyncTransactionCommit =
+                    Flags.removeStartingWindowWaitForMultiTransitions()
+                            ? getSyncTransactionCommitCallbackDepth() > 0
+                            : mStartingData.mWaitForSyncTransactionCommit;
+            if (isWaitingForSyncTransactionCommit
                     || mSyncState != SYNC_STATE_NONE) {
                 mStartingData.mRemoveAfterTransaction = AFTER_TRANSACTION_REMOVE_DIRECTLY;
                 mStartingData.mPrepareRemoveAnimation = prepareAnimation;

@@ -63,6 +63,7 @@ import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationLockscreenScrimViewModel
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
@@ -102,6 +103,7 @@ constructor(
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val lockscreenContentViewModelFactory: LockscreenContentViewModel.Factory,
+    private val notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
     private val lockscreenSceneBlueprintsLazy: Lazy<Set<LockscreenSceneBlueprint>>,
     private val clockInteractor: KeyguardClockInteractor,
     private val keyguardViewMediator: KeyguardViewMediator,
@@ -207,6 +209,7 @@ constructor(
     private fun createLockscreen(
         context: Context,
         viewModelFactory: LockscreenContentViewModel.Factory,
+        notificationScrimViewModelFactory: NotificationLockscreenScrimViewModel.Factory,
         blueprints: Set<@JvmSuppressWildcards LockscreenSceneBlueprint>,
     ): View {
         val sceneBlueprints =
@@ -222,6 +225,8 @@ constructor(
                         with(
                             LockscreenContent(
                                 viewModelFactory = viewModelFactory,
+                                notificationScrimViewModelFactory =
+                                    notificationScrimViewModelFactory,
                                 blueprints = sceneBlueprints,
                                 clockInteractor = clockInteractor,
                             )

@@ -30,8 +30,8 @@ genrule {
     name: "systemfeatures-gen-tests-srcs",
     cmd: "$(location systemfeatures-gen-tool) com.android.systemfeatures.RwNoFeatures --readonly=false > $(location RwNoFeatures.java) && " +
         "$(location systemfeatures-gen-tool) com.android.systemfeatures.RoNoFeatures --readonly=true --feature-apis=WATCH > $(location RoNoFeatures.java) && " +
-        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RwFeatures --readonly=false --feature=WATCH:1 --feature=WIFI:0 --feature=VULKAN:-1 --feature=AUTO: > $(location RwFeatures.java) && " +
-        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RoFeatures --readonly=true --feature=WATCH:1 --feature=WIFI:0 --feature=VULKAN:-1 --feature=AUTO: --feature-apis=WATCH,PC > $(location RoFeatures.java)",
+        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RwFeatures --readonly=false --feature=WATCH:1 --feature=WIFI:0 --feature=VULKAN:UNAVAILABLE --feature=AUTO: > $(location RwFeatures.java) && " +
+        "$(location systemfeatures-gen-tool) com.android.systemfeatures.RoFeatures --readonly=true --feature=WATCH:1 --feature=WIFI:0 --feature=VULKAN:UNAVAILABLE --feature=AUTO: --feature-apis=WATCH,PC > $(location RoFeatures.java)",
     out: [
         "RwNoFeatures.java",
         "RoNoFeatures.java",

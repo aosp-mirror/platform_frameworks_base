@@ -71,7 +71,6 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Binder;
 import android.os.SystemProperties;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
@@ -1599,7 +1598,6 @@ public class ViewRootImplTest {
                 nativeCreateASurfaceControlFromSurface(mViewRootImpl.mSurface));
     }
 
-    @EnableFlags(Flags.FLAG_INSETS_CONTROL_SEQ)
     @Test
     public void testHandleInsetsControlChanged() {
         mView = new View(sContext);

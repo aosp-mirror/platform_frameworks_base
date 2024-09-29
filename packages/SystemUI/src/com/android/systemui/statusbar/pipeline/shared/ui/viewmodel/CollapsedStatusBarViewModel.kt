@@ -96,8 +96,6 @@ interface CollapsedStatusBarViewModel {
     val isNotificationIconContainerVisible: Flow<VisibilityModel>
     val isSystemInfoVisible: Flow<VisibilityModel>
 
-    // TODO(b/364360986): Add isOngoingActivityChipVisible: Flow<VisibilityModel>
-
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
      * status bar and navigation icons dim. In this mode, a notification dot appears where the
@@ -211,7 +209,7 @@ constructor(
                 isStatusBarAllowed && visibilityViaDisableFlags.areNotificationIconsAllowed
             VisibilityModel(
                 showNotificationIconContainer.toVisibilityInt(),
-                visibilityViaDisableFlags.animate
+                visibilityViaDisableFlags.animate,
             )
         }
     override val isSystemInfoVisible: Flow<VisibilityModel> =

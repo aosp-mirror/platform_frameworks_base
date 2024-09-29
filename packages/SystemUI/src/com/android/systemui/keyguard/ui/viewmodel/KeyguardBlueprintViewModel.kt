@@ -24,21 +24,23 @@ import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
+import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-data class TransitionData(
-    val config: Config,
-    val start: Long = System.currentTimeMillis(),
-)
+data class TransitionData(val config: Config, val start: Long = System.currentTimeMillis())
 
 class KeyguardBlueprintViewModel
 @Inject
 constructor(
     @Main private val handler: Handler,
-    keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
+    private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
+    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
     val blueprint = keyguardBlueprintInteractor.blueprint
     val blueprintId = keyguardBlueprintInteractor.blueprintId
@@ -51,12 +53,12 @@ constructor(
     private val transitionListener =
         object : Transition.TransitionListener {
             override fun onTransitionCancel(transition: Transition) {
-                if (DEBUG) Log.e(TAG, "onTransitionCancel: ${transition::class.simpleName}")
+                if (DEBUG) Log.w(TAG, "onTransitionCancel: ${transition::class.simpleName}")
                 updateTransitions(null) { remove(transition) }
             }
 
             override fun onTransitionEnd(transition: Transition) {
-                if (DEBUG) Log.e(TAG, "onTransitionEnd: ${transition::class.simpleName}")
+                if (DEBUG) Log.i(TAG, "onTransitionEnd: ${transition::class.simpleName}")
                 updateTransitions(null) { remove(transition) }
             }
 
@@ -76,11 +78,36 @@ constructor(
             }
         }
 
+    fun refreshBlueprint(type: Type = Type.NoTransition) =
+        keyguardBlueprintInteractor.refreshBlueprint(type)
+
     fun updateTransitions(data: TransitionData?, mutate: MutableSet<Transition>.() -> Unit) {
         runningTransitions.mutate()
 
         if (runningTransitions.size <= 0) _currentTransition.value = null
         else if (data != null) _currentTransition.value = data
+    }
+
+    fun runTransition(
+        constraintLayout: ConstraintLayout,
+        clockViewModel: KeyguardClockViewModel,
+        smartspaceViewModel: KeyguardSmartspaceViewModel,
+        config: Config,
+        apply: () -> Unit,
+    ) {
+        val newConfig =
+            if (keyguardTransitionInteractor.getCurrentState() == KeyguardState.OFF) {
+                config.copy(type = Type.Init)
+            } else {
+                config
+            }
+
+        runTransition(
+            constraintLayout,
+            IntraBlueprintTransition(newConfig, clockViewModel, smartspaceViewModel),
+            config,
+            apply,
+        )
     }
 
     fun runTransition(
@@ -95,28 +122,36 @@ constructor(
                 Log.w(
                     TAG,
                     "runTransition: skipping ${transition::class.simpleName}: " +
-                        "currentPriority=$currentPriority; config=$config"
+                        "currentPriority=$currentPriority; config=$config",
                 )
             }
             apply()
             return
         }
 
+        // Don't allow transitions with animations while in OFF state
+        val newConfig =
+            if (keyguardTransitionInteractor.getCurrentState() == KeyguardState.OFF) {
+                config.copy(type = Type.Init)
+            } else {
+                config
+            }
+
         if (DEBUG) {
             Log.i(
                 TAG,
                 "runTransition: running ${transition::class.simpleName}: " +
-                    "currentPriority=$currentPriority; config=$config"
+                    "currentPriority=$currentPriority; config=$newConfig",
             )
         }
 
         // beginDelayedTransition makes a copy, so we temporarially add the uncopied transition to
         // the running set until the copy is started by the handler.
-        updateTransitions(TransitionData(config)) { add(transition) }
+        updateTransitions(TransitionData(newConfig)) { add(transition) }
         transition.addListener(transitionListener)
 
         handler.post {
-            if (config.terminatePrevious) {
+            if (newConfig.terminatePrevious) {
                 TransitionManager.endTransitions(constraintLayout)
             }
 

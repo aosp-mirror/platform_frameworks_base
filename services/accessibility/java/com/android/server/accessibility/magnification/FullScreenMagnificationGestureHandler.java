@@ -68,10 +68,14 @@ import android.view.ViewConfiguration;
 import com.android.internal.R;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.gestures.GestureUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class handles full screen magnification in response to touch events.
@@ -871,6 +875,15 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
      */
     class DetectingState implements State, Handler.Callback {
 
+        private static final Histogram HISTOGRAM_FIRST_INTERVAL =
+                new Histogram(
+                        "accessibility.value_full_triple_tap_first_interval",
+                        new Histogram.UniformOptions(25, 0, 250));
+        private static final Histogram HISTOGRAM_SECOND_INTERVAL =
+                new Histogram(
+                        "accessibility.value_full_triple_tap_second_interval",
+                        new Histogram.UniformOptions(25, 0, 250));
+
         private static final int MESSAGE_ON_TRIPLE_TAP_AND_HOLD = 1;
         private static final int MESSAGE_TRANSITION_TO_DELEGATING_STATE = 2;
         private static final int MESSAGE_TRANSITION_TO_PANNINGSCALING_STATE = 3;
@@ -1115,6 +1128,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (multitapTriggered && numTaps > 2) {
                 final boolean enabled = !isActivated();
                 mMagnificationLogger.logMagnificationTripleTap(enabled);
+
+                List<Long> intervals = intervalsOf(mDelayedEventQueue, ACTION_UP);
+                if (intervals.size() >= 2) {
+                    HISTOGRAM_FIRST_INTERVAL.logSample(intervals.get(0));
+                    HISTOGRAM_SECOND_INTERVAL.logSample(intervals.get(1));
+                }
             }
             return multitapTriggered;
         }
@@ -1142,6 +1161,10 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
          */
         private long timeOf(@Nullable MotionEvent event) {
             return event != null ? event.getEventTime() : Long.MIN_VALUE;
+        }
+
+        public List<Long> intervalsOf(MotionEventInfo info, int eventType) {
+            return MotionEventInfo.intervalsOf(info, eventType);
         }
 
         public int tapCount() {
@@ -1649,7 +1672,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         return !(Float.isNaN(pointerDownLocation.x) && Float.isNaN(pointerDownLocation.y));
     }
 
-    private static final class MotionEventInfo {
+    public static final class MotionEventInfo {
 
         private static final int MAX_POOL_SIZE = 10;
         private static final Object sLock = new Object();
@@ -1709,6 +1732,14 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
         }
 
+        public MotionEventInfo getNext() {
+            return mNext;
+        }
+
+        public void setNext(MotionEventInfo info) {
+            mNext = info;
+        }
+
         private void clear() {
             event = recycleAndNullify(event);
             rawEvent = recycleAndNullify(rawEvent);
@@ -1719,6 +1750,23 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (info == null) return 0;
             return (info.event.getAction() == eventType ? 1 : 0)
                     + countOf(info.mNext, eventType);
+        }
+
+        static List<Long> intervalsOf(MotionEventInfo info, int eventType) {
+            List<Long> intervals = new ArrayList<>();
+            MotionEventInfo current = info;
+            MotionEventInfo previous = null;
+
+            while (current != null) {
+                if (current.event.getAction() == eventType) {
+                    if (previous != null) {
+                        intervals.add(current.event.getDownTime() - previous.event.getDownTime());
+                    }
+                    previous = current;
+                }
+                current = current.mNext;
+            }
+            return intervals;
         }
 
         public static String toString(MotionEventInfo info) {

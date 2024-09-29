@@ -38,6 +38,7 @@ import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
+import static android.app.Notification.FLAG_PROMOTED_ONGOING;
 import static android.app.Notification.FLAG_USER_INITIATED_JOB;
 import static android.app.Notification.GROUP_ALERT_CHILDREN;
 import static android.app.Notification.VISIBILITY_PRIVATE;
@@ -53,6 +54,7 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
+import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
@@ -191,6 +193,7 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.Person;
 import android.app.RemoteInput;
@@ -468,6 +471,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     NotificationChannel mSilentChannel = new NotificationChannel("low", "low", IMPORTANCE_LOW);
 
+    NotificationChannel mMinChannel = new NotificationChannel("min", "min", IMPORTANCE_MIN);
+
     private static final int NOTIFICATION_LOCATION_UNKNOWN = 0;
 
     private static final String VALID_CONVO_SHORTCUT_ID = "shortcut";
@@ -558,8 +563,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return FlagsParameterization.allCombinationsOf(
-                FLAG_ALL_NOTIFS_NEED_TTL);
+        return FlagsParameterization.allCombinationsOf();
     }
 
     public NotificationManagerServiceTest(FlagsParameterization flags) {
@@ -652,7 +656,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAtm.getTaskToShowPermissionDialogOn(anyString(), anyInt()))
                 .thenReturn(INVALID_TASK_ID);
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
-        when(mUm.getProfileIds(eq(mUserId), eq(false))).thenReturn(new int[] { mUserId });
+        when(mUm.getProfileIds(eq(mUserId), anyBoolean())).thenReturn(new int[]{mUserId});
+        when(mUmInternal.getProfileIds(eq(mUserId), anyBoolean())).thenReturn(new int[]{mUserId});
         when(mAmi.getCurrentUserId()).thenReturn(mUserId);
 
         when(mPackageManagerClient.hasSystemFeature(FEATURE_TELECOM)).thenReturn(true);
@@ -856,15 +861,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mInternalService = mService.getInternalService();
 
         mBinderService.createNotificationChannels(mPkg, new ParceledListSlice(
-                Arrays.asList(mTestNotificationChannel, mSilentChannel)));
+                Arrays.asList(mTestNotificationChannel, mSilentChannel, mMinChannel)));
         mBinderService.createNotificationChannels(PKG_P, new ParceledListSlice(
-                Arrays.asList(mTestNotificationChannel, mSilentChannel)));
+                Arrays.asList(mTestNotificationChannel, mSilentChannel, mMinChannel)));
         mBinderService.createNotificationChannels(PKG_O, new ParceledListSlice(
-                Arrays.asList(mTestNotificationChannel, mSilentChannel)));
+                Arrays.asList(mTestNotificationChannel, mSilentChannel, mMinChannel)));
         assertNotNull(mBinderService.getNotificationChannel(
                 mPkg, mContext.getUserId(), mPkg, TEST_CHANNEL_ID));
         assertNotNull(mBinderService.getNotificationChannel(
                 mPkg, mContext.getUserId(), mPkg, mSilentChannel.getId()));
+        assertNotNull(mBinderService.getNotificationChannel(
+                mPkg, mContext.getUserId(), mPkg, mMinChannel.getId()));
         clearInvocations(mRankingHandler);
         when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
 
@@ -941,6 +948,16 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             // Must remove static reference to this test object to prevent leak (b/261039202)
             mTestableLooper.remove(this);
         }
+    }
+
+    private ShortcutInfo createMockConvoShortcut() {
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getPackage()).thenReturn(mPkg);
+        when(info.getId()).thenReturn(VALID_CONVO_SHORTCUT_ID);
+        when(info.getUserId()).thenReturn(USER_SYSTEM);
+        when(info.isLongLived()).thenReturn(true);
+        when(info.isEnabled()).thenReturn(true);
+        return info;
     }
 
     private void simulatePackageSuspendBroadcast(boolean suspend, String pkg,
@@ -4637,7 +4654,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         doThrow(new SecurityException("no access")).when(mUgmInternal)
                 .checkGrantUriPermission(eq(Process.myUid()), any(), eq(soundUri),
-                    anyInt(), eq(Process.myUserHandle().getIdentifier()));
+                anyInt(), eq(Process.myUserHandle().getIdentifier()));
+
+        mBinderService.updateNotificationChannelFromPrivilegedListener(
+                null, mPkg, Process.myUserHandle(), updatedNotificationChannel);
+
+        verify(mPreferencesHelper, times(1)).updateNotificationChannel(
+                anyString(), anyInt(), any(), anyBoolean(),  anyInt(), anyBoolean());
+
+        verify(mListeners, never()).notifyNotificationChannelChanged(eq(mPkg),
+                eq(Process.myUserHandle()), eq(mTestNotificationChannel),
+                eq(NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED));
+    }
+
+    @Test
+    public void
+        testUpdateNotificationChannelFromPrivilegedListener_oldSoundNoUriPerm_newSoundHasUriPerm()
+            throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mCompanionMgr.getAssociations(mPkg, mUserId))
+                .thenReturn(singletonList(mock(AssociationInfo.class)));
+        when(mPreferencesHelper.getNotificationChannel(eq(mPkg), anyInt(),
+                eq(mTestNotificationChannel.getId()), anyBoolean()))
+                .thenReturn(mTestNotificationChannel);
+
+        // Missing Uri permissions for the old channel sound
+        final Uri oldSoundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+        doThrow(new SecurityException("no access")).when(mUgmInternal)
+                .checkGrantUriPermission(eq(Process.myUid()), any(), eq(oldSoundUri),
+                anyInt(), eq(Process.myUserHandle().getIdentifier()));
+
+        // Has Uri permissions for the old channel sound
+        final Uri newSoundUri = Uri.parse("content://media/test/sound/uri");
+        final NotificationChannel updatedNotificationChannel = new NotificationChannel(
+                TEST_CHANNEL_ID, TEST_CHANNEL_ID, IMPORTANCE_DEFAULT);
+        updatedNotificationChannel.setSound(newSoundUri,
+                updatedNotificationChannel.getAudioAttributes());
 
         mBinderService.updateNotificationChannelFromPrivilegedListener(
                 null, mPkg, Process.myUserHandle(), updatedNotificationChannel);
@@ -15921,6 +15973,57 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(updatedRule.getValue().isEnabled()).isFalse();
     }
 
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    public void setNotificationPolicy_fromSystemApp_appliesPriorityChannelsAllowed()
+            throws Exception {
+        setUpRealZenTest();
+        // Start with hasPriorityChannels=true, allowPriorityChannels=true ("default").
+        mService.mZenModeHelper.setNotificationPolicy(new Policy(0, 0, 0, 0,
+                        Policy.policyState(true, true), 0),
+                ZenModeConfig.ORIGIN_SYSTEM, Process.SYSTEM_UID);
+
+        // The caller will supply states with "wrong" hasPriorityChannels.
+        int stateBlockingPriorityChannels = Policy.policyState(false, false);
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(1, 0, 0, 0, stateBlockingPriorityChannels, 0), false);
+
+        // hasPriorityChannels is untouched and allowPriorityChannels was updated.
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(1);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, false));
+
+        // Same but setting allowPriorityChannels to true.
+        int stateAllowingPriorityChannels = Policy.policyState(false, true);
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(2, 0, 0, 0, stateAllowingPriorityChannels, 0), false);
+
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(2);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, true));
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    @DisableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_fromRegularAppThatCanModifyPolicy_ignoresState()
+            throws Exception {
+        setUpRealZenTest();
+        // Start with hasPriorityChannels=true, allowPriorityChannels=true ("default").
+        mService.mZenModeHelper.setNotificationPolicy(new Policy(0, 0, 0, 0,
+                        Policy.policyState(true, true), 0),
+                ZenModeConfig.ORIGIN_SYSTEM, Process.SYSTEM_UID);
+        mService.setCallerIsNormalPackage();
+
+        mBinderService.setNotificationPolicy(mPkg,
+                new Policy(1, 0, 0, 0, Policy.policyState(false, false), 0), false);
+
+        // Policy was updated but the attempt to change state was ignored (it's a @hide API).
+        assertThat(mBinderService.getNotificationPolicy(mPkg).priorityCategories).isEqualTo(1);
+        assertThat(mBinderService.getNotificationPolicy(mPkg).state).isEqualTo(
+                Policy.policyState(true, true));
+    }
+
     /** Prepares for a zen-related test that uses the real {@link ZenModeHelper}. */
     private void setUpRealZenTest() throws Exception {
         when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
@@ -16540,13 +16643,297 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertThat(r.getChannel().getId()).isEqualTo(NEWS_ID);
     }
 
-    private ShortcutInfo createMockConvoShortcut() {
-        ShortcutInfo info = mock(ShortcutInfo.class);
-        when(info.getPackage()).thenReturn(mPkg);
-        when(info.getId()).thenReturn(VALID_CONVO_SHORTCUT_ID);
-        when(info.getUserId()).thenReturn(USER_SYSTEM);
-        when(info.isLongLived()).thenReturn(true);
-        when(info.isEnabled()).thenReturn(true);
-        return info;
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testSetCanBePromoted_granted() throws Exception {
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        // qualifying posted notification
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        // qualifying enqueued notification
+        Notification n1 = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+        StatusBarNotification sbn1 = new StatusBarNotification(mPkg, mPkg, 7, null, mUid, 0,
+                n1, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r1 = new NotificationRecord(mContext, sbn1, mTestNotificationChannel);
+
+        // another package but otherwise would qualify
+        Notification n2 = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG_O, PKG_O, 7, null, UID_O, 0,
+                n2, UserHandle.getUserHandleForUid(UID_O), null, 0);
+        NotificationRecord r2 = new NotificationRecord(mContext, sbn2, mTestNotificationChannel);
+
+        // not-qualifying posted notification
+        Notification n3 = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        StatusBarNotification sbn3 = new StatusBarNotification(mPkg, mPkg, 8, null, mUid, 0,
+                n3, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r3 = new NotificationRecord(mContext, sbn3, mTestNotificationChannel);
+
+        mService.addNotification(r3);
+        mService.addNotification(r2);
+        mService.addNotification(r);
+        mService.addEnqueuedNotification(r1);
+
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+
+        // the posted one
+        assertThat(mService.hasFlag(captor.getValue().getNotification().flags,
+                FLAG_PROMOTED_ONGOING)).isTrue();
+        // the enqueued one
+        assertThat(mService.hasFlag(r1.getNotification().flags, FLAG_PROMOTED_ONGOING)).isTrue();
+        // the other app
+        assertThat(mService.hasFlag(r2.getNotification().flags, FLAG_PROMOTED_ONGOING)).isFalse();
+        // same app, not qualifying
+        assertThat(mService.hasFlag(r3.getNotification().flags, FLAG_PROMOTED_ONGOING)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testSetCanBePromoted_granted_onlyNotifiesOnce() throws Exception {
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        // qualifying posted notification
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addNotification(r);
+
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+        waitForIdle();
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testSetCanBePromoted_revoked() throws Exception {
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        // start from true state
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+
+        // qualifying posted notification
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        // qualifying enqueued notification
+        Notification n1 = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+        StatusBarNotification sbn1 = new StatusBarNotification(mPkg, mPkg, 7, null, mUid, 0,
+                n1, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r1 = new NotificationRecord(mContext, sbn1, mTestNotificationChannel);
+
+        // doesn't qualify, same package
+        Notification n2 = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+        StatusBarNotification sbn2 = new StatusBarNotification(mPkg, mPkg, 8, null, mUid, 0,
+                n2, UserHandle.getUserHandleForUid(UID_O), null, 0);
+        NotificationRecord r2 = new NotificationRecord(mContext, sbn2, mTestNotificationChannel);
+
+        mService.addNotification(r2);
+        mService.addNotification(r);
+        mService.addEnqueuedNotification(r1);
+
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+
+        // the posted one
+        assertThat(mService.hasFlag(captor.getValue().getNotification().flags,
+                FLAG_PROMOTED_ONGOING)).isFalse();
+        // the enqueued one
+        assertThat(mService.hasFlag(r1.getNotification().flags, FLAG_PROMOTED_ONGOING)).isFalse();
+        // the not qualifying one
+        assertThat(mService.hasFlag(r2.getNotification().flags, FLAG_PROMOTED_ONGOING)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testSetCanBePromoted_revoked_onlyNotifiesOnce() throws Exception {
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        // start from true state
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+
+        // qualifying posted notification
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setFlag(FLAG_PROMOTED_ONGOING, true) // add manually since we're skipping post
+                .setFlag(FLAG_CAN_COLORIZE, true) // add manually since we're skipping post
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mService.addNotification(r);
+
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        waitForIdle();
+        mBinderService.setCanBePromoted(mPkg, mUid, false, true);
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testPostPromotableNotification() throws Exception {
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+        assertThat(mBinderService.appCanBePromoted(mPkg, mUid)).isTrue();
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+
+        assertThat(mService.hasFlag(captor.getValue().getNotification().flags,
+                FLAG_PROMOTED_ONGOING)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testPostPromotableNotification_noPermission() throws Exception {
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        Notification n = new Notification.Builder(mContext, mTestNotificationChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+
+        assertThat(mService.hasFlag(captor.getValue().getNotification().flags,
+                FLAG_PROMOTED_ONGOING)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_API_RICH_ONGOING)
+    public void testPostPromotableNotification_unimportantNotification() throws Exception {
+        mBinderService.setCanBePromoted(mPkg, mUid, true, true);
+        mContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.USE_COLORIZED_NOTIFICATIONS, PERMISSION_GRANTED);
+        Notification n = new Notification.Builder(mContext, mMinChannel.getId())
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .build();
+
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, 9, null, mUid, 0,
+                n, UserHandle.getUserHandleForUid(mUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+
+        ArgumentCaptor<NotificationRecord> captor =
+                ArgumentCaptor.forClass(NotificationRecord.class);
+        verify(mListeners, times(1)).prepareNotifyPostedLocked(
+                captor.capture(), any(), anyBoolean());
+
+        assertThat(mService.hasFlag(captor.getValue().getNotification().flags,
+                FLAG_PROMOTED_ONGOING)).isFalse();
     }
 }

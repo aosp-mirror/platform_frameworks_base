@@ -26,6 +26,7 @@ import static android.content.Intent.FLAG_RECEIVER_FOREGROUND;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -453,6 +454,10 @@ public class ActivityOptions extends ComponentOptions {
     private static final String KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE =
             "android.activity.pendingIntentCreatorBackgroundActivityStartMode";
 
+    /** See {@link #setAllowPassThroughOnTouchOutside(boolean)}. */
+    private static final String KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE =
+            "android.activity.allowPassThroughOnTouchOutside";
+
     /**
      * @see #setLaunchCookie
      * @hide
@@ -554,6 +559,7 @@ public class ActivityOptions extends ComponentOptions {
     private int mPendingIntentCreatorBackgroundActivityStartMode =
             MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
     private boolean mDisableStartingWindow;
+    private boolean mAllowPassThroughOnTouchOutside;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -1416,6 +1422,7 @@ public class ActivityOptions extends ComponentOptions {
                 KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE,
                 MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED);
         mDisableStartingWindow = opts.getBoolean(KEY_DISABLE_STARTING_WINDOW);
+        mAllowPassThroughOnTouchOutside = opts.getBoolean(KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE);
         mAnimationAbortListener = IRemoteCallback.Stub.asInterface(
                 opts.getBinder(KEY_ANIM_ABORT_LISTENER));
     }
@@ -1837,6 +1844,39 @@ public class ActivityOptions extends ComponentOptions {
     public boolean isLaunchIntoPip() {
         return mLaunchIntoPipParams != null
                 && mLaunchIntoPipParams.isLaunchIntoPip();
+    }
+
+    /**
+     * Returns whether the source activity allows the overlaying activities from the to-be-launched
+     * app to pass through touch events to it when touches fall outside the content window.
+     *
+     * @see #setAllowPassThroughOnTouchOutside(boolean)
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_TOUCH_PASS_THROUGH_OPT_IN)
+    public boolean isAllowPassThroughOnTouchOutside() {
+        return mAllowPassThroughOnTouchOutside;
+    }
+
+    /**
+     * Sets whether the source activity allows the overlaying activities from the to-be-launched
+     * app to pass through touch events to it when touches fall outside the content window.
+     *
+     * <p> By default, touches that fall on a translucent non-touchable area of an overlaying
+     * activity window are blocked from passing through to the activity below (source activity),
+     * unless the overlaying activity is from the same UID as the source activity. The source
+     * activity may use this method to opt in and allow the overlaying activities from the
+     * to-be-launched app to pass through touches to itself. The source activity needs to ensure
+     * that it trusts the overlaying activity and its content is not vulnerable to UI redressing
+     * attacks. The flag is ignored if the context calling
+     * {@link Context#startActivity(Intent, Bundle)} is not an activity.
+     *
+     * <p> For backward compatibility, apps with target SDK 35 and below may still receive
+     * pass-through touches without opt-in if the cross-uid activity is launched by the source
+     * activity.
+     */
+    @FlaggedApi(com.android.window.flags.Flags.FLAG_TOUCH_PASS_THROUGH_OPT_IN)
+    public void setAllowPassThroughOnTouchOutside(boolean allowed) {
+        mAllowPassThroughOnTouchOutside = allowed;
     }
 
     /** @hide */
@@ -2519,6 +2559,10 @@ public class ActivityOptions extends ComponentOptions {
         }
         if (mDisableStartingWindow) {
             b.putBoolean(KEY_DISABLE_STARTING_WINDOW, mDisableStartingWindow);
+        }
+        if (mAllowPassThroughOnTouchOutside) {
+            b.putBoolean(KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE,
+                    mAllowPassThroughOnTouchOutside);
         }
         b.putBinder(KEY_ANIM_ABORT_LISTENER,
                 mAnimationAbortListener != null ? mAnimationAbortListener.asBinder() : null);

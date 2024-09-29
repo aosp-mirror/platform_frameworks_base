@@ -31,9 +31,9 @@ import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
-import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.SourceType;
+import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -148,12 +148,18 @@ public class StackScrollAlgorithm {
             if (isHunGoingToShade) {
                 // Keep 100% opacity for heads up notification going to shade.
                 viewState.setAlpha(1f);
-            } else if (ambientState.isOnKeyguard()) {
+            } else if ((!SceneContainerFlag.isEnabled() && ambientState.isOnKeyguard())
+                    || ambientState.isShowingStackOnLockscreen()) {
                 // Adjust alpha for wakeup to lockscreen.
                 if (view.isHeadsUpState()) {
                     // Pulsing HUN should be visible on AOD and stay visible during 
                     // AOD=>lockscreen transition
                     viewState.setAlpha(1f - ambientState.getHideAmount());
+                } else if (SceneContainerFlag.isEnabled()) {
+                    // Take into account scene container-specific Lockscreen fade-in progress
+                    float fadeAlpha = ambientState.getLockscreenStackFadeInProgress();
+                    float dozeAlpha = 1f - ambientState.getDozeAmount();
+                    viewState.setAlpha(Math.min(dozeAlpha, fadeAlpha));
                 } else {
                     // Normal notifications are hidden on AOD and should fade in during 
                     // AOD=>lockscreen transition
@@ -677,22 +683,30 @@ public class StackScrollAlgorithm {
         );
         if (view instanceof FooterView) {
             if (FooterViewRefactor.isEnabled()) {
-                // TODO(b/333445519): shouldBeHidden should reflect whether the shade is closed
-                //  already, so we shouldn't need to use ambientState here. However, currently it
-                //  doesn't get updated quickly enough and can cause the footer to flash when
-                //  closing the shade. As such, we temporarily also check the ambientState directly.
-                if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
-                    // Note: This is no longer necessary in flexiglass.
-                    if (!SceneContainerFlag.isEnabled()) {
-                        viewState.hidden = true;
-                    }
-                } else {
-                    final float footerEnd = algorithmState.mCurrentExpandedYPosition
-                            + view.getIntrinsicHeight();
-                    final boolean noSpaceForFooter = footerEnd > ambientState.getStackEndHeight();
+                if (SceneContainerFlag.isEnabled()) {
+                    final float footerEnd =
+                            stackTop + viewState.getYTranslation() + view.getIntrinsicHeight();
+                    final boolean noSpaceForFooter = footerEnd > ambientState.getStackCutoff();
                     ((FooterView.FooterViewState) viewState).hideContent =
                             noSpaceForFooter || (ambientState.isClearAllInProgress()
                                     && !hasNonClearableNotifs(algorithmState));
+                } else {
+                    // TODO(b/333445519): shouldBeHidden should reflect whether the shade is closed
+                    //  already, so we shouldn't need to use ambientState here. However,
+                    //  currently it doesn't get updated quickly enough and can cause the footer to
+                    //  flash when closing the shade. As such, we temporarily also check the
+                    //  ambientState directly.
+                    if (((FooterView) view).shouldBeHidden() || !ambientState.isShadeExpanded()) {
+                        viewState.hidden = true;
+                    } else {
+                        final float footerEnd = algorithmState.mCurrentExpandedYPosition
+                                + view.getIntrinsicHeight();
+                        final boolean noSpaceForFooter =
+                                footerEnd > ambientState.getStackEndHeight();
+                        ((FooterView.FooterViewState) viewState).hideContent =
+                                noSpaceForFooter || (ambientState.isClearAllInProgress()
+                                        && !hasNonClearableNotifs(algorithmState));
+                    }
                 }
             } else {
                 final boolean shadeClosed = !ambientState.isShadeExpanded();

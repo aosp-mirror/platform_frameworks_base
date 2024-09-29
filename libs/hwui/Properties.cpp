@@ -50,6 +50,10 @@ constexpr bool skip_eglmanager_telemetry() {
 constexpr bool resample_gainmap_regions() {
     return false;
 }
+
+constexpr bool query_global_priority() {
+    return false;
+}
 }  // namespace hwui_flags
 #endif
 
@@ -110,6 +114,7 @@ bool Properties::clipSurfaceViews = false;
 bool Properties::hdr10bitPlus = false;
 bool Properties::skipTelemetry = false;
 bool Properties::resampleGainmapRegions = false;
+bool Properties::queryGlobalPriority = false;
 
 int Properties::timeoutMultiplier = 1;
 
@@ -187,6 +192,7 @@ bool Properties::load() {
     hdr10bitPlus = hwui_flags::hdr_10bit_plus();
     resampleGainmapRegions = base::GetBoolProperty("debug.hwui.resample_gainmap_regions",
                                                    hwui_flags::resample_gainmap_regions());
+    queryGlobalPriority = hwui_flags::query_global_priority();
 
     timeoutMultiplier = android::base::GetIntProperty("ro.hw_timeout_multiplier", 1);
     skipTelemetry = base::GetBoolProperty(PROPERTY_SKIP_EGLMANAGER_TELEMETRY,

@@ -16,12 +16,19 @@
 
 package com.android.systemui.notifications.ui.viewmodel
 
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 /**
  * Models UI state used to render the content of the notifications shade overlay.
@@ -34,13 +41,40 @@ class NotificationsShadeOverlayContentViewModel
 constructor(
     val shadeHeaderViewModelFactory: ShadeHeaderViewModel.Factory,
     val notificationsPlaceholderViewModelFactory: NotificationsPlaceholderViewModel.Factory,
-    private val sceneInteractor: SceneInteractor,
-) {
+    val sceneInteractor: SceneInteractor,
+    private val shadeInteractor: ShadeInteractor,
+) : ExclusiveActivatable() {
+
+    override suspend fun onActivated(): Nothing {
+        coroutineScope {
+            launch {
+                sceneInteractor.currentScene.collect { currentScene ->
+                    when (currentScene) {
+                        // TODO(b/369513770): The ShadeSession should be preserved in this scenario.
+                        Scenes.Bouncer ->
+                            shadeInteractor.collapseNotificationsShade(
+                                loggingReason = "bouncer shown while shade is open"
+                            )
+                    }
+                }
+            }
+
+            launch {
+                shadeInteractor.isShadeTouchable
+                    .distinctUntilChanged()
+                    .filter { !it }
+                    .collect {
+                        shadeInteractor.collapseNotificationsShade(
+                            loggingReason = "device became non-interactive"
+                        )
+                    }
+            }
+        }
+        awaitCancellation()
+    }
+
     fun onScrimClicked() {
-        sceneInteractor.hideOverlay(
-            overlay = Overlays.NotificationsShade,
-            loggingReason = "Shade scrim clicked",
-        )
+        shadeInteractor.collapseNotificationsShade(loggingReason = "shade scrim clicked")
     }
 
     @AssistedFactory

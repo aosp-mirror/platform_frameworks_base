@@ -122,18 +122,20 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     private final Lock mBackgroundServiceLock = new ReentrantLock();
     private ExecutorService mBackgroundLoggingService = Executors.newSingleThreadExecutor();
 
-    public PerfettoProtoLogImpl(@NonNull IProtoLogGroup[] groups) {
+    public PerfettoProtoLogImpl(@NonNull IProtoLogGroup[] groups)
+            throws ServiceManager.ServiceNotFoundException {
         this(null, null, null, () -> {}, groups);
     }
 
-    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater, @NonNull IProtoLogGroup[] groups) {
+    public PerfettoProtoLogImpl(@NonNull Runnable cacheUpdater, @NonNull IProtoLogGroup[] groups)
+            throws ServiceManager.ServiceNotFoundException {
         this(null, null, null, cacheUpdater, groups);
     }
 
     public PerfettoProtoLogImpl(
             @NonNull String viewerConfigFilePath,
             @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups) {
+            @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         this(viewerConfigFilePath,
                 null,
                 new ProtoLogViewerConfigReader(() -> {
@@ -177,12 +179,14 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             @Nullable ViewerConfigInputStreamProvider viewerConfigInputStreamProvider,
             @Nullable ProtoLogViewerConfigReader viewerConfigReader,
             @NonNull Runnable cacheUpdater,
-            @NonNull IProtoLogGroup[] groups) {
+            @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         this(viewerConfigFilePath, viewerConfigInputStreamProvider, viewerConfigReader,
                 cacheUpdater, groups,
                 ProtoLogDataSource::new,
-                IProtoLogConfigurationService.Stub
-                        .asInterface(ServiceManager.getService(PROTOLOG_CONFIGURATION_SERVICE))
+                android.tracing.Flags.clientSideProtoLogging() ?
+                    IProtoLogConfigurationService.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow(PROTOLOG_CONFIGURATION_SERVICE)
+                    ) : null
         );
     }
 
@@ -222,7 +226,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         if (android.tracing.Flags.clientSideProtoLogging()) {
             mProtoLogConfigurationService = configurationService;
             Objects.requireNonNull(mProtoLogConfigurationService,
-                    "ServiceManager returned a null ProtoLog Configuration Service");
+                    "A null ProtoLog Configuration Service was provided!");
 
             try {
                 var args = new ProtoLogConfigurationServiceImpl.RegisterClientArgs();

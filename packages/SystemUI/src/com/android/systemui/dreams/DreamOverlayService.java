@@ -65,6 +65,7 @@ import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
 import com.android.systemui.navigationbar.gestural.domain.TaskMatcher;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -499,8 +500,11 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         mDreamOverlayContainerViewController =
                 dreamOverlayComponent.getDreamOverlayContainerViewController();
-        mTouchMonitor = ambientTouchComponent.getTouchMonitor();
-        mTouchMonitor.init();
+
+        if (!SceneContainerFlag.isEnabled()) {
+            mTouchMonitor = ambientTouchComponent.getTouchMonitor();
+            mTouchMonitor.init();
+        }
 
         mStateController.setShouldShowComplications(shouldShowComplications());
 

@@ -130,7 +130,6 @@ import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionReg
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
 import com.android.wm.shell.windowdecor.extension.TaskInfoKt;
 import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
-import com.android.wm.shell.windowdecor.viewhost.WindowDecorViewHostSupplier;
 
 import kotlin.Pair;
 import kotlin.Unit;
@@ -169,7 +168,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final Optional<DesktopTasksLimiter> mDesktopTasksLimiter;
     private final AppHeaderViewHolder.Factory mAppHeaderViewHolderFactory;
-    private final WindowDecorViewHostSupplier mWindowDecorViewHostSupplier;
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
@@ -239,8 +237,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
-            WindowDecorViewHostSupplier windowDecorViewHostSupplier) {
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler) {
         this(
                 context,
                 shellExecutor,
@@ -260,7 +257,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 genericLinksParser,
                 assistContentRequester,
                 multiInstanceHelper,
-                windowDecorViewHostSupplier,
                 new DesktopModeWindowDecoration.Factory(),
                 new InputMonitorFactory(),
                 SurfaceControl.Transaction::new,
@@ -294,7 +290,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             AppToWebGenericLinksParser genericLinksParser,
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
-            WindowDecorViewHostSupplier windowDecorViewHostSupplier,
             DesktopModeWindowDecoration.Factory desktopModeWindowDecorFactory,
             InputMonitorFactory inputMonitorFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
@@ -322,7 +317,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mMultiInstanceHelper = multiInstanceHelper;
         mShellCommandHandler = shellCommandHandler;
         mWindowManager = windowManager;
-        mWindowDecorViewHostSupplier = windowDecorViewHostSupplier;
         mDesktopModeWindowDecorFactory = desktopModeWindowDecorFactory;
         mInputMonitorFactory = inputMonitorFactory;
         mTransactionFactory = transactionFactory;
@@ -1412,8 +1406,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mGenericLinksParser,
                         mAssistContentRequester,
                         mMultiInstanceHelper,
-                        mWindowDecorCaptionHandleRepository,
-                        mWindowDecorViewHostSupplier);
+                        mWindowDecorCaptionHandleRepository);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
         final TaskPositioner taskPositioner = mTaskPositionerFactory.create(

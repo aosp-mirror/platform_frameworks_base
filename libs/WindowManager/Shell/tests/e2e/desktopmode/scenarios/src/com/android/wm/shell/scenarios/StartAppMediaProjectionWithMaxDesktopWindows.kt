@@ -72,7 +72,6 @@ open class StartAppMediaProjectionWithMaxDesktopWindows {
 
     @Test
     open fun startMediaProjection() {
-        // TODO(b/366455106) - handle max task Limit
         mediaProjectionAppHelper.startSingleAppMediaProjection(wmHelper, targetApp)
         mailApp.launchViaIntent(wmHelper)
         simpleApp.launchViaIntent(wmHelper)

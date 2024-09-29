@@ -1722,7 +1722,7 @@ public class ZenModeHelper {
             // booleans to determine whether to reset the rules to the default rules
             boolean allRulesDisabled = true;
             boolean hasDefaultRules = config.automaticRules.containsAll(
-                    ZenModeConfig.DEFAULT_RULE_IDS);
+                    ZenModeConfig.getDefaultRuleIds());
 
             long time = Flags.modesApi() ? mClock.millis() : System.currentTimeMillis();
             if (config.automaticRules != null && config.automaticRules.size() > 0) {
@@ -1797,6 +1797,14 @@ public class ZenModeHelper {
             if (Flags.modesApi() && forRestore) {
                 // Note: forBackup doesn't write deletedRules, but just in case.
                 config.deletedRules.clear();
+            }
+
+            if (Flags.modesUi() && config.automaticRules != null) {
+                ZenRule obsoleteEventsRule = config.automaticRules.get(
+                        ZenModeConfig.EVENTS_OBSOLETE_RULE_ID);
+                if (obsoleteEventsRule != null && !obsoleteEventsRule.enabled) {
+                    config.automaticRules.remove(ZenModeConfig.EVENTS_OBSOLETE_RULE_ID);
+                }
             }
 
             if (DEBUG) Log.d(TAG, reason);
@@ -2257,7 +2265,7 @@ public class ZenModeHelper {
     private static void updateRuleStringsForCurrentLocale(Context context,
             ZenModeConfig defaultConfig) {
         for (ZenRule rule : defaultConfig.automaticRules.values()) {
-            if (ZenModeConfig.EVENTS_DEFAULT_RULE_ID.equals(rule.id)) {
+            if (ZenModeConfig.EVENTS_OBSOLETE_RULE_ID.equals(rule.id)) {
                 rule.name = context.getResources()
                         .getString(R.string.zen_mode_default_events_name);
             } else if (ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID.equals(rule.id)) {
@@ -2279,7 +2287,7 @@ public class ZenModeHelper {
         }
         ZenPolicy defaultPolicy = defaultConfig.getZenPolicy();
         for (ZenRule rule : defaultConfig.automaticRules.values()) {
-            if (ZenModeConfig.DEFAULT_RULE_IDS.contains(rule.id) && rule.zenPolicy == null) {
+            if (ZenModeConfig.getDefaultRuleIds().contains(rule.id) && rule.zenPolicy == null) {
                 rule.zenPolicy = defaultPolicy.copy();
             }
         }
@@ -2483,7 +2491,7 @@ public class ZenModeHelper {
             List<StatsEvent> events) {
         // Make the ID safe.
         String id = rule.id == null ? "" : rule.id;
-        if (!ZenModeConfig.DEFAULT_RULE_IDS.contains(id)) {
+        if (!ZenModeConfig.getDefaultRuleIds().contains(id)) {
             id = "";
         }
 

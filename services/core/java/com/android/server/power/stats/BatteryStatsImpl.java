@@ -509,6 +509,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private boolean mSaveBatteryUsageStatsOnReset;
+    private boolean mAccumulateBatteryUsageStats;
     private BatteryUsageStatsProvider mBatteryUsageStatsProvider;
     private PowerStatsStore mPowerStatsStore;
 
@@ -11975,10 +11976,12 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void saveBatteryUsageStatsOnReset(
             @NonNull BatteryUsageStatsProvider batteryUsageStatsProvider,
-            @NonNull PowerStatsStore powerStatsStore) {
+            @NonNull PowerStatsStore powerStatsStore,
+            boolean accumulateBatteryUsageStats) {
         mSaveBatteryUsageStatsOnReset = true;
         mBatteryUsageStatsProvider = batteryUsageStatsProvider;
         mPowerStatsStore = powerStatsStore;
+        mAccumulateBatteryUsageStats = accumulateBatteryUsageStats;
     }
 
     @GuardedBy("this")
@@ -12179,29 +12182,33 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        final BatteryUsageStats batteryUsageStats;
-        synchronized (this) {
-            batteryUsageStats = mBatteryUsageStatsProvider.getBatteryUsageStats(this,
-                    new BatteryUsageStatsQuery.Builder()
-                            .setMaxStatsAgeMs(0)
-                            .includePowerModels()
-                            .includeProcessStateData()
-                            .build());
-        }
-
-        // TODO(b/188068523): BatteryUsageStats should use monotonic time for start and end
-        // Once that change is made, we will be able to use the BatteryUsageStats' monotonic
-        // start time
-        long monotonicStartTime =
-                mMonotonicClock.monotonicTime() - batteryUsageStats.getStatsDuration();
-        mHandler.post(() -> {
-            mPowerStatsStore.storeBatteryUsageStats(monotonicStartTime, batteryUsageStats);
-            try {
-                batteryUsageStats.close();
-            } catch (IOException e) {
-                Log.e(TAG, "Cannot close BatteryUsageStats", e);
+        if (mAccumulateBatteryUsageStats) {
+            mBatteryUsageStatsProvider.accumulateBatteryUsageStats(this);
+        } else {
+            final BatteryUsageStats batteryUsageStats;
+            synchronized (this) {
+                batteryUsageStats = mBatteryUsageStatsProvider.getBatteryUsageStats(this,
+                        new BatteryUsageStatsQuery.Builder()
+                                .setMaxStatsAgeMs(0)
+                                .includePowerModels()
+                                .includeProcessStateData()
+                                .build());
             }
-        });
+
+            // TODO(b/188068523): BatteryUsageStats should use monotonic time for start and end
+            // Once that change is made, we will be able to use the BatteryUsageStats' monotonic
+            // start time
+            long monotonicStartTime =
+                    mMonotonicClock.monotonicTime() - batteryUsageStats.getStatsDuration();
+            mHandler.post(() -> {
+                mPowerStatsStore.storeBatteryUsageStats(monotonicStartTime, batteryUsageStats);
+                try {
+                    batteryUsageStats.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Cannot close BatteryUsageStats", e);
+                }
+            });
+        }
     }
 
     @GuardedBy("this")
