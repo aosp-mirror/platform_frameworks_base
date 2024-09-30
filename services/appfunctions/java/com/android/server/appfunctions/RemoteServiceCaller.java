@@ -18,6 +18,7 @@ package com.android.server.appfunctions;
 import android.annotation.NonNull;
 import android.content.Intent;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.UserHandle;
 
 /**
@@ -30,9 +31,10 @@ import android.os.UserHandle;
 public interface RemoteServiceCaller<T> {
 
     /**
-     * Initiates service binding and executes a provided method when the service connects. Unbinds
-     * the service after execution or upon cancellation timeout. Returns the result of the
-     * bindService API.
+     * Initiates service binding and executes a provided method when the service connects.
+     *
+     * <p>Unbinds the service after execution or upon cancellation timeout or calling process death.
+     * Returns the result of the bindService API.
      *
      * <p>When the service connection was made successfully, it's the caller responsibility to
      * report the usage is completed and can be unbound by calling {@link
@@ -43,6 +45,9 @@ public interface RemoteServiceCaller<T> {
      * return the result within `cancellationTimeoutMillis` after the cancellation signal is sent,
      * this method will unbind the service connection.
      *
+     * <p>This method will also unbind the service after the calling process dies (because a
+     * cancellation signal cannot be sent and system server can become bound forever if otherwise).
+     *
      * @param intent An Intent object that describes the service that should be bound.
      * @param bindFlags Flags used to control the binding process See {@link
      *     android.content.Context#bindService}.
@@ -52,6 +57,7 @@ public interface RemoteServiceCaller<T> {
      * @param cancellationSignal The cancellation signal forwarded to the service.
      * @param callback A callback to be invoked for various events. See {@link
      *     RunServiceCallCallback}.
+     * @param callerBinder The binder of the caller.
      */
     boolean runServiceCall(
             @NonNull Intent intent,
@@ -59,7 +65,8 @@ public interface RemoteServiceCaller<T> {
             @NonNull UserHandle userHandle,
             long cancellationTimeoutMillis,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull RunServiceCallCallback<T> callback);
+            @NonNull RunServiceCallCallback<T> callback,
+            @NonNull IBinder callerBinder);
 
     /** An interface for clients to signal that they have finished using a bound service. */
     interface ServiceUsageCompleteListener {
