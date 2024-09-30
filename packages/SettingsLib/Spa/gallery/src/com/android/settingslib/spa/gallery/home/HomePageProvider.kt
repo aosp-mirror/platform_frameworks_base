@@ -20,10 +20,8 @@ import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
@@ -46,33 +44,11 @@ import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
 import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
+import com.android.settingslib.spa.widget.ui.Category
 
 object HomePageProvider : SettingsPageProvider {
     override val name = SettingsPageProviderEnum.HOME.name
     override val displayName = SettingsPageProviderEnum.HOME.displayName
-    private val owner = createSettingsPage()
-
-    override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
-        return listOf(
-            PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SearchScaffoldPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SuwScaffoldPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            SpinnerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            PagerMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            FooterPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            IllustrationPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            CategoryPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ActionButtonPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ProgressBarPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            LoadingBarPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ChartPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            DialogMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            EditorMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            BannerPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            CopyablePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-        )
-    }
 
     override fun getTitle(arguments: Bundle?): String {
         return SpaEnvironmentFactory.instance.appContext.getString(R.string.app_name)
@@ -81,12 +57,31 @@ object HomePageProvider : SettingsPageProvider {
     @Composable
     override fun Page(arguments: Bundle?) {
         val title = remember { getTitle(arguments) }
-        val entries = remember { buildEntry(arguments) }
         HomeScaffold(title) {
-            for (entry in entries) {
-                entry.UiLayout()
+            Category {
+                PreferenceMainPageProvider.Entry()
             }
-            ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
+            Category {
+                SearchScaffoldPageProvider.Entry()
+                SuwScaffoldPageProvider.Entry()
+                ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
+            }
+            Category {
+                SliderPageProvider.Entry()
+                SpinnerPageProvider.Entry()
+                PagerMainPageProvider.Entry()
+                FooterPageProvider.Entry()
+                IllustrationPageProvider.Entry()
+                CategoryPageProvider.Entry()
+                ActionButtonPageProvider.Entry()
+                ProgressBarPageProvider.Entry()
+                LoadingBarPageProvider.Entry()
+                ChartPageProvider.Entry()
+                DialogMainPageProvider.Entry()
+                EditorMainPageProvider.Entry()
+                BannerPageProvider.Entry()
+                CopyablePageProvider.Entry()
+            }
         }
     }
 }
