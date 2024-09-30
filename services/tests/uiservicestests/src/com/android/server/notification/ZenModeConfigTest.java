@@ -1010,7 +1010,39 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(Flags.FLAG_MODES_UI)
-    public void testConfigXml_manualRule_upgradeWhenExisting() throws Exception {
+    public void testConfigXml_manualRuleWithoutCondition_upgradeWhenExisting() throws Exception {
+        // prior to modes_ui, it's possible to have a non-null manual rule that doesn't have much
+        // data on it because it's meant to indicate that the manual rule is on by merely existing.
+        ZenModeConfig config = new ZenModeConfig();
+        config.manualRule = new ZenModeConfig.ZenRule();
+        config.manualRule.enabled = true;
+        config.manualRule.pkg = "android";
+        config.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        config.manualRule.conditionId = null;
+        config.manualRule.enabler = "test";
+
+        // write out entire config xml
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeConfigXml(config, XML_VERSION_MODES_API, /* forBackup= */ false, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig fromXml = readConfigXml(bais);
+
+
+        // The result should be valid and contain a manual rule; the rule should have a non-null
+        // ZenPolicy and a condition whose state is true. The conditionId should be default.
+        assertThat(fromXml.isValid()).isTrue();
+        assertThat(fromXml.manualRule).isNotNull();
+        assertThat(fromXml.manualRule.zenPolicy).isNotNull();
+        assertThat(fromXml.manualRule.condition).isNotNull();
+        assertThat(fromXml.manualRule.condition.state).isEqualTo(STATE_TRUE);
+        assertThat(fromXml.manualRule.conditionId).isEqualTo(Uri.EMPTY);
+        assertThat(fromXml.manualRule.enabler).isEqualTo("test");
+        assertThat(fromXml.isManualActive()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    public void testConfigXml_manualRuleWithCondition_upgradeWhenExisting() throws Exception {
         // prior to modes_ui, it's possible to have a non-null manual rule that doesn't have much
         // data on it because it's meant to indicate that the manual rule is on by merely existing.
         ZenModeConfig config = new ZenModeConfig();
@@ -1029,6 +1061,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         // The result should have a manual rule; it should have a non-null ZenPolicy and a condition
         // whose state is true. The conditionId and enabler data should also be preserved.
+        assertThat(fromXml.isValid()).isTrue();
         assertThat(fromXml.manualRule).isNotNull();
         assertThat(fromXml.manualRule.zenPolicy).isNotNull();
         assertThat(fromXml.manualRule.condition).isNotNull();
