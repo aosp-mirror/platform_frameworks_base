@@ -19,6 +19,7 @@ package com.android.server.profcollect;
 import static com.android.server.profcollect.ProfcollectForwardingService.LOG_TAG;
 
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
@@ -42,7 +43,7 @@ public final class Utils {
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
                 mIProfcollect.trace_system(eventName);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
         });
@@ -56,7 +57,7 @@ public final class Utils {
         BackgroundThread.get().getThreadHandler().postDelayed(() -> {
             try {
                 mIProfcollect.trace_system(eventName);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
         }, delayMs);
@@ -73,7 +74,7 @@ public final class Utils {
                 mIProfcollect.trace_process(eventName,
                         processName,
                         durationMs);
-            } catch (RemoteException e) {
+            } catch (RemoteException | ServiceSpecificException e) {
                 Log.e(LOG_TAG, "Failed to initiate trace: " + e.getMessage());
             }
         });
