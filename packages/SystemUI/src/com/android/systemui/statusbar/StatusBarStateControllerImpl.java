@@ -37,6 +37,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
+import com.android.compose.animation.scene.OverlayKey;
 import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -60,6 +61,7 @@ import com.android.systemui.scene.domain.interactor.SceneBackInteractor;
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Overlays;
 import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
@@ -75,6 +77,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -230,6 +233,7 @@ public class StatusBarStateControllerImpl implements
                     combineFlows(
                         mDeviceUnlockedInteractorLazy.get().getDeviceUnlockStatus(),
                         mSceneInteractorLazy.get().getCurrentScene(),
+                        mSceneInteractorLazy.get().getCurrentOverlays(),
                         mSceneBackInteractorLazy.get().getBackStack(),
                         mSceneContainerOcclusionInteractorLazy.get().getInvisibleDueToOcclusion(),
                         this::calculateStateFromSceneFramework),
@@ -690,19 +694,25 @@ public class StatusBarStateControllerImpl implements
     private int calculateStateFromSceneFramework(
             DeviceUnlockStatus deviceUnlockStatus,
             SceneKey currentScene,
+            Set<OverlayKey> currentOverlays,
             SceneStack backStack,
             boolean isOccluded) {
         SceneContainerFlag.isUnexpectedlyInLegacyMode();
         if (currentScene.equals(Scenes.Lockscreen)) {
+            if (currentOverlays.contains(Overlays.NotificationsShade) || currentOverlays.contains(
+                    Overlays.QuickSettingsShade)) {
+                return StatusBarState.SHADE_LOCKED;
+            }
             return StatusBarState.KEYGUARD;
-        } else if (currentScene.equals(Scenes.Shade)
+        }
+        if (currentScene.equals(Scenes.Shade)
                 && SceneStackKt.contains(backStack, Scenes.Lockscreen)) {
             return StatusBarState.SHADE_LOCKED;
-        } else if (deviceUnlockStatus.isUnlocked() || isOccluded) {
-            return StatusBarState.SHADE;
-        } else {
-            return Preconditions.checkNotNull(sStatusBarStateByLockedSceneKey.get(currentScene));
         }
+        if (deviceUnlockStatus.isUnlocked() || isOccluded) {
+            return StatusBarState.SHADE;
+        }
+        return Preconditions.checkNotNull(sStatusBarStateByLockedSceneKey.get(currentScene));
     }
 
     /** Notifies that the {@link StatusBarState} has changed to the given new state. */
