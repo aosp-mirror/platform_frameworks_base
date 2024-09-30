@@ -65,4 +65,17 @@ public class ColorUtils {
         }
         return 0;
     }
+
+    /**
+     * Utility function to create a color as an int
+     *
+     * @param r red
+     * @param g green
+     * @param b blue
+     * @param a alpha
+     * @return int packed color
+     */
+    public static int createColor(int r, int g, int b, int a) {
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
 }
