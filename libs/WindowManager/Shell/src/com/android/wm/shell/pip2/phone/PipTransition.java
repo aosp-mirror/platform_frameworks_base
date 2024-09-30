@@ -54,6 +54,7 @@ import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.pip2.animation.PipEnterExitAnimator;
+import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
@@ -403,6 +404,18 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange.getTaskInfo() != null
                 && pipChange.getTaskInfo().pictureInPictureParams != null) {
             sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
+        }
+
+        // For opening type transitions, if there is a non-pip change of mode TO_FRONT/OPEN,
+        // make sure that change has alpha of 1f, since it's init state might be set to alpha=0f
+        // by the Transitions framework to simplify Task opening transitions.
+        if (TransitionUtil.isOpeningType(info.getType())) {
+            for (TransitionInfo.Change change : info.getChanges()) {
+                if (change.getLeash() == null || change == pipChange) continue;
+                if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
+                    startTransaction.setAlpha(change.getLeash(), 1f);
+                }
+            }
         }
 
         PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
