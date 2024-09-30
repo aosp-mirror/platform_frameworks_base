@@ -26,4 +26,5 @@ union StatsBootstrapAtomValue {
     float floatValue;
     String stringValue;
     byte[] bytesValue;
+    String[] stringArrayValue;
 }

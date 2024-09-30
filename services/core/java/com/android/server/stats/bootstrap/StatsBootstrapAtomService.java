@@ -62,6 +62,9 @@ public class StatsBootstrapAtomService extends IStatsBootstrapAtomService.Stub {
                 case StatsBootstrapAtomValue.bytesValue:
                     builder.writeByteArray(value.getBytesValue());
                     break;
+                case StatsBootstrapAtomValue.stringArrayValue:
+                    builder.writeStringArray(value.getStringArrayValue());
+                    break;
                 default:
                     Slog.e(TAG, "Unexpected value type " + value.getTag()
                             + " when logging atom " + atom.atomId);
