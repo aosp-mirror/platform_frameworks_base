@@ -42,6 +42,7 @@ android_library {
         "SettingsLibFooterPreference",
         "SettingsLibHelpUtils",
         "SettingsLibIllustrationPreference",
+        "SettingsLibIntroPreference",
         "SettingsLibLayoutPreference",
         "SettingsLibMainSwitchPreference",
         "SettingsLibProfileSelector",
