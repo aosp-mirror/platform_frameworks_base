@@ -82,11 +82,11 @@ class QSFragmentComposeViewModelForceQSTest(private val testData: TestData) :
                 (0u..31u).map { bitfield ->
                     TestData(
                         statusBarState,
-                        expanded = (bitfield or 1u) == 1u,
-                        stackScrollerOverScrolling = (bitfield or 2u) == 1u,
-                        bypassEnabled = (bitfield or 4u) == 1u,
-                        transitioningToFullShade = (bitfield or 8u) == 1u,
-                        inSplitShade = (bitfield or 16u) == 1u,
+                        expanded = (bitfield and 1u) == 1u,
+                        stackScrollerOverScrolling = (bitfield and 2u) == 2u,
+                        bypassEnabled = (bitfield and 4u) == 4u,
+                        transitioningToFullShade = (bitfield and 8u) == 8u,
+                        inSplitShade = (bitfield and 16u) == 16u,
                     )
                 }
             }
