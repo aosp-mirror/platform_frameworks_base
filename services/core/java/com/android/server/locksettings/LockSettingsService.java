@@ -127,6 +127,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -312,6 +313,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     @GuardedBy("mUserCreationAndRemovalLock")
     private boolean mThirdPartyAppsStarted;
 
+    // This list contains the (protectorId, userId) of any protectors that were by replaced by a
+    // migration and should be destroyed once rollback to the old build is no longer possible.
+    private ArrayList<Pair<Long, Integer>> mProtectorsToDestroyOnBootCompleted = new ArrayList<>();
+
     // Current password metrics for all secured users on the device. Updated when user unlocks the
     // device or changes password. Removed if user is stopped with its CE key evicted.
     @GuardedBy("this")
@@ -366,6 +371,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mLockSettingsService.migrateOldDataAfterSystemReady();
                 mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
             } else if (phase == PHASE_BOOT_COMPLETED) {
+                // In the case of an upgrade, PHASE_BOOT_COMPLETED means that a rollback to the old
+                // build can no longer occur.  This is the time to destroy any migrated protectors.
+                mLockSettingsService.destroyMigratedProtectors();
+
                 mLockSettingsService.loadEscrowData();
             }
         }
@@ -1123,7 +1132,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             // - Upgrading from Android 14, where unsecured users didn't have Keystore super keys.
             //
             // - Upgrading from a build with config_disableWeaverOnUnsecuredUsers=false to one with
-            //   config_disableWeaverOnUnsecuredUsers=true.
+            //   config_disableWeaverOnUnsecuredUsers=true.  (We don't bother to proactively add
+            //   Weaver for the reverse update to false, as it's too late to help in that case.)
             //
             // The end result is that all users, regardless of whether they are secured or not, have
             // a synthetic password with all keys initialized and protected by it, and honoring
@@ -1176,12 +1186,16 @@ public class LockSettingsService extends ILockSettings.Stub {
             // protected by Weaver.  Note that the problematic HAL can also deadlock if called with
             // the ActivityManagerService lock held, but that should not be a problem here since
             // that lock isn't held here, unlike unlockUserKeyIfUnsecured() where it is.
-            while (sp == null) {
+            for (int i = 0; i < 12 && sp == null; i++) {
                 Slog.e(TAG, "Failed to unwrap synthetic password. Waiting 5 seconds to retry.");
                 SystemClock.sleep(5000);
                 result = mSpManager.unlockLskfBasedProtector(getGateKeeperService(), protectorId,
                             LockscreenCredential.createNone(), userId, null);
                 sp = result.syntheticPassword;
+            }
+            if (sp == null) {
+                throw new IllegalStateException(
+                        "Failed to unwrap synthetic password for unsecured user");
             }
             // If the SP is protected by Weaver, then remove the Weaver protection in order to make
             // config_disableWeaverOnUnsecuredUsers=true take effect.
@@ -1199,9 +1213,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                     throw new IllegalStateException("New SP protector does not work");
                 }
 
-                // Replace the protector.
+                // Replace the protector.  Wait until PHASE_BOOT_COMPLETED to destroy the old
+                // protector, since the Weaver slot erasure and freeing cannot be rolled back.
                 setCurrentLskfBasedProtectorId(newProtectorId, userId);
-                mSpManager.destroyLskfBasedProtector(protectorId, userId);
+                mProtectorsToDestroyOnBootCompleted.add(new Pair(protectorId, userId));
             } else {
                 Slog.i(TAG, "Synthetic password is already not protected by Weaver");
             }
@@ -1223,6 +1238,17 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         Slogf.i(TAG, "Initializing Keystore super keys for user %d", userId);
         initKeystoreSuperKeys(userId, sp, /* allowExisting= */ true);
+    }
+
+    private void destroyMigratedProtectors() {
+        if (!mProtectorsToDestroyOnBootCompleted.isEmpty()) {
+            synchronized (mSpManager) {
+                for (Pair<Long, Integer> pair : mProtectorsToDestroyOnBootCompleted) {
+                    mSpManager.destroyLskfBasedProtector(pair.first, pair.second);
+                }
+            }
+        }
+        mProtectorsToDestroyOnBootCompleted = null; // The list is no longer needed.
     }
 
     /**
