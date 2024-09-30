@@ -28,15 +28,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
-import com.android.settingslib.spa.framework.common.createSettingsPage
+import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
-import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Category
 import com.android.settingslib.spa.widget.ui.SettingsIcon
@@ -46,7 +44,6 @@ object PreferencePageProvider : SettingsPageProvider {
 
     override val name = "Preference"
     private const val PAGE_TITLE = "Sample Preference"
-    private val owner = createSettingsPage()
 
     @Composable
     override fun Page(arguments: Bundle?) {
@@ -109,14 +106,12 @@ object PreferencePageProvider : SettingsPageProvider {
         }
     }
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = owner)
-            .setMacro {
-                SimplePreferenceMacro(
-                    title = PAGE_TITLE,
-                    clickRoute = name
-                )
-            }
+    @Composable
+    fun Entry() {
+        Preference(model = object : PreferenceModel {
+            override val title = PAGE_TITLE
+            override val onClick = navigator(name)
+        })
     }
 }
 
