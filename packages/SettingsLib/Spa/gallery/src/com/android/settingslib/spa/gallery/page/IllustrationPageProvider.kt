@@ -41,7 +41,7 @@ object IllustrationPageProvider : SettingsPageProvider {
     override fun buildEntry(arguments: Bundle?): List<SettingsEntry> {
         val entryList = mutableListOf<SettingsEntry>()
         entryList.add(
-            SettingsEntryBuilder.create( "Lottie Illustration", owner)
+            SettingsEntryBuilder.create("Lottie Illustration", owner)
                 .setUiLayoutFn {
                     Preference(object : PreferenceModel {
                         override val title = "Lottie Illustration"
@@ -54,7 +54,7 @@ object IllustrationPageProvider : SettingsPageProvider {
                 }.build()
         )
         entryList.add(
-            SettingsEntryBuilder.create( "Image Illustration", owner)
+            SettingsEntryBuilder.create("Image Illustration", owner)
                 .setUiLayoutFn {
                     Preference(object : PreferenceModel {
                         override val title = "Image Illustration"
@@ -70,14 +70,12 @@ object IllustrationPageProvider : SettingsPageProvider {
         return entryList
     }
 
-     fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner)
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
-            }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
     }
 
     override fun getTitle(arguments: Bundle?): String {
