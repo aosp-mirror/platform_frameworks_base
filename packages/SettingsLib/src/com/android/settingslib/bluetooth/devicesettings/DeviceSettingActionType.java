@@ -24,26 +24,18 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.SOURCE)
 @IntDef(
         value = {
-            DeviceSettingType.DEVICE_SETTING_TYPE_UNKNOWN,
-            DeviceSettingType.DEVICE_SETTING_TYPE_ACTION_SWITCH,
-            DeviceSettingType.DEVICE_SETTING_TYPE_MULTI_TOGGLE,
-            DeviceSettingType.DEVICE_SETTING_TYPE_FOOTER,
-            DeviceSettingType.DEVICE_SETTING_TYPE_HELP,
+            DeviceSettingActionType.DEVICE_SETTING_ACTION_TYPE_UNKNOWN,
+            DeviceSettingActionType.DEVICE_SETTING_ACTION_TYPE_INTENT,
+            DeviceSettingActionType.DEVICE_SETTING_ACTION_TYPE_PENDING_INTENT,
         },
         open = true)
-public @interface DeviceSettingType {
-    /** Device setting type is unknown. */
-    int DEVICE_SETTING_TYPE_UNKNOWN = 0;
+public @interface DeviceSettingActionType {
+    /** Device setting action type is unknown. */
+    int DEVICE_SETTING_ACTION_TYPE_UNKNOWN = 0;
 
-    /** Device setting type is action/switch preference. */
-    int DEVICE_SETTING_TYPE_ACTION_SWITCH = 1;
+    /** Device setting action is an intent to start an activity. */
+    int DEVICE_SETTING_ACTION_TYPE_INTENT = 1;
 
-    /** Device setting type is multi-toggle preference. */
-    int DEVICE_SETTING_TYPE_MULTI_TOGGLE = 2;
-
-    /** Device setting type is footer preference. */
-    int DEVICE_SETTING_TYPE_FOOTER = 3;
-
-    /** Device setting type is "help" preference. */
-    int DEVICE_SETTING_TYPE_HELP = 4;
+    /** Device setting action is a pending intent. */
+    int DEVICE_SETTING_ACTION_TYPE_PENDING_INTENT = 2;
 }

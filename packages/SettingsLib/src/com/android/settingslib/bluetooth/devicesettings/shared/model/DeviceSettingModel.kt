@@ -16,6 +16,7 @@
 
 package com.android.settingslib.bluetooth.devicesettings.shared.model
 
+import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
@@ -34,7 +35,7 @@ sealed interface DeviceSettingModel {
         val title: String,
         val summary: String? = null,
         val icon: DeviceSettingIcon? = null,
-        val intent: Intent? = null,
+        val action: DeviceSettingActionModel? = null,
         val switchState: DeviceSettingStateModel.ActionSwitchPreferenceState? = null,
         val isAllowedChangingState: Boolean = true,
         val updateState: ((DeviceSettingStateModel.ActionSwitchPreferenceState) -> Unit)? = null,
@@ -82,4 +83,12 @@ sealed interface DeviceSettingIcon {
     data class BitmapIcon(val bitmap: Bitmap) : DeviceSettingIcon
 
     data class ResourceIcon(@DrawableRes val resId: Int) : DeviceSettingIcon
+}
+
+/** Models an action in device settings. */
+sealed interface DeviceSettingActionModel {
+
+    data class IntentAction(val intent: Intent) : DeviceSettingActionModel
+
+    data class PendingIntentAction(val pendingIntent: PendingIntent) : DeviceSettingActionModel
 }
