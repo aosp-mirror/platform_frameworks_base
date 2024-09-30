@@ -30,9 +30,6 @@ import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
 import com.android.settingslib.spa.gallery.editor.SettingsDropdownBoxPageProvider
 import com.android.settingslib.spa.gallery.editor.SettingsDropdownCheckBoxProvider
 import com.android.settingslib.spa.gallery.home.HomePageProvider
-import com.android.settingslib.spa.gallery.itemList.ItemListPageProvider
-import com.android.settingslib.spa.gallery.itemList.ItemOperatePageProvider
-import com.android.settingslib.spa.gallery.itemList.OperateListPageProvider
 import com.android.settingslib.spa.gallery.editor.SettingsOutlinedTextFieldPageProvider
 import com.android.settingslib.spa.gallery.editor.SettingsTextFieldPasswordPageProvider
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
@@ -67,8 +64,6 @@ import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 enum class SettingsPageProviderEnum(val displayName: String) {
     HOME("home"),
     PREFERENCE("preference"),
-    ITEM_LIST("itemList"),
-    ITEM_OP_PAGE("itemOp"),
 
     // Add your SPPs
 }
@@ -100,9 +95,6 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 ChartPageProvider,
                 DialogMainPageProvider,
                 NavDialogProvider,
-                ItemListPageProvider,
-                ItemOperatePageProvider,
-                OperateListPageProvider,
                 EditorMainPageProvider,
                 SettingsOutlinedTextFieldPageProvider,
                 SettingsDropdownBoxPageProvider,
