@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shade
+package com.android.systemui.statusbar.phone
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import org.mockito.Mockito.mock
 
-var Kosmos.shadeViewController by Kosmos.Fixture { mock<ShadeViewController>() }
+val Kosmos.mockPhoneStatusBarViewController: PhoneStatusBarViewController by
+    Kosmos.Fixture { mock(PhoneStatusBarViewController::class.java) }
 
-val Kosmos.mockNotificationShadeWindowViewController by
-    Kosmos.Fixture { mock<NotificationShadeWindowViewController>() }
+var Kosmos.phoneStatusBarViewController by Kosmos.Fixture { mockPhoneStatusBarViewController }
 
-var Kosmos.notificationShadeWindowViewController by
-    Kosmos.Fixture { mockNotificationShadeWindowViewController }
+val Kosmos.mockPhoneStatusBarTransitions: PhoneStatusBarTransitions by
+    Kosmos.Fixture { mock(PhoneStatusBarTransitions::class.java) }
 
-val Kosmos.mockShadeSurface by Kosmos.Fixture { mock<ShadeSurface>() }
-
-var Kosmos.shadeSurface by Kosmos.Fixture { mockShadeSurface }
+var Kosmos.phoneStatusBarTransitions by Kosmos.Fixture { mockPhoneStatusBarTransitions }

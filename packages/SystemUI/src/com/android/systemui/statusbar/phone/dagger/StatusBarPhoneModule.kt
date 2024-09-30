@@ -16,16 +16,36 @@
 package com.android.systemui.statusbar.phone.dagger
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.statusbar.core.CommandQueueInitializer
 import com.android.systemui.statusbar.core.StatusBarInitializer
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl
+import com.android.systemui.statusbar.core.StatusBarOrchestrator
+import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks
+import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
+import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStoreImpl
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
+import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
 /** Similar in purpose to [StatusBarModule], but scoped only to phones */
 @Module
 interface StatusBarPhoneModule {
+
+    @Binds
+    abstract fun windowStateRepoStore(
+        impl: StatusBarWindowStateRepositoryStoreImpl
+    ): StatusBarWindowStateRepositoryStore
+
+    @Binds
+    abstract fun commandQCallbacks(
+        impl: CentralSurfacesCommandQueueCallbacks
+    ): CommandQueue.Callbacks
 
     /** Binds {@link StatusBarInitializer} as a {@link CoreStartable}. */
     @Binds
@@ -34,4 +54,34 @@ interface StatusBarPhoneModule {
     fun bindStatusBarInitializer(impl: StatusBarInitializerImpl): CoreStartable
 
     @Binds fun statusBarInitializer(impl: StatusBarInitializerImpl): StatusBarInitializer
+
+    companion object {
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(StatusBarOrchestrator::class)
+        fun orchestratorCoreStartable(
+            orchestratorLazy: Lazy<StatusBarOrchestrator>
+        ): CoreStartable {
+            return if (StatusBarSimpleFragment.isEnabled) {
+                orchestratorLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(CommandQueueInitializer::class)
+        fun commandQueueInitializerCoreStartable(
+            initializerLazy: Lazy<CommandQueueInitializer>
+        ): CoreStartable {
+            return if (StatusBarSimpleFragment.isEnabled) {
+                initializerLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+    }
 }
