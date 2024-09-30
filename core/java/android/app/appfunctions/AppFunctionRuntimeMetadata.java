@@ -204,11 +204,17 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
                             packageName, functionId));
         }
 
+        public Builder(AppFunctionRuntimeMetadata original) {
+            this(original.getPackageName(), original.getFunctionId());
+            setEnabled(original.getEnabled());
+        }
+
         /**
          * Sets an indicator specifying if the function is enabled or not. This would override the
          * default enabled state in the static metadata ({@link
-         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to
-         * null to clear the override.
+         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to null
+         * to clear the override.
+         * TODO(369683073) Replace the tristate Boolean with IntDef EnabledState.
          */
         @NonNull
         public Builder setEnabled(@Nullable Boolean enabled) {

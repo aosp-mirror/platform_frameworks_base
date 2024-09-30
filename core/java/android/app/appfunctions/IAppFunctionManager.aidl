@@ -17,9 +17,11 @@
 package android.app.appfunctions;
 
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
+import android.app.appfunctions.IAppFunctionEnabledCallback;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.os.ICancellationSignal;
 
+import android.os.UserHandle;
 /**
  * Defines the interface for apps to interact with the app function execution service
  * {@code AppFunctionManagerService} running in the system server process.
@@ -36,5 +38,16 @@ interface IAppFunctionManager {
     ICancellationSignal executeAppFunction(
         in ExecuteAppFunctionAidlRequest request,
         in IExecuteAppFunctionCallback callback
+    );
+
+    /**
+    * Sets an AppFunction's enabled state provided by {@link AppFunctionService} through the system.
+    */
+    void setAppFunctionEnabled(
+        in String callingPackage,
+        in String functionIdentifier,
+        in UserHandle userHandle,
+        int enabledState,
+        in IAppFunctionEnabledCallback callback
     );
 }
