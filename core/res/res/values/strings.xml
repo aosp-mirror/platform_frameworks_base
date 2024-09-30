@@ -6508,6 +6508,14 @@ ul.</string>
     <string name="satellite_notification_open_message">Open Messages</string>
     <!-- Invoke Satellite setting activity of Settings -->
     <string name="satellite_notification_how_it_works">How it works</string>
+    <!-- Popup title when satellite start with manual selection -->
+    <string name="satellite_manual_selection_state_popup_title">Turn on \"Automatically select network\"</string>
+    <!-- Popup message when satellite start with manual selection -->
+    <string name="satellite_manual_selection_state_popup_message">Turn on \"Automatically select network\" in Settings so your phone can find a network that works with satellite</string>
+    <!-- Popup button for set network selection automatic -->
+    <string name="satellite_manual_selection_state_popup_ok">Turn on</string>
+    <!-- Popup button for cancel satellite request -->
+    <string name="satellite_manual_selection_state_popup_cancel">Go back</string>
     <!-- Initial/System provided label shown for an app which gets unarchived. [CHAR LIMIT=64]. -->
     <string name="unarchival_session_app_label">Pending...</string>
 
