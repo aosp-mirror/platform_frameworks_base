@@ -52,6 +52,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
+import com.android.settingslib.flags.Flags;
 
 import com.google.common.collect.ImmutableList;
 
@@ -1134,20 +1135,8 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to assistant profile is null");
             return;
         }
-        List<BluetoothDevice> connectedDevices = mServiceBroadcastAssistant.getConnectedDevices();
-        List<BluetoothDevice> devicesInSharing =
-                connectedDevices.stream()
-                        .filter(
-                                bluetoothDevice -> {
-                                    List<BluetoothLeBroadcastReceiveState> sourceList =
-                                            mServiceBroadcastAssistant.getAllSources(
-                                                    bluetoothDevice);
-                                    return !sourceList.isEmpty()
-                                            && sourceList.stream()
-                                                    .anyMatch(BluetoothUtils::isConnected);
-                                })
-                        .collect(Collectors.toList());
-        if (devicesInSharing.isEmpty()) {
+        List<BluetoothDevice> devicesInBroadcast = getDevicesInBroadcast();
+        if (devicesInBroadcast.isEmpty()) {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded due to no sinks in broadcast");
             return;
         }
@@ -1156,7 +1145,7 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         BluetoothDevice targetDevice = null;
         // Find the earliest connected device in sharing session.
         int targetDeviceIdx = -1;
-        for (BluetoothDevice device : devicesInSharing) {
+        for (BluetoothDevice device : devicesInBroadcast) {
             if (devices.contains(device)) {
                 int idx = devices.indexOf(device);
                 if (idx > targetDeviceIdx) {
@@ -1169,10 +1158,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded, target is null");
             return;
         }
-        Log.d(
-                TAG,
-                "updateFallbackActiveDeviceIfNeeded, set active device: "
-                        + targetDevice.getAnonymizedAddress());
         CachedBluetoothDevice targetCachedDevice = mDeviceManager.findDevice(targetDevice);
         if (targetCachedDevice == null) {
             Log.d(TAG, "Skip updateFallbackActiveDeviceIfNeeded, fail to find cached bt device");
@@ -1180,14 +1165,35 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
         }
         int fallbackActiveGroupId = getFallbackActiveGroupId();
         if (fallbackActiveGroupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID
-                && getGroupId(targetCachedDevice) == fallbackActiveGroupId) {
+                && BluetoothUtils.getGroupId(targetCachedDevice) == fallbackActiveGroupId) {
             Log.d(
                     TAG,
                     "Skip updateFallbackActiveDeviceIfNeeded, already is fallback: "
                             + fallbackActiveGroupId);
             return;
         }
+        Log.d(
+                TAG,
+                "updateFallbackActiveDeviceIfNeeded, set active device: "
+                        + targetDevice.getAnonymizedAddress());
         targetCachedDevice.setActive();
+    }
+
+    private List<BluetoothDevice> getDevicesInBroadcast() {
+        boolean hysteresisModeFixEnabled = Flags.audioSharingHysteresisModeFix();
+        List<BluetoothDevice> connectedDevices = mServiceBroadcastAssistant.getConnectedDevices();
+        return connectedDevices.stream()
+                .filter(
+                        bluetoothDevice -> {
+                            List<BluetoothLeBroadcastReceiveState> sourceList =
+                                    mServiceBroadcastAssistant.getAllSources(
+                                            bluetoothDevice);
+                            return !sourceList.isEmpty() && sourceList.stream().anyMatch(
+                                    source -> hysteresisModeFixEnabled
+                                            ? BluetoothUtils.isSourceMatched(source, mBroadcastId)
+                                            : BluetoothUtils.isConnected(source));
+                        })
+                .collect(Collectors.toList());
     }
 
     private int getFallbackActiveGroupId() {
@@ -1195,23 +1201,6 @@ public class LocalBluetoothLeBroadcast implements LocalBluetoothProfile {
                 mContext.getContentResolver(),
                 "bluetooth_le_broadcast_fallback_active_group_id",
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
-    }
-
-    private int getGroupId(CachedBluetoothDevice cachedDevice) {
-        int groupId = cachedDevice.getGroupId();
-        String anonymizedAddress = cachedDevice.getDevice().getAnonymizedAddress();
-        if (groupId != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
-            Log.d(TAG, "getGroupId by CSIP profile for device: " + anonymizedAddress);
-            return groupId;
-        }
-        for (LocalBluetoothProfile profile : cachedDevice.getProfiles()) {
-            if (profile instanceof LeAudioProfile) {
-                Log.d(TAG, "getGroupId by LEA profile for device: " + anonymizedAddress);
-                return ((LeAudioProfile) profile).getGroupId(cachedDevice.getDevice());
-            }
-        }
-        Log.d(TAG, "getGroupId return invalid id for device: " + anonymizedAddress);
-        return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
     }
 
     private void notifyBroadcastStateChange(@BroadcastState int state) {
