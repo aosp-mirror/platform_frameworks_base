@@ -2154,7 +2154,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
 
-        mActivityRecordInputSink = new ActivityRecordInputSink(this, sourceRecord);
+        final boolean appOptInTouchPassThrough =
+                options != null && options.isAllowPassThroughOnTouchOutside();
+        mActivityRecordInputSink = new ActivityRecordInputSink(
+                this, sourceRecord, appOptInTouchPassThrough);
 
         mAppActivityEmbeddingSplitsEnabled = isAppActivityEmbeddingSplitsEnabled();
         mAllowUntrustedEmbeddingStateSharing = getAllowUntrustedEmbeddingStateSharingProperty();
@@ -3171,14 +3174,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return getWindowConfiguration().canReceiveKeys() && !mWaitForEnteringPinnedMode;
     }
 
-    boolean isResizeable() {
-        return isResizeable(/* checkPictureInPictureSupport */ true);
+    /**
+     * Returns {@code true} if the fixed orientation, aspect ratio, resizability of this activity
+     * will be ignored.
+     */
+    boolean isUniversalResizeable() {
+        return mWmService.mConstants.mIgnoreActivityOrientationRequest
+                && info.applicationInfo.category != ApplicationInfo.CATEGORY_GAME
+                // If the user preference respects aspect ratio, then it becomes non-resizable.
+                && !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
+                        .shouldApplyUserMinAspectRatioOverride();
     }
 
-    boolean isResizeable(boolean checkPictureInPictureSupport) {
+    boolean isResizeable() {
         return mAtmService.mForceResizableActivities
                 || ActivityInfo.isResizeableMode(info.resizeMode)
-                || (info.supportsPictureInPicture() && checkPictureInPictureSupport)
+                || info.supportsPictureInPicture()
+                || isUniversalResizeable()
                 // If the activity can be embedded, it should inherit the bounds of task fragment.
                 || isEmbedded();
     }
@@ -8162,11 +8174,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
-        final int candidateOrientation;
-        if (!mWmService.mConstants.mIgnoreActivityOrientationRequest
-                || info.applicationInfo.category == ApplicationInfo.CATEGORY_GAME) {
-            candidateOrientation = super.getOverrideOrientation();
-        } else {
+        int candidateOrientation = super.getOverrideOrientation();
+        if (isUniversalResizeable() && ActivityInfo.isFixedOrientation(candidateOrientation)) {
             candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()
@@ -10025,7 +10034,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         StringBuilder sb = new StringBuilder(128);
         sb.append("ActivityRecord{");
-        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(System.identityHashCode(this));
         sb.append(" u");
         sb.append(mUserId);
         sb.append(' ');
