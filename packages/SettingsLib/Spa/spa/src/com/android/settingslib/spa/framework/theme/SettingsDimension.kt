@@ -24,6 +24,7 @@ object SettingsDimension {
     val paddingExtraSmall = 4.dp
     val paddingSmall = if (isSpaExpressiveEnabled) 8.dp else 4.dp
     val paddingExtraSmall5 = 10.dp
+    val paddingExtraSmall6 = 12.dp
     val paddingLarge = 16.dp
     val paddingExtraLarge = 24.dp
 
@@ -36,9 +37,9 @@ object SettingsDimension {
 
     val itemIconSize = 24.dp
     val itemIconContainerSize = 72.dp
-    val itemPaddingStart = paddingExtraLarge
+    val itemPaddingStart = if (isSpaExpressiveEnabled) paddingLarge else paddingExtraLarge
     val itemPaddingEnd = paddingLarge
-    val itemPaddingVertical = paddingLarge
+    val itemPaddingVertical = if (isSpaExpressiveEnabled) paddingExtraSmall6 else paddingLarge
     val itemPadding = PaddingValues(
         start = itemPaddingStart,
         top = itemPaddingVertical,

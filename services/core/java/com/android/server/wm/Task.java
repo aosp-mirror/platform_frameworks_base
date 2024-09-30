@@ -4707,8 +4707,13 @@ class Task extends TaskFragment {
                         // If the moveToFront is a part of finishing transition, then make sure
                         // the z-order of tasks are up-to-date.
                         if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
-                            Transition.assignLayers(taskDisplayArea,
-                                    taskDisplayArea.getPendingTransaction());
+                            final SurfaceControl.Transaction tx =
+                                    taskDisplayArea.getPendingTransaction();
+                            Transition.assignLayers(taskDisplayArea, tx);
+                            final SurfaceControl leash = topActivity.getFixedRotationLeash();
+                            if (leash != null) {
+                                tx.setLayer(leash, topActivity.getLastLayer());
+                            }
                         }
                     }
                 }

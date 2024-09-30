@@ -27,8 +27,8 @@ import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.gallery.SettingsPageProviderEnum
-import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.banner.BannerPageProvider
+import com.android.settingslib.spa.gallery.button.ActionButtonPageProvider
 import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
