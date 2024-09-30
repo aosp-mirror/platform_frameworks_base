@@ -16,11 +16,13 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.app.tracing.coroutines.flow.map
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
@@ -41,21 +43,23 @@ class ShadeUserActionsViewModel
 constructor(
     private val qsSceneAdapter: QSSceneAdapter,
     private val shadeInteractor: ShadeInteractor,
+    private val sceneBackInteractor: SceneBackInteractor,
 ) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         combine(
                 shadeInteractor.shadeMode,
                 qsSceneAdapter.isCustomizerShowing,
-            ) { shadeMode, isCustomizerShowing ->
+                sceneBackInteractor.backScene.map { it ?: SceneFamilies.Home },
+            ) { shadeMode, isCustomizerShowing, backScene ->
                 buildMap<UserAction, UserActionResult> {
                     if (!isCustomizerShowing) {
                         set(
                             Swipe(SwipeDirection.Up),
                             UserActionResult(
-                                SceneFamilies.Home,
-                                ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
-                            )
+                                backScene,
+                                ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
+                            ),
                         )
                     }
 
