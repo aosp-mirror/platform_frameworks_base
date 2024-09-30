@@ -350,7 +350,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             underTest.performDotFeedback(null)
 
-            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.DRAG_INDICATOR)
+            assertThat(msdlPlayer.latestTokenPlayed).isEqualTo(MSDLToken.DRAG_INDICATOR_DISCRETE)
             assertThat(msdlPlayer.latestPropertiesPlayed).isNull()
         }
 

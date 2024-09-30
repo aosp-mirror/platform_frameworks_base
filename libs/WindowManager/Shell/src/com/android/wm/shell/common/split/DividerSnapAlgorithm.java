@@ -19,9 +19,9 @@ package com.android.wm.shell.common.split;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_30_70;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50;
-import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_70_30;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_33_66;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_66_33;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_END_AND_DISMISS;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_MINIMIZE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_NONE;
@@ -283,10 +283,10 @@ public class DividerSnapAlgorithm {
 
     private void addNonDismissingTargets(boolean isHorizontalDivision, int topPosition,
             int bottomPosition, int dividerMax) {
-        maybeAddTarget(topPosition, topPosition - getStartInset(), SNAP_TO_30_70);
+        maybeAddTarget(topPosition, topPosition - getStartInset(), SNAP_TO_2_33_66);
         addMiddleTarget(isHorizontalDivision);
         maybeAddTarget(bottomPosition,
-                dividerMax - getEndInset() - (bottomPosition + mDividerSize), SNAP_TO_70_30);
+                dividerMax - getEndInset() - (bottomPosition + mDividerSize), SNAP_TO_2_66_33);
     }
 
     private void addFixedDivisionTargets(boolean isHorizontalDivision, int dividerMax) {
@@ -332,7 +332,7 @@ public class DividerSnapAlgorithm {
     private void addMiddleTarget(boolean isHorizontalDivision) {
         int position = DockedDividerUtils.calculateMiddlePosition(isHorizontalDivision,
                 mInsets, mDisplayWidth, mDisplayHeight, mDividerSize);
-        mTargets.add(new SnapTarget(position, SNAP_TO_50_50));
+        mTargets.add(new SnapTarget(position, SNAP_TO_2_50_50));
     }
 
     private void addMinimizedTarget(boolean isHorizontalDivision, int dockedSide) {
