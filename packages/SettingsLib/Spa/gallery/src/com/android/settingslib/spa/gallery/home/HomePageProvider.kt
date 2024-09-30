@@ -33,7 +33,6 @@ import com.android.settingslib.spa.gallery.chart.ChartPageProvider
 import com.android.settingslib.spa.gallery.dialog.DialogMainPageProvider
 import com.android.settingslib.spa.gallery.editor.EditorMainPageProvider
 import com.android.settingslib.spa.gallery.itemList.OperateListPageProvider
-import com.android.settingslib.spa.gallery.page.ArgumentPageModel
 import com.android.settingslib.spa.gallery.page.ArgumentPageProvider
 import com.android.settingslib.spa.gallery.page.FooterPageProvider
 import com.android.settingslib.spa.gallery.page.IllustrationPageProvider
@@ -58,7 +57,6 @@ object HomePageProvider : SettingsPageProvider {
         return listOf(
             PreferenceMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             OperateListPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
-            ArgumentPageProvider.buildInjectEntry("foo")!!.setLink(fromPage = owner).build(),
             SearchScaffoldPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SuwScaffoldPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             SliderPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
@@ -88,12 +86,9 @@ object HomePageProvider : SettingsPageProvider {
         val entries = remember { buildEntry(arguments) }
         HomeScaffold(title) {
             for (entry in entries) {
-                if (entry.owner.isCreateBy(SettingsPageProviderEnum.ARGUMENT.name)) {
-                    entry.UiLayout(ArgumentPageModel.buildArgument(intParam = 0))
-                } else {
-                    entry.UiLayout()
-                }
+                entry.UiLayout()
             }
+            ArgumentPageProvider.EntryItem(stringParam = "foo", intParam = 0)
         }
     }
 }
