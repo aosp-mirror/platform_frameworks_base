@@ -25,7 +25,10 @@ object ElementKeys {
     val GridAnchor = ElementKey("QuickSettingsGridAnchor")
     val FooterActions = ElementKey("FooterActions")
 
-    class TileElementKey(spec: TileSpec, val position: Int) : ElementKey(spec.spec, spec.spec)
+    fun TileSpec.toElementKey(positionInGrid: Int) =
+        ElementKey(this.spec, TileIdentity(this, positionInGrid))
 
-    fun TileSpec.toElementKey(positionInGrid: Int) = TileElementKey(this, positionInGrid)
+    val TileElementMatcher = ElementKey.withIdentity { it is TileIdentity }
 }
+
+private data class TileIdentity(val spec: TileSpec, val position: Int)

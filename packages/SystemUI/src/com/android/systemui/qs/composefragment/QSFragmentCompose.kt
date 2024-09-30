@@ -66,6 +66,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -288,7 +291,7 @@ constructor(
                 transitions =
                     transitions {
                         from(QuickQuickSettings, QuickSettings) {
-                            quickQuickSettingsToQuickSettings()
+                            quickQuickSettingsToQuickSettings(viewModel::inFirstPage::get)
                         }
                     },
             )
@@ -704,6 +707,14 @@ object SceneKeys {
             else -> QuickSettings
         }
     }
+
+    val QqsTileElementMatcher =
+        object : ElementMatcher {
+            override fun matches(key: ElementKey, content: ContentKey): Boolean {
+                return content == SceneKeys.QuickQuickSettings &&
+                    ElementKeys.TileElementMatcher.matches(key, content)
+            }
+        }
 }
 
 suspend fun synchronizeQsState(state: MutableSceneTransitionLayoutState, expansion: Flow<Float>) {

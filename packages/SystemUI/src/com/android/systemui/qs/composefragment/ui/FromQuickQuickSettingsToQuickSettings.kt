@@ -17,13 +17,23 @@
 package com.android.systemui.qs.composefragment.ui
 
 import com.android.compose.animation.scene.TransitionBuilder
+import com.android.systemui.qs.composefragment.SceneKeys
 import com.android.systemui.qs.shared.ui.ElementKeys
 
-fun TransitionBuilder.quickQuickSettingsToQuickSettings() {
+fun TransitionBuilder.quickQuickSettingsToQuickSettings(inFirstPage: () -> Boolean = { true }) {
 
     fractionRange(start = 0.5f) { fade(ElementKeys.QuickSettingsContent) }
 
     fractionRange(start = 0.9f) { fade(ElementKeys.FooterActions) }
 
     anchoredTranslate(ElementKeys.QuickSettingsContent, ElementKeys.GridAnchor)
+
+    sharedElement(ElementKeys.TileElementMatcher, enabled = inFirstPage())
+
+    // This will animate between 0f (QQS) and 0.6, fading in the QQS tiles when coming back
+    // from non first page QS. The QS content ends fading out at 0.5f, so there's a brief
+    // overlap, but because they are really faint, it looks better than complete black without
+    // overlap.
+    fractionRange(end = 0.6f) { fade(SceneKeys.QqsTileElementMatcher) }
+    anchoredTranslate(SceneKeys.QqsTileElementMatcher, ElementKeys.GridAnchor)
 }
