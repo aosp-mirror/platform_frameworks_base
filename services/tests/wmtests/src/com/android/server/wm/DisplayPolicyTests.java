@@ -540,6 +540,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+        makeWindowVisible(mImeWindow);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
         mImeWindow.mGivenContentInsets.set(0, 10, 0, 0);
