@@ -67,7 +67,6 @@ import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 enum class SettingsPageProviderEnum(val displayName: String) {
     HOME("home"),
     PREFERENCE("preference"),
-    ARGUMENT("argument"),
     ITEM_LIST("itemList"),
     ITEM_OP_PAGE("itemOp"),
 
