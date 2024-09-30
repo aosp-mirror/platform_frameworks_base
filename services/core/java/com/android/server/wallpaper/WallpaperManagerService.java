@@ -20,6 +20,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.Flags.fixWallpaperChanged;
 import static android.app.Flags.removeNextWallpaperComponent;
 import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_LOCK;
@@ -349,7 +350,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             if (DEBUG) {
                                 Slog.d(TAG, "publish system wallpaper changed!");
                             }
-                            notifyWallpaperChanged(wallpaper);
+                            notifyWallpaperComplete(wallpaper);
+                            if (fixWallpaperChanged()) {
+                                notifyWallpaperChanged(wallpaper);
+                            }
                         }
                     };
 
@@ -369,7 +373,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             if (DEBUG) {
                                 Slog.d(TAG, "publish lock wallpaper changed!");
                             }
-                            notifyWallpaperChanged(wallpaper);
+                            notifyWallpaperComplete(wallpaper);
+                            if (fixWallpaperChanged()) {
+                                notifyWallpaperChanged(wallpaper);
+                            }
                         }
                     };
 
@@ -403,8 +410,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    private void notifyWallpaperChanged(WallpaperData wallpaper) {
-        // Publish completion *after* we've persisted the changes
+    /*
+     * Calls wallpaper setComplete methods. Called for static wallpapers after the wallpaper is set
+     * and changes are persisted.
+     */
+    private void notifyWallpaperComplete(WallpaperData wallpaper) {
         if (wallpaper.setComplete != null) {
             try {
                 wallpaper.setComplete.onWallpaperChanged();
@@ -1787,6 +1797,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     switchWallpaper(systemWallpaper, null);
                     // TODO(b/278261563): call notifyCallbacksLocked inside switchWallpaper
                     notifyCallbacksLocked(systemWallpaper);
+                    if (fixWallpaperChanged()) {
+                        notifyWallpaperChanged(systemWallpaper);
+                    }
                 }
                 if (mLockWallpaperWaitingForUnlock) {
                     final WallpaperData lockWallpaper =
@@ -1794,6 +1807,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     lockWallpaper.mBindSource = BindSource.SWITCH_WALLPAPER_UNLOCK_USER;
                     switchWallpaper(lockWallpaper, null);
                     notifyCallbacksLocked(lockWallpaper);
+                    if (fixWallpaperChanged()) {
+                        notifyWallpaperChanged(lockWallpaper);
+                    }
                 }
 
                 // Make sure that the SELinux labeling of all the relevant files is correct.
@@ -3248,6 +3264,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     }
                     newWallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(newWallpaper);
+                    if (fixWallpaperChanged()) {
+                        notifyWallpaperChanged(newWallpaper);
+                    }
                     shouldNotifyColors = true;
                     if (offloadColorExtraction()) {
                         shouldNotifyColors = false;
@@ -3625,8 +3644,18 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
         wallpaper.callbacks.finishBroadcast();
 
+        if (!fixWallpaperChanged()) {
+            final Intent intent = new Intent(Intent.ACTION_WALLPAPER_CHANGED);
+            intent.putExtra(WallpaperManager.EXTRA_FROM_FOREGROUND_APP,
+                    wallpaper.fromForegroundApp);
+            mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
+        }
+    }
+
+    private void notifyWallpaperChanged(WallpaperData wallpaper) {
         final Intent intent = new Intent(Intent.ACTION_WALLPAPER_CHANGED);
         intent.putExtra(WallpaperManager.EXTRA_FROM_FOREGROUND_APP, wallpaper.fromForegroundApp);
+        intent.putExtra(WallpaperManager.EXTRA_WHICH_WALLPAPER_CHANGED, wallpaper.mWhich);
         mContext.sendBroadcastAsUser(intent, new UserHandle(mCurrentUserId));
     }
 
