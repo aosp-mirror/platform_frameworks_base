@@ -165,7 +165,7 @@ public class ProcessedPerfettoProtoLogImplTest {
                     throw new RuntimeException(
                             "Unexpected viewer config file path provided");
                 }
-                return new ProtoInputStream(sViewerConfigBuilder.build().toByteArray());
+                return new AutoClosableProtoInputStream(sViewerConfigBuilder.build().toByteArray());
             });
         };
         sProtoLogConfigurationService =

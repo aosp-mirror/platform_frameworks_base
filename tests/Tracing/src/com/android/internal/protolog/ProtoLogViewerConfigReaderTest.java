@@ -20,7 +20,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import android.platform.test.annotations.Presubmit;
-import android.util.proto.ProtoInputStream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -83,7 +82,7 @@ public class ProtoLogViewerConfigReaderTest {
                 ).build().toByteArray();
 
     private final ViewerConfigInputStreamProvider mViewerConfigInputStreamProvider =
-            () -> new ProtoInputStream(TEST_VIEWER_CONFIG);
+            () -> new AutoClosableProtoInputStream(TEST_VIEWER_CONFIG);
 
     private ProtoLogViewerConfigReader mConfig;
 

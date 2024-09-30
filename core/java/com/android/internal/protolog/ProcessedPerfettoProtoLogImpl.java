@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.util.proto.ProtoInputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLogConfigurationServiceImpl.RegisterClientArgs;
@@ -47,11 +46,13 @@ public class ProcessedPerfettoProtoLogImpl extends PerfettoProtoLogImpl {
             @NonNull Runnable cacheUpdater,
             @NonNull IProtoLogGroup[] groups) throws ServiceManager.ServiceNotFoundException {
         this(viewerConfigFilePath, new ViewerConfigInputStreamProvider() {
-                    @androidx.annotation.NonNull
+                    @NonNull
                     @Override
-                    public ProtoInputStream getInputStream() {
+                    public AutoClosableProtoInputStream getInputStream() {
                         try {
-                            return new ProtoInputStream(new FileInputStream(viewerConfigFilePath));
+                            final var protoFileInputStream =
+                                    new FileInputStream(viewerConfigFilePath);
+                            return new AutoClosableProtoInputStream(protoFileInputStream);
                         } catch (FileNotFoundException e) {
                             throw new RuntimeException(
                                     "Failed to load viewer config file " + viewerConfigFilePath, e);
