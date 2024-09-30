@@ -64,7 +64,6 @@ filegroup {
     srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
-        ":ravenwood-annotations",
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -294,7 +293,6 @@ java_defaults {
         enforce_permissions_exceptions: [
             // Do not add entries to this list.
             ":framework-annotations",
-            ":ravenwood-annotations",
             ":framework-blobstore-sources",
             ":framework-core-sources",
             ":framework-drm-sources",
