@@ -26,6 +26,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -99,7 +100,16 @@ private fun AlertDialogPresenter.SettingsAlertDialog(
             dismissButton?.let {
                 { if (isSpaExpressiveEnabled) DismissButton(it) else Button(it) }
             },
-        title = title?.let { { CenterRow { Text(it) } } },
+        title =
+            title?.let {
+                {
+                    CenterRow {
+                        if (isSpaExpressiveEnabled)
+                            Text(it, style = MaterialTheme.typography.bodyLarge)
+                        else Text(it)
+                    }
+                }
+            },
         text =
             text?.let {
                 { CenterRow { Column(Modifier.verticalScroll(rememberScrollState())) { text() } } }
