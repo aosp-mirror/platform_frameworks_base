@@ -53,6 +53,7 @@ android_library {
         "SettingsLibSelectorWithWidgetPreference",
         "SettingsLibSettingsSpinner",
         "SettingsLibSettingsTransition",
+        "SettingsLibSliderPreference",
         "SettingsLibTopIntroPreference",
         "SettingsLibTwoTargetPreference",
         "SettingsLibUsageProgressBarPreference",
