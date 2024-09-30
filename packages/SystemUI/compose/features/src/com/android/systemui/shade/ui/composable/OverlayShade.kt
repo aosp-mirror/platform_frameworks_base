@@ -18,7 +18,6 @@
 
 package com.android.systemui.shade.ui.composable
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -40,20 +39,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
-import com.android.systemui.scene.shared.model.Scenes
 
 /** Renders a lightweight shade UI container, as an overlay. */
 @Composable
@@ -62,13 +58,6 @@ fun SceneScope.OverlayShade(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val view = LocalView.current
-    LaunchedEffect(Unit) {
-        if (layoutState.currentTransition?.fromContent == Scenes.Gone) {
-            view.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
-        }
-    }
-
     Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 

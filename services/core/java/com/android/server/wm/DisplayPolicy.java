@@ -2156,6 +2156,11 @@ public class DisplayPolicy {
         }
         mDecorInsets.invalidate();
         mDecorInsets.mInfoForRotation[rotation].set(newInfo);
+        if (!mService.mDisplayEnabled) {
+            // There could be other pending changes during booting. It might be better to let the
+            // clients receive the new states earlier.
+            return true;
+        }
         return !sameConfigFrame;
     }
 

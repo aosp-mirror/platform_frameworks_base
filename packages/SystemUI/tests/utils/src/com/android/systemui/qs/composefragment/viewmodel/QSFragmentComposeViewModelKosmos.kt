@@ -19,14 +19,15 @@ package com.android.systemui.qs.composefragment.viewmodel
 import android.content.res.mainResources
 import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.footerActionsController
 import com.android.systemui.qs.footerActionsViewModelFactory
+import com.android.systemui.qs.panels.domain.interactor.tileSquishinessInteractor
 import com.android.systemui.qs.ui.viewmodel.quickSettingsContainerViewModel
 import com.android.systemui.shade.largeScreenHeaderHelper
 import com.android.systemui.shade.transition.largeScreenShadeInterpolator
 import com.android.systemui.statusbar.disableflags.data.repository.disableFlagsRepository
-import com.android.systemui.statusbar.phone.keyguardBypassController
 import com.android.systemui.statusbar.sysuiStatusBarStateController
 
 val Kosmos.qsFragmentComposeViewModelFactory by
@@ -41,11 +42,12 @@ val Kosmos.qsFragmentComposeViewModelFactory by
                     footerActionsViewModelFactory,
                     footerActionsController,
                     sysuiStatusBarStateController,
-                    keyguardBypassController,
+                    deviceEntryInteractor,
                     disableFlagsRepository,
                     largeScreenShadeInterpolator,
                     configurationInteractor,
                     largeScreenHeaderHelper,
+                    tileSquishinessInteractor,
                     lifecycleScope,
                 )
             }

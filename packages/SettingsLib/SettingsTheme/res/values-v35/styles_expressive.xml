@@ -290,4 +290,49 @@
         <item name="iconPadding">@dimen/settingslib_expressive_space_extrasmall4</item>
         <item name="rippleColor">?android:attr/colorControlHighlight</item>
     </style>
+
+    <style name="EntityHeader">
+        <item name="android:paddingTop">@dimen/settingslib_expressive_space_small4</item>
+        <item name="android:paddingBottom">@dimen/settingslib_expressive_space_small1</item>
+        <item name="android:paddingEnd">@dimen/settingslib_expressive_space_small1</item>
+    </style>
+
+    <style name="SettingsLibEntityHeader" parent="EntityHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:paddingEnd">?android:attr/listPreferredItemPaddingEnd</item>
+    </style>
+
+    <style name="SettingsLibEntityHeaderContent">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="SettingsLibEntityHeaderIcon">
+        <item name="android:layout_width">@dimen/settingslib_expressive_space_large3</item>
+        <item name="android:layout_height">@dimen/settingslib_expressive_space_large3</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:antialias">true</item>
+    </style>
+
+    <style name="SettingsLibEntityHeaderTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/settingslib_expressive_space_small1</item>
+        <item name="android:singleLine">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:textDirection">locale</item>
+        <item name="android:textAppearance">@style/TextAppearance.EntityHeaderTitle</item>
+    </style>
+
+    <style name="SettingslibTextAppearance.LinkableTextStyle.Expressive"
+           parent="@android:style/TextAppearance.DeviceDefault.WindowTitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">?android:attr/colorAccent</item>
+    </style>
 </resources>

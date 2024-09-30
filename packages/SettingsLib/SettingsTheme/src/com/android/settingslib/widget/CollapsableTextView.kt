@@ -18,6 +18,9 @@ package com.android.settingslib.widget
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.text.SpannableString
+import android.text.TextUtils
+import android.text.style.URLSpan
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -40,12 +43,18 @@ class CollapsableTextView @JvmOverloads constructor(
     private val titleTextView: TextView
     private val collapseButton: MaterialButton
     private val collapseButtonResources: CollapseButtonResources
+    private var learnMoreListener: View.OnClickListener? = null
+    private var learnMoreText: CharSequence? = null
+    private var learnMoreSpan: LearnMoreSpan? = null
+    val learnMoreTextView: LinkableTextView
+    var isLearnMoreEnabled: Boolean = false
 
     init {
         LayoutInflater.from(context)
             .inflate(R.layout.settingslib_expressive_collapsable_textview, this)
         titleTextView = findViewById(android.R.id.title)
         collapseButton = findViewById(R.id.collapse_button)
+        learnMoreTextView = findViewById(R.id.settingslib_expressive_learn_more)
 
         collapseButtonResources = CollapseButtonResources(
             context.getDrawable(R.drawable.settingslib_expressive_icon_collapse)!!,
@@ -111,6 +120,45 @@ class CollapsableTextView @JvmOverloads constructor(
         updateView()
     }
 
+    /**
+     * Sets the action when clicking on the learn more view.
+     * @param listener The click listener for learn more.
+     */
+    fun setLearnMoreAction(listener: View.OnClickListener?) {
+        if (learnMoreListener != listener) {
+            learnMoreListener = listener
+            formatLearnMoreText()
+        }
+    }
+
+    /**
+     * Sets the text of learn more view.
+     * @param text The text of learn more.
+     */
+    fun setLearnMoreText(text: CharSequence?) {
+        if (!TextUtils.equals(learnMoreText, text)) {
+            learnMoreText = text
+            formatLearnMoreText()
+        }
+    }
+
+    private fun formatLearnMoreText() {
+        if (learnMoreListener == null || TextUtils.isEmpty(learnMoreText)) {
+            learnMoreTextView.visibility = GONE
+            isLearnMoreEnabled = false
+            return
+        }
+        val spannableLearnMoreText = SpannableString(learnMoreText)
+        if (learnMoreSpan != null) {
+            spannableLearnMoreText.removeSpan(learnMoreSpan)
+        }
+        learnMoreSpan = LearnMoreSpan(clickListener = learnMoreListener!!)
+        spannableLearnMoreText.setSpan(learnMoreSpan, 0, learnMoreText!!.length, 0)
+        learnMoreTextView.setText(spannableLearnMoreText)
+        learnMoreTextView.visibility = VISIBLE
+        isLearnMoreEnabled = true
+    }
+
     private fun updateView() {
         when {
             isCollapsed -> {
@@ -130,6 +178,7 @@ class CollapsableTextView @JvmOverloads constructor(
             }
         }
         collapseButton.visibility = if (isCollapsable) VISIBLE else GONE
+        learnMoreTextView.visibility = if (isLearnMoreEnabled && !isCollapsed) VISIBLE else GONE
     }
 
     private data class CollapseButtonResources(
@@ -148,3 +197,12 @@ class CollapsableTextView @JvmOverloads constructor(
     }
 }
 
+internal class LearnMoreSpan(
+    val url: String = "",
+    val clickListener: View.OnClickListener) : URLSpan(url) {
+    override fun onClick(widget: View) {
+        if (clickListener != null) {
+            clickListener.onClick(widget)
+        }
+    }
+}

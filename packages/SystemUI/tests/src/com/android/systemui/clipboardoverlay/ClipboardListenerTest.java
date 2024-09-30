@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
@@ -121,7 +121,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
     public void test_initialization() {
         mClipboardListener.start();
         verify(mClipboardManager).addPrimaryClipChangedListener(any());
-        verifyZeroInteractions(mUiEventLogger);
+        verifyNoMoreInteractions(mUiEventLogger);
     }
 
     @Test
@@ -204,7 +204,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         verify(mUiEventLogger, times(1)).log(
                 ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
         verify(mClipboardToast, times(1)).showCopiedToast();
-        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         verify(mUiEventLogger, times(1)).log(
                 ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
         verify(mClipboardToast, times(1)).showCopiedToast();
-        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 
     @Test
@@ -232,7 +232,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         verify(mUiEventLogger, times(1)).log(
                 ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED, 0, mSampleSource);
         verify(mOverlayController).setClipData(mSampleClipData, mSampleSource);
-        verifyZeroInteractions(mClipboardToast);
+        verifyNoMoreInteractions(mClipboardToast);
     }
 
     @Test
@@ -242,9 +242,9 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mClipboardListener.start();
         mClipboardListener.onPrimaryClipChanged();
 
-        verifyZeroInteractions(mUiEventLogger);
-        verifyZeroInteractions(mClipboardToast);
-        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyNoMoreInteractions(mUiEventLogger);
+        verifyNoMoreInteractions(mClipboardToast);
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 
     @Test
@@ -259,6 +259,6 @@ public class ClipboardListenerTest extends SysuiTestCase {
         verify(mUiEventLogger, times(1)).log(
                 ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
         verify(mClipboardToast, times(1)).showCopiedToast();
-        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 }

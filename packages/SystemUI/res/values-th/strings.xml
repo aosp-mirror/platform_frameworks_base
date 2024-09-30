@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"การสนทนา"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ล้างการแจ้งเตือนแบบไม่มีเสียงทั้งหมด"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"หยุดการแจ้งเตือนชั่วคราวโดย \"ห้ามรบกวน\""</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"เริ่มเลย"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ไม่มีการแจ้งเตือน"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ไม่มีการแจ้งเตือนใหม่"</string>
@@ -965,7 +967,7 @@
     <string name="tuner_menu" msgid="363690665924769420">"เมนู"</string>
     <string name="tuner_app" msgid="6949280415826686972">"แอป <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"การแจ้งเตือน"</string>
-    <string name="notification_channel_battery" msgid="9219995638046695106">"แบตเตอรี"</string>
+    <string name="notification_channel_battery" msgid="9219995638046695106">"แบตเตอรี่"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ภาพหน้าจอ"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
     <string name="notification_channel_setup" msgid="7660580986090760350">"ตั้งค่า"</string>

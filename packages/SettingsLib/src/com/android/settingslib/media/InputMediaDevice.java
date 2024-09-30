@@ -98,14 +98,13 @@ public class InputMediaDevice extends MediaDevice {
 
     @Override
     public @NonNull String getName() {
-        CharSequence name =
-                switch (mAudioDeviceInfoType) {
-                    case TYPE_WIRED_HEADSET ->
-                            mContext.getString(R.string.media_transfer_wired_device_mic_name);
-                    case TYPE_USB_DEVICE, TYPE_USB_HEADSET, TYPE_USB_ACCESSORY ->
-                            mContext.getString(R.string.media_transfer_usb_device_mic_name);
-                    default -> mContext.getString(R.string.media_transfer_internal_mic);
-                };
+        CharSequence name = switch (mAudioDeviceInfoType) {
+            case TYPE_WIRED_HEADSET -> mContext.getString(
+                    R.string.media_transfer_wired_device_mic_name);
+            case TYPE_USB_DEVICE, TYPE_USB_HEADSET, TYPE_USB_ACCESSORY -> mContext.getString(
+                    R.string.media_transfer_usb_device_mic_name);
+            default -> mContext.getString(R.string.media_transfer_this_device_name_desktop);
+        };
         return name.toString();
     }
 
