@@ -98,7 +98,12 @@ fun TileLazyGrid(
 }
 
 @Composable
-fun Tile(tile: TileViewModel, iconOnly: Boolean, modifier: Modifier) {
+fun Tile(
+    tile: TileViewModel,
+    iconOnly: Boolean,
+    squishiness: () -> Float,
+    modifier: Modifier = Modifier,
+) {
     val state by tile.state.collectAsStateWithLifecycle(tile.currentState)
     val resources = resources()
     val uiState = remember(state, resources) { state.toUiState(resources) }
@@ -119,6 +124,7 @@ fun Tile(tile: TileViewModel, iconOnly: Boolean, modifier: Modifier) {
         onClick = tile::onClick,
         onLongClick = tile::onLongClick,
         uiState = uiState,
+        squishiness = squishiness,
         modifier = modifier,
     ) { expandable ->
         val icon = getTileIcon(icon = uiState.icon)
@@ -144,6 +150,7 @@ fun Tile(tile: TileViewModel, iconOnly: Boolean, modifier: Modifier) {
                 },
                 onLongClick = { tile.onLongClick(expandable) },
                 accessibilityUiState = uiState.accessibilityUiState,
+                squishiness = squishiness,
             )
         }
     }
@@ -155,12 +162,17 @@ private fun TileContainer(
     shape: Shape,
     iconOnly: Boolean,
     uiState: TileUiState,
+    squishiness: () -> Float,
     modifier: Modifier = Modifier,
     onClick: (Expandable) -> Unit = {},
     onLongClick: (Expandable) -> Unit = {},
     content: @Composable BoxScope.(Expandable) -> Unit,
 ) {
-    Expandable(color = color, shape = shape, modifier = modifier.clip(shape)) {
+    Expandable(
+        color = color,
+        shape = shape,
+        modifier = modifier.clip(shape).verticalSquish(squishiness),
+    ) {
         val longPressLabel = longPressLabel()
         Box(
             modifier =
