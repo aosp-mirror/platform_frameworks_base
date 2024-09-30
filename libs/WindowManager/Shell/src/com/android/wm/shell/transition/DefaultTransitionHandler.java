@@ -361,8 +361,11 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     final int anim = getRotationAnimationHint(change, info, mDisplayController);
                     isSeamlessDisplayChange = anim == ROTATION_ANIMATION_SEAMLESS;
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
-                        startRotationAnimation(startTransaction, change, info, anim, animations,
-                                onAnimFinish);
+                        final int flags = wallpaperTransit != WALLPAPER_TRANSITION_NONE
+                                && Flags.commonSurfaceAnimator()
+                                ? ScreenRotationAnimation.FLAG_HAS_WALLPAPER : 0;
+                        startRotationAnimation(startTransaction, change, info, anim, flags,
+                                animations, onAnimFinish);
                         isDisplayRotationAnimationStarted = true;
                         continue;
                     }
@@ -414,7 +417,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 if (change.getParent() == null && !change.hasFlags(FLAG_IS_DISPLAY)
                         && change.getStartRotation() != change.getEndRotation()) {
                     startRotationAnimation(startTransaction, change, info,
-                            ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);
+                            ROTATION_ANIMATION_ROTATE, 0 /* flags */, animations, onAnimFinish);
                     continue;
                 }
             }
@@ -699,12 +702,12 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     }
 
     private void startRotationAnimation(SurfaceControl.Transaction startTransaction,
-            TransitionInfo.Change change, TransitionInfo info, int animHint,
+            TransitionInfo.Change change, TransitionInfo info, int animHint, int flags,
             ArrayList<Animator> animations, Runnable onAnimFinish) {
         final int rootIdx = TransitionUtil.rootIndexFor(change, info);
         final ScreenRotationAnimation anim = new ScreenRotationAnimation(mContext,
                 mTransactionPool, startTransaction, change, info.getRoot(rootIdx).getLeash(),
-                animHint);
+                animHint, flags);
         // The rotation animation may consist of 3 animations: fade-out screenshot, fade-in real
         // content, and background color. The item of "animGroup" will be removed if the sub
         // animation is finished. Then if the list becomes empty, the rotation animation is done.
