@@ -42,19 +42,44 @@ class SplitScreenConstantsTest {
             SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT,
         )
         assertEquals(
-            "the value of SNAP_TO_30_70 should be 0",
+            "the value of SNAP_TO_2_33_66 should be 0",
             0,
-            SplitScreenConstants.SNAP_TO_30_70,
+            SplitScreenConstants.SNAP_TO_2_33_66,
         )
         assertEquals(
-            "the value of SNAP_TO_50_50 should be 1",
+            "the value of SNAP_TO_2_50_50 should be 1",
             1,
-            SplitScreenConstants.SNAP_TO_50_50,
+            SplitScreenConstants.SNAP_TO_2_50_50,
         )
         assertEquals(
-            "the value of SNAP_TO_70_30 should be 2",
+            "the value of SNAP_TO_2_66_33 should be 2",
             2,
-            SplitScreenConstants.SNAP_TO_70_30,
+            SplitScreenConstants.SNAP_TO_2_66_33,
+        )
+        assertEquals(
+            "the value of SNAP_TO_2_90_10 should be 3",
+            3,
+            SplitScreenConstants.SNAP_TO_2_90_10,
+        )
+        assertEquals(
+            "the value of SNAP_TO_2_10_90 should be 4",
+            4,
+            SplitScreenConstants.SNAP_TO_2_10_90,
+        )
+        assertEquals(
+            "the value of SNAP_TO_3_33_33_33 should be 5",
+            5,
+            SplitScreenConstants.SNAP_TO_3_33_33_33,
+        )
+        assertEquals(
+            "the value of SNAP_TO_3_45_45_10 should be 6",
+            6,
+            SplitScreenConstants.SNAP_TO_3_45_45_10,
+        )
+        assertEquals(
+            "the value of SNAP_TO_3_10_45_45 should be 7",
+            7,
+            SplitScreenConstants.SNAP_TO_3_10_45_45,
         )
     }
 }

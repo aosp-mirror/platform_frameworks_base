@@ -18,7 +18,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.recents.RecentTasks
 import com.android.wm.shell.shared.GroupedRecentTaskInfo
 import com.android.wm.shell.shared.split.SplitBounds
-import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_50_50
+import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
 import java.util.function.Consumer
@@ -268,7 +268,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
         GroupedRecentTaskInfo.forSplitTasks(
             createTaskInfo(taskId1, userId1, isVisible),
             createTaskInfo(taskId2, userId2, isVisible),
-            SplitBounds(Rect(), Rect(), taskId1, taskId2, SNAP_TO_50_50)
+            SplitBounds(Rect(), Rect(), taskId1, taskId2, SNAP_TO_2_50_50)
         )
 
     private fun createTaskInfo(taskId: Int, userId: Int, isVisible: Boolean = false) =
