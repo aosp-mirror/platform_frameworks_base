@@ -637,6 +637,13 @@ flag {
 }
 
 flag {
+    name: "screenshot_policy_split_and_desktop_mode"
+    namespace: "systemui"
+    description: "Improves screenshot policy handling for split screen and desktop mode."
+    bug: "365597999"
+}
+
+flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
