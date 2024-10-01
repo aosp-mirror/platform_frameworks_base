@@ -1023,16 +1023,19 @@ static void Image_getLockedImage(JNIEnv* env, jobject thiz, LockedImage *image) 
         return;
     }
 
+    // Maintain a StrongPointer so that the GraphicBuffer isn't destroyed when the
+    // StrongPointer in lockImageFromBuffer goes out of scope.
+    sp<GraphicBuffer> bufferSp(buffer);
     // ImageWriter doesn't use crop by itself, app sets it, use the no crop version.
-    const Rect noCrop(buffer->width, buffer->height);
+    const Rect noCrop(bufferSp->width, bufferSp->height);
     status_t res = lockImageFromBuffer(
-            buffer, GRALLOC_USAGE_SW_WRITE_OFTEN, noCrop, fenceFd, image);
+            bufferSp, GRALLOC_USAGE_SW_WRITE_OFTEN, noCrop, fenceFd, image);
     // Clear the fenceFd as it is already consumed by lock call.
     env->SetIntField(thiz, gSurfaceImageClassInfo.mNativeFenceFd, -1);
     if (res != OK) {
         jniThrowExceptionFmt(env, "java/lang/RuntimeException",
                 "lock buffer failed for format 0x%x",
-                buffer->getPixelFormat());
+                bufferSp->getPixelFormat());
         return;
     }
 
