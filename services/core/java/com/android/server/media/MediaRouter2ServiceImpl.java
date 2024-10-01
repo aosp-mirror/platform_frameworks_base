@@ -1653,9 +1653,11 @@ class MediaRouter2ServiceImpl {
                             manager));
         }
 
+        List<MediaRoute2Info> routes =
+                userRecord.mHandler.mLastNotifiedRoutesToPrivilegedRouters.values().stream()
+                        .toList();
         userRecord.mHandler.sendMessage(
-                obtainMessage(
-                        UserHandler::notifyInitialRoutesToManager, userRecord.mHandler, manager));
+                obtainMessage(ManagerRecord::notifyRoutesUpdated, managerRecord, routes));
     }
 
     @GuardedBy("mLock")
@@ -2430,6 +2432,19 @@ class MediaRouter2ServiceImpl {
                         TAG,
                         "Failed to notify manager of the request failure. Manager probably died.",
                         ex);
+            }
+        }
+
+        /**
+         * Notifies the corresponding manager of the availability of the given routes.
+         *
+         * @param routes The routes available to the manager that corresponds to this record.
+         */
+        public void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
+            try {
+                mManager.notifyRoutesUpdated(routes);
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify routes. Manager probably died.", ex);
             }
         }
 
@@ -3266,25 +3281,6 @@ class MediaRouter2ServiceImpl {
                 @NonNull RoutingSessionInfo sessionInfo) {
             for (RouterRecord routerRecord : routerRecords) {
                 routerRecord.notifySessionInfoChanged(sessionInfo);
-            }
-        }
-
-        /**
-         * Notifies {@code manager} with all known routes. This only happens once after {@code
-         * manager} is registered through {@link #registerManager(IMediaRouter2Manager, String)
-         * registerManager()}.
-         *
-         * @param manager {@link IMediaRouter2Manager} to be notified.
-         */
-        private void notifyInitialRoutesToManager(@NonNull IMediaRouter2Manager manager) {
-            if (mLastNotifiedRoutesToPrivilegedRouters.isEmpty()) {
-                return;
-            }
-            try {
-                manager.notifyRoutesUpdated(
-                        new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify all routes. Manager probably died.", ex);
             }
         }
 
