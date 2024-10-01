@@ -1203,7 +1203,8 @@ class DraggableHandlerTest {
     fun overscroll_releaseBetween0And100Percent_up() = runGestureTest {
         // Make scene B overscrollable.
         layoutState.transitions = transitions {
-            from(SceneA, to = SceneB) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
+            defaultSwipeSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy)
+            from(SceneA, to = SceneB) {}
             overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
         }
 
@@ -1234,7 +1235,8 @@ class DraggableHandlerTest {
     fun overscroll_releaseBetween0And100Percent_down() = runGestureTest {
         // Make scene C overscrollable.
         layoutState.transitions = transitions {
-            from(SceneA, to = SceneC) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
+            defaultSwipeSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy)
+            from(SceneA, to = SceneC) {}
             overscroll(SceneC, Orientation.Vertical) { fade(TestElements.Foo) }
         }
 
