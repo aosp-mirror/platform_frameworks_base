@@ -27,9 +27,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.gallery.R
@@ -49,15 +47,13 @@ private const val TITLE = "Sample SuwScaffold"
 object SuwScaffoldPageProvider : SettingsPageProvider {
     override val name = "SuwScaffold"
 
-    private val owner = createSettingsPage()
-
-    fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner = owner)
-        .setUiLayoutFn {
-            Preference(object : PreferenceModel {
-                override val title = TITLE
-                override val onClick = navigator(name)
-            })
-        }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
+    }
 
     @Composable
     override fun Page(arguments: Bundle?) {

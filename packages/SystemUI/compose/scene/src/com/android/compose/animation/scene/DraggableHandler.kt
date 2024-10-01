@@ -188,38 +188,47 @@ internal class DraggableHandlerImpl(
         return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
     }
 
+    private fun resolveSwipeSource(startedPosition: Offset?): SwipeSource.Resolved? {
+        if (startedPosition == null) return null
+        return layoutImpl.swipeSourceDetector.source(
+            layoutSize = layoutImpl.lastSize,
+            position = startedPosition.round(),
+            density = layoutImpl.density,
+            orientation = orientation,
+        )
+    }
+
+    private fun resolveSwipe(
+        pointersDown: Int,
+        fromSource: SwipeSource.Resolved?,
+        isUpOrLeft: Boolean,
+    ): Swipe.Resolved {
+        return Swipe.Resolved(
+            direction =
+                when (orientation) {
+                    Orientation.Horizontal ->
+                        if (isUpOrLeft) {
+                            SwipeDirection.Resolved.Left
+                        } else {
+                            SwipeDirection.Resolved.Right
+                        }
+
+                    Orientation.Vertical ->
+                        if (isUpOrLeft) {
+                            SwipeDirection.Resolved.Up
+                        } else {
+                            SwipeDirection.Resolved.Down
+                        }
+                },
+            pointerCount = pointersDown,
+            fromSource = fromSource,
+        )
+    }
+
     private fun computeSwipes(startedPosition: Offset?, pointersDown: Int): Swipes {
-        val fromSource =
-            startedPosition?.let { position ->
-                layoutImpl.swipeSourceDetector.source(
-                    layoutImpl.lastSize,
-                    position.round(),
-                    layoutImpl.density,
-                    orientation,
-                )
-            }
-
-        val upOrLeft =
-            Swipe.Resolved(
-                direction =
-                    when (orientation) {
-                        Orientation.Horizontal -> SwipeDirection.Resolved.Left
-                        Orientation.Vertical -> SwipeDirection.Resolved.Up
-                    },
-                pointerCount = pointersDown,
-                fromSource = fromSource,
-            )
-
-        val downOrRight =
-            Swipe.Resolved(
-                direction =
-                    when (orientation) {
-                        Orientation.Horizontal -> SwipeDirection.Resolved.Right
-                        Orientation.Vertical -> SwipeDirection.Resolved.Down
-                    },
-                pointerCount = pointersDown,
-                fromSource = fromSource,
-            )
+        val fromSource = resolveSwipeSource(startedPosition)
+        val upOrLeft = resolveSwipe(pointersDown, fromSource, isUpOrLeft = true)
+        val downOrRight = resolveSwipe(pointersDown, fromSource, isUpOrLeft = false)
 
         return if (fromSource == null) {
             Swipes(

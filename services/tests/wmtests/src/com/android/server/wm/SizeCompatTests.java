@@ -4849,6 +4849,39 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testUniversalResizeable() {
+        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        setUpApp(mDisplayContent);
+        final float maxAspect = 1.8f;
+        final float minAspect = 1.5f;
+        prepareLimitedBounds(mActivity, maxAspect, minAspect,
+                ActivityInfo.SCREEN_ORIENTATION_LOCKED, true /* isUnresizable */);
+
+        assertTrue(mActivity.isUniversalResizeable());
+        assertTrue(mActivity.isResizeable());
+        assertFalse(mActivity.shouldCreateAppCompatDisplayInsets());
+        assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOverrideOrientation());
+        assertEquals(mActivity.getTask().getBounds(), mActivity.getBounds());
+        final AppCompatAspectRatioPolicy aspectRatioPolicy = mActivity.mAppCompatController
+                .getAppCompatAspectRatioPolicy();
+        assertEquals(0, aspectRatioPolicy.getMaxAspectRatio(), 0 /* delta */);
+        assertEquals(0, aspectRatioPolicy.getMinAspectRatio(), 0 /* delta */);
+
+        // Compat override can still take effect.
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
+        spyOn(aspectRatioOverrides);
+        doReturn(true).when(aspectRatioOverrides).shouldOverrideMinAspectRatio();
+        assertEquals(minAspect, aspectRatioPolicy.getMinAspectRatio(), 0 /* delta */);
+
+        // User override can still take effect.
+        doReturn(true).when(aspectRatioOverrides).shouldApplyUserMinAspectRatioOverride();
+        assertFalse(mActivity.isResizeable());
+        assertEquals(maxAspect, aspectRatioPolicy.getMaxAspectRatio(), 0 /* delta */);
+        assertNotEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOverrideOrientation());
+    }
+
+    @Test
     public void testClearSizeCompat_resetOverrideConfig() {
         final int origDensity = 480;
         final int newDensity = 520;

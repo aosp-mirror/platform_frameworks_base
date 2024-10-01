@@ -19,7 +19,6 @@ package com.android.settingslib.spa.gallery.ui
 import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.common.EntrySearchData
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -38,17 +37,14 @@ object CategoryPageProvider : SettingsPageProvider {
     override val name = "Category"
     private val owner = createSettingsPage()
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner)
-            .setUiLayoutFn {
-                Preference(
-                    object : PreferenceModel {
-                        override val title = TITLE
-                        override val onClick = navigator(name)
-                    }
-                )
+    @Composable
+    fun Entry() {
+        Preference(
+            object : PreferenceModel {
+                override val title = TITLE
+                override val onClick = navigator(name)
             }
-            .setSearchDataFn { EntrySearchData(title = TITLE) }
+        )
     }
 
     override fun getTitle(arguments: Bundle?): String {

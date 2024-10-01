@@ -573,10 +573,12 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कोई नई सूचना नहीं है"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"नोटिफ़िकेशन कूलडाउन की सेटिंग चालू है"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"लगातार सूचनाएं आने पर आवाज़ कम करने की सेटिंग चालू है"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"एक साथ कई सूचनाएं मिलने पर, डिवाइस में सूचनाओं से होने वाली आवाज़ और सूचनाएं, दो मिनट के लिए अपने-आप कम हो जाएंगी."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"बंद करें"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुरानी सूचाएं देखने के लिए अनलॉक करें"</string>

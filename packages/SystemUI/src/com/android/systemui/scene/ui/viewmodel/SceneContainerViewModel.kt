@@ -17,8 +17,10 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.geometry.Offset
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -60,6 +62,8 @@ constructor(
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
     gestureFilterFactory: SceneContainerGestureFilter.Factory,
+    hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
+    @Assisted view: View,
     @Assisted displayId: Int,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
@@ -71,6 +75,8 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
+
+    private val hapticsViewModel = hapticsViewModelFactory.create(view)
 
     /**
      * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
@@ -107,6 +113,7 @@ constructor(
             coroutineScope {
                 launch { hydrator.activate() }
                 launch { gestureFilter.activate() }
+                launch("SceneContainerHapticsViewModel") { hapticsViewModel.activate() }
             }
             awaitCancellation()
         } finally {
@@ -281,6 +288,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
+            view: View,
             displayId: Int,
             motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
         ): SceneContainerViewModel

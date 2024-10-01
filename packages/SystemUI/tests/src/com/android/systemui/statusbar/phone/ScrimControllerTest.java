@@ -40,7 +40,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
@@ -1229,7 +1229,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         reset(mScrimBehind);
         mScrimController.setExpansionAffectsAlpha(false);
         mScrimController.setRawPanelExpansionFraction(0.8f);
-        verifyZeroInteractions(mScrimBehind);
+        verifyNoMoreInteractions(mScrimBehind);
         assertEquals("Scrim opacity shouldn't change when setExpansionAffectsAlpha "
                 + "is false", scrimAlpha, mScrimBehind.getViewAlpha(), 0.01f);
 
@@ -1441,7 +1441,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testDoesNotHoldWakeLock_whenUnlocking() {
         mScrimController.legacyTransitionTo(ScrimState.UNLOCKED);
         finishAnimationsImmediately();
-        verifyZeroInteractions(mWakeLock);
+        verifyNoMoreInteractions(mWakeLock);
     }
 
     @Test

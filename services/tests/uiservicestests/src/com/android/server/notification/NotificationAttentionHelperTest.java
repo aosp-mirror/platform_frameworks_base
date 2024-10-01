@@ -31,6 +31,12 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION;
 import static android.media.AudioAttributes.USAGE_NOTIFICATION_RINGTONE;
 
+import static com.android.server.notification.NotificationAttentionHelper.MUTE_REASON_COOLDOWN;
+import static com.android.server.notification.NotificationAttentionHelper.MUTE_REASON_FLAG_SILENT;
+import static com.android.server.notification.NotificationAttentionHelper.MUTE_REASON_GROUP_ALERT;
+import static com.android.server.notification.NotificationAttentionHelper.MUTE_REASON_NOT_MUTED;
+import static com.android.server.notification.NotificationAttentionHelper.MUTE_REASON_OTHER_INSISTENT_PLAYING;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -106,6 +112,7 @@ import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.Notificat
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.IntPair;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.LightsManager;
@@ -1276,7 +1283,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyNeverBeep();
         assertFalse(r.isInterruptive());
         assertEquals(-1, r.getLastAudiblyAlertedMs());
-        assertTrue(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS,
+                true)).isEqualTo(MUTE_REASON_FLAG_SILENT);
     }
 
     @Test
@@ -1295,7 +1303,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyNeverBeep();
         assertFalse(r.isInterruptive());
         assertEquals(-1, r.getLastAudiblyAlertedMs());
-        assertTrue(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS,
+                true)).isEqualTo(MUTE_REASON_GROUP_ALERT);
     }
 
     @Test
@@ -1861,7 +1870,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyBeepLooped();
 
         NotificationRecord interrupter = getBeepyOtherNotification();
-        assertTrue(mAttentionHelper.shouldMuteNotificationLocked(interrupter, DEFAULT_SIGNALS));
+        assertThat(
+                mAttentionHelper.shouldMuteNotificationLocked(interrupter, DEFAULT_SIGNALS,
+                true)).isEqualTo(MUTE_REASON_OTHER_INSISTENT_PLAYING);
         mAttentionHelper.buzzBeepBlinkLocked(interrupter, DEFAULT_SIGNALS);
 
         verifyBeep(1);
@@ -1879,16 +1890,16 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         ringtoneChannel.enableVibration(true);
         NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
         mService.addNotification(ringtoneNotification);
-        assertFalse(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
-            DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
+                DEFAULT_SIGNALS, true)).isEqualTo(MUTE_REASON_NOT_MUTED);
         mAttentionHelper.buzzBeepBlinkLocked(ringtoneNotification, DEFAULT_SIGNALS);
         verifyBeepLooped();
         verifyDelayedVibrateLooped();
         Mockito.reset(mVibrator);
         Mockito.reset(mRingtonePlayer);
 
-        assertFalse(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
-            DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
+                DEFAULT_SIGNALS, true)).isEqualTo(MUTE_REASON_NOT_MUTED);
         mAttentionHelper.buzzBeepBlinkLocked(ringtoneNotification, DEFAULT_SIGNALS);
 
         // beep wasn't reset
@@ -1907,8 +1918,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         ringtoneChannel.enableVibration(true);
         NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
         mService.addNotification(ringtoneNotification);
-        assertFalse(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
-            DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
+                DEFAULT_SIGNALS, true)).isEqualTo(MUTE_REASON_NOT_MUTED);
         mAttentionHelper.buzzBeepBlinkLocked(ringtoneNotification, DEFAULT_SIGNALS);
         verifyBeepLooped();
         verifyDelayedVibrateLooped();
@@ -1930,8 +1941,8 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         ringtoneChannel.enableVibration(true);
         NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
         mService.addNotification(ringtoneNotification);
-        assertFalse(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
-            DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
+                DEFAULT_SIGNALS, true)).isEqualTo(MUTE_REASON_NOT_MUTED);
         mAttentionHelper.buzzBeepBlinkLocked(ringtoneNotification, DEFAULT_SIGNALS);
         verifyBeepLooped();
         verifyNeverVibrate();
@@ -1951,14 +1962,15 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
             new AudioAttributes.Builder().setUsage(USAGE_NOTIFICATION_RINGTONE).build());
         ringtoneChannel.enableVibration(true);
         NotificationRecord ringtoneNotification = getCallRecord(1, ringtoneChannel, true);
-        assertFalse(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
-            DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(ringtoneNotification,
+                DEFAULT_SIGNALS, true)).isEqualTo(MUTE_REASON_NOT_MUTED);
 
         mAttentionHelper.buzzBeepBlinkLocked(ringtoneNotification, DEFAULT_SIGNALS);
         verifyVibrateLooped();
 
         NotificationRecord interrupter = getBuzzyOtherNotification();
-        assertTrue(mAttentionHelper.shouldMuteNotificationLocked(interrupter, DEFAULT_SIGNALS));
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(interrupter,
+                DEFAULT_SIGNALS, true)).isEqualTo(MUTE_REASON_OTHER_INSISTENT_PLAYING);
         mAttentionHelper.buzzBeepBlinkLocked(interrupter, DEFAULT_SIGNALS);
 
         verifyVibrate(1);
@@ -2260,10 +2272,13 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // 2nd update should beep at 0% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
-        verifyBeepVolume(0.0f);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
+        assertThat(mAttentionHelper.shouldMuteNotificationLocked(r, DEFAULT_SIGNALS, true))
+                .isEqualTo(MUTE_REASON_COOLDOWN);
 
-        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+        verify(mAccessibilityService, times(2)).sendAccessibilityEvent(any(), anyInt());
         assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 
@@ -2305,8 +2320,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // 2nd update should beep at 0% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
-        verifyBeepVolume(0.0f);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
         verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
         assertEquals(-1, r3.getLastAudiblyAlertedMs());
@@ -2381,9 +2397,10 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
                 false, null, Notification.GROUP_ALERT_ALL, false, mUser, "anotherPkg");
 
         // update should beep at 0% volume
-        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
         assertEquals(-1, r2.getLastAudiblyAlertedMs());
-        verifyBeepVolume(0.0f);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
         // Use different package for next notifications
         NotificationRecord r3 = getNotificationRecord(mId, false /* insistent */, false /* once */,
@@ -2392,8 +2409,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // 2nd update should beep at 0% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
-        verifyBeepVolume(0.0f);
+        buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
         verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
         assertEquals(-1, r3.getLastAudiblyAlertedMs());
@@ -2493,8 +2511,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // Regular notification: should beep at 0% volume
         NotificationRecord r = getBeepyNotification();
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
-        verifyBeepVolume(0.0f);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
         assertEquals(-1, r.getLastAudiblyAlertedMs());
         Mockito.reset(mRingtonePlayer);
 
@@ -2525,8 +2544,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // 2nd update should beep at 0% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
-        verifyBeepVolume(0.0f);
+        buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r3, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
         // Set important conversation
         mChannel.setImportantConversation(true);
@@ -2751,9 +2771,10 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         Mockito.reset(mRingtonePlayer);
 
         // next update at 0% volume
-        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
         assertEquals(-1, summary.getLastAudiblyAlertedMs());
-        verifyBeepVolume(0.0f);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
         verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
     }
@@ -2823,9 +2844,10 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // 2nd update should beep at 0% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r2, DEFAULT_SIGNALS);
         assertEquals(-1, r2.getLastAudiblyAlertedMs());
-        verifyBeepVolume(0.0f);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
         // Use different package for next notifications
         NotificationRecord r3 = getNotificationRecord(mId, false /* insistent */, false /* once */,
@@ -2891,6 +2913,94 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testBeepVolume_politeNotif_groupAlertSummary() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        // NOTIFICATION_COOLDOWN_ALL setting is enabled
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ALL, 1);
+        initAttentionHelper(flagResolver);
+
+        // child should beep at 0% volume
+        NotificationRecord child = getBeepyNotificationRecord("a", GROUP_ALERT_SUMMARY);
+        mAttentionHelper.buzzBeepBlinkLocked(child, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(child.isInterruptive());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // child should beep at 0% volume
+        child = getBeepyNotificationRecord("a", GROUP_ALERT_SUMMARY);
+        mAttentionHelper.buzzBeepBlinkLocked(child, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(child.isInterruptive());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // summary 100% volume (GROUP_ALERT_SUMMARY)
+        NotificationRecord summary = getBeepyNotificationRecord("a", GROUP_ALERT_SUMMARY);
+        summary.getNotification().flags |= Notification.FLAG_GROUP_SUMMARY;
+        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        assertNotEquals(-1, summary.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+        Mockito.reset(mRingtonePlayer);
+
+        // next update at 50% volume because only summary was tracked as alerting
+        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        assertNotEquals(-1, summary.getLastAudiblyAlertedMs());
+        verifyBeepVolume(0.5f);
+
+        verify(mAccessibilityService, times(4)).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
+    public void testBeepVolume_politeNotif_groupAlertChildren() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        // NOTIFICATION_COOLDOWN_ALL setting is enabled
+        Settings.System.putInt(getContext().getContentResolver(),
+                Settings.System.NOTIFICATION_COOLDOWN_ALL, 1);
+        initAttentionHelper(flagResolver);
+
+        // summary 0% volume (GROUP_ALERT_CHILDREN)
+        NotificationRecord summary = getBeepyNotificationRecord("a", GROUP_ALERT_CHILDREN);
+        summary.getNotification().flags |= Notification.FLAG_GROUP_SUMMARY;
+        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(summary.isInterruptive());
+        assertEquals(-1, summary.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // child should beep at 100% volume
+        NotificationRecord child = getBeepyNotificationRecord("a", GROUP_ALERT_CHILDREN);
+        mAttentionHelper.buzzBeepBlinkLocked(child, DEFAULT_SIGNALS);
+        assertNotEquals(-1, child.getLastAudiblyAlertedMs());
+        verifyBeepVolume(1.0f);
+        Mockito.reset(mRingtonePlayer);
+
+        // child should beep at 50% volume
+        child = getBeepyNotificationRecord("a", GROUP_ALERT_CHILDREN);
+        mAttentionHelper.buzzBeepBlinkLocked(child, DEFAULT_SIGNALS);
+        assertNotEquals(-1, child.getLastAudiblyAlertedMs());
+        verifyBeepVolume(0.5f);
+        Mockito.reset(mRingtonePlayer);
+
+        // child should beep at 0% volume
+        mAttentionHelper.buzzBeepBlinkLocked(child, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertTrue(child.isInterruptive());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
+
+        verify(mAccessibilityService, times(4)).sendAccessibilityEvent(any(), anyInt());
+    }
+
+    @Test
     public void testVibrationIntensity_politeNotif() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
@@ -2914,8 +3024,9 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         Mockito.reset(vibratorHelper);
 
         // 2nd update should buzz at 0% intensity
-        mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
-        verify(vibratorHelper, times(1)).scale(any(), eq(0.0f));
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r, DEFAULT_SIGNALS);
+        verifyNeverVibrate();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
     }
 
     @Test
@@ -3007,10 +3118,11 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
 
         // 2nd update should beep at 0% volume
         Mockito.reset(mRingtonePlayer);
-        mAttentionHelper.buzzBeepBlinkLocked(r, WORK_PROFILE_SIGNALS);
-        verifyBeepVolume(0.0f);
+        int buzzBeepBlink = mAttentionHelper.buzzBeepBlinkLocked(r, WORK_PROFILE_SIGNALS);
+        verifyNeverBeep();
+        assertThat(buzzBeepBlink).isEqualTo(MetricsEvent.ALERT_MUTED | MUTE_REASON_COOLDOWN);
 
-        verify(mAccessibilityService, times(3)).sendAccessibilityEvent(any(), anyInt());
+        verify(mAccessibilityService, times(2)).sendAccessibilityEvent(any(), anyInt());
         assertEquals(-1, r.getLastAudiblyAlertedMs());
     }
 

@@ -47,6 +47,7 @@ import androidx.graphics.shapes.CornerRounding
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.star
 import androidx.graphics.shapes.toPath
+import com.android.settingslib.spa.framework.theme.toSemiBoldWeight
 
 @Composable
 fun ZeroStatePreference(icon: ImageVector, text: String? = null, description: String? = null) {
@@ -80,7 +81,7 @@ fun ZeroStatePreference(icon: ImageVector, text: String? = null, description: St
             Text(
                 text = text,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.toSemiBoldWeight(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 24.dp),
             )

@@ -471,6 +471,58 @@ public final class NfcOemExtension {
         NfcAdapter.callService(() -> NfcAdapter.sService.setControllerAlwaysOn(mode));
     }
 
+    /**
+     * Triggers NFC initialization. If OEM extension is registered
+     * (indicated via `enable_oem_extension` NFC overlay), the NFC stack initialization at bootup
+     * is delayed until the OEM extension app triggers the initialization via this call.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void triggerInitialization() {
+        NfcAdapter.callService(() -> NfcAdapter.sService.triggerInitialization());
+    }
+
+    /**
+     * Gets the last user toggle status.
+     * @return true if NFC is set to ON, false otherwise
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean hasUserEnabledNfc() {
+        return NfcAdapter.callServiceReturn(() -> NfcAdapter.sService.getSettingStatus(), false);
+    }
+
+    /**
+     * Checks if the tag is present or not.
+     * @return true if the tag is present, false otherwise
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean isTagPresent() {
+        return NfcAdapter.callServiceReturn(() -> NfcAdapter.sService.isTagPresent(), false);
+    }
+
+    /**
+     * Pauses NFC tag reader mode polling for a {@code timeoutInMs} millisecond. If polling must be
+     * resumed before timeout, use {@link #resumePolling()}.
+     * @param timeoutInMs the pause polling duration in millisecond
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void pausePolling(int timeoutInMs) {
+        NfcAdapter.callService(() -> NfcAdapter.sService.pausePolling(timeoutInMs));
+    }
+
+    /**
+     * Resumes default NFC tag reader mode polling for the current device state if polling is
+     * paused. Calling this while polling is not paused is a no-op.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void resumePolling() {
+        NfcAdapter.callService(() -> NfcAdapter.sService.resumePolling());
+    }
+
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
 
         @Override

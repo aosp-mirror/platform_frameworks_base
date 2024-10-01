@@ -19,6 +19,7 @@ package com.android.systemui.bouncer.ui.composable
 import android.app.AlertDialog
 import android.platform.test.annotations.MotionTest
 import android.testing.TestableLooper.RunWithLooper
+import android.view.View
 import androidx.activity.BackEventCompat
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -52,27 +53,21 @@ import com.android.systemui.bouncer.ui.BouncerDialogFactory
 import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerUserActionsViewModel
 import com.android.systemui.bouncer.ui.viewmodel.bouncerSceneContentViewModel
-import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.motion.createSysUiComposeMotionTestRule
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
-import com.android.systemui.scene.sceneContainerGestureFilterFactory
-import com.android.systemui.scene.shared.logger.sceneLogger
+import com.android.systemui.scene.sceneContainerViewModelFactory
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.sceneDataSourceDelegator
 import com.android.systemui.scene.ui.composable.Scene
 import com.android.systemui.scene.ui.composable.SceneContainer
-import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
-import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
 import com.android.systemui.settings.displayTracker
-import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.testKosmos
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.awaitCancellation
@@ -85,6 +80,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 import platform.test.motion.compose.ComposeFeatureCaptures.positionInRoot
 import platform.test.motion.compose.ComposeRecordingSpec
 import platform.test.motion.compose.MotionControl
@@ -121,24 +117,17 @@ class BouncerPredictiveBackTest : SysuiTestCase() {
         val navigationDistances = mapOf(Scenes.Lockscreen to 1, Scenes.Bouncer to 0)
         SceneContainerConfig(sceneKeys, initialSceneKey, emptyList(), navigationDistances)
     }
+    private val view = mock<View>()
 
     private val transitionState by lazy {
         MutableStateFlow<ObservableTransitionState>(
             ObservableTransitionState.Idle(kosmos.sceneContainerConfig.initialSceneKey)
         )
     }
+
     private val sceneContainerViewModel by lazy {
-        SceneContainerViewModel(
-                sceneInteractor = kosmos.sceneInteractor,
-                falsingInteractor = kosmos.falsingInteractor,
-                powerInteractor = kosmos.powerInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-                splitEdgeDetector = kosmos.splitEdgeDetector,
-                logger = kosmos.sceneLogger,
-                gestureFilterFactory = kosmos.sceneContainerGestureFilterFactory,
-                displayId = kosmos.displayTracker.defaultDisplayId,
-                motionEventHandlerReceiver = {},
-            )
+        kosmos.sceneContainerViewModelFactory
+            .create(view, kosmos.displayTracker.defaultDisplayId, {})
             .apply { setTransitionState(transitionState) }
     }
 

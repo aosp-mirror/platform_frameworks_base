@@ -559,6 +559,13 @@ flag {
 }
 
 flag {
+    name: "volume_redesign"
+    namespace: "systemui"
+    description: "Enables Volume BC25 visuals update"
+    bug: "368308908"
+}
+
+flag {
     name: "clipboard_shared_transitions"
     namespace: "systemui"
     description: "Show shared transitions from clipboard"

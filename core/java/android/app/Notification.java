@@ -3216,11 +3216,13 @@ public class Notification implements Parcelable
      */
     @FlaggedApi(Flags.FLAG_UI_RICH_ONGOING)
     public boolean hasPromotableStyle() {
-        //TODO(b/367739672): Add progress style
-        return extras == null || !extras.containsKey(Notification.EXTRA_TEMPLATE)
-                || isStyle(Notification.BigPictureStyle.class)
-                || isStyle(Notification.BigTextStyle.class)
-                || isStyle(Notification.CallStyle.class);
+        final Class<? extends Style> notificationStyle = getNotificationStyle();
+
+        return notificationStyle == null
+                || BigPictureStyle.class.equals(notificationStyle)
+                || BigTextStyle.class.equals(notificationStyle)
+                || CallStyle.class.equals(notificationStyle)
+                || ProgressStyle.class.equals(notificationStyle);
     }
 
     /**
