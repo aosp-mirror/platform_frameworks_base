@@ -64,6 +64,7 @@ import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.Flags;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.util.ArrayList;
@@ -955,6 +956,7 @@ public class FullScreenMagnificationController implements
                         context,
                         traceManager,
                         LocalServices.getService(WindowManagerInternal.class),
+                        LocalServices.getService(InputManagerInternal.class),
                         new Handler(context.getMainLooper()),
                         context.getResources().getInteger(R.integer.config_longAnimTime)),
                 lock,
@@ -1640,6 +1642,8 @@ public class FullScreenMagnificationController implements
      */
     public void persistScale(int displayId) {
         final float scale = getScale(displayId);
+        notifyScaleForInput(displayId, scale);
+
         if (scale < MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
             return;
         }
@@ -1687,6 +1691,20 @@ public class FullScreenMagnificationController implements
                 return false;
             }
             return display.isZoomedOutFromService();
+        }
+    }
+
+    /**
+     * Notifies input manager that magnification scale changed non-transiently
+     * so that pointer cursor is scaled as well.
+     *
+     * @param displayId The logical display id.
+     * @param scale     The new scale factor.
+     */
+    public void notifyScaleForInput(int displayId, float scale) {
+        if (Flags.magnificationEnlargePointer()) {
+            mControllerCtx.getInputManager()
+                    .setAccessibilityPointerIconScaleFactor(displayId, scale);
         }
     }
 
@@ -2166,6 +2184,7 @@ public class FullScreenMagnificationController implements
         private final Context mContext;
         private final AccessibilityTraceManager mTrace;
         private final WindowManagerInternal mWindowManager;
+        private final InputManagerInternal mInputManager;
         private final Handler mHandler;
         private final Long mAnimationDuration;
 
@@ -2175,11 +2194,13 @@ public class FullScreenMagnificationController implements
         public ControllerContext(@NonNull Context context,
                 @NonNull AccessibilityTraceManager traceManager,
                 @NonNull WindowManagerInternal windowManager,
+                @NonNull InputManagerInternal inputManager,
                 @NonNull Handler handler,
                 long animationDuration) {
             mContext = context;
             mTrace = traceManager;
             mWindowManager = windowManager;
+            mInputManager = inputManager;
             mHandler = handler;
             mAnimationDuration = animationDuration;
         }
@@ -2206,6 +2227,14 @@ public class FullScreenMagnificationController implements
         @NonNull
         public WindowManagerInternal getWindowManager() {
             return mWindowManager;
+        }
+
+        /**
+         * @return InputManagerInternal
+         */
+        @NonNull
+        public InputManagerInternal getInputManager() {
+            return mInputManager;
         }
 
         /**

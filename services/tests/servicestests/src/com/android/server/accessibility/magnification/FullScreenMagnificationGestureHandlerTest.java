@@ -90,6 +90,7 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
 import com.android.server.wm.WindowManagerInternal;
@@ -227,9 +228,11 @@ public class FullScreenMagnificationGestureHandlerTest {
         final FullScreenMagnificationController.ControllerContext mockController =
                 mock(FullScreenMagnificationController.ControllerContext.class);
         final WindowManagerInternal mockWindowManager = mock(WindowManagerInternal.class);
+        final InputManagerInternal mockInputManager = mock(InputManagerInternal.class);
         when(mockController.getContext()).thenReturn(mContext);
         when(mockController.getTraceManager()).thenReturn(mMockTraceManager);
         when(mockController.getWindowManager()).thenReturn(mockWindowManager);
+        when(mockController.getInputManager()).thenReturn(mockInputManager);
         when(mockController.getHandler()).thenReturn(new Handler(mContext.getMainLooper()));
         when(mockController.newValueAnimator()).thenReturn(new ValueAnimator());
         when(mockController.getAnimationDuration()).thenReturn(1000L);

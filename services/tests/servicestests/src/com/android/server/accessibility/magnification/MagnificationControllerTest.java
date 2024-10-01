@@ -76,6 +76,7 @@ import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.window.flags.Flags;
 
@@ -154,6 +155,8 @@ public class MagnificationControllerTest {
     private WindowManagerInternal mWindowManagerInternal;
     @Mock
     private WindowManagerInternal.AccessibilityControllerInternal mA11yController;
+    @Mock
+    private InputManagerInternal mInputManagerInternal;
 
     @Mock
     private DisplayManagerInternal mDisplayManagerInternal;
@@ -200,6 +203,7 @@ public class MagnificationControllerTest {
         when(mControllerCtx.getContext()).thenReturn(mContext);
         when(mControllerCtx.getTraceManager()).thenReturn(mTraceManager);
         when(mControllerCtx.getWindowManager()).thenReturn(mWindowManagerInternal);
+        when(mControllerCtx.getInputManager()).thenReturn(mInputManagerInternal);
         when(mControllerCtx.getHandler()).thenReturn(mMessageCapturingHandler);
         when(mControllerCtx.getAnimationDuration()).thenReturn(1000L);
         when(mControllerCtx.newValueAnimator()).thenReturn(mValueAnimator);

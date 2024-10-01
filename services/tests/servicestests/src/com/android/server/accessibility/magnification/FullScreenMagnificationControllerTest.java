@@ -18,6 +18,7 @@ package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 
+import static com.android.server.accessibility.Flags.FLAG_MAGNIFICATION_ENLARGE_POINTER;
 import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY;
 import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
@@ -76,6 +77,7 @@ import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.test.MessageCapturingHandler;
+import com.android.server.input.InputManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 
@@ -126,6 +128,7 @@ public class FullScreenMagnificationControllerTest {
     final Resources mMockResources = mock(Resources.class);
     final AccessibilityTraceManager mMockTraceManager = mock(AccessibilityTraceManager.class);
     final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
+    final InputManagerInternal mMockInputManager = mock(InputManagerInternal.class);
     private final MagnificationAnimationCallback mAnimationCallback = mock(
             MagnificationAnimationCallback.class);
     private final MagnificationInfoChangedCallback mRequestObserver = mock(
@@ -163,6 +166,7 @@ public class FullScreenMagnificationControllerTest {
         when(mMockControllerCtx.getContext()).thenReturn(mMockContext);
         when(mMockControllerCtx.getTraceManager()).thenReturn(mMockTraceManager);
         when(mMockControllerCtx.getWindowManager()).thenReturn(mMockWindowManager);
+        when(mMockControllerCtx.getInputManager()).thenReturn(mMockInputManager);
         when(mMockControllerCtx.getHandler()).thenReturn(mMessageCapturingHandler);
         when(mMockControllerCtx.getAnimationDuration()).thenReturn(1000L);
         mResolver = new MockContentResolver();
@@ -1476,6 +1480,23 @@ public class FullScreenMagnificationControllerTest {
                 3.0f);
         Assert.assertEquals(mFullScreenMagnificationController.getPersistedScale(DISPLAY_1),
                 4.0f);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_MAGNIFICATION_ENLARGE_POINTER)
+    public void persistScale_setValue_notifyInput() {
+        register(TEST_DISPLAY);
+
+        PointF pivotPoint = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
+        mFullScreenMagnificationController.setScale(TEST_DISPLAY, 4.0f, pivotPoint.x, pivotPoint.y,
+                true, SERVICE_ID_1);
+        mFullScreenMagnificationController.persistScale(TEST_DISPLAY);
+
+        // persistScale may post a task to a background thread. Let's wait for it completes.
+        waitForBackgroundThread();
+        Assert.assertEquals(mFullScreenMagnificationController.getPersistedScale(TEST_DISPLAY),
+                4.0f);
+        verify(mMockInputManager).setAccessibilityPointerIconScaleFactor(TEST_DISPLAY, 4.0f);
     }
 
     @Test
