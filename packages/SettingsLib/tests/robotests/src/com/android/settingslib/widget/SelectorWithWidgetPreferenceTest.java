@@ -19,8 +19,6 @@ package com.android.settingslib.widget;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.app.Application;
 import android.platform.test.annotations.DisableFlags;
@@ -68,7 +66,7 @@ public class SelectorWithWidgetPreferenceTest {
         mPreference = new SelectorWithWidgetPreference(mContext);
 
         View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.preference_selector_with_widget, null /* root */);
+                .inflate(mPreference.getLayoutResource(), null /* root */);
         PreferenceViewHolder preferenceViewHolder =
                 PreferenceViewHolder.createInstanceForTests(view);
         mPreference.onBindViewHolder(preferenceViewHolder);
@@ -104,28 +102,28 @@ public class SelectorWithWidgetPreferenceTest {
     @Test
     public void onBindViewHolder_withSummary_containerShouldBeVisible() {
         mPreference.setSummary("some summary");
-        View summaryContainer = new View(mContext);
-        View view = mock(View.class);
-        when(view.findViewById(R.id.summary_container)).thenReturn(summaryContainer);
+        View view = LayoutInflater.from(mContext)
+                .inflate(mPreference.getLayoutResource(), null /* root */);
         PreferenceViewHolder preferenceViewHolder =
                 PreferenceViewHolder.createInstanceForTests(view);
 
         mPreference.onBindViewHolder(preferenceViewHolder);
 
+        View summaryContainer = view.findViewById(R.id.summary_container);
         assertEquals(View.VISIBLE, summaryContainer.getVisibility());
     }
 
     @Test
     public void onBindViewHolder_emptySummary_containerShouldBeGone() {
         mPreference.setSummary("");
-        View summaryContainer = new View(mContext);
-        View view = mock(View.class);
-        when(view.findViewById(R.id.summary_container)).thenReturn(summaryContainer);
+        View view = LayoutInflater.from(mContext)
+                .inflate(mPreference.getLayoutResource(), null /* root */);
         PreferenceViewHolder preferenceViewHolder =
                 PreferenceViewHolder.createInstanceForTests(view);
 
         mPreference.onBindViewHolder(preferenceViewHolder);
 
+        View summaryContainer = view.findViewById(R.id.summary_container);
         assertEquals(View.GONE, summaryContainer.getVisibility());
     }
 
@@ -186,23 +184,27 @@ public class SelectorWithWidgetPreferenceTest {
     @Test
     public void nullSummary_containerShouldBeGone() {
         mPreference.setSummary(null);
-        View summaryContainer = new View(mContext);
-        View view = mock(View.class);
-        when(view.findViewById(R.id.summary_container)).thenReturn(summaryContainer);
+        View view = LayoutInflater.from(mContext)
+                .inflate(mPreference.getLayoutResource(), null /* root */);
         PreferenceViewHolder preferenceViewHolder =
                 PreferenceViewHolder.createInstanceForTests(view);
+
         mPreference.onBindViewHolder(preferenceViewHolder);
+
+        View summaryContainer = view.findViewById(R.id.summary_container);
         assertEquals(View.GONE, summaryContainer.getVisibility());
     }
 
     @Test
     public void setAppendixVisibility_setGone_shouldBeGone() {
         mPreference.setAppendixVisibility(View.GONE);
-
         View view = LayoutInflater.from(mContext)
-                .inflate(R.layout.preference_selector_with_widget, null /* root */);
-        PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(view);
+                .inflate(mPreference.getLayoutResource(), null /* root */);
+        PreferenceViewHolder holder =
+                PreferenceViewHolder.createInstanceForTests(view);
+
         mPreference.onBindViewHolder(holder);
+
         assertThat(holder.findViewById(R.id.appendix).getVisibility()).isEqualTo(View.GONE);
     }
 
