@@ -1031,7 +1031,10 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             return this;
         }
 
-        private long getStatsDuration() {
+        /**
+         * Returns the duration of the battery session reflected by these stats.
+         */
+        public long getStatsDuration() {
             if (mStatsDurationMs != -1) {
                 return mStatsDurationMs;
             } else {
