@@ -7590,7 +7590,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void setProfileApp(ApplicationInfo app, String processName, ProfilerInfo profilerInfo,
-            ApplicationInfo sdkSandboxClientApp) {
+            ApplicationInfo sdkSandboxClientApp, int profileType) {
         synchronized (mAppProfiler.mProfilerLock) {
             if (!Build.IS_DEBUGGABLE) {
                 boolean isAppDebuggable = (app.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
@@ -7606,7 +7606,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + "and not profileable by shell: " + app.packageName);
                 }
             }
-            mAppProfiler.setProfileAppLPf(processName, profilerInfo);
+            mAppProfiler.setProfileAppLPf(processName, profilerInfo, profileType);
         }
     }
 
@@ -17860,7 +17860,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + android.Manifest.permission.SET_ACTIVITY_WATCHER);
         }
 
-        if (start && (profilerInfo == null || profilerInfo.profileFd == null)) {
+        if (start && profileType == ProfilerInfo.PROFILE_TYPE_REGULAR
+                && (profilerInfo == null || profilerInfo.profileFd == null)) {
             throw new IllegalArgumentException("null profile info or fd");
         }
 
@@ -19476,7 +19477,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
 
                     if (profilerInfo != null) {
-                        setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo, null);
+                        // We only support normal method tracing along with app startup for now.
+                        setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo,
+                                null, /*profileType= */ ProfilerInfo.PROFILE_TYPE_REGULAR);
                     }
                     wmLock.notify();
                 }
