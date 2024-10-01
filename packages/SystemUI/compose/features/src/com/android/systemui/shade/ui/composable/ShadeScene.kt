@@ -53,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
@@ -395,7 +394,8 @@ private fun SceneScope.SingleShade(
             modifier =
                 Modifier.align(Alignment.BottomCenter)
                     .height(navBarHeight)
-                    .pointerInteropFilter { true }
+                    // Intercepts touches, prevents the scrollable container behind from scrolling.
+                    .clickable(interactionSource = null, indication = null) { /* do nothing */ }
                     .verticalNestedScrollToScene(
                         topBehavior = NestedScrollBehavior.EdgeAlways,
                         isExternalOverscrollGesture = { false },
