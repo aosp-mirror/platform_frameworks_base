@@ -22,3 +22,16 @@ android_library {
     ],
     kotlincflags: ["-Xjvm-default=all"],
 }
+
+android_library {
+    name: "SettingsLibPreference-testutils",
+    srcs: ["testutils/**/*.kt"],
+    static_libs: [
+        "SettingsLibPreference",
+        "androidx.fragment_fragment-testing",
+        "androidx.test.core",
+        "androidx.test.ext.junit",
+        "flag-junit",
+        "truth",
+    ],
+}

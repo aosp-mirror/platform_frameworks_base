@@ -19,7 +19,7 @@ package com.android.systemui.statusbar.policy;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -61,7 +61,7 @@ public class RotationLockControllerImplTest extends SysuiTestCase {
     public void whenFlagOff_doesntInteractWithDeviceStateRotationController() {
         createRotationLockController(new String[0]);
 
-        verifyZeroInteractions(mDeviceStateRotationLockSettingController);
+        verifyNoMoreInteractions(mDeviceStateRotationLockSettingController);
     }
 
     @Test

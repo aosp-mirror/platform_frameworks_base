@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"वार्तालापहरू"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"सबै मौन सूचनाहरू हटाउनुहोस्"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"बाधा नपुऱ्याउनुहोस् नामक मोडमार्फत पज पारिएका सूचनाहरू"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"अहिले न"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कुनै सूचनाहरू छैनन्"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कुनै पनि नयाँ सूचना छैन"</string>
@@ -1396,8 +1398,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"\"कोल्याप्स गर्नुहोस्\" आइकन"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"\"एक्स्पान्ड गर्नुहोस्\" आइकन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"वा"</string>
-    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
-    <skip />
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ड्र्याग ह्यान्डल"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"किबोर्ड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"किबोर्डका सर्टकटहरू प्रयोग गर्न सिक्नुहोस्"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"टचप्याड प्रयोग गरी नेभिगेट गर्नुहोस्"</string>

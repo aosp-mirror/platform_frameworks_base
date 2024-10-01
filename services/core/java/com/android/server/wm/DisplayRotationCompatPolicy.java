@@ -30,6 +30,7 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.Display.TYPE_INTERNAL;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_CAMERA_COMPAT;
 
 import android.annotation.NonNull;
@@ -131,6 +132,11 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
             restoreOverriddenOrientationIfNeeded();
         }
         return mLastReportedOrientation;
+    }
+
+    float getCameraCompatAspectRatio(@NonNull ActivityRecord unusedActivity) {
+        // This policy does not apply camera compat aspect ratio by default, only via overrides.
+        return MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
     }
 
     @ScreenOrientation
@@ -271,7 +277,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
 
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
         return isTreatmentEnabledForDisplay()
-                && isCameraActive(activity, /* mustBeFullscreen */ true)
+                && isCameraRunningAndWindowingModeEligible(activity, /* mustBeFullscreen */ true)
                 && activity.mAppCompatController.getAppCompatCameraOverrides()
                     .shouldForceRotateForCameraCompat();
     }
@@ -290,7 +296,17 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         return isTreatmentEnabledForActivity(activity, /* mustBeFullscreen */ true);
     }
 
-    boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
+    boolean shouldCameraCompatControlOrientation(@NonNull ActivityRecord activity) {
+        return isCameraRunningAndWindowingModeEligible(activity, /* mustBeFullscreen= */ true);
+    }
+
+    boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord unusedActivity) {
+        // This policy does not apply camera compat aspect ratio by default, only via overrides.
+        return false;
+    }
+
+    boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity,
+            boolean mustBeFullscreen) {
         // Checking windowing mode on activity level because we don't want to
         // apply treatment in case of activity embedding.
         return (!mustBeFullscreen || !activity.inMultiWindowMode())
@@ -299,7 +315,8 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
 
     private boolean isTreatmentEnabledForActivity(@Nullable ActivityRecord activity,
             boolean mustBeFullscreen) {
-        return activity != null && isCameraActive(activity, mustBeFullscreen)
+        return activity != null
+                && isCameraRunningAndWindowingModeEligible(activity, mustBeFullscreen)
                 && activity.getRequestedConfigurationOrientation() != ORIENTATION_UNDEFINED
                 // "locked" and "nosensor" values are often used by camera apps that can't
                 // handle dynamic changes so we shouldn't force rotate them.
@@ -428,6 +445,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     private boolean shouldOverrideMinAspectRatio(@NonNull ActivityRecord activityRecord) {
         return activityRecord.mAppCompatController.getAppCompatCameraOverrides()
                 .isOverrideMinAspectRatioForCameraEnabled()
-                        && isCameraActive(activityRecord, /* mustBeFullscreen= */ true);
+                        && isCameraRunningAndWindowingModeEligible(activityRecord,
+                                /* mustBeFullscreen= */ true);
     }
 }

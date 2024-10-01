@@ -58,16 +58,17 @@ class AppCompatOrientationPolicy {
                 && displayContent.getIgnoreOrientationRequest();
         final boolean shouldApplyUserFullscreenOverride = mAppCompatOverrides
                 .getAppCompatAspectRatioOverrides().shouldApplyUserFullscreenOverride();
-        final boolean isCameraActive = displayContent != null
-                && displayContent.mAppCompatCameraPolicy.isCameraActive(mActivityRecord,
-                        /* mustBeFullscreen */ true);
+        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy
+                .getAppCompatCameraPolicy(mActivityRecord);
+        final boolean shouldCameraCompatControlOrientation = cameraPolicy != null
+                && cameraPolicy.shouldCameraCompatControlOrientation(mActivityRecord);
         if (shouldApplyUserFullscreenOverride && isIgnoreOrientationRequestEnabled
                 // Do not override orientation to fullscreen for camera activities.
                 // Fixed-orientation activities are rarely tested in other orientations, and it
                 // often results in sideways or stretched previews. As the camera compat treatment
                 // targets fixed-orientation activities, overriding the orientation disables the
                 // treatment.
-                && !isCameraActive) {
+                && !shouldCameraCompatControlOrientation) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate)
                     + " for " + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER)
@@ -113,7 +114,7 @@ class AppCompatOrientationPolicy {
                 // often results in sideways or stretched previews. As the camera compat treatment
                 // targets fixed-orientation activities, overriding the orientation disables the
                 // treatment.
-                && !isCameraActive) {
+                && !shouldCameraCompatControlOrientation) {
             Slog.v(TAG, "Requested orientation  " + screenOrientationToString(candidate)
                     + " for " + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER));
@@ -192,8 +193,9 @@ class AppCompatOrientationPolicy {
                         + mActivityRecord);
                 return true;
             }
-            final AppCompatCameraPolicy cameraPolicy = mActivityRecord.mAppCompatController
-                    .getAppCompatCameraPolicy();
+
+            final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy
+                    .getAppCompatCameraPolicy(mActivityRecord);
             if (cameraPolicy != null
                     && cameraPolicy.isTreatmentEnabledForActivity(mActivityRecord)) {
                 Slog.w(TAG, "Ignoring orientation update to "

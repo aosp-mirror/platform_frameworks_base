@@ -1529,13 +1529,34 @@ bool ResourceParser::ParseStyleItem(xml::XmlPullParser* parser, Style* style) {
   ResolvePackage(parser, &maybe_key.value());
   maybe_key.value().SetSource(source);
 
+  auto flag = ParseFlag(xml::FindAttribute(parser, xml::kSchemaAndroid, "featureFlag"));
+
   std::unique_ptr<Item> value = ParseXml(parser, 0, kAllowRawString);
   if (!value) {
     diag_->Error(android::DiagMessage(source) << "could not parse style item");
     return false;
   }
 
-  style->entries.push_back(Style::Entry{std::move(maybe_key.value()), std::move(value)});
+  if (flag) {
+    if (options_.flag) {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number()))
+                   << "Resource flag are not allowed both in the path and in the file");
+      return false;
+    }
+    std::string error;
+    auto flag_status = GetFlagStatus(flag, options_.feature_flag_values, &error);
+    if (flag_status) {
+      value->SetFlagStatus(flag_status.value());
+      value->SetFlag(std::move(flag));
+    } else {
+      diag_->Error(android::DiagMessage(source_.WithLine(parser->line_number())) << error);
+      return false;
+    }
+  }
+
+  if (value->GetFlagStatus() != FlagStatus::Disabled) {
+    style->entries.push_back(Style::Entry{std::move(maybe_key.value()), std::move(value)});
+  }
   return true;
 }
 

@@ -29,6 +29,7 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -123,7 +124,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
      * </ul>
      */
     @VisibleForTesting
-    boolean shouldApplyFreeformTreatmentForCameraCompat(@NonNull ActivityRecord activity) {
+    boolean isCameraCompatForFreeformEnabledForActivity(@NonNull ActivityRecord activity) {
         return Flags.enableCameraCompatForDesktopWindowing() && !activity.info.isChangeEnabled(
                 ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT);
     }
@@ -168,6 +169,36 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         mCameraTask = null;
         mIsCameraCompatTreatmentPending = false;
         return true;
+    }
+
+    boolean shouldCameraCompatControlOrientation(@NonNull ActivityRecord activity) {
+        return isCameraRunningAndWindowingModeEligible(activity);
+    }
+
+    boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity) {
+        return activity.inFreeformWindowingMode()
+                && mCameraStateMonitor.isCameraRunningForActivity(activity);
+    }
+
+    boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord activity) {
+        // Camera compat should direct aspect ratio when in camera compat mode, unless an app has a
+        // different camera compat aspect ratio set: this allows per-app camera compat override
+        // aspect ratio to be smaller than the default.
+        return isInCameraCompatMode(activity) && !activity.mAppCompatController
+                .getAppCompatCameraOverrides().isOverrideMinAspectRatioForCameraEnabled();
+    }
+
+    private boolean isInCameraCompatMode(@NonNull ActivityRecord activity) {
+        return activity.mAppCompatController.getAppCompatCameraOverrides()
+                .getFreeformCameraCompatMode() != CAMERA_COMPAT_FREEFORM_NONE;
+    }
+
+    float getCameraCompatAspectRatio(@NonNull ActivityRecord activityRecord) {
+        if (shouldCameraCompatControlAspectRatio(activityRecord)) {
+            return activityRecord.mWmService.mAppCompatConfiguration.getCameraCompatAspectRatio();
+        }
+
+        return MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
     }
 
     private void forceUpdateActivityAndTask(ActivityRecord cameraActivity) {
@@ -225,7 +256,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
      */
     private boolean isTreatmentEnabledForActivity(@NonNull ActivityRecord activity) {
         int orientation = activity.getRequestedConfigurationOrientation();
-        return shouldApplyFreeformTreatmentForCameraCompat(activity)
+        return isCameraCompatForFreeformEnabledForActivity(activity)
                 && mCameraStateMonitor.isCameraRunningForActivity(activity)
                 && orientation != ORIENTATION_UNDEFINED
                 && activity.inFreeformWindowingMode()

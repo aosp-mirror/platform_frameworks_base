@@ -76,7 +76,7 @@ public class InputMediaDeviceTest {
                         IS_VOLUME_FIXED);
         assertThat(builtinMediaDevice).isNotNull();
         assertThat(builtinMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_internal_mic));
+                .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name_desktop));
     }
 
     @Test
