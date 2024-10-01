@@ -16,6 +16,7 @@
 package com.android.server.appfunctions;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,8 +25,10 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Slog;
 
 import java.util.concurrent.Executor;
 import java.util.function.Function;
@@ -66,7 +69,8 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             @NonNull UserHandle userHandle,
             long cancellationTimeoutMillis,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull RunServiceCallCallback<T> callback) {
+            @NonNull RunServiceCallCallback<T> callback,
+            @NonNull IBinder callerBinder) {
         OneOffServiceConnection serviceConnection =
                 new OneOffServiceConnection(
                         intent,
@@ -74,7 +78,8 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
                         userHandle,
                         cancellationTimeoutMillis,
                         cancellationSignal,
-                        callback);
+                        callback,
+                        callerBinder);
 
         return serviceConnection.bindAndRun();
     }
@@ -88,6 +93,8 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
         private final long mCancellationTimeoutMillis;
         private final CancellationSignal mCancellationSignal;
         private final Runnable mCancellationTimeoutRunnable;
+        private final IBinder mCallerBinder;
+        @Nullable private IBinder.DeathRecipient mDirectServiceVulture;
 
         OneOffServiceConnection(
                 @NonNull Intent intent,
@@ -95,7 +102,8 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
                 @NonNull UserHandle userHandle,
                 long cancellationTimeoutMillis,
                 @NonNull CancellationSignal cancellationSignal,
-                @NonNull RunServiceCallCallback<T> callback) {
+                @NonNull RunServiceCallCallback<T> callback,
+                @NonNull IBinder callerBinder) {
             mIntent = intent;
             mFlags = flags;
             mCallback = callback;
@@ -103,6 +111,7 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             mCancellationTimeoutMillis = cancellationTimeoutMillis;
             mCancellationSignal = cancellationSignal;
             mCancellationTimeoutRunnable = this::safeUnbind;
+            mCallerBinder = callerBinder;
         }
 
         public boolean bindAndRun() {
@@ -116,6 +125,16 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
                             mHandler.postDelayed(
                                     mCancellationTimeoutRunnable, mCancellationTimeoutMillis);
                         });
+                mDirectServiceVulture =
+                        () -> {
+                            Slog.w(TAG, "Caller process onDeath signal received");
+                            mCancellationSignal.cancel();
+                        };
+                try {
+                    mCallerBinder.linkToDeath(mDirectServiceVulture, /* flags= */ 0);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to link to death on " + mCallerBinder + ": ", e);
+                }
             } else {
                 safeUnbind();
             }
@@ -152,6 +171,9 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             try {
                 mHandler.removeCallbacks(mCancellationTimeoutRunnable);
                 mContext.unbindService(this);
+                if (mDirectServiceVulture != null) {
+                    mCallerBinder.unlinkToDeath(mDirectServiceVulture, 0);
+                }
             } catch (Exception ex) {
                 Log.w(TAG, "Failed to unbind", ex);
             }
