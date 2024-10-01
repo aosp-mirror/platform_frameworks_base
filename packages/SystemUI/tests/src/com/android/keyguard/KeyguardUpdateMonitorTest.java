@@ -2237,6 +2237,36 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSimStateChanged_LockedToNotReadyToLocked() {
+        int validSubId = 10;
+        int slotId = 0;
+
+        KeyguardUpdateMonitorCallback keyguardUpdateMonitorCallback = spy(
+                KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback);
+        // Initially locked
+        mKeyguardUpdateMonitor.handleSimStateChange(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+
+        reset(keyguardUpdateMonitorCallback);
+        // Not ready, with invalid sub id
+        mKeyguardUpdateMonitor.handleSimStateChange(SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                slotId, TelephonyManager.SIM_STATE_NOT_READY);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, slotId,
+                TelephonyManager.SIM_STATE_NOT_READY);
+
+        reset(keyguardUpdateMonitorCallback);
+        // Back to PIN required, which notifies listeners
+        mKeyguardUpdateMonitor.handleSimStateChange(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+    }
+
+    @Test
     public void onAuthEnrollmentChangesCallbacksAreNotified() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         ArgumentCaptor<AuthController.Callback> authCallback = ArgumentCaptor.forClass(

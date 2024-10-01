@@ -3373,6 +3373,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * Removes all valid subscription info from the map for the given slotId.
+     */
+    private void invalidateSlot(int slotId) {
+        Iterator<Map.Entry<Integer, SimData>> iter = mSimDatas.entrySet().iterator();
+        while (iter.hasNext()) {
+            SimData data = iter.next().getValue();
+            if (data.slotId == slotId && SubscriptionManager.isValidSubscriptionId(data.subId)) {
+                mSimLogger.logInvalidSubId(data.subId);
+                iter.remove();
+            }
+        }
+    }
+
+    /**
      * Handle {@link #MSG_SIM_STATE_CHANGE}
      */
     @VisibleForTesting
@@ -3380,29 +3394,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         Assert.isMainThread();
         mSimLogger.logSimState(subId, slotId, state);
 
-        boolean becameAbsent = false;
+        boolean becameAbsent = ABSENT_SIM_STATE_LIST.contains(state);
         if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             mSimLogger.w("invalid subId in handleSimStateChange()");
             /* Only handle No SIM(ABSENT) and Card Error(CARD_IO_ERROR) due to
              * handleServiceStateChange() handle other case */
-            if (state == TelephonyManager.SIM_STATE_ABSENT) {
-                updateTelephonyCapable(true);
-                // Even though the subscription is not valid anymore, we need to notify that the
-                // SIM card was removed so we can update the UI.
-                becameAbsent = true;
-                for (SimData data : mSimDatas.values()) {
-                    // Set the SIM state of all SimData associated with that slot to ABSENT se we
-                    // do not move back into PIN/PUK locked and not detect the change below.
-                    if (data.slotId == slotId) {
-                        data.simState = TelephonyManager.SIM_STATE_ABSENT;
-                    }
-                }
-            } else if (state == TelephonyManager.SIM_STATE_CARD_IO_ERROR) {
+            if (state == TelephonyManager.SIM_STATE_ABSENT
+                    || state == TelephonyManager.SIM_STATE_CARD_IO_ERROR) {
                 updateTelephonyCapable(true);
             }
-        }
 
-        becameAbsent |= ABSENT_SIM_STATE_LIST.contains(state);
+            invalidateSlot(slotId);
+        }
 
         // TODO(b/327476182): Preserve SIM_STATE_CARD_IO_ERROR sims in a separate data source.
         SimData data = mSimDatas.get(subId);
@@ -3874,6 +3877,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean refreshSimState(int subId, int slotId) {
         int state = mTelephonyManager.getSimState(slotId);
         SimData data = mSimDatas.get(subId);
+
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+            invalidateSlot(slotId);
+        }
+
         final boolean changed;
         if (data == null) {
             data = new SimData(state, slotId, subId);
