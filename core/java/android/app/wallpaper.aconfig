@@ -22,3 +22,11 @@ flag {
   bug: "347235611"
   is_exported: true
 }
+
+flag {
+    name: "customization_packs_apis"
+    is_exported: true
+    namespace: "systemui"
+    description: "Move APIs related to bitmap and crops to @SystemApi."
+    bug: "372344184"
+}

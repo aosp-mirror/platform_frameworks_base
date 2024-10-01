@@ -2410,6 +2410,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     @Override
+    public Bundle getCurrentBitmapCrops(int which, int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "getBitmapCrop", null);
+        synchronized (mLock) {
+            checkPermission(READ_WALLPAPER_INTERNAL);
+            WallpaperData wallpaper = (which == FLAG_LOCK) ? mLockWallpaperMap.get(userId)
+                    : mWallpaperMap.get(userId);
+            if (wallpaper == null || !mImageWallpaper.equals(wallpaper.getComponent())) {
+                return null;
+            }
+            Bundle bundle = new Bundle();
+            for (int i = 0; i < wallpaper.mCropHints.size(); i++) {
+                String key = String.valueOf(wallpaper.mCropHints.keyAt(i));
+                Rect rect = wallpaper.mCropHints.valueAt(i);
+                bundle.putParcelable(key, rect);
+            }
+            return bundle;
+        }
+    }
+
+    @Override
     public List<Rect> getFutureBitmapCrops(Point bitmapSize, List<Point> displaySizes,
             int[] screenOrientations, List<Rect> crops) {
         SparseArray<Rect> cropMap = getCropMap(screenOrientations, crops);
