@@ -32,6 +32,7 @@ import android.util.ArrayMap;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,7 @@ import java.util.concurrent.Executor;
 @VisibleForTesting(visibility = Visibility.PACKAGE)
 public final class DeviceStateManagerGlobal {
     @Nullable
+    @GuardedBy("DeviceStateManagerGlobal.class")
     private static DeviceStateManagerGlobal sInstance;
     private static final String TAG = "DeviceStateManagerGlobal";
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
@@ -84,10 +86,12 @@ public final class DeviceStateManagerGlobal {
     @GuardedBy("mLock")
     private DeviceStateInfo mLastReceivedInfo;
 
+    // Constructor should be called while holding the lock.
+    // @GuardedBy("DeviceStateManagerGlobal.class") can't be used on constructors.
     @VisibleForTesting
     public DeviceStateManagerGlobal(@NonNull IDeviceStateManager deviceStateManager) {
         mDeviceStateManager = deviceStateManager;
-        registerCallbackIfNeededLocked();
+        registerCallbackLocked();
     }
 
     /**
@@ -279,14 +283,17 @@ public final class DeviceStateManagerGlobal {
         }
     }
 
-    private void registerCallbackIfNeededLocked() {
-        if (mCallback != null) {
-            return;
-        }
-
+    @GuardedBy("DeviceStateManagerGlobal.class")
+    private void registerCallbackLocked() {
         mCallback = new DeviceStateManagerCallback();
         try {
-            mDeviceStateManager.registerCallback(mCallback);
+            if (Flags.wlinfoOncreate()) {
+                synchronized (mLock) {
+                    mLastReceivedInfo = mDeviceStateManager.registerCallback(mCallback);
+                }
+            } else {
+                mDeviceStateManager.registerCallback(mCallback);
+            }
         } catch (RemoteException ex) {
             mCallback = null;
             throw ex.rethrowFromSystemServer();
