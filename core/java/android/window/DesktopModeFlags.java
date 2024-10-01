@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.window.flags;
+package android.window;
 
 import android.annotation.Nullable;
 import android.app.ActivityThread;
