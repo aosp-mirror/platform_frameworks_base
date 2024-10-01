@@ -17,13 +17,13 @@
 package com.android.wm.shell.transition;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 import static com.android.wm.shell.transition.Transitions.TransitionObserver;
 
 import android.annotation.NonNull;
-import android.app.ActivityManager.RunningTaskInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -62,10 +62,9 @@ public class FocusTransitionObserver implements TransitionObserver {
         final List<TransitionInfo.Change> changes = info.getChanges();
         for (int i = changes.size() - 1; i >= 0; i--) {
             final TransitionInfo.Change change = changes.get(i);
-            final RunningTaskInfo task = change.getTaskInfo();
-            if (task != null && task.isFocused && change.hasFlags(FLAG_MOVED_TO_TOP)) {
-                if (mFocusedDisplayId != task.displayId) {
-                    mFocusedDisplayId = task.displayId;
+            if (change.hasFlags(FLAG_IS_DISPLAY) && change.hasFlags(FLAG_MOVED_TO_TOP)) {
+                if (mFocusedDisplayId != change.getEndDisplayId()) {
+                    mFocusedDisplayId = change.getEndDisplayId();
                     notifyFocusedDisplayChanged();
                 }
                 return;
