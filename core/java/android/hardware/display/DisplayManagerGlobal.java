@@ -792,7 +792,6 @@ public final class DisplayManagerGlobal {
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
         try {
             mDm.setVirtualDisplaySurface(token, surface);
-            setVirtualDisplayState(token, surface != null);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -810,14 +809,6 @@ public final class DisplayManagerGlobal {
     public void releaseVirtualDisplay(IVirtualDisplayCallback token) {
         try {
             mDm.releaseVirtualDisplay(token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    void setVirtualDisplayState(IVirtualDisplayCallback token, boolean isOn) {
-        try {
-            mDm.setVirtualDisplayState(token, isOn);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
