@@ -22,6 +22,7 @@ import android.content.Context
 import android.os.SystemClock
 import android.provider.Settings.Secure
 import com.android.wm.shell.R
+import com.android.wm.shell.desktopmode.CaptionState
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
 import java.time.Duration
@@ -35,8 +36,12 @@ class AppHandleEducationFilter(
       context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
 
   /** Returns true if conditions to show app handle education are met, returns false otherwise. */
-  suspend fun shouldShowAppHandleEducation(focusAppPackageName: String): Boolean {
+  suspend fun shouldShowAppHandleEducation(captionState: CaptionState): Boolean {
+    if ((captionState as CaptionState.AppHandle).isHandleMenuExpanded) return false
+    val focusAppPackageName =
+        captionState.runningTaskInfo.topActivityInfo?.packageName ?: return false
     val windowingEducationProto = appHandleEducationDatastoreRepository.windowingEducationProto()
+
     return isFocusAppInAllowlist(focusAppPackageName) &&
         !isOtherEducationShowing() &&
         hasSufficientTimeSinceSetup() &&
