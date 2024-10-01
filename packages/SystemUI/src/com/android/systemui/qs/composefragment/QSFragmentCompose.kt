@@ -52,8 +52,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
@@ -536,6 +536,10 @@ constructor(
 
             onDispose { qqsVisible.value = false }
         }
+        val squishiness by
+            viewModel.containerViewModel.quickQuickSettingsViewModel.squishinessViewModel
+                .squishiness
+                .collectAsStateWithLifecycle()
         Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
             Box(
                 modifier =
@@ -549,7 +553,16 @@ constructor(
                                 topFromRoot + coordinates.size.height,
                             )
                         }
-                        .onSizeChanged { size -> qqsHeight.value = size.height }
+                        // Use an approach layout to determien the height without squishiness, as
+                        // that's the value that NPVC and QuickSettingsController care about
+                        // (measured height).
+                        .approachLayout(isMeasurementApproachInProgress = { squishiness < 1f }) {
+                            measurable,
+                            constraints ->
+                            qqsHeight.value = lookaheadSize.height
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                        }
                         .padding(top = { qqsPadding }, bottom = { bottomPadding.roundToPx() })
             ) {
                 val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
