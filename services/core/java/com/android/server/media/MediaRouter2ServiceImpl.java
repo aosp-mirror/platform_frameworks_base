@@ -2449,6 +2449,22 @@ class MediaRouter2ServiceImpl {
         }
 
         /**
+         * Notifies the corresponding manager of an update in the given session.
+         *
+         * @param sessionInfo The updated session info.
+         */
+        public void notifySessionUpdated(RoutingSessionInfo sessionInfo) {
+            try {
+                mManager.notifySessionUpdated(sessionInfo);
+            } catch (RemoteException ex) {
+                Slog.w(
+                        TAG,
+                        "notifySessionUpdatedToManagers: Failed to notify. Manager probably died.",
+                        ex);
+            }
+        }
+
+        /**
          * Notifies the corresponding manager that the given session has been released.
          *
          * @param sessionInfo The released session info.
@@ -3101,8 +3117,10 @@ class MediaRouter2ServiceImpl {
 
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
-            List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionUpdatedToManagers(managers, sessionInfo);
+            List<ManagerRecord> managers = getManagerRecords();
+            for (ManagerRecord manager : managers) {
+                manager.notifySessionUpdated(sessionInfo);
+            }
 
             // For system provider, notify all routers.
             if (provider == mSystemProvider) {
@@ -3204,20 +3222,6 @@ class MediaRouter2ServiceImpl {
             return true;
         }
 
-        private List<IMediaRouter2Manager> getManagers() {
-            final List<IMediaRouter2Manager> managers = new ArrayList<>();
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
-                return managers;
-            }
-            synchronized (service.mLock) {
-                for (ManagerRecord managerRecord : mUserRecord.mManagerRecords) {
-                    managers.add(managerRecord.mManager);
-                }
-            }
-            return managers;
-        }
-
         private List<RouterRecord> getRouterRecords() {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
@@ -3316,19 +3320,6 @@ class MediaRouter2ServiceImpl {
                                     MediaRouter2Manager.REQUEST_ID_NONE), session);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "notifySessionCreatedToManagers: "
-                            + "Failed to notify. Manager probably died.", ex);
-                }
-            }
-        }
-
-        private void notifySessionUpdatedToManagers(
-                @NonNull List<IMediaRouter2Manager> managers,
-                @NonNull RoutingSessionInfo sessionInfo) {
-            for (IMediaRouter2Manager manager : managers) {
-                try {
-                    manager.notifySessionUpdated(sessionInfo);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "notifySessionUpdatedToManagers: "
                             + "Failed to notify. Manager probably died.", ex);
                 }
             }
