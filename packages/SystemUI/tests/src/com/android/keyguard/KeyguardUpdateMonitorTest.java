@@ -127,6 +127,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
+import com.android.keyguard.logging.SimLogger;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -266,6 +267,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private ActiveUnlockConfig mActiveUnlockConfig;
     @Mock
     private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
+    @Mock
+    private SimLogger mSimLogger;
     @Mock
     private SessionTracker mSessionTracker;
     @Mock
@@ -2487,7 +2490,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
                     mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig,
-                    mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker,
+                    mKeyguardUpdateMonitorLogger, mSimLogger, mUiEventLogger, () -> mSessionTracker,
                     mTrustManager, mSubscriptionManager, mUserManager,
                     mDreamManager, mDevicePolicyManager, mSensorPrivacyManager, mTelephonyManager,
                     mPackageManager, mFingerprintManager, mBiometricManager,
