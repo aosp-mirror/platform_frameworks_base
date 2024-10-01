@@ -3786,8 +3786,9 @@ public class DisplayModeDirectorTest {
 
         when(mInjector.getBrightnessInfo(DISPLAY_ID)).thenReturn(
                 new BrightnessInfo(floatBri, floatAdjBri, 0.0f, 1.0f,
-                    BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF, TRANSITION_POINT,
-                    BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE));
+                        BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF, TRANSITION_POINT,
+                        BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE,
+                        false /* isBrightnessOverrideByWindow */));
         listener.onDisplayChanged(DISPLAY_ID);
     }
 

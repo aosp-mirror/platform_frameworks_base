@@ -172,17 +172,18 @@ public class BrightnessClamperController {
      * Applies clamping
      * Called in DisplayControllerHandler
      */
-    public DisplayBrightnessState clamp(DisplayManagerInternal.DisplayPowerRequest request,
+    public DisplayBrightnessState clamp(DisplayBrightnessState displayBrightnessState,
+            DisplayManagerInternal.DisplayPowerRequest request,
             float brightnessValue, boolean slowChange, int displayState) {
         float cappedBrightness = Math.min(brightnessValue, mBrightnessCap);
 
-        DisplayBrightnessState.Builder builder = DisplayBrightnessState.builder();
+        DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(
+                displayBrightnessState);
         builder.setIsSlowChange(slowChange);
         builder.setBrightness(cappedBrightness);
         builder.setMaxBrightness(mBrightnessCap);
         builder.setCustomAnimationRate(mCustomAnimationRate);
         builder.setBrightnessMaxReason(getBrightnessMaxReason());
-
         if (mClamperType != null) {
             builder.getBrightnessReason().addModifier(BrightnessReason.MODIFIER_THROTTLED);
             if (!mClamperApplied) {

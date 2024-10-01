@@ -64,6 +64,9 @@ interface ScreenBrightnessRepository {
     /** Current maximum value for the brightness */
     val maxLinearBrightness: Flow<LinearBrightness>
 
+    /** Whether the current brightness value is overridden by the application window */
+    val isBrightnessOverriddenByWindow: StateFlow<Boolean>
+
     /** Gets the current values for min and max brightness */
     suspend fun getMinMaxLinearBrightness(): Pair<LinearBrightness, LinearBrightness>
 
@@ -179,6 +182,11 @@ constructor(
             .map { LinearBrightness(it.brightness) }
             .logDiffForTable(tableBuffer, TABLE_PREFIX_LINEAR, TABLE_COLUMN_BRIGHTNESS, null)
             .stateIn(applicationScope, SharingStarted.WhileSubscribed(), LinearBrightness(0f))
+
+    override val isBrightnessOverriddenByWindow = brightnessInfo
+        .filterNotNull()
+        .map { it.isBrightnessOverrideByWindow }
+        .stateIn(applicationScope, SharingStarted.WhileSubscribed(), false)
 
     override fun setTemporaryBrightness(value: LinearBrightness) {
         apiQueue.trySend(SetBrightnessMethod.Temporary(value))

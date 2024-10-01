@@ -1633,6 +1633,16 @@ flag {
 }
 
 flag {
+   name: "show_toast_when_app_control_brightness"
+   namespace: "systemui"
+   description: "Showing the warning toast if the current running app window has controlled the brightness value."
+   bug: "363225340"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "home_controls_dream_hsum"
   namespace: "systemui"
   description: "Enables the home controls dream in HSUM"
