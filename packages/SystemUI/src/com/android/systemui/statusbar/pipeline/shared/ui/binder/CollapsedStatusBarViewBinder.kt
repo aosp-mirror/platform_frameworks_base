@@ -95,7 +95,8 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                                         primaryChipView.show(shouldAnimateChange = true)
                                     is OngoingActivityChipModel.Hidden ->
                                         primaryChipView.hide(
-                                            shouldAnimateChange = primaryChipModel.shouldAnimate
+                                            state = View.GONE,
+                                            shouldAnimateChange = primaryChipModel.shouldAnimate,
                                         )
                                 }
                             } else {
