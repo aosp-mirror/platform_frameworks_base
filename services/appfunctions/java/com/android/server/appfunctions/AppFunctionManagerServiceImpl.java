@@ -16,8 +16,6 @@
 
 package com.android.server.appfunctions;
 
-import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DISABLED;
-import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_ENABLED;
 import static android.app.appfunctions.AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_METADATA_DB;
 import static android.app.appfunctions.AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_NAMESPACE;
 
@@ -363,26 +361,14 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     callingPackage,
                                     functionIdentifier,
                                     runtimeMetadataSearchSession));
-            AppFunctionRuntimeMetadata.Builder newMetadata =
-                    new AppFunctionRuntimeMetadata.Builder(existingMetadata);
-            switch (enabledState) {
-                case AppFunctionManager.APP_FUNCTION_STATE_DEFAULT -> {
-                    newMetadata.setEnabled(null);
-                }
-                case APP_FUNCTION_STATE_ENABLED -> {
-                    newMetadata.setEnabled(true);
-                }
-                case APP_FUNCTION_STATE_DISABLED -> {
-                    newMetadata.setEnabled(false);
-                }
-                default ->
-                        throw new IllegalArgumentException("Value of EnabledState is unsupported.");
-            }
+            AppFunctionRuntimeMetadata newMetadata =
+                    new AppFunctionRuntimeMetadata.Builder(existingMetadata)
+                            .setEnabled(enabledState).build();
             AppSearchBatchResult<String, Void> putDocumentBatchResult =
                     runtimeMetadataSearchSession
                             .put(
                                     new PutDocumentsRequest.Builder()
-                                            .addGenericDocuments(newMetadata.build())
+                                            .addGenericDocuments(newMetadata)
                                             .build())
                             .get();
             if (!putDocumentBatchResult.isSuccess()) {
