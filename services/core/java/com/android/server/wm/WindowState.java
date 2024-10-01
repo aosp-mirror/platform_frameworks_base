@@ -2777,6 +2777,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mTmpRect.isEmpty()) {
+            // TODO(b/371182877) If the app does not draw under cutout region, the touchable region
+            // should not include cutout regions (if scrolling from letterbox feature is not desired
+            // for this region).
             final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
             if (transformedBounds != null) {
                 // Task is in the same orientation as display, so the rotated bounds should be
