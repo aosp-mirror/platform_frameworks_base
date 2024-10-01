@@ -58,6 +58,11 @@ public class InputRouteManagerTest {
     private static final int MAX_VOLUME = 1;
     private static final int CURRENT_VOLUME = 0;
     private static final boolean VOLUME_FIXED_TRUE = true;
+    private static final String PRODUCT_NAME_BUILTIN_MIC = "Built-in Mic";
+    private static final String PRODUCT_NAME_WIRED_HEADSET = "My Wired Headset";
+    private static final String PRODUCT_NAME_USB_HEADSET = "My USB Headset";
+    private static final String PRODUCT_NAME_USB_DEVICE = "My USB Device";
+    private static final String PRODUCT_NAME_USB_ACCESSORY = "My USB Accessory";
 
     private final Context mContext = spy(RuntimeEnvironment.application);
     private InputRouteManager mInputRouteManager;
@@ -75,25 +80,31 @@ public class InputRouteManagerTest {
         final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
         when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
         when(info1.getId()).thenReturn(BUILTIN_MIC_ID);
+        when(info1.getProductName()).thenReturn(PRODUCT_NAME_BUILTIN_MIC);
 
         final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
         when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
         when(info2.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        when(info2.getProductName()).thenReturn(PRODUCT_NAME_WIRED_HEADSET);
 
         final AudioDeviceInfo info3 = mock(AudioDeviceInfo.class);
         when(info3.getType()).thenReturn(AudioDeviceInfo.TYPE_USB_DEVICE);
         when(info3.getId()).thenReturn(INPUT_USB_DEVICE_ID);
+        when(info3.getProductName()).thenReturn(PRODUCT_NAME_USB_DEVICE);
 
         final AudioDeviceInfo info4 = mock(AudioDeviceInfo.class);
         when(info4.getType()).thenReturn(AudioDeviceInfo.TYPE_USB_HEADSET);
         when(info4.getId()).thenReturn(INPUT_USB_HEADSET_ID);
+        when(info4.getProductName()).thenReturn(PRODUCT_NAME_USB_HEADSET);
 
         final AudioDeviceInfo info5 = mock(AudioDeviceInfo.class);
         when(info5.getType()).thenReturn(AudioDeviceInfo.TYPE_USB_ACCESSORY);
         when(info5.getId()).thenReturn(INPUT_USB_ACCESSORY_ID);
+        when(info5.getProductName()).thenReturn(PRODUCT_NAME_USB_ACCESSORY);
 
         final AudioDeviceInfo unsupportedInfo = mock(AudioDeviceInfo.class);
         when(unsupportedInfo.getType()).thenReturn(AudioDeviceInfo.TYPE_HDMI);
+        when(unsupportedInfo.getProductName()).thenReturn("HDMI device");
 
         final AudioManager audioManager = mock(AudioManager.class);
         AudioDeviceInfo[] devices = {info1, info2, info3, info4, info5, unsupportedInfo};
@@ -142,10 +153,12 @@ public class InputRouteManagerTest {
         final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
         when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
         when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        when(info1.getProductName()).thenReturn(PRODUCT_NAME_WIRED_HEADSET);
 
         final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
         when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
         when(info2.getId()).thenReturn(BUILTIN_MIC_ID);
+        when(info2.getProductName()).thenReturn(PRODUCT_NAME_BUILTIN_MIC);
 
         final AudioManager audioManager = mock(AudioManager.class);
         AudioDeviceInfo[] devices = {info1, info2};
@@ -171,10 +184,12 @@ public class InputRouteManagerTest {
         final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
         when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
         when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        when(info1.getProductName()).thenReturn(PRODUCT_NAME_WIRED_HEADSET);
 
         final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
         when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
         when(info2.getId()).thenReturn(BUILTIN_MIC_ID);
+        when(info2.getProductName()).thenReturn(PRODUCT_NAME_BUILTIN_MIC);
 
         final AudioManager audioManager = mock(AudioManager.class);
         AudioDeviceInfo[] devices = {info1, info2};
@@ -204,10 +219,12 @@ public class InputRouteManagerTest {
         final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
         when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
         when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        when(info1.getProductName()).thenReturn(PRODUCT_NAME_WIRED_HEADSET);
 
         final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
         when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_BUILTIN_MIC);
         when(info2.getId()).thenReturn(BUILTIN_MIC_ID);
+        when(info2.getProductName()).thenReturn(PRODUCT_NAME_BUILTIN_MIC);
 
         final AudioManager audioManager = mock(AudioManager.class);
         AudioDeviceInfo[] devices = {info1, info2};
@@ -239,7 +256,8 @@ public class InputRouteManagerTest {
                         AudioDeviceInfo.TYPE_BUILTIN_MIC,
                         MAX_VOLUME,
                         CURRENT_VOLUME,
-                        VOLUME_FIXED_TRUE);
+                        VOLUME_FIXED_TRUE,
+                        PRODUCT_NAME_BUILTIN_MIC);
         inputRouteManager.selectDevice(inputMediaDevice);
 
         AudioDeviceAttributes deviceAttributes =
@@ -266,5 +284,52 @@ public class InputRouteManagerTest {
     @Test
     public void isInputGainFixed() {
         assertThat(mInputRouteManager.isInputGainFixed()).isTrue();
+    }
+
+    @Test
+    public void onAudioDevicesAdded_shouldSetProductNameCorrectly() {
+        final AudioDeviceInfo info1 = mock(AudioDeviceInfo.class);
+        when(info1.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(info1.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        String firstProductName = "My first headset";
+        when(info1.getProductName()).thenReturn(firstProductName);
+
+        final AudioDeviceInfo info2 = mock(AudioDeviceInfo.class);
+        when(info2.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(info2.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        String secondProductName = "My second headset";
+        when(info2.getProductName()).thenReturn(secondProductName);
+
+        final AudioDeviceInfo infoWithNullProductName = mock(AudioDeviceInfo.class);
+        when(infoWithNullProductName.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(infoWithNullProductName.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        when(infoWithNullProductName.getProductName()).thenReturn(null);
+
+        final AudioDeviceInfo infoWithBlankProductName = mock(AudioDeviceInfo.class);
+        when(infoWithBlankProductName.getType()).thenReturn(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+        when(infoWithBlankProductName.getId()).thenReturn(INPUT_WIRED_HEADSET_ID);
+        when(infoWithBlankProductName.getProductName()).thenReturn("");
+
+        final AudioManager audioManager = mock(AudioManager.class);
+        AudioDeviceInfo[] devices = {
+            info1, info2, infoWithNullProductName, infoWithBlankProductName
+        };
+        when(audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)).thenReturn(devices);
+
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+
+        assertThat(inputRouteManager.mInputMediaDevices).isEmpty();
+
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        assertThat(getProductNameAtIndex(inputRouteManager, 1)).isEqualTo(firstProductName);
+        assertThat(getProductNameAtIndex(inputRouteManager, 2)).isEqualTo(secondProductName);
+        assertThat(getProductNameAtIndex(inputRouteManager, 3)).isNull();
+        assertThat(getProductNameAtIndex(inputRouteManager, 4)).isNull();
+    }
+
+    private String getProductNameAtIndex(InputRouteManager inputRouteManager, int index) {
+        return ((InputMediaDevice) inputRouteManager.mInputMediaDevices.get(index))
+                .getProductName();
     }
 }

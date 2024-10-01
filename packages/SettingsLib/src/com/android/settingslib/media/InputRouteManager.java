@@ -151,7 +151,8 @@ public final class InputRouteManager {
                             info.getType(),
                             getMaxInputGain(),
                             getCurrentInputGain(),
-                            isInputGainFixed());
+                            isInputGainFixed(),
+                            getProductNameFromAudioDeviceInfo(info));
             if (mediaDevice != null) {
                 if (info.getType() == selectedInputDeviceAttributesType) {
                     mediaDevice.setState(STATE_SELECTED);
@@ -167,6 +168,25 @@ public final class InputRouteManager {
                 callback.onInputDeviceListUpdated(inputMediaDevices);
             }
         }
+    }
+
+    /**
+     * Gets the product name for the given {@link AudioDeviceInfo}.
+     *
+     * @return The product name for the given {@link AudioDeviceInfo}, or null if a suitable name
+     *     cannot be found.
+     */
+    @Nullable
+    private String getProductNameFromAudioDeviceInfo(AudioDeviceInfo deviceInfo) {
+        CharSequence productName = deviceInfo.getProductName();
+        if (productName == null) {
+            return null;
+        }
+        String productNameString = productName.toString();
+        if (productNameString.isBlank()) {
+            return null;
+        }
+        return productNameString;
     }
 
     public void selectDevice(@NonNull MediaDevice device) {
