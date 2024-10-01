@@ -271,6 +271,10 @@ system_java_library {
         "service-permission.stubs.system_server",
         "service-rkp.stubs.system_server",
         "service-sdksandbox.stubs.system_server",
+
+        // TODO: b/30242953 This is for accessing IVcnManagementService and
+        // can be removed VCN is in mainline
+        "framework-connectivity-b-pre-jarjar",
     ],
 
     soong_config_variables: {
