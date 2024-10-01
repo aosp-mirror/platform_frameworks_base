@@ -170,6 +170,7 @@ import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
@@ -3400,6 +3401,9 @@ class Task extends TaskFragment {
         info.isTopActivityTransparent = top != null && !top.fillsParent();
         info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
+        final WindowState windowState = top != null ? top.findMainWindow() : null;
+        info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
+                ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
     }
 
