@@ -30,9 +30,13 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.window.DisplayAreaInfo
+import android.window.WindowContainerTransaction
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.wm.shell.R
+import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
@@ -44,7 +48,8 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystem
 class DesktopWindowingEducationTooltipController(
     private val context: Context,
     private val additionalSystemViewContainerFactory: AdditionalSystemViewContainer.Factory,
-) {
+    private val displayController: DisplayController,
+) : OnDisplayChangingListener {
   // TODO: b/369384567 - Set tooltip color scheme to match LT/DT of app theme
   private var tooltipView: View? = null
   private var animator: PhysicsAnimator<View>? = null
@@ -52,6 +57,20 @@ class DesktopWindowingEducationTooltipController(
     PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY)
   }
   private var popupWindow: AdditionalSystemViewContainer? = null
+
+  override fun onDisplayChange(
+      displayId: Int,
+      fromRotation: Int,
+      toRotation: Int,
+      newDisplayAreaInfo: DisplayAreaInfo?,
+      t: WindowContainerTransaction?
+  ) {
+    // Exit if the rotation hasn't changed or is changed by 180 degrees. [fromRotation] and
+    // [toRotation] can be one of the [@Surface.Rotation] values.
+    if ((fromRotation % 2 == toRotation % 2)) return
+    hideEducationTooltip()
+    // TODO: b/370820018 - Update tooltip position on orientation change instead of dismissing
+  }
 
   /**
    * Shows education tooltip.
@@ -64,6 +83,7 @@ class DesktopWindowingEducationTooltipController(
     tooltipView = createEducationTooltipView(tooltipViewConfig, taskId)
     animator = createAnimator()
     animateShowTooltipTransition()
+    displayController.addDisplayChangingController(this)
   }
 
   /** Hide the current education view if visible */
@@ -145,6 +165,7 @@ class DesktopWindowingEducationTooltipController(
     animator = null
     popupWindow?.releaseView()
     popupWindow = null
+    displayController.removeDisplayChangingController(this)
   }
 
   private fun createTooltipPopupWindow(
