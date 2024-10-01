@@ -26,6 +26,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_PAUSE;
 import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -35,6 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
 import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 
 import static org.junit.Assert.assertEquals;
@@ -247,8 +249,8 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
         assertTrue(mActivity.info
                 .isChangeEnabled(OVERRIDE_CAMERA_COMPAT_DISABLE_FREEFORM_WINDOWING_TREATMENT));
-        assertFalse(mCameraCompatFreeformPolicy
-                .shouldApplyFreeformTreatmentForCameraCompat(mActivity));
+        assertFalse(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
+                mActivity));
     }
 
     @Test
@@ -256,8 +258,8 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     public void testShouldApplyCameraCompatFreeformTreatment_notDisabledByOverride_returnsTrue() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertTrue(mCameraCompatFreeformPolicy
-                .shouldApplyFreeformTreatmentForCameraCompat(mActivity));
+        assertTrue(mCameraCompatFreeformPolicy.isCameraCompatForFreeformEnabledForActivity(
+                mActivity));
     }
 
     @Test
@@ -301,6 +303,49 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         callOnActivityConfigurationChanging(mActivity);
 
         assertActivityRefreshRequested(/* refreshRequested */ true, /* cycleThroughStop */ false);
+    }
+
+    @Test
+    public void testGetCameraCompatAspectRatio_activityNotInCameraCompat_returnsDefaultAspRatio() {
+        configureActivity(SCREEN_ORIENTATION_FULL_USER);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
+
+        assertEquals(MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO,
+                mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(mActivity),
+                /* delta= */ 0.001);
+    }
+
+    @Test
+    public void testGetCameraCompatAspectRatio_activityInCameraCompat_returnsConfigAspectRatio() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        final float configAspectRatio = 1.5f;
+        mWm.mAppCompatConfiguration.setCameraCompatAspectRatio(configAspectRatio);
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
+
+        assertEquals(configAspectRatio,
+                mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(mActivity),
+                /* delta= */ 0.001);
+    }
+
+
+    @Test
+    public void testGetCameraCompatAspectRatio_inCameraCompatPerAppOverride_returnDefAspectRatio() {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        final float configAspectRatio = 1.5f;
+        mWm.mAppCompatConfiguration.setCameraCompatAspectRatio(configAspectRatio);
+        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+                .isOverrideMinAspectRatioForCameraEnabled();
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity);
+
+        assertEquals(MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO,
+                mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(mActivity),
+                /* delta= */ 0.001);
     }
 
     private void configureActivity(@ScreenOrientation int activityOrientation) {

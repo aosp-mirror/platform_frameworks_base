@@ -259,6 +259,7 @@ fun SceneScope.ConstrainedNotificationStack(
         HeadsUpNotificationSpace(
             stackScrollView = stackScrollView,
             viewModel = viewModel,
+            useHunBounds = { shouldUseLockscreenHunBounds(layoutState.transitionState) },
             modifier = Modifier.align(Alignment.TopCenter),
         )
         NotificationStackCutoffGuideline(
@@ -541,6 +542,7 @@ fun SceneScope.NotificationScrollingStack(
             HeadsUpNotificationSpace(
                 stackScrollView = stackScrollView,
                 viewModel = viewModel,
+                useHunBounds = { !shouldUseLockscreenHunBounds(layoutState.transitionState) },
                 modifier = Modifier.padding(top = topPadding),
             )
         }
@@ -673,6 +675,14 @@ private suspend fun scrollNotificationStack(
 
 private fun shouldUseLockscreenStackBounds(state: TransitionState): Boolean {
     return state is TransitionState.Idle && state.currentScene == Scenes.Lockscreen
+}
+
+private fun shouldUseLockscreenHunBounds(state: TransitionState): Boolean {
+    return when (state) {
+        is TransitionState.Idle -> state.currentScene == Scenes.Lockscreen
+        is TransitionState.Transition ->
+            state.isTransitioning(from = Scenes.QuickSettings, to = Scenes.Lockscreen)
+    }
 }
 
 private fun shouldAnimateScrimCornerRadius(

@@ -194,9 +194,10 @@ public class DesktopAppCompatAspectRatioPolicy {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
 
-        final DisplayContent dc = task.mDisplayContent;
-        final boolean shouldOverrideMinAspectRatioForCamera = dc != null
-                && dc.mAppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord);
+        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy.getAppCompatCameraPolicy(
+                mActivityRecord);
+        final boolean shouldOverrideMinAspectRatioForCamera = cameraPolicy != null
+                && cameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord);
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
                 && !shouldOverrideMinAspectRatioForCamera) {
             if (mActivityRecord.isUniversalResizeable()) {

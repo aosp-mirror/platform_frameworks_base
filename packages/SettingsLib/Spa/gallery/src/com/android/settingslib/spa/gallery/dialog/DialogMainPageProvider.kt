@@ -18,6 +18,7 @@ package com.android.settingslib.spa.gallery.dialog
 
 import android.os.Bundle
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -55,13 +56,13 @@ object DialogMainPageProvider : SettingsPageProvider {
         }.build(),
     )
 
-    fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner)
-        .setUiLayoutFn {
-            Preference(object : PreferenceModel {
-                override val title = TITLE
-                override val onClick = navigator(name)
-            })
-        }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
+    }
 
     override fun getTitle(arguments: Bundle?) = TITLE
 }

@@ -65,8 +65,7 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             @NonNull UserHandle userHandle,
             @NonNull RunServiceCallCallback<T> callback) {
         OneOffServiceConnection serviceConnection =
-                new OneOffServiceConnection(
-                        intent, bindFlags, userHandle, callback);
+                new OneOffServiceConnection(intent, bindFlags, userHandle, callback);
 
         return serviceConnection.bindAndRun();
     }
@@ -93,7 +92,7 @@ public class RemoteServiceCallerImpl<T> implements RemoteServiceCaller<T> {
             boolean bindServiceResult =
                     mContext.bindServiceAsUser(mIntent, this, mFlags, mUserHandle);
 
-            if(!bindServiceResult) {
+            if (!bindServiceResult) {
                 safeUnbind();
             }
 
