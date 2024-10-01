@@ -209,7 +209,7 @@ class DesktopTasksController(
             { createExternalInterface() },
             this
         )
-        shellController.addUserChangeListener(this);
+        shellController.addUserChangeListener(this)
         transitions.addHandler(this)
         dragToDesktopTransitionHandler.dragToDesktopStateListener = dragToDesktopStateListener
         recentsTransitionHandler.addTransitionStateListener(
