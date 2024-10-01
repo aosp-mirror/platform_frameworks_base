@@ -119,20 +119,20 @@ those.
 In addition to proc state, the `AppOpsService` also receives process capability update from the
 `ActivityManagerService`. Proc capability specifies what while-in-use(`MODE_FOREGROUND`) operations
  the proc is allowed to perform in its current proc state. There are three proc capabilities
- defined so far: 
+ defined so far:
 `PROCESS_CAPABILITY_FOREGROUND_LOCATION`, `PROCESS_CAPABILITY_FOREGROUND_CAMERA` and
 `PROCESS_CAPABILITY_FOREGROUND_MICROPHONE`, they correspond to the while-in-use operation of
 location, camera and microphone (microphone is `RECORD_AUDIO`).
 
 In `ActivityManagerService`, `PROCESS_STATE_TOP` and `PROCESS_STATE_PERSISTENT` have all
 three capabilities, `PROCESS_STATE_FOREGROUND_SERVICE` has capabilities defined by
- `foregroundServiceType` that is specified in foreground service's manifest file. A client process 
+ `foregroundServiceType` that is specified in foreground service's manifest file. A client process
  can pass its capabilities to service using `BIND_INCLUDE_CAPABILITIES` flag.
 
 The proc state and capability are used for two use cases: Firstly, Tracking remembers the proc state
  for each tracked event. Secondly, `noteOp`/`checkOp` calls for app-op that are set to
  `MODE_FOREGROUND` are translated using the `AppOpsService.UidState.evalMode` method into
- `MODE_ALLOWED` when the app has the capability and `MODE_IGNORED` when the app does not have the 
+ `MODE_ALLOWED` when the app has the capability and `MODE_IGNORED` when the app does not have the
  capability. `checkOpRaw` calls are not affected.
 
 The current proc state and capability for an app can be read from `dumpsys appops`.
@@ -284,7 +284,7 @@ indicating what code accesses what private data.
 ##### Self data accesses
 
 This is similar to the [synchronous data access](#synchronous-data-accesses) case only that the data
-provider and client are in the same process. In this case Android's RPC code is no involved and
+provider and client are in the same process. In this case Android's RPC code is not involved and
 `AppOpsManager.noteOp` directly triggers `OnOpNotedCallback.onSelfNoted`. This should be a uncommon
 case as it is uncommon for an app to provide data, esp. to itself.
 
