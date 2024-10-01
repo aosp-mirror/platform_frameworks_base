@@ -461,6 +461,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
                 notifyNoCaptionHandle();
             }
+            mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
             disposeStatusBarInputLayer();
             Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
             return;
