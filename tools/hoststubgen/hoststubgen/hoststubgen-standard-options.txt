@@ -3,8 +3,6 @@
 --debug
 
 # Uncomment below lines to enable each feature.
---enable-non-stub-method-check
-# --no-non-stub-method-check
 
 #--default-method-call-hook
 #    com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
@@ -13,14 +11,9 @@
 
 # Standard annotations.
 # Note, each line is a single argument, so we need newlines after each `--xxx-annotation`.
---stub-annotation
-    android.hosttest.annotation.HostSideTestStub
 
 --keep-annotation
     android.hosttest.annotation.HostSideTestKeep
-
---stub-class-annotation
-    android.hosttest.annotation.HostSideTestWholeClassStub
 
 --keep-class-annotation
     android.hosttest.annotation.HostSideTestWholeClassKeep
@@ -31,11 +24,17 @@
 --remove-annotation
     android.hosttest.annotation.HostSideTestRemove
 
+--ignore-annotation
+    android.hosttest.annotation.HostSideTestIgnore
+
 --substitute-annotation
     android.hosttest.annotation.HostSideTestSubstitute
 
---native-substitute-annotation
-    android.hosttest.annotation.HostSideTestNativeSubstitutionClass
+--redirect-annotation
+    android.hosttest.annotation.HostSideTestRedirect
+
+--redirection-class-annotation
+    android.hosttest.annotation.HostSideTestRedirectionClass
 
 --class-load-hook-annotation
     android.hosttest.annotation.HostSideTestClassLoadHook

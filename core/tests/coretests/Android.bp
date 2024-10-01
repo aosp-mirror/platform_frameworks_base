@@ -25,6 +25,7 @@ filegroup {
         "BinderProxyCountingTestApp/src/**/*.java",
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
+        "AppThatCallsBinderMethods/src/**/*.kt",
     ],
     visibility: ["//visibility:private"],
 }
@@ -141,6 +142,7 @@ android_test {
         ":BinderFrozenStateChangeCallbackTestApp",
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
+        ":AppThatCallsBinderMethods",
     ],
 }
 

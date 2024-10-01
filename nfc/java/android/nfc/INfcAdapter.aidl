@@ -114,4 +114,7 @@ interface INfcAdapter
     void setScreenState();
     void checkFirmware();
     List<String> fetchActiveNfceeList();
+    void triggerInitialization();
+    boolean getSettingStatus();
+    boolean isTagPresent();
 }
