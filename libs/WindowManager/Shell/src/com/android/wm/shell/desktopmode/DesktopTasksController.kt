@@ -1574,7 +1574,7 @@ class DesktopTasksController(
             return
         }
 
-        val indicator = visualIndicator ?: return
+        val indicator = getVisualIndicator() ?: return
         val indicatorType =
             indicator.updateIndicatorType(
                 PointF(inputCoordinate.x, currentDragBounds.top.toFloat()),
