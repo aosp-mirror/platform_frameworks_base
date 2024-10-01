@@ -2776,18 +2776,20 @@ class MediaRouter2ServiceImpl {
                     getRouterRecords(/* hasSystemRoutingPermission= */ true);
             List<RouterRecord> routerRecordsWithoutSystemRoutingPermission =
                     getRouterRecords(/* hasSystemRoutingPermission= */ false);
-            List<IMediaRouter2Manager> managers = getManagers();
+            List<ManagerRecord> managers = getManagerRecords();
 
             // Managers receive all provider updates with all routes.
-            notifyRoutesUpdatedToManagers(
-                    managers, new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
+            List<MediaRoute2Info> routesForPrivilegedRouters =
+                    mLastNotifiedRoutesToPrivilegedRouters.values().stream().toList();
+            for (ManagerRecord manager : managers) {
+                manager.notifyRoutesUpdated(routesForPrivilegedRouters);
+            }
 
             // Routers with system routing access (either via {@link MODIFY_AUDIO_ROUTING} or
             // {@link BLUETOOTH_CONNECT} + {@link BLUETOOTH_SCAN}) receive all provider updates
             // with all routes.
             notifyRoutesUpdatedToRouterRecords(
-                    routerRecordsWithSystemRoutingPermission,
-                    new ArrayList<>(mLastNotifiedRoutesToPrivilegedRouters.values()));
+                    routerRecordsWithSystemRoutingPermission, routesForPrivilegedRouters);
 
             if (!isSystemProvider) {
                 // Regular routers receive updates from all non-system providers with all non-system
@@ -3281,18 +3283,6 @@ class MediaRouter2ServiceImpl {
                 @NonNull RoutingSessionInfo sessionInfo) {
             for (RouterRecord routerRecord : routerRecords) {
                 routerRecord.notifySessionInfoChanged(sessionInfo);
-            }
-        }
-
-        private void notifyRoutesUpdatedToManagers(
-                @NonNull List<IMediaRouter2Manager> managers,
-                @NonNull List<MediaRoute2Info> routes) {
-            for (IMediaRouter2Manager manager : managers) {
-                try {
-                    manager.notifyRoutesUpdated(routes);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes changed. Manager probably died.", ex);
-                }
             }
         }
 
