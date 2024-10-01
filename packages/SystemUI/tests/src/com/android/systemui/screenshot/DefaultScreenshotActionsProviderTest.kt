@@ -29,7 +29,6 @@ import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.kotlin.any
@@ -47,15 +46,10 @@ class DefaultScreenshotActionsProviderTest : SysuiTestCase() {
     private val uiEventLogger = mock<UiEventLogger>()
     private val actionsCallback = mock<ScreenshotActionsController.ActionsCallback>()
 
-    private val request = ScreenshotData.forTesting()
+    private val request = ScreenshotData.forTesting(userHandle = UserHandle.OWNER)
     private val validResult = ScreenshotSavedResult(Uri.EMPTY, Process.myUserHandle(), 0)
 
     private lateinit var actionsProvider: ScreenshotActionsProvider
-
-    @Before
-    fun setUp() {
-        request.userHandle = UserHandle.OWNER
-    }
 
     @Test
     fun previewActionAccessed_beforeScreenshotCompleted_doesNothing() {
