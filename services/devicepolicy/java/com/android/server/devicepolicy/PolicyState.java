@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.PolicyValue;
-import android.app.admin.flags.Flags;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.util.XmlUtils;
@@ -296,18 +295,6 @@ final class PolicyState<V> {
                                 + "definition " + policyDefinition) + ", EnforcingAdmin is: "
                                 + (admin == null ? "null" : admin) + ", value is : "
                                 + (value == null ? "null" : value));
-                    }
-                    break;
-                case TAG_POLICY_DEFINITION_ENTRY:
-                    if (Flags.dontReadPolicyDefinition()) {
-                        // Should be passed by the caller.
-                        Objects.requireNonNull(policyDefinition);
-                    } else {
-                        policyDefinition = PolicyDefinition.readFromXml(parser);
-                        if (policyDefinition == null) {
-                            Slogf.wtf(TAG, "Error Parsing TAG_POLICY_DEFINITION_ENTRY, "
-                                    + "PolicyDefinition is null");
-                        }
                     }
                     break;
 
