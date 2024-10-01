@@ -597,8 +597,6 @@ filegroup {
 filegroup {
     name: "framework-networkstack-shared-srcs",
     srcs: [
-        // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
-        ":framework-annotations",
         ":modules-utils-preconditions-srcs",
         "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
