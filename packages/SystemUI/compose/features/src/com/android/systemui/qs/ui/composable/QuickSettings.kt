@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,6 +47,7 @@ import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Companion.Collaps
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.Expanding
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQQS
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter.State.UnsquishingQS
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 
 object QuickSettings {
@@ -73,10 +76,21 @@ object QuickSettings {
         val MediaLandscapeTopOffset = ValueKey("MediaLandscapeTopOffset")
 
         object MediaOffset {
-            val InQQS = 0.dp
             // Brightness + padding
             val InQS = 92.dp
             val Default = 0.dp
+
+            @Composable
+            fun inQqs(isMediaInRow: Boolean): Dp {
+                return if (isMediaInRow) {
+                    // Tiles are laid out in a center of a container, that has this
+                    // margin on the bottom. This compensates this margin, so that the Media
+                    // Carousel can be properly centered
+                    -dimensionResource(id = R.dimen.qqs_layout_padding_bottom) / 2
+                } else {
+                    0.dp
+                }
+            }
         }
     }
 }

@@ -15,11 +15,13 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -28,9 +30,10 @@ import java.util.List;
  * Mainly for colors in theming.
  */
 public class ColorConstant implements Operation {
+    private static final int OP_CODE = Operations.COLOR_CONSTANT;
+    private static final String CLASS_NAME = "ColorConstant";
     public int mColorId;
     public int mColor;
-    public static final Companion COMPANION = new Companion();
 
     public ColorConstant(int colorId, int color) {
         this.mColorId = colorId;
@@ -39,7 +42,7 @@ public class ColorConstant implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mColorId, mColor);
+        apply(buffer, mColorId, mColor);
     }
 
     @Override
@@ -47,39 +50,42 @@ public class ColorConstant implements Operation {
         return "ColorConstant[" + mColorId + "] = " + Utils.colorInt(mColor) + "";
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "ColorConstant";
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public int id() {
-            return Operations.COLOR_CONSTANT;
-        }
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer
+     * @param colorId
+     * @param color
+     */
+    public static void apply(WireBuffer buffer, int colorId, int color) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(colorId);
+        buffer.writeInt(color);
+    }
 
-        /**
-         * Writes out the operation to the buffer
-         *
-         * @param buffer
-         * @param colorId
-         * @param color
-         */
-        public void apply(WireBuffer buffer, int colorId, int color) {
-            buffer.start(Operations.COLOR_CONSTANT);
-            buffer.writeInt(colorId);
-            buffer.writeInt(color);
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int colorId = buffer.readInt();
+        int color = buffer.readInt();
+        operations.add(new ColorConstant(colorId, color));
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int colorId = buffer.readInt();
-            int color = buffer.readInt();
-            operations.add(new ColorConstant(colorId, color));
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Expressions Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Define a Color")
+                .field(INT, "id",
+                        "Id of the color")
+                .field(INT, "color",
+                        "32 bit ARGB color");
     }
 
     @Override

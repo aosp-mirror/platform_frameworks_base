@@ -18,6 +18,7 @@ package com.android.wm.shell.windowdecor
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.annotation.DrawableRes
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -130,6 +131,11 @@ class MaximizeButtonView(
                     R.color.desktop_mode_caption_button_color_selector_light))
             }
         }
+    }
+
+    /** Set the drawable resource to use for the maximize button. */
+    fun setIcon(@DrawableRes icon: Int) {
+        maximizeWindow.setImageResource(icon)
     }
 
     companion object {

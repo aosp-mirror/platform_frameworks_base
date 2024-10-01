@@ -734,6 +734,13 @@ void SerializeValueToPb(const Value& value, pb::Value* out_value, android::Strin
       out_value->mutable_item()->set_flag_negated(flag->negated);
       out_value->mutable_item()->set_flag_name(flag->name);
     }
+  } else if (out_value->has_compound_value()) {
+    out_value->mutable_compound_value()->set_flag_status((uint32_t)value.GetFlagStatus());
+    if (value.GetFlag()) {
+      const auto& flag = value.GetFlag();
+      out_value->mutable_compound_value()->set_flag_negated(flag->negated);
+      out_value->mutable_compound_value()->set_flag_name(flag->name);
+    }
   }
 }
 

@@ -18,8 +18,12 @@ package com.android.settingslib.widget
 
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.text.Spannable
 import android.text.SpannableString
+import android.text.TextPaint
 import android.text.TextUtils
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.text.style.URLSpan
 import android.util.AttributeSet
 import android.view.Gravity
@@ -43,6 +47,7 @@ class CollapsableTextView @JvmOverloads constructor(
     private val titleTextView: TextView
     private val collapseButton: MaterialButton
     private val collapseButtonResources: CollapseButtonResources
+    private var hyperlinkListener: View.OnClickListener? = null
     private var learnMoreListener: View.OnClickListener? = null
     private var learnMoreText: CharSequence? = null
     private var learnMoreSpan: LearnMoreSpan? = null
@@ -142,6 +147,45 @@ class CollapsableTextView @JvmOverloads constructor(
         }
     }
 
+    fun setHyperlinkListener(listener: View.OnClickListener?) {
+        if (hyperlinkListener != listener) {
+            hyperlinkListener = listener
+            linkifyTitle()
+        }
+    }
+
+    private fun linkifyTitle() {
+        var text = titleTextView.text.toString()
+        val beginIndex = text.indexOf(LINK_BEGIN_MARKER)
+        text = text.replace(LINK_BEGIN_MARKER, "")
+        val endIndex = text.indexOf(LINK_END_MARKER)
+        text = text.replace(LINK_END_MARKER, "")
+        titleTextView.text = text
+        if (beginIndex == -1 || endIndex == -1 || beginIndex >= endIndex) {
+            return
+        }
+
+        titleTextView.setText(text, TextView.BufferType.SPANNABLE)
+        titleTextView.movementMethod = LinkMovementMethod.getInstance()
+        val spannableContent = titleTextView.getText() as Spannable
+        val spannableLink = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                hyperlinkListener?.onClick(widget)
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.isUnderlineText = true
+            }
+        }
+        spannableContent.setSpan(
+            spannableLink,
+            beginIndex,
+            endIndex,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+    }
+
     private fun formatLearnMoreText() {
         if (learnMoreListener == null || TextUtils.isEmpty(learnMoreText)) {
             learnMoreTextView.visibility = GONE
@@ -191,6 +235,9 @@ class CollapsableTextView @JvmOverloads constructor(
     companion object {
         private const val DEFAULT_MAX_LINES = 10
         private const val DEFAULT_MIN_LINES = 2
+
+        private const val LINK_BEGIN_MARKER = "LINK_BEGIN"
+        private const val LINK_END_MARKER = "LINK_END"
 
         private val Attrs = R.styleable.CollapsableTextView
         private val GravityAttr = R.styleable.CollapsableTextView_android_gravity

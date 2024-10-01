@@ -15,7 +15,10 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
+import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.DecoratorComponent;
 
 /**
@@ -26,7 +29,8 @@ public abstract class DecoratorModifierOperation extends PaintOperation
         implements ModifierOperation, DecoratorComponent {
 
     @Override
-    public void onClick(float x, float y) {
+    public void onClick(RemoteContext context, CoreDocument document,
+                        Component component, float x, float y) {
         // nothing
     }
 }

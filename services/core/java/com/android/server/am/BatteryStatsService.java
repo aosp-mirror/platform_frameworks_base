@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
+import static android.os.BatteryConsumer.POWER_COMPONENT_BASE;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
@@ -432,7 +433,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
         mPowerAttributor = new MultiStatePowerAttributor(mContext, mPowerStatsStore, mPowerProfile,
-                mCpuScalingPolicies, mPowerStatsUidResolver);
+                mCpuScalingPolicies, () -> mStats.getBatteryCapacity(),
+                mPowerStatsUidResolver);
         mPowerStatsScheduler = createPowerStatsScheduler(mContext);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context,
                 mPowerAttributor, mPowerProfile, mCpuScalingPolicies,
@@ -512,6 +514,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         attributor.setPowerComponentSupported(
                 BatteryConsumer.POWER_COMPONENT_CPU,
                 Flags.streamlinedBatteryStats());
+
+        mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_WAKELOCK,
+                Flags.streamlinedMiscBatteryStats());
+        attributor.setPowerComponentSupported(
+                BatteryConsumer.POWER_COMPONENT_WAKELOCK,
+                Flags.streamlinedMiscBatteryStats());
 
         mStats.setPowerStatsCollectorEnabled(BatteryConsumer.POWER_COMPONENT_SCREEN,
                 Flags.streamlinedMiscBatteryStats());
@@ -1224,8 +1232,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
             final float totalDeviceConsumedPowerMah = (float) deviceConsumer.getConsumedPower();
 
-            for (@BatteryConsumer.PowerComponentId int componentIndex :
+            for (@BatteryConsumer.PowerComponentId int powerComponentId :
                     deviceConsumer.getPowerComponentIds()) {
+                if (powerComponentId == POWER_COMPONENT_BASE) {
+                    continue;
+                }
 
                 for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
 
@@ -1237,7 +1248,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                             totalDeviceConsumedPowerMah,
                             0,
                             deviceConsumer,
-                            componentIndex)) {
+                            powerComponentId)) {
                         return StatsManager.PULL_SUCCESS;
                     }
                 }
@@ -1253,8 +1264,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 final int uid = uidConsumer.getUid();
                 final float totalConsumedPowerMah = (float) uidConsumer.getConsumedPower();
 
-                for (@BatteryConsumer.PowerComponentId int componentIndex :
+                for (@BatteryConsumer.PowerComponentId int powerComponentId :
                         uidConsumer.getPowerComponentIds()) {
+                    if (powerComponentId == POWER_COMPONENT_BASE) {
+                        continue;
+                    }
 
                     for (@BatteryConsumer.ProcessState int processState : UID_PROCESS_STATES) {
 
@@ -1268,7 +1282,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 totalConsumedPowerMah,
                                 timeInProcessStateMs,
                                 uidConsumer,
-                                componentIndex)) {
+                                powerComponentId)) {
                             return StatsManager.PULL_SUCCESS;
                         }
                     }

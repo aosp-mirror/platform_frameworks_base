@@ -42,7 +42,7 @@ import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.window.flags.Flags;
 
 /**
@@ -159,7 +159,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
                 : null;
         if (topActivity != null) {
             if (isActivityForCameraIdRefreshing(topActivity, cameraId)) {
-                ProtoLog.v(ProtoLogGroup.WM_DEBUG_STATES,
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_STATES,
                         "Display id=%d is notified that Camera %s is closed but activity is"
                                 + " still refreshing. Rescheduling an update.",
                         mDisplayContent.mDisplayId, cameraId);
