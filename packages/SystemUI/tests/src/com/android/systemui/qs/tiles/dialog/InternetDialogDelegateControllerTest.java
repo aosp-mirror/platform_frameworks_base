@@ -901,7 +901,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
         // 1st time is onStart(), 2nd time is getActiveAutoSwitchNonDdsSubId()
         verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
-        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size() == 2);
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size()).isEqualTo(2);
 
         // Adds non DDS subId again
         doReturn(SUB_ID2).when(info).getSubscriptionId();
@@ -912,7 +912,7 @@ public class InternetDialogDelegateControllerTest extends SysuiTestCase {
 
         // Does not add due to cached subInfo in mSubIdTelephonyCallbackMap.
         verify(mTelephonyManager, times(2)).registerTelephonyCallback(any(), any());
-        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size() == 2);
+        assertThat(mInternetDialogController.mSubIdTelephonyCallbackMap.size()).isEqualTo(2);
     }
 
     @Test
