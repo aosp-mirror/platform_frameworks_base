@@ -430,6 +430,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         serviceIntent,
                         bindFlags,
                         targetUser,
+                        mServiceConfig.getExecuteAppFunctionCancellationTimeoutMillis(),
+                        cancellationSignal,
                         new RunServiceCallCallback<IAppFunctionService>() {
                             @Override
                             public void onServiceConnected(
@@ -469,6 +471,14 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                                 ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
                                                 "Failed to connect to AppFunctionService",
                                                 /* extras= */ null));
+                            }
+
+                            @Override
+                            public void onCancelled() {
+                                // Do not forward the result back to the caller once it has been
+                                // canceled. The caller does not need a notification and should
+                                // proceed after initiating a cancellation.
+                                safeExecuteAppFunctionCallback.disable();
                             }
                         });
 
