@@ -184,6 +184,26 @@ public class SelectorWithWidgetPreferenceTest {
     }
 
     @Test
+    public void onBindViewHolder_appliesWidgetContentDescription() {
+        mPreference = new SelectorWithWidgetPreference(mContext);
+        View view = LayoutInflater.from(mContext)
+                .inflate(mPreference.getLayoutResource(), /* root= */ null);
+        PreferenceViewHolder preferenceViewHolder =
+                PreferenceViewHolder.createInstanceForTests(view);
+
+        mPreference.setExtraWidgetContentDescription("this is clearer");
+        mPreference.onBindViewHolder(preferenceViewHolder);
+
+        View widget = preferenceViewHolder.findViewById(R.id.selector_extra_widget);
+        assertThat(widget.getContentDescription().toString()).isEqualTo("this is clearer");
+
+        mPreference.setExtraWidgetContentDescription(null);
+        mPreference.onBindViewHolder(preferenceViewHolder);
+
+        assertThat(widget.getContentDescription().toString()).isEqualTo("Settings");
+    }
+
+    @Test
     public void nullSummary_containerShouldBeGone() {
         mPreference.setSummary(null);
         View summaryContainer = new View(mContext);
