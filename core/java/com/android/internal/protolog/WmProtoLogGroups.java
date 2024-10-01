@@ -26,7 +26,7 @@ import java.util.UUID;
  * This file is used by the ProtoLogTool to generate optimized logging code. All of its dependencies
  * must be included in services.core.wm.protologgroups build target.
  */
-public enum ProtoLogGroup implements IProtoLogGroup {
+public enum WmProtoLogGroups implements IProtoLogGroup {
     WM_ERROR(true, true, true, Consts.TAG_WM),
     WM_DEBUG_ORIENTATION(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM),
@@ -115,7 +115,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
      * @param logToLogcat enable text logging for the group
      * @param tag         name of the source of the logged message
      */
-    ProtoLogGroup(boolean enabled, boolean logToProto, boolean logToLogcat, String tag) {
+    WmProtoLogGroups(boolean enabled, boolean logToProto, boolean logToLogcat, String tag) {
         this.mEnabled = enabled;
         this.mLogToProto = logToProto;
         this.mLogToLogcat = logToLogcat;
@@ -168,7 +168,7 @@ public enum ProtoLogGroup implements IProtoLogGroup {
         private static final boolean ENABLE_DEBUG = true;
         private static final boolean ENABLE_LOG_TO_PROTO_DEBUG = true;
         private static final int START_ID = (int) (
-                UUID.nameUUIDFromBytes(ProtoLogGroup.class.getName().getBytes())
+                UUID.nameUUIDFromBytes(WmProtoLogGroups.class.getName().getBytes())
                         .getMostSignificantBits() % Integer.MAX_VALUE);
     }
 }

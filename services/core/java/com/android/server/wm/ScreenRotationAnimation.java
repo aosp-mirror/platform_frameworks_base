@@ -20,8 +20,8 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.RotationUtils.deltaRotation;
 import static android.view.WindowManagerPolicyConstants.SCREEN_FREEZE_LAYER_BASE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.AnimationSpecProto.ROTATE;
 import static com.android.server.wm.RotationAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.RotationAnimationSpecProto.END_LUMA;
