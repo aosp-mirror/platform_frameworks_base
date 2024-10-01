@@ -42,6 +42,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.toolkitFrameRateAnimationBugfix25q1;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
@@ -2458,13 +2459,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateDefaultNormalReadOnly();
     private static final boolean sToolkitFrameRateBySizeReadOnlyFlagValue =
             toolkitFrameRateBySizeReadOnly();
-
     private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
             toolkitFrameRateSmallUsesPercentReadOnly();
     private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue =
             toolkitFrameRateViewEnablingReadOnly();
     private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
             toolkitFrameRateVelocityMappingReadOnly();
+    private static boolean sToolkitFrameRateAnimationBugfix25q1FlagValue =
+            toolkitFrameRateAnimationBugfix25q1();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -24427,6 +24429,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             a.getTransformation(drawingTime, invalidationTransform, 1f);
         } else {
             invalidationTransform = t;
+        }
+
+        // Increase the frame rate if there is a transformation that applies a matrix.
+        if (sToolkitFrameRateAnimationBugfix25q1FlagValue
+                && ((t.getTransformationType() & Transformation.TYPE_MATRIX) != 0)) {
+            mPrivateFlags4 |= PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
         }
 
         if (more) {
