@@ -56,7 +56,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyZeroInteractions
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.MockitoAnnotations.initMocks
 
 /** atest SystemUITests:NoteTaskInitializerTest */
@@ -135,7 +135,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
         underTest.initialize()
 
-        verifyZeroInteractions(
+        verifyNoMoreInteractions(
             commandQueue,
             bubbles,
             controller,
@@ -151,7 +151,7 @@ internal class NoteTaskInitializerTest : SysuiTestCase() {
 
         underTest.initialize()
 
-        verifyZeroInteractions(
+        verifyNoMoreInteractions(
             commandQueue,
             bubbles,
             controller,

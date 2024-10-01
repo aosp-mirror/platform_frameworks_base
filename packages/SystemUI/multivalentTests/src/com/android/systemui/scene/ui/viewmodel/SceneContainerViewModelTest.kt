@@ -21,23 +21,21 @@ package com.android.systemui.scene.ui.viewmodel
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.MotionEvent
+import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.classifier.fakeFalsingManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.data.repository.fakePowerRepository
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.fakeOverlaysByKeys
 import com.android.systemui.scene.sceneContainerConfig
-import com.android.systemui.scene.sceneContainerGestureFilterFactory
-import com.android.systemui.scene.shared.logger.sceneLogger
+import com.android.systemui.scene.sceneContainerViewModelFactory
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
@@ -72,6 +70,7 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     private val fakeShadeRepository by lazy { kosmos.fakeShadeRepository }
     private val sceneContainerConfig by lazy { kosmos.sceneContainerConfig }
     private val falsingManager by lazy { kosmos.fakeFalsingManager }
+    private val view = mock<View>()
 
     private lateinit var underTest: SceneContainerViewModel
 
@@ -81,16 +80,10 @@ class SceneContainerViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         underTest =
-            SceneContainerViewModel(
-                sceneInteractor = sceneInteractor,
-                falsingInteractor = kosmos.falsingInteractor,
-                powerInteractor = kosmos.powerInteractor,
-                shadeInteractor = kosmos.shadeInteractor,
-                splitEdgeDetector = kosmos.splitEdgeDetector,
-                logger = kosmos.sceneLogger,
-                gestureFilterFactory = kosmos.sceneContainerGestureFilterFactory,
-                displayId = kosmos.displayTracker.defaultDisplayId,
-                motionEventHandlerReceiver = { motionEventHandler ->
+            kosmos.sceneContainerViewModelFactory.create(
+                view,
+                kosmos.displayTracker.defaultDisplayId,
+                { motionEventHandler ->
                     this@SceneContainerViewModelTest.motionEventHandler = motionEventHandler
                 },
             )

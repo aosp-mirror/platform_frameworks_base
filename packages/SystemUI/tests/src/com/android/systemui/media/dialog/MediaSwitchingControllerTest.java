@@ -30,7 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
@@ -313,7 +313,7 @@ public class MediaSwitchingControllerTest extends SysuiTestCase {
         mMediaSwitchingController.start(mCb);
 
         verify(mSessionMediaController, never()).registerCallback(any());
-        verifyZeroInteractions(mMediaSessionManager);
+        verifyNoMoreInteractions(mMediaSessionManager);
     }
 
     @Test

@@ -77,7 +77,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 
 @SmallTest
@@ -420,7 +420,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         val contentToInflate =
             FLAG_CONTENT_VIEW_CONTRACTED or FLAG_CONTENT_VIEW_EXPANDED or FLAG_CONTENT_VIEW_HEADS_UP
         inflateAndWait(notificationInflater, contentToInflate, row)
-        verifyZeroInteractions(fakeRonViewInflater)
+        verifyNoMoreInteractions(fakeRonViewInflater)
     }
 
     @Test
@@ -567,7 +567,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
 
         // THEN  do not dispose old contracted binder handle and change contracted child
         verify(entry).setContentModel(argThat { richOngoingContentModel === mockRonModel })
-        verifyZeroInteractions(oldHandle)
+        verifyNoMoreInteractions(oldHandle)
         verify(privateLayout, never()).setContractedChild(any())
     }
 
@@ -590,7 +590,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
 
         // THEN  do not dispose old expanded binder handle and change expanded child
         verify(entry).setContentModel(argThat { richOngoingContentModel === mockRonModel })
-        verifyZeroInteractions(oldHandle)
+        verifyNoMoreInteractions(oldHandle)
         verify(privateLayout, never()).setExpandedChild(any())
     }
 
@@ -613,7 +613,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
 
         // THEN - do not dispose old heads up binder handle and change heads up child
         verify(entry).setContentModel(argThat { richOngoingContentModel === mockRonModel })
-        verifyZeroInteractions(oldHandle)
+        verifyNoMoreInteractions(oldHandle)
         verify(privateLayout, never()).setHeadsUpChild(any())
     }
 

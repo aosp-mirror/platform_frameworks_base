@@ -41,6 +41,7 @@ import com.android.systemui.qs.ui.adapter.fakeQSSceneAdapter
 import com.android.systemui.res.R
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
+import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
@@ -76,6 +77,7 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        kosmos.sceneContainerStartable.start()
         underTest.activateIn(testScope)
     }
 
@@ -230,6 +232,20 @@ class ShadeUserActionsViewModelTest : SysuiTestCase() {
                     }
                 )
                 .isEmpty()
+        }
+
+    @Test
+    fun upTransitionSceneKey_backToCommunal() =
+        testScope.runTest {
+            val actions by collectLastValue(underTest.actions)
+            val currentScene by collectLastValue(kosmos.sceneInteractor.currentScene)
+            assertThat(currentScene).isEqualTo(Scenes.Lockscreen)
+            kosmos.sceneInteractor.changeScene(Scenes.Communal, "")
+            assertThat(currentScene).isEqualTo(Scenes.Communal)
+            kosmos.sceneInteractor.changeScene(Scenes.Shade, "")
+            assertThat(currentScene).isEqualTo(Scenes.Shade)
+
+            assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Communal))
         }
 
     private fun TestScope.setDeviceEntered(isEntered: Boolean) {

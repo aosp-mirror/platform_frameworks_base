@@ -18,6 +18,8 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
+import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo.ScreenOrientation;
@@ -72,6 +74,12 @@ class AppCompatCameraPolicy {
         if (mActivityRefresher != null) {
             mActivityRefresher.onActivityRefreshed(activity);
         }
+    }
+
+    @Nullable
+    static AppCompatCameraPolicy getAppCompatCameraPolicy(@NonNull ActivityRecord activityRecord) {
+        return activityRecord.mDisplayContent != null
+                ? activityRecord.mDisplayContent.mAppCompatCameraPolicy : null;
     }
 
     /**
@@ -167,12 +175,37 @@ class AppCompatCameraPolicy {
                 : SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
+    // TODO(b/369070416): have policies implement the same interface.
+    boolean shouldCameraCompatControlOrientation(@NonNull ActivityRecord activity) {
+        return (mDisplayRotationCompatPolicy != null
+                        && mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(
+                                activity))
+                || (mCameraCompatFreeformPolicy != null
+                        && mCameraCompatFreeformPolicy.shouldCameraCompatControlOrientation(
+                                activity));
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
+    boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord activity) {
+        return (mDisplayRotationCompatPolicy != null
+                        && mDisplayRotationCompatPolicy.shouldCameraCompatControlAspectRatio(
+                                activity))
+                || (mCameraCompatFreeformPolicy != null
+                        && mCameraCompatFreeformPolicy.shouldCameraCompatControlAspectRatio(
+                                activity));
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
     /**
-     * @return {@code true} if the Camera is active for the provided {@link ActivityRecord}.
+     * @return {@code true} if the Camera is active for the provided {@link ActivityRecord} and
+     * any camera compat treatment could be triggered for the current windowing mode.
      */
-    boolean isCameraActive(@NonNull ActivityRecord activity, boolean mustBeFullscreen) {
-        return mDisplayRotationCompatPolicy != null
-                && mDisplayRotationCompatPolicy.isCameraActive(activity, mustBeFullscreen);
+    private boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity) {
+        return (mDisplayRotationCompatPolicy != null
+                && mDisplayRotationCompatPolicy.isCameraRunningAndWindowingModeEligible(activity,
+                        /* mustBeFullscreen */ true))
+                || (mCameraCompatFreeformPolicy != null && mCameraCompatFreeformPolicy
+                        .isCameraRunningAndWindowingModeEligible(activity));
     }
 
     @Nullable
@@ -183,12 +216,24 @@ class AppCompatCameraPolicy {
         return null;
     }
 
+    // TODO(b/369070416): have policies implement the same interface.
+    float getCameraCompatAspectRatio(@NonNull ActivityRecord activity) {
+        float displayRotationCompatPolicyAspectRatio = mDisplayRotationCompatPolicy != null
+                ? mDisplayRotationCompatPolicy.getCameraCompatAspectRatio(activity)
+                : MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+        float cameraCompatFreeformPolicyAspectRatio = mCameraCompatFreeformPolicy != null
+                ? mCameraCompatFreeformPolicy.getCameraCompatAspectRatio(activity)
+                : MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
+        return Math.max(displayRotationCompatPolicyAspectRatio,
+                cameraCompatFreeformPolicyAspectRatio);
+    }
+
     /**
      * Whether we should apply the min aspect ratio per-app override only when an app is connected
      * to the camera.
      */
     boolean shouldOverrideMinAspectRatioForCamera(@NonNull ActivityRecord activityRecord) {
-        return isCameraActive(activityRecord, /* mustBeFullscreen= */ true)
+        return isCameraRunningAndWindowingModeEligible(activityRecord)
                 && activityRecord.mAppCompatController.getAppCompatCameraOverrides()
                         .isOverrideMinAspectRatioForCameraEnabled();
     }

@@ -18,9 +18,7 @@ package com.android.settingslib.spa.gallery.scaffold
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -32,15 +30,13 @@ private const val TITLE = "Sample SearchScaffold"
 object SearchScaffoldPageProvider : SettingsPageProvider {
     override val name = "SearchScaffold"
 
-    private val owner = createSettingsPage()
-
-    fun buildInjectEntry() = SettingsEntryBuilder.createInject(owner = owner)
-        .setUiLayoutFn {
-            Preference(object : PreferenceModel {
-                override val title = TITLE
-                override val onClick = navigator(name)
-            })
-        }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
+    }
 
     @Composable
     override fun Page(arguments: Bundle?) {

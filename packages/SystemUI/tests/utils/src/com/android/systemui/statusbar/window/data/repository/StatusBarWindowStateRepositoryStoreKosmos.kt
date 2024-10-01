@@ -21,6 +21,9 @@ import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.statusbar.commandQueue
 
+val Kosmos.fakeStatusBarWindowStateRepositoryStore by
+    Kosmos.Fixture { FakeStatusBarWindowStateRepositoryStore() }
+
 class KosmosStatusBarWindowStatePerDisplayRepositoryFactory(private val kosmos: Kosmos) :
     StatusBarWindowStatePerDisplayRepositoryFactory {
     override fun create(displayId: Int): StatusBarWindowStatePerDisplayRepositoryImpl {
@@ -32,7 +35,7 @@ class KosmosStatusBarWindowStatePerDisplayRepositoryFactory(private val kosmos: 
     }
 }
 
-val Kosmos.statusBarWindowStateRepositoryStore by
+var Kosmos.statusBarWindowStateRepositoryStore: StatusBarWindowStateRepositoryStore by
     Kosmos.Fixture {
         StatusBarWindowStateRepositoryStoreImpl(
             displayId = displayTracker.defaultDisplayId,

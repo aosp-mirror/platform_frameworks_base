@@ -1038,6 +1038,25 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetCameraCompatAspectRatio(PrintWriter pw) throws RemoteException {
+        final float aspectRatio;
+        try {
+            String arg = getNextArgRequired();
+            aspectRatio = Float.parseFloat(arg);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: bad aspect ratio format " + e);
+            return -1;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println(
+                    "Error: aspect ratio should be provided as an argument " + e);
+            return -1;
+        }
+        synchronized (mInternal.mGlobalLock) {
+            mAppCompatConfiguration.setCameraCompatAspectRatio(aspectRatio);
+        }
+        return 0;
+    }
+
     private int runSetLetterboxStyle(PrintWriter pw) throws RemoteException {
         if (peekNextArg() == null) {
             getErrPrintWriter().println("Error: No arguments provided.");
@@ -1129,6 +1148,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     runSetBooleanFlag(pw,
                             mAppCompatConfiguration::setCameraCompatRefreshCycleThroughStopEnabled);
                     break;
+                case "--cameraCompatAspectRatio":
+                    runSetCameraCompatAspectRatio(pw);
+                    break;
                 default:
                     getErrPrintWriter().println(
                             "Error: Unrecognized letterbox style option: " + arg);
@@ -1219,6 +1241,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     case "isCameraCompatRefreshCycleThroughStopEnabled":
                         mAppCompatConfiguration
                                 .resetCameraCompatRefreshCycleThroughStopEnabled();
+                        break;
+                    case "cameraCompatAspectRatio":
+                        mAppCompatConfiguration.resetCameraCompatAspectRatio();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -1330,6 +1355,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mAppCompatConfiguration.resetUserAppAspectRatioFullscreenEnabled();
             mAppCompatConfiguration.resetCameraCompatRefreshEnabled();
             mAppCompatConfiguration.resetCameraCompatRefreshCycleThroughStopEnabled();
+            mAppCompatConfiguration.resetCameraCompatAspectRatio();
         }
     }
 
@@ -1619,6 +1645,11 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("        Whether activity \"refresh\" in camera compatibility treatment should");
         pw.println("        happen using the \"stopped -> resumed\" cycle rather than");
         pw.println("        \"paused -> resumed\" cycle.");
+        pw.println("      --cameraCompatAspectRatio aspectRatio");
+        pw.println("        Aspect ratio of letterbox for fixed-orientation camera apps, during ");
+        pw.println("        freeform camera compat mode. If aspectRatio <= "
+                + AppCompatConfiguration.MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO);
+        pw.println("        it will be ignored.");
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|verticalPositionMultiplier");
@@ -1627,7 +1658,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      |isTranslucentLetterboxingEnabled|isUserAppAspectRatioSettingsEnabled");
         pw.println("      |persistentPositionMultiplierForHorizontalReachability");
         pw.println("      |persistentPositionMultiplierForVerticalReachability");
-        pw.println("      |defaultPositionMultiplierForVerticalReachability]");
+        pw.println("      |defaultPositionMultiplierForVerticalReachability");
+        pw.println("      |cameraCompatAspectRatio]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");
         pw.println("    If no arguments provided, all values will be reset.");

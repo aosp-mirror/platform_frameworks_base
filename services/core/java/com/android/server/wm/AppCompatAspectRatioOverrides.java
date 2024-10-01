@@ -255,8 +255,8 @@ class AppCompatAspectRatioOverrides {
                 mActivityRecord.getOverrideOrientation());
         final AppCompatCameraOverrides cameraOverrides =
                 mActivityRecord.mAppCompatController.getAppCompatCameraOverrides();
-        final AppCompatCameraPolicy cameraPolicy =
-                mActivityRecord.mAppCompatController.getAppCompatCameraPolicy();
+        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy.getAppCompatCameraPolicy(
+                mActivityRecord);
         // Don't resize to split screen size when in book mode if letterbox position is centered
         return (isBookMode && isNotCenteredHorizontally || isTabletopMode && isLandscape)
                 || cameraOverrides.isCameraCompatSplitScreenAspectRatioAllowed()

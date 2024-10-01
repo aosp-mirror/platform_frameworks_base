@@ -399,13 +399,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 return -1;
             }
             case "enable-text" -> {
-                if (mViewerConfigReader != null) {
-                    mViewerConfigReader.loadViewerConfig(groups, logger);
-                }
-                return setTextLogging(true, logger, groups);
+                return startLoggingToLogcat(groups, logger);
             }
             case "disable-text" -> {
-                return setTextLogging(false, logger, groups);
+                return stopLoggingToLogcat(groups, logger);
             }
             default -> {
                 return unknownCommand(pw);

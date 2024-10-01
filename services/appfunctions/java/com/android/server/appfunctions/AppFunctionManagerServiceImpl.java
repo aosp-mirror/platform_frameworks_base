@@ -16,22 +16,35 @@
 
 package com.android.server.appfunctions;
 
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DISABLED;
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_ENABLED;
+import static android.app.appfunctions.AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_METADATA_DB;
+import static android.app.appfunctions.AppFunctionRuntimeMetadata.APP_FUNCTION_RUNTIME_NAMESPACE;
+
 import static com.android.server.appfunctions.AppFunctionExecutors.THREAD_POOL_EXECUTOR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
-import android.app.appfunctions.AppFunctionService;
+import android.app.appfunctions.AppFunctionManager;
+import android.app.appfunctions.AppFunctionManagerHelper;
+import android.app.appfunctions.AppFunctionRuntimeMetadata;
 import android.app.appfunctions.AppFunctionStaticMetadataHelper;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.ExecuteAppFunctionResponse;
+import android.app.appfunctions.IAppFunctionEnabledCallback;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appfunctions.IAppFunctionService;
 import android.app.appfunctions.ICancellationCallback;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
+import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
+import android.app.appsearch.AppSearchManager.SearchContext;
 import android.app.appsearch.AppSearchResult;
+import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByDocumentIdRequest;
+import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.observer.DocumentChangeInfo;
 import android.app.appsearch.observer.ObserverCallback;
 import android.app.appsearch.observer.ObserverSpec;
@@ -40,12 +53,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.CancellationSignal;
-import android.os.IBinder;
 import android.os.ICancellationSignal;
+import android.os.OutcomeReceiver;
+import android.os.ParcelableException;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.server.SystemService.TargetUser;
@@ -54,6 +70,7 @@ import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteL
 
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
 /** Implementation of the AppFunctionManagerService. */
 public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
@@ -64,6 +81,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
     private final ServiceHelper mInternalServiceHelper;
     private final ServiceConfig mServiceConfig;
     private final Context mContext;
+    private final Object mLock = new Object();
 
     public AppFunctionManagerServiceImpl(@NonNull Context context) {
         this(
@@ -180,52 +198,214 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             return;
         }
 
-        var unused =
-                mCallerValidator
-                        .verifyCallerCanExecuteAppFunction(
-                                callingUid,
-                                callingPid,
-                                requestInternal.getCallingPackage(),
-                                targetPackageName,
-                                requestInternal.getClientRequest().getFunctionIdentifier())
-                        .thenAccept(
-                                canExecute -> {
-                                    if (!canExecute) {
-                                        safeExecuteAppFunctionCallback.onResult(
-                                                ExecuteAppFunctionResponse.newFailure(
-                                                        ExecuteAppFunctionResponse.RESULT_DENIED,
-                                                        "Caller does not have permission to execute"
-                                                                + " the appfunction",
-                                                        /* extras= */ null));
-                                        return;
-                                    }
-                                    Intent serviceIntent =
-                                            mInternalServiceHelper.resolveAppFunctionService(
-                                                    targetPackageName, targetUser);
-                                    if (serviceIntent == null) {
-                                        safeExecuteAppFunctionCallback.onResult(
-                                                ExecuteAppFunctionResponse.newFailure(
-                                                        ExecuteAppFunctionResponse
-                                                                .RESULT_INTERNAL_ERROR,
-                                                        "Cannot find the target service.",
-                                                        /* extras= */ null));
-                                        return;
-                                    }
-                                    bindAppFunctionServiceUnchecked(
-                                            requestInternal,
-                                            serviceIntent,
-                                            targetUser,
-                                            localCancelTransport,
-                                            safeExecuteAppFunctionCallback,
-                                            /* bindFlags= */ Context.BIND_AUTO_CREATE
-                                                    | Context.BIND_FOREGROUND_SERVICE);
-                                })
-                        .exceptionally(
-                                ex -> {
-                                    safeExecuteAppFunctionCallback.onResult(
-                                            mapExceptionToExecuteAppFunctionResponse(ex));
-                                    return null;
-                                });
+        mCallerValidator
+                .verifyCallerCanExecuteAppFunction(
+                        callingUid,
+                        callingPid,
+                        requestInternal.getCallingPackage(),
+                        targetPackageName,
+                        requestInternal.getClientRequest().getFunctionIdentifier())
+                .thenAccept(
+                        canExecute -> {
+                            if (!canExecute) {
+                                safeExecuteAppFunctionCallback.onResult(
+                                        ExecuteAppFunctionResponse.newFailure(
+                                                ExecuteAppFunctionResponse.RESULT_DENIED,
+                                                "Caller does not have permission to execute the"
+                                                        + " appfunction",
+                                                /* extras= */ null));
+                            }
+                        })
+                .thenCompose(
+                        isEnabled ->
+                                isAppFunctionEnabled(
+                                        requestInternal.getClientRequest().getFunctionIdentifier(),
+                                        requestInternal.getClientRequest().getTargetPackageName(),
+                                        getAppSearchManagerAsUser(requestInternal.getUserHandle()),
+                                        THREAD_POOL_EXECUTOR))
+                .thenAccept(
+                        isEnabled -> {
+                            if (!isEnabled) {
+                                throw new DisabledAppFunctionException(
+                                        "The app function is disabled");
+                            }
+                        })
+                .thenAccept(
+                        unused -> {
+                            Intent serviceIntent =
+                                    mInternalServiceHelper.resolveAppFunctionService(
+                                            targetPackageName, targetUser);
+                            if (serviceIntent == null) {
+                                safeExecuteAppFunctionCallback.onResult(
+                                        ExecuteAppFunctionResponse.newFailure(
+                                                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
+                                                "Cannot find the target service.",
+                                                /* extras= */ null));
+                                return;
+                            }
+                            bindAppFunctionServiceUnchecked(
+                                    requestInternal,
+                                    serviceIntent,
+                                    targetUser,
+                                    localCancelTransport,
+                                    safeExecuteAppFunctionCallback,
+                                    /* bindFlags= */ Context.BIND_AUTO_CREATE
+                                            | Context.BIND_FOREGROUND_SERVICE);
+                        })
+                .exceptionally(
+                        ex -> {
+                            safeExecuteAppFunctionCallback.onResult(
+                                    mapExceptionToExecuteAppFunctionResponse(ex));
+                            return null;
+                        });
+    }
+
+    private static AndroidFuture<Boolean> isAppFunctionEnabled(
+            @NonNull String functionIdentifier,
+            @NonNull String targetPackage,
+            @NonNull AppSearchManager appSearchManager,
+            @NonNull Executor executor) {
+        AndroidFuture<Boolean> future = new AndroidFuture<>();
+        AppFunctionManagerHelper.isAppFunctionEnabled(
+                functionIdentifier,
+                targetPackage,
+                appSearchManager,
+                executor,
+                new OutcomeReceiver<>() {
+                    @Override
+                    public void onResult(@NonNull Boolean result) {
+                        future.complete(result);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception error) {
+                        future.completeExceptionally(error);
+                    }
+                });
+        return future;
+    }
+
+    @Override
+    public void setAppFunctionEnabled(
+            @NonNull String callingPackage,
+            @NonNull String functionIdentifier,
+            @NonNull UserHandle userHandle,
+            @AppFunctionManager.EnabledState int enabledState,
+            @NonNull IAppFunctionEnabledCallback callback) {
+        try {
+            mCallerValidator.validateCallingPackage(callingPackage);
+        } catch (SecurityException e) {
+            reportException(callback, e);
+            return;
+        }
+        THREAD_POOL_EXECUTOR.execute(
+                () -> {
+                    try {
+                        // TODO(357551503): Instead of holding a global lock, hold a per-package
+                        //  lock.
+                        synchronized (mLock) {
+                            setAppFunctionEnabledInternalLocked(
+                                    callingPackage, functionIdentifier, userHandle, enabledState);
+                        }
+                        callback.onSuccess();
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Error in setAppFunctionEnabled: ", e);
+                        reportException(callback, e);
+                    }
+                });
+    }
+
+    private static void reportException(
+            @NonNull IAppFunctionEnabledCallback callback, @NonNull Exception exception) {
+        try {
+            callback.onError(new ParcelableException(exception));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to report the exception", e);
+        }
+    }
+
+    /**
+     * Sets the enabled status of a specified app function.
+     * <p>
+     * Required to hold a lock to call this function to avoid document changes during the process.
+     */
+    @WorkerThread
+    @GuardedBy("mLock")
+    private void setAppFunctionEnabledInternalLocked(
+            @NonNull String callingPackage,
+            @NonNull String functionIdentifier,
+            @NonNull UserHandle userHandle,
+            @AppFunctionManager.EnabledState int enabledState)
+            throws Exception {
+        AppSearchManager perUserAppSearchManager = getAppSearchManagerAsUser(userHandle);
+
+        if (perUserAppSearchManager == null) {
+            throw new IllegalStateException(
+                    "AppSearchManager not found for user:" + userHandle.getIdentifier());
+        }
+        SearchContext runtimeMetadataSearchContext =
+                new SearchContext.Builder(APP_FUNCTION_RUNTIME_METADATA_DB).build();
+
+        try (FutureAppSearchSession runtimeMetadataSearchSession =
+                new FutureAppSearchSessionImpl(
+                        perUserAppSearchManager,
+                        THREAD_POOL_EXECUTOR,
+                        runtimeMetadataSearchContext)) {
+            AppFunctionRuntimeMetadata existingMetadata =
+                    new AppFunctionRuntimeMetadata(
+                            getRuntimeMetadataGenericDocument(
+                                    callingPackage,
+                                    functionIdentifier,
+                                    runtimeMetadataSearchSession));
+            AppFunctionRuntimeMetadata.Builder newMetadata =
+                    new AppFunctionRuntimeMetadata.Builder(existingMetadata);
+            switch (enabledState) {
+                case AppFunctionManager.APP_FUNCTION_STATE_DEFAULT -> {
+                    newMetadata.setEnabled(null);
+                }
+                case APP_FUNCTION_STATE_ENABLED -> {
+                    newMetadata.setEnabled(true);
+                }
+                case APP_FUNCTION_STATE_DISABLED -> {
+                    newMetadata.setEnabled(false);
+                }
+                default ->
+                        throw new IllegalArgumentException(
+                                "Value of EnabledState is unsupported.");
+            }
+            AppSearchBatchResult<String, Void> putDocumentBatchResult =
+                    runtimeMetadataSearchSession
+                            .put(
+                                    new PutDocumentsRequest.Builder()
+                                            .addGenericDocuments(newMetadata.build())
+                                            .build())
+                            .get();
+            if (!putDocumentBatchResult.isSuccess()) {
+                throw new IllegalStateException("Failed writing updated doc to AppSearch due to "
+                        + putDocumentBatchResult);
+            }
+        }
+    }
+
+    @WorkerThread
+    @NonNull
+    private AppFunctionRuntimeMetadata getRuntimeMetadataGenericDocument(
+            @NonNull String packageName,
+            @NonNull String functionId,
+            @NonNull FutureAppSearchSession runtimeMetadataSearchSession)
+            throws Exception {
+        String documentId =
+                AppFunctionRuntimeMetadata.getDocumentIdForAppFunction(packageName, functionId);
+        GetByDocumentIdRequest request =
+                new GetByDocumentIdRequest.Builder(APP_FUNCTION_RUNTIME_NAMESPACE)
+                        .addIds(documentId)
+                        .build();
+        AppSearchBatchResult<String, GenericDocument> result =
+                runtimeMetadataSearchSession.getByDocumentId(request).get();
+        if (result.isSuccess()) {
+            return new AppFunctionRuntimeMetadata((result.getSuccesses().get(documentId)));
+        }
+        throw new IllegalArgumentException("Function " + functionId + " does not exist");
     }
 
     private void bindAppFunctionServiceUnchecked(
@@ -302,24 +482,27 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         }
     }
 
+    private AppSearchManager getAppSearchManagerAsUser(@NonNull UserHandle userHandle) {
+        return mContext.createContextAsUser(userHandle, /* flags= */ 0)
+                .getSystemService(AppSearchManager.class);
+    }
+
     private ExecuteAppFunctionResponse mapExceptionToExecuteAppFunctionResponse(Throwable e) {
         if (e instanceof CompletionException) {
             e = e.getCause();
         }
-
-        if (e instanceof AppSearchException) {
-            AppSearchException appSearchException = (AppSearchException) e;
-            return ExecuteAppFunctionResponse.newFailure(
+        int resultCode = ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR;
+        if (e instanceof AppSearchException appSearchException) {
+            resultCode =
                     mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(
-                            appSearchException.getResultCode()),
-                    appSearchException.getMessage(),
-                    /* extras= */ null);
+                            appSearchException.getResultCode());
+        } else if (e instanceof SecurityException) {
+            resultCode = ExecuteAppFunctionResponse.RESULT_DENIED;
+        } else if (e instanceof DisabledAppFunctionException) {
+            resultCode = ExecuteAppFunctionResponse.RESULT_DISABLED;
         }
-
         return ExecuteAppFunctionResponse.newFailure(
-                ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
-                e.getMessage(),
-                /* extras= */ null);
+                resultCode, e.getMessage(), /* extras= */ null);
     }
 
     private int mapAppSearchResultFailureCodeToExecuteAppFunctionResponse(int resultCode) {
@@ -432,6 +615,13 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     var unused = mPerUserMetadataSyncAdapter.submitSyncRequest();
                 }
             }
+        }
+    }
+
+    /** Throws when executing a disabled app function. */
+    private static class DisabledAppFunctionException extends RuntimeException {
+        private DisabledAppFunctionException(@NonNull String errorMessage) {
+            super(errorMessage);
         }
     }
 }

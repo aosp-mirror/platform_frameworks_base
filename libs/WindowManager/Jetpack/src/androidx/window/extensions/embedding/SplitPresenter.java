@@ -187,8 +187,12 @@ class SplitPresenter extends JetpackTaskFragmentOrganizer {
         mBackupHelper.scheduleBackup();
     }
 
-    boolean isRebuildTaskContainersNeeded() {
+    boolean isWaitingToRebuildTaskContainers() {
         return mBackupHelper.hasPendingStateToRestore();
+    }
+
+    void abortTaskContainerRebuilding(@NonNull WindowContainerTransaction wct) {
+        mBackupHelper.abortTaskContainerRebuilding(wct);
     }
 
     boolean rebuildTaskContainers(@NonNull WindowContainerTransaction wct,
