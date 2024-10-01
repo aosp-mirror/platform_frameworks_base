@@ -27,6 +27,7 @@ import android.app.WindowConfiguration.WindowingMode
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_MAIN
 import android.content.pm.ActivityInfo
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
@@ -930,13 +931,13 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     fun testDecor_onClickToOpenBrowser_closeMenus() {
         val openInBrowserListenerCaptor = forClass(Consumer::class.java)
-                as ArgumentCaptor<Consumer<Uri>>
+                as ArgumentCaptor<Consumer<Intent>>
         val decor = createOpenTaskDecoration(
             windowingMode = WINDOWING_MODE_FULLSCREEN,
             onOpenInBrowserClickListener = openInBrowserListenerCaptor
         )
 
-        openInBrowserListenerCaptor.value.accept(Uri.EMPTY)
+        openInBrowserListenerCaptor.value.accept(Intent())
 
         verify(decor).closeHandleMenu()
         verify(decor).closeMaximizeMenu()
@@ -946,20 +947,19 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     fun testDecor_onClickToOpenBrowser_opensBrowser() {
         doNothing().whenever(spyContext).startActivity(any())
         val uri = Uri.parse("https://www.google.com")
+        val intent = Intent(ACTION_MAIN, uri)
         val openInBrowserListenerCaptor = forClass(Consumer::class.java)
-                as ArgumentCaptor<Consumer<Uri>>
+                as ArgumentCaptor<Consumer<Intent>>
         createOpenTaskDecoration(
             windowingMode = WINDOWING_MODE_FULLSCREEN,
             onOpenInBrowserClickListener = openInBrowserListenerCaptor
         )
 
-        openInBrowserListenerCaptor.value.accept(uri)
+        openInBrowserListenerCaptor.value.accept(intent)
 
         verify(spyContext).startActivityAsUser(argThat { intent ->
-            intent.data == uri
-                    && ((intent.flags and Intent.FLAG_ACTIVITY_NEW_TASK) != 0)
-                    && intent.categories.contains(Intent.CATEGORY_LAUNCHER)
-                    && intent.action == Intent.ACTION_MAIN
+            uri.equals(intent.data)
+                    && intent.action == ACTION_MAIN
         }, eq(mockUserHandle))
     }
 
@@ -1233,8 +1233,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onToSplitScreenClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
-        onOpenInBrowserClickListener: ArgumentCaptor<Consumer<Uri>> =
-            forClass(Consumer::class.java) as ArgumentCaptor<Consumer<Uri>>,
+        onOpenInBrowserClickListener: ArgumentCaptor<Consumer<Intent>> =
+            forClass(Consumer::class.java) as ArgumentCaptor<Consumer<Intent>>,
         onCaptionButtonClickListener: ArgumentCaptor<View.OnClickListener> =
             forClass(View.OnClickListener::class.java) as ArgumentCaptor<View.OnClickListener>,
         onCaptionButtonTouchListener: ArgumentCaptor<View.OnTouchListener> =

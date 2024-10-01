@@ -22,9 +22,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.content.Intent.ACTION_MAIN;
-import static android.content.Intent.CATEGORY_APP_BROWSER;
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_HOVER_ENTER;
@@ -58,7 +55,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -560,20 +556,17 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         decoration.closeMaximizeMenu();
     }
 
-    private void onOpenInBrowser(int taskId, @NonNull Uri uri) {
+    private void onOpenInBrowser(int taskId, @NonNull Intent intent) {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
         if (decoration == null) {
             return;
         }
-        openInBrowser(uri, decoration.getUser());
+        openInBrowser(intent, decoration.getUser());
         decoration.closeHandleMenu();
         decoration.closeMaximizeMenu();
     }
 
-    private void openInBrowser(Uri uri, @NonNull UserHandle userHandle) {
-        final Intent intent = Intent.makeMainSelectorActivity(ACTION_MAIN, CATEGORY_APP_BROWSER)
-                .setData(uri)
-                .addFlags(FLAG_ACTIVITY_NEW_TASK);
+    private void openInBrowser(@NonNull Intent intent, @NonNull UserHandle userHandle) {
         mContext.startActivityAsUser(intent, userHandle);
     }
 
@@ -1472,8 +1465,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             onToSplitScreen(taskInfo.taskId);
             return Unit.INSTANCE;
         });
-        windowDecoration.setOpenInBrowserClickListener((uri) -> {
-            onOpenInBrowser(taskInfo.taskId, uri);
+        windowDecoration.setOpenInBrowserClickListener((intent) -> {
+            onOpenInBrowser(taskInfo.taskId, intent);
         });
         windowDecoration.setOnNewWindowClickListener(() -> {
             onNewWindow(taskInfo.taskId);
