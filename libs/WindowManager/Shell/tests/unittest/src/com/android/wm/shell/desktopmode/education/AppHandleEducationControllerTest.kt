@@ -31,6 +31,7 @@ import com.android.wm.shell.desktopmode.education.AppHandleEducationController.C
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController.Companion.APP_HANDLE_EDUCATION_TIMEOUT_MILLIS
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.util.createAppHandleState
 import com.android.wm.shell.util.createAppHeaderState
 import com.android.wm.shell.util.createWindowingEducationProto
@@ -53,6 +54,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -335,6 +337,51 @@ class AppHandleEducationControllerTest : ShellTestCase() {
         waitForBufferDelay()
 
         verify(mockTooltipController, times(2)).showEducationTooltip(any(), any())
+      }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  fun setAppHandleEducationTooltipCallbacks_onAppHandleTooltipClicked_callbackInvoked() =
+      testScope.runTest {
+        // App handle is visible. Should show education tooltip.
+        setShouldShowAppHandleEducation(true)
+        val mockOpenHandleMenuCallback: (Int) -> Unit = mock()
+        val mockToDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit = mock()
+        educationController.setAppHandleEducationTooltipCallbacks(
+            mockOpenHandleMenuCallback, mockToDesktopModeCallback)
+        // Simulate app handle visible.
+        testCaptionStateFlow.value = createAppHandleState()
+        // Wait for first tooltip to showup.
+        waitForBufferDelay()
+
+        verify(mockTooltipController, atLeastOnce())
+            .showEducationTooltip(educationConfigCaptor.capture(), any())
+        educationConfigCaptor.lastValue.onEducationClickAction.invoke()
+
+        verify(mockOpenHandleMenuCallback, times(1)).invoke(any())
+      }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  fun setAppHandleEducationTooltipCallbacks_onWindowingImageButtonTooltipClicked_callbackInvoked() =
+      testScope.runTest {
+        // After first tooltip is dismissed, app handle is expanded. Should show second education
+        // tooltip.
+        showAndDismissFirstTooltip()
+        val mockOpenHandleMenuCallback: (Int) -> Unit = mock()
+        val mockToDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit = mock()
+        educationController.setAppHandleEducationTooltipCallbacks(
+            mockOpenHandleMenuCallback, mockToDesktopModeCallback)
+        // Simulate app handle expanded.
+        testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
+        // Wait for next tooltip to showup.
+        waitForBufferDelay()
+
+        verify(mockTooltipController, atLeastOnce())
+            .showEducationTooltip(educationConfigCaptor.capture(), any())
+        educationConfigCaptor.lastValue.onEducationClickAction.invoke()
+
+        verify(mockToDesktopModeCallback, times(1)).invoke(any(), any())
       }
 
   private suspend fun TestScope.showAndDismissFirstTooltip() {

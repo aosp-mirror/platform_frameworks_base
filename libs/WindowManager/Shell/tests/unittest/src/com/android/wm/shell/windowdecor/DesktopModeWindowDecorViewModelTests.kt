@@ -64,6 +64,7 @@ import android.widget.Toast
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean
 import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
@@ -89,6 +90,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository
+import com.android.wm.shell.desktopmode.education.AppHandleEducationController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
@@ -105,6 +107,7 @@ import java.util.function.Consumer
 import java.util.function.Supplier
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -136,6 +139,7 @@ import org.mockito.quality.Strictness
  * Tests of [DesktopModeWindowDecorViewModel]
  * Usage: atest WMShellUnitTests:DesktopModeWindowDecorViewModelTests
  */
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper
@@ -184,6 +188,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockTaskPositionerFactory:
             DesktopModeWindowDecorViewModel.TaskPositionerFactory
     @Mock private lateinit var mockTaskPositioner: TaskPositioner
+    @Mock private lateinit var mockAppHandleEducationController: AppHandleEducationController
     @Mock private lateinit var mockCaptionHandleRepository: WindowDecorCaptionHandleRepository
     private lateinit var spyContext: TestableContext
 
@@ -242,6 +247,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 windowDecorByTaskIdSpy,
                 mockInteractionJankMonitor,
                 Optional.of(mockTasksLimiter),
+                mockAppHandleEducationController,
                 mockCaptionHandleRepository,
                 Optional.of(mockActivityOrientationChangeHandler),
                 mockTaskPositionerFactory
@@ -955,6 +961,83 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                     && intent.categories.contains(Intent.CATEGORY_LAUNCHER)
                     && intent.action == Intent.ACTION_MAIN
         }, eq(mockUserHandle))
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun testDecor_createWindowDecoration_setsAppHandleEducationTooltipClickCallbacks() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
+
+        shellInit.init()
+
+        verify(
+            mockAppHandleEducationController,
+            times(1)
+        ).setAppHandleEducationTooltipCallbacks(any(), any())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun testDecor_invokeOpenHandleMenuCallback_openHandleMenu() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decor = setUpMockDecorationForTask(task)
+        val openHandleMenuCallbackCaptor = argumentCaptor<(Int) -> Unit>()
+        // Set task as gmail
+        val gmailPackageName = "com.google.android.gm"
+        val baseComponent = ComponentName(gmailPackageName, /* class */ "")
+        task.baseActivity = baseComponent
+
+        onTaskOpening(task)
+        verify(
+            mockAppHandleEducationController,
+            times(1)
+        ).setAppHandleEducationTooltipCallbacks(openHandleMenuCallbackCaptor.capture(), any())
+        openHandleMenuCallbackCaptor.lastValue.invoke(task.taskId)
+
+        verify(decor, times(1)).createHandleMenu(anyBoolean())
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun testDecor_openTaskWithFlagDisabled_doNotOpenHandleMenu() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        setUpMockDecorationForTask(task)
+        val openHandleMenuCallbackCaptor = argumentCaptor<(Int) -> Unit>()
+        // Set task as gmail
+        val gmailPackageName = "com.google.android.gm"
+        val baseComponent = ComponentName(gmailPackageName, /* class */ "")
+        task.baseActivity = baseComponent
+
+        onTaskOpening(task)
+        verify(
+            mockAppHandleEducationController,
+            never()
+        ).setAppHandleEducationTooltipCallbacks(openHandleMenuCallbackCaptor.capture(), any())
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+    fun testDecor_invokeOnToDesktopCallback_setsAppHandleEducationTooltipClickCallbacks() {
+        whenever(DesktopModeStatus.canEnterDesktopMode(any())).thenReturn(true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        setUpMockDecorationsForTasks(task)
+        onTaskOpening(task)
+        val onToDesktopCallbackCaptor = argumentCaptor<(Int, DesktopModeTransitionSource) -> Unit>()
+
+        verify(
+            mockAppHandleEducationController,
+            times(1)
+        ).setAppHandleEducationTooltipCallbacks(any(), onToDesktopCallbackCaptor.capture())
+        onToDesktopCallbackCaptor.lastValue.invoke(
+            task.taskId,
+            DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON
+        )
+
+        verify(mockDesktopTasksController, times(1))
+            .moveTaskToDesktop(any(), any(), any())
     }
 
     @Test

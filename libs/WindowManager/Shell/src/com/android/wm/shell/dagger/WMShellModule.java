@@ -252,6 +252,7 @@ public abstract class WMShellModule {
             AssistContentRequester assistContentRequester,
             MultiInstanceHelper multiInstanceHelper,
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            AppHandleEducationController appHandleEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> desktopActivityOrientationHandler) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
@@ -277,6 +278,7 @@ public abstract class WMShellModule {
                     assistContentRequester,
                     multiInstanceHelper,
                     desktopTasksLimiter,
+                    appHandleEducationController,
                     windowDecorCaptionHandleRepository,
                     desktopActivityOrientationHandler);
         }
@@ -869,8 +871,7 @@ public abstract class WMShellModule {
     @Provides
     static Object provideIndependentShellComponentsToCreate(
             DragAndDropController dragAndDropController,
-            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional,
-            AppHandleEducationController appHandleEducationController
+            Optional<DesktopTasksTransitionObserver> desktopTasksTransitionObserverOptional
     ) {
         return new Object();
     }
