@@ -27,6 +27,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -58,6 +59,8 @@ public class ClipboardListenerTest extends SysuiTestCase {
 
     @Mock
     private ClipboardManager mClipboardManager;
+    @Mock
+    private KeyguardManager mKeyguardManager;
     @Mock
     private ClipboardOverlayController mOverlayController;
     @Mock
@@ -96,7 +99,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         when(mClipboardManager.getPrimaryClipSource()).thenReturn(mSampleSource);
 
         mClipboardListener = new ClipboardListener(getContext(), mOverlayControllerProvider,
-                mClipboardToast, mClipboardManager, mUiEventLogger);
+                mClipboardToast, mClipboardManager, mKeyguardManager, mUiEventLogger);
     }
 
 
@@ -180,6 +183,19 @@ public class ClipboardListenerTest extends SysuiTestCase {
     public void test_userSetupIncomplete_showsToast() {
         Settings.Secure.putInt(
                 mContext.getContentResolver(), SETTINGS_SECURE_USER_SETUP_COMPLETE, 0);
+
+        mClipboardListener.start();
+        mClipboardListener.onPrimaryClipChanged();
+
+        verify(mUiEventLogger, times(1)).log(
+                ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN, 0, mSampleSource);
+        verify(mClipboardToast, times(1)).showCopiedToast();
+        verifyZeroInteractions(mOverlayControllerProvider);
+    }
+
+    @Test
+    public void test_deviceLocked_showsToast() {
+        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
 
         mClipboardListener.start();
         mClipboardListener.onPrimaryClipChanged();
