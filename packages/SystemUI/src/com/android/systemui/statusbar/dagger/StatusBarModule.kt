@@ -46,6 +46,7 @@ import dagger.multibindings.IntoMap
  */
 @Module(includes = [StatusBarDataLayerModule::class, SystemBarUtilsProxyImpl.Module::class])
 abstract class StatusBarModule {
+
     @Binds
     @IntoMap
     @ClassKey(OngoingCallController::class)

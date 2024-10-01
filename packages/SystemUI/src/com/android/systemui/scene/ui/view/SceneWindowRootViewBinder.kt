@@ -108,7 +108,11 @@ object SceneWindowRootViewBinder {
                 traceName = "SceneWindowRootViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
                 factory = {
-                    viewModelFactory.create(view.context.displayId, motionEventHandlerReceiver)
+                    viewModelFactory.create(
+                        view,
+                        view.context.displayId,
+                        motionEventHandlerReceiver,
+                    )
                 },
             ) { viewModel ->
                 try {

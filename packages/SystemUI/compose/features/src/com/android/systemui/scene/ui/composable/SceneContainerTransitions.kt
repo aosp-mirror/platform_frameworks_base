@@ -85,6 +85,7 @@ val SceneContainerTransitions = transitions {
     from(Scenes.Shade, to = Scenes.Lockscreen) {
         reversed { lockscreenToShadeTransition() }
         sharedElement(Notifications.Elements.NotificationStackPlaceholder, enabled = false)
+        sharedElement(Notifications.Elements.HeadsUpNotificationPlaceholder, enabled = false)
     }
 
     // Overlay transitions

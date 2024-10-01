@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
@@ -937,7 +937,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
     public void sensitiveNotificationProtectionControllerListenerNotRegistered() {
         initController(/* viewIsAttached= */ true);
-        verifyZeroInteractions(mSensitiveNotificationProtectionController);
+        verifyNoMoreInteractions(mSensitiveNotificationProtectionController);
     }
 
     @Test

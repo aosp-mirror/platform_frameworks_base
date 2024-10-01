@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Rozmowy"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Usuń wszystkie ciche powiadomienia"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Powiadomienia wstrzymane przez tryb Nie przeszkadzać"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"Rozpocznij teraz"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Brak powiadomień"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Brak nowych powiadomień"</string>
@@ -1396,8 +1398,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona zwijania"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona rozwijania"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"lub"</string>
-    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
-    <skip />
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Uchwyt do przeciągania"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Nawiguj za pomocą klawiatury"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Dowiedz się więcej o skrótach klawiszowych"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Nawiguj za pomocą touchpada"</string>

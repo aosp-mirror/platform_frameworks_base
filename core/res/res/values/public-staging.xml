@@ -118,6 +118,9 @@
     <public name="languageSettingsActivity"/>
     <!-- @FlaggedApi("android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM") -->
     <public name="dreamCategory"/>
+    <!-- @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled")
+         @hide @SystemApi -->
+    <public name="backgroundPermission"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">

@@ -24,6 +24,7 @@ import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.FileUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -149,6 +150,27 @@ public class ResourceFlaggingTest {
     @Test(expected = Resources.NotFoundException.class)
     public void testDisabledDrawable() {
         mResources.getDrawable(R.drawable.removedpng);
+    }
+
+    @Test
+    public void testDisabledStyleDoesntOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style1, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    @Test
+    public void testEnabledStyleDoesOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style2, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    @Test
+    public void testEnabledStyleItemDoesOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style3, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
     }
 
     private LayoutInflater getLayoutInflater() {

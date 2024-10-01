@@ -1338,7 +1338,7 @@
     <string name="network_available_sign_in" msgid="1520342291829283114">"Ingia katika mtandao"</string>
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
-    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> haina uwezo wa kufikia intaneti"</string>
+    <string name="wifi_no_internet" msgid="1386911698276448061">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> haina intaneti"</string>
     <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Gusa ili upate chaguo"</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mtandao wa simu hauna uwezo wa kufikia intaneti"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Mtandao hauna uwezo wa kufikia intaneti"</string>
@@ -2408,9 +2408,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Muundo wa kibodi umewekwa kuwa <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Gusa ili ubadilishe."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Mipangilio ya kibodi halisi imewekwa"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Gusa ili uangalie kibodi"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Wa faragha"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Faragha"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Nakala"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Wa kazini"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Kazini"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Wa 2 wa Kazini"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Wa 3 wa Kazini"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Jaribio"</string>

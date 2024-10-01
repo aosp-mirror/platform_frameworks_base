@@ -186,7 +186,8 @@ class AppCompatActivityRobot {
 
     void setTopActivityCameraActive(boolean enabled) {
         doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
-                .isCameraActive(eq(mActivityStack.top()), /* mustBeFullscreen= */ eq(true));
+                .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()),
+                        /* mustBeFullscreen= */ eq(true));
     }
 
     void setTopActivityEligibleForOrientationOverride(boolean enabled) {

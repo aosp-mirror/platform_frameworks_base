@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,6 +74,7 @@ fun LargeTileContent(
     secondaryLabel: String?,
     icon: Icon,
     colors: TileColors,
+    squishiness: () -> Float,
     accessibilityUiState: AccessibilityUiState? = null,
     toggleClickSupported: Boolean = false,
     iconShape: Shape = RoundedCornerShape(CommonTileDefaults.InactiveCornerRadius),
@@ -89,6 +91,7 @@ fun LargeTileContent(
             modifier =
                 Modifier.size(CommonTileDefaults.ToggleTargetSize).thenIf(toggleClickSupported) {
                     Modifier.clip(iconShape)
+                        .verticalSquish(squishiness)
                         .background(colors.iconBackground, { 1f })
                         .combinedClickable(
                             onClick = onClick,
@@ -174,15 +177,17 @@ fun SmallTileContent(
     } else if (icon is Icon.Resource) {
         val image = AnimatedImageVector.animatedVectorResource(id = icon.res)
         val painter =
-            if (animateToEnd) {
-                rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
-            } else {
-                var atEnd by remember(icon.res) { mutableStateOf(false) }
-                LaunchedEffect(key1 = icon.res) {
-                    delay(350)
-                    atEnd = true
+            key(icon) {
+                if (animateToEnd) {
+                    rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
+                } else {
+                    var atEnd by remember(icon.res) { mutableStateOf(false) }
+                    LaunchedEffect(key1 = icon.res) {
+                        delay(350)
+                        atEnd = true
+                    }
+                    rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = atEnd)
                 }
-                rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = atEnd)
             }
         Image(
             painter = painter,

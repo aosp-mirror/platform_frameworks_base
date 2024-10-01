@@ -24,16 +24,19 @@ import androidx.lifecycle.LifecycleCoroutineScope
 import com.android.systemui.Dumpable
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.FooterActionsController
+import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel.QSExpansionState
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
+import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.util.LargeScreenUtils
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printSection
@@ -50,6 +53,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -61,13 +65,14 @@ constructor(
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val sysuiStatusBarStateController: SysuiStatusBarStateController,
-    private val keyguardBypassController: KeyguardBypassController,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
     private val disableFlagsRepository: DisableFlagsRepository,
     private val largeScreenShadeInterpolator: LargeScreenShadeInterpolator,
     private val configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
+    private val squishinessInteractor: TileSquishinessInteractor,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
-) : Dumpable {
+) : Dumpable, ExclusiveActivatable() {
     val footerActionsViewModel =
         footerActionsViewModelFactory.create(lifecycleScope).also {
             lifecycleScope.launch { footerActionsController.init() }
@@ -110,7 +115,7 @@ constructor(
             _panelFraction.value = value
         }
 
-    private val _squishinessFraction = MutableStateFlow(0f)
+    private val _squishinessFraction = MutableStateFlow(1f)
     var squishinessFractionValue: Float
         get() = _squishinessFraction.value
         set(value) {
@@ -131,7 +136,7 @@ constructor(
     private val _headerAnimating = MutableStateFlow(false)
 
     private val _stackScrollerOverscrolling = MutableStateFlow(false)
-    var stackScrollerOverscrollingValue: Boolean
+    var isStackScrollerOverscrolling: Boolean
         get() = _stackScrollerOverscrolling.value
         set(value) {
             _stackScrollerOverscrolling.value = value
@@ -149,8 +154,6 @@ constructor(
                 SharingStarted.WhileSubscribed(),
                 disableFlagsRepository.disableFlags.value.isQuickSettingsEnabled(),
             )
-
-    private val _showCollapsedOnKeyguard = MutableStateFlow(false)
 
     private val _keyguardAndExpanded = MutableStateFlow(false)
 
@@ -177,10 +180,20 @@ constructor(
 
                 awaitClose { sysuiStatusBarStateController.removeCallback(callback) }
             }
+            .onStart { emit(sysuiStatusBarStateController.state) }
             .stateIn(
                 lifecycleScope,
                 SharingStarted.WhileSubscribed(),
                 sysuiStatusBarStateController.state,
+            )
+
+    private val isKeyguardState =
+        statusBarState
+            .map { it == StatusBarState.KEYGUARD }
+            .stateIn(
+                lifecycleScope,
+                SharingStarted.WhileSubscribed(),
+                statusBarState.value == StatusBarState.KEYGUARD,
             )
 
     private val _viewHeight = MutableStateFlow(0)
@@ -188,10 +201,44 @@ constructor(
     private val _headerTranslation = MutableStateFlow(0f)
 
     private val _inSplitShade = MutableStateFlow(false)
+    var isInSplitShade: Boolean
+        get() = _inSplitShade.value
+        set(value) {
+            _inSplitShade.value = value
+        }
 
     private val _transitioningToFullShade = MutableStateFlow(false)
+    var isTransitioningToFullShade: Boolean
+        get() = _transitioningToFullShade.value
+        set(value) {
+            _transitioningToFullShade.value = value
+        }
 
-    private val _lockscreenToShadeProgress = MutableStateFlow(false)
+    private val isBypassEnabled = deviceEntryInteractor.isBypassEnabled
+
+    private val showCollapsedOnKeyguard =
+        combine(
+                isBypassEnabled,
+                _transitioningToFullShade,
+                _inSplitShade,
+                ::calculateShowCollapsedOnKeyguard,
+            )
+            .stateIn(
+                lifecycleScope,
+                SharingStarted.WhileSubscribed(),
+                calculateShowCollapsedOnKeyguard(
+                    isBypassEnabled.value,
+                    isTransitioningToFullShade,
+                    isInSplitShade,
+                ),
+            )
+
+    private val _lockscreenToShadeProgress = MutableStateFlow(0.0f)
+    var lockscreenToShadeProgressValue: Float
+        get() = _lockscreenToShadeProgress.value
+        set(value) {
+            _lockscreenToShadeProgress.value = value
+        }
 
     private val _overscrolling = MutableStateFlow(false)
 
@@ -212,18 +259,48 @@ constructor(
             _heightOverride.value = value
         }
 
+    private val forceQS =
+        combine(
+                _qsExpanded,
+                _stackScrollerOverscrolling,
+                isKeyguardState,
+                showCollapsedOnKeyguard,
+                ::calculateForceQs,
+            )
+            .stateIn(
+                lifecycleScope,
+                SharingStarted.WhileSubscribed(),
+                calculateForceQs(
+                    isQSExpanded,
+                    isStackScrollerOverscrolling,
+                    isKeyguardState.value,
+                    showCollapsedOnKeyguard.value,
+                ),
+            )
+
     val expansionState: StateFlow<QSExpansionState> =
-        combine(_stackScrollerOverscrolling, _qsExpanded, _qsExpansion) { args: Array<Any> ->
-                val expansion = args[2] as Float
-                QSExpansionState(expansion.coerceIn(0f, 1f))
-            }
-            .stateIn(lifecycleScope, SharingStarted.WhileSubscribed(), QSExpansionState(0f))
+        combine(_qsExpansion, forceQS, ::calculateExpansionState)
+            .stateIn(
+                lifecycleScope,
+                SharingStarted.WhileSubscribed(),
+                calculateExpansionState(_qsExpansion.value, forceQS.value),
+            )
 
     /**
      * Accessibility action for collapsing/expanding QS. The provided runnable is responsible for
      * determining the correct action based on the expansion state.
      */
     var collapseExpandAccessibilityAction: Runnable? = null
+
+    override suspend fun onActivated(): Nothing {
+        hydrateSquishinessInteractor()
+    }
+
+    private suspend fun hydrateSquishinessInteractor(): Nothing {
+        _squishinessFraction.collect {
+            squishinessInteractor.setSquishinessValue(it.constrainSquishiness())
+        }
+    }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.asIndenting().run {
@@ -238,13 +315,17 @@ constructor(
                 println("panelExpansionFraction", panelExpansionFractionValue)
                 println("squishinessFraction", squishinessFractionValue)
                 println("expansionState", expansionState.value)
+                println("forceQS", forceQS.value)
             }
             printSection("Shade state") {
-                println("stackOverscrolling", stackScrollerOverscrollingValue)
+                println("stackOverscrolling", isStackScrollerOverscrolling)
                 println("statusBarState", StatusBarState.toString(statusBarState.value))
+                println("isKeyguardState", isKeyguardState.value)
                 println("isSmallScreen", isSmallScreenValue)
                 println("heightOverride", "${heightOverrideValue}px")
                 println("qqsHeaderHeight", "${qqsHeaderHeight.value}px")
+                println("isSplitShade", isInSplitShade)
+                println("showCollapsedOnKeyguard", showCollapsedOnKeyguard.value)
             }
         }
     }
@@ -256,4 +337,36 @@ constructor(
 
     // In the future, this will have other relevant elements like squishiness.
     data class QSExpansionState(@FloatRange(0.0, 1.0) val progress: Float)
+}
+
+private fun Float.constrainSquishiness(): Float {
+    return (0.1f + this * 0.9f).coerceIn(0f, 1f)
+}
+
+// Helper methods for combining flows.
+
+private fun calculateExpansionState(expansion: Float, forceQs: Boolean): QSExpansionState {
+    return if (forceQs) {
+        QSExpansionState(1f)
+    } else {
+        QSExpansionState(expansion.coerceIn(0f, 1f))
+    }
+}
+
+private fun calculateForceQs(
+    isQSExpanded: Boolean,
+    isStackOverScrolling: Boolean,
+    isKeyguardShowing: Boolean,
+    shouldShowCollapsedOnKeyguard: Boolean,
+): Boolean {
+    return (isQSExpanded || isStackOverScrolling) &&
+        (isKeyguardShowing && !shouldShowCollapsedOnKeyguard)
+}
+
+private fun calculateShowCollapsedOnKeyguard(
+    isBypassEnabled: Boolean,
+    isTransitioningToFullShade: Boolean,
+    isInSplitShade: Boolean,
+): Boolean {
+    return isBypassEnabled || (isTransitioningToFullShade && !isInSplitShade)
 }

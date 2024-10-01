@@ -33,6 +33,7 @@ import com.android.systemui.qs.panels.ui.compose.rememberEditListState
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.TileSquishinessViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
@@ -45,6 +46,7 @@ class InfiniteGridLayout
 constructor(
     private val iconTilesViewModel: IconTilesViewModel,
     private val gridSizeViewModel: FixedColumnsSizeViewModel,
+    private val squishinessViewModel: TileSquishinessViewModel,
 ) : PaginatableGridLayout {
 
     @Composable
@@ -60,6 +62,7 @@ constructor(
         }
         val columns by gridSizeViewModel.columns.collectAsStateWithLifecycle()
         val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
+        val squishiness by squishinessViewModel.squishiness.collectAsStateWithLifecycle()
 
         VerticalSpannedGrid(
             columns = columns,
@@ -72,6 +75,7 @@ constructor(
                 tile = it.tile,
                 iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
                 modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
             )
         }
     }
