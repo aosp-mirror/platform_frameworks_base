@@ -182,7 +182,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                TelephonyManager.RADIO_POWER_UNAVAILABLE
+                TelephonyManager.RADIO_POWER_UNAVAILABLE,
             )
 
     /**
@@ -265,9 +265,10 @@ constructor(
 
                 var registered = false
                 try {
+                    logBuffer.i { "registerForCommunicationAllowedStateChanged" }
                     sm.registerForCommunicationAllowedStateChanged(
                         bgDispatcher.asExecutor(),
-                        callback
+                        callback,
                     )
                     registered = true
                 } catch (e: Exception) {
@@ -276,6 +277,7 @@ constructor(
 
                 awaitClose {
                     if (registered) {
+                        logBuffer.i { "unRegisterForCommunicationAllowedStateChanged" }
                         sm.unregisterForCommunicationAllowedStateChanged(callback)
                     }
                 }
@@ -321,9 +323,10 @@ constructor(
 
                 var registered = false
                 try {
+                    logBuffer.i { "registerForSupportedStateChanged" }
                     satelliteManager.registerForSupportedStateChanged(
                         bgDispatcher.asExecutor(),
-                        callback
+                        callback,
                     )
                     registered = true
                 } catch (e: Exception) {
@@ -332,6 +335,7 @@ constructor(
 
                 awaitClose {
                     if (registered) {
+                        logBuffer.i { "unregisterForSupportedStateChanged" }
                         satelliteManager.unregisterForSupportedStateChanged(callback)
                     }
                 }
@@ -366,10 +370,7 @@ constructor(
                 var registered = false
                 try {
                     logBuffer.i { "registerForProvisionStateChanged" }
-                    sm.registerForProvisionStateChanged(
-                        bgDispatcher.asExecutor(),
-                        callback,
-                    )
+                    sm.registerForProvisionStateChanged(bgDispatcher.asExecutor(), callback)
                     registered = true
                 } catch (e: Exception) {
                     logBuffer.e("error registering for provisioning state callback", e)
@@ -377,6 +378,7 @@ constructor(
 
                 awaitClose {
                     if (registered) {
+                        logBuffer.i { "unregisterForProvisionStateChanged" }
                         sm.unregisterForProvisionStateChanged(callback)
                     }
                 }
@@ -526,17 +528,10 @@ constructor(
             uptime - (clock.uptimeMillis() - android.os.Process.getStartUptimeMillis())
 
         /** A couple of convenience logging methods rather than a whole class */
-        private fun LogBuffer.i(
-            initializer: MessageInitializer = {},
-            printer: MessagePrinter,
-        ) = this.log(TAG, LogLevel.INFO, initializer, printer)
+        private fun LogBuffer.i(initializer: MessageInitializer = {}, printer: MessagePrinter) =
+            this.log(TAG, LogLevel.INFO, initializer, printer)
 
         private fun LogBuffer.e(message: String, exception: Throwable? = null) =
-            this.log(
-                tag = TAG,
-                level = LogLevel.ERROR,
-                message = message,
-                exception = exception,
-            )
+            this.log(tag = TAG, level = LogLevel.ERROR, message = message, exception = exception)
     }
 }
