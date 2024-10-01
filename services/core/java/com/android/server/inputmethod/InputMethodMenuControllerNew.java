@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
 import android.view.Gravity;
@@ -49,7 +50,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.widget.RecyclerView;
+import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,17 +83,28 @@ final class InputMethodMenuControllerNew {
     /**
      * Shows the Input Method Switcher Menu, with a list of IMEs and their subtypes.
      *
-     * @param items         the list of menu items.
-     * @param selectedIndex the index of the menu item that is selected.
-     *                      If no other IMEs are enabled, this index will be out of reach.
-     * @param displayId     the ID of the display where the menu was requested.
-     * @param userId        the ID of the user that requested the menu.
+     * @param items                the list of input method and subtype items.
+     * @param selectedImeId        the ID of the selected input method.
+     * @param selectedSubtypeIndex the index of the selected subtype in the input method's array of
+     *                             subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if no
+     *                             subtype is selected.
+     * @param displayId            the ID of the display where the menu was requested.
+     * @param userId               the ID of the user that requested the menu.
      */
     @RequiresPermission(allOf = {INTERACT_ACROSS_USERS, HIDE_OVERLAY_WINDOWS})
-    void show(@NonNull List<MenuItem> items, int selectedIndex, int displayId,
-            @UserIdInt int userId) {
+    void show(@NonNull List<ImeSubtypeListItem> items, @Nullable String selectedImeId,
+            int selectedSubtypeIndex, int displayId, @UserIdInt int userId) {
         // Hide the menu in case it was already showing.
         hide(displayId, userId);
+
+        final var itemsAndIndex = toMenuItems(items, selectedImeId, selectedSubtypeIndex);
+        final var menuItems = itemsAndIndex.first;
+        final int selectedIndex = itemsAndIndex.second;
+
+        if (selectedIndex == -1) {
+            Slog.w(TAG, "Switching menu shown with no item selected, IME id: " + selectedImeId
+                    + ", subtype index: " + selectedSubtypeIndex);
+        }
 
         final Context dialogWindowContext = mDialogWindowContext.get(displayId);
         final var builder = new AlertDialog.Builder(dialogWindowContext,
@@ -106,50 +120,26 @@ final class InputMethodMenuControllerNew {
 
         final DialogInterface.OnClickListener onClickListener = (dialog, which) -> {
             if (which != selectedIndex) {
-                final var item = items.get(which);
+                final var item = menuItems.get(which);
                 InputMethodManagerInternal.get()
                         .switchToInputMethod(item.mImi.getId(), item.mSubtypeIndex, userId);
             }
             hide(displayId, userId);
         };
 
-        final var selectedImi = selectedIndex >= 0 ? items.get(selectedIndex).mImi : null;
-        final var languageSettingsIntent = selectedImi != null
-                ? selectedImi.createImeLanguageSettingsActivityIntent() : null;
-        final boolean isDeviceProvisioned = Settings.Global.getInt(
-                dialogWindowContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
-                0) != 0;
-        final boolean hasLanguageSettingsButton = languageSettingsIntent != null
-                && isDeviceProvisioned;
-        if (hasLanguageSettingsButton) {
-            final View buttonBar = contentView
-                    .requireViewById(com.android.internal.R.id.button_bar);
-            buttonBar.setVisibility(View.VISIBLE);
-
-            languageSettingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            final Button languageSettingsButton = contentView
-                    .requireViewById(com.android.internal.R.id.button1);
-            languageSettingsButton.setVisibility(View.VISIBLE);
-            languageSettingsButton.setOnClickListener(v -> {
-                v.getContext().startActivityAsUser(languageSettingsIntent, UserHandle.of(userId));
-                hide(displayId, userId);
-            });
-        }
-
         // Create the current IME subtypes list.
         final RecyclerView recyclerView = contentView
                 .requireViewById(com.android.internal.R.id.list);
-        recyclerView.setAdapter(new Adapter(items, selectedIndex, inflater, onClickListener));
+        recyclerView.setAdapter(new Adapter(menuItems, selectedIndex, inflater, onClickListener));
         // Scroll to the currently selected IME. This must run after the recycler view is laid out.
         recyclerView.post(() -> recyclerView.scrollToPosition(selectedIndex));
-        // Indicate that the list can be scrolled.
-        recyclerView.setScrollIndicators(
-                hasLanguageSettingsButton ? View.SCROLL_INDICATOR_BOTTOM : 0);
         // Request focus to enable rotary scrolling on watches.
         recyclerView.requestFocus();
 
+        updateLanguageSettingsButton(menuItems.get(selectedIndex), contentView, displayId, userId);
+
         builder.setOnCancelListener(dialog -> hide(displayId, userId));
-        mMenuItems = items;
+        mMenuItems = menuItems;
         mDialog = builder.create();
         mDialog.setCanceledOnTouchOutside(true);
         final Window w = mDialog.getWindow();
@@ -208,10 +198,92 @@ final class InputMethodMenuControllerNew {
     }
 
     /**
+     * Gets the list of Input Method Switcher Menu items and the index of the selected item.
+     *
+     * @param items                the list of input method and subtype items.
+     * @param selectedImeId        the ID of the selected input method.
+     * @param selectedSubtypeIndex the index of the selected subtype in the input method's array of
+     *                             subtypes, or {@link InputMethodUtils#NOT_A_SUBTYPE_INDEX} if no
+     *                             subtype is selected.
+     * @return the list of menu items, and the index of the selected item,
+     * or {@code -1} if no item is selected.
+     */
+    @NonNull
+    private static Pair<List<MenuItem>, Integer> toMenuItems(
+            @NonNull List<ImeSubtypeListItem> items, @Nullable String selectedImeId,
+            int selectedSubtypeIndex) {
+        // No item is selected by default. When we have a list of explicitly enabled subtypes,
+        // the implicit subtype is no longer listed. If the implicit one is still selected,
+        // no items will be shown as selected.
+        int selectedIndex = -1;
+        String prevImeId = null;
+        final var menuItems = new ArrayList<MenuItem>();
+        for (int i = 0; i < items.size(); i++) {
+            final var item = items.get(i);
+            final var imeId = item.mImi.getId();
+            // Check if this is the selected IME-subtype pair.
+            if (selectedIndex == -1 && imeId.equals(selectedImeId)) {
+                final int subtypeIndex = item.mSubtypeIndex;
+                if ((subtypeIndex == 0 && selectedSubtypeIndex == NOT_A_SUBTYPE_INDEX)
+                        || subtypeIndex == NOT_A_SUBTYPE_INDEX
+                        || subtypeIndex == selectedSubtypeIndex) {
+                    selectedIndex = i;
+                }
+            }
+            final boolean hasHeader = !imeId.equals(prevImeId);
+            final boolean hasDivider = hasHeader && prevImeId != null;
+            menuItems.add(new MenuItem(item.mImeName, item.mSubtypeName, item.mImi,
+                    item.mSubtypeIndex, hasHeader, hasDivider));
+            prevImeId = imeId;
+        }
+
+        return new Pair<>(menuItems, selectedIndex);
+    }
+
+    /**
+     * Updates the visibility of the Language Settings button to visible if the currently selected
+     * item specifies a (language) settings activity and the device is provisioned. Otherwise,
+     * the button won't be shown.
+     *
+     * @param selectedItem the currently selected item, or {@code null} if no item is selected.
+     * @param view         the menu dialog view.
+     * @param displayId    the ID of the display where the menu was requested.
+     * @param userId       the ID of the user that requested the menu.
+     */
+    @RequiresPermission(allOf = {INTERACT_ACROSS_USERS})
+    private void updateLanguageSettingsButton(@Nullable MenuItem selectedItem, @NonNull View view,
+            int displayId, @UserIdInt int userId) {
+        final var settingsIntent = selectedItem != null
+                ? selectedItem.mImi.createImeLanguageSettingsActivityIntent() : null;
+        final boolean isDeviceProvisioned = Settings.Global.getInt(
+                view.getContext().getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                0) != 0;
+        final boolean hasButton = settingsIntent != null && isDeviceProvisioned;
+        final View buttonBar = view.requireViewById(com.android.internal.R.id.button_bar);
+        final Button button = view.requireViewById(com.android.internal.R.id.button1);
+        final RecyclerView recyclerView = view.requireViewById(com.android.internal.R.id.list);
+        if (hasButton) {
+            settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            buttonBar.setVisibility(View.VISIBLE);
+            button.setOnClickListener(v -> {
+                v.getContext().startActivityAsUser(settingsIntent, UserHandle.of(userId));
+                hide(displayId, userId);
+            });
+            // Indicate that the list can be scrolled.
+            recyclerView.setScrollIndicators(View.SCROLL_INDICATOR_BOTTOM);
+        } else {
+            buttonBar.setVisibility(View.GONE);
+            button.setOnClickListener(null);
+            // Remove scroll indicator as there is nothing drawn below the list.
+            recyclerView.setScrollIndicators(0 /* indicators */);
+        }
+    }
+
+    /**
      * Item to be shown in the Input Method Switcher Menu, containing an input method and
      * optionally an input method subtype.
      */
-    static class MenuItem {
+    private static class MenuItem {
 
         /** The name of the input method. */
         @NonNull
@@ -268,7 +340,7 @@ final class InputMethodMenuControllerNew {
         }
     }
 
-    private static class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
+    private static final class Adapter extends RecyclerView.Adapter<Adapter.ViewHolder> {
 
         /** The list of items to show. */
         @NonNull
