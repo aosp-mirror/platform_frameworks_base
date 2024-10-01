@@ -244,7 +244,7 @@ class PackageMonitorCallbackHelper {
                 return;
             }
             int registerUid = registerUser.getUid();
-            if (allowUids != null && registerUid != Process.SYSTEM_UID
+            if (allowUids != null && !UserHandle.isSameApp(registerUid, Process.SYSTEM_UID)
                     && !ArrayUtils.contains(allowUids, registerUid)) {
                 if (DEBUG) {
                     Slog.w(TAG, "Skip invoke PackageMonitorCallback for " + intent.getAction()
