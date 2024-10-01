@@ -188,21 +188,21 @@ public class DesktopAppCompatAspectRatioPolicy {
         }
 
         final ActivityInfo info = mActivityRecord.info;
-        if (info.applicationInfo == null) {
-            return info.getMinAspectRatio();
-        }
-
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides();
         if (shouldApplyUserMinAspectRatioOverride(task)) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }
 
-        final DisplayContent dc = task.mDisplayContent;
-        final boolean shouldOverrideMinAspectRatioForCamera = dc != null
-                && dc.mAppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord);
+        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy.getAppCompatCameraPolicy(
+                mActivityRecord);
+        final boolean shouldOverrideMinAspectRatioForCamera = cameraPolicy != null
+                && cameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord);
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
                 && !shouldOverrideMinAspectRatioForCamera) {
+            if (mActivityRecord.isUniversalResizeable()) {
+                return 0;
+            }
             return info.getMinAspectRatio();
         }
 
@@ -245,6 +245,9 @@ public class DesktopAppCompatAspectRatioPolicy {
     private float getMaxAspectRatio() {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMaxAspectRatio();
+        }
+        if (mActivityRecord.isUniversalResizeable()) {
+            return 0;
         }
         return mActivityRecord.info.getMaxAspectRatio();
     }

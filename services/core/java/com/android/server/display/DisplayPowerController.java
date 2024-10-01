@@ -1480,29 +1480,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessState = clampScreenBrightness(brightnessState);
         }
 
-        if (useDozeBrightness) {
-            // TODO(b/329676661): Introduce a config property to choose between this brightness
-            //  strategy and DOZE_DEFAULT
-            // On some devices, when auto-brightness is disabled and the device is dozing, we use
-            // the current brightness setting scaled by the doze scale factor
-            if ((Float.isNaN(brightnessState)
-                    || displayBrightnessState.getDisplayBrightnessStrategyName()
-                    .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME))
-                    && mFlags.isDisplayOffloadEnabled()
-                    && mDisplayOffloadSession != null
+        if (useDozeBrightness && (Float.isNaN(brightnessState)
+                || displayBrightnessState.getDisplayBrightnessStrategyName()
+                .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME))) {
+            if (mFlags.isDisplayOffloadEnabled() && mDisplayOffloadSession != null
                     && (mAutomaticBrightnessController == null
                     || !mAutomaticBrightnessStrategy.shouldUseAutoBrightness())) {
+                // TODO(b/329676661): Introduce a config property to choose between this brightness
+                //  strategy and DOZE_DEFAULT
+                // On some devices, when auto-brightness is disabled and the device is dozing, we
+                // use the current brightness setting scaled by the doze scale factor
                 rawBrightnessState = getDozeBrightnessForOffload();
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 updateScreenBrightnessSetting = false;
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_MANUAL);
                 mTempBrightnessEvent.setFlags(
                         mTempBrightnessEvent.getFlags() | BrightnessEvent.FLAG_DOZE_SCALE);
-            }
-
-            // Use default brightness when dozing unless overridden.
-            if (Float.isNaN(brightnessState)
-                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()) {
+            } else if (!mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()) {
+                // Use default brightness when dozing unless overridden.
                 rawBrightnessState = mScreenBrightnessDozeConfig;
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);

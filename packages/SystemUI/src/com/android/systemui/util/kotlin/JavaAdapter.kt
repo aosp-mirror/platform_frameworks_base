@@ -39,11 +39,7 @@ import kotlinx.coroutines.launch
 
 /** A class allowing Java classes to collect on Kotlin flows. */
 @SysUISingleton
-class JavaAdapter
-@Inject
-constructor(
-    @Application private val scope: CoroutineScope,
-) {
+class JavaAdapter @Inject constructor(@Application private val scope: CoroutineScope) {
     /**
      * Collect information for the given [flow], calling [consumer] for each emitted event.
      *
@@ -55,10 +51,7 @@ constructor(
      * Do *not* call this method in a class's constructor. Instead, call it in
      * [com.android.systemui.CoreStartable.start] or similar method.
      */
-    fun <T> alwaysCollectFlow(
-        flow: Flow<T>,
-        consumer: Consumer<T>,
-    ): Job {
+    fun <T> alwaysCollectFlow(flow: Flow<T>, consumer: Consumer<T>): Job {
         return scope.launch { flow.collect { consumer.accept(it) } }
     }
 
@@ -66,7 +59,7 @@ constructor(
     fun <T> stateInApp(
         flow: Flow<T>,
         initialValue: T,
-        started: SharingStarted = SharingStarted.Eagerly
+        started: SharingStarted = SharingStarted.Eagerly,
     ): StateFlow<T> {
         return flow.stateIn(scope, started, initialValue)
     }
@@ -117,7 +110,7 @@ fun <A, B, C, R> combineFlows(
     flow1: Flow<A>,
     flow2: Flow<B>,
     flow3: Flow<C>,
-    trifunction: (A, B, C) -> R
+    trifunction: (A, B, C) -> R,
 ): Flow<R> {
     return combine(flow1, flow2, flow3, trifunction)
 }
@@ -127,7 +120,18 @@ fun <T1, T2, T3, T4, R> combineFlows(
     flow2: Flow<T2>,
     flow3: Flow<T3>,
     flow4: Flow<T4>,
-    transform: (T1, T2, T3, T4) -> R
+    transform: (T1, T2, T3, T4) -> R,
 ): Flow<R> {
     return combine(flow, flow2, flow3, flow4, transform)
+}
+
+fun <T1, T2, T3, T4, T5, R> combineFlows(
+    flow: Flow<T1>,
+    flow2: Flow<T2>,
+    flow3: Flow<T3>,
+    flow4: Flow<T4>,
+    flow5: Flow<T5>,
+    transform: (T1, T2, T3, T4, T5) -> R,
+): Flow<R> {
+    return combine(flow, flow2, flow3, flow4, flow5, transform)
 }

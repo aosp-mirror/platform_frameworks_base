@@ -1475,7 +1475,7 @@ class Task extends TaskFragment {
             // The starting window should keep covering its task when a pure TaskFragment is added
             // because its bounds may not fill the task.
             final ActivityRecord top = getTopMostActivity();
-            if (top != null) {
+            if (top != null && !top.hasFixedRotationTransform()) {
                 top.associateStartingWindowWithTaskIfNeeded();
             }
         }
@@ -4707,8 +4707,13 @@ class Task extends TaskFragment {
                         // If the moveToFront is a part of finishing transition, then make sure
                         // the z-order of tasks are up-to-date.
                         if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
-                            Transition.assignLayers(taskDisplayArea,
-                                    taskDisplayArea.getPendingTransaction());
+                            final SurfaceControl.Transaction tx =
+                                    taskDisplayArea.getPendingTransaction();
+                            Transition.assignLayers(taskDisplayArea, tx);
+                            final SurfaceControl leash = topActivity.getFixedRotationLeash();
+                            if (leash != null) {
+                                tx.setLayer(leash, topActivity.getLastLayer());
+                            }
                         }
                     }
                 }

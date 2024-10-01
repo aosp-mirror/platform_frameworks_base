@@ -308,6 +308,8 @@ public class ActivityOptionsTest {
                     // KEY_PENDING_INTENT_CREATOR_BACKGROUND_ACTIVITY_START_MODE
                 case "android.activity.launchCookie": // KEY_LAUNCH_COOKIE
                 case "android:activity.animAbortListener": // KEY_ANIM_ABORT_LISTENER
+                case "android.activity.allowPassThroughOnTouchOutside":
+                    // KEY_ALLOW_PASS_THROUGH_ON_TOUCH_OUTSIDE
                     // Existing keys
 
                     break;

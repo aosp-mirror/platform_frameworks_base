@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade.ui.composable
 
-import android.view.HapticFeedbackConstants
 import android.view.ViewGroup
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -60,7 +59,6 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
@@ -226,12 +224,6 @@ private fun SceneScope.ShadeScene(
     shadeSession: SaveableSession,
     usingCollapsedLandscapeMedia: Boolean,
 ) {
-    val view = LocalView.current
-    LaunchedEffect(Unit) {
-        if (layoutState.currentTransition?.fromContent == Scenes.Gone) {
-            view.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
-        }
-    }
 
     val shadeMode by viewModel.shadeMode.collectAsStateWithLifecycle()
     when (shadeMode) {

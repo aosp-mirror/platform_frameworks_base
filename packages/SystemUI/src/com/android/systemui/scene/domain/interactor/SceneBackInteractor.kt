@@ -19,7 +19,6 @@ package com.android.systemui.scene.domain.interactor
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.data.model.SceneStack
-import com.android.systemui.scene.data.model.asIterable
 import com.android.systemui.scene.data.model.peek
 import com.android.systemui.scene.data.model.pop
 import com.android.systemui.scene.data.model.push
@@ -68,13 +67,13 @@ constructor(
                     checkNotNull(stack.pop()) { "Cannot pop ${from.debugName} when stack is empty" }
             }
         }
-        logger.logSceneBackStack(backStack.value.asIterable())
+        logger.logSceneBackStack(backStack.value)
     }
 
     /** Applies the given [transform] to the back stack. */
     fun updateBackStack(transform: (SceneStack) -> SceneStack) {
         _backStack.update { stack -> transform(stack) }
-        logger.logSceneBackStack(backStack.value.asIterable())
+        logger.logSceneBackStack(backStack.value)
     }
 
     private fun stackOperation(from: SceneKey, to: SceneKey, stack: SceneStack): StackOperation? {

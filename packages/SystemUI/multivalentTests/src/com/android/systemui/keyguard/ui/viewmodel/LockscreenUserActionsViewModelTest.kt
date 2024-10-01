@@ -147,7 +147,7 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
             }
         }
 
-        private fun expectedLeftDestination(
+        private fun expectedStartDestination(
             isCommunalAvailable: Boolean,
             isShadeTouchable: Boolean,
         ): SceneKey? {
@@ -246,17 +246,17 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            val leftScene by
+            val startScene by
                 collectLastValue(
-                    (userActions?.get(Swipe.Left) as? UserActionResult.ChangeScene)?.toScene?.let {
-                        scene ->
-                        kosmos.sceneInteractor.resolveSceneFamily(scene)
-                    } ?: flowOf(null)
+                    (userActions?.get(Swipe.Start) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                        ?.let { scene -> kosmos.sceneInteractor.resolveSceneFamily(scene) }
+                        ?: flowOf(null)
                 )
 
-            assertThat(leftScene)
+            assertThat(startScene)
                 .isEqualTo(
-                    expectedLeftDestination(
+                    expectedStartDestination(
                         isCommunalAvailable = isCommunalAvailable,
                         isShadeTouchable = isShadeTouchable,
                     )
@@ -341,17 +341,17 @@ class LockscreenUserActionsViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            val leftScene by
+            val startScene by
                 collectLastValue(
-                    (userActions?.get(Swipe.Left) as? UserActionResult.ChangeScene)?.toScene?.let {
-                        scene ->
-                        kosmos.sceneInteractor.resolveSceneFamily(scene)
-                    } ?: flowOf(null)
+                    (userActions?.get(Swipe.Start) as? UserActionResult.ChangeScene)
+                        ?.toScene
+                        ?.let { scene -> kosmos.sceneInteractor.resolveSceneFamily(scene) }
+                        ?: flowOf(null)
                 )
 
-            assertThat(leftScene)
+            assertThat(startScene)
                 .isEqualTo(
-                    expectedLeftDestination(
+                    expectedStartDestination(
                         isCommunalAvailable = isCommunalAvailable,
                         isShadeTouchable = isShadeTouchable,
                     )

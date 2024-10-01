@@ -43,7 +43,7 @@ interface RichOngoingNotificationContentExtractor {
         entry: NotificationEntry,
         builder: Notification.Builder,
         systemUIContext: Context,
-        packageContext: Context
+        packageContext: Context,
     ): RichOngoingContentModel?
 }
 
@@ -52,7 +52,7 @@ class NoOpRichOngoingNotificationContentExtractor : RichOngoingNotificationConte
         entry: NotificationEntry,
         builder: Notification.Builder,
         systemUIContext: Context,
-        packageContext: Context
+        packageContext: Context,
     ): RichOngoingContentModel? = null
 }
 
@@ -68,7 +68,7 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         entry: NotificationEntry,
         builder: Notification.Builder,
         systemUIContext: Context,
-        packageContext: Context
+        packageContext: Context,
     ): RichOngoingContentModel? {
         val sbn = entry.sbn
         val notification = sbn.notification
@@ -89,7 +89,7 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                         null
                     }
                 }
-            } else if (builder.style is Notification.EnRouteStyle) {
+            } else if (builder.style is Notification.ProgressStyle) {
                 parseEnRouteNotification(notification, icon)
             } else null
         } catch (e: Exception) {
@@ -104,7 +104,7 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
      */
     private fun parseTimerNotification(
         notification: Notification,
-        icon: IconModel
+        icon: IconModel,
     ): TimerContentModel {
         // sortKey=1 0|↺7|RUNNING|▶16:21:58.523|Σ0:05:00|Δ0:00:03|⏳0:04:57
         // sortKey=1 0|↺7|PAUSED|Σ0:05:00|Δ0:04:54|⏳0:00:06
@@ -132,7 +132,7 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                             resumeIntent = notification.findStartIntent(),
                             addMinuteAction = notification.findAddMinuteAction(),
                             resetAction = notification.findResetAction(),
-                        )
+                        ),
                 )
             }
             "RUNNING" -> {
@@ -149,7 +149,7 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
                             pauseIntent = notification.findPauseIntent(),
                             addMinuteAction = notification.findAddMinuteAction(),
                             resetAction = notification.findResetAction(),
-                        )
+                        ),
                 )
             }
             else -> error("unknown state ($state) in sortKey=$sortKey")
@@ -192,7 +192,7 @@ class RichOngoingNotificationContentExtractorImpl @Inject constructor() :
         val localDateTime =
             LocalDateTime.of(
                 LocalDate.now(),
-                LocalTime.of(hour.toInt(), minute.toInt(), second.toInt(), millis.toInt() * 1000000)
+                LocalTime.of(hour.toInt(), minute.toInt(), second.toInt(), millis.toInt() * 1000000),
             )
         val offset = ZoneId.systemDefault().rules.getOffset(localDateTime)
         return localDateTime.toInstant(offset).toEpochMilli()

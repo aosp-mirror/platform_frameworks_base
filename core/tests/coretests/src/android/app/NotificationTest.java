@@ -439,6 +439,27 @@ public class NotificationTest {
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_UI_RICH_ONGOING, Flags.FLAG_API_RICH_ONGOING})
+    public void testHasPromotableStyle_progress() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.ProgressStyle())
+                .build();
+        assertThat(n.hasPromotableStyle()).isTrue();
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_UI_RICH_ONGOING})
+    public void testHasPromotableStyle_unknownStyle() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new NotAPlatformStyle())
+                .build();
+
+        assertThat(n.hasPromotableStyle()).isTrue();
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
     public void testHasPromotableCharacteristics() {
         Notification n = new Notification.Builder(mContext, "test")

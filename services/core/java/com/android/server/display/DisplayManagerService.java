@@ -48,6 +48,7 @@ import static android.os.Process.ROOT_UID;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
+import static android.text.TextUtils.formatSimple;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
 
 import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
@@ -279,6 +280,8 @@ public final class DisplayManagerService extends SystemService {
     private InputManagerInternal mInputManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private final UidImportanceListener mUidImportanceListener = new UidImportanceListener();
+    private final DisplayFrozenProcessListener mDisplayFrozenProcessListener;
+
     @Nullable
     private IMediaProjectionManager mProjectionService;
     private DeviceStateManagerInternal mDeviceStateManager;
@@ -320,6 +323,12 @@ public final class DisplayManagerService extends SystemService {
     // All callback records indexed by calling process id.
     @GuardedBy("mSyncRoot")
     private final SparseArray<CallbackRecord> mCallbacks = new SparseArray<>();
+
+    // All callback records indexed by [uid][pid], for fast lookup by uid.
+    // This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
+    @GuardedBy("mSyncRoot")
+    private final SparseArray<SparseArray<CallbackRecord>> mCallbackRecordByPidByUid =
+            new SparseArray<>();
 
     /**
      *  All {@link IVirtualDevice} and {@link DisplayWindowPolicyController}s indexed by
@@ -472,6 +481,7 @@ public final class DisplayManagerService extends SystemService {
 
     // Pending callback records indexed by calling process uid and pid.
     // Must be used outside of the lock mSyncRoot and should be self-locked.
+    // This is only used when {@link deferDisplayEventsWhenFrozen()} is false.
     @GuardedBy("mPendingCallbackSelfLocked")
     private final SparseArray<SparseArray<PendingCallback>> mPendingCallbackSelfLocked =
             new SparseArray<>();
@@ -611,6 +621,7 @@ public final class DisplayManagerService extends SystemService {
         mFlags = injector.getFlags();
         mHandler = new DisplayManagerHandler(displayThreadLooper);
         mHandlerExecutor = new HandlerExecutor(mHandler);
+        mDisplayFrozenProcessListener = new DisplayFrozenProcessListener();
         mUiHandler = UiThread.getHandler();
         mDisplayDeviceRepo = new DisplayDeviceRepository(mSyncRoot, mPersistentDataStore);
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContext,
@@ -1034,10 +1045,14 @@ public final class DisplayManagerService extends SystemService {
     private class UidImportanceListener implements ActivityManager.OnUidImportanceListener {
         @Override
         public void onUidImportance(int uid, int importance) {
-          onUidImportanceInternal(uid, importance);
+            if (deferDisplayEventsWhenFrozen()) {
+                onUidImportanceFlagged(uid, importance);
+            } else {
+                onUidImportanceUnflagged(uid, importance);
+            }
         }
 
-        private void onUidImportanceInternal(int uid, int importance) {
+        private void onUidImportanceUnflagged(int uid, int importance) {
             synchronized (mPendingCallbackSelfLocked) {
                 if (importance >= IMPORTANCE_GONE) {
                     // Clean up as the app is already gone
@@ -1067,6 +1082,83 @@ public final class DisplayManagerService extends SystemService {
                 }
                 mPendingCallbackSelfLocked.delete(uid);
             }
+        }
+
+        private void onUidImportanceFlagged(int uid, int importance) {
+            final boolean cached = (importance >= IMPORTANCE_CACHED);
+            List<CallbackRecord> readyCallbackRecords = null;
+            synchronized (mSyncRoot) {
+                final SparseArray<CallbackRecord> procs = mCallbackRecordByPidByUid.get(uid);
+                if (procs == null) {
+                    return;
+                }
+                if (cached) {
+                    setCachedLocked(procs);
+                } else {
+                    readyCallbackRecords = setUncachedLocked(procs);
+                }
+            }
+            if (readyCallbackRecords != null) {
+                // Attempt to dispatch pending events if the UID is coming out of cached state.
+                for (int i = 0; i < readyCallbackRecords.size(); i++) {
+                    readyCallbackRecords.get(i).dispatchPending();
+                }
+            }
+        }
+
+        // Set all processes in the list to cached.
+        @GuardedBy("mSyncRoot")
+        private void setCachedLocked(SparseArray<CallbackRecord> procs) {
+            for (int i = 0; i < procs.size(); i++) {
+                final CallbackRecord cb = procs.valueAt(i);
+                if (cb != null) {
+                    cb.setCached(true);
+                }
+            }
+        }
+
+        // Set all processes to uncached and return the list of processes that were modified.
+        @GuardedBy("mSyncRoot")
+        private List<CallbackRecord> setUncachedLocked(SparseArray<CallbackRecord> procs) {
+            ArrayList<CallbackRecord> ready = null;
+            for (int i = 0; i < procs.size(); i++) {
+                final CallbackRecord cb = procs.valueAt(i);
+                if (cb != null) {
+                    if (cb.setCached(false)) {
+                        if (ready == null) ready = new ArrayList<>();
+                        ready.add(cb);
+                    }
+                }
+            }
+            return ready;
+        }
+    }
+
+    private class DisplayFrozenProcessListener
+            implements ActivityManagerInternal.FrozenProcessListener {
+        public void onProcessFrozen(int pid) {
+            synchronized (mSyncRoot) {
+                CallbackRecord callback = mCallbacks.get(pid);
+                if (callback == null) {
+                    return;
+                }
+                callback.setFrozen(true);
+            }
+        }
+
+        public void onProcessUnfrozen(int pid) {
+            // First, see if there is a callback associated with this pid.  If there's no
+            // callback, then there is nothing to do.
+            CallbackRecord callback;
+            synchronized (mSyncRoot) {
+                callback = mCallbacks.get(pid);
+                if (callback == null) {
+                    return;
+                }
+                callback.setFrozen(false);
+            }
+            // Attempt to dispatch pending events if the process is coming out of frozen.
+            callback.dispatchPending();
         }
     }
 
@@ -1314,12 +1406,29 @@ public final class DisplayManagerService extends SystemService {
             }
 
             mCallbacks.put(callingPid, record);
+            if (deferDisplayEventsWhenFrozen()) {
+                SparseArray<CallbackRecord> uidPeers = mCallbackRecordByPidByUid.get(record.mUid);
+                if (uidPeers == null) {
+                    uidPeers = new SparseArray<CallbackRecord>();
+                    mCallbackRecordByPidByUid.put(record.mUid, uidPeers);
+                }
+                uidPeers.put(record.mPid, record);
+            }
         }
     }
 
     private void onCallbackDied(CallbackRecord record) {
         synchronized (mSyncRoot) {
             mCallbacks.remove(record.mPid);
+            if (deferDisplayEventsWhenFrozen()) {
+                SparseArray<CallbackRecord> uidPeers = mCallbackRecordByPidByUid.get(record.mUid);
+                if (uidPeers != null) {
+                    uidPeers.remove(record.mPid);
+                    if (uidPeers.size() == 0) {
+                        mCallbackRecordByPidByUid.remove(record.mUid);
+                    }
+                }
+            }
             stopWifiDisplayScanLocked(record);
         }
     }
@@ -3296,12 +3405,16 @@ public final class DisplayManagerService extends SystemService {
         // After releasing the lock, send the notifications out.
         for (int i = 0; i < mTempCallbacks.size(); i++) {
             CallbackRecord callbackRecord = mTempCallbacks.get(i);
-            deliverEventInternal(callbackRecord, displayId, event);
+            if (deferDisplayEventsWhenFrozen()) {
+                deliverEventFlagged(callbackRecord, displayId, event);
+            } else {
+                deliverEventUnflagged(callbackRecord, displayId, event);
+            }
         }
         mTempCallbacks.clear();
     }
 
-    private void deliverEventInternal(CallbackRecord callbackRecord, int displayId, int event) {
+    private void deliverEventUnflagged(CallbackRecord callbackRecord, int displayId, int event) {
         final int uid = callbackRecord.mUid;
         final int pid = callbackRecord.mPid;
         if (isUidCached(uid)) {
@@ -3328,6 +3441,10 @@ public final class DisplayManagerService extends SystemService {
         } else {
             callbackRecord.notifyDisplayEventAsync(displayId, event);
         }
+    }
+
+    private void deliverEventFlagged(CallbackRecord callbackRecord, int displayId, int event) {
+        callbackRecord.notifyDisplayEventAsync(displayId, event);
     }
 
     private boolean extraLogging(String packageName) {
@@ -3454,9 +3571,7 @@ public final class DisplayManagerService extends SystemService {
             pw.println("Callbacks: size=" + callbackCount);
             pw.println("-----------------");
             for (int i = 0; i < callbackCount; i++) {
-                CallbackRecord callback = mCallbacks.valueAt(i);
-                pw.println("  " + i + ": mPid=" + callback.mPid
-                        + ", mWifiDisplayScanRequested=" + callback.mWifiDisplayScanRequested);
+                pw.println("  " + i + ": " + mCallbacks.valueAt(i).dump());
             }
 
             pw.println();
@@ -3855,12 +3970,43 @@ public final class DisplayManagerService extends SystemService {
 
         public boolean mWifiDisplayScanRequested;
 
+        // A single pending event.
+        private record Event(int displayId, @DisplayEvent int event) { };
+
+        // The list of pending events.  This is null until there is a pending event to be saved.
+        // This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
+        @GuardedBy("mCallback")
+        private ArrayList<Event> mPendingEvents;
+
+        // Process states: a process is ready to receive events if it is neither cached nor
+        // frozen.
+        @GuardedBy("mCallback")
+        private boolean mCached;
+        @GuardedBy("mCallback")
+        private boolean mFrozen;
+
         CallbackRecord(int pid, int uid, @NonNull IDisplayManagerCallback callback,
                 @EventsMask long eventsMask) {
             mPid = pid;
             mUid = uid;
             mCallback = callback;
             mEventsMask = new AtomicLong(eventsMask);
+            mCached = false;
+            mFrozen = false;
+
+            if (deferDisplayEventsWhenFrozen()) {
+                // Some CallbackRecords are registered very early in system boot, before
+                // mActivityManagerInternal is initialized. If mActivityManagerInternal is null,
+                // do not register the frozen process listener.  However, do verify that all such
+                // registrations are for the self pid (which can never be frozen, so the frozen
+                // process listener does not matter).
+                if (mActivityManagerInternal != null) {
+                    mActivityManagerInternal.addFrozenProcessListener(pid, mHandlerExecutor,
+                            mDisplayFrozenProcessListener);
+                } else if (Process.myPid() != pid) {
+                    Slog.e(TAG, "DisplayListener registered too early");
+                }
+            }
 
             String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
             mPackageName = packageNames == null ? null : packageNames[0];
@@ -3868,6 +4014,46 @@ public final class DisplayManagerService extends SystemService {
 
         public void updateEventsMask(@EventsMask long eventsMask) {
             mEventsMask.set(eventsMask);
+        }
+
+        /**
+         * Return true if the process can accept events.
+         */
+        @GuardedBy("mCallback")
+        private boolean isReadyLocked() {
+            return !mCached && !mFrozen;
+        }
+
+        /**
+         * Return true if the process is now ready and has pending events to be delivered.
+         */
+        @GuardedBy("mCallback")
+        private boolean hasPendingAndIsReadyLocked() {
+            return isReadyLocked() && mPendingEvents != null && !mPendingEvents.isEmpty();
+        }
+
+        /**
+         * Set the frozen flag for this process.  Return true if the process is now ready to
+         * receive events and there are pending events to be delivered.
+         * This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
+         */
+        public boolean setFrozen(boolean frozen) {
+            synchronized (mCallback) {
+                mFrozen = frozen;
+                return hasPendingAndIsReadyLocked();
+            }
+        }
+
+        /**
+         * Set the cached flag for this process.  Return true if the process is now ready to
+         * receive events and there are pending events to be delivered.
+         * This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
+         */
+        public boolean setCached(boolean cached) {
+            synchronized (mCallback) {
+                mCached = cached;
+                return hasPendingAndIsReadyLocked();
+            }
         }
 
         @Override
@@ -3885,7 +4071,7 @@ public final class DisplayManagerService extends SystemService {
         /**
          * @return {@code false} if RemoteException happens; otherwise {@code true} for
          * success.  This returns true even if the event was deferred because the remote client is
-         * cached.
+         * cached or frozen.
          */
         public boolean notifyDisplayEventAsync(int displayId, @DisplayEvent int event) {
             if (!shouldSendEvent(event)) {
@@ -3900,6 +4086,22 @@ public final class DisplayManagerService extends SystemService {
                 }
                 // The client is not interested in this event, so do nothing.
                 return true;
+            }
+
+            if (deferDisplayEventsWhenFrozen()) {
+                synchronized (mCallback) {
+                    // Add the new event to the pending list if the client frozen or cached (not
+                    // ready) or if there are existing pending events.  The latter condition
+                    // occurs as the client is transitioning to ready but pending events have not
+                    // been dispatched.  The new event must be added to the pending list to
+                    // preserve event ordering.
+                    if (!isReadyLocked() || (mPendingEvents != null && !mPendingEvents.isEmpty())) {
+                        // The client is interested in the event but is not ready to receive it.
+                        // Put the event on the pending list.
+                        addDisplayEvent(displayId, event);
+                        return true;
+                    }
+                }
             }
 
             return transmitDisplayEvent(displayId, event);
@@ -3948,8 +4150,81 @@ public final class DisplayManagerService extends SystemService {
                     return true;
             }
         }
+
+        // Add a single event to the pending list, possibly combining or collapsing events in the
+        // list.
+        // This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
+        @GuardedBy("mCallback")
+        private void addDisplayEvent(int displayId, int event) {
+            if (mPendingEvents == null) {
+                mPendingEvents = new ArrayList<>();
+            }
+            if (!mPendingEvents.isEmpty()) {
+                // Ignore redundant events. Further optimization is possible by merging adjacent
+                // events.
+                Event last = mPendingEvents.get(mPendingEvents.size() - 1);
+                if (last.displayId == displayId && last.event == event) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Ignore redundant display event " + displayId + "/" + event
+                                + " to " + mUid + "/" + mPid);
+                    }
+                    return;
+                }
+            }
+            mPendingEvents.add(new Event(displayId, event));
+        }
+
+        // Send all pending events.  This can safely be called if the process is not ready, but it
+        // would be unusual to do so.  The method returns true on success.
+        // This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
+        public boolean dispatchPending() {
+            synchronized (mCallback) {
+                if (mPendingEvents == null || mPendingEvents.isEmpty()) {
+                    return true;
+                }
+                if (!isReadyLocked()) {
+                    return false;
+                }
+                for (int i = 0; i < mPendingEvents.size(); i++) {
+                    Event displayEvent = mPendingEvents.get(i);
+                    if (DEBUG) {
+                        Slog.d(TAG, "Send pending display event #" + i + " "
+                                + displayEvent.displayId + "/"
+                                + displayEvent.event + " to " + mUid + "/" + mPid);
+                    }
+                    if (!transmitDisplayEvent(displayEvent.displayId, displayEvent.event)) {
+                        Slog.d(TAG, "Drop pending events for dead process " + mPid);
+                        break;
+                    }
+                }
+                mPendingEvents.clear();
+                return true;
+            }
+        }
+
+        // Return a string suitable for dumpsys.
+        private String dump() {
+            if (deferDisplayEventsWhenFrozen()) {
+                final String fmt =
+                        "mPid=%d mUid=%d mWifiDisplayScanRequested=%s"
+                        + " cached=%s frozen=%s pending=%d";
+                synchronized (mCallback) {
+                    return formatSimple(fmt,
+                            mPid, mUid, mWifiDisplayScanRequested, mCached, mFrozen,
+                            (mPendingEvents == null) ? 0 : mPendingEvents.size());
+                }
+            } else {
+                final String fmt =
+                        "mPid=%d mUid=%d mWifiDisplayScanRequested=%s";
+                return formatSimple(fmt,
+                        mPid, mUid, mWifiDisplayScanRequested);
+            }
+        }
     }
 
+    /**
+     * This is only used if {@link deferDisplayEventsWhenFrozen()} is false.
+     */
     private static final class PendingCallback {
         private final CallbackRecord mCallbackRecord;
         private final ArrayList<Pair<Integer, Integer>> mDisplayEvents;
@@ -5503,5 +5778,12 @@ public final class DisplayManagerService extends SystemService {
         public ExternalDisplayStatsService getExternalDisplayStatsService() {
             return mExternalDisplayStatsService;
         }
+    }
+
+    /**
+     * Return the value of the pause
+     */
+    private static boolean deferDisplayEventsWhenFrozen() {
+        return com.android.server.am.Flags.deferDisplayEventsWhenFrozen();
     }
 }
