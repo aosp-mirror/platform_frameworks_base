@@ -36,14 +36,18 @@ class OpenByDefaultDialogView @JvmOverloads constructor(
     private lateinit var backgroundDim: Drawable
 
     fun setDismissOnClickListener(callback: (View) -> Unit) {
-        val dismissButton = dialogContainer.requireViewById<Button>(
-            R.id.open_by_default_settings_dialog_dismiss_button)
-        dismissButton.setOnClickListener(callback)
         // Clicks on the background dim should also dismiss the dialog.
         setOnClickListener(callback)
         // We add a no-op on-click listener to the dialog container so that clicks on it won't
         // propagate to the listener of the layout (which represents the background dim).
         dialogContainer.setOnClickListener { }
+    }
+
+    fun setConfirmButtonClickListener(callback: (View) -> Unit) {
+        val dismissButton = dialogContainer.requireViewById<Button>(
+            R.id.open_by_default_settings_dialog_confirm_button
+        )
+        dismissButton.setOnClickListener(callback)
     }
 
     override fun onFinishInflate() {
