@@ -20,38 +20,23 @@ import org.objectweb.asm.Attribute
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
-import org.objectweb.asm.Opcodes
 import org.objectweb.asm.TypePath
 
 /**
- * A method visitor that removes everything from method body.
+ * A method visitor that creates or replaces a method body.
  *
- * To inject a method body, override [visitCode] and create the opcodes there.
+ * Override [emitNewCode] to build the method body.
  */
 abstract class BodyReplacingMethodVisitor(
-    access: Int,
-    name: String,
-    descriptor: String,
-    signature: String?,
-    exceptions: Array<String>?,
-    next: MethodVisitor?,
+    private val createBody: Boolean,
+    next: MethodVisitor?
 ) : MethodVisitor(OPCODE_VERSION, next) {
-    val isVoid: Boolean
-    val isStatic: Boolean
-
-    init {
-        isVoid = descriptor.endsWith(")V")
-        isStatic = access and Opcodes.ACC_STATIC != 0
-    }
 
     // Following methods are for things that we need to keep.
     // Since they're all calling the super method, we can just remove them, but we keep them
     // just to clarify what we're keeping.
 
-    final override fun visitParameter(
-            name: String?,
-            access: Int
-    ) {
+    final override fun visitParameter(name: String?, access: Int) {
         super.visitParameter(name, access)
     }
 
@@ -59,10 +44,7 @@ abstract class BodyReplacingMethodVisitor(
         return super.visitAnnotationDefault()
     }
 
-    final override fun visitAnnotation(
-            descriptor: String?,
-            visible: Boolean
-    ): AnnotationVisitor? {
+    final override fun visitAnnotation(descriptor: String?, visible: Boolean): AnnotationVisitor? {
         return super.visitAnnotation(descriptor, visible)
     }
 
@@ -75,27 +57,20 @@ abstract class BodyReplacingMethodVisitor(
         return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible)
     }
 
-    final override fun visitAnnotableParameterCount(
-            parameterCount: Int,
-            visible: Boolean
-    ) {
+    final override fun visitAnnotableParameterCount(parameterCount: Int, visible: Boolean) {
         super.visitAnnotableParameterCount(parameterCount, visible)
     }
 
     final override fun visitParameterAnnotation(
-            parameter: Int,
-            descriptor: String?,
-            visible: Boolean
+        parameter: Int,
+        descriptor: String?,
+        visible: Boolean
     ): AnnotationVisitor? {
         return super.visitParameterAnnotation(parameter, descriptor, visible)
     }
 
     final override fun visitAttribute(attribute: Attribute?) {
         super.visitAttribute(attribute)
-    }
-
-    override fun visitEnd() {
-        super.visitEnd()
     }
 
     /**
@@ -108,9 +83,18 @@ abstract class BodyReplacingMethodVisitor(
      * (See also https://asm.ow2.io/asm4-guide.pdf section 3.2.1 about the MethovVisitor
      * call order.)
      */
-    var emitCode = false
+    private var emitCode = false
+
+    /**
+     * This value will be set as true when [visitCode] is called. In [visitEnd], if this value
+     * is still false, this means that the original method does not have a body.
+     *
+     * We want to forcefully inject a method body in [visitEnd] if [createBody] is true.
+     */
+    private var visitedCode = false
 
     final override fun visitCode() {
+        visitedCode = true
         super.visitCode()
 
         try {
@@ -122,15 +106,19 @@ abstract class BodyReplacingMethodVisitor(
         }
     }
 
+    final override fun visitEnd() {
+        if (!visitedCode && createBody) {
+            visitCode()
+        }
+        super.visitEnd()
+    }
+
     /**
      * Subclass must implement it and emit code, and call [visitMaxs] at the end.
      */
     abstract fun emitNewCode()
 
-    final override fun visitMaxs(
-            maxStack: Int,
-            maxLocals: Int
-    ) {
+    final override fun visitMaxs(maxStack: Int, maxLocals: Int) {
         if (emitCode) {
             super.visitMaxs(maxStack, maxLocals)
         }
@@ -140,11 +128,11 @@ abstract class BodyReplacingMethodVisitor(
     // emit any of them, so they are all no-op.
 
     final override fun visitFrame(
-            type: Int,
-            numLocal: Int,
-            local: Array<out Any>?,
-            numStack: Int,
-            stack: Array<out Any>?
+        type: Int,
+        numLocal: Int,
+        local: Array<out Any>?,
+        numStack: Int,
+        stack: Array<out Any>?
     ) {
         if (emitCode) {
             super.visitFrame(type, numLocal, local, numStack, stack)
@@ -157,38 +145,29 @@ abstract class BodyReplacingMethodVisitor(
         }
     }
 
-    final override fun visitIntInsn(
-            opcode: Int,
-            operand: Int
-    ) {
+    final override fun visitIntInsn(opcode: Int, operand: Int) {
         if (emitCode) {
             super.visitIntInsn(opcode, operand)
         }
     }
 
-    final override fun visitVarInsn(
-            opcode: Int,
-            varIndex: Int
-    ) {
+    final override fun visitVarInsn(opcode: Int, varIndex: Int) {
         if (emitCode) {
             super.visitVarInsn(opcode, varIndex)
         }
     }
 
-    final override fun visitTypeInsn(
-            opcode: Int,
-            type: String?
-    ) {
+    final override fun visitTypeInsn(opcode: Int, type: String?) {
         if (emitCode) {
             super.visitTypeInsn(opcode, type)
         }
     }
 
     final override fun visitFieldInsn(
-            opcode: Int,
-            owner: String?,
-            name: String?,
-            descriptor: String?
+        opcode: Int,
+        owner: String?,
+        name: String?,
+        descriptor: String?
     ) {
         if (emitCode) {
             super.visitFieldInsn(opcode, owner, name, descriptor)
@@ -196,11 +175,11 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitMethodInsn(
-            opcode: Int,
-            owner: String?,
-            name: String?,
-            descriptor: String?,
-            isInterface: Boolean
+        opcode: Int,
+        owner: String?,
+        name: String?,
+        descriptor: String?,
+        isInterface: Boolean
     ) {
         if (emitCode) {
             super.visitMethodInsn(opcode, owner, name, descriptor, isInterface)
@@ -208,21 +187,20 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitInvokeDynamicInsn(
-            name: String?,
-            descriptor: String?,
-            bootstrapMethodHandle: Handle?,
-            vararg bootstrapMethodArguments: Any?
+        name: String?,
+        descriptor: String?,
+        bootstrapMethodHandle: Handle?,
+        vararg bootstrapMethodArguments: Any?
     ) {
         if (emitCode) {
-            super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle,
-                    *bootstrapMethodArguments)
+            super.visitInvokeDynamicInsn(
+                name, descriptor, bootstrapMethodHandle,
+                *bootstrapMethodArguments
+            )
         }
     }
 
-    final override fun visitJumpInsn(
-            opcode: Int,
-            label: Label?
-    ) {
+    final override fun visitJumpInsn(opcode: Int, label: Label?) {
         if (emitCode) {
             super.visitJumpInsn(opcode, label)
         }
@@ -240,20 +218,17 @@ abstract class BodyReplacingMethodVisitor(
         }
     }
 
-    final override fun visitIincInsn(
-            varIndex: Int,
-            increment: Int
-    ) {
+    final override fun visitIincInsn(varIndex: Int, increment: Int) {
         if (emitCode) {
             super.visitIincInsn(varIndex, increment)
         }
     }
 
     final override fun visitTableSwitchInsn(
-            min: Int,
-            max: Int,
-            dflt: Label?,
-            vararg labels: Label?
+        min: Int,
+        max: Int,
+        dflt: Label?,
+        vararg labels: Label?
     ) {
         if (emitCode) {
             super.visitTableSwitchInsn(min, max, dflt, *labels)
@@ -261,29 +236,26 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitLookupSwitchInsn(
-            dflt: Label?,
-            keys: IntArray?,
-            labels: Array<out Label>?
+        dflt: Label?,
+        keys: IntArray?,
+        labels: Array<out Label>?
     ) {
         if (emitCode) {
             super.visitLookupSwitchInsn(dflt, keys, labels)
         }
     }
 
-    final override fun visitMultiANewArrayInsn(
-            descriptor: String?,
-            numDimensions: Int
-    ) {
+    final override fun visitMultiANewArrayInsn(descriptor: String?, numDimensions: Int) {
         if (emitCode) {
             super.visitMultiANewArrayInsn(descriptor, numDimensions)
         }
     }
 
     final override fun visitInsnAnnotation(
-            typeRef: Int,
-            typePath: TypePath?,
-            descriptor: String?,
-            visible: Boolean
+        typeRef: Int,
+        typePath: TypePath?,
+        descriptor: String?,
+        visible: Boolean
     ): AnnotationVisitor? {
         if (emitCode) {
             return super.visitInsnAnnotation(typeRef, typePath, descriptor, visible)
@@ -292,10 +264,10 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitTryCatchBlock(
-            start: Label?,
-            end: Label?,
-            handler: Label?,
-            type: String?
+        start: Label?,
+        end: Label?,
+        handler: Label?,
+        type: String?
     ) {
         if (emitCode) {
             super.visitTryCatchBlock(start, end, handler, type)
@@ -303,10 +275,10 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitTryCatchAnnotation(
-            typeRef: Int,
-            typePath: TypePath?,
-            descriptor: String?,
-            visible: Boolean
+        typeRef: Int,
+        typePath: TypePath?,
+        descriptor: String?,
+        visible: Boolean
     ): AnnotationVisitor? {
         if (emitCode) {
             return super.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible)
@@ -315,12 +287,12 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitLocalVariable(
-            name: String?,
-            descriptor: String?,
-            signature: String?,
-            start: Label?,
-            end: Label?,
-            index: Int
+        name: String?,
+        descriptor: String?,
+        signature: String?,
+        start: Label?,
+        end: Label?,
+        index: Int
     ) {
         if (emitCode) {
             super.visitLocalVariable(name, descriptor, signature, start, end, index)
@@ -328,25 +300,23 @@ abstract class BodyReplacingMethodVisitor(
     }
 
     final override fun visitLocalVariableAnnotation(
-            typeRef: Int,
-            typePath: TypePath?,
-            start: Array<out Label>?,
-            end: Array<out Label>?,
-            index: IntArray?,
-            descriptor: String?,
-            visible: Boolean
+        typeRef: Int,
+        typePath: TypePath?,
+        start: Array<out Label>?,
+        end: Array<out Label>?,
+        index: IntArray?,
+        descriptor: String?,
+        visible: Boolean
     ): AnnotationVisitor? {
         if (emitCode) {
             return super.visitLocalVariableAnnotation(
-                    typeRef, typePath, start, end, index, descriptor, visible)
+                typeRef, typePath, start, end, index, descriptor, visible
+            )
         }
         return null
     }
 
-    final override fun visitLineNumber(
-            line: Int,
-            start: Label?
-    ) {
+    final override fun visitLineNumber(line: Int, start: Label?) {
         if (emitCode) {
             super.visitLineNumber(line, start)
         }

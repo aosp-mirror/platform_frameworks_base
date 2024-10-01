@@ -116,7 +116,6 @@ cc_library_shared_for_libandroid_runtime {
     ],
 
     static_libs: [
-        "libnativehelper_lazy",
         "libziparchive_for_incfs",
         "libguiflags",
     ],
@@ -290,6 +289,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libdmabufinfo",
                 "libgui_window_info_static",
                 "libkernelconfigs",
+                "libnativehelper_lazy",
                 "libseccomp_policy",
                 "libgrallocusage",
                 "libscrypt_static",
@@ -419,6 +419,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libimage_type_recognition",
                 "libinput",
                 "libjpeg",
+                "libnativehelper_jvm",
                 "libpiex",
                 "libpng",
                 "libtiff_directory",

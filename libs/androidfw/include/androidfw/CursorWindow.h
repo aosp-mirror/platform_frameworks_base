@@ -26,6 +26,8 @@
 #include "binder/Parcel.h"
 #include "utils/String8.h"
 
+#include "android-base/mapped_file.h"
+
 #define LOG_WINDOW(...)
 
 namespace android {
@@ -149,6 +151,8 @@ private:
     String8 mName;
     int mAshmemFd = -1;
     void* mData = nullptr;
+    std::unique_ptr<android::base::MappedFile> mMappedFile;
+
     /**
      * Pointer to the first FieldSlot, used to optimize the extremely
      * hot code path of getFieldSlot().

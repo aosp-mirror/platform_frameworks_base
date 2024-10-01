@@ -1,20 +1,15 @@
-// Keep the following two TEST_MAPPINGs in sync:
-// frameworks/base/ravenwood/TEST_MAPPING
-// frameworks/base/tools/hoststubgen/TEST_MAPPING
 {
   "presubmit": [
     { "name": "tiny-framework-dump-test" },
     { "name": "hoststubgentest" },
+    { "name": "hoststubgen-test-tiny-test" },
     { "name": "hoststubgen-invoke-test" },
-    {
-      "name": "RavenwoodMockitoTest_device"
-    },
-    {
-      "name": "RavenwoodBivalentTest_device"
-    },
-    {
-      "name": "RavenwoodResApkTest"
-    },
+    { "name": "RavenwoodMockitoTest_device" },
+    { "name": "RavenwoodBivalentTest_device" },
+
+    { "name": "RavenwoodBivalentInstTest_nonself_inst" },
+    { "name": "RavenwoodBivalentInstTest_self_inst_device" },
+
     // The sysui tests should match vendor/unbundled_google/packages/SystemUIGoogle/TEST_MAPPING
     {
       "name": "SystemUIGoogleTests"
@@ -26,6 +21,128 @@
     }
   ],
   "ravenwood-presubmit": [
+    // AUTO-GENERATED-START
+    // DO NOT MODIFY MANUALLY
+    // Use scripts/update-test-mapping.sh to update it.
+    {
+      "name": "AdServicesSharedLibrariesUnitTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "android.test.mock.ravenwood.tests",
+      "host": true
+    },
+    {
+      "name": "CarLibHostUnitTest",
+      "host": true,
+      "keywords": ["automotive_code_coverage"]
+    },
+    {
+      "name": "CarServiceHostUnitTest",
+      "host": true,
+      "keywords": ["automotive_code_coverage"]
+    },
+    {
+      "name": "CarSystemUIRavenTests",
+      "host": true,
+      "keywords": ["automotive_code_coverage"]
+    },
+    {
+      "name": "CtsAccountManagerTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsAppTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsContentTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsDatabaseTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsGraphicsTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsIcuTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsInputMethodTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsOsTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsProtoTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsResourcesTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsTextTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksCoreSystemPropertiesTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksCoreTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksInputMethodSystemServerTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksMockingServicesTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksServicesTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "FrameworksUtilTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "InternalTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "PowerStatsTestsRavenwood",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentInstTest_nonself_inst",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentInstTest_self_inst",
+      "host": true
+    },
+    {
+      "name": "RavenwoodBivalentTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodCoreTest",
+      "host": true
+    },
     {
       "name": "RavenwoodMinimumTest",
       "host": true
@@ -35,15 +152,22 @@
       "host": true
     },
     {
-      "name": "CtsUtilTestCasesRavenwood",
+      "name": "RavenwoodResApkTest",
       "host": true
     },
     {
-      "name": "RavenwoodCoreTest",
+      "name": "RavenwoodRuntimeTest",
       "host": true
     },
     {
-      "name": "RavenwoodBivalentTest",
+      "name": "RavenwoodServicesTest",
+      "host": true
+    }
+    // AUTO-GENERATED-END
+  ],
+  "ravenwood-postsubmit": [
+    {
+      "name": "SystemUiRavenTests",
       "host": true
     }
   ]

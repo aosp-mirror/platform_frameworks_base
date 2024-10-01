@@ -16,7 +16,6 @@
 package com.android.hoststubgen.filters
 
 import com.android.hoststubgen.asm.ClassNodes
-import com.android.hoststubgen.asm.getDirectOuterClassName
 
 /**
  * This is used as the second last fallback filter. This filter propagates the class-wide policy
@@ -24,74 +23,71 @@ import com.android.hoststubgen.asm.getDirectOuterClassName
  */
 class ClassWidePolicyPropagatingFilter(
     private val classes: ClassNodes,
-    fallback: OutputFilter,
-    ) : DelegatingFilter(fallback) {
+    fallback: OutputFilter
+) : DelegatingFilter(fallback) {
 
-    private fun getClassWidePolicy(className: String, resolve: Boolean): FilterPolicyWithReason? {
+    /**
+     * We don't use ClassNode.outerClass, because it gives as the top-level
+     * outer class (A$B$C -> A), not the direct outer class (A$B$C -> A$B).
+     *
+     * Sometimes a class name includes `$`, but is not as a nested class name separator
+     * (e.g. a class name like `MyClass$$`). In this case, `MyClass$` is not actually a class.
+     *
+     * So before getting the class policy on a nonexistent class, which may cause an
+     * incorrect result, we make sure the class actually exists.
+     */
+    private fun getDirectOuterClass(className: String): String? {
         var currentClass = className
-
-
-        // If the class name is `a.b.c.A$B$C`, then we try to get the class wide policy
-        // from a.b.c.A$B$C, then a.b.c.A$B, and then a.b.c.A.
         while (true) {
-            // Sometimes a class name has a `$` in it but not as a nest class name separator --
-            // e.g. class name like "MyClass$$". In this case, `MyClass$` may not actually be
-            // a class name.
-            // So before getting the class policy on a nonexistent class, which may cause an
-            // incorrect result, we make sure if className actually exists.
-            if (classes.hasClass(className)) {
-                outermostFilter.getPolicyForClass(className).let { policy ->
-                    if (policy.policy.isClassWidePolicy) {
-                        val p = if (resolve) {
-                            policy.policy.resolveClassWidePolicy()
-                        } else {
-                            policy.policy
-                        }
-
-                        return p.withReason(policy.reason)
-                            .wrapReason("class-wide in $currentClass")
-                    }
-                    // If the class's policy is remove, then remove it.
-                    if (policy.policy == FilterPolicy.Remove) {
-                        return FilterPolicy.Remove.withReason("class-wide in $currentClass")
-                    }
-                }
-            }
-
-            // Next, look at the outer class...
-            val outer = getDirectOuterClassName(currentClass)
-            if (outer == null) {
+            val pos = currentClass.lastIndexOf('$')
+            if (pos < 0) {
                 return null
             }
-            currentClass = outer
+            currentClass = currentClass.substring(0, pos)
+            if (classes.hasClass(currentClass)) {
+                return currentClass
+            }
         }
+    }
+
+    private fun getClassWidePolicy(className: String, resolve: Boolean): FilterPolicyWithReason? {
+        outermostFilter.getPolicyForClass(className).let { policy ->
+            if (policy.policy == FilterPolicy.KeepClass) {
+                val p = if (resolve) {
+                    policy.policy.resolveClassWidePolicy()
+                } else {
+                    policy.policy
+                }
+
+                return p.withReason(policy.reason)
+                    .wrapReason("class-wide in $className")
+            }
+            // If the class's policy is remove, then remove it.
+            if (policy.policy == FilterPolicy.Remove) {
+                return FilterPolicy.Remove.withReason("class-wide in $className")
+            }
+        }
+        return null
     }
 
     override fun getPolicyForClass(className: String): FilterPolicyWithReason {
-        // If it's a nested class, use the outer class's policy.
-        getDirectOuterClassName(className)?.let { outerName ->
-            getClassWidePolicy(outerName, resolve = false)?.let { policy ->
-                return policy
-            }
-        }
-
-        return super.getPolicyForClass(className)
+        // If the class name is `a.b.c.A$B$C`, then we try to get the class wide policy
+        // from a.b.c.A$B$C, then a.b.c.A$B, and then a.b.c.A, recursively
+        return getDirectOuterClass(className)?.let { getClassWidePolicy(it, resolve = false) }
+            ?: super.getPolicyForClass(className)
     }
 
-    override fun getPolicyForField(
-            className: String,
-            fieldName: String
-    ): FilterPolicyWithReason {
+    override fun getPolicyForField(className: String, fieldName: String): FilterPolicyWithReason {
         return getClassWidePolicy(className, resolve = true)
                 ?: super.getPolicyForField(className, fieldName)
     }
 
     override fun getPolicyForMethod(
-            className: String,
-            methodName: String,
-            descriptor: String
+        className: String,
+        methodName: String,
+        descriptor: String
     ): FilterPolicyWithReason {
         return getClassWidePolicy(className, resolve = true)
-                ?: super.getPolicyForMethod(className, methodName, descriptor)
+            ?: super.getPolicyForMethod(className, methodName, descriptor)
     }
 }

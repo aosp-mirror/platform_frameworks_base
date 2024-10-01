@@ -63,7 +63,7 @@ shift $(($OPTIND - 1))
 
 
 # Build the dump files, which are the input of this test.
-run m tiny-framework-dump-test
+run m  dump-jar tiny-framework-dump-test
 
 
 # Get the path to the generate text files. (not the golden files.)

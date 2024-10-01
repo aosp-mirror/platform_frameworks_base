@@ -15,12 +15,12 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
 /**
  * This class will be renamed by the "rename" directive in the policy file.
  */
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkToBeRenamed {
     private final int mValue;
 

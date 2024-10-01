@@ -2406,9 +2406,9 @@ public class Instrumentation {
      * @hide
      */
     @android.ravenwood.annotation.RavenwoodKeep
-    public final void basicInit(Context context) {
-        mInstrContext = context;
-        mAppContext = context;
+    public final void basicInit(Context instrContext, Context appContext) {
+        mInstrContext = instrContext;
+        mAppContext = appContext;
     }
 
     /** @hide */
