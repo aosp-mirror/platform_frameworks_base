@@ -16,8 +16,6 @@
 
 package com.android.server.companion.securechannel;
 
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS;
-
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Build;
@@ -498,7 +496,7 @@ public class SecureChannel {
 
     private void exchangeAttestation()
             throws IOException, GeneralSecurityException, BadHandleException, CryptoException {
-        if (mVerificationResult == RESULT_SUCCESS) {
+        if (mVerificationResult == 0) {
             Slog.d(TAG, "Remote attestation was already verified.");
             return;
         }
@@ -530,11 +528,11 @@ public class SecureChannel {
         sendMessage(MessageType.AVF_RESULT, verificationResult);
         byte[] remoteVerificationResult = readMessage(MessageType.AVF_RESULT);
 
-        if (ByteBuffer.wrap(remoteVerificationResult).getInt() != RESULT_SUCCESS) {
+        if (ByteBuffer.wrap(remoteVerificationResult).getInt() != 0) {
             throw new SecureChannelException("Remote device failed to verify local attestation.");
         }
 
-        if (mVerificationResult != RESULT_SUCCESS) {
+        if (mVerificationResult != 0) {
             throw new SecureChannelException("Failed to verify remote attestation.");
         }
 
@@ -549,7 +547,7 @@ public class SecureChannel {
             return false;
         }
         // Is authenticated
-        return mPskVerified || mVerificationResult == RESULT_SUCCESS;
+        return mPskVerified || mVerificationResult == 0;
     }
 
     // First byte indicates message type; 0 = CLIENT INIT, 1 = SERVER INIT

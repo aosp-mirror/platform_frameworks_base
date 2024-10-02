@@ -68,6 +68,7 @@ public class SelectorWithWidgetPreference extends CheckBoxPreference {
 
     private View mExtraWidgetContainer;
     private ImageView mExtraWidget;
+    @Nullable private String mExtraWidgetContentDescription;
     private boolean mIsCheckBox = false;  // whether to display this button as a checkbox
 
     private View.OnClickListener mExtraWidgetOnClickListener;
@@ -173,6 +174,12 @@ public class SelectorWithWidgetPreference extends CheckBoxPreference {
 
         setExtraWidgetOnClickListener(mExtraWidgetOnClickListener);
 
+        if (mExtraWidget != null) {
+            mExtraWidget.setContentDescription(mExtraWidgetContentDescription != null
+                    ? mExtraWidgetContentDescription
+                    : getContext().getString(R.string.settings_label));
+        }
+
         if (Flags.allowSetTitleMaxLines()) {
             TextView title = (TextView) holder.findViewById(android.R.id.title);
             title.setMaxLines(mTitleMaxLines);
@@ -207,6 +214,17 @@ public class SelectorWithWidgetPreference extends CheckBoxPreference {
 
         mExtraWidgetContainer.setVisibility((mExtraWidgetOnClickListener != null)
                 ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Sets the content description of the extra widget. If {@code null}, a default content
+     * description will be used ("Settings").
+     */
+    public void setExtraWidgetContentDescription(@Nullable String contentDescription) {
+        if (!TextUtils.equals(mExtraWidgetContentDescription, contentDescription)) {
+            mExtraWidgetContentDescription = contentDescription;
+            notifyChanged();
+        }
     }
 
     /**

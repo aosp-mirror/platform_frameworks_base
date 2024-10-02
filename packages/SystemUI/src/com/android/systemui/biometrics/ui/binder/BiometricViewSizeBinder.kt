@@ -18,13 +18,11 @@ package com.android.systemui.biometrics.ui.binder
 
 import android.animation.Animator
 import android.animation.AnimatorSet
-import android.animation.ValueAnimator
 import android.graphics.Outline
 import android.graphics.Rect
 import android.transition.AutoTransition
 import android.transition.TransitionManager
 import android.util.TypedValue
-import android.view.Surface
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewOutlineProvider
@@ -52,7 +50,6 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import kotlin.math.abs
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /** Helper for [BiometricViewBinder] to handle resize transitions. */
@@ -98,7 +95,7 @@ object BiometricViewSizeBinder {
             TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
                 1f,
-                view.resources.displayMetrics
+                view.resources.displayMetrics,
             )
         val cornerRadiusPx = (pxToDp * cornerRadius).toInt()
 
@@ -114,7 +111,7 @@ object BiometricViewSizeBinder {
                                 0,
                                 view.width + cornerRadiusPx,
                                 view.height,
-                                cornerRadiusPx.toFloat()
+                                cornerRadiusPx.toFloat(),
                             )
                         }
                         PromptPosition.Left -> {
@@ -123,7 +120,7 @@ object BiometricViewSizeBinder {
                                 0,
                                 view.width,
                                 view.height,
-                                cornerRadiusPx.toFloat()
+                                cornerRadiusPx.toFloat(),
                             )
                         }
                         PromptPosition.Bottom,
@@ -133,7 +130,7 @@ object BiometricViewSizeBinder {
                                 0,
                                 view.width,
                                 view.height + cornerRadiusPx,
-                                cornerRadiusPx.toFloat()
+                                cornerRadiusPx.toFloat(),
                             )
                         }
                     }
@@ -160,16 +157,13 @@ object BiometricViewSizeBinder {
             fun setVisibilities(hideSensorIcon: Boolean, size: PromptSize) {
                 viewsToHideWhenSmall.forEach { it.showContentOrHide(forceHide = size.isSmall) }
                 largeConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                largeConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                 largeConstraintSet.setVisibility(R.id.indicator, View.GONE)
                 largeConstraintSet.setVisibility(R.id.scrollView, View.GONE)
 
                 if (hideSensorIcon) {
                     smallConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                    smallConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     smallConstraintSet.setVisibility(R.id.indicator, View.GONE)
                     mediumConstraintSet.setVisibility(iconHolderView.id, View.GONE)
-                    mediumConstraintSet.setVisibility(R.id.biometric_icon_overlay, View.GONE)
                     mediumConstraintSet.setVisibility(R.id.indicator, View.GONE)
                 }
             }
@@ -189,24 +183,24 @@ object BiometricViewSizeBinder {
                                     R.id.biometric_icon,
                                     ConstraintSet.LEFT,
                                     ConstraintSet.PARENT_ID,
-                                    ConstraintSet.LEFT
+                                    ConstraintSet.LEFT,
                                 )
                                 mediumConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.LEFT,
-                                    position.left
+                                    position.left,
                                 )
                                 smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.RIGHT)
                                 smallConstraintSet.connect(
                                     R.id.biometric_icon,
                                     ConstraintSet.LEFT,
                                     ConstraintSet.PARENT_ID,
-                                    ConstraintSet.LEFT
+                                    ConstraintSet.LEFT,
                                 )
                                 smallConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.LEFT,
-                                    position.left
+                                    position.left,
                                 )
                             }
                             if (position.top != 0) {
@@ -216,13 +210,13 @@ object BiometricViewSizeBinder {
                                 mediumConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.TOP,
-                                    position.top
+                                    position.top,
                                 )
                                 smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.BOTTOM)
                                 smallConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.TOP,
-                                    position.top
+                                    position.top,
                                 )
                             }
                             if (position.right != 0) {
@@ -233,24 +227,24 @@ object BiometricViewSizeBinder {
                                     R.id.biometric_icon,
                                     ConstraintSet.RIGHT,
                                     ConstraintSet.PARENT_ID,
-                                    ConstraintSet.RIGHT
+                                    ConstraintSet.RIGHT,
                                 )
                                 mediumConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.RIGHT,
-                                    position.right
+                                    position.right,
                                 )
                                 smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.LEFT)
                                 smallConstraintSet.connect(
                                     R.id.biometric_icon,
                                     ConstraintSet.RIGHT,
                                     ConstraintSet.PARENT_ID,
-                                    ConstraintSet.RIGHT
+                                    ConstraintSet.RIGHT,
                                 )
                                 smallConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.RIGHT,
-                                    position.right
+                                    position.right,
                                 )
                             }
                             if (position.bottom != 0) {
@@ -260,13 +254,13 @@ object BiometricViewSizeBinder {
                                 mediumConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.BOTTOM,
-                                    position.bottom
+                                    position.bottom,
                                 )
                                 smallConstraintSet.clear(R.id.biometric_icon, ConstraintSet.TOP)
                                 smallConstraintSet.setMargin(
                                     R.id.biometric_icon,
                                     ConstraintSet.BOTTOM,
-                                    position.bottom
+                                    position.bottom,
                                 )
                             }
                             iconHolderView.layoutParams = iconParams
@@ -305,11 +299,11 @@ object BiometricViewSizeBinder {
                         } else if (bounds.right < 0) {
                             mediumConstraintSet.setGuidelineBegin(
                                 rightGuideline.id,
-                                abs(bounds.right)
+                                abs(bounds.right),
                             )
                             smallConstraintSet.setGuidelineBegin(
                                 rightGuideline.id,
-                                abs(bounds.right)
+                                abs(bounds.right),
                             )
                         }
 
@@ -362,13 +356,13 @@ object BiometricViewSizeBinder {
                                 R.id.scrollView,
                                 ConstraintSet.LEFT,
                                 R.id.midGuideline,
-                                ConstraintSet.LEFT
+                                ConstraintSet.LEFT,
                             )
                             flipConstraintSet.connect(
                                 R.id.scrollView,
                                 ConstraintSet.RIGHT,
                                 R.id.rightGuideline,
-                                ConstraintSet.RIGHT
+                                ConstraintSet.RIGHT,
                             )
                         } else if (position.isTop) {
                             // Top position is only used for 180 rotation Udfps
@@ -377,24 +371,24 @@ object BiometricViewSizeBinder {
                                 R.id.scrollView,
                                 ConstraintSet.TOP,
                                 R.id.indicator,
-                                ConstraintSet.BOTTOM
+                                ConstraintSet.BOTTOM,
                             )
                             mediumConstraintSet.connect(
                                 R.id.scrollView,
                                 ConstraintSet.BOTTOM,
                                 R.id.button_bar,
-                                ConstraintSet.TOP
+                                ConstraintSet.TOP,
                             )
                             mediumConstraintSet.connect(
                                 R.id.panel,
                                 ConstraintSet.TOP,
                                 R.id.biometric_icon,
-                                ConstraintSet.TOP
+                                ConstraintSet.TOP,
                             )
                             mediumConstraintSet.setMargin(
                                 R.id.panel,
                                 ConstraintSet.TOP,
-                                (-24 * pxToDp).toInt()
+                                (-24 * pxToDp).toInt(),
                             )
                             mediumConstraintSet.setVerticalBias(R.id.scrollView, 0f)
                         }

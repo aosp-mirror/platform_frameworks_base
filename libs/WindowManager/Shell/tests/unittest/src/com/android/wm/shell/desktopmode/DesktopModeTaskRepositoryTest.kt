@@ -882,6 +882,51 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         assertThat(tasks).containsExactly(1, 3).inOrder()
     }
 
+    @Test
+    fun setTaskInFullImmersiveState_savedAsInImmersiveState() {
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isFalse()
+
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
+    }
+
+    @Test
+    fun removeTaskInFullImmersiveState_removedAsInImmersiveState() {
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
+
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = false)
+
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isFalse()
+    }
+
+    @Test
+    fun removeTaskInFullImmersiveState_otherWasImmersive_otherRemainsImmersive() {
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 2, immersive = false)
+
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
+    }
+
+    @Test
+    fun setTaskInFullImmersiveState_sameDisplay_overridesExistingFullImmersiveTask() {
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 2, immersive = true)
+
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isFalse()
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 2)).isTrue()
+    }
+
+    @Test
+    fun setTaskInFullImmersiveState_differentDisplay_bothAreImmersive() {
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1, taskId = 2, immersive = true)
+
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 1)).isTrue()
+        assertThat(repo.isTaskInFullImmersiveState(taskId = 2)).isTrue()
+    }
 
     class TestListener : DesktopModeTaskRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0

@@ -10613,20 +10613,31 @@ public class TelephonyManager {
         return null;
     }
 
-    /** @hide */
+    /**
+     * Get the names of packages with carrier privileges for the current subscription.
+     *
+     * @throws UnsupportedOperationException If the device does not have {@link
+     *     PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}
+     * @hide
+     */
+    @FlaggedApi(android.os.Flags.FLAG_MAINLINE_VCN_PLATFORM_API)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public List<String> getPackagesWithCarrierPrivileges() {
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
+    @NonNull
+    public Set<String> getPackagesWithCarrierPrivileges() {
+        final Set<String> result = new HashSet<>();
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getPackagesWithCarrierPrivileges(getPhoneId());
+                result.addAll(telephony.getPackagesWithCarrierPrivileges(getPhoneId()));
             }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getPackagesWithCarrierPrivileges RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "getPackagesWithCarrierPrivileges NPE", ex);
         }
-        return Collections.EMPTY_LIST;
+        return result;
     }
 
     /**

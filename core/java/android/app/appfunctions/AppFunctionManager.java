@@ -305,17 +305,18 @@ public final class AppFunctionManager {
 
         @Override
         public void onError(@NonNull ParcelableException exception) {
-            mExecutor.execute(() -> {
-                if (IllegalArgumentException.class.isAssignableFrom(
-                        exception.getCause().getClass())) {
-                    mCallback.onError((IllegalArgumentException) exception.getCause());
-                } else if (SecurityException.class.isAssignableFrom(
-                        exception.getCause().getClass())) {
-                    mCallback.onError((SecurityException) exception.getCause());
-                } else {
-                    mCallback.onError(exception);
-                }
-            });
+            mExecutor.execute(
+                    () -> {
+                        if (IllegalArgumentException.class.isAssignableFrom(
+                                exception.getCause().getClass())) {
+                            mCallback.onError((IllegalArgumentException) exception.getCause());
+                        } else if (SecurityException.class.isAssignableFrom(
+                                exception.getCause().getClass())) {
+                            mCallback.onError((SecurityException) exception.getCause());
+                        } else {
+                            mCallback.onError(exception);
+                        }
+                    });
         }
     }
 }

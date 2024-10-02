@@ -45,6 +45,7 @@ import static android.hardware.display.HdrConversionMode.HDR_CONVERSION_UNSUPPOR
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.ROOT_UID;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_FULL;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_HIGH;
 import static android.provider.Settings.Secure.RESOLUTION_MODE_UNKNOWN;
@@ -655,12 +656,14 @@ public final class DisplayManagerService extends SystemService {
         mExtraDisplayLoggingPackageName = DisplayProperties.debug_vri_package().orElse(null);
         mExtraDisplayEventLogging = !TextUtils.isEmpty(mExtraDisplayLoggingPackageName);
 
-        mExternalDisplayStatsService = new ExternalDisplayStatsService(mContext, mHandler);
+        mExternalDisplayStatsService = new ExternalDisplayStatsService(mContext, mHandler,
+                this::isExtendedDisplayEnabled);
         mDisplayNotificationManager = new DisplayNotificationManager(mFlags, mContext,
                 mExternalDisplayStatsService);
         mExternalDisplayPolicy = new ExternalDisplayPolicy(new ExternalDisplayPolicyInjector());
         if (mFlags.isDisplayTopologyEnabled()) {
-            mDisplayTopologyCoordinator = new DisplayTopologyCoordinator();
+            mDisplayTopologyCoordinator =
+                    new DisplayTopologyCoordinator(this::isExtendedDisplayEnabled);
         } else {
             mDisplayTopologyCoordinator = null;
         }
@@ -2260,6 +2263,17 @@ public final class DisplayManagerService extends SystemService {
         }
 
         updateLogicalDisplayState(display);
+    }
+
+    private boolean isExtendedDisplayEnabled() {
+        try {
+            return 0 != Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0);
+        } catch (Throwable e) {
+            // Some services might not be initialised yet to be able to call getInt
+            return false;
+        }
     }
 
     @SuppressLint("AndroidFrameworkRequiresPermission")

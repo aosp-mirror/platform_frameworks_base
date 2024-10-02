@@ -23,7 +23,6 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
@@ -48,8 +47,6 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     public static final int SPACE_EVENLY = 7;
     public static final int SPACE_AROUND = 8;
 
-    public static final ColumnLayout.Companion COMPANION = new ColumnLayout.Companion();
-
     int mHorizontalPositioning;
     int mVerticalPositioning;
     float mSpacedBy = 0f;
@@ -64,7 +61,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     public ColumnLayout(Component parent, int componentId, int animationId,
-                     int horizontalPositioning, int verticalPositioning, float spacedBy) {
+                        int horizontalPositioning, int verticalPositioning, float spacedBy) {
         this(parent, componentId, animationId, 0, 0, 0, 0,
                 horizontalPositioning, verticalPositioning, spacedBy);
     }
@@ -214,7 +211,6 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
             }
             childMeasure.setX(tx);
             childMeasure.setY(ty);
-            childMeasure.setVisibility(child.mVisibility);
             ty += childMeasure.getH();
             if (mVerticalPositioning == SPACE_BETWEEN
                     || mVerticalPositioning == SPACE_AROUND
@@ -226,66 +222,66 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         DebugLog.e();
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        @Override
-        public String name() {
-            return "ColumnLayout";
-        }
+    public static String name() {
+        return "ColumnLayout";
+    }
 
-        @Override
-        public int id() {
-            return Operations.LAYOUT_COLUMN;
-        }
+    public static int id() {
+        return Operations.LAYOUT_COLUMN;
+    }
 
-        public void apply(WireBuffer buffer, int componentId, int animationId,
-                          int horizontalPositioning, int verticalPositioning, float spacedBy) {
-            buffer.start(Operations.LAYOUT_COLUMN);
-            buffer.writeInt(componentId);
-            buffer.writeInt(animationId);
-            buffer.writeInt(horizontalPositioning);
-            buffer.writeInt(verticalPositioning);
-            buffer.writeFloat(spacedBy);
-        }
+    public static void apply(WireBuffer buffer, int componentId, int animationId,
+                             int horizontalPositioning, int verticalPositioning, float spacedBy) {
+        buffer.start(Operations.LAYOUT_COLUMN);
+        buffer.writeInt(componentId);
+        buffer.writeInt(animationId);
+        buffer.writeInt(horizontalPositioning);
+        buffer.writeInt(verticalPositioning);
+        buffer.writeFloat(spacedBy);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int componentId = buffer.readInt();
-            int animationId = buffer.readInt();
-            int horizontalPositioning = buffer.readInt();
-            int verticalPositioning = buffer.readInt();
-            float spacedBy = buffer.readFloat();
-            operations.add(new ColumnLayout(null, componentId, animationId,
-                    horizontalPositioning, verticalPositioning, spacedBy));
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int componentId = buffer.readInt();
+        int animationId = buffer.readInt();
+        int horizontalPositioning = buffer.readInt();
+        int verticalPositioning = buffer.readInt();
+        float spacedBy = buffer.readFloat();
+        operations.add(new ColumnLayout(null, componentId, animationId,
+                horizontalPositioning, verticalPositioning, spacedBy));
+    }
 
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Layout Operations", id(), name())
-               .description("Column layout implementation, positioning components one"
-                       + " after the other vertically.\n\n"
-                       + "It supports weight and horizontal/vertical positioning.")
-               .examplesDimension(100, 400)
-               .exampleImage("Top", "layout-ColumnLayout-start-top.png")
-               .exampleImage("Center", "layout-ColumnLayout-start-center.png")
-               .exampleImage("Bottom", "layout-ColumnLayout-start-bottom.png")
-               .exampleImage("SpaceEvenly", "layout-ColumnLayout-start-space-evenly.png")
-               .exampleImage("SpaceAround", "layout-ColumnLayout-start-space-around.png")
-               .exampleImage("SpaceBetween", "layout-ColumnLayout-start-space-between.png")
-               .field(INT, "COMPONENT_ID", "unique id for this component")
-               .field(INT, "ANIMATION_ID", "id used to match components,"
-                       + " for animation purposes")
-               .field(INT, "HORIZONTAL_POSITIONING", "horizontal positioning value")
-               .possibleValues("START", ColumnLayout.START)
-               .possibleValues("CENTER", ColumnLayout.CENTER)
-               .possibleValues("END", ColumnLayout.END)
-               .field(INT, "VERTICAL_POSITIONING", "vertical positioning value")
-               .possibleValues("TOP", ColumnLayout.TOP)
-               .possibleValues("CENTER", ColumnLayout.CENTER)
-               .possibleValues("BOTTOM", ColumnLayout.BOTTOM)
-               .possibleValues("SPACE_BETWEEN", ColumnLayout.SPACE_BETWEEN)
-               .possibleValues("SPACE_EVENLY", ColumnLayout.SPACE_EVENLY)
-               .possibleValues("SPACE_AROUND", ColumnLayout.SPACE_AROUND)
-                    .field(FLOAT, "SPACED_BY", "Horizontal spacing between components");
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
+                .description("Column layout implementation, positioning components one"
+                        + " after the other vertically.\n\n"
+                        + "It supports weight and horizontal/vertical positioning.")
+                .examplesDimension(100, 400)
+                .exampleImage("Top", "layout-ColumnLayout-start-top.png")
+                .exampleImage("Center", "layout-ColumnLayout-start-center.png")
+                .exampleImage("Bottom", "layout-ColumnLayout-start-bottom.png")
+                .exampleImage("SpaceEvenly", "layout-ColumnLayout-start-space-evenly.png")
+                .exampleImage("SpaceAround", "layout-ColumnLayout-start-space-around.png")
+                .exampleImage("SpaceBetween", "layout-ColumnLayout-start-space-between.png")
+                .field(INT, "COMPONENT_ID", "unique id for this component")
+                .field(INT, "ANIMATION_ID", "id used to match components,"
+                        + " for animation purposes")
+                .field(INT, "HORIZONTAL_POSITIONING", "horizontal positioning value")
+                .possibleValues("START", ColumnLayout.START)
+                .possibleValues("CENTER", ColumnLayout.CENTER)
+                .possibleValues("END", ColumnLayout.END)
+                .field(INT, "VERTICAL_POSITIONING", "vertical positioning value")
+                .possibleValues("TOP", ColumnLayout.TOP)
+                .possibleValues("CENTER", ColumnLayout.CENTER)
+                .possibleValues("BOTTOM", ColumnLayout.BOTTOM)
+                .possibleValues("SPACE_BETWEEN", ColumnLayout.SPACE_BETWEEN)
+                .possibleValues("SPACE_EVENLY", ColumnLayout.SPACE_EVENLY)
+                .possibleValues("SPACE_AROUND", ColumnLayout.SPACE_AROUND)
+                .field(FLOAT, "SPACED_BY", "Horizontal spacing between components");
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        apply(buffer, mComponentId, mAnimationId,
+                mHorizontalPositioning, mVerticalPositioning, mSpacedBy);
     }
 }

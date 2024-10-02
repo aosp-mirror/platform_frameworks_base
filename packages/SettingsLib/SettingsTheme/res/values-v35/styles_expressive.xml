@@ -335,4 +335,15 @@
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
+
+    <style name="SettingsLibStatusBannerCardStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginHorizontal">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:layout_marginVertical">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="cardBackgroundColor">@color/settingslib_materialColorSurfaceBright</item>
+        <item name="cardCornerRadius">@dimen/settingslib_expressive_radius_extralarge2</item>
+        <item name="cardElevation">0dp</item>
+        <item name="rippleColor">?android:attr/colorControlHighlight</item>
+    </style>
 </resources>

@@ -268,7 +268,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
 
         verify(mClipboardOverlaySuppressionController).shouldSuppressOverlay(mSampleClipData,
                 mSampleSource, Build.IS_EMULATOR);
-        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 
     @Test
@@ -296,7 +296,7 @@ public class ClipboardListenerTest extends SysuiTestCase {
         mClipboardListener.start();
         mClipboardListener.onPrimaryClipChanged();
 
-        verifyZeroInteractions(mOverlayControllerProvider);
+        verifyNoMoreInteractions(mOverlayControllerProvider);
     }
 
     @Test

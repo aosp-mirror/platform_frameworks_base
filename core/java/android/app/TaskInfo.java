@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.view.DisplayCutout;
+import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
@@ -329,6 +330,13 @@ public class TaskInfo {
     public long capturedLinkTimestamp;
 
     /**
+     * The requested visible types of insets.
+     * @hide
+     */
+    @WindowInsets.Type.InsetsType
+    public int requestedVisibleTypes;
+
+    /**
      * Encapsulate specific App Compat information.
      * @hide
      */
@@ -465,6 +473,7 @@ public class TaskInfo {
                 && lastNonFullscreenBounds == this.lastNonFullscreenBounds
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
+                && requestedVisibleTypes == that.requestedVisibleTypes
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
@@ -539,6 +548,7 @@ public class TaskInfo {
         lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
+        requestedVisibleTypes = source.readInt();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
@@ -591,6 +601,7 @@ public class TaskInfo {
         dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
+        dest.writeInt(requestedVisibleTypes);
         dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
@@ -633,6 +644,7 @@ public class TaskInfo {
                 + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
+                + " requestedVisibleTypes=" + requestedVisibleTypes
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
     }

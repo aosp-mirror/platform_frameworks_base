@@ -17,6 +17,7 @@
 package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
+import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.app.KeyguardManager
 import android.app.PendingIntent
@@ -101,6 +102,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_DESKTO
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
+import com.android.wm.shell.sysui.UserChangeListener
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
@@ -146,10 +148,12 @@ class DesktopTasksController(
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
-    DragAndDropController.DragAndDropListener {
+    DragAndDropController.DragAndDropListener,
+    UserChangeListener {
 
     private val desktopMode: DesktopModeImpl
     private var visualIndicator: DesktopModeVisualIndicator? = null
+    private var userId: Int
     private val desktopModeShellCommandHandler: DesktopModeShellCommandHandler =
         DesktopModeShellCommandHandler(this)
     private val mOnAnimationFinishedCallback =
@@ -193,6 +197,7 @@ class DesktopTasksController(
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback({ onInit() }, this)
         }
+        userId = ActivityManager.getCurrentUser()
     }
 
     private fun onInit() {
@@ -204,6 +209,7 @@ class DesktopTasksController(
             { createExternalInterface() },
             this
         )
+        shellController.addUserChangeListener(this)
         transitions.addHandler(this)
         dragToDesktopTransitionHandler.dragToDesktopStateListener = dragToDesktopStateListener
         recentsTransitionHandler.addTransitionStateListener(
@@ -1777,6 +1783,11 @@ class DesktopTasksController(
         t.remove(dragEvent.dragSurface)
         t.apply()
         return true
+    }
+
+    // TODO(b/366397912): Support full multi-user mode in Windowing.
+    override fun onUserChanged(newUserId: Int, userContext: Context) {
+        userId = newUserId
     }
 
     private fun dump(pw: PrintWriter, prefix: String) {

@@ -224,6 +224,13 @@ class AggregatedPowerStats {
         }
     }
 
+    public void noteBatteryLevel(int batteryLevel, int batteryChargeUah, long timestampMs) {
+        for (int i = 0; i < mPowerComponentStats.size(); i++) {
+            mPowerComponentStats.valueAt(i).noteBatteryLevel(batteryLevel, batteryChargeUah,
+                    timestampMs);
+        }
+    }
+
     void finish(long timestampMs) {
         for (int i = 0; i < mPowerComponentStats.size(); i++) {
             PowerComponentAggregatedPowerStats component = mPowerComponentStats.valueAt(i);

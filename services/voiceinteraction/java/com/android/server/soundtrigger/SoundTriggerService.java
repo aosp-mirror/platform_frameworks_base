@@ -687,6 +687,7 @@ public class SoundTriggerService extends SystemService {
         @Override
         public int startRecognitionForService(ParcelUuid soundModelId, Bundle params,
                 ComponentName detectionService, SoundTrigger.RecognitionConfig config) {
+            final UserHandle userHandle = Binder.getCallingUserHandle();
             mEventLogger.enqueue(new SessionEvent(Type.START_RECOGNITION_SERVICE,
                         getUuid(soundModelId)));
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
@@ -699,7 +700,7 @@ public class SoundTriggerService extends SystemService {
 
                 IRecognitionStatusCallback callback =
                         new RemoteSoundTriggerDetectionService(soundModelId.getUuid(), params,
-                                detectionService, Binder.getCallingUserHandle(), config);
+                                detectionService, userHandle, config);
 
                 synchronized (mLock) {
                     SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
