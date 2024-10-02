@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.keyguard.data.quickaffordance
 
+import android.content.applicationContext
+import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.statusbar.policy.devicePostureController
+import com.android.systemui.settings.userFileManager
+import com.android.systemui.settings.userTracker
 
-val Kosmos.devicePostureRepository: DevicePostureRepository by
-    Kosmos.Fixture { DevicePostureRepositoryImpl(devicePostureController, testDispatcher) }
+val Kosmos.localUserSelectionManager by
+    Kosmos.Fixture {
+        KeyguardQuickAffordanceLocalUserSelectionManager(
+            context = applicationContext,
+            userFileManager = userFileManager,
+            userTracker = userTracker,
+            broadcastDispatcher = broadcastDispatcher,
+        )
+    }

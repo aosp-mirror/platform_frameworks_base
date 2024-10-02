@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.dump.dumpManager
+import com.android.systemui.keyguard.data.repository.pulseExpansionRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.statusbar.policy.devicePostureController
 
-val Kosmos.devicePostureRepository: DevicePostureRepository by
-    Kosmos.Fixture { DevicePostureRepositoryImpl(devicePostureController, testDispatcher) }
+val Kosmos.pulseExpansionInteractor: PulseExpansionInteractor by
+    Kosmos.Fixture { PulseExpansionInteractor(pulseExpansionRepository, dumpManager) }

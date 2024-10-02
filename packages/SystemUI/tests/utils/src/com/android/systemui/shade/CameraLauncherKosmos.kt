@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.keyguard.data.repository
+package com.android.systemui.shade
 
+import com.android.systemui.camera.cameraGestureHelper
+import com.android.systemui.keyguard.domain.interactor.keyguardQuickAffordanceInteractor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.statusbar.policy.devicePostureController
+import com.android.systemui.statusbar.phone.keyguardBypassController
 
-val Kosmos.devicePostureRepository: DevicePostureRepository by
-    Kosmos.Fixture { DevicePostureRepositoryImpl(devicePostureController, testDispatcher) }
+val Kosmos.cameraLauncher by
+    Kosmos.Fixture {
+        CameraLauncher(cameraGestureHelper, keyguardBypassController) {
+            keyguardQuickAffordanceInteractor
+        }
+    }
