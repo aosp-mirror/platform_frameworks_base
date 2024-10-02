@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -95,7 +96,25 @@ class AppHandleEducationController(
               }
             }
             .flowOn(backgroundDispatcher)
-            .collectLatest { captionState -> showEducation(captionState) }
+            .collectLatest { captionState ->
+              showEducation(captionState)
+              // After showing first tooltip, mark education as viewed
+              appHandleEducationDatastoreRepository.updateEducationViewedTimestampMillis(true)
+            }
+      }
+
+      applicationCoroutineScope.launch {
+        if (isFeatureUsed()) return@launch
+        windowDecorCaptionHandleRepository.captionStateFlow
+            .filter { captionState ->
+              captionState is CaptionState.AppHandle && captionState.isHandleMenuExpanded
+            }
+            .take(1)
+            .flowOn(backgroundDispatcher)
+            .collect {
+              // If user expands app handle, mark user has used the feature
+              appHandleEducationDatastoreRepository.updateFeatureUsedTimestampMillis(true)
+            }
       }
     }
   }
@@ -271,6 +290,13 @@ class AppHandleEducationController(
       appHandleEducationDatastoreRepository.dataStoreFlow
           .map { preferences -> preferences.hasEducationViewedTimestampMillis() }
           .distinctUntilChanged()
+
+  /**
+   * Listens to the changes to [WindowingEducationProto#hasFeatureUsedTimestampMillis()] in
+   * datastore proto object.
+   */
+  private suspend fun isFeatureUsed(): Boolean =
+      appHandleEducationDatastoreRepository.dataStoreFlow.first().hasFeatureUsedTimestampMillis()
 
   private fun getSize(@DimenRes resourceId: Int): Int {
     if (resourceId == Resources.ID_NULL) return 0
