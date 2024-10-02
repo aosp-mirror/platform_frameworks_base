@@ -5039,6 +5039,25 @@ public abstract class PackageManager {
             "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
 
     /**
+     * Used by the system to query a {@link android.content.pm.verify.pkg.VerifierService} provider,
+     * which registers itself via an intent-filter handling this action.
+     *
+     * <p class="note">Only the system can bind to such a verifier service. This is protected by the
+     * {@link android.Manifest.permission#BIND_VERIFICATION_AGENT} permission. The verifier service
+     * app should protect the service by adding this permission in the service declaration in its
+     * manifest.
+     * <p>
+     * A verifier service must be a privileged app and hold the
+     * {@link android.Manifest.permission#VERIFICATION_AGENT} permission.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_VERIFICATION_SERVICE)
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_VERIFY_PACKAGE = "android.content.pm.action.VERIFY_PACKAGE";
+
+    /**
      * The names of the requested permissions.
      * <p>
      * <strong>Type:</strong> String[]
