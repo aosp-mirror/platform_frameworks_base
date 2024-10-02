@@ -25,6 +25,7 @@ import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
 
@@ -63,6 +64,7 @@ public class ZenModeDiff {
     public static class FieldDiff<T> {
         private final T mFrom;
         private final T mTo;
+        private final BaseDiff mDetailedDiff;
 
         /**
          * Constructor to create a FieldDiff object with the given values.
@@ -72,6 +74,19 @@ public class ZenModeDiff {
         public FieldDiff(@Nullable T from, @Nullable T to) {
             mFrom = from;
             mTo = to;
+            mDetailedDiff = null;
+        }
+
+        /**
+         * Constructor to create a FieldDiff object with the given values, and that has a
+         * detailed BaseDiff.
+         * @param from from (old) value
+         * @param to to (new) value
+         */
+        public FieldDiff(@Nullable T from, @Nullable T to, @Nullable BaseDiff detailedDiff) {
+            mFrom = from;
+            mTo = to;
+            mDetailedDiff = detailedDiff;
         }
 
         /**
@@ -93,6 +108,9 @@ public class ZenModeDiff {
          */
         @Override
         public String toString() {
+            if (mDetailedDiff != null) {
+                return mDetailedDiff.toString();
+            }
             return mFrom + "->" + mTo;
         }
 
@@ -100,6 +118,9 @@ public class ZenModeDiff {
          * Returns whether this represents an actual diff.
          */
         public boolean hasDiff() {
+            if (mDetailedDiff != null) {
+                return mDetailedDiff.hasDiff();
+            }
             // note that Objects.equals handles null values gracefully.
             return !Objects.equals(mFrom, mTo);
         }
@@ -115,7 +136,8 @@ public class ZenModeDiff {
         @ExistenceChange private int mExists = NONE;
 
         // Map from field name to diffs for any standalone fields in the object.
-        private ArrayMap<String, FieldDiff> mFields = new ArrayMap<>();
+        // LinkedHashMap is specifically chosen here to show insertion order when keys are fetched.
+        private LinkedHashMap<String, FieldDiff> mFields = new LinkedHashMap<>();
 
         // Functions for actually diffing objects and string representations have to be implemented
         // by subclasses.
@@ -550,8 +572,16 @@ public class ZenModeDiff {
             if (!Objects.equals(from.enabler, to.enabler)) {
                 addField(FIELD_ENABLER, new FieldDiff<>(from.enabler, to.enabler));
             }
-            if (!Objects.equals(from.zenPolicy, to.zenPolicy)) {
-                addField(FIELD_ZEN_POLICY, new FieldDiff<>(from.zenPolicy, to.zenPolicy));
+            if (android.app.Flags.modesApi()) {
+                PolicyDiff policyDiff = new PolicyDiff(from.zenPolicy, to.zenPolicy);
+                if (policyDiff.hasDiff()) {
+                    addField(FIELD_ZEN_POLICY, new FieldDiff<>(from.zenPolicy, to.zenPolicy,
+                            policyDiff));
+                }
+            } else {
+                if (!Objects.equals(from.zenPolicy, to.zenPolicy)) {
+                    addField(FIELD_ZEN_POLICY, new FieldDiff<>(from.zenPolicy, to.zenPolicy));
+                }
             }
             if (from.modified != to.modified) {
                 addField(FIELD_MODIFIED, new FieldDiff<>(from.modified, to.modified));
@@ -560,9 +590,12 @@ public class ZenModeDiff {
                 addField(FIELD_PKG, new FieldDiff<>(from.pkg, to.pkg));
             }
             if (android.app.Flags.modesApi()) {
-                if (!Objects.equals(from.zenDeviceEffects, to.zenDeviceEffects)) {
+                DeviceEffectsDiff deviceEffectsDiff = new DeviceEffectsDiff(from.zenDeviceEffects,
+                        to.zenDeviceEffects);
+                if (deviceEffectsDiff.hasDiff()) {
                     addField(FIELD_ZEN_DEVICE_EFFECTS,
-                            new FieldDiff<>(from.zenDeviceEffects, to.zenDeviceEffects));
+                            new FieldDiff<>(from.zenDeviceEffects, to.zenDeviceEffects,
+                                    deviceEffectsDiff));
                 }
                 if (!Objects.equals(from.triggerDescription, to.triggerDescription)) {
                     addField(FIELD_TRIGGER_DESCRIPTION,
@@ -630,7 +663,7 @@ public class ZenModeDiff {
 
                 sb.append(key);
                 sb.append(":");
-                sb.append(diff);
+                sb.append(diff.toString());
             }
 
             if (becameActive()) {
