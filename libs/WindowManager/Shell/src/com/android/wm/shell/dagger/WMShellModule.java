@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.dagger;
 
+import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
 import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
 import android.annotation.Nullable;
@@ -61,8 +62,10 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.dagger.back.ShellBackAnimationModule;
 import com.android.wm.shell.dagger.pip.PipModule;
+import com.android.wm.shell.desktopmode.CloseDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.DefaultDragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
+import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
@@ -87,6 +90,8 @@ import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
+import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.freeform.FreeformTaskTransitionStarterInitializer;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -332,9 +337,13 @@ public abstract class WMShellModule {
     static FreeformComponents provideFreeformComponents(
             FreeformTaskListener taskListener,
             FreeformTaskTransitionHandler transitionHandler,
-            FreeformTaskTransitionObserver transitionObserver) {
+            FreeformTaskTransitionObserver transitionObserver,
+            FreeformTaskTransitionStarterInitializer transitionStarterInitializer) {
         return new FreeformComponents(
-                taskListener, Optional.of(transitionHandler), Optional.of(transitionObserver));
+                taskListener,
+                Optional.of(transitionHandler),
+                Optional.of(transitionObserver),
+                Optional.of(transitionStarterInitializer));
     }
 
     @WMSingleton
@@ -358,27 +367,15 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static FreeformTaskTransitionHandler provideFreeformTaskTransitionHandler(
-            ShellInit shellInit,
             Transitions transitions,
-            Context context,
-            WindowDecorViewModel windowDecorViewModel,
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellAnimationThread ShellExecutor animExecutor,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
-            InteractionJankMonitor interactionJankMonitor,
-            @ShellMainThread Handler handler) {
+            @ShellAnimationThread ShellExecutor animExecutor) {
         return new FreeformTaskTransitionHandler(
-                shellInit,
                 transitions,
-                context,
-                windowDecorViewModel,
                 displayController,
                 mainExecutor,
-                animExecutor,
-                desktopModeTaskRepository,
-                interactionJankMonitor,
-                handler);
+                animExecutor);
     }
 
     @WMSingleton
@@ -390,6 +387,23 @@ public abstract class WMShellModule {
             WindowDecorViewModel windowDecorViewModel) {
         return new FreeformTaskTransitionObserver(
                 context, shellInit, transitions, windowDecorViewModel);
+    }
+
+    @WMSingleton
+    @Provides
+    static FreeformTaskTransitionStarterInitializer provideFreeformTaskTransitionStarterInitializer(
+            ShellInit shellInit,
+            WindowDecorViewModel windowDecorViewModel,
+            FreeformTaskTransitionHandler freeformTaskTransitionHandler,
+            Optional<DesktopMixedTransitionHandler> desktopMixedTransitionHandler) {
+        FreeformTaskTransitionStarter transitionStarter;
+        if (desktopMixedTransitionHandler.isPresent()) {
+            transitionStarter = desktopMixedTransitionHandler.get();
+        } else {
+            transitionStarter = freeformTaskTransitionHandler;
+        }
+        return new FreeformTaskTransitionStarterInitializer(shellInit, windowDecorViewModel,
+                transitionStarter);
     }
 
     //
@@ -701,7 +715,17 @@ public abstract class WMShellModule {
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler) {
         return new ExitDesktopTaskTransitionHandler(
-            transitions, context, interactionJankMonitor, handler);
+                transitions, context, interactionJankMonitor, handler);
+    }
+
+    @WMSingleton
+    @Provides
+    static CloseDesktopTaskTransitionHandler provideCloseDesktopTaskTransitionHandler(
+            Context context,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellAnimationThread ShellExecutor animExecutor
+    ) {
+        return new CloseDesktopTaskTransitionHandler(context, mainExecutor, animExecutor);
     }
 
     @WMSingleton
@@ -756,6 +780,32 @@ public abstract class WMShellModule {
                 Optional.of(new DesktopTasksTransitionObserver(
                         context, repository, transitions, shellTaskOrganizer, shellInit))
         );
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopMixedTransitionHandler> provideDesktopMixedTransitionHandler(
+            Context context,
+            Transitions transitions,
+            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            FreeformTaskTransitionHandler freeformTaskTransitionHandler,
+            CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
+            InteractionJankMonitor interactionJankMonitor,
+            @ShellMainThread Handler handler
+    ) {
+        if (!DesktopModeStatus.canEnterDesktopMode(context)
+                || !ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS.isTrue()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new DesktopMixedTransitionHandler(
+                        context,
+                        transitions,
+                        desktopModeTaskRepository,
+                        freeformTaskTransitionHandler,
+                        closeDesktopTaskTransitionHandler,
+                        interactionJankMonitor,
+                        handler));
     }
 
     @WMSingleton

@@ -64,7 +64,8 @@ public enum DesktopModeFlags {
     ENABLE_WINDOWING_EDGE_DRAG_RESIZE(Flags::enableWindowingEdgeDragResize, true),
     ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
             Flags::enableDesktopWindowingTaskbarRunningApps, true),
-    ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false);
+    ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
+    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.
