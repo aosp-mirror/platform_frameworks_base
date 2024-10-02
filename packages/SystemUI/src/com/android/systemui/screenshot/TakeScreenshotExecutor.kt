@@ -20,9 +20,11 @@ import android.net.Uri
 import android.os.Trace
 import android.util.Log
 import android.view.Display
+import android.view.WindowManager.ScreenshotSource
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.util.ScreenshotRequest
+import com.android.systemui.Flags.screenshotMultidisplayFocusChange
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.data.repository.DisplayRepository
@@ -40,7 +42,7 @@ interface TakeScreenshotExecutor {
     suspend fun executeScreenshots(
         screenshotRequest: ScreenshotRequest,
         onSaved: (Uri?) -> Unit,
-        requestCallback: RequestCallback
+        requestCallback: RequestCallback,
     )
 
     fun onCloseSystemDialogsReceived()
@@ -52,7 +54,7 @@ interface TakeScreenshotExecutor {
     fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
         onSaved: Consumer<Uri?>,
-        requestCallback: RequestCallback
+        requestCallback: RequestCallback,
     )
 }
 
@@ -60,7 +62,7 @@ interface ScreenshotHandler {
     fun handleScreenshot(
         screenshot: ScreenshotData,
         finisher: Consumer<Uri?>,
-        requestCallback: RequestCallback
+        requestCallback: RequestCallback,
     )
 }
 
@@ -75,7 +77,7 @@ class TakeScreenshotExecutorImpl
 @Inject
 constructor(
     private val interactiveScreenshotHandlerFactory: InteractiveScreenshotHandler.Factory,
-    displayRepository: DisplayRepository,
+    private val displayRepository: DisplayRepository,
     @Application private val mainScope: CoroutineScope,
     private val screenshotRequestProcessor: ScreenshotRequestProcessor,
     private val uiEventLogger: UiEventLogger,
@@ -95,31 +97,44 @@ constructor(
     override suspend fun executeScreenshots(
         screenshotRequest: ScreenshotRequest,
         onSaved: (Uri?) -> Unit,
-        requestCallback: RequestCallback
+        requestCallback: RequestCallback,
     ) {
-        val displays = getDisplaysToScreenshot(screenshotRequest.type)
-        val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
-        if (displays.isEmpty()) {
-            Log.wtf(TAG, "No displays found for screenshot.")
-        }
-        displays.forEach { display ->
-            val displayId = display.displayId
-            var screenshotHandler: ScreenshotHandler =
-                if (displayId == Display.DEFAULT_DISPLAY) {
-                    getScreenshotController(display)
-                } else {
-                    headlessScreenshotHandler
-                }
-            Log.d(TAG, "Executing screenshot for display $displayId")
+        if (screenshotMultidisplayFocusChange()) {
+            val display = getDisplayToScreenshot(screenshotRequest)
+            val screenshotHandler = getScreenshotController(display)
             dispatchToController(
                 screenshotHandler,
-                rawScreenshotData = ScreenshotData.fromRequest(screenshotRequest, displayId),
-                onSaved =
-                    if (displayId == Display.DEFAULT_DISPLAY) {
-                        onSaved
-                    } else { _ -> },
-                callback = resultCallbackWrapper.createCallbackForId(displayId)
+                ScreenshotData.fromRequest(screenshotRequest, display.displayId),
+                onSaved,
+                requestCallback,
             )
+        } else {
+            val displays = getDisplaysToScreenshot(screenshotRequest.type)
+            val resultCallbackWrapper = MultiResultCallbackWrapper(requestCallback)
+            if (displays.isEmpty()) {
+                Log.e(TAG, "No displays found for screenshot.")
+            }
+
+            displays.forEach { display ->
+                val displayId = display.displayId
+                var screenshotHandler: ScreenshotHandler =
+                    if (displayId == Display.DEFAULT_DISPLAY) {
+                        getScreenshotController(display)
+                    } else {
+                        headlessScreenshotHandler
+                    }
+
+                Log.d(TAG, "Executing screenshot for display $displayId")
+                dispatchToController(
+                    screenshotHandler,
+                    rawScreenshotData = ScreenshotData.fromRequest(screenshotRequest, displayId),
+                    onSaved =
+                        if (displayId == Display.DEFAULT_DISPLAY) {
+                            onSaved
+                        } else { _ -> },
+                    callback = resultCallbackWrapper.createCallbackForId(displayId),
+                )
+            }
         }
     }
 
@@ -128,7 +143,7 @@ constructor(
         screenshotHandler: ScreenshotHandler,
         rawScreenshotData: ScreenshotData,
         onSaved: (Uri?) -> Unit,
-        callback: RequestCallback
+        callback: RequestCallback,
     ) {
         // Let's wait before logging "screenshot requested", as we should log the processed
         // ScreenshotData.
@@ -160,13 +175,13 @@ constructor(
         uiEventLogger.log(
             ScreenshotEvent.getScreenshotSource(screenshotData.source),
             0,
-            screenshotData.packageNameString
+            screenshotData.packageNameString,
         )
     }
 
     private fun onFailedScreenshotRequest(
         screenshotData: ScreenshotData,
-        callback: RequestCallback
+        callback: RequestCallback,
     ) {
         uiEventLogger.log(SCREENSHOT_CAPTURE_FAILED, 0, screenshotData.packageNameString)
         getNotificationController(screenshotData.displayId)
@@ -183,6 +198,31 @@ constructor(
             allDisplays.filter { it.type in ALLOWED_DISPLAY_TYPES }
         }
     }
+
+    // Return the single display to be screenshot based upon the request.
+    private suspend fun getDisplayToScreenshot(screenshotRequest: ScreenshotRequest): Display {
+        return when (screenshotRequest.source) {
+            // TODO(b/367394043): Overview requests should use a display ID provided in
+            //  ScreenshotRequest.
+            ScreenshotSource.SCREENSHOT_OVERVIEW ->
+                displayRepository.getDisplay(Display.DEFAULT_DISPLAY)
+                    ?: error("Can't find default display")
+
+            // Key chord and vendor gesture occur on the device itself, so screenshot the device's
+            // display
+            ScreenshotSource.SCREENSHOT_KEY_CHORD,
+            ScreenshotSource.SCREENSHOT_VENDOR_GESTURE ->
+                displayRepository.getDisplay(Display.DEFAULT_DISPLAY)
+                    ?: error("Can't find default display")
+
+            // All other invocations use the focused display
+            else -> focusedDisplay()
+        }
+    }
+
+    // TODO(b/367394043): Determine the focused display here.
+    private suspend fun focusedDisplay() =
+        displayRepository.getDisplay(Display.DEFAULT_DISPLAY) ?: error("Can't find default display")
 
     /** Propagates the close system dialog signal to the ScreenshotController. */
     override fun onCloseSystemDialogsReceived() {
@@ -214,7 +254,7 @@ constructor(
     override fun executeScreenshotsAsync(
         screenshotRequest: ScreenshotRequest,
         onSaved: Consumer<Uri?>,
-        requestCallback: RequestCallback
+        requestCallback: RequestCallback,
     ) {
         mainScope.launch {
             executeScreenshots(screenshotRequest, { uri -> onSaved.accept(uri) }, requestCallback)
@@ -235,9 +275,7 @@ constructor(
      * - If any finished with an error, [reportError] of [originalCallback] is called
      * - Otherwise, [onFinish] is called.
      */
-    private class MultiResultCallbackWrapper(
-        private val originalCallback: RequestCallback,
-    ) {
+    private class MultiResultCallbackWrapper(private val originalCallback: RequestCallback) {
         private val idsPending = mutableSetOf<Int>()
         private val idsWithErrors = mutableSetOf<Int>()
 
@@ -290,7 +328,7 @@ constructor(
                 Display.TYPE_EXTERNAL,
                 Display.TYPE_INTERNAL,
                 Display.TYPE_OVERLAY,
-                Display.TYPE_WIFI
+                Display.TYPE_WIFI,
             )
     }
 }
