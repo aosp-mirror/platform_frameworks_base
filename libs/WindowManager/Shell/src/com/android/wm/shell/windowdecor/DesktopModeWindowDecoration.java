@@ -51,6 +51,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -63,10 +64,12 @@ import android.os.UserHandle;
 import android.util.Size;
 import android.util.Slog;
 import android.view.Choreographer;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.window.TaskSnapshot;
@@ -445,8 +448,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             mHandleMenu.relayout(startT, mResult.mCaptionX);
         }
 
+        final boolean inFullImmersive = mDesktopRepository
+                .isTaskInFullImmersiveState(taskInfo.taskId);
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
-                shouldSetTaskPositionAndCrop);
+                shouldSetTaskPositionAndCrop, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
+                inFullImmersive, mDisplayController.getInsetsState(taskInfo.displayId));
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -494,8 +500,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ));
         } else {
             mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
-                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo),
-                    mDesktopRepository.isTaskInFullImmersiveState(mTaskInfo.taskId)
+                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo), inFullImmersive
             ));
         }
         Trace.endSection();
@@ -758,7 +763,11 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             Context context,
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
-            boolean shouldSetTaskPositionAndCrop) {
+            boolean shouldSetTaskPositionAndCrop,
+            boolean isStatusBarVisible,
+            boolean isKeyguardVisibleAndOccluded,
+            boolean inFullImmersiveMode,
+            @NonNull InsetsState displayInsetsState) {
         final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
         final boolean isAppHeader =
                 captionLayoutId == R.layout.desktop_mode_app_header;
@@ -768,6 +777,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mLayoutResId = captionLayoutId;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
+
+        final boolean showCaption;
+        if (Flags.enableFullyImmersiveInDesktop()) {
+            if (inFullImmersiveMode) {
+                showCaption = isStatusBarVisible && !isKeyguardVisibleAndOccluded;
+            } else {
+                showCaption = taskInfo.isFreeform()
+                        || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
+            }
+        } else {
+            // Caption should always be visible in freeform mode. When not in freeform,
+            // align with the status bar except when showing over keyguard (where it should not
+            // shown).
+            //  TODO(b/356405803): Investigate how it's possible for the status bar visibility to
+            //   be false while a freeform window is open if the status bar is always
+            //   forcibly-shown. It may be that the InsetsState (from which |mIsStatusBarVisible|
+            //   is set) still contains an invisible insets source in immersive cases even if the
+            //   status bar is shown?
+            showCaption = taskInfo.isFreeform()
+                    || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
+        }
+        relayoutParams.mIsCaptionVisible = showCaption;
 
         if (isAppHeader) {
             if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
@@ -786,6 +817,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 // Always force-consume the caption bar insets for maximum app compatibility,
                 // including non-immersive apps that just don't handle caption insets properly.
                 relayoutParams.mInsetSourceFlags |= FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
+            }
+            if (Flags.enableFullyImmersiveInDesktop() && inFullImmersiveMode) {
+                final Insets systemBarInsets = displayInsetsState.calculateInsets(
+                        taskInfo.getConfiguration().windowConfiguration.getBounds(),
+                        WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
+                        false /* ignoreVisibility */);
+                relayoutParams.mCaptionTopPadding = systemBarInsets.top;
             }
             // Report occluding elements as bounding rects to the insets system so that apps can
             // draw in the empty space in the center:

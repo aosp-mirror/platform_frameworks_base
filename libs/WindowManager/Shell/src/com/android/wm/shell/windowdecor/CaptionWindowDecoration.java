@@ -194,6 +194,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             ActivityManager.RunningTaskInfo taskInfo,
             boolean applyStartTransactionOnDraw,
             boolean setTaskCropAndPosition,
+            boolean isStatusBarVisible,
+            boolean isKeyguardVisibleAndOccluded,
             InsetsState displayInsetsState) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
@@ -204,6 +206,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
         relayoutParams.mSetTaskPositionAndCrop = setTaskCropAndPosition;
+        relayoutParams.mIsCaptionVisible = taskInfo.isFreeform()
+                || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
 
         if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
             // If the app is requesting to customize the caption bar, allow input to fall
@@ -240,7 +244,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
-                setTaskCropAndPosition, mDisplayController.getInsetsState(taskInfo.displayId));
+                setTaskCropAndPosition, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
+                mDisplayController.getInsetsState(taskInfo.displayId));
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo
