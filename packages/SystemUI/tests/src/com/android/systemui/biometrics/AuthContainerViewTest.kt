@@ -138,6 +138,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
         PromptSelectorInteractorImpl(
             fingerprintRepository,
             displayStateInteractor,
+            credentialInteractor,
             biometricPromptRepository,
             lockPatternUtils,
         )

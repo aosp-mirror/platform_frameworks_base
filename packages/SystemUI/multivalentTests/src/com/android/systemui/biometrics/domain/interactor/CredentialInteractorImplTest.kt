@@ -3,7 +3,9 @@ package com.android.systemui.biometrics.domain.interactor
 import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResourcesManager
 import android.content.pm.UserInfo
+import android.hardware.biometrics.Flags
 import android.os.UserManager
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
@@ -33,6 +35,7 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val USER_ID = 22
+private const val OWNER_ID = 10
 private const val OPERATION_ID = 100L
 private const val MAX_ATTEMPTS = 5
 
@@ -67,7 +70,7 @@ class CredentialInteractorImplTest : SysuiTestCase() {
                 lockPatternUtils,
                 userManager,
                 devicePolicyManager,
-                systemClock
+                systemClock,
             )
     }
 
@@ -115,58 +118,87 @@ class CredentialInteractorImplTest : SysuiTestCase() {
 
     @Test fun pinCredentialWhenBadAndThrottled() = pinCredential(badCredential(timeout = 5_000))
 
-    private fun pinCredential(result: VerifyCredentialResponse) = runTest {
-        val usedAttempts = 1
-        whenever(lockPatternUtils.getCurrentFailedPasswordAttempts(eq(USER_ID)))
-            .thenReturn(usedAttempts)
-        whenever(lockPatternUtils.verifyCredential(any(), eq(USER_ID), anyInt())).thenReturn(result)
-        whenever(lockPatternUtils.verifyGatekeeperPasswordHandle(anyLong(), anyLong(), eq(USER_ID)))
-            .thenReturn(result)
-        whenever(lockPatternUtils.setLockoutAttemptDeadline(anyInt(), anyInt())).thenAnswer {
-            systemClock.elapsedRealtime() + (it.arguments[1] as Int)
-        }
+    @EnableFlags(Flags.FLAG_PRIVATE_SPACE_BP)
+    @Test
+    fun pinCredentialTiedProfileWhenGood() = pinCredential(goodCredential(), OWNER_ID)
 
-        // wrap in an async block so the test can advance the clock if throttling credential
-        // checks prevents the method from returning
-        val statusList = mutableListOf<CredentialStatus>()
-        interactor
-            .verifyCredential(pinRequest(), LockscreenCredential.createPin("1234"))
-            .toList(statusList)
+    @EnableFlags(Flags.FLAG_PRIVATE_SPACE_BP)
+    @Test
+    fun pinCredentialTiedProfileWhenBad() = pinCredential(badCredential(), OWNER_ID)
 
-        val last = statusList.removeLastOrNull()
-        if (result.isMatched) {
-            assertThat(statusList).isEmpty()
-            val successfulResult = last as? CredentialStatus.Success.Verified
-            assertThat(successfulResult).isNotNull()
-            assertThat(successfulResult!!.hat).isEqualTo(result.gatekeeperHAT)
+    @EnableFlags(Flags.FLAG_PRIVATE_SPACE_BP)
+    @Test
+    fun pinCredentialTiedProfileWhenBadAndThrottled() =
+        pinCredential(badCredential(timeout = 5_000), OWNER_ID)
 
-            verify(lockPatternUtils).userPresent(eq(USER_ID))
-            verify(lockPatternUtils)
-                .removeGatekeeperPasswordHandle(eq(result.gatekeeperPasswordHandle))
-        } else {
-            val failedResult = last as? CredentialStatus.Fail.Error
-            assertThat(failedResult).isNotNull()
-            assertThat(failedResult!!.remainingAttempts)
-                .isEqualTo(if (result.timeout > 0) null else MAX_ATTEMPTS - usedAttempts - 1)
-            assertThat(failedResult.urgentMessage).isNull()
+    private fun pinCredential(result: VerifyCredentialResponse, credentialOwner: Int = USER_ID) =
+        runTest {
+            val usedAttempts = 1
+            whenever(lockPatternUtils.getCurrentFailedPasswordAttempts(eq(USER_ID)))
+                .thenReturn(usedAttempts)
+            whenever(lockPatternUtils.verifyCredential(any(), eq(USER_ID), anyInt()))
+                .thenReturn(result)
+            whenever(lockPatternUtils.verifyTiedProfileChallenge(any(), eq(USER_ID), anyInt()))
+                .thenReturn(result)
+            whenever(
+                    lockPatternUtils.verifyGatekeeperPasswordHandle(
+                        anyLong(),
+                        anyLong(),
+                        eq(USER_ID),
+                    )
+                )
+                .thenReturn(result)
+            whenever(lockPatternUtils.setLockoutAttemptDeadline(anyInt(), anyInt())).thenAnswer {
+                systemClock.elapsedRealtime() + (it.arguments[1] as Int)
+            }
 
-            if (result.timeout > 0) { // failed and throttled
-                // messages are in the throttled errors, so the final Error.error is empty
-                assertThat(failedResult.error).isEmpty()
-                assertThat(statusList).isNotEmpty()
-                assertThat(statusList.filterIsInstance(CredentialStatus.Fail.Throttled::class.java))
-                    .hasSize(statusList.size)
+            // wrap in an async block so the test can advance the clock if throttling credential
+            // checks prevents the method from returning
+            val statusList = mutableListOf<CredentialStatus>()
+            interactor
+                .verifyCredential(
+                    pinRequest(credentialOwner),
+                    LockscreenCredential.createPin("1234"),
+                )
+                .toList(statusList)
 
-                verify(lockPatternUtils).setLockoutAttemptDeadline(eq(USER_ID), eq(result.timeout))
-            } else { // failed
-                assertThat(failedResult.error)
-                    .matches(Regex("(.*)try again(.*)", RegexOption.IGNORE_CASE).toPattern())
+            val last = statusList.removeLastOrNull()
+            if (result.isMatched) {
                 assertThat(statusList).isEmpty()
+                val successfulResult = last as? CredentialStatus.Success.Verified
+                assertThat(successfulResult).isNotNull()
+                assertThat(successfulResult!!.hat).isEqualTo(result.gatekeeperHAT)
 
-                verify(lockPatternUtils).reportFailedPasswordAttempt(eq(USER_ID))
+                verify(lockPatternUtils).userPresent(eq(USER_ID))
+                verify(lockPatternUtils)
+                    .removeGatekeeperPasswordHandle(eq(result.gatekeeperPasswordHandle))
+            } else {
+                val failedResult = last as? CredentialStatus.Fail.Error
+                assertThat(failedResult).isNotNull()
+                assertThat(failedResult!!.remainingAttempts)
+                    .isEqualTo(if (result.timeout > 0) null else MAX_ATTEMPTS - usedAttempts - 1)
+                assertThat(failedResult.urgentMessage).isNull()
+
+                if (result.timeout > 0) { // failed and throttled
+                    // messages are in the throttled errors, so the final Error.error is empty
+                    assertThat(failedResult.error).isEmpty()
+                    assertThat(statusList).isNotEmpty()
+                    assertThat(
+                            statusList.filterIsInstance(CredentialStatus.Fail.Throttled::class.java)
+                        )
+                        .hasSize(statusList.size)
+
+                    verify(lockPatternUtils)
+                        .setLockoutAttemptDeadline(eq(USER_ID), eq(result.timeout))
+                } else { // failed
+                    assertThat(failedResult.error)
+                        .matches(Regex("(.*)try again(.*)", RegexOption.IGNORE_CASE).toPattern())
+                    assertThat(statusList).isEmpty()
+
+                    verify(lockPatternUtils).reportFailedPasswordAttempt(eq(USER_ID))
+                }
             }
         }
-    }
 
     @Test
     fun pinCredentialWhenBadAndFinalAttempt() = runTest {
@@ -212,11 +244,11 @@ class CredentialInteractorImplTest : SysuiTestCase() {
     }
 }
 
-private fun pinRequest(): BiometricPromptRequest.Credential.Pin =
+private fun pinRequest(credentialOwner: Int = USER_ID): BiometricPromptRequest.Credential.Pin =
     BiometricPromptRequest.Credential.Pin(
         promptInfo(),
-        BiometricUserInfo(USER_ID),
-        BiometricOperationInfo(OPERATION_ID)
+        BiometricUserInfo(userId = USER_ID, deviceCredentialOwnerId = credentialOwner),
+        BiometricOperationInfo(OPERATION_ID),
     )
 
 private fun goodCredential(
