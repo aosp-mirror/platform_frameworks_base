@@ -994,7 +994,9 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         // be dropped, causing the shade expansion to fail silently. Since the shade doesn't open,
         // it doesn't become visible, and the bounds will never update. Therefore, we must detect
         // the incorrect bounds here and force the update so that touches are routed correctly.
-        if (SceneContainerFlag.isEnabled() && mWindowRootView.getVisibility() == View.INVISIBLE) {
+        if (SceneContainerFlag.isEnabled()
+                && mWindowRootView != null
+                && mWindowRootView.getVisibility() == View.INVISIBLE) {
             Rect bounds = newConfig.windowConfiguration.getBounds();
             if (mWindowRootView.getWidth() != bounds.width()) {
                 mLogger.logConfigChangeWidthAdjust(mWindowRootView.getWidth(), bounds.width());
