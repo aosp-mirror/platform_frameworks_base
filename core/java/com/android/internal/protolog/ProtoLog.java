@@ -22,8 +22,8 @@ import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * ProtoLog API - exposes static logging methods. Usage of this API is similar
@@ -73,7 +73,7 @@ public class ProtoLog {
                 if (sProtoLogInstance != null) {
                     // The ProtoLog instance has already been initialized in this process
                     final var alreadyRegisteredGroups = sProtoLogInstance.getRegisteredGroups();
-                    final var allGroups = new ArrayList<>(alreadyRegisteredGroups);
+                    final var allGroups = new HashSet<>(alreadyRegisteredGroups);
                     allGroups.addAll(Arrays.stream(groups).toList());
                     groups = allGroups.toArray(new IProtoLogGroup[0]);
                 }
