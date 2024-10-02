@@ -11197,7 +11197,7 @@ public class Notification implements Parcelable
      */
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
     public static class ProgressStyle extends Notification.Style {
-        private static final String KEY_ELEMENT_STABLE_ID = "stableId";
+        private static final String KEY_ELEMENT_ID = "id";
         private static final String KEY_ELEMENT_COLOR = "colorInt";
         private static final String KEY_SEGMENT_LENGTH = "length";
         private static final String KEY_STEP_POSITION = "position";
@@ -11624,7 +11624,7 @@ public class Notification implements Parcelable
 
                     final Bundle bundle = new Bundle();
                     bundle.putInt(KEY_SEGMENT_LENGTH, segment.getLength());
-                    bundle.putInt(KEY_ELEMENT_STABLE_ID, segment.getStableId());
+                    bundle.putInt(KEY_ELEMENT_ID, segment.getId());
                     bundle.putInt(KEY_ELEMENT_COLOR, segment.getColor());
 
                     segments.add(bundle);
@@ -11645,11 +11645,11 @@ public class Notification implements Parcelable
                         continue;
                     }
 
-                    final int stableId = segmentBundle.getInt(KEY_ELEMENT_STABLE_ID);
+                    final int id = segmentBundle.getInt(KEY_ELEMENT_ID);
                     final int color = segmentBundle.getInt(KEY_ELEMENT_COLOR,
                             Notification.COLOR_DEFAULT);
                     final Segment segment = new Segment(length)
-                            .setStableId(stableId).setColor(color);
+                            .setId(id).setColor(color);
 
                     segments.add(segment);
                 }
@@ -11670,7 +11670,7 @@ public class Notification implements Parcelable
 
                     final Bundle bundle = new Bundle();
                     bundle.putInt(KEY_STEP_POSITION, step.getPosition());
-                    bundle.putInt(KEY_ELEMENT_STABLE_ID, step.getStableId());
+                    bundle.putInt(KEY_ELEMENT_ID, step.getId());
                     bundle.putInt(KEY_ELEMENT_COLOR, step.getColor());
 
                     steps.add(bundle);
@@ -11691,10 +11691,10 @@ public class Notification implements Parcelable
                     if (position < 0) {
                         continue;
                     }
-                    final int stableId = segmentBundle.getInt(KEY_ELEMENT_STABLE_ID);
+                    final int id = segmentBundle.getInt(KEY_ELEMENT_ID);
                     final int color = segmentBundle.getInt(KEY_ELEMENT_COLOR,
                             Notification.COLOR_DEFAULT);
-                    final Step step = new Step(position).setStableId(stableId).setColor(color);
+                    final Step step = new Step(position).setId(id).setColor(color);
                     steps.add(step);
                 }
             }
@@ -11710,7 +11710,7 @@ public class Notification implements Parcelable
          */
         public static final class Segment {
             private int mLength;
-            private int mStableId = 0;
+            private int mId = 0;
             @ColorInt
             private int mColor = Notification.COLOR_DEFAULT;
 
@@ -11733,19 +11733,19 @@ public class Notification implements Parcelable
             }
 
             /**
-             * Gets the stable id of this Segment.
+             * Gets the id of this Segment.
              *
-             * @see #setStableId
+             * @see #setId
              */
-            public int getStableId() {
-                return mStableId;
+            public int getId() {
+                return mId;
             }
 
             /**
              * Optional ID used to uniquely identify the element across updates.
              */
-            public @NonNull Segment setStableId(int stableId) {
-                mStableId = stableId;
+            public @NonNull Segment setId(int id) {
+                mId = id;
                 return this;
             }
 
@@ -11775,13 +11775,13 @@ public class Notification implements Parcelable
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Segment segment = (Segment) o;
-                return mLength == segment.mLength && mStableId == segment.mStableId
+                return mLength == segment.mLength && mId == segment.mId
                         && mColor == segment.mColor;
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(mLength, mStableId, mColor);
+                return Objects.hash(mLength, mId, mColor);
             }
         }
 
@@ -11795,7 +11795,7 @@ public class Notification implements Parcelable
         public static final class Step {
 
             private int mPosition;
-            private int mStableId;
+            private int mId;
             @ColorInt
             private int mColor = Notification.COLOR_DEFAULT;
 
@@ -11821,17 +11821,17 @@ public class Notification implements Parcelable
 
 
             /**
-             * Optional ID used to uniqurely identify the element across updates.
+             * Optional ID used to uniquely identify the element across updates.
              */
-            public int getStableId() {
-                return mStableId;
+            public int getId() {
+                return mId;
             }
 
             /**
-             * Optional ID used to uniqurely identify the element across updates.
+             * Optional ID used to uniquely identify the element across updates.
              */
-            public @NonNull Step setStableId(int stableId) {
-                mStableId = stableId;
+            public @NonNull Step setId(int id) {
+                mId = id;
                 return this;
             }
 
@@ -11861,13 +11861,13 @@ public class Notification implements Parcelable
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
                 Step step = (Step) o;
-                return mPosition == step.mPosition && mStableId == step.mStableId
+                return mPosition == step.mPosition && mId == step.mId
                         && mColor == step.mColor;
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(mPosition, mStableId, mColor);
+                return Objects.hash(mPosition, mId, mColor);
             }
         }
     }
