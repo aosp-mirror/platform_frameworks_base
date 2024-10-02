@@ -322,7 +322,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"တည်နေရာ"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"ဤစက်ပစ္စည်း၏ တည်နေရာကို ရယူရန်"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"ပြက္ခဒိန်"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"ဖိုင်များ"</string>
@@ -797,7 +797,7 @@
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"သတိပေးချက်များအား အသုံးပြုခွင့်"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"အပလီကေးရှင်းကို အကြောင်းကြားချက်များအား ထုတ်လုပ်ရန်၊ လေ့လာရန်၊ ဖျက်ရန် ခွင့်ပြုခြင်း။ တခြား အပလီကေးရှင်းများမှ သတိပေးချက်များလည်း ပါဝင်ပါသည်"</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"သတိပေးချက် နားထောင်ခြင်း ဆားဗစ် နှင့် ပူးပေါင်းခြင်း"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးခြင်း။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးသည်။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"အခြေအနေ စီမံပေးရေး ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"စွဲကိုင်ထားသူအား အခြေအနေကို စီမံပေးသူ၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ကို ပေးသည်။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"အိပ်မက် ဝန်ဆောင်မှုသို့ ပေါင်းစည်းမည်"</string>

@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"બાયોમેટ્રિક્સનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"બાયોમેટ્રિક્સ અથવા સ્ક્રીન લૉકનો ઉપયોગ કરો"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"આ તમે જ છો તેની ચકાસણી કરો"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"આગળ વધવા માટે બાયોમેટ્રિકનો ઉપયોગ કરો"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"ચાલુ રાખવા માટે તમારા બાયોમેટ્રિક ડેટા અથવા સ્ક્રીન લૉક સુવિધાનો ઉપયોગ કરો"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>

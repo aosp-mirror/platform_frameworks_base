@@ -642,7 +642,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"మీ మీడియా సేకరణ నుండి లొకేషన్లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"బయోమెట్రిక్స్‌ను ఉపయోగించండి"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"బయోమెట్రిక్స్‌ను లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ఇది మీరేనని వెరిఫై చేసుకోండి"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"ఈ చర్య చేస్తోంది మీరేనని వెరిఫై చేయండి"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"కొనసాగించడానికి, మీ బయోమెట్రిక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"కొనసాగించడానికి మీ బయోమెట్రిక్ లేదా స్క్రీన్ లాక్‌ను ఉపయోగించండి"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"బయోమెట్రిక్ హార్డ్‌వేర్‌ అందుబాటులో లేదు"</string>
