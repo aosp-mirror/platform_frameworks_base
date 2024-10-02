@@ -205,6 +205,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                 .verifyCallerCanExecuteAppFunction(
                         callingUid,
                         callingPid,
+                        targetUser,
                         requestInternal.getCallingPackage(),
                         targetPackageName,
                         requestInternal.getClientRequest().getFunctionIdentifier())

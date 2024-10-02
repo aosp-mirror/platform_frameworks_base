@@ -93,6 +93,7 @@ class CallerValidatorImpl implements CallerValidator {
     public AndroidFuture<Boolean> verifyCallerCanExecuteAppFunction(
             int callingUid,
             int callingPid,
+            @NonNull UserHandle targetUser,
             @NonNull String callerPackageName,
             @NonNull String targetPackageName,
             @NonNull String functionId) {
@@ -122,7 +123,10 @@ class CallerValidatorImpl implements CallerValidator {
 
         FutureAppSearchSession futureAppSearchSession =
                 new FutureAppSearchSessionImpl(
-                        mContext.getSystemService(AppSearchManager.class),
+                        Objects.requireNonNull(
+                                mContext
+                                        .createContextAsUser(targetUser, 0)
+                                        .getSystemService(AppSearchManager.class)),
                         THREAD_POOL_EXECUTOR,
                         new SearchContext.Builder(APP_FUNCTION_STATIC_METADATA_DB).build());
 
