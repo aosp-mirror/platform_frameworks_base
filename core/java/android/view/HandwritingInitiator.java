@@ -19,6 +19,7 @@ package android.view;
 import static com.android.text.flags.Flags.handwritingCursorPosition;
 import static com.android.text.flags.Flags.handwritingTrackDisabled;
 import static com.android.text.flags.Flags.handwritingUnsupportedMessage;
+import static com.android.text.flags.Flags.handwritingUnsupportedShowSoftInputFix;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
@@ -241,7 +242,11 @@ public class HandwritingInitiator {
                             if (!candidateView.hasFocus()) {
                                 requestFocusWithoutReveal(candidateView);
                             }
-                            mImm.showSoftInput(candidateView, 0);
+                            if (!handwritingUnsupportedShowSoftInputFix()
+                                    || (candidateView instanceof TextView tv
+                                            && tv.getShowSoftInputOnFocus())) {
+                                mImm.showSoftInput(candidateView, 0);
+                            }
                             mState.mHandled = true;
                             mState.mShouldInitHandwriting = false;
                             motionEvent.setAction((motionEvent.getAction()
