@@ -728,20 +728,23 @@ public class StatusBarStateControllerImpl implements
         // doesn't work well for clients of this class (like remote input) that expect the device to
         // be fully and properly unlocked when the state changes to SHADE.
         //
-        // Therefore, we calculate the device to be in a locked-ish state (KEYGUARD or SHADE_LOCKED,
+        // Therefore, we consider the device to be in a keyguardish state (KEYGUARD or SHADE_LOCKED,
         // but not SHADE) if *any* of these are still true:
         // 1. deviceUnlockStatus.isUnlocked is false.
-        // 2. We are on (currentScene equals) a locked-ish scene (Lockscreen, Bouncer, or Communal).
-        // 3. We are over (backStack contains) a locked-ish scene (Lockscreen or Communal).
+        // 2. currentScene is a keyguardish scene (Lockscreen, Bouncer, or Communal).
+        // 3. backStack contains a keyguardish scene (Lockscreen or Communal).
+
+        final boolean onKeyguardish = onLockscreen || onBouncer || onCommunal;
+        final boolean overKeyguardish = overLockscreen || overCommunal;
 
         if (isOccluded) {
             // Occlusion is special; even though the device is still technically on the lockscreen,
             // the UI behaves as if it is unlocked.
             newState = StatusBarState.SHADE;
-        } else if (onLockscreen || onBouncer || onCommunal || overLockscreen || overCommunal) {
-            // We get here if we are on or over a locked-ish scene, even if isUnlocked is true; we
+        } else if (onKeyguardish || overKeyguardish) {
+            // We get here if we are on or over a keyguardish scene, even if isUnlocked is true; we
             // want to return SHADE_LOCKED or KEYGUARD until we are also neither on nor over a
-            // locked-ish scene.
+            // keyguardish scene.
             if (onShade || onQuickSettings || overShade || overlaidShade || overlaidQuickSettings) {
                 newState = StatusBarState.SHADE_LOCKED;
             } else {
@@ -751,7 +754,7 @@ public class StatusBarStateControllerImpl implements
             newState = StatusBarState.SHADE;
         } else if (onShade || onQuickSettings) {
             // We get here if deviceUnlockStatus.isUnlocked is false but we are no longer on or over
-            // a locked-ish scene; we want to return SHADE_LOCKED until isUnlocked is also true.
+            // a keyguardish scene; we want to return SHADE_LOCKED until isUnlocked is also true.
             newState = StatusBarState.SHADE_LOCKED;
         } else {
             throw new IllegalArgumentException(

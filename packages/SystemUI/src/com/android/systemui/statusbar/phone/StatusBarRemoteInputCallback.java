@@ -117,16 +117,13 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
 
     @Override
     public void onStateChanged(int state) {
-        boolean hasPendingRemoteInput = mPendingRemoteInputView != null;
-        if (state == StatusBarState.SHADE
-                && (mStatusBarStateController.leaveOpenOnKeyguardHide() || hasPendingRemoteInput)) {
-            if (!mStatusBarStateController.isKeyguardRequested()
-                    && mKeyguardStateController.isUnlocked()) {
-                if (hasPendingRemoteInput) {
-                    mExecutor.execute(mPendingRemoteInputView::callOnClick);
-                }
-                mPendingRemoteInputView = null;
-            }
+        if (mPendingRemoteInputView == null) {
+            return;
+        }
+
+        if (state == StatusBarState.SHADE && canRetryPendingRemoteInput()) {
+            mExecutor.execute(mPendingRemoteInputView::callOnClick);
+            mPendingRemoteInputView = null;
         }
     }
 
@@ -318,6 +315,14 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         if (displayId == mContext.getDisplayId()) {
             mDisabled2 = state2;
         }
+    }
+
+    /**
+     * Returns {@code true} if it is safe to retry a pending remote input.
+     */
+    private boolean canRetryPendingRemoteInput() {
+        return mKeyguardStateController.isUnlocked()
+                && !mStatusBarStateController.isKeyguardRequested();
     }
 
     protected class ChallengeReceiver extends BroadcastReceiver {
