@@ -253,9 +253,15 @@ public class Utils {
 
         // Check if any of the non-biometric and non-credential bits are set. If so, this is
         // invalid.
-        final int testBits = ~(Authenticators.DEVICE_CREDENTIAL
-                | Authenticators.BIOMETRIC_MIN_STRENGTH
-                | Authenticators.MANDATORY_BIOMETRICS);
+        final int testBits;
+        if (Flags.mandatoryBiometrics()) {
+            testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                    | Authenticators.BIOMETRIC_MIN_STRENGTH
+                    | Authenticators.MANDATORY_BIOMETRICS);
+        } else {
+            testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                    | Authenticators.BIOMETRIC_MIN_STRENGTH);
+        }
         if ((authenticators & testBits) != 0) {
             Slog.e(BiometricService.TAG, "Non-biometric, non-credential bits found."
                     + " Authenticators: " + authenticators);
