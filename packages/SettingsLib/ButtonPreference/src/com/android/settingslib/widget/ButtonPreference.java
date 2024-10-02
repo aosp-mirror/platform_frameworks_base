@@ -137,8 +137,8 @@ public class ButtonPreference extends Preference {
             mGravity = a.getInt(R.styleable.ButtonPreference_android_gravity, Gravity.START);
 
             if (SettingsThemeHelper.isExpressiveTheme(context)) {
-                int type = a.getInt(R.styleable.ButtonPreference_buttonType, 0);
-                int size = a.getInt(R.styleable.ButtonPreference_buttonSize, 0);
+                int type = a.getInt(R.styleable.ButtonPreference_buttonPreferenceType, 0);
+                int size = a.getInt(R.styleable.ButtonPreference_buttonPreferenceSize, 0);
                 resId = ButtonStyle.getLayoutId(type, size);
             }
             a.recycle();
