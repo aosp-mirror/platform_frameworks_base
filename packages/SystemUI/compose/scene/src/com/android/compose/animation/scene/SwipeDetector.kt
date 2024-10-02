@@ -17,7 +17,6 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerInputChange
 
 /** {@link SwipeDetector} helps determine whether a swipe gestured has occurred. */
@@ -31,8 +30,6 @@ interface SwipeDetector {
 }
 
 val DefaultSwipeDetector = PassthroughSwipeDetector()
-
-val DefaultGestureFilter = { _: Offset -> false }
 
 /** An {@link SwipeDetector} implementation that recognizes a swipe on any input. */
 class PassthroughSwipeDetector : SwipeDetector {
