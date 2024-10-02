@@ -168,11 +168,29 @@ public class GroupedTaskInfo implements Parcelable {
     }
 
     /**
+     * @return The task info for the task in this group with the given {@code taskId}.
+     */
+    @Nullable
+    public TaskInfo getTaskById(int taskId) {
+        return mTasks.stream()
+                .filter(task -> task.taskId == taskId)
+                .findFirst().orElse(null);
+    }
+
+    /**
      * Get all {@link RecentTaskInfo}s grouped together.
      */
     @NonNull
     public List<TaskInfo> getTaskInfoList() {
         return mTasks;
+    }
+
+    /**
+     * @return Whether this grouped task contains a task with the given {@code taskId}.
+     */
+    public boolean containsTask(int taskId) {
+        return mTasks.stream()
+                .anyMatch((task -> task.taskId == taskId));
     }
 
     /**
