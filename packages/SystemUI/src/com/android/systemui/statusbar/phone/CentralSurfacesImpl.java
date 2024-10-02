@@ -594,7 +594,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final ColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
             (extractor, which) -> updateTheme();
     private final BrightnessMirrorShowingInteractor mBrightnessMirrorShowingInteractor;
-    private final GlanceableHubContainerController mGlanceableHubContainerController;
+
+    // Only use before the scene container. Null if scene container is enabled.
+    @Nullable private final GlanceableHubContainerController mGlanceableHubContainerController;
 
     private final EmergencyGestureIntentFactory mEmergencyGestureIntentFactory;
 
@@ -807,7 +809,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mFingerprintManager = fingerprintManager;
         mActivityStarter = activityStarter;
         mBrightnessMirrorShowingInteractor = brightnessMirrorShowingInteractor;
-        mGlanceableHubContainerController = glanceableHubContainerController;
+        if (!SceneContainerFlag.isEnabled()) {
+            mGlanceableHubContainerController = glanceableHubContainerController;
+        } else {
+            mGlanceableHubContainerController = null;
+        }
         mEmergencyGestureIntentFactory = emergencyGestureIntentFactory;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
@@ -2972,7 +2978,9 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
     @Override
     public void handleCommunalHubTouch(MotionEvent event) {
-        mGlanceableHubContainerController.onTouchEvent(event);
+        if (mGlanceableHubContainerController != null) {
+            mGlanceableHubContainerController.onTouchEvent(event);
+        }
     }
 
     @Override
