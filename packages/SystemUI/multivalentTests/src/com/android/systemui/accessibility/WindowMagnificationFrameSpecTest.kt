@@ -16,9 +16,9 @@
 
 package com.android.systemui.accessibility
 
-import android.testing.AndroidTestingRunner
 import android.util.Size
 import androidx.test.filters.SmallTest
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.WindowMagnificationSettings.MagnificationSize
 import com.google.common.truth.Truth.assertThat
@@ -26,7 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 class WindowMagnificationFrameSpecTest : SysuiTestCase() {
 
     @Test
