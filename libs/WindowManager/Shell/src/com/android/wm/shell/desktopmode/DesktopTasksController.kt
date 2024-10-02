@@ -35,6 +35,9 @@ import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.Region
+import android.hardware.input.InputManager
+import android.hardware.input.InputManager.KeyGestureEventHandler
+import android.hardware.input.KeyGestureEvent
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
@@ -42,6 +45,7 @@ import android.os.SystemProperties
 import android.util.Size
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
+import android.view.KeyEvent
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_CLOSE
@@ -57,6 +61,7 @@ import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import androidx.annotation.BinderThread
+import com.android.hardware.input.Flags.useKeyGestureEventHandler
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE
@@ -65,6 +70,7 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.policy.ScreenDecorationsUtils
 import com.android.internal.protolog.ProtoLog
 import com.android.window.flags.Flags
+import com.android.window.flags.Flags.enableMoveToNextDisplayShortcut
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
@@ -78,12 +84,13 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
-import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.DragStartState
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
+import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
 import com.android.wm.shell.draganddrop.DragAndDropController
+import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.recents.RecentTasksController
 import com.android.wm.shell.recents.RecentsTransitionHandler
@@ -92,7 +99,6 @@ import com.android.wm.shell.shared.ShellSharedConstants
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
-import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
@@ -105,6 +111,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.UserChangeListener
+import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.OneShotRemoteHandler
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility
@@ -149,11 +156,14 @@ class DesktopTasksController(
     private val recentTasksController: RecentTasksController?,
     private val interactionJankMonitor: InteractionJankMonitor,
     @ShellMainThread private val handler: Handler,
+    private val inputManager: InputManager,
+    private val focusTransitionObserver: FocusTransitionObserver,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
     DragAndDropController.DragAndDropListener,
-    UserChangeListener {
+    UserChangeListener,
+    KeyGestureEventHandler {
 
     private val desktopMode: DesktopModeImpl
     private var visualIndicator: DesktopModeVisualIndicator? = null
@@ -226,6 +236,9 @@ class DesktopTasksController(
             }
         )
         dragAndDropController.addListener(this)
+        if (useKeyGestureEventHandler() && enableMoveToNextDisplayShortcut()) {
+            inputManager.registerKeyGestureEventHandler(this)
+        }
     }
 
     @VisibleForTesting
@@ -1587,11 +1600,25 @@ class DesktopTasksController(
         getFocusedFreeformTask(displayId)?.let { requestSplit(it, leftOrTop) }
     }
 
+    /** Move the focused desktop task in given `displayId` to next display. */
+    fun moveFocusedTaskToNextDisplay(displayId: Int) {
+        getFocusedFreeformTask(displayId)?.let { moveToNextDisplay(it.taskId) }
+    }
+
     private fun getFocusedFreeformTask(displayId: Int): RunningTaskInfo? {
         return shellTaskOrganizer.getRunningTasks(displayId).find { taskInfo ->
             taskInfo.isFocused && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
         }
     }
+
+    // TODO(b/364154795): wait for the completion of moveToNextDisplay transition, otherwise it will
+    //  pick a wrong task when a user quickly perform other actions with keyboard shortcuts after
+    //  moveToNextDisplay.
+    private fun getGloballyFocusedFreeformTask(): RunningTaskInfo? =
+        shellTaskOrganizer.getRunningTasks().find { taskInfo ->
+            taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
+                    focusTransitionObserver.hasGlobalFocus(taskInfo)
+        }
 
     /**
      * Requests a task be transitioned from desktop to split select. Applies needed windowing
@@ -1945,6 +1972,31 @@ class DesktopTasksController(
         pw.println("${prefix}DesktopTasksController")
         DesktopModeStatus.dump(pw, innerPrefix, context)
         taskRepository.dump(pw, innerPrefix)
+    }
+
+    override fun handleKeyGestureEvent(
+        event: KeyGestureEvent,
+        focusedToken: IBinder?
+    ): Boolean {
+        if (!isKeyGestureSupported(event.keyGestureType)) return false
+        when (event.keyGestureType) {
+            KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY -> {
+                if (event.keycodes.contains(KeyEvent.KEYCODE_D) &&
+                    event.hasModifiers(KeyEvent.META_CTRL_ON or KeyEvent.META_META_ON)) {
+                    logV("Key gesture MOVE_TO_NEXT_DISPLAY is handled")
+                    getGloballyFocusedFreeformTask()?.let { moveToNextDisplay(it.taskId) }
+                    return true
+                }
+                return false
+            }
+            else -> return false
+        }
+    }
+
+    override fun isKeyGestureSupported(gestureType: Int): Boolean = when (gestureType) {
+        KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY
+            -> enableMoveToNextDisplayShortcut()
+        else -> false
     }
 
     /** The interface for calls from outside the shell, within the host process. */
