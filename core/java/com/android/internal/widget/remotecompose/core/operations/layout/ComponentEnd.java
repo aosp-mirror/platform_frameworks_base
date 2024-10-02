@@ -20,17 +20,14 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
 public class ComponentEnd implements Operation {
 
-    public static final ComponentEnd.Companion COMPANION = new ComponentEnd.Companion();
-
     @Override
     public void write(WireBuffer buffer) {
-        Companion.apply(buffer);
+        apply(buffer);
     }
 
     @Override
@@ -48,35 +45,30 @@ public class ComponentEnd implements Operation {
         return (indent != null ? indent : "") + toString();
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        @Override
-        public String name() {
-            return "ComponentEnd";
-        }
+    public static String name() {
+        return "ComponentEnd";
+    }
 
-        @Override
-        public int id() {
-            return Operations.COMPONENT_END;
-        }
+    public static int id() {
+        return Operations.COMPONENT_END;
+    }
 
-        public static void apply(WireBuffer buffer) {
-            buffer.start(Operations.COMPONENT_END);
-        }
+    public static void apply(WireBuffer buffer) {
+        buffer.start(Operations.COMPONENT_END);
+    }
 
-        public static int size() {
-            return 1 + 4 + 4 + 4;
-        }
+    public static int size() {
+        return 1 + 4 + 4 + 4;
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            operations.add(new ComponentEnd());
-        }
 
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Layout Operations", id(), name())
-                    .description("End tag for components / layouts. This operation marks the end"
-                            + "of a component");
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        operations.add(new ComponentEnd());
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
+                .description("End tag for components / layouts. This operation marks the end"
+                        + "of a component");
     }
 }

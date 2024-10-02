@@ -893,7 +893,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
     }
 
-    private static class Message {
+    protected static class Message {
         @Nullable
         private final Long mMessageHash;
         private final int mMessageMask;
@@ -918,12 +918,17 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
 
         @Nullable
-        private String getMessage() {
+        protected Long getMessageHash() {
+            return mMessageHash;
+        }
+
+        @Nullable
+        protected String getMessage() {
             return mMessageString;
         }
 
         @Nullable
-        private String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
+        protected String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
             if (mMessageString != null) {
                 return mMessageString;
             }

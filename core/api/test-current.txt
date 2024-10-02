@@ -3123,7 +3123,7 @@ package android.service.autofill.augmented {
 
 package android.service.chooser {
 
-  @FlaggedApi("android.service.chooser.enable_chooser_result") public final class ChooserResult implements android.os.Parcelable {
+  public final class ChooserResult implements android.os.Parcelable {
     ctor public ChooserResult(int, @Nullable android.content.ComponentName, boolean);
   }
 

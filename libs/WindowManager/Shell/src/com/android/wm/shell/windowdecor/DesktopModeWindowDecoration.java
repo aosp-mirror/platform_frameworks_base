@@ -44,6 +44,7 @@ import android.app.WindowConfiguration.WindowingMode;
 import android.app.assist.AssistContent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -166,7 +167,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private CapturedLink mCapturedLink;
     private Uri mGenericLink;
     private Uri mWebUri;
-    private Consumer<Uri> mOpenInBrowserClickListener;
+    private Consumer<Intent> mOpenInBrowserClickListener;
 
     private ExclusionRegionListener mExclusionRegionListener;
 
@@ -335,7 +336,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mDragPositioningCallback = dragPositioningCallback;
     }
 
-    void setOpenInBrowserClickListener(Consumer<Uri> listener) {
+    void setOpenInBrowserClickListener(Consumer<Intent> listener) {
         mOpenInBrowserClickListener = listener;
     }
 
@@ -461,6 +462,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             if (canEnterDesktopMode(mContext) && Flags.enableDesktopWindowingAppHandleEducation()) {
                 notifyNoCaptionHandle();
             }
+            mExclusionRegionListener.onExclusionRegionDismissed(mTaskInfo.taskId);
             disposeStatusBarInputLayer();
             Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
             return;
@@ -517,21 +519,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     @Nullable
-    private Uri getBrowserLink() {
+    private Intent getBrowserLink() {
         // Do not show browser link in browser applications
         final ComponentName baseActivity = mTaskInfo.baseActivity;
         if (baseActivity != null && AppToWebUtils.isBrowserApp(mContext,
                 baseActivity.getPackageName(), mUserContext.getUserId())) {
             return null;
         }
+
+        final Uri browserLink;
         // If the captured link is available and has not expired, return the captured link.
         // Otherwise, return the generic link which is set to null if a generic link is unavailable.
         if (mCapturedLink != null && !mCapturedLink.mExpired) {
-            return mCapturedLink.mUri;
+            browserLink = mCapturedLink.mUri;
         } else if (mWebUri != null) {
-            return mWebUri;
+            browserLink = mWebUri;
+        } else {
+            browserLink = mGenericLink;
         }
-        return mGenericLink;
+
+        if (browserLink == null) return null;
+        return AppToWebUtils.getBrowserIntent(browserLink, mContext.getPackageManager());
+
     }
 
     UserHandle getUser() {
@@ -1048,7 +1057,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     /**
-     * Determine the highest y coordinate of a freeform task. Used for restricting drag inputs.
+     * Determine the highest y coordinate of a freeform task. Used for restricting drag inputs.fmdra
      */
     private int determineMaxY(int requiredEmptySpace, Rect stableBounds) {
         return stableBounds.bottom - requiredEmptySpace;
@@ -1171,8 +1180,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* onToSplitScreenClickListener= */ mOnToSplitscreenClickListener,
                 /* onNewWindowClickListener= */ mOnNewWindowClickListener,
                 /* onManageWindowsClickListener= */ mOnManageWindowsClickListener,
-                /* openInBrowserClickListener= */ (uri) -> {
-                    mOpenInBrowserClickListener.accept(uri);
+                /* openInBrowserClickListener= */ (intent) -> {
+                    mOpenInBrowserClickListener.accept(intent);
                     onCapturedLinkExpired();
                     return Unit.INSTANCE;
                 },

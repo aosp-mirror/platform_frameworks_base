@@ -561,10 +561,12 @@ public class WindowOnBackInvokedDispatcherTest {
         waitForIdle();
         onBackCancelledCalled.await(1000, TimeUnit.MILLISECONDS);
 
+        verify(mWindowSession, timeout(1000)).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow),
+                isNull());
+        waitForIdle();
         // verify that onBackCancelled is called exactly once in this case
         assertEquals(0, onBackCancelledCalled.getCount());
         assertEquals(0, onBackInvokedCalled.get());
-        verify(mWindowSession).setOnBackInvokedCallbackInfo(Mockito.eq(mWindow), isNull());
         assertFalse(mDispatcher.mProgressAnimator.isBackAnimationInProgress());
     }
 

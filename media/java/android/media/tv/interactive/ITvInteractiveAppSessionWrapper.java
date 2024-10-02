@@ -267,7 +267,9 @@ public class ITvInteractiveAppSessionWrapper
                 break;
             }
             case DO_NOTIFY_CONTENT_BLOCKED: {
-                mSessionImpl.notifyContentBlocked((TvContentRating) msg.obj);
+                String contentRating = (String) msg.obj;
+                mSessionImpl.notifyContentBlocked(
+                        TvContentRating.unflattenFromString(contentRating));
                 break;
             }
             case DO_NOTIFY_SIGNAL_STRENGTH: {

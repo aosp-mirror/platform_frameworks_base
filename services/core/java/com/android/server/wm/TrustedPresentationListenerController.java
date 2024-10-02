@@ -21,7 +21,7 @@ import static android.graphics.Matrix.MSCALE_Y;
 import static android.graphics.Matrix.MSKEW_X;
 import static android.graphics.Matrix.MSKEW_Y;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TPL;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TPL;
 
 import android.graphics.Matrix;
 import android.graphics.Rect;

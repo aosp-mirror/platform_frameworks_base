@@ -53,6 +53,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.ParcelableException;
@@ -160,7 +161,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                 callingUid,
                                 callingPid,
                                 localCancelTransport,
-                                safeExecuteAppFunctionCallback);
+                                safeExecuteAppFunctionCallback,
+                                executeAppFunctionCallback.asBinder());
                     } catch (Exception e) {
                         safeExecuteAppFunctionCallback.onResult(
                                 mapExceptionToExecuteAppFunctionResponse(e));
@@ -171,11 +173,12 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
     @WorkerThread
     private void executeAppFunctionInternal(
-            ExecuteAppFunctionAidlRequest requestInternal,
+            @NonNull ExecuteAppFunctionAidlRequest requestInternal,
             int callingUid,
             int callingPid,
-            ICancellationSignal localCancelTransport,
-            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
+            @NonNull ICancellationSignal localCancelTransport,
+            @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
+            @NonNull IBinder callerBinder) {
         UserHandle targetUser = requestInternal.getUserHandle();
         // TODO(b/354956319): Add and honor the new enterprise policies.
         if (mCallerValidator.isUserOrganizationManaged(targetUser)) {
@@ -250,7 +253,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                     localCancelTransport,
                                     safeExecuteAppFunctionCallback,
                                     /* bindFlags= */ Context.BIND_AUTO_CREATE
-                                            | Context.BIND_FOREGROUND_SERVICE);
+                                            | Context.BIND_FOREGROUND_SERVICE,
+                                    callerBinder);
                         })
                 .exceptionally(
                         ex -> {
@@ -326,8 +330,9 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
 
     /**
      * Sets the enabled status of a specified app function.
-     * <p>
-     * Required to hold a lock to call this function to avoid document changes during the process.
+     *
+     * <p>Required to hold a lock to call this function to avoid document changes during the
+     * process.
      */
     @WorkerThread
     @GuardedBy("mLock")
@@ -370,8 +375,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                     newMetadata.setEnabled(false);
                 }
                 default ->
-                        throw new IllegalArgumentException(
-                                "Value of EnabledState is unsupported.");
+                        throw new IllegalArgumentException("Value of EnabledState is unsupported.");
             }
             AppSearchBatchResult<String, Void> putDocumentBatchResult =
                     runtimeMetadataSearchSession
@@ -381,8 +385,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                             .build())
                             .get();
             if (!putDocumentBatchResult.isSuccess()) {
-                throw new IllegalStateException("Failed writing updated doc to AppSearch due to "
-                        + putDocumentBatchResult);
+                throw new IllegalStateException(
+                        "Failed writing updated doc to AppSearch due to " + putDocumentBatchResult);
             }
         }
     }
@@ -414,7 +418,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             @NonNull UserHandle targetUser,
             @NonNull ICancellationSignal cancellationSignalTransport,
             @NonNull SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback,
-            int bindFlags) {
+            int bindFlags,
+            @NonNull IBinder callerBinder) {
         CancellationSignal cancellationSignal =
                 CancellationSignal.fromTransport(cancellationSignalTransport);
         ICancellationCallback cancellationCallback =
@@ -430,6 +435,8 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         serviceIntent,
                         bindFlags,
                         targetUser,
+                        mServiceConfig.getExecuteAppFunctionCancellationTimeoutMillis(),
+                        cancellationSignal,
                         new RunServiceCallCallback<IAppFunctionService>() {
                             @Override
                             public void onServiceConnected(
@@ -470,7 +477,16 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                                                 "Failed to connect to AppFunctionService",
                                                 /* extras= */ null));
                             }
-                        });
+
+                            @Override
+                            public void onCancelled() {
+                                // Do not forward the result back to the caller once it has been
+                                // canceled. The caller does not need a notification and should
+                                // proceed after initiating a cancellation.
+                                safeExecuteAppFunctionCallback.disable();
+                            }
+                        },
+                        callerBinder);
 
         if (!bindServiceResult) {
             Slog.e(TAG, "Failed to bind to the AppFunctionService");

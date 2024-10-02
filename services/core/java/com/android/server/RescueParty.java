@@ -631,7 +631,8 @@ public class RescueParty {
         // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
         // when device shutting down.
         setRebootProperty(true);
-        Runnable runnable = () -> {
+
+        if (Flags.synchronousRebootInRescueParty()) {
             try {
                 PowerManager pm = context.getSystemService(PowerManager.class);
                 if (pm != null) {
@@ -640,9 +641,20 @@ public class RescueParty {
             } catch (Throwable t) {
                 logRescueException(level, failedPackage, t);
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        } else {
+            Runnable runnable = () -> {
+                try {
+                    PowerManager pm = context.getSystemService(PowerManager.class);
+                    if (pm != null) {
+                        pm.reboot(TAG);
+                    }
+                } catch (Throwable t) {
+                    logRescueException(level, failedPackage, t);
+                }
+            };
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
     }
 
     private static void executeFactoryReset(Context context, int level,
@@ -655,18 +667,28 @@ public class RescueParty {
         setFactoryResetProperty(true);
         long now = System.currentTimeMillis();
         setLastFactoryResetTimeMs(now);
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    RecoverySystem.rebootPromptAndWipeUserData(context, TAG + "," + failedPackage);
-                } catch (Throwable t) {
-                    logRescueException(level, failedPackage, t);
-                }
+
+        if (Flags.synchronousRebootInRescueParty()) {
+            try {
+                RecoverySystem.rebootPromptAndWipeUserData(context, TAG + "," + failedPackage);
+            } catch (Throwable t) {
+                logRescueException(level, failedPackage, t);
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        } else {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        RecoverySystem.rebootPromptAndWipeUserData(context,
+                            TAG + "," + failedPackage);
+                    } catch (Throwable t) {
+                        logRescueException(level, failedPackage, t);
+                    }
+                }
+            };
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
     }
 
 

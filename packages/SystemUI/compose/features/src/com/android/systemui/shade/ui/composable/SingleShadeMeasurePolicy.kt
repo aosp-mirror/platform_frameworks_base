@@ -90,19 +90,28 @@ class SingleShadeMeasurePolicy(
                 y = insetsTop + shadeHeaderPlaceable.height,
             )
 
-            if (isMediaInRow) {
-                mediaPlaceable?.placeRelative(
-                    x = insetsLeft + constraintsWithCutout.maxWidth / 2,
-                    y = mediaOffset() + insetsTop + shadeHeaderPlaceable.height,
-                    zIndex = mediaZIndex(),
-                )
-            } else {
-                mediaPlaceable?.placeRelative(
-                    x = insetsLeft,
-                    y = insetsTop + shadeHeaderPlaceable.height + quickSettingsPlaceable.height,
-                    zIndex = mediaZIndex(),
-                )
-            }
+            if (mediaPlaceable != null)
+                if (isMediaInRow) {
+                    // mediaPlaceable height ranges from 0 to qsHeight. We want it to be centered
+                    // vertically when it's smaller than the QS
+                    val mediaCenteringOffset =
+                        (quickSettingsPlaceable.height - mediaPlaceable.height) / 2
+                    mediaPlaceable.placeRelative(
+                        x = insetsLeft + constraintsWithCutout.maxWidth / 2,
+                        y =
+                            insetsTop +
+                                shadeHeaderPlaceable.height +
+                                mediaCenteringOffset +
+                                mediaOffset(),
+                        zIndex = mediaZIndex(),
+                    )
+                } else {
+                    mediaPlaceable.placeRelative(
+                        x = insetsLeft,
+                        y = insetsTop + shadeHeaderPlaceable.height + quickSettingsPlaceable.height,
+                        zIndex = mediaZIndex(),
+                    )
+                }
 
             // Notifications don't need to accommodate for horizontal insets
             notificationsPlaceable.placeRelative(x = 0, y = notificationsTop)

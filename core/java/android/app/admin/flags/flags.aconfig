@@ -323,9 +323,9 @@ flag {
 }
 
 flag {
-    name: "dont_read_policy_definition"
+    name: "dont_write_policy_definition"
     namespace: "enterprise"
-    description: "Rely on <policy-key-entry> to determine policy definition and ignore <policy-definition-entry>"
+    description: "Don't write redundant policy-definition-entry tags"
     bug: "335663055"
     metadata {
         purpose: PURPOSE_BUGFIX

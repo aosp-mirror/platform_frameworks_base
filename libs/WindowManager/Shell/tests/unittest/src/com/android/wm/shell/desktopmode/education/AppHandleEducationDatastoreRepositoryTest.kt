@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
 import com.android.wm.shell.desktopmode.education.data.WindowingEducationProto
+import com.android.wm.shell.util.GMAIL_PACKAGE_NAME
 import com.android.wm.shell.util.createWindowingEducationProto
 import com.google.common.truth.Truth.assertThat
 import java.io.File
@@ -109,7 +110,6 @@ class AppHandleEducationDatastoreRepositoryTest {
       }
 
   companion object {
-    private const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
     private const val APP_HANDLE_EDUCATION_DATASTORE_TEST_FILE = "app_handle_education_test.pb"
   }
 }

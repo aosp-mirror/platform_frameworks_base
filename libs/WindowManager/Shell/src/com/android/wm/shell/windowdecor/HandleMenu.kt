@@ -20,13 +20,13 @@ import android.annotation.DimenRes
 import android.annotation.SuppressLint
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.MotionEvent.ACTION_OUTSIDE
@@ -70,7 +70,7 @@ class HandleMenu(
     private val shouldShowWindowingPill: Boolean,
     private val shouldShowNewWindowButton: Boolean,
     private val shouldShowManageWindowsButton: Boolean,
-    private val openInBrowserLink: Uri?,
+    private val openInBrowserIntent: Intent?,
     private val captionWidth: Int,
     private val captionHeight: Int,
     captionX: Int
@@ -107,7 +107,7 @@ class HandleMenu(
     private val globalMenuPosition: Point = Point()
 
     private val shouldShowBrowserPill: Boolean
-        get() = openInBrowserLink != null
+        get() = openInBrowserIntent != null
 
     init {
         updateHandleMenuPillPositions(captionX)
@@ -119,7 +119,7 @@ class HandleMenu(
         onToSplitScreenClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
         onManageWindowsClickListener: () -> Unit,
-        openInBrowserClickListener: (Uri) -> Unit,
+        openInBrowserClickListener: (Intent) -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit,
     ) {
@@ -152,7 +152,7 @@ class HandleMenu(
         onToSplitScreenClickListener: () -> Unit,
         onNewWindowClickListener: () -> Unit,
         onManageWindowsClickListener: () -> Unit,
-        openInBrowserClickListener: (Uri) -> Unit,
+        openInBrowserClickListener: (Intent) -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit
     ) {
@@ -172,7 +172,7 @@ class HandleMenu(
             this.onNewWindowClickListener = onNewWindowClickListener
             this.onManageWindowsClickListener = onManageWindowsClickListener
             this.onOpenInBrowserClickListener = {
-                openInBrowserClickListener.invoke(openInBrowserLink!!)
+                openInBrowserClickListener.invoke(openInBrowserIntent!!)
             }
             this.onCloseMenuClickListener = onCloseMenuClickListener
             this.onOutsideTouchListener = onOutsideTouchListener
@@ -661,7 +661,7 @@ interface HandleMenuFactory {
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
         shouldShowManageWindowsButton: Boolean,
-        openInBrowserLink: Uri?,
+        openInBrowserIntent: Intent?,
         captionWidth: Int,
         captionHeight: Int,
         captionX: Int
@@ -680,7 +680,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
         shouldShowWindowingPill: Boolean,
         shouldShowNewWindowButton: Boolean,
         shouldShowManageWindowsButton: Boolean,
-        openInBrowserLink: Uri?,
+        openInBrowserIntent: Intent?,
         captionWidth: Int,
         captionHeight: Int,
         captionX: Int
@@ -695,7 +695,7 @@ object DefaultHandleMenuFactory : HandleMenuFactory {
             shouldShowWindowingPill,
             shouldShowNewWindowButton,
             shouldShowManageWindowsButton,
-            openInBrowserLink,
+            openInBrowserIntent,
             captionWidth,
             captionHeight,
             captionX

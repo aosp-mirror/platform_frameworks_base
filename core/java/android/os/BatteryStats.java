@@ -1950,7 +1950,8 @@ public abstract class BatteryStats {
 
         // STATES bits that are used for Power Stats tracking
         public static final int IMPORTANT_FOR_POWER_STATS_STATES =
-                STATE_GPS_ON_FLAG | STATE_SENSOR_ON_FLAG | STATE_AUDIO_ON_FLAG;
+                STATE_GPS_ON_FLAG | STATE_SENSOR_ON_FLAG | STATE_AUDIO_ON_FLAG
+                        | STATE_WAKE_LOCK_FLAG;
 
         @UnsupportedAppUsage
         public int states;
@@ -3623,6 +3624,21 @@ public abstract class BatteryStats {
      * @return The latest learned battery capacity in uAh.
      */
     public abstract int getLearnedBatteryCapacity();
+
+    /**
+     * Returns best known estimate of the battery capacity in milli-amp-hours.
+     */
+    public int getBatteryCapacity() {
+        int batteryCapacityUah = getLearnedBatteryCapacity();
+        if (batteryCapacityUah > 0) {
+            return batteryCapacityUah / 1000;
+        }
+        batteryCapacityUah = getMinLearnedBatteryCapacity();
+        if (batteryCapacityUah > 0) {
+            return batteryCapacityUah / 1000;
+        }
+        return getEstimatedBatteryCapacity();
+    }
 
     /**
      * Return the array of discharge step durations.

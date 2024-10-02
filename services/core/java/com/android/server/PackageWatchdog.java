@@ -1292,6 +1292,16 @@ public class PackageWatchdog {
 
     /** Dump status of every observer in mAllObservers. */
     public void dump(@NonNull PrintWriter pw) {
+        if (Flags.synchronousRebootInRescueParty() && RescueParty.isRecoveryTriggeredReboot()) {
+            dumpInternal(pw);
+        } else {
+            synchronized (mLock) {
+                dumpInternal(pw);
+            }
+        }
+    }
+
+    private void dumpInternal(@NonNull PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("Package Watchdog status");
         ipw.increaseIndent();

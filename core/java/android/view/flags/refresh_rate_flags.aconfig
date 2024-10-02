@@ -112,3 +112,11 @@ flag {
     bug: "335874198"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "toolkit_frame_rate_animation_bugfix_25q1"
+    namespace: "toolkit"
+    description: "Feature flag to enable the fix for applyLegacyAnimation for VRR V QPR2"
+    bug: "335874198"
+    is_fixed_read_only: true
+}
