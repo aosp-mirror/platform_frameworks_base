@@ -411,8 +411,7 @@ public class PhoneStatusBarPolicy
                     mainActiveMode.getIcon().key().resPackage(),
                     mainActiveMode.getIcon().key().resId(),
                     mainActiveMode.getIcon().drawable(),
-                    mResources.getString(R.string.active_mode_content_description,
-                            mainActiveMode.getName()),
+                    mainActiveMode.getName(),
                     StatusBarIcon.Shape.FIXED_SPACE);
         }
         if (visible != mZenVisible) {
