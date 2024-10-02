@@ -68,6 +68,13 @@ flag {
 }
 
 flag {
+    name: "multiuser_widget"
+    namespace: "multiuser"
+    description: "Implement the Multiuser Widget"
+    bug: "365748524"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     is_exported: true
     namespace: "profile_experiences"
