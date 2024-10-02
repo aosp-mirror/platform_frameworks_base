@@ -97,6 +97,7 @@ public final class AutofillStateFingerprint {
             if (sDebug) {
                 Log.d(TAG, "Autofillable views count prior to auth:" + autofillableViews.size());
             }
+//            ArrayList<Integer> hashes = getFingerprintIds(autofillableViews);
 
             ArrayMap<Integer, View> hashes = getFingerprintIds(autofillableViews);
             for (Map.Entry<Integer, View> entry : hashes.entrySet()) {
@@ -122,6 +123,7 @@ public final class AutofillStateFingerprint {
                 if (view != null) {
                     int id = getEphemeralFingerprintId(view, 0 /* position irrelevant */);
                     AutofillId autofillId = view.getAutofillId();
+                    autofillId.setSessionId(mSessionId);
                     mHashToAutofillIdMap.put(id, autofillId);
                 } else {
                     if (sDebug) {
