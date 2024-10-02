@@ -1282,11 +1282,9 @@ public final class HintManagerService extends SystemService {
         boolean updateHintAllowedByProcState(boolean allowed) {
             synchronized (this) {
                 if (allowed && !mUpdateAllowedByProcState && !mShouldForcePause) {
-                    Slogf.e(TAG, "ADPF IS GETTING RESUMED? UID: " + mUid + " TAG: " + mTag);
                     resume();
                 }
                 if (!allowed && mUpdateAllowedByProcState) {
-                    Slogf.e(TAG, "ADPF IS GETTING PAUSED? UID: " + mUid + " TAG: " + mTag);
                     pause();
                 }
                 mUpdateAllowedByProcState = allowed;
