@@ -764,6 +764,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     boolean hasPermissions(List<String> permissions) {
         for (String permission : permissions) {
             if (mContext.checkPermission(permission, mPid, mUid) != PERMISSION_GRANTED) {
+                Log.e(TAG, "no permission for " + permission);
                 return false;
             }
         }
@@ -919,6 +920,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             }
         }
         if (curAuthState != newAuthState) {
+            if (newAuthState == AUTHORIZATION_DENIED
+                    || newAuthState == AUTHORIZATION_DENIED_GRACE_PERIOD) {
+                Log.e(TAG, "updateNanoAppAuthState auth error: "
+                        + Long.toHexString(nanoAppId) + ", "
+                        + nanoappPermissions + ", "
+                        + gracePeriodExpired + ", "
+                        + forceDenied);
+            }
             // Don't send the callback in the synchronized block or it could end up in a deadlock.
             sendAuthStateCallback(nanoAppId, newAuthState);
         }

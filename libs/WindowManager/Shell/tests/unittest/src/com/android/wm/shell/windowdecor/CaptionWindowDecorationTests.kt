@@ -47,6 +47,8 @@ class CaptionWindowDecorationTests : ShellTestCase() {
             taskInfo,
             true,
             false,
+            true /* isStatusBarVisible */,
+            false /* isKeyguardVisibleAndOccluded */,
             InsetsState()
         )
 
@@ -66,6 +68,8 @@ class CaptionWindowDecorationTests : ShellTestCase() {
             taskInfo,
             true,
             false,
+            true /* isStatusBarVisible */,
+            false /* isKeyguardVisibleAndOccluded */,
             InsetsState()
         )
 
@@ -81,6 +85,8 @@ class CaptionWindowDecorationTests : ShellTestCase() {
             taskInfo,
             true,
             false,
+            true /* isStatusBarVisible */,
+            false /* isKeyguardVisibleAndOccluded */,
             InsetsState()
         )
         Truth.assertThat(relayoutParams.mOccludingCaptionElements.size).isEqualTo(2)

@@ -573,8 +573,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Clear all silent notifications"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notifications paused by Do Not Disturb"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{No notifications}=1{Notifications paused by {mode}}=2{Notifications paused by {mode} and one other mode}other{Notifications paused by {mode} and # other modes}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Start now"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No notifications"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No new notifications"</string>
@@ -1436,6 +1435,8 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"To view all your apps, press the action key on your keyboard"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Redacted"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Unlock to view"</string>
+    <!-- no translation found for contextual_education_dialog_title (4630392552837487324) -->
+    <skip />
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Use your touchpad to go back"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Swipe left or right using three fingers. Tap to learn more gestures."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Use your touchpad to go home"</string>

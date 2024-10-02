@@ -396,6 +396,7 @@ package android.app {
     method public void cleanUpCallersAfter(long);
     method @FlaggedApi("android.app.modes_api") @NonNull public android.service.notification.ZenPolicy getDefaultZenPolicy();
     method public android.content.ComponentName getEffectsSuppressor();
+    method @FlaggedApi("android.service.notification.notification_classification") @NonNull public java.util.Set<java.lang.String> getUnsupportedAdjustmentTypes();
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method @FlaggedApi("android.app.modes_api") public boolean removeAutomaticZenRule(@NonNull String, boolean);
     method @FlaggedApi("android.app.api_rich_ongoing") public void setCanPostPromotedNotifications(@NonNull String, int, boolean);

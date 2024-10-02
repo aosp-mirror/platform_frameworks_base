@@ -4117,6 +4117,34 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void setAdjustmentTypeSupportedState(INotificationListener token,
+                @Adjustment.Keys String key, boolean supported) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mNotificationLock) {
+                    final ManagedServiceInfo info = mAssistants.checkServiceTokenLocked(token);
+                    if (key == null) {
+                        return;
+                    }
+                    mAssistants.setAdjustmentTypeSupportedState(info,  key, supported);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public @NonNull List<String> getUnsupportedAdjustmentTypes() {
+            checkCallerIsSystemOrSystemUiOrShell();
+            synchronized (mNotificationLock) {
+                return new ArrayList(mAssistants.mNasUnsupported.getOrDefault(
+                        UserHandle.getUserId(Binder.getCallingUid()), new HashSet<>()));
+            }
+        }
+
+        @Override
         @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
         public boolean appCanBePromoted(String pkg, int uid) {
             checkCallerIsSystemOrSystemUiOrShell();
@@ -7435,7 +7463,7 @@ public class NotificationManagerService extends SystemService {
                 NotificationRecord r = findNotificationLocked(pkg, null, notificationId, userId);
                 if (r != null) {
                     if (DBG) {
-                        final String type = (flag ==  FLAG_FOREGROUND_SERVICE) ? "FGS" : "UIJ";
+                        final String type = (flag == FLAG_FOREGROUND_SERVICE) ? "FGS" : "UIJ";
                         Slog.d(TAG, "Remove " + type + " flag not allow. "
                                 + "Cancel " + type + " notification");
                     }
@@ -7452,7 +7480,11 @@ public class NotificationManagerService extends SystemService {
                         // strip flag from all enqueued notifications. listeners will be informed
                         // in post runnable.
                         StatusBarNotification sbn = r.getSbn();
-                        sbn.getNotification().flags = (r.mOriginalFlags & ~flag);
+                        if (notificationForceGrouping()) {
+                            sbn.getNotification().flags = (r.getFlags() & ~flag);
+                        } else {
+                            sbn.getNotification().flags = (r.mOriginalFlags & ~flag);
+                        }
                     }
                 }
 
@@ -7461,7 +7493,11 @@ public class NotificationManagerService extends SystemService {
                 if (r != null) {
                     // if posted notification exists, strip its flag and tell listeners
                     StatusBarNotification sbn = r.getSbn();
-                    sbn.getNotification().flags = (r.mOriginalFlags & ~flag);
+                    if (notificationForceGrouping()) {
+                        sbn.getNotification().flags = (r.getFlags() & ~flag);
+                    } else {
+                        sbn.getNotification().flags = (r.mOriginalFlags & ~flag);
+                    }
                     mRankingHelper.sort(mNotificationList);
                     mListeners.notifyPostedLocked(r, r);
                 }
@@ -9459,6 +9495,28 @@ public class NotificationManagerService extends SystemService {
     }
 
     /**
+     *  Check if the notification was a summary that has been auto-grouped
+     * @param r the current notification record
+     * @param old the previous notification record
+     * @return true if the notification record was a summary that was auto-grouped
+     */
+    @GuardedBy("mNotificationLock")
+    private boolean wasSummaryAutogrouped(NotificationRecord r, NotificationRecord old) {
+        boolean wasAutogrouped = false;
+        if (old != null) {
+            boolean wasSummary = (old.mOriginalFlags & FLAG_GROUP_SUMMARY) != 0;
+            boolean wasForcedGrouped = (old.getFlags() & FLAG_GROUP_SUMMARY) == 0
+                    && old.getSbn().getOverrideGroupKey() != null;
+            boolean isNotAutogroupSummary = (r.getFlags() & FLAG_AUTOGROUP_SUMMARY) == 0
+                    && (r.getFlags() & FLAG_GROUP_SUMMARY) != 0;
+            if ((wasSummary && wasForcedGrouped) || (wasForcedGrouped && isNotAutogroupSummary)) {
+                wasAutogrouped = true;
+            }
+        }
+        return wasAutogrouped;
+    }
+
+    /**
      * Ensures that grouped notification receive their special treatment.
      *
      * <p>Cancels group children if the new notification causes a group to lose
@@ -9478,14 +9536,9 @@ public class NotificationManagerService extends SystemService {
         }
 
         if (notificationForceGrouping()) {
-            if (old != null) {
-                // If this is an update to a summary that was forced grouped => remove summary flag
-                boolean wasSummary = (old.mOriginalFlags & FLAG_GROUP_SUMMARY) != 0;
-                boolean wasForcedGrouped = (old.getFlags() & FLAG_GROUP_SUMMARY) == 0
-                        && old.getSbn().getOverrideGroupKey() != null;
-                if (n.isGroupSummary() && wasSummary && wasForcedGrouped) {
-                    n.flags &= ~FLAG_GROUP_SUMMARY;
-                }
+            // If this is an update to a summary that was forced grouped => remove summary flag
+            if (wasSummaryAutogrouped(r, old)) {
+                n.flags &= ~FLAG_GROUP_SUMMARY;
             }
         }
 
@@ -11333,11 +11386,15 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_TYPES = "types";
+        private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
 
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
         private Set<String> mAllowedAdjustments = new ArraySet<>();
+
+        @GuardedBy("mLock")
+        private Map<Integer, HashSet<String>> mNasUnsupported = new ArrayMap<>();
 
         protected ComponentName mDefaultFromConfig = null;
 
@@ -11831,12 +11888,73 @@ public class NotificationManagerService extends SystemService {
                     setNotificationAssistantAccessGrantedForUserInternal(
                             currentComponent, userId, false, userSet);
                 }
+            } else {
+                if (android.service.notification.Flags.notificationClassification()) {
+                    mNasUnsupported.put(userId, new HashSet<>());
+                }
             }
             super.setPackageOrComponentEnabled(pkgOrComponent, userId, isPrimary, enabled, userSet);
         }
 
         private boolean isVerboseLogEnabled() {
             return Log.isLoggable("notification_assistant", Log.VERBOSE);
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        @GuardedBy("mNotificationLock")
+        public void setAdjustmentTypeSupportedState(ManagedServiceInfo info,
+                @Adjustment.Keys String key, boolean supported) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            HashSet<String> disabledAdjustments =
+                    mNasUnsupported.getOrDefault(info.userid, new HashSet<>());
+            if (supported) {
+                disabledAdjustments.remove(key);
+            } else {
+                disabledAdjustments.add(key);
+            }
+            mNasUnsupported.put(info.userid, disabledAdjustments);
+            handleSavePolicyFile();
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        @GuardedBy("mNotificationLock")
+        public @NonNull Set<String> getUnsupportedAdjustments(@UserIdInt int userId) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return new HashSet<>();
+            }
+            return mNasUnsupported.getOrDefault(userId, new HashSet<>());
+        }
+
+        @Override
+        protected void writeExtraAttributes(TypedXmlSerializer out, @UserIdInt int approvedUserId)
+                throws IOException {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            synchronized (mLock) {
+                if (mNasUnsupported.containsKey(approvedUserId)) {
+                    out.attribute(null, ATT_NAS_UNSUPPORTED,
+                            TextUtils.join(",", mNasUnsupported.get(approvedUserId)));
+                }
+            }
+        }
+
+        @Override
+        protected void readExtraAttributes(String tag, TypedXmlPullParser parser,
+                @UserIdInt int approvedUserId) throws IOException {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            if (ManagedServices.TAG_MANAGED_SERVICES.equals(tag)) {
+                final String types = XmlUtils.readStringAttribute(parser, ATT_NAS_UNSUPPORTED);
+                synchronized (mLock) {
+                    if (!TextUtils.isEmpty(types)) {
+                        mNasUnsupported.put(approvedUserId, new HashSet(List.of(types.split(","))));
+                    }
+                }
+            }
         }
     }
 

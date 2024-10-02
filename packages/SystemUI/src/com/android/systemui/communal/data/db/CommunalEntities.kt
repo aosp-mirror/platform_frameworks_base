@@ -40,6 +40,12 @@ data class CommunalWidgetItem(
      */
     @ColumnInfo(name = "user_serial_number", defaultValue = "$USER_SERIAL_NUMBER_UNDEFINED")
     val userSerialNumber: Int,
+
+    /**
+     * The vertical span of the widget. Span_Y default value corresponds to
+     * CommunalContentSize.HALF.span
+     */
+    @ColumnInfo(name = "span_y", defaultValue = "3") val spanY: Int,
 ) {
     companion object {
         /**

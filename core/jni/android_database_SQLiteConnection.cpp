@@ -16,27 +16,22 @@
 
 #define LOG_TAG "SQLiteConnection"
 
-#include <jni.h>
-#include <nativehelper/JNIHelp.h>
+#include <android-base/mapped_file.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
-
-#include <utils/Log.h>
-#include <utils/String8.h>
-#include <utils/String16.h>
-#include <cutils/ashmem.h>
-#include <sys/mman.h>
-
-#include <string.h>
-#include <unistd.h>
-
 #include <androidfw/CursorWindow.h>
-
+#include <cutils/ashmem.h>
+#include <jni.h>
+#include <nativehelper/JNIHelp.h>
 #include <sqlite3.h>
 #include <sqlite3_android.h>
+#include <string.h>
+#include <unistd.h>
+#include <utils/Log.h>
+#include <utils/String16.h>
+#include <utils/String8.h>
 
 #include "android_database_SQLiteCommon.h"
-
 #include "core_jni_helpers.h"
 
 // Set to 1 to use UTF16 storage for localized indexes.
@@ -669,13 +664,14 @@ static int createAshmemRegionWithData(JNIEnv* env, const void* data, size_t leng
         ALOGE("ashmem_create_region failed: %s", strerror(error));
     } else {
         if (length > 0) {
-            void* ptr = mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-            if (ptr == MAP_FAILED) {
+            std::unique_ptr<base::MappedFile> mappedFile =
+                    base::MappedFile::FromFd(fd, 0, length, PROT_READ | PROT_WRITE);
+            if (mappedFile == nullptr) {
                 error = errno;
                 ALOGE("mmap failed: %s", strerror(error));
             } else {
-                memcpy(ptr, data, length);
-                munmap(ptr, length);
+                memcpy(mappedFile->data(), data, length);
+                mappedFile.reset();
             }
         }
 

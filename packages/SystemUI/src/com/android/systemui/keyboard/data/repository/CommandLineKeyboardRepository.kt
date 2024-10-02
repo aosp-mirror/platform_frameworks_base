@@ -50,6 +50,8 @@ class CommandLineKeyboardRepository @Inject constructor(commandRegistry: Command
     private val _newlyConnectedKeyboard: MutableStateFlow<Keyboard?> = MutableStateFlow(null)
     override val newlyConnectedKeyboard: Flow<Keyboard> = _newlyConnectedKeyboard.filterNotNull()
 
+    override val connectedKeyboards: Flow<Set<Keyboard>> = MutableStateFlow(emptySet())
+
     init {
         Log.i(TAG, "initializing shell command $COMMAND")
         commandRegistry.registerCommand(COMMAND) { KeyboardCommand() }

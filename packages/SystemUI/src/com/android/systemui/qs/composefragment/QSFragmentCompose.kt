@@ -52,7 +52,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -62,7 +61,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -191,58 +189,22 @@ constructor(
         val context = inflater.context
         val composeView =
             ComposeView(context).apply {
-                setBackPressedDispatcher()
-                setContent {
-                    PlatformTheme {
-                        val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
-
-                        AnimatedVisibility(
-                            visible = visible,
-                            modifier =
-                                Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-                                    .thenIf(notificationScrimClippingParams.isEnabled) {
-                                        Modifier.notificationScrimClip(
-                                            notificationScrimClippingParams.leftInset,
-                                            notificationScrimClippingParams.top,
-                                            notificationScrimClippingParams.rightInset,
-                                            notificationScrimClippingParams.bottom,
-                                            notificationScrimClippingParams.radius,
+                repeatWhenAttached {
+                    repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        setViewTreeOnBackPressedDispatcherOwner(
+                            object : OnBackPressedDispatcherOwner {
+                                override val onBackPressedDispatcher =
+                                    OnBackPressedDispatcher().apply {
+                                        setOnBackInvokedDispatcher(
+                                            it.viewRootImpl.onBackInvokedDispatcher
                                         )
                                     }
-                                    .graphicsLayer { elevation = 4.dp.toPx() },
-                        ) {
-                            val isEditing by
-                                viewModel.containerViewModel.editModeViewModel.isEditing
-                                    .collectAsStateWithLifecycle()
-                            val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                            AnimatedContent(
-                                targetState = isEditing,
-                                transitionSpec = {
-                                    fadeIn(animationSpecEditMode) togetherWith
-                                        fadeOut(animationSpecEditMode)
-                                },
-                                label = "EditModeAnimatedContent",
-                            ) { editing ->
-                                if (editing) {
-                                    val qqsPadding by
-                                        viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
-                                    EditMode(
-                                        viewModel = viewModel.containerViewModel.editModeViewModel,
-                                        modifier =
-                                            Modifier.fillMaxWidth()
-                                                .padding(top = { qqsPadding })
-                                                .padding(
-                                                    horizontal = {
-                                                        QuickSettingsShade.Dimensions.Padding
-                                                            .roundToPx()
-                                                    }
-                                                ),
-                                    )
-                                } else {
-                                    CollapsableQuickSettingsSTL()
-                                }
+
+                                override val lifecycle: Lifecycle =
+                                    this@repeatWhenAttached.lifecycle
                             }
-                        }
+                        )
+                        setContent { this@QSFragmentCompose.Content() }
                     }
                 }
             }
@@ -259,6 +221,58 @@ constructor(
             FrameLayout.LayoutParams.MATCH_PARENT,
         )
         return frame
+    }
+
+    @Composable
+    private fun Content() {
+        PlatformTheme {
+            val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
+
+            AnimatedVisibility(
+                visible = visible,
+                modifier =
+                    Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
+                        notificationScrimClippingParams.isEnabled
+                    ) {
+                        Modifier.notificationScrimClip(
+                            notificationScrimClippingParams.leftInset,
+                            notificationScrimClippingParams.top,
+                            notificationScrimClippingParams.rightInset,
+                            notificationScrimClippingParams.bottom,
+                            notificationScrimClippingParams.radius,
+                        )
+                    },
+            ) {
+                val isEditing by
+                    viewModel.containerViewModel.editModeViewModel.isEditing
+                        .collectAsStateWithLifecycle()
+                val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                AnimatedContent(
+                    targetState = isEditing,
+                    transitionSpec = {
+                        fadeIn(animationSpecEditMode) togetherWith fadeOut(animationSpecEditMode)
+                    },
+                    label = "EditModeAnimatedContent",
+                ) { editing ->
+                    if (editing) {
+                        val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+                        EditMode(
+                            viewModel = viewModel.containerViewModel.editModeViewModel,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(top = { qqsPadding })
+                                    .padding(
+                                        horizontal = {
+                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
+                                        }
+                                    ),
+                        )
+                    } else {
+                        CollapsableQuickSettingsSTL()
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -645,23 +659,6 @@ constructor(
             if (::viewModel.isInitialized) {
                 printSection("View Model") { viewModel.dump(this@run, args) }
             }
-        }
-    }
-}
-
-private fun View.setBackPressedDispatcher() {
-    repeatWhenAttached {
-        repeatOnLifecycle(Lifecycle.State.CREATED) {
-            setViewTreeOnBackPressedDispatcherOwner(
-                object : OnBackPressedDispatcherOwner {
-                    override val onBackPressedDispatcher =
-                        OnBackPressedDispatcher().apply {
-                            setOnBackInvokedDispatcher(it.viewRootImpl.onBackInvokedDispatcher)
-                        }
-
-                    override val lifecycle: Lifecycle = this@repeatWhenAttached.lifecycle
-                }
-            )
         }
     }
 }

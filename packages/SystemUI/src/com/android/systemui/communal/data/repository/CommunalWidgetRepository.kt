@@ -92,6 +92,14 @@ interface CommunalWidgetRepository {
 
     /** Aborts the restore process and removes files from disk if necessary. */
     fun abortRestoreWidgets()
+
+    /**
+     * Update the spanY of a widget in the database.
+     *
+     * @param widgetId id of the widget to update.
+     * @param spanY new spanY value for the widget.
+     */
+    fun updateWidgetSpanY(widgetId: Int, spanY: Int)
 }
 
 @SysUISingleton
@@ -118,19 +126,29 @@ constructor(
 
     /** Widget metadata from database + matching [AppWidgetProviderInfo] if any. */
     private val widgetEntries: Flow<List<CommunalWidgetEntry>> =
-        combine(
-            communalWidgetDao.getWidgets(),
-            communalWidgetHost.appWidgetProviders,
-        ) { entries, providers ->
+        combine(communalWidgetDao.getWidgets(), communalWidgetHost.appWidgetProviders) {
+            entries,
+            providers ->
             entries.mapNotNull { (rank, widget) ->
                 CommunalWidgetEntry(
                     appWidgetId = widget.widgetId,
                     componentName = widget.componentName,
                     rank = rank.rank,
-                    providerInfo = providers[widget.widgetId]
+                    providerInfo = providers[widget.widgetId],
                 )
             }
         }
+
+    override fun updateWidgetSpanY(widgetId: Int, spanY: Int) {
+        bgScope.launch {
+            communalWidgetDao.updateWidgetSpanY(widgetId, spanY)
+            logger.i({ "Updated spanY of widget $int1 to $int2." }) {
+                int1 = widgetId
+                int2 = spanY
+            }
+            backupManager.dataChanged()
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
@@ -197,6 +215,7 @@ constructor(
                     provider = provider,
                     rank = rank,
                     userSerialNumber = userManager.getUserSerialNumber(user.identifier),
+                    spanY = 3,
                 )
                 backupManager.dataChanged()
             } else {
@@ -325,6 +344,7 @@ constructor(
                         componentName = restoredWidget.componentName
                         rank = restoredWidget.rank
                         userSerialNumber = userManager.getUserSerialNumber(newUser.identifier)
+                        spanY = restoredWidget.spanY
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
@@ -383,6 +403,7 @@ constructor(
             appWidgetId = entry.appWidgetId,
             providerInfo = entry.providerInfo!!,
             rank = entry.rank,
+            spanY = entry.spanY,
         )
     }
 
@@ -400,6 +421,7 @@ constructor(
                 appWidgetId = entry.appWidgetId,
                 providerInfo = entry.providerInfo!!,
                 rank = entry.rank,
+                spanY = entry.spanY,
             )
         }
 
@@ -412,6 +434,7 @@ constructor(
                 componentName = componentName,
                 icon = session.icon,
                 user = session.user,
+                spanY = entry.spanY,
             )
         } else {
             null
@@ -423,5 +446,6 @@ constructor(
         val componentName: String,
         val rank: Int,
         var providerInfo: AppWidgetProviderInfo? = null,
+        var spanY: Int = 3,
     )
 }

@@ -117,6 +117,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = defaultWidgets[0],
                     rank = 0,
                     userSerialNumber = 0,
+                    spanY = 3,
                 )
             verify(communalWidgetDao)
                 .addWidget(
@@ -124,6 +125,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = defaultWidgets[1],
                     rank = 1,
                     userSerialNumber = 0,
+                    spanY = 3,
                 )
             verify(communalWidgetDao)
                 .addWidget(
@@ -131,6 +133,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = defaultWidgets[2],
                     rank = 2,
                     userSerialNumber = 0,
+                    spanY = 3,
                 )
         }
 
@@ -152,6 +155,7 @@ class DefaultWidgetPopulationTest : SysuiTestCase() {
                     componentName = any(),
                     rank = anyInt(),
                     userSerialNumber = anyInt(),
+                    spanY = anyInt(),
                 )
         }
 }

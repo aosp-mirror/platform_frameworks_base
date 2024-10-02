@@ -304,54 +304,28 @@ public class PipTransition extends PipTransitionController implements
         if (pipChange == null) {
             return false;
         }
-        WindowContainerToken pipTaskToken = pipChange.getContainer();
         SurfaceControl pipLeash = pipChange.getLeash();
+        Preconditions.checkNotNull(pipLeash, "Leash is null for swipe-up transition.");
 
-        if (pipTaskToken == null || pipLeash == null) {
-            return false;
-        }
-
-        SurfaceControl overlayLeash = mPipTransitionState.getSwipePipToHomeOverlay();
-        PictureInPictureParams params = pipChange.getTaskInfo().pictureInPictureParams;
-
-        Rect appBounds = mPipTransitionState.getSwipePipToHomeAppBounds();
-        Rect destinationBounds = pipChange.getEndAbsBounds();
-
-        float aspectRatio = pipChange.getTaskInfo().pictureInPictureParams.getAspectRatioFloat();
-
-        // We fake the source rect hint when the one prvided by the app is invalid for
-        // the animation with an app icon overlay.
-        Rect animationSrcRectHint = overlayLeash == null ? params.getSourceRectHint()
-                : PipUtils.getEnterPipWithOverlaySrcRectHint(appBounds, aspectRatio);
-
-        WindowContainerTransaction finishWct = new WindowContainerTransaction();
-        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-
-        final float scale = (float) destinationBounds.width() / animationSrcRectHint.width();
-        startTransaction.setWindowCrop(pipLeash, animationSrcRectHint);
-        startTransaction.setPosition(pipLeash,
-                destinationBounds.left - animationSrcRectHint.left * scale,
-                destinationBounds.top - animationSrcRectHint.top * scale);
-        startTransaction.setScale(pipLeash, scale, scale);
-
-        if (overlayLeash != null) {
+        final Rect destinationBounds = pipChange.getEndAbsBounds();
+        final SurfaceControl swipePipToHomeOverlay = mPipTransitionState.getSwipePipToHomeOverlay();
+        if (swipePipToHomeOverlay != null) {
             final int overlaySize = PipContentOverlay.PipAppIconOverlay.getOverlaySize(
                     mPipTransitionState.getSwipePipToHomeAppBounds(), destinationBounds);
-
-            // Overlay needs to be adjusted once a new draw comes in resetting surface transform.
-            tx.setScale(overlayLeash, 1f, 1f);
-            tx.setPosition(overlayLeash, (destinationBounds.width() - overlaySize) / 2f,
-                    (destinationBounds.height() - overlaySize) / 2f);
+            // It is possible we reparent the PIP activity to a new PIP task (in multi-activity
+            // apps), so we should also reparent the overlay to the final PIP task.
+            startTransaction.reparent(swipePipToHomeOverlay, pipLeash)
+                    .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE)
+                    .setScale(swipePipToHomeOverlay, 1f, 1f)
+                    .setPosition(swipePipToHomeOverlay,
+                            (destinationBounds.width() - overlaySize) / 2f,
+                            (destinationBounds.height() - overlaySize) / 2f);
         }
+
+        startTransaction.merge(finishTransaction);
         startTransaction.apply();
-
-        tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
-                        this::onClientDrawAtTransitionEnd);
-        finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
-
-        // Note that finishWct should be free of any actual WM state changes; we are using
-        // it for syncing with the client draw after delayed configuration changes are dispatched.
-        finishCallback.onTransitionFinished(finishWct.isEmpty() ? null : finishWct);
+        finishCallback.onTransitionFinished(null /* finishWct */);
+        onClientDrawAtTransitionEnd();
         return true;
     }
 

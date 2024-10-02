@@ -1947,7 +1947,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mCleanupTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         buildCleanupTransaction(mCleanupTransaction, info);
         if (mController.getTransitionPlayer() != null && mIsPlayerEnabled) {
-            mController.dispatchLegacyAppTransitionStarting(info, mStatusBarTransitionDelay);
+            mController.dispatchLegacyAppTransitionStarting(participantDisplays,
+                    mStatusBarTransitionDelay);
             try {
                 ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);
@@ -2188,30 +2189,32 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             for (int i = onTopTasksEnd.size() - 1; i >= 0; --i) {
                 final Task task = onTopTasksEnd.get(i);
                 if (task.getDisplayId() != displayId) continue;
-                if (!enableDisplayFocusInShellTransitions()
-                        || mOnTopDisplayStart == onTopDisplayEnd
-                        || displayId != onTopDisplayEnd.mDisplayId) {
-                    // If it didn't change since last report, don't report
-                    if (reportedOnTop == null) {
-                        if (mOnTopTasksStart.contains(task)) continue;
-                    } else if (reportedOnTop.contains(task)) {
-                        continue;
-                    }
+                if (reportedOnTop == null) {
+                    if (mOnTopTasksStart.contains(task)) continue;
+                } else if (reportedOnTop.contains(task)) {
+                    continue;
                 }
-                // Need to report it.
-                mParticipants.add(task);
-                int changeIdx = mChanges.indexOfKey(task);
-                if (changeIdx < 0) {
-                    mChanges.put(task, new ChangeInfo(task));
-                    changeIdx = mChanges.indexOfKey(task);
-                }
-                mChanges.valueAt(changeIdx).mFlags |= ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP;
+                addToTopChange(task);
             }
             // Swap in the latest on-top tasks.
             mController.mLatestOnTopTasksReported.put(displayId, onTopTasksEnd);
             onTopTasksEnd = reportedOnTop != null ? reportedOnTop : new ArrayList<>();
             onTopTasksEnd.clear();
+
+            if (enableDisplayFocusInShellTransitions()
+                    && mOnTopDisplayStart != onTopDisplayEnd
+                    && displayId == onTopDisplayEnd.mDisplayId) {
+                addToTopChange(onTopDisplayEnd);
+            }
         }
+    }
+
+    private void addToTopChange(@NonNull WindowContainer wc) {
+        mParticipants.add(wc);
+        if (!mChanges.containsKey(wc)) {
+            mChanges.put(wc, new ChangeInfo(wc));
+        }
+        mChanges.get(wc).mFlags |= ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP;
     }
 
     private void postCleanupOnFailure() {
