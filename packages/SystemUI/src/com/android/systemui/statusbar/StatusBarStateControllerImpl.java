@@ -272,7 +272,7 @@ public class StatusBarStateControllerImpl implements
      * Updates the {@link StatusBarState} and notifies registered listeners, if needed.
      */
     private void updateStateAndNotifyListeners(int state) {
-        if (state != mUpcomingState) {
+        if (state != mUpcomingState && !SceneContainerFlag.isEnabled()) {
             Log.d(TAG, "setState: requested state " + StatusBarState.toString(state)
                     + "!= upcomingState: " + StatusBarState.toString(mUpcomingState) + ". "
                     + "This usually means the status bar state transition was interrupted before "
