@@ -2309,10 +2309,6 @@
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
 
-    <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
-         on grouped devices. -->
-    <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
-
     <!-- Flag indicating current media Output Switcher version. -->
     <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
 
