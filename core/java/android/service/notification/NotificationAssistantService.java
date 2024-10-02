@@ -393,6 +393,23 @@ public abstract class NotificationAssistantService extends NotificationListenerS
         }
     }
 
+    /**
+     * Informs the notification manager about what {@link Adjustment Adjustments} are supported by
+     * this NAS.
+     *
+     * For backwards compatibility, we assume all Adjustment types are supported by the NAS.
+     */
+    @FlaggedApi(Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public final void setAdjustmentTypeSupportedState(@NonNull @Adjustment.Keys String key,
+            boolean supported) {
+        if (!isBound()) return;
+        try {
+            getNotificationInterface().setAdjustmentTypeSupportedState(mWrapper, key, supported);
+        } catch (android.os.RemoteException ex) {
+            Log.v(TAG, "Unable to contact notification manager", ex);
+        }
+    }
+
     private class NotificationAssistantServiceWrapper extends NotificationListenerWrapper {
         @Override
         public void onNotificationEnqueuedWithChannel(IStatusBarNotificationHolder sbnHolder,
