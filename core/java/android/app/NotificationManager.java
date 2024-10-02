@@ -958,6 +958,9 @@ public class NotificationManager {
      * Returns whether the calling app's properly formatted notifications can appear in a promoted
      * format, which may result in higher ranking, appearances on additional surfaces, and richer
      * presentation.
+     *
+     * Apps can request this permission by sending the user to the activity that matches the system
+     * intent action {@link android.provider.Settings#ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS}.
      */
     @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     public boolean canPostPromotedNotifications() {

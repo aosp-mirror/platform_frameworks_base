@@ -2367,6 +2367,21 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
 
     /**
+     * Activity Action: Show the permission screen for allowing apps to post promoted notifications.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS
+            = "android.settings.APP_NOTIFICATION_PROMOTION_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
