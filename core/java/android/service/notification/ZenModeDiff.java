@@ -16,6 +16,7 @@
 
 package android.service.notification;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.Flags;
@@ -663,4 +664,338 @@ public class ZenModeDiff {
             return mActiveDiff != null && !mActiveDiff.to();
         }
     }
+
+    /**
+     * Diff class representing a change between two
+     * {@link android.service.notification.ZenDeviceEffects}.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static class DeviceEffectsDiff extends BaseDiff {
+        public static final String FIELD_GRAYSCALE = "mGrayscale";
+        public static final String FIELD_SUPPRESS_AMBIENT_DISPLAY = "mSuppressAmbientDisplay";
+        public static final String FIELD_DIM_WALLPAPER = "mDimWallpaper";
+        public static final String FIELD_NIGHT_MODE = "mNightMode";
+        public static final String FIELD_DISABLE_AUTO_BRIGHTNESS = "mDisableAutoBrightness";
+        public static final String FIELD_DISABLE_TAP_TO_WAKE = "mDisableTapToWake";
+        public static final String FIELD_DISABLE_TILT_TO_WAKE = "mDisableTiltToWake";
+        public static final String FIELD_DISABLE_TOUCH = "mDisableTouch";
+        public static final String FIELD_MINIMIZE_RADIO_USAGE = "mMinimizeRadioUsage";
+        public static final String FIELD_MAXIMIZE_DOZE = "mMaximizeDoze";
+        public static final String FIELD_EXTRA_EFFECTS = "mExtraEffects";
+        // NOTE: new field strings must match the variable names in ZenDeviceEffects
+
+        /**
+         * Create a DeviceEffectsDiff representing the difference between two ZenDeviceEffects
+         * objects.
+         * @param from previous ZenDeviceEffects
+         * @param to new ZenDeviceEffects
+         * @return The diff between the two given ZenDeviceEffects
+         */
+        public DeviceEffectsDiff(ZenDeviceEffects from, ZenDeviceEffects to) {
+            super(from, to);
+            // Short-circuit the both-null case
+            if (from == null && to == null) {
+                return;
+            }
+            if (hasExistenceChange()) {
+                // either added or removed; return here. otherwise (they're not both null) there's
+                // field diffs.
+                return;
+            }
+
+            // Compare all fields, knowing there's some diff and that neither is null.
+            if (from.shouldDisplayGrayscale() != to.shouldDisplayGrayscale()) {
+                addField(FIELD_GRAYSCALE, new FieldDiff<>(from.shouldDisplayGrayscale(),
+                        to.shouldDisplayGrayscale()));
+            }
+            if (from.shouldSuppressAmbientDisplay() != to.shouldSuppressAmbientDisplay()) {
+                addField(FIELD_SUPPRESS_AMBIENT_DISPLAY,
+                        new FieldDiff<>(from.shouldSuppressAmbientDisplay(),
+                                to.shouldSuppressAmbientDisplay()));
+            }
+            if (from.shouldDimWallpaper() != to.shouldDimWallpaper()) {
+                addField(FIELD_DIM_WALLPAPER, new FieldDiff<>(from.shouldDimWallpaper(),
+                        to.shouldDimWallpaper()));
+            }
+            if (from.shouldUseNightMode() != to.shouldUseNightMode()) {
+                addField(FIELD_NIGHT_MODE, new FieldDiff<>(from.shouldUseNightMode(),
+                        to.shouldUseNightMode()));
+            }
+            if (from.shouldDisableAutoBrightness() != to.shouldDisableAutoBrightness()) {
+                addField(FIELD_DISABLE_AUTO_BRIGHTNESS,
+                        new FieldDiff<>(from.shouldDisableAutoBrightness(),
+                                to.shouldDisableAutoBrightness()));
+            }
+            if (from.shouldDisableTapToWake() != to.shouldDisableTapToWake()) {
+                addField(FIELD_DISABLE_TAP_TO_WAKE, new FieldDiff<>(from.shouldDisableTapToWake(),
+                        to.shouldDisableTapToWake()));
+            }
+            if (from.shouldDisableTiltToWake() != to.shouldDisableTiltToWake()) {
+                addField(FIELD_DISABLE_TILT_TO_WAKE,
+                        new FieldDiff<>(from.shouldDisableTiltToWake(),
+                                to.shouldDisableTiltToWake()));
+            }
+            if (from.shouldDisableTouch() != to.shouldDisableTouch()) {
+                addField(FIELD_DISABLE_TOUCH, new FieldDiff<>(from.shouldDisableTouch(),
+                        to.shouldDisableTouch()));
+            }
+            if (from.shouldMinimizeRadioUsage() != to.shouldMinimizeRadioUsage()) {
+                addField(FIELD_MINIMIZE_RADIO_USAGE,
+                        new FieldDiff<>(from.shouldMinimizeRadioUsage(),
+                                to.shouldMinimizeRadioUsage()));
+            }
+            if (from.shouldMaximizeDoze() != to.shouldMaximizeDoze()) {
+                addField(FIELD_MAXIMIZE_DOZE, new FieldDiff<>(from.shouldMaximizeDoze(),
+                        to.shouldMaximizeDoze()));
+            }
+            if (!Objects.equals(from.getExtraEffects(), to.getExtraEffects())) {
+                addField(FIELD_EXTRA_EFFECTS, new FieldDiff<>(from.getExtraEffects(),
+                        to.getExtraEffects()));
+            }
+        }
+
+        /**
+         * Returns whether this object represents an actual diff.
+         */
+        @Override
+        public boolean hasDiff() {
+            return hasExistenceChange() || hasFieldDiffs();
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ZenDeviceEffectsDiff{");
+            if (!hasDiff()) {
+                sb.append("no changes");
+            }
+
+            // If added or deleted, we just append that.
+            if (hasExistenceChange()) {
+                if (wasAdded()) {
+                    sb.append("added");
+                } else if (wasRemoved()) {
+                    sb.append("removed");
+                }
+            }
+
+            // Append all of the individual field diffs
+            boolean first = true;
+            for (String key : fieldNamesWithDiff()) {
+                FieldDiff diff = getDiffForField(key);
+                if (diff == null) {
+                    // The diff should not have null diffs added, but we add this to be defensive.
+                    continue;
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+
+                sb.append(key);
+                sb.append(":");
+                sb.append(diff);
+            }
+
+            return sb.append("}").toString();
+        }
+    }
+
+    /**
+     * Diff class representing a change between two {@link android.service.notification.ZenPolicy}.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static class PolicyDiff extends BaseDiff {
+        public static final String FIELD_PRIORITY_CATEGORY_REMINDERS =
+                "mPriorityCategories_Reminders";
+        public static final String FIELD_PRIORITY_CATEGORY_EVENTS = "mPriorityCategories_Events";
+        public static final String FIELD_PRIORITY_CATEGORY_MESSAGES =
+                "mPriorityCategories_Messages";
+        public static final String FIELD_PRIORITY_CATEGORY_CALLS = "mPriorityCategories_Calls";
+        public static final String FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS =
+                "mPriorityCategories_RepeatCallers";
+        public static final String FIELD_PRIORITY_CATEGORY_ALARMS = "mPriorityCategories_Alarms";
+        public static final String FIELD_PRIORITY_CATEGORY_MEDIA = "mPriorityCategories_Media";
+        public static final String FIELD_PRIORITY_CATEGORY_SYSTEM = "mPriorityCategories_System";
+        public static final String FIELD_PRIORITY_CATEGORY_CONVERSATIONS =
+                "mPriorityCategories_Conversations";
+
+        public static final String FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT =
+                "mVisualEffects_FullScreenIntent";
+        public static final String FIELD_VISUAL_EFFECT_LIGHTS = "mVisualEffects_Lights";
+        public static final String FIELD_VISUAL_EFFECT_PEEK = "mVisualEffects_Peek";
+        public static final String FIELD_VISUAL_EFFECT_STATUS_BAR = "mVisualEffects_StatusBar";
+        public static final String FIELD_VISUAL_EFFECT_BADGE = "mVisualEffects_Badge";
+        public static final String FIELD_VISUAL_EFFECT_AMBIENT = "mVisualEffects_Ambient";
+        public static final String FIELD_VISUAL_EFFECT_NOTIFICATION_LIST =
+                "mVisualEffects_NotificationList";
+
+        public static final String FIELD_PRIORITY_MESSAGES = "mPriorityMessages";
+        public static final String FIELD_PRIORITY_CALLS = "mPriorityCalls";
+        public static final String FIELD_CONVERSATION_SENDERS = "mConversationSenders";
+        public static final String FIELD_ALLOW_CHANNELS = "mAllowChannels";
+
+        /**
+         * Create a PolicyDiff representing the difference between two ZenPolicy objects.
+         *
+         * @param from previous ZenPolicy
+         * @param to   new ZenPolicy
+         * @return The diff between the two given ZenPolicy
+         */
+        public PolicyDiff(ZenPolicy from, ZenPolicy to) {
+            super(from, to);
+            // Short-circuit the both-null case
+            if (from == null && to == null) {
+                return;
+            }
+            if (hasExistenceChange()) {
+                // either added or removed; return here. otherwise (they're not both null) there's
+                // field diffs.
+                return;
+            }
+
+            // Compare all fields, knowing there's some diff and that neither is null.
+            if (from.getPriorityCategoryReminders() != to.getPriorityCategoryReminders()) {
+                addField(FIELD_PRIORITY_CATEGORY_REMINDERS,
+                        new FieldDiff<>(from.getPriorityCategoryReminders(),
+                                to.getPriorityCategoryReminders()));
+            }
+            if (from.getPriorityCategoryEvents() != to.getPriorityCategoryEvents()) {
+                addField(FIELD_PRIORITY_CATEGORY_EVENTS,
+                        new FieldDiff<>(from.getPriorityCategoryEvents(),
+                                to.getPriorityCategoryEvents()));
+            }
+            if (from.getPriorityCategoryMessages() != to.getPriorityCategoryMessages()) {
+                addField(FIELD_PRIORITY_CATEGORY_MESSAGES,
+                        new FieldDiff<>(from.getPriorityCategoryMessages(),
+                                to.getPriorityCategoryMessages()));
+            }
+            if (from.getPriorityCategoryCalls() != to.getPriorityCategoryCalls()) {
+                addField(FIELD_PRIORITY_CATEGORY_CALLS,
+                        new FieldDiff<>(from.getPriorityCategoryCalls(),
+                                to.getPriorityCategoryCalls()));
+            }
+            if (from.getPriorityCategoryRepeatCallers() != to.getPriorityCategoryRepeatCallers()) {
+                addField(FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS,
+                        new FieldDiff<>(from.getPriorityCategoryRepeatCallers(),
+                                to.getPriorityCategoryRepeatCallers()));
+            }
+            if (from.getPriorityCategoryAlarms() != to.getPriorityCategoryAlarms()) {
+                addField(FIELD_PRIORITY_CATEGORY_ALARMS,
+                        new FieldDiff<>(from.getPriorityCategoryAlarms(),
+                                to.getPriorityCategoryAlarms()));
+            }
+            if (from.getPriorityCategoryMedia() != to.getPriorityCategoryMedia()) {
+                addField(FIELD_PRIORITY_CATEGORY_MEDIA,
+                        new FieldDiff<>(from.getPriorityCategoryMedia(),
+                                to.getPriorityCategoryMedia()));
+            }
+            if (from.getPriorityCategorySystem() != to.getPriorityCategorySystem()) {
+                addField(FIELD_PRIORITY_CATEGORY_SYSTEM,
+                        new FieldDiff<>(from.getPriorityCategorySystem(),
+                                to.getPriorityCategorySystem()));
+            }
+            if (from.getPriorityCategoryConversations() != to.getPriorityCategoryConversations()) {
+                addField(FIELD_PRIORITY_CATEGORY_CONVERSATIONS,
+                        new FieldDiff<>(from.getPriorityCategoryConversations(),
+                                to.getPriorityCategoryConversations()));
+            }
+            if (from.getVisualEffectFullScreenIntent() != to.getVisualEffectFullScreenIntent()) {
+                addField(FIELD_VISUAL_EFFECT_FULL_SCREEN_INTENT,
+                        new FieldDiff<>(from.getVisualEffectFullScreenIntent(),
+                                to.getVisualEffectFullScreenIntent()));
+            }
+            if (from.getVisualEffectLights() != to.getVisualEffectLights()) {
+                addField(FIELD_VISUAL_EFFECT_LIGHTS,
+                        new FieldDiff<>(from.getVisualEffectLights(), to.getVisualEffectLights()));
+            }
+            if (from.getVisualEffectPeek() != to.getVisualEffectPeek()) {
+                addField(FIELD_VISUAL_EFFECT_PEEK, new FieldDiff<>(from.getVisualEffectPeek(),
+                        to.getVisualEffectPeek()));
+            }
+            if (from.getVisualEffectStatusBar() != to.getVisualEffectStatusBar()) {
+                addField(FIELD_VISUAL_EFFECT_STATUS_BAR,
+                        new FieldDiff<>(from.getVisualEffectStatusBar(),
+                                to.getVisualEffectStatusBar()));
+            }
+            if (from.getVisualEffectBadge() != to.getVisualEffectBadge()) {
+                addField(FIELD_VISUAL_EFFECT_BADGE, new FieldDiff<>(from.getVisualEffectBadge(),
+                        to.getVisualEffectBadge()));
+            }
+            if (from.getVisualEffectAmbient() != to.getVisualEffectAmbient()) {
+                addField(FIELD_VISUAL_EFFECT_AMBIENT, new FieldDiff<>(from.getVisualEffectAmbient(),
+                        to.getVisualEffectAmbient()));
+            }
+            if (from.getVisualEffectNotificationList() != to.getVisualEffectNotificationList()) {
+                addField(FIELD_VISUAL_EFFECT_NOTIFICATION_LIST,
+                        new FieldDiff<>(from.getVisualEffectNotificationList(),
+                                to.getVisualEffectNotificationList()));
+            }
+            if (from.getPriorityMessageSenders() != to.getPriorityMessageSenders()) {
+                addField(FIELD_PRIORITY_MESSAGES, new FieldDiff<>(from.getPriorityMessageSenders(),
+                        to.getPriorityMessageSenders()));
+            }
+            if (from.getPriorityCallSenders() != to.getPriorityCallSenders()) {
+                addField(FIELD_PRIORITY_CALLS, new FieldDiff<>(from.getPriorityCallSenders(),
+                        to.getPriorityCallSenders()));
+            }
+            if (from.getPriorityConversationSenders() != to.getPriorityConversationSenders()) {
+                addField(FIELD_CONVERSATION_SENDERS,
+                        new FieldDiff<>(from.getPriorityConversationSenders(),
+                                to.getPriorityConversationSenders()));
+            }
+            if (from.getPriorityChannelsAllowed() != to.getPriorityChannelsAllowed()) {
+                addField(FIELD_ALLOW_CHANNELS, new FieldDiff<>(from.getPriorityChannelsAllowed(),
+                        to.getPriorityChannelsAllowed()));
+            }
+        }
+
+        /**
+         * Returns whether this object represents an actual diff.
+         */
+        @Override
+        public boolean hasDiff() {
+            return hasExistenceChange() || hasFieldDiffs();
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ZenPolicyDiff{");
+            // The diff should not have null diffs added, but we add this to be defensive.
+            if (!hasDiff()) {
+                sb.append("no changes");
+            }
+
+            // If added or deleted, we just append that.
+            if (hasExistenceChange()) {
+                if (wasAdded()) {
+                    sb.append("added");
+                } else if (wasRemoved()) {
+                    sb.append("removed");
+                }
+            }
+
+            // Go through all of the individual fields
+            boolean first = true;
+            for (String key : fieldNamesWithDiff()) {
+                FieldDiff diff = getDiffForField(key);
+                if (diff == null) {
+                    // this shouldn't happen...
+                    continue;
+                }
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+
+                sb.append(key);
+                sb.append(":");
+                sb.append(diff);
+            }
+
+            return sb.append("}").toString();
+        }
+    }
+
 }

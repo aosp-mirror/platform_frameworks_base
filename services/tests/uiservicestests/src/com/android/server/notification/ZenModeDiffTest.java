@@ -60,6 +60,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -127,7 +128,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.ZenRule.class, getZenRuleExemptFields());
+                ZenModeConfig.ZenRule.class, getZenRuleExemptFields(), false);
         generateFieldDiffs(r1, r2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.RuleDiff d = new ZenModeDiff.RuleDiff(r1, r2);
@@ -143,6 +144,180 @@ public class ZenModeDiffTest extends UiServiceTestCase {
             assertEquals(expectedFrom.get(name), d.getDiffForField(name).from());
             assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
         }
+    }
+
+    @Test
+    public void testDeviceEffectsDiff_addRemoveSame() {
+        // Test add, remove, and both sides same
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder().build();
+
+        // Both sides same rule
+        ZenModeDiff.DeviceEffectsDiff dSame = new ZenModeDiff.DeviceEffectsDiff(effects, effects);
+        assertFalse(dSame.hasDiff());
+
+        // from existent rule to null: expect deleted
+        ZenModeDiff.DeviceEffectsDiff deleted = new ZenModeDiff.DeviceEffectsDiff(effects, null);
+        assertTrue(deleted.hasDiff());
+        assertTrue(deleted.wasRemoved());
+
+        // from null to new rule: expect added
+        ZenModeDiff.DeviceEffectsDiff added = new ZenModeDiff.DeviceEffectsDiff(null, effects);
+        assertTrue(added.hasDiff());
+        assertTrue(added.wasAdded());
+    }
+
+    @Test
+    public void testDeviceEffectsDiff_fieldDiffs() throws Exception {
+        // Start these the same
+        ZenDeviceEffects effects1 = new ZenDeviceEffects.Builder().build();
+        ZenDeviceEffects effects2 = new ZenDeviceEffects.Builder().build();
+
+        // maps mapping field name -> expected output value as we set diffs
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(
+                ZenDeviceEffects.class, Collections.emptySet() /*no exempt fields*/, true);
+        generateFieldDiffs(effects1, effects2, fieldsForDiff, expectedFrom, expectedTo);
+
+        ZenModeDiff.DeviceEffectsDiff d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
+        assertTrue(d.hasDiff());
+
+        // Now diff them and check that each of the fields has a diff
+        for (Field f : fieldsForDiff) {
+            String name = f.getName();
+            assertNotNull("diff not found for field: " + name, d.getDiffForField(name));
+            assertTrue(d.getDiffForField(name).hasDiff());
+            assertTrue("unexpected field: " + name, expectedFrom.containsKey(name));
+            assertTrue("unexpected field: " + name, expectedTo.containsKey(name));
+            assertEquals(expectedFrom.get(name), d.getDiffForField(name).from());
+            assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
+        }
+    }
+
+    @Test
+    public void testDeviceEffectsDiff_toString() throws Exception {
+        // Ensure device effects toString is readable.
+        ZenDeviceEffects effects1 = new ZenDeviceEffects.Builder().build();
+        ZenDeviceEffects effects2 = new ZenDeviceEffects.Builder().build();
+
+        ZenModeDiff.DeviceEffectsDiff d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{no changes}");
+
+        d = new ZenModeDiff.DeviceEffectsDiff(effects1, null);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{removed}");
+
+        d = new ZenModeDiff.DeviceEffectsDiff(null, effects2);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{added}");
+
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(
+                ZenDeviceEffects.class, Collections.emptySet() /*no exempt fields*/, true);
+        generateFieldDiffs(effects1, effects2, fieldsForDiff, expectedFrom, expectedTo);
+
+        d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
+        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{mNightMode:true->false, "
+                + "mDisableTapToWake:true->false, mDisableAutoBrightness:true->false, "
+                + "mSuppressAmbientDisplay:true->false, mDisableTiltToWake:true->false, "
+                + "mGrayscale:true->false, mDisableTouch:true->false, mMaximizeDoze:true->false, "
+                + "mMinimizeRadioUsage:true->false, mExtraEffects:null->[], "
+                + "mDimWallpaper:true->false}");
+    }
+
+
+    @Test
+    public void testPolicyDiff_addRemoveSame() {
+        // Test add, remove, and both sides same
+        ZenPolicy effects = new ZenPolicy.Builder().build();
+
+        // Both sides same rule
+        ZenModeDiff.PolicyDiff dSame = new ZenModeDiff.PolicyDiff(effects, effects);
+        assertFalse(dSame.hasDiff());
+
+        // from existent rule to null: expect deleted
+        ZenModeDiff.PolicyDiff deleted = new ZenModeDiff.PolicyDiff(effects, null);
+        assertTrue(deleted.hasDiff());
+        assertTrue(deleted.wasRemoved());
+
+        // from null to new rule: expect added
+        ZenModeDiff.PolicyDiff added = new ZenModeDiff.PolicyDiff(null, effects);
+        assertTrue(added.hasDiff());
+        assertTrue(added.wasAdded());
+    }
+
+    @Test
+    public void testPolicyDiff_fieldDiffs() throws Exception {
+        // Start these the same
+        ZenPolicy policy1 = new ZenPolicy.Builder().build();
+        ZenPolicy policy2 = new ZenPolicy.Builder().build();
+
+        // maps mapping field name -> expected output value as we set diffs
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(ZenPolicy.class, Collections.emptySet(),
+                false);
+        generateFieldDiffsForZenPolicy(policy1, policy2, fieldsForDiff, expectedFrom, expectedTo);
+
+        ZenModeDiff.PolicyDiff d = new ZenModeDiff.PolicyDiff(policy1, policy2);
+        assertTrue(d.hasDiff());
+
+        // Now diff them and check that each of the fields has a diff.
+        // Because ZenPolicy consolidates priority category and visual effect fields in a list,
+        // we cannot use reflection on ZenPolicy to get the list of fields.
+        ArrayList<String> diffFields = new ArrayList<>();
+        Field[] fields = ZenModeDiff.PolicyDiff.class.getDeclaredFields();
+
+        for (Field field : fields) {
+            int m = field.getModifiers();
+            if (Modifier.isStatic(m) && Modifier.isFinal(m)) {
+                diffFields.add((String) field.get(policy1));
+            }
+        }
+
+        for (String name : diffFields) {
+            assertNotNull("diff not found for field: " + name, d.getDiffForField(name));
+            assertTrue(d.getDiffForField(name).hasDiff());
+            assertTrue("unexpected field: " + name, expectedFrom.containsKey(name));
+            assertTrue("unexpected field: " + name, expectedTo.containsKey(name));
+            assertEquals(expectedFrom.get(name), d.getDiffForField(name).from());
+            assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
+        }
+    }
+
+    @Test
+    public void testPolicyDiff_toString() throws Exception {
+        // Ensure device effects toString is readable.
+        ZenPolicy policy1 = new ZenPolicy.Builder().build();
+        ZenPolicy policy2 = new ZenPolicy.Builder().build();
+
+        ZenModeDiff.PolicyDiff d = new ZenModeDiff.PolicyDiff(policy1, policy2);
+        assertThat(d.toString()).isEqualTo("ZenPolicyDiff{no changes}");
+
+        d = new ZenModeDiff.PolicyDiff(policy1, null);
+        assertThat(d.toString()).isEqualTo("ZenPolicyDiff{removed}");
+
+        d = new ZenModeDiff.PolicyDiff(null, policy2);
+        assertThat(d.toString()).isEqualTo("ZenPolicyDiff{added}");
+
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(
+                ZenPolicy.class, Collections.emptySet() /*no exempt fields*/, false);
+        generateFieldDiffsForZenPolicy(policy1, policy2, fieldsForDiff, expectedFrom, expectedTo);
+
+        d = new ZenModeDiff.PolicyDiff(policy1, policy2);
+        assertThat(d.toString()).isEqualTo("ZenPolicyDiff{mPriorityCalls:2->1, "
+                + "mVisualEffects_StatusBar:1->2, mPriorityCategories_RepeatCallers:1->2, "
+                + "mPriorityCategories_Calls:1->2, mPriorityCategories_Media:1->2, "
+                + "mConversationSenders:2->1, mPriorityCategories_Reminders:1->2, "
+                + "mVisualEffects_Badge:1->2, mPriorityCategories_Messages:1->2, "
+                + "mAllowChannels:2->1, mPriorityMessages:2->1, "
+                + "mVisualEffects_NotificationList:1->2, mVisualEffects_FullScreenIntent:1->2, "
+                + "mPriorityCategories_Alarms:1->2, mVisualEffects_Lights:1->2, "
+                + "mPriorityCategories_Events:1->2, mVisualEffects_Ambient:1->2, "
+                + "mPriorityCategories_System:1->2, mPriorityCategories_Conversations:1->2, "
+                + "mVisualEffects_Peek:1->2}");
     }
 
     private static Set<String> getZenRuleExemptFields() {
@@ -194,7 +369,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.class, getConfigExemptAndFlaggedFields());
+                ZenModeConfig.class, getConfigExemptAndFlaggedFields(), false);
         generateFieldDiffs(c1, c2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.ConfigDiff d = new ZenModeDiff.ConfigDiff(c1, c2);
@@ -223,7 +398,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.class, ZEN_MODE_CONFIG_EXEMPT_FIELDS);
+                ZenModeConfig.class, ZEN_MODE_CONFIG_EXEMPT_FIELDS, false);
         generateFieldDiffs(c1, c2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.ConfigDiff d = new ZenModeDiff.ConfigDiff(c1, c2);
@@ -359,22 +534,128 @@ public class ZenModeDiffTest extends UiServiceTestCase {
 
     // Get the fields on which we would want to check a diff. The requirements are: not final or/
     // static (as these should/can never change), and not in a specific list that's exempted.
-    private List<Field> getFieldsForDiffCheck(Class<?> c, Set<String> exemptNames)
+    private List<Field> getFieldsForDiffCheck(Class<?> c, Set<String> exemptNames,
+                                              boolean includeFinal)
             throws SecurityException {
         Field[] fields = c.getDeclaredFields();
         ArrayList<Field> out = new ArrayList<>();
 
         for (Field field : fields) {
             // Check for exempt reasons
+            // Anything in provided exemptNames is skipped.
+            if (exemptNames.contains(field.getName())) {
+                continue;
+            }
             int m = field.getModifiers();
-            if (Modifier.isFinal(m)
-                    || Modifier.isStatic(m)
-                    || exemptNames.contains(field.getName())) {
+            if (Modifier.isStatic(m)) {
+                continue;
+            }
+            if (!includeFinal && Modifier.isFinal(m)) {
                 continue;
             }
             out.add(field);
         }
         return out;
+    }
+
+    // Generate a set of diffs for two ZenPolicy objects. Store the results in the provided
+    // expectation maps.
+    private void generateFieldDiffsForZenPolicy(ZenPolicy a, ZenPolicy b, List<Field> fields,
+            ArrayMap<String, Object> expectedA, ArrayMap<String, Object> expectedB)
+            throws Exception {
+        // Loop through fields for which we want to check diffs, set a diff and keep track of
+        // what we set.
+        for (Field f : fields) {
+            f.setAccessible(true);
+            // Just double-check also that the fields actually are for the class declared
+            assertEquals(f.getDeclaringClass(), a.getClass());
+            Class<?> t = f.getType();
+
+            if (int.class.equals(t)) {
+                // these will not be valid for arbitrary int enums, but should suffice for a diff.
+                f.setInt(a, 2);
+                expectedA.put(f.getName(), 2);
+                f.setInt(b, 1);
+                expectedB.put(f.getName(), 1);
+            } else if (List.class.equals(t)) {
+                // Fieds mPriorityCategories and mVisualEffects store multiple values and
+                // must be treated separately.
+                List<Integer> aList = (ArrayList<Integer>) f.get(a);
+                List<Integer> bList = (ArrayList<Integer>) f.get(b);
+                if (f.getName().equals("mPriorityCategories")) {
+                    // PRIORITY_CATEGORY_REMINDERS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 0,
+                            "mPriorityCategories_Reminders");
+                    // PRIORITY_CATEGORY_EVENTS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 1,
+                            "mPriorityCategories_Events");
+                    // PRIORITY_CATEGORY_MESSAGES
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 2,
+                            "mPriorityCategories_Messages");
+                    // PRIORITY_CATEGORY_CALLS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 3,
+                            "mPriorityCategories_Calls");
+                    // PRIORITY_CATEGORY_REPEAT_CALLERS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 4,
+                            "mPriorityCategories_RepeatCallers");
+                    // PRIORITY_CATEGORY_ALARMS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 5,
+                            "mPriorityCategories_Alarms");
+                    // PRIORITY_CATEGORY_MEDIA
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 6,
+                            "mPriorityCategories_Media");
+                    // PRIORITY_CATEGORY_SYSTEM
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 7,
+                            "mPriorityCategories_System");
+                    // PRIORITY_CATEGORY_CONVERSATIONS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 8,
+                            "mPriorityCategories_Conversations");
+                    // Assert that we've set every PriorityCategory enum value.
+                    assertThat(Collections.frequency(aList, ZenPolicy.STATE_ALLOW))
+                            .isEqualTo(ZenPolicy.NUM_PRIORITY_CATEGORIES);
+                } else if (f.getName().equals("mVisualEffects")) {
+                    // VISUAL_EFFECT_FULL_SCREEN_INTENT
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 0,
+                            "mVisualEffects_FullScreenIntent");
+                    // VISUAL_EFFECT_LIGHTS
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 1,
+                            "mVisualEffects_Lights");
+                    // VISUAL_EFFECT_PEEK
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 2,
+                            "mVisualEffects_Peek");
+                    // VISUAL_EFFECT_STATUS_BAR
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 3,
+                            "mVisualEffects_StatusBar");
+                    // VISUAL_EFFECT_BADGE
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 4,
+                            "mVisualEffects_Badge");
+                    // VISUAL_EFFECT_AMBIENT
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 5,
+                            "mVisualEffects_Ambient");
+                    // VISUAL_EFFECT_NOTIFICATION_LIST
+                    setPolicyListValueDiff(aList, bList, expectedA, expectedB, 6,
+                            "mVisualEffects_NotificationList");
+                    // Assert that we've set every VisualeEffect enum value.
+                    assertThat(Collections.frequency(aList, ZenPolicy.STATE_ALLOW))
+                            .isEqualTo(ZenPolicy.NUM_VISUAL_EFFECTS);
+                } else {
+                    // Any other lists that are added should be added to the diff.
+                    fail("could not generate field diffs for policy list: " + f.getName());
+                }
+            }
+        }
+    }
+
+    // Helper function to create a diff in two list values at a given index, and record that
+    // diff's values in the associated expected maps under the provided field name.
+    private void setPolicyListValueDiff(List<Integer> aList, List<Integer> bList,
+                                        ArrayMap<String, Object> expectedA,
+                                        ArrayMap<String, Object> expectedB,
+                                        int index, String fieldName) {
+        aList.set(index, ZenPolicy.STATE_ALLOW);
+        expectedA.put(fieldName, ZenPolicy.STATE_ALLOW);
+        bList.set(index, ZenPolicy.STATE_DISALLOW);
+        expectedB.put(fieldName, ZenPolicy.STATE_DISALLOW);
     }
 
     // Generate a set of generic diffs for the specified two objects and the fields to generate
