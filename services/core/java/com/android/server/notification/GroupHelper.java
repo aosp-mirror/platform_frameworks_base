@@ -1435,6 +1435,10 @@ public class GroupHelper {
                 return false;
             }
 
+            if (record.getSbn().getNotification().isMediaNotification()) {
+                return false;
+            }
+
             return true;
         }
     }

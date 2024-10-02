@@ -33,6 +33,7 @@ import static android.app.Notification.FLAG_AUTO_CANCEL;
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_CAN_COLORIZE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
+import static android.app.Notification.FLAG_GROUP_SUMMARY;
 import static android.app.Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_NO_DISMISS;
@@ -2869,6 +2870,131 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
         verify(mGroupHelper, never()).onNotificationPostedWithDelay(eq(r), any(), any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testEnqueueNotification_forceGrouped_clearsSummaryFlag() throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+
+        // Old record was a summary and it was auto-grouped
+        final NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, true);
+        mService.addNotification(r);
+        mService.convertSummaryToNotificationLocked(r.getKey());
+        mService.addAutogroupKeyLocked(r.getKey(), aggregateGroupName, true);
+
+        assertThat(mService.mNotificationList).hasSize(1);
+
+        // Update record is a summary
+        final Notification updatedNotification = generateNotificationRecord(
+                mTestNotificationChannel, 0, originalGroupName, true).getNotification();
+        assertThat(updatedNotification.flags & FLAG_GROUP_SUMMARY).isEqualTo(FLAG_GROUP_SUMMARY);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, r.getSbn().getTag(),
+                r.getSbn().getId(), updatedNotification, r.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that FLAG_GROUP_SUMMARY was removed
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getFlags() & FLAG_GROUP_SUMMARY).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testEnqueueNotification_forceGroupedRegular_updatedAsSummary_clearsSummaryFlag()
+            throws Exception {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+
+        // Old record was not summary and it was auto-grouped
+        final NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, false);
+        mService.addNotification(r);
+        mService.addAutogroupKeyLocked(r.getKey(), aggregateGroupName, true);
+        assertThat(mService.mNotificationList).hasSize(1);
+
+        // Update record is a summary
+        final Notification updatedNotification = generateNotificationRecord(
+                mTestNotificationChannel, 0, originalGroupName, true).getNotification();
+        assertThat(updatedNotification.flags & FLAG_GROUP_SUMMARY).isEqualTo(FLAG_GROUP_SUMMARY);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, r.getSbn().getTag(),
+                r.getSbn().getId(), updatedNotification, r.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that FLAG_GROUP_SUMMARY was removed
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getFlags() & FLAG_GROUP_SUMMARY).isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testEnqueueNotification_notForceGrouped_dontClearSummaryFlag()
+            throws Exception {
+        final String originalGroupName = "originalGroup";
+
+        // Old record was a summary and it was not auto-grouped
+        final NotificationRecord r =
+                generateNotificationRecord(mTestNotificationChannel, 0, originalGroupName, true);
+        mService.addNotification(r);
+        assertThat(mService.mNotificationList).hasSize(1);
+
+        // Update record is a summary
+        final Notification updatedNotification = generateNotificationRecord(
+                mTestNotificationChannel, 0, originalGroupName, true).getNotification();
+        assertThat(updatedNotification.flags & FLAG_GROUP_SUMMARY).isEqualTo(FLAG_GROUP_SUMMARY);
+
+        mBinderService.enqueueNotificationWithTag(mPkg, mPkg, r.getSbn().getTag(),
+                r.getSbn().getId(), updatedNotification, r.getSbn().getUserId());
+        waitForIdle();
+
+        // Check that FLAG_GROUP_SUMMARY was not removed
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getFlags() & FLAG_GROUP_SUMMARY).isEqualTo(
+                FLAG_GROUP_SUMMARY);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testRemoveFGSFlagFromNotification_enqueued_forceGrouped_clearsSummaryFlag() {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null,
+                originalGroupName, true);
+        r.getSbn().getNotification().flags &= ~FLAG_GROUP_SUMMARY;
+        r.setOverrideGroupKey(aggregateGroupName);
+        mService.addEnqueuedNotification(r);
+
+        mInternalService.removeForegroundServiceFlagFromNotification(
+                mPkg, r.getSbn().getId(), r.getSbn().getUserId());
+        waitForIdle();
+
+        assertThat(mService.mEnqueuedNotifications).hasSize(1);
+        assertThat(mService.mEnqueuedNotifications.get(0).getFlags() & FLAG_GROUP_SUMMARY)
+                .isEqualTo(0);
+    }
+
+    @Test
+    @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void testRemoveFGSFlagFromNotification_posted_forceGrouped_clearsSummaryFlag() {
+        final String originalGroupName = "originalGroup";
+        final String aggregateGroupName = "Aggregate_Test";
+
+        final NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null,
+                originalGroupName, true);
+        r.getSbn().getNotification().flags &= ~FLAG_GROUP_SUMMARY;
+        r.setOverrideGroupKey(aggregateGroupName);
+        mService.addNotification(r);
+
+        mInternalService.removeForegroundServiceFlagFromNotification(
+                mPkg, r.getSbn().getId(), r.getSbn().getUserId());
+        waitForIdle();
+
+        assertThat(mService.mNotificationList).hasSize(1);
+        assertThat(mService.mNotificationList.get(0).getFlags() & FLAG_GROUP_SUMMARY).isEqualTo(0);
     }
 
     @Test
