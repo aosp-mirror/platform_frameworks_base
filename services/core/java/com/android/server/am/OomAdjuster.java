@@ -1816,9 +1816,36 @@ public class OomAdjuster {
         }
     }
 
+    private boolean isDeviceFullyAwake() {
+        if (Flags.pushGlobalStateToOomadjuster()) {
+            return mGlobalState.isAwake();
+        } else {
+            return mService.mWakefulness.get() == PowerManagerInternal.WAKEFULNESS_AWAKE;
+        }
+    }
+
     private boolean isScreenOnOrAnimatingLocked(ProcessStateRecord state) {
-        return mService.mWakefulness.get() == PowerManagerInternal.WAKEFULNESS_AWAKE
-                || state.isRunningRemoteAnimation();
+        return isDeviceFullyAwake() || state.isRunningRemoteAnimation();
+    }
+
+    private boolean isBackupProcess(ProcessRecord app) {
+        if (Flags.pushGlobalStateToOomadjuster()) {
+            return app == mGlobalState.getBackupTarget(app.userId);
+        } else {
+            final BackupRecord backupTarget = mService.mBackupTargets.get(app.userId);
+            if (backupTarget == null) {
+                return false;
+            }
+            return app == backupTarget.app;
+        }
+    }
+
+    private boolean isLastMemoryLevelNormal() {
+        if (Flags.pushGlobalStateToOomadjuster()) {
+            return mGlobalState.isLastMemoryLevelNormal();
+        } else {
+            return mService.mAppProfiler.isLastMemoryLevelNormal();
+        }
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -2259,8 +2286,7 @@ public class OomAdjuster {
         state.setHasStartedServices(false);
         state.setAdjSeq(mAdjSeq);
 
-        final BackupRecord backupTarget = mService.mBackupTargets.get(app.userId);
-        if (backupTarget != null && app == backupTarget.app) {
+        if (isBackupProcess(app)) {
             // If possible we want to avoid killing apps while they're being backed up
             if (adj > BACKUP_APP_ADJ) {
                 if (DEBUG_BACKUP) Slog.v(TAG_BACKUP, "oom BACKUP_APP_ADJ for " + app);
@@ -2526,8 +2552,7 @@ public class OomAdjuster {
                     double cachedRestoreThreshold =
                             mProcessList.getCachedRestoreThresholdKb() * thresholdModifier;
 
-                    if (mService.mAppProfiler.isLastMemoryLevelNormal()
-                            && lastPssOrRss >= cachedRestoreThreshold) {
+                    if (isLastMemoryLevelNormal() && lastPssOrRss >= cachedRestoreThreshold) {
                         state.setServiceHighRam(true);
                         state.setServiceB(true);
                         //Slog.i(TAG, "ADJ " + app + " high ram!");
@@ -2621,7 +2646,7 @@ public class OomAdjuster {
         // Put bound foreground services in a special sched group for additional
         // restrictions on screen off
         if (state.getCurProcState() >= PROCESS_STATE_BOUND_FOREGROUND_SERVICE
-                && mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
+                && !isDeviceFullyAwake()
                 && !state.shouldScheduleLikeTopApp()) {
             if (schedGroup > SCHED_GROUP_RESTRICTED) {
                 schedGroup = SCHED_GROUP_RESTRICTED;
@@ -2910,8 +2935,7 @@ public class OomAdjuster {
                         clientProcState = PROCESS_STATE_FOREGROUND_SERVICE;
                     } else if (cr.hasFlag(Context.BIND_FOREGROUND_SERVICE)) {
                         clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-                    } else if (mService.mWakefulness.get()
-                            == PowerManagerInternal.WAKEFULNESS_AWAKE
+                    } else if (isDeviceFullyAwake()
                             && cr.hasFlag(Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE)) {
                         clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
                     } else {
