@@ -230,6 +230,20 @@ java_library {
 }
 
 java_library {
+    name: "servicestests-utils-ravenwood",
+    srcs: [
+        "utils/**/*.java",
+        "utils/**/*.kt",
+        "utils-mockito/**/*.kt",
+    ],
+    libs: [
+        "android.test.runner.stubs.system",
+        "junit",
+        "mockito-ravenwood-prebuilt",
+    ],
+}
+
+java_library {
     name: "mockito-test-utils",
     srcs: [
         "utils-mockito/**/*.kt",
