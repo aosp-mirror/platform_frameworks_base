@@ -25,7 +25,12 @@ public class Utils {
 
     public static int idFromNan(float value) {
         int b = Float.floatToRawIntBits(value);
-        return b & 0xFFFFF;
+        return b & 0x3FFFFF;
+    }
+
+    public static String idStringFromNan(float value) {
+        int b = Float.floatToRawIntBits(value) & 0x3FFFFF;
+        return (b > 0xFFFFF) ? "A_" + (b & 0xFFFFF) : "" + b;
     }
 
     public static float getActualValue(float lr) {

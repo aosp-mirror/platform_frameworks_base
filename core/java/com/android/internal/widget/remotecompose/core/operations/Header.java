@@ -24,7 +24,6 @@ import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 
 import java.util.List;
 
@@ -35,6 +34,8 @@ import java.util.List;
  * as the dimensions of the document in pixels.
  */
 public class Header implements RemoteComposeOperation {
+    private static final int OP_CODE = Operations.HEADER;
+    private static final String CLASS_NAME = "Header";
     public static final int MAJOR_VERSION = 0;
     public static final int MINOR_VERSION = 1;
     public static final int PATCH_VERSION = 0;
@@ -49,7 +50,6 @@ public class Header implements RemoteComposeOperation {
     float mDensity;
     long mCapabilities;
 
-    public static final Companion COMPANION = new Companion();
 
     /**
      * It encodes the version of the document (following semantic versioning) as well
@@ -76,7 +76,7 @@ public class Header implements RemoteComposeOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mWidth, mHeight, mDensity, mCapabilities);
+        apply(buffer, mWidth, mHeight, mDensity, mCapabilities);
     }
 
     @Override
@@ -96,59 +96,51 @@ public class Header implements RemoteComposeOperation {
         return toString();
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public String name() {
-            return "Header";
-        }
-
-        @Override
-        public int id() {
-            return Operations.HEADER;
-        }
-
-        public void apply(WireBuffer buffer, int width, int height,
-                          float density, long capabilities) {
-            buffer.start(Operations.HEADER);
-            buffer.writeInt(MAJOR_VERSION); // major version number of the protocol
-            buffer.writeInt(MINOR_VERSION); // minor version number of the protocol
-            buffer.writeInt(PATCH_VERSION); // patch version number of the protocol
-            buffer.writeInt(width);
-            buffer.writeInt(height);
-            // buffer.writeFloat(density);
-            buffer.writeLong(capabilities);
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int majorVersion = buffer.readInt();
-            int minorVersion = buffer.readInt();
-            int patchVersion = buffer.readInt();
-            int width = buffer.readInt();
-            int height = buffer.readInt();
-            // float density = buffer.readFloat();
-            float density = 1f;
-            long capabilities = buffer.readLong();
-            Header header = new Header(majorVersion, minorVersion, patchVersion,
-                    width, height, density, capabilities);
-            operations.add(header);
-        }
-
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Protocol Operations", id(), name())
-                    .description("Document metadata, containing the version,"
-                          + " original size & density, capabilities mask")
-                    .field(INT, "MAJOR_VERSION", "Major version")
-                    .field(INT, "MINOR_VERSION", "Minor version")
-                    .field(INT, "PATCH_VERSION", "Patch version")
-                    .field(INT, "WIDTH", "Major version")
-                    .field(INT, "HEIGHT", "Major version")
-                    // .field(FLOAT, "DENSITY", "Major version")
-                    .field(LONG, "CAPABILITIES", "Major version");
-        }
+    public static String name() {
+        return CLASS_NAME;
     }
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    public static void apply(WireBuffer buffer, int width, int height,
+                             float density, long capabilities) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(MAJOR_VERSION); // major version number of the protocol
+        buffer.writeInt(MINOR_VERSION); // minor version number of the protocol
+        buffer.writeInt(PATCH_VERSION); // patch version number of the protocol
+        buffer.writeInt(width);
+        buffer.writeInt(height);
+        // buffer.writeFloat(density); TODO fix or remove
+        buffer.writeLong(capabilities);
+    }
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int majorVersion = buffer.readInt();
+        int minorVersion = buffer.readInt();
+        int patchVersion = buffer.readInt();
+        int width = buffer.readInt();
+        int height = buffer.readInt();
+        // float density = buffer.readFloat();
+        float density = 1f;
+        long capabilities = buffer.readLong();
+        Header header = new Header(majorVersion, minorVersion, patchVersion,
+                width, height, density, capabilities);
+        operations.add(header);
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
+                .description("Document metadata, containing the version,"
+                        + " original size & density, capabilities mask")
+                .field(INT, "MAJOR_VERSION", "Major version")
+                .field(INT, "MINOR_VERSION", "Minor version")
+                .field(INT, "PATCH_VERSION", "Patch version")
+                .field(INT, "WIDTH", "Major version")
+                .field(INT, "HEIGHT", "Major version")
+                // .field(FLOAT, "DENSITY", "Major version")
+                .field(LONG, "CAPABILITIES", "Major version");
+    }
+
 }

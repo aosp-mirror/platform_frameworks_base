@@ -25,6 +25,7 @@ import android.view.MotionEvent
  */
 class TouchpadGestureHandler(
     private val gestureMonitor: TouchpadGestureMonitor,
+    private val easterEggGestureMonitor: EasterEggGestureMonitor,
 ) {
 
     fun onMotionEvent(event: MotionEvent): Boolean {
@@ -36,7 +37,11 @@ class TouchpadGestureHandler(
             event.actionMasked == MotionEvent.ACTION_DOWN &&
                 event.isButtonPressed(MotionEvent.BUTTON_PRIMARY)
         return if (isFromTouchpad && !buttonClick) {
-            gestureMonitor.processTouchpadEvent(event)
+            if (isTwoFingerSwipe(event)) {
+                easterEggGestureMonitor.processTouchpadEvent(event)
+            } else {
+                gestureMonitor.processTouchpadEvent(event)
+            }
             true
         } else {
             false

@@ -54,7 +54,7 @@ class PriorityNestedScrollConnectionTest {
             },
             onStop = {
                 lastStop = it
-                returnOnStop
+                { returnOnStop }
             },
         )
 

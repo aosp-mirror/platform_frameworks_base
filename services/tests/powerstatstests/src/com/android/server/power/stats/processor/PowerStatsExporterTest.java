@@ -132,7 +132,7 @@ public class PowerStatsExporterTest {
                 null, 0, mCpuStatsArrayLayout.getUidStatsArrayLength(), extras);
 
         mPowerAttributor = new MultiStatePowerAttributor(mock(Context.class), mPowerStatsStore,
-                mock(PowerProfile.class), mock(CpuScalingPolicies.class),
+                mock(PowerProfile.class), mock(CpuScalingPolicies.class), () -> 3500,
                 mock(PowerStatsUidResolver.class));
     }
 
@@ -340,8 +340,7 @@ public class PowerStatsExporterTest {
             AggregatedPowerStats aps,
             boolean includeProcessStateData, boolean includeScreenStateData,
             boolean includesPowerStateData) {
-        PowerStatsExporter
-                exporter = new PowerStatsExporter(mPowerStatsStore,
+        PowerStatsExporter exporter = new PowerStatsExporter(mPowerStatsStore,
                 mPowerStatsAggregator, /* batterySessionTimeSpanSlackMillis */ 0);
 
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(new String[0], false,

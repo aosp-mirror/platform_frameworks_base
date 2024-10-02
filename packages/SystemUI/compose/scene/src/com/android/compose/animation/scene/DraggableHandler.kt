@@ -27,6 +27,7 @@ import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.HasOverscrollProperties.Companion.DistanceUnspecified
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
+import com.android.compose.nestedscroll.SuspendedValue
 import kotlin.math.absoluteValue
 
 internal interface DraggableHandler {
@@ -54,9 +55,9 @@ internal interface DragController {
     /**
      * Stop the current drag with the given [velocity].
      *
-     * @return the consumed [velocity]
+     * @return the consumed [velocity] when the animation complete
      */
-    fun onStop(velocity: Float, canChangeContent: Boolean): Float
+    fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float>
 }
 
 internal class DraggableHandlerImpl(
@@ -386,7 +387,7 @@ private class DragControllerImpl(
         return consumedDelta
     }
 
-    override fun onStop(velocity: Float, canChangeContent: Boolean): Float {
+    override fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float> {
         return onStop(velocity, canChangeContent, swipeAnimation)
     }
 
@@ -399,14 +400,14 @@ private class DragControllerImpl(
         // callbacks (like onAnimationCompleted()) might incorrectly finish a new transition that
         // replaced this one.
         swipeAnimation: SwipeAnimation<T>,
-    ): Float {
+    ): SuspendedValue<Float> {
         // The state was changed since the drag started; don't do anything.
         if (!isDrivingTransition || swipeAnimation.isAnimatingOffset()) {
-            return 0f
+            return { 0f }
         }
 
         val fromContent = swipeAnimation.fromContent
-        val consumedVelocity: Float
+        val consumedVelocity: SuspendedValue<Float>
         if (canChangeContent) {
             // If we are halfway between two contents, we check what the target will be based on the
             // velocity and offset of the transition, then we launch the animation.
@@ -738,5 +739,5 @@ internal const val OffsetVisibilityThreshold = 0.5f
 private object NoOpDragController : DragController {
     override fun onDrag(delta: Float) = 0f
 
-    override fun onStop(velocity: Float, canChangeContent: Boolean) = 0f
+    override fun onStop(velocity: Float, canChangeContent: Boolean) = suspend { 0f }
 }

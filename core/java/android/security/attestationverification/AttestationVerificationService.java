@@ -20,7 +20,7 @@ import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.app.Service;
 import android.os.Bundle;
-import android.security.attestationverification.AttestationVerificationManager.VerificationResult;
+import android.security.attestationverification.AttestationVerificationManager.VerificationResultFlags;
 
 /**
  * A verifier which can be implemented by apps to verify an attestation (as described in {@link
@@ -93,7 +93,7 @@ public abstract class AttestationVerificationService extends Service {
      * byte[], java.util.concurrent.Executor, java.util.function.BiConsumer)
      */
     @CheckResult
-    @VerificationResult
+    @VerificationResultFlags
     public abstract int onVerifyPeerDeviceAttestation(
             @NonNull Bundle requirements,
             @NonNull byte[] attestation);

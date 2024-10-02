@@ -39,6 +39,7 @@ Paint::Paint(const Paint& paint)
         , mLetterSpacing(paint.mLetterSpacing)
         , mWordSpacing(paint.mWordSpacing)
         , mFontFeatureSettings(paint.mFontFeatureSettings)
+        , mFontVariationOverride(paint.mFontVariationOverride)
         , mMinikinLocaleListId(paint.mMinikinLocaleListId)
         , mFamilyVariant(paint.mFamilyVariant)
         , mHyphenEdit(paint.mHyphenEdit)
@@ -59,6 +60,7 @@ Paint& Paint::operator=(const Paint& other) {
     mLetterSpacing = other.mLetterSpacing;
     mWordSpacing = other.mWordSpacing;
     mFontFeatureSettings = other.mFontFeatureSettings;
+    mFontVariationOverride = other.mFontVariationOverride;
     mMinikinLocaleListId = other.mMinikinLocaleListId;
     mFamilyVariant = other.mFamilyVariant;
     mHyphenEdit = other.mHyphenEdit;
@@ -76,6 +78,7 @@ bool operator==(const Paint& a, const Paint& b) {
     return static_cast<const SkPaint&>(a) == static_cast<const SkPaint&>(b) && a.mFont == b.mFont &&
            a.mLooper == b.mLooper && a.mLetterSpacing == b.mLetterSpacing &&
            a.mWordSpacing == b.mWordSpacing && a.mFontFeatureSettings == b.mFontFeatureSettings &&
+           a.mFontVariationOverride == b.mFontVariationOverride &&
            a.mMinikinLocaleListId == b.mMinikinLocaleListId &&
            a.mFamilyVariant == b.mFamilyVariant && a.mHyphenEdit == b.mHyphenEdit &&
            a.mTypeface == b.mTypeface && a.mAlign == b.mAlign &&

@@ -3204,8 +3204,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return ADD_OKAY;
         }
 
-        // Allow virtual device owners to add overlays on the displays they own.
+        // Allow virtual device owners to add overlays on the trusted displays they own.
         if (mWindowManagerFuncs.isCallerVirtualDeviceOwner(displayId, callingUid)
+                && mWindowManagerFuncs.isDisplayTrusted(displayId)
                 && mContext.checkCallingOrSelfPermission(CREATE_VIRTUAL_DEVICE)
                 == PERMISSION_GRANTED) {
             return ADD_OKAY;

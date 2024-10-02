@@ -16,17 +16,15 @@
 
 package com.android.server.security;
 
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_CERTS;
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS;
 import static android.security.attestationverification.AttestationVerificationManager.PARAM_CHALLENGE;
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_FAILURE;
-import static android.security.attestationverification.AttestationVerificationManager.RESULT_SUCCESS;
 import static android.security.attestationverification.AttestationVerificationManager.TYPE_CHALLENGE;
 
 import android.annotation.NonNull;
-import android.os.Build;
 import android.os.Bundle;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.org.bouncycastle.asn1.ASN1InputStream;
@@ -64,7 +62,6 @@ import java.util.Set;
  */
 class AttestationVerificationSelfTrustedVerifierForTesting {
     private static final String TAG = "AVF";
-    private static final boolean DEBUG = Build.IS_DEBUGGABLE && Log.isLoggable(TAG, Log.VERBOSE);
 
     // The OID for the extension Android Keymint puts into device-generated certificates.
     private static final String ANDROID_KEYMINT_KEY_DESCRIPTION_EXTENSION_OID =
@@ -99,18 +96,6 @@ class AttestationVerificationSelfTrustedVerifierForTesting {
         return sAttestationVerificationSelfTrustedVerifier;
     }
 
-    private static void debugVerboseLog(String str, Throwable t) {
-        if (DEBUG) {
-            Slog.v(TAG, str, t);
-        }
-    }
-
-    private static void debugVerboseLog(String str) {
-        if (DEBUG) {
-            Slog.v(TAG, str);
-        }
-    }
-
     private AttestationVerificationSelfTrustedVerifierForTesting() throws Exception {
         mCertificateFactory = CertificateFactory.getInstance("X.509");
         mCertPathValidator = CertPathValidator.getInstance("PKIX");
@@ -142,23 +127,42 @@ class AttestationVerificationSelfTrustedVerifierForTesting {
                 certificates.add((X509Certificate) mCertificateFactory.generateCertificate(bis));
             }
         } catch (CertificateException e) {
-            debugVerboseLog("Unable to parse certificates from attestation", e);
-            return RESULT_FAILURE;
+            Slog.e("Unable to parse certificates from attestation", e.getLocalizedMessage());
+            return FLAG_FAILURE_CERTS;
         }
 
-        if (localBindingType == TYPE_CHALLENGE
-                && validateRequirements(requirements)
-                && checkLeafChallenge(requirements, certificates)
-                && verifyCertificateChain(certificates)) {
-            return RESULT_SUCCESS;
+        int result = 0;
+
+        if (localBindingType != TYPE_CHALLENGE
+                || !validateRequirements(requirements)) {
+            Slog.e(TAG, "Local binding requirements verification failure." + localBindingType);
+            return FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS;
         }
 
-        return RESULT_FAILURE;
+        // Verify challenge
+        byte[] challenge;
+        try {
+            challenge = getChallengeFromCert(certificates.get(0));
+        } catch (Throwable t) {
+            Slog.e("Unable to parse challenge from certificate.", t.getLocalizedMessage());
+            result |= FLAG_FAILURE_CERTS;
+            return result;
+        }
+        if (!Arrays.equals(requirements.getByteArray(PARAM_CHALLENGE), challenge)) {
+            Slog.e(TAG, "Self-Trusted validation failed; challenge mismatch.");
+            result |= FLAG_FAILURE_LOCAL_BINDING_REQUIREMENTS;
+        }
+
+        if (!verifyCertificateChain(certificates)) {
+            result |= FLAG_FAILURE_CERTS;
+        }
+
+        return result;
     }
 
     private boolean verifyCertificateChain(List<X509Certificate> certificates) {
         if (certificates.size() < 2) {
-            debugVerboseLog("Certificate chain less than 2 in size.");
+            Slog.e(TAG, "Certificate chain less than 2 in size.");
             return false;
         }
 
@@ -170,7 +174,7 @@ class AttestationVerificationSelfTrustedVerifierForTesting {
             validationParams.setRevocationEnabled(false);
             mCertPathValidator.validate(certificatePath, validationParams);
         } catch (Throwable t) {
-            debugVerboseLog("Invalid certificate chain", t);
+            Slog.e(TAG, "Invalid certificate chain", t);
             return false;
         }
 
@@ -183,32 +187,14 @@ class AttestationVerificationSelfTrustedVerifierForTesting {
 
     private boolean validateRequirements(Bundle requirements) {
         if (requirements.size() != 1) {
-            debugVerboseLog("Requirements does not contain exactly 1 key.");
+            Slog.e(TAG, "Requirements does not contain exactly 1 key.");
             return false;
         }
         if (!requirements.containsKey(PARAM_CHALLENGE)) {
-            debugVerboseLog("Requirements does not contain key: " + PARAM_CHALLENGE);
+            Slog.e(TAG, "Requirements does not contain key: " + PARAM_CHALLENGE);
             return false;
         }
         return true;
-    }
-
-    private boolean checkLeafChallenge(Bundle requirements, List<X509Certificate> certificates) {
-        // Verify challenge
-        byte[] challenge;
-        try {
-            challenge = getChallengeFromCert(certificates.get(0));
-        } catch (Throwable t) {
-            debugVerboseLog("Unable to parse challenge from certificate.", t);
-            return false;
-        }
-
-        if (Arrays.equals(requirements.getByteArray(PARAM_CHALLENGE), challenge)) {
-            return true;
-        } else {
-            debugVerboseLog("Self-Trusted validation failed; challenge mismatch.");
-            return false;
-        }
     }
 
     private byte[] getChallengeFromCert(@NonNull X509Certificate x509Certificate)

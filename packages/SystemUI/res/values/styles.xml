@@ -1721,7 +1721,7 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="ContextualEduDialog" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+    <style name="ContextualEduDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar">
         <!-- To make the dialog wrap to content when the education text is short -->
         <item name="windowMinWidthMajor">0%</item>
         <item name="windowMinWidthMinor">0%</item>
