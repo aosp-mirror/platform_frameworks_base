@@ -617,7 +617,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             }
 
             if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
-            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
+            mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY,
+                    /* isScaleTransient= */ true, /* animate= */ false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
 
             checkShouldDetectPassPersistedScale();
@@ -1974,6 +1975,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     /* scale= */ scale,
                     /* centerX= */ mPivotEdge.x,
                     /* centerY= */ mPivotEdge.y,
+                    /* isScaleTransient= */ true,
                     /* animate= */ true,
                     /* id= */ AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
             if (scale == 1.0f) {

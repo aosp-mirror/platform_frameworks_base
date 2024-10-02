@@ -421,7 +421,7 @@ public class MagnificationControllerTest {
         assertTrue(mMagnificationConnectionManager.isWindowMagnifierEnabled(TEST_DISPLAY));
         verify(mScreenMagnificationController, never()).setScaleAndCenter(TEST_DISPLAY,
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
-                true, MAGNIFICATION_GESTURE_HANDLER_ID);
+                true, true, MAGNIFICATION_GESTURE_HANDLER_ID);
         verify(mTransitionCallBack).onResult(TEST_DISPLAY, false);
     }
 
@@ -471,7 +471,7 @@ public class MagnificationControllerTest {
         assertFalse(mMagnificationConnectionManager.isWindowMagnifierEnabled(TEST_DISPLAY));
         verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY),
                 eq(DEFAULT_SCALE), eq(MAGNIFIED_CENTER_X), eq(MAGNIFIED_CENTER_Y),
-                any(MagnificationAnimationCallback.class), eq(TEST_SERVICE_ID));
+                eq(false), any(MagnificationAnimationCallback.class), eq(TEST_SERVICE_ID));
     }
 
     @Test
@@ -488,7 +488,7 @@ public class MagnificationControllerTest {
 
         verify(mScreenMagnificationController, never()).setScaleAndCenter(anyInt(),
                 anyFloat(), anyFloat(), anyFloat(),
-                anyBoolean(), anyInt());
+                anyBoolean(), anyBoolean(), anyInt());
     }
 
     @Test
@@ -550,7 +550,7 @@ public class MagnificationControllerTest {
                 config, animate, TEST_SERVICE_ID);
         verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY),
                 /* scale= */ anyFloat(), /* centerX= */ anyFloat(), /* centerY= */ anyFloat(),
-                mCallbackArgumentCaptor.capture(), /* id= */ anyInt());
+                anyBoolean(), mCallbackArgumentCaptor.capture(), /* id= */ anyInt());
         mCallbackArgumentCaptor.getValue().onResult(true);
         mMockConnection.invokeCallbacks();
 
@@ -620,7 +620,7 @@ public class MagnificationControllerTest {
     @Test
     public void magnifyThroughExternalRequest_showMagnificationButton() {
         mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY, DEFAULT_SCALE,
-                MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y, false, TEST_SERVICE_ID);
+                MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y, true, false, TEST_SERVICE_ID);
 
         // The first time is trigger when fullscreen mode is activated.
         // The second time is triggered when magnification spec is changed.
@@ -642,7 +642,7 @@ public class MagnificationControllerTest {
         mMagnificationController.onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
         verify(mScreenMagnificationController).setScaleAndCenter(eq(TEST_DISPLAY), eq(newScale),
-                anyFloat(), anyFloat(), anyBoolean(), anyInt());
+                anyFloat(), anyFloat(), anyBoolean(), anyBoolean(), anyInt());
         verify(mScreenMagnificationController).persistScale(eq(TEST_DISPLAY));
     }
 
@@ -685,7 +685,7 @@ public class MagnificationControllerTest {
         final MagnificationConfig config = obtainMagnificationConfig(MODE_FULLSCREEN);
         mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
                 config.getScale(), config.getCenterX(), config.getCenterY(),
-                true, TEST_SERVICE_ID);
+                true, true, TEST_SERVICE_ID);
 
         // The notify method is triggered when setting magnification enabled.
         // The setScaleAndCenter call should not trigger notify method due to same scale and center.
@@ -934,7 +934,7 @@ public class MagnificationControllerTest {
     public void onWindowModeActivated_fullScreenIsActivatedByExternal_fullScreenIsDisabled() {
         mScreenMagnificationController.setScaleAndCenter(TEST_DISPLAY,
                 DEFAULT_SCALE, MAGNIFIED_CENTER_X, MAGNIFIED_CENTER_Y,
-                true, TEST_SERVICE_ID);
+                true, true, TEST_SERVICE_ID);
 
         mMagnificationController.onWindowMagnificationActivationState(TEST_DISPLAY, true);
 
@@ -1321,7 +1321,8 @@ public class MagnificationControllerTest {
         }
         if (mode == MODE_FULLSCREEN) {
             mScreenMagnificationController.setScaleAndCenter(displayId, DEFAULT_SCALE, centerX,
-                    centerY, true, AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+                    centerY, true, true,
+                    AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         } else {
             mMagnificationConnectionManager.enableWindowMagnification(displayId, DEFAULT_SCALE,
                     centerX, centerY, null, TEST_SERVICE_ID);

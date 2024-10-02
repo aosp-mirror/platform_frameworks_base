@@ -1346,7 +1346,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, persistedScale,
                 UserHandle.USER_SYSTEM);
         mFullScreenMagnificationController.setScale(DISPLAY_0, scale, DEFAULT_X,
-                DEFAULT_Y, /* animate= */ false,
+                DEFAULT_Y, true, /* animate= */ false,
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
 
         mMgh.transitionTo(mMgh.mPanningScalingState);
@@ -1367,7 +1367,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, persistedScale,
                 UserHandle.USER_SYSTEM);
         mFullScreenMagnificationController.setScale(DISPLAY_0, scale, DEFAULT_X,
-                DEFAULT_Y, /* animate= */ false,
+                DEFAULT_Y, true, /* animate= */ false,
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
 
         mMgh.transitionTo(mMgh.mPanningScalingState);
@@ -1404,7 +1404,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 mFullScreenMagnificationController.getPersistedScale(DISPLAY_0);
 
         mFullScreenMagnificationController.setScale(DISPLAY_0, persistedScale, DEFAULT_X,
-                DEFAULT_Y, /* animate= */ false,
+                DEFAULT_Y, true, /* animate= */ false,
                 AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
         mMgh.transitionTo(mMgh.mPanningScalingState);
 
@@ -1441,7 +1441,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 5.6f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
         centerX = mFullScreenMagnificationController.getCenterX(DISPLAY_0);
         centerY = mFullScreenMagnificationController.getCenterY(DISPLAY_0);
 
@@ -1533,7 +1533,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 6.2f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
         MotionEvent event = mouseEvent(centerX, centerY, ACTION_HOVER_MOVE);
         send(event, InputDevice.SOURCE_MOUSE);
         fastForward(20);
@@ -1574,7 +1574,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 4.0f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
 
         // HOVER_MOVE should change magnifier viewport.
         MotionEvent event = motionEvent(centerX + 20, centerY, ACTION_HOVER_MOVE);
@@ -1618,7 +1618,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 5.3f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
         MotionEvent event = motionEvent(centerX, centerY, ACTION_HOVER_MOVE);
         send(event, source);
         fastForward(20);
@@ -1652,7 +1652,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 2.7f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
         MotionEvent event = motionEvent(centerX, centerY, ACTION_HOVER_MOVE);
         send(event, source);
         fastForward(20);
@@ -1688,7 +1688,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 3.8f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
         centerX = mFullScreenMagnificationController.getCenterX(DISPLAY_0);
         centerY = mFullScreenMagnificationController.getCenterY(DISPLAY_0);
 
@@ -1725,7 +1725,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                 (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
         float scale = 4.0f; // value is unimportant but unique among tests to increase coverage.
         mFullScreenMagnificationController.setScaleAndCenter(
-                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+                DISPLAY_0, centerX, centerY, scale, true, /* animate= */ false, 1);
         centerX = mFullScreenMagnificationController.getCenterX(DISPLAY_0);
         centerY = mFullScreenMagnificationController.getCenterY(DISPLAY_0);
 
