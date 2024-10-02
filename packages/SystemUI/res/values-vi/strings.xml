@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Loa và màn hình"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Thiết bị được đề xuất"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"Đầu vào"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Đầu ra"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Dừng phiên chia sẻ của bạn để chuyển nội dung nghe nhìn sang thiết bị khác"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Dừng"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Cách tính năng truyền hoạt động"</string>
@@ -1293,8 +1291,7 @@
     <string name="add" msgid="81036585205287996">"Thêm"</string>
     <string name="manage_users" msgid="1823875311934643849">"Quản lý ng.dùng"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Thông báo này không hỗ trợ thao tác kéo để chia đôi màn hình"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"Vị trí đang hoạt động"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Không có Wi‑Fi"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Chế độ ưu tiên"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Đã đặt chuông báo"</string>
@@ -1351,8 +1348,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Tuỳ chỉnh màn hình khoá"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Mở khoá để tuỳ chỉnh màn hình khoá"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Không có Wi-Fi"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"Vị trí đang hoạt động"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Máy ảnh bị chặn"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Máy ảnh và micrô bị chặn"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Micrô bị chặn"</string>
@@ -1400,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Biểu tượng Thu gọn"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Biểu tượng Mở rộng"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"hoặc"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Nút kéo"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Di chuyển bằng bàn phím"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Tìm hiểu về phím tắt"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Di chuyển bằng bàn di chuột"</string>
@@ -1408,8 +1405,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Tìm hiểu về cử chỉ trên bàn di chuột, phím tắt và nhiều mục khác"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Cử chỉ quay lại"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Cử chỉ chuyển đến màn hình chính"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Xem các ứng dụng gần đây"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Xong"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Quay lại"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Để quay lại, hãy dùng 3 ngón tay vuốt sang trái hoặc sang phải ở vị trí bất kỳ trên bàn di chuột.\n\nBạn cũng có thể dùng phím tắt Hành động + ESC cho thao tác này."</string>
@@ -1419,14 +1415,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Để chuyển đến màn hình chính bất cứ lúc nào, hãy dùng 3 ngón tay vuốt lên từ cuối màn hình lên."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Tốt lắm!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Bạn đã thực hiện xong cử chỉ chuyển đến màn hình chính."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Xem các ứng dụng gần đây"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Dùng 3 ngón tay vuốt lên và giữ trên bàn di chuột."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Tuyệt vời!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Bạn đã hoàn tất cử chỉ xem ứng dụng gần đây."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Phím hành động"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Để truy cập vào các ứng dụng của bạn, hãy nhấn phím hành động trên bàn phím."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Xin chúc mừng!"</string>
@@ -1450,14 +1442,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Dùng 3 ngón tay vuốt lên và giữ. Hãy nhấn để tìm hiểu các cử chỉ khác."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Sử dụng bàn phím để xem tất cả ứng dụng"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Nhấn phím hành động bất cứ lúc nào. Hãy nhấn để tìm hiểu các cử chỉ khác."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Tính năng siêu tối hiện đã có trên thanh trượt điều chỉnh độ sáng"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Giờ đây, bạn có thể giảm thêm độ sáng để làm màn hình trở nên siêu tối.\n\nVì tính năng này hiện đã có trên thanh trượt điều chỉnh độ sáng nên lối tắt đến tính năng siêu tối sẽ bị xoá."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Xoá lối tắt đến tính năng siêu tối"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Đã xoá lối tắt đến tính năng siêu tối"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Khả năng kết nối"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Hỗ trợ tiếp cận"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Phần mềm tiện ích"</string>

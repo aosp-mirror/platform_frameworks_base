@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ਸਪੀਕਰ ਅਤੇ ਡਿਸਪਲੇਆਂ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ਸੁਝਾਏ ਗਏ ਡੀਵਾਈਸ"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"ਇਨਪੁੱਟ"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"ਆਊਟਪੁੱਟ"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"ਮੀਡੀਆ ਨੂੰ ਕਿਸੇ ਹੋਰ ਡੀਵਾਈਸ \'ਤੇ ਲਿਜਾਉਣ ਲਈ ਆਪਣੇ ਸਾਂਝੇ ਕੀਤੇ ਸੈਸ਼ਨ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"ਬੰਦ ਕਰੋ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ਪ੍ਰਸਾਰਨ ਕਿਵੇਂ ਕੰਮ ਕਰਦਾ ਹੈ"</string>
@@ -1398,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ਪ੍ਰਤੀਕ ਨੂੰ ਸਮੇਟੋ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ਪ੍ਰਤੀਕ ਦਾ ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ਜਾਂ"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ਘਸੀਟਣ ਵਾਲਾ ਹੈਂਡਲ"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ਆਪਣੇ ਕੀ-ਬੋਰਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ ਬਾਰੇ ਜਾਣੋ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ਆਪਣੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>

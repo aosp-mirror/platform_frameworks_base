@@ -576,7 +576,7 @@
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कोई नई सूचना नहीं है"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"नोटिफ़िकेशन कूलडाउन की सेटिंग चालू है"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"लगातार सूचनाएं आने पर आवाज़ कम करने की सेटिंग चालू है"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"एक साथ कई सूचनाएं मिलने पर, डिवाइस में सूचनाओं से होने वाली आवाज़ और सूचनाएं, दो मिनट के लिए अपने-आप कम हो जाएंगी."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"बंद करें"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"पुरानी सूचाएं देखने के लिए अनलॉक करें"</string>
@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"स्पीकर और डिसप्ले"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"सुझाए गए डिवाइस"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"इनपुट"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"आउटपुट"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"मीडिया को किसी दूसरे डिवाइस में ट्रांसफ़र करने के लिए, अपने शेयर किए गए सेशन को बंद करें"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"बंद करें"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ब्रॉडकास्ट करने की सुविधा कैसे काम करती है"</string>
@@ -1398,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"छोटा करने का आइकॉन"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"बड़ा करने का आइकॉन"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"या"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"खींचकर छोड़ने वाला हैंडल"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"कीबोर्ड का इस्तेमाल करके नेविगेट करें"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"कीबोर्ड शॉर्टकट के बारे में जानें"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"टचपैड का इस्तेमाल करके नेविगेट करें"</string>

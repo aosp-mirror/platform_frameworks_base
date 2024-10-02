@@ -83,7 +83,7 @@
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವ ಮೊದಲು ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಬೇಕು"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪುನಃ ತೆಗೆದುಕೊಳ್ಳಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ಆ್ಯಪ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳುವುದನ್ನು ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು ನಿರ್ಬಂಧಿಸಿದ್ದಾರೆ"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
@@ -963,7 +963,7 @@
     <string name="tuner_left" msgid="5758862558405684490">"ಎಡ"</string>
     <string name="tuner_right" msgid="8247571132790812149">"ಬಲ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"ಮೆನು"</string>
-    <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್"</string>
+    <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ಆ್ಯಪ್"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"ಅಲರ್ಟ್‌ಗಳು"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"ಬ್ಯಾಟರಿ"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳು"</string>
@@ -986,8 +986,8 @@
     <string name="dnd_is_off" msgid="3185706903793094463">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಮೋಡ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"(<xliff:g id="ID_1">%s</xliff:g>) ಸ್ವಯಂಚಾಲಿತ ನಿಯಮದ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"(<xliff:g id="ID_1">%s</xliff:g>) ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ಸ್ವಯಂಚಾಲಿತ ನಿಯಮ ಅಥವಾ ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
+    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"(<xliff:g id="ID_1">%s</xliff:g>) ಆ್ಯಪ್‌ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"ಸ್ವಯಂಚಾಲಿತ ನಿಯಮ ಅಥವಾ ಆ್ಯಪ್‌ ಮೂಲಕ ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಆನ್ ಆಗಿದೆ."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್ ಮಾಡಬೇಕೆ?"</string>
@@ -997,7 +997,7 @@
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"ಲಭ್ಯತೆಯ ಆಧಾರದ ಮೇಲೆ ಮೊಬೈಲ್ ಡೇಟಾ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಬದಲಾಗುವುದಿಲ್ಲ"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"ಬೇಡ, ಧನ್ಯವಾದಗಳು"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"ಹೌದು, ಬದಲಿಸಿ"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಮರೆಮಾಚುತ್ತಿರುವ ಕಾರಣ, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಆ್ಯಪ್ ಮರೆಮಾಚುತ್ತಿರುವ ಕಾರಣ, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"<xliff:g id="APP_2">%2$s</xliff:g> ಸ್ಲೈಸ್‌ಗಳನ್ನು ತೋರಿಸಲು <xliff:g id="APP_0">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- ಇದು <xliff:g id="APP">%1$s</xliff:g> ನಿಂದ ಮಾಹಿತಿಯನ್ನು ಓದಬಹುದು"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- ಇದು <xliff:g id="APP">%1$s</xliff:g> ಒಳಗಡೆ ಕ್ರಿಯೆಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು"</string>
@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ಸ್ಪೀಕರ್‌ಗಳು ಮತ್ತು ಡಿಸ್‌ಪ್ಲೇಗಳು"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ಸೂಚಿಸಿದ ಸಾಧನಗಳು"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"ಇನ್‌ಪುಟ್"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"ಔಟ್‌ಪುಟ್"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"ಮೀಡಿಯಾವನ್ನು ಮತ್ತೊಂದು ಸಾಧನಕ್ಕೆ ಸರಿಸಲು ನಿಮ್ಮ ಹಂಚಿಕೊಂಡ ಸೆಶನ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"ನಿಲ್ಲಿಸಿ"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ಪ್ರಸಾರವು ಹೇಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ"</string>
@@ -1398,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ಕುಗ್ಗಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ವಿಸ್ತೃತಗೊಳಿಸುವ ಐಕಾನ್"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ಅಥವಾ"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ಡ್ರ್ಯಾಗ್‌ ಹ್ಯಾಂಡಲ್‌"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ನಿಮ್ಮ ಕೀಬೋರ್ಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ಕಲಿಯಿರಿ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ನಿಮ್ಮ ಟಚ್‌ಪ್ಯಾಡ್ ಬಳಸಿ ನ್ಯಾವಿಗೇಟ್ ಮಾಡಿ"</string>

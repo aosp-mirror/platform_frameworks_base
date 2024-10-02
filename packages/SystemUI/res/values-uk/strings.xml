@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки й екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Пропоновані пристрої"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"Введення"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Виведення"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Зупиніть сеанс спільного доступу, щоб перенести медіаконтент на інший пристрій"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Зупинити"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як працює трансляція"</string>
@@ -1293,8 +1291,7 @@
     <string name="add" msgid="81036585205287996">"Додати"</string>
     <string name="manage_users" msgid="1823875311934643849">"Керувати користувачами"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Це сповіщення не підтримує режим розділеного екрана"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"Геолокацію ввімкнено"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Мережа Wi-Fi недоступна"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Режим пріоритету"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Будильник установлено"</string>
@@ -1351,8 +1348,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Налаштувати заблокований екран"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Розблокуйте, щоб налаштувати заблокований екран"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Мережа Wi-Fi недоступна"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"Геолокацію ввімкнено"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камеру заблоковано"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камеру й мікрофон заблоковано"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Мікрофон заблоковано"</string>
@@ -1400,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок згортання"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок розгортання"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"або"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер переміщення"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навігація за допомогою клавіатури"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Комбінації клавіш: докладніше"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навігація за допомогою сенсорної панелі"</string>
@@ -1408,8 +1405,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Жести для сенсорної панелі, комбінації клавіш тощо: докладніше"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Жест \"Назад\""</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Жест переходу на головний екран"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Переглянути нещодавні додатки"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Щоб перейти назад, проведіть трьома пальцями вліво або вправо по сенсорній панелі.\n\nТакож можна скористатися комбінацією \"клавіша дії\" + ESC."</string>
@@ -1419,14 +1415,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Щоб будь-коли перейти на головний екран, проведіть трьома пальцями вгору від нижнього краю екрана."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Чудово!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Ви виконали жест переходу на головний екран."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Переглянути нещодавні додатки"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Проведіть трьома пальцями вгору й утримуйте їх на сенсорній панелі."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Чудово!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Ви виконали жест для перегляду нещодавно відкритих додатків."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"Клавіша дії"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Щоб переглянути додатки, натисніть клавішу дії на клавіатурі."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Вітаємо!"</string>
@@ -1450,14 +1442,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Проведіть трьома пальцями вгору й утримуйте їх на екрані. Натисніть, щоб дізнатися про інші жести."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Щоб переглянути всі додатки, використовуйте клавіатуру"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Будь-коли натисніть клавішу дії. Натисніть, щоб дізнатися про інші жести."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Тепер функція додаткового зменшення яскравості активується за допомогою повзунка"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Тепер ви можете зробити екран ще темнішим, додатково зменшуючи рівень яскравості.\n\nОскільки тепер ця функція активується за допомогою повзунка яскравості, комбінації клавіш для додаткового зменшення яскравості буде вилучено."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Вилучити комбінації клавіш для додаткового зменшення яскравості"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Комбінації клавіш для додаткового зменшення яскравості вилучено"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Обмін даними"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Функції доступності"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Утиліти"</string>
