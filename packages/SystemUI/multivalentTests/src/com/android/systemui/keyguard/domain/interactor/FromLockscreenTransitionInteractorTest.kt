@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.util.KeyguardTransitionRepositorySpySubject.Companion.assertThat as assertThatRepository
@@ -81,7 +82,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
 
             assertThat(values)
                 .containsExactly(
-                    null, // LOCKSCREEN -> AOD does not have any specific surface visibility.
+                    null // LOCKSCREEN -> AOD does not have any specific surface visibility.
                 )
 
             transitionRepository.sendTransitionStep(
@@ -118,6 +119,53 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun draggingToPrimaryBouncerUpdateIsSent() =
+        testScope.runTest {
+            underTest.start()
+            transitionRepository.sendTransitionSteps(
+                from = KeyguardState.OFF,
+                to = KeyguardState.LOCKSCREEN,
+                testScope,
+            )
+
+            val steps by collectValues(transitionRepository.transitions)
+
+            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeRepository.setLegacyShadeTracking(true)
+            keyguardRepository.setKeyguardDismissible(false)
+            keyguardRepository.setStatusBarState(KEYGUARD)
+            runCurrent()
+
+            // User starts dragging up
+            shadeRepository.setLegacyShadeExpansion(0.1f)
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                )
+
+            // FakeKeyguardRepository doesn't send the step, so do that
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                    value = 0f,
+                )
+            )
+            runCurrent()
+
+            // Update is sent
+            shadeRepository.setLegacyShadeExpansion(0.2f)
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .updatedTransition(value = 1f, state = TransitionState.RUNNING)
+        }
+
+    @Test
     @EnableFlags(Flags.FLAG_KEYGUARD_WM_STATE_REFACTOR)
     fun testTransitionsToGone_whenDismissFlingWhileDismissable_flagEnabled() =
         testScope.runTest {
@@ -132,10 +180,7 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThatRepository(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                )
+                .startedTransition(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
         }
 
     @Test
@@ -184,15 +229,12 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
                 true,
                 ActivityManager.RunningTaskInfo().apply {
                     topActivityType = WindowConfiguration.ACTIVITY_TYPE_STANDARD
-                }
+                },
             )
             runCurrent()
 
             assertThatRepository(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.OCCLUDED,
-                )
+                .startedTransition(from = KeyguardState.LOCKSCREEN, to = KeyguardState.OCCLUDED)
         }
 
     @Test
@@ -207,14 +249,11 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
                 true,
                 ActivityManager.RunningTaskInfo().apply {
                     topActivityType = WindowConfiguration.ACTIVITY_TYPE_DREAM
-                }
+                },
             )
             runCurrent()
 
             assertThatRepository(transitionRepository)
-                .startedTransition(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.DREAMING,
-                )
+                .startedTransition(from = KeyguardState.LOCKSCREEN, to = KeyguardState.DREAMING)
         }
 }

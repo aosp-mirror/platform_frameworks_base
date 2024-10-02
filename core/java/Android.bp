@@ -660,7 +660,7 @@ java_library {
 java_library {
     name: "protolog-groups",
     srcs: [
-        "com/android/internal/protolog/ProtoLogGroup.java",
+        "com/android/internal/protolog/WmProtoLogGroups.java",
         ":protolog-common-src",
     ],
 }

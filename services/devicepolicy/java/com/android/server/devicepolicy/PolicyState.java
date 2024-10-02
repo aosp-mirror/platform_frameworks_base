@@ -225,9 +225,11 @@ final class PolicyState<V> {
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
-        serializer.startTag(/* namespace= */ null, TAG_POLICY_DEFINITION_ENTRY);
-        mPolicyDefinition.saveToXml(serializer);
-        serializer.endTag(/* namespace= */ null, TAG_POLICY_DEFINITION_ENTRY);
+        if (!Flags.dontWritePolicyDefinition()) {
+            serializer.startTag(/* namespace= */ null, TAG_POLICY_DEFINITION_ENTRY);
+            mPolicyDefinition.saveToXml(serializer);
+            serializer.endTag(/* namespace= */ null, TAG_POLICY_DEFINITION_ENTRY);
+        }
 
         if (mCurrentResolvedPolicy != null) {
             serializer.startTag(/* namespace= */ null, TAG_RESOLVED_VALUE_ENTRY);
@@ -296,18 +298,6 @@ final class PolicyState<V> {
                                 + "definition " + policyDefinition) + ", EnforcingAdmin is: "
                                 + (admin == null ? "null" : admin) + ", value is : "
                                 + (value == null ? "null" : value));
-                    }
-                    break;
-                case TAG_POLICY_DEFINITION_ENTRY:
-                    if (Flags.dontReadPolicyDefinition()) {
-                        // Should be passed by the caller.
-                        Objects.requireNonNull(policyDefinition);
-                    } else {
-                        policyDefinition = PolicyDefinition.readFromXml(parser);
-                        if (policyDefinition == null) {
-                            Slogf.wtf(TAG, "Error Parsing TAG_POLICY_DEFINITION_ENTRY, "
-                                    + "PolicyDefinition is null");
-                        }
                     }
                     break;
 

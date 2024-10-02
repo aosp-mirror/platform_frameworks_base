@@ -376,6 +376,23 @@ public class BatteryUsageStatsRule implements TestRule {
         return mBatteryStats.getUidStatsLocked(uid);
     }
 
+    /**
+     * Adds the supplied duration to all three: current time, elapsed time and uptime
+     */
+    public void advanceTime(long millis) {
+        mMockClock.currentTime += millis;
+        mMockClock.realtime += millis;
+        mMockClock.uptime += millis;
+    }
+
+    /**
+     * Adds the supplied duration to current time and elapsed time, but not to uptime
+     */
+    public void advanceSuspendedTime(long millis) {
+        mMockClock.currentTime += millis;
+        mMockClock.realtime += millis;
+    }
+
     public void setTime(long realtimeMs, long uptimeMs) {
         mMockClock.currentTime = realtimeMs;
         mMockClock.realtime = realtimeMs;

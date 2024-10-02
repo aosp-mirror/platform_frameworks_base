@@ -46,6 +46,7 @@ import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
+import com.android.window.flags.Flags
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
 import android.window.flags.DesktopModeFlags
@@ -59,6 +60,7 @@ import com.android.wm.shell.windowdecor.common.OPACITY_65
 import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.extension.isLightCaptionBarAppearance
 import com.android.wm.shell.windowdecor.extension.isTransparentCaptionBarAppearance
+import com.android.wm.shell.windowdecor.extension.requestingImmersive
 
 /**
  * A desktop mode window decoration used when the window is floating (i.e. freeform). It hosts
@@ -241,16 +243,25 @@ class AppHeaderViewHolder(
         }
         minimizeWindowButton.isGone = !enableMinimizeButton()
         // Maximize button.
-        maximizeButtonView.setAnimationTints(
-            darkMode = header.appTheme == Theme.DARK,
-            iconForegroundColor = colorStateList,
-            baseForegroundColor = foregroundColor,
-            rippleDrawable = createRippleDrawable(
-                color = foregroundColor,
-                cornerRadius = headerButtonsRippleRadius,
-                drawableInsets = maximizeDrawableInsets
+        maximizeButtonView.apply {
+            setAnimationTints(
+                darkMode = header.appTheme == Theme.DARK,
+                iconForegroundColor = colorStateList,
+                baseForegroundColor = foregroundColor,
+                rippleDrawable = createRippleDrawable(
+                    color = foregroundColor,
+                    cornerRadius = headerButtonsRippleRadius,
+                    drawableInsets = maximizeDrawableInsets
+                )
             )
-        )
+            setIcon(
+                if (taskInfo.requestingImmersive && Flags.enableFullyImmersiveInDesktop()) {
+                    R.drawable.decor_desktop_mode_immersive_button_dark
+                } else {
+                    R.drawable.decor_desktop_mode_maximize_button_dark
+                }
+            )
+        }
         // Close button.
         closeWindowButton.apply {
             imageTintList = colorStateList

@@ -75,7 +75,7 @@ public class AnimateMeasure {
         mP = Math.min(elapsed / (float) mDuration, 1f);
         //mP = motionEasing.get(mP);
         mVp = Math.min(elapsed / (float) mDurationVisibilityChange, 1f);
-        mVp = mVisibilityEasing.get(mVp);
+       // mVp = mVisibilityEasing.get(mVp);
     }
 
     public PaintBundle paint = new PaintBundle();
@@ -101,7 +101,6 @@ public class AnimateMeasure {
             }
         }
 
-        mComponent.mVisibility = mTarget.getVisibility();
         if (mOriginal.getVisibility() != mTarget.getVisibility()) {
             if (mTarget.getVisibility() == Component.Visibility.GONE) {
                 switch (mExitAnimation) {
@@ -256,7 +255,7 @@ public class AnimateMeasure {
             } else {
                 mComponent.paintingComponent(context);
             }
-        } else {
+        } else if (mTarget.getVisibility() == Component.Visibility.VISIBLE) {
             mComponent.paintingComponent(context);
         }
 
