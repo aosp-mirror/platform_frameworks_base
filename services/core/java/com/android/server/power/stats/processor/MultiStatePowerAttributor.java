@@ -35,6 +35,7 @@ import com.android.server.power.stats.PowerStatsStore;
 import com.android.server.power.stats.PowerStatsUidResolver;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 public class MultiStatePowerAttributor implements PowerAttributor {
     private static final String TAG = "MultiStatePowerAttributor";
@@ -48,10 +49,11 @@ public class MultiStatePowerAttributor implements PowerAttributor {
     // attribution isolates UIDs are supposed to be long forgotten.
     public MultiStatePowerAttributor(Context context, PowerStatsStore powerStatsStore,
             @NonNull PowerProfile powerProfile, @NonNull CpuScalingPolicies cpuScalingPolicies,
+            @NonNull DoubleSupplier batteryCapacitySupplier,
             @NonNull PowerStatsUidResolver powerStatsUidResolver) {
         this(powerStatsStore, new PowerStatsAggregator(
                 createAggregatedPowerStatsConfig(context, powerProfile, cpuScalingPolicies,
-                        powerStatsUidResolver)));
+                        batteryCapacitySupplier, powerStatsUidResolver)));
     }
 
     @VisibleForTesting
@@ -62,13 +64,14 @@ public class MultiStatePowerAttributor implements PowerAttributor {
         mPowerStatsStore.addSectionReader(
                 new AggregatedPowerStatsSection.Reader(mPowerStatsAggregator.getConfig()));
         mPowerStatsExporter = new PowerStatsExporter(mPowerStatsStore, mPowerStatsAggregator);
+        setPowerComponentSupported(BatteryConsumer.POWER_COMPONENT_BASE, true);
     }
 
     private static AggregatedPowerStatsConfig createAggregatedPowerStatsConfig(Context context,
             PowerProfile powerProfile, CpuScalingPolicies cpuScalingPolicies,
-            PowerStatsUidResolver powerStatsUidResolver) {
+            DoubleSupplier batteryCapacitySupplier, PowerStatsUidResolver powerStatsUidResolver) {
         AggregatedPowerStatsConfig config = new AggregatedPowerStatsConfig();
-        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU)
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_BASE)
                 .trackDeviceStates(
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN)
@@ -76,6 +79,21 @@ public class MultiStatePowerAttributor implements PowerAttributor {
                         AggregatedPowerStatsConfig.STATE_POWER,
                         AggregatedPowerStatsConfig.STATE_SCREEN,
                         AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessorSupplier(() -> new BasePowerStatsProcessor(batteryCapacitySupplier));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_WAKELOCK)
+                .trackDeviceStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN)
+                .trackUidStates(
+                        AggregatedPowerStatsConfig.STATE_POWER,
+                        AggregatedPowerStatsConfig.STATE_SCREEN,
+                        AggregatedPowerStatsConfig.STATE_PROCESS_STATE)
+                .setProcessorSupplier(
+                        () -> new WakelockPowerStatsProcessor(powerProfile));
+
+        config.trackPowerComponent(BatteryConsumer.POWER_COMPONENT_CPU,
+                        BatteryConsumer.POWER_COMPONENT_WAKELOCK)
                 .setProcessorSupplier(
                         () -> new CpuPowerStatsProcessor(powerProfile, cpuScalingPolicies));
 

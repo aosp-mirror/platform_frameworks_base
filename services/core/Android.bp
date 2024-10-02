@@ -60,7 +60,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-file-path /etc/core.protolog.pb " +
         "--legacy-viewer-config-file-path /system/etc/protolog.conf.json.gz " +
@@ -79,7 +79,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-type json " +
         "--viewer-config $(out) " +
@@ -96,7 +96,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         "--viewer-config-type proto " +
         "--viewer-config $(out) " +

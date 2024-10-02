@@ -53,7 +53,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
@@ -70,7 +69,7 @@ import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
-import com.android.compose.animation.scene.animateSceneDpAsState
+import com.android.compose.animation.scene.animateContentDpAsState
 import com.android.compose.animation.scene.animateSceneFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.padding
@@ -101,7 +100,6 @@ import com.android.systemui.qs.footer.ui.compose.FooterActionsWithAnimatedVisibi
 import com.android.systemui.qs.ui.composable.BrightnessMirror
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaLandscapeTopOffset
-import com.android.systemui.qs.ui.composable.QuickSettings.SharedValues.MediaOffset.InQQS
 import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
@@ -292,7 +290,11 @@ private fun SceneScope.SingleShade(
     // Media is visible and we are in landscape on a small height screen
     val mediaInRow = isMediaVisible && isLandscape()
     val mediaOffset by
-        animateSceneDpAsState(value = InQQS, key = MediaLandscapeTopOffset, canOverflow = false)
+        animateContentDpAsState(
+            value = QuickSettings.SharedValues.MediaOffset.inQqs(mediaInRow),
+            key = MediaLandscapeTopOffset,
+            canOverflow = false,
+        )
 
     val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
@@ -395,7 +397,8 @@ private fun SceneScope.SingleShade(
             modifier =
                 Modifier.align(Alignment.BottomCenter)
                     .height(navBarHeight)
-                    .pointerInteropFilter { true }
+                    // Intercepts touches, prevents the scrollable container behind from scrolling.
+                    .clickable(interactionSource = null, indication = null) { /* do nothing */ }
                     .verticalNestedScrollToScene(
                         topBehavior = NestedScrollBehavior.EdgeAlways,
                         isExternalOverscrollGesture = { false },

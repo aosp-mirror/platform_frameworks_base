@@ -110,7 +110,7 @@ struct ParsedResource {
   std::optional<OverlayableItem> overlayable_item;
   std::optional<StagedId> staged_alias;
   std::optional<FeatureFlagAttribute> flag;
-  FlagStatus flag_status;
+  FlagStatus flag_status = FlagStatus::NoFlag;
 
   std::string comment;
   std::unique_ptr<Value> value;
