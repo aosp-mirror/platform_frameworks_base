@@ -655,6 +655,14 @@ public class LogModule {
         return factory.create("DisplayMetricsRepo", 50);
     }
 
+    /** Provides a {@link LogBuffer} for focus related logs. */
+    @Provides
+    @SysUISingleton
+    @FocusedDisplayRepoLog
+    public static LogBuffer provideFocusedDisplayRepoLogBuffer(LogBufferFactory factory) {
+        return factory.create("FocusedDisplayRepo", 50);
+    }
+
     /** Provides a {@link LogBuffer} for the scene framework. */
     @Provides
     @SysUISingleton
