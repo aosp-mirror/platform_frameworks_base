@@ -444,8 +444,17 @@ public class ContextHubService extends IContextHubService.Stub {
         mSupportedContextHubPerms = hubInfo.second;
         mContextHubInfoList = new ArrayList<>(mContextHubIdToInfoMap.values());
         mClientManager = new ContextHubClientManager(mContext, mContextHubWrapper);
-        mTransactionManager = new ContextHubTransactionManager(
-                mContextHubWrapper, mClientManager, mNanoAppStateManager);
+
+        if (Flags.reduceLockingContextHubTransactionManager()) {
+            mTransactionManager =
+                    new ContextHubTransactionManager(
+                            mContextHubWrapper, mClientManager, mNanoAppStateManager);
+        } else {
+            mTransactionManager =
+                    new ContextHubTransactionManagerOld(
+                            mContextHubWrapper, mClientManager, mNanoAppStateManager);
+        }
+
         mSensorPrivacyManagerInternal =
                 LocalServices.getService(SensorPrivacyManagerInternal.class);
         return true;
