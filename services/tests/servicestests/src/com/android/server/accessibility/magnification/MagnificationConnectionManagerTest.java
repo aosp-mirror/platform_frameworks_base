@@ -300,7 +300,8 @@ public class MagnificationConnectionManagerTest {
         mMagnificationConnectionManager.setConnection(mMockConnection.getConnection());
         mMagnificationConnectionManager.enableWindowMagnification(TEST_DISPLAY, 2.5f, NaN, NaN);
 
-        mMagnificationConnectionManager.setScale(TEST_DISPLAY, 10.0f);
+        mMagnificationConnectionManager.setScale(TEST_DISPLAY,
+                MagnificationScaleProvider.MAX_SCALE * 2.f);
 
         assertEquals(mMagnificationConnectionManager.getScale(TEST_DISPLAY),
                 MagnificationScaleProvider.MAX_SCALE);
