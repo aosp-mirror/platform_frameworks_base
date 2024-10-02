@@ -72,4 +72,12 @@ public class SafeOneTimeExecuteAppFunctionCallback {
             mOnDispatchCallback.accept(result);
         }
     }
+
+    /**
+     * Disables this callback. Subsequent calls to {@link #onResult(ExecuteAppFunctionResponse)}
+     * will be ignored.
+     */
+    public void disable() {
+        mOnResultCalled.set(true);
+    }
 }

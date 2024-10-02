@@ -403,6 +403,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
                 startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */);
+
+                setVisibleDirectly(mImeRequestedVisible || mAnimation != null);
             }
         }
 
@@ -540,6 +542,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     show ? ANIMATION_DURATION_SHOW_MS : ANIMATION_DURATION_HIDE_MS);
             if (seek) {
                 mAnimation.setCurrentFraction((seekValue - startY) / (endY - startY));
+            } else {
+                // In some cases the value in onAnimationStart is zero, therefore setting it
+                // explicitly to startY
+                mAnimation.setCurrentFraction(0);
             }
 
             mAnimation.addUpdateListener(animation -> {
@@ -621,6 +627,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.hide(animatingLeash);
                         removeImeSurface(mDisplayId);
+                        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                            setVisibleDirectly(false /* visible */);
+                        }
                         ImeTracker.forLogging().onHidden(mStatsToken);
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
                         ImeTracker.forLogging().onShown(mStatsToken);
@@ -645,13 +654,13 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     animatingControl.release(SurfaceControl::release);
                 }
             });
-            if (!show) {
+            if (!android.view.inputmethod.Flags.refactorInsetsController() && !show) {
                 // When going away, queue up insets change first, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(false /* visible */);
             }
             mAnimation.start();
-            if (show) {
+            if (!android.view.inputmethod.Flags.refactorInsetsController() && show) {
                 // When showing away, queue up insets change last, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(true /* visible */);

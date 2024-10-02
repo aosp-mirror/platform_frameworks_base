@@ -15,24 +15,52 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.layout.modifiers;
 
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.FLOAT;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
+import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+
+import java.util.List;
 
 /**
  * Set the width dimension on a component
  */
 public class WidthModifierOperation extends DimensionModifierOperation {
+    private static final int OP_CODE = Operations.MODIFIER_WIDTH;
+    public static final String CLASS_NAME = "WidthModifierOperation";
 
-    public static final DimensionModifierOperation.Companion COMPANION =
-            new DimensionModifierOperation.Companion(Operations.MODIFIER_WIDTH, "WIDTH") {
-                @Override
-                public Operation construct(DimensionModifierOperation.Type type, float value) {
-                    return new WidthModifierOperation(type, value);
-                }
-            };
+
+    public static String name() {
+        return CLASS_NAME;
+    }
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    public static void apply(WireBuffer buffer, int type, float value) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(type);
+        buffer.writeFloat(value);
+    }
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        Type type = Type.fromInt(buffer.readInt());
+        float value = buffer.readFloat();
+        Operation op = new WidthModifierOperation(type, value);
+        operations.add(op);
+    }
 
     public WidthModifierOperation(Type type, float value) {
         super(type, value);
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        apply(buffer, mType.ordinal(), mValue);
     }
 
     public WidthModifierOperation(Type type) {
@@ -51,5 +79,14 @@ public class WidthModifierOperation extends DimensionModifierOperation {
     @Override
     public String serializedName() {
         return "WIDTH";
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Modifier Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("define the animation")
+                .field(INT, "type", "")
+                .field(FLOAT, "value", "");
     }
 }

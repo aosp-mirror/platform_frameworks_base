@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.Velocity
 import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.math.sign
 
+internal typealias SuspendedValue<T> = suspend () -> T
+
 /**
  * This [NestedScrollConnection] waits for a child to scroll ([onPreScroll] or [onPostScroll]), and
  * then decides (via [canStartPreScroll] or [canStartPostScroll]) if it should take over scrolling.
@@ -42,7 +44,7 @@ class PriorityNestedScrollConnection(
     private val canScrollOnFling: Boolean,
     private val onStart: (offsetAvailable: Offset) -> Unit,
     private val onScroll: (offsetAvailable: Offset) -> Offset,
-    private val onStop: (velocityAvailable: Velocity) -> Velocity,
+    private val onStop: (velocityAvailable: Velocity) -> SuspendedValue<Velocity>,
 ) : NestedScrollConnection {
 
     /** In priority mode [onPreScroll] events are first consumed by the parent, via [onScroll]. */
@@ -106,12 +108,12 @@ class PriorityNestedScrollConnection(
         }
         // Step 3b: The finger is lifted, we can stop intercepting scroll events and use the speed
         // of the fling gesture.
-        return onPriorityStop(velocity = available)
+        return onPriorityStop(velocity = available).invoke()
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
         if (isPriorityMode) {
-            return onPriorityStop(velocity = available)
+            return onPriorityStop(velocity = available).invoke()
         }
 
         if (!canStartPostFling(available)) {
@@ -126,7 +128,7 @@ class PriorityNestedScrollConnection(
         onPriorityStart(available = smallOffset)
 
         // This is the last event of a scroll gesture.
-        return onPriorityStop(available)
+        return onPriorityStop(available).invoke()
     }
 
     /**
@@ -155,12 +157,12 @@ class PriorityNestedScrollConnection(
         return onScroll(available)
     }
 
-    private fun onPriorityStop(velocity: Velocity): Velocity {
+    private fun onPriorityStop(velocity: Velocity): SuspendedValue<Velocity> {
         // We can restart tracking the consumed offsets from scratch.
         offsetScrolledBeforePriorityMode = Offset.Zero
 
         if (!isPriorityMode) {
-            return Velocity.Zero
+            return { Velocity.Zero }
         }
 
         isPriorityMode = false
@@ -178,7 +180,7 @@ fun PriorityNestedScrollConnection(
     canScrollOnFling: Boolean,
     onStart: (offsetAvailable: Float) -> Unit,
     onScroll: (offsetAvailable: Float) -> Float,
-    onStop: (velocityAvailable: Float) -> Float,
+    onStop: (velocityAvailable: Float) -> SuspendedValue<Float>,
 ) =
     with(SpaceVectorConverter(orientation)) {
         PriorityNestedScrollConnection(
@@ -198,7 +200,8 @@ fun PriorityNestedScrollConnection(
                 onScroll(offsetAvailable.toFloat()).toOffset()
             },
             onStop = { velocityAvailable: Velocity ->
-                onStop(velocityAvailable.toFloat()).toVelocity()
+                val consumedVelocity = onStop(velocityAvailable.toFloat())
+                suspend { consumedVelocity.invoke().toVelocity() }
             },
         )
     }

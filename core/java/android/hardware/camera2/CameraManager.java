@@ -69,6 +69,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -80,6 +81,7 @@ import com.android.internal.camera.flags.Flags;
 import com.android.internal.util.ArrayUtils;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -2157,6 +2159,12 @@ public final class CameraManager {
 
         private final Set<Set<DeviceCameraInfo>> mConcurrentCameraIdCombinations = new ArraySet<>();
 
+        // Diagnostic messages for ArrayIndexOutOfBoundsException in extractCameraIdListLocked
+        // b/367649718
+        private static final int DEVICE_STATUS_ARRAY_SIZE = 10;
+        private final ArrayDeque<String> mDeviceStatusHistory =
+                new ArrayDeque<>(DEVICE_STATUS_ARRAY_SIZE);
+
         // Registered availability callbacks and their executors
         private final ArrayMap<AvailabilityCallback, Executor> mCallbackMap = new ArrayMap<>();
 
@@ -2274,6 +2282,10 @@ public final class CameraManager {
             }
 
             try {
+                addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                        "connectCameraServiceLocked(E): tid(%d): mDeviceStatus size %d",
+                        Thread.currentThread().getId(), mDeviceStatus.size()));
+
                 CameraStatus[] cameraStatuses = cameraService.addListener(this);
                 for (CameraStatus cameraStatus : cameraStatuses) {
                     DeviceCameraInfo info = new DeviceCameraInfo(cameraStatus.cameraId,
@@ -2296,6 +2308,10 @@ public final class CameraManager {
                     }
                 }
                 mCameraService = cameraService;
+
+                addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                        "connectCameraServiceLocked(X): tid(%d): mDeviceStatus size %d",
+                        Thread.currentThread().getId(), mDeviceStatus.size()));
             } catch (ServiceSpecificException e) {
                 // Unexpected failure
                 throw new IllegalStateException("Failed to register a camera service listener", e);
@@ -2349,18 +2365,28 @@ public final class CameraManager {
         }
 
         private String[] extractCameraIdListLocked(int deviceId, int devicePolicy) {
-            List<String> cameraIds = new ArrayList<>();
-            for (int i = 0; i < mDeviceStatus.size(); i++) {
-                int status = mDeviceStatus.valueAt(i);
-                DeviceCameraInfo info = mDeviceStatus.keyAt(i);
-                if (status == ICameraServiceListener.STATUS_NOT_PRESENT
-                        || status == ICameraServiceListener.STATUS_ENUMERATING
-                        || shouldHideCamera(deviceId, devicePolicy, info)) {
-                    continue;
+            addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                    "extractCameraIdListLocked(E): tid(%d): mDeviceStatus size %d",
+                    Thread.currentThread().getId(), mDeviceStatus.size()));
+            try {
+                List<String> cameraIds = new ArrayList<>();
+                for (int i = 0; i < mDeviceStatus.size(); i++) {
+                    int status = mDeviceStatus.valueAt(i);
+                    DeviceCameraInfo info = mDeviceStatus.keyAt(i);
+                    if (status == ICameraServiceListener.STATUS_NOT_PRESENT
+                            || status == ICameraServiceListener.STATUS_ENUMERATING
+                            || shouldHideCamera(deviceId, devicePolicy, info)) {
+                        continue;
+                    }
+                    cameraIds.add(info.mCameraId);
                 }
-                cameraIds.add(info.mCameraId);
+                return cameraIds.toArray(new String[0]);
+            }  catch (ArrayIndexOutOfBoundsException e) {
+                String message = e.getMessage();
+                String messageWithHistory = message + ": {"
+                        + String.join(" -> ", mDeviceStatusHistory) + "}";
+                throw new ArrayIndexOutOfBoundsException(messageWithHistory);
             }
-            return cameraIds.toArray(new String[0]);
         }
 
         private Set<Set<String>> extractConcurrentCameraIdListLocked(int deviceId,
@@ -2488,6 +2514,10 @@ public final class CameraManager {
             synchronized (mLock) {
                 connectCameraServiceLocked();
                 try {
+                    addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                            "getCameraIdListNoLazy(E): tid(%d): mDeviceStatus size %d",
+                            Thread.currentThread().getId(), mDeviceStatus.size()));
+
                     // The purpose of the addListener, removeListener pair here is to get a fresh
                     // list of camera ids from cameraserver. We do this since for in test processes,
                     // changes can happen w.r.t non-changeable permissions (eg: SYSTEM_CAMERA
@@ -2521,6 +2551,9 @@ public final class CameraManager {
                         onStatusChangedLocked(ICameraServiceListener.STATUS_NOT_PRESENT, info);
                         mTorchStatus.remove(info);
                     }
+                    addDeviceStatusHistoryLocked(TextUtils.formatSimple(
+                            "getCameraIdListNoLazy(X): tid(%d): mDeviceStatus size %d",
+                            Thread.currentThread().getId(), mDeviceStatus.size()));
                 } catch (ServiceSpecificException e) {
                     // Unexpected failure
                     throw new IllegalStateException("Failed to register a camera service listener",
@@ -3209,7 +3242,13 @@ public final class CameraManager {
         public void onStatusChanged(int status, String cameraId, int deviceId)
                 throws RemoteException {
             synchronized(mLock) {
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("onStatusChanged(E): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
                 onStatusChangedLocked(status, new DeviceCameraInfo(cameraId, deviceId));
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("onStatusChanged(X): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
             }
         }
 
@@ -3352,6 +3391,10 @@ public final class CameraManager {
          */
         public void binderDied() {
             synchronized(mLock) {
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("binderDied(E): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
+
                 // Only do this once per service death
                 if (mCameraService == null) return;
 
@@ -3380,6 +3423,10 @@ public final class CameraManager {
                 mConcurrentCameraIdCombinations.clear();
 
                 scheduleCameraServiceReconnectionLocked();
+
+                addDeviceStatusHistoryLocked(
+                        TextUtils.formatSimple("binderDied(X): tid(%d): mDeviceStatus size %d",
+                                Thread.currentThread().getId(), mDeviceStatus.size()));
             }
         }
 
@@ -3409,5 +3456,13 @@ public final class CameraManager {
                 return Objects.hash(mCameraId, mDeviceId);
             }
         }
+
+        private void addDeviceStatusHistoryLocked(String log) {
+            if (mDeviceStatusHistory.size() == DEVICE_STATUS_ARRAY_SIZE) {
+                mDeviceStatusHistory.removeFirst();
+            }
+            mDeviceStatusHistory.addLast(log);
+        }
+
     } // CameraManagerGlobal
 } // CameraManager

@@ -42,6 +42,7 @@ import com.android.wm.shell.R
 import com.android.wm.shell.shared.animation.Interpolators
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
+import com.android.wm.shell.windowdecor.viewholder.WindowDecorationViewHolder.Data
 
 /**
  * A desktop mode window decoration used when the window is in full "focus" (i.e. fullscreen/split).
@@ -53,11 +54,20 @@ internal class AppHandleViewHolder(
     onCaptionButtonClickListener: OnClickListener,
     private val windowManagerWrapper: WindowManagerWrapper,
     private val handler: Handler
-) : WindowDecorationViewHolder(rootView) {
+) : WindowDecorationViewHolder<AppHandleViewHolder.HandleData>(rootView) {
 
     companion object {
         private const val CAPTION_HANDLE_ANIMATION_DURATION: Long = 100
     }
+
+    data class HandleData(
+        val taskInfo: RunningTaskInfo,
+        val position: Point,
+        val width: Int,
+        val height: Int,
+        val isCaptionVisible: Boolean
+    ) : Data()
+
     private lateinit var taskInfo: RunningTaskInfo
     private val captionView: View = rootView.requireViewById(R.id.desktop_mode_caption)
     private val captionHandle: ImageButton = rootView.requireViewById(R.id.caption_handle)
@@ -89,7 +99,11 @@ internal class AppHandleViewHolder(
         }
     }
 
-    override fun bindData(
+    override fun bindData(data: HandleData) {
+        bindData(data.taskInfo, data.position, data.width, data.height, data.isCaptionVisible)
+    }
+
+    private fun bindData(
         taskInfo: RunningTaskInfo,
         position: Point,
         width: Int,

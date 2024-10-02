@@ -38,13 +38,14 @@ import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_WAKE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_KEEP_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SLEEP_TOKEN;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WALLPAPER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -2867,7 +2868,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             token = new SleepToken(tag, displayId);
             mSleepTokens.put(tokenKey, token);
             display.mAllSleepTokens.add(token);
-            ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
+            ProtoLog.d(WM_DEBUG_SLEEP_TOKEN, "Create SleepToken: tag=%s, displayId=%d",
+                    tag, displayId);
         } else {
             throw new RuntimeException("Create the same sleep token twice: " + token);
         }
@@ -2886,8 +2888,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return;
         }
 
-        ProtoLog.d(WM_DEBUG_STATES, "Remove sleep token: tag=%s, displayId=%d", token.mTag,
-                token.mDisplayId);
+        ProtoLog.d(WM_DEBUG_SLEEP_TOKEN, "Remove SleepToken: tag=%s, displayId=%d",
+                token.mTag, token.mDisplayId);
         display.mAllSleepTokens.remove(token);
         if (display.mAllSleepTokens.isEmpty()) {
             mService.updateSleepIfNeededLocked();

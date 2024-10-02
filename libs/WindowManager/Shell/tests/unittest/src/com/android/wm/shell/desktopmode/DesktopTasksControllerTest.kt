@@ -144,6 +144,7 @@ import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeastOnce
@@ -3199,6 +3200,11 @@ class DesktopTasksControllerTest : ShellTestCase() {
     testOnUnhandledDrag(DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR,
       PointF(1200f, 50f),
       Rect())
+  }
+
+  @Test
+  fun shellController_registersUserChangeListener() {
+      verify(shellController, times(1)).addUserChangeListener(any())
   }
 
   /**

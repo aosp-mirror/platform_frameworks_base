@@ -3433,4 +3433,15 @@ interface ITelephony {
      * @hide
      */
     ComponentName getTestEuiccUiComponent();
+
+    /**
+     * This API can be used only for test purpose to override the carrier romaing Ntn eligibility
+     *
+     * @param status to update Ntn Eligibility.
+     * @param resetRequired to reset the overridden flag in satellite controller.
+     * @return {@code true} if the shell command is successful, {@code false} otherwise.
+     * @hide
+     */
+    boolean overrideCarrierRoamingNtnEligibilityChanged(
+            in boolean status, in boolean resetRequired);
 }

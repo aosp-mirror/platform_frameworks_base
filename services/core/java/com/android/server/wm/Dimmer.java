@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
