@@ -105,7 +105,7 @@ public interface VolumeModule {
     /**  */
     @Provides
     static VolumeDialog provideVolumeDialog(
-            Lazy<VolumeDialogPlugin> newVolumeDialogProvider,
+            Lazy<VolumeDialogPlugin> volumeDialogProvider,
             Context context,
             VolumeDialogController volumeDialogController,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
@@ -124,7 +124,7 @@ public interface VolumeModule {
             SystemClock systemClock,
             VolumeDialogInteractor interactor) {
         if (Flags.volumeRedesign()) {
-            return newVolumeDialogProvider.get();
+            return volumeDialogProvider.get();
         } else {
             VolumeDialogImpl impl = new VolumeDialogImpl(
                     context,
