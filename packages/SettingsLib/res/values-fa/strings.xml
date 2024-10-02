@@ -239,10 +239,10 @@
     <string name="category_work" msgid="4014193632325996115">"کاری"</string>
     <string name="category_private" msgid="4244892185452788977">"خصوصی"</string>
     <string name="category_clone" msgid="1554511758987195974">"همسانه‌سازی"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های توسعه‌دهندگان"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های توسعه‌دهندگان"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"گزینه‌های برنامه‌نویس برای این کاربر موجود نیست"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"گزینه‌های توسعه‌دهندگان برای این کاربر موجود نیست"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"‏تنظیمات VPN برای این کاربر در دسترس نیست"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"تنظیمات اشتراک‌گذاری اینترنت برای این کاربر در دسترس نیست"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"تنظیمات نام تقطه دسترسی برای این کاربر در دسترس نیست"</string>
@@ -287,8 +287,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"اجازه دهید قفل بوت‌لودر باز شود"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"‏بازکردن سازنده تجهیزات اصلی مجاز (OEM) است؟"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"اخطار: قابلیت‌های حفاظتی دستگاه وقتی این تنظیم روشن است در این دستگاه کار نمی‌کند."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"انتخاب برنامه موقعیت مکانی ساختگی"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"هیچ برنامه موقعیت مکانی ساختگی تنظیم نشده است"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"انتخاب برنامه مکان ساختگی"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"برنامه مکان ساختگی تنظیم نشده است"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
@@ -376,7 +376,7 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"چشمک زدن صفحه هنگام انجام عملیات طولانی توسط برنامه‌ها در رشته اصلی"</string>
     <string name="pointer_location" msgid="7516929526199520173">"محل اشاره‌گر"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"هم‌پوشانی صفحه‌نمایش با نمایش داده لمسی فعلی"</string>
-    <string name="show_touches" msgid="8437666942161289025">"نمایش ضربه‌ها"</string>
+    <string name="show_touches" msgid="8437666942161289025">"نمایش تک‌ضرب‌ها"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"نمایش بازخورد تصویری برای ضربه‌ها"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"نمایش فشار کلیدها"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"نمایش بازخورد بصری برای فشار دادن کلیدهای فیزیکی"</string>
@@ -397,7 +397,7 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"‏غیرفعال کردن مسیریابی خودکار به وسایل جانبی صوتی USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"نمایش محدوده‌های طرح‌بندی"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"اجباری کردن چیدمان راست‌چین"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"الزام جانمایی راست به چپ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"نوار پیمایش شفاف"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"رنگ پس‌زمینه نوار پیمایش را به‌طور پیش‌فرض شفاف می‌کند"</string>
@@ -418,7 +418,7 @@
     <string name="verbose_vendor_logging_preference_summary_on" msgid="9017757242481762036">"به‌طور نامحدود فعال شد"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"مقیاس طول مدت انیماتور"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"مقیاس طول مدت مقیاس مدت پویانماساز"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"شبیه‌سازی نمایشگر ثانویه"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"برنامه‌ها"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"فعالیت‌ها نگه داشته نشوند"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"هم‌اکنون"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"این تلفن"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"این رایانه لوحی"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"این رایانه (داخلی)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"میکروفون (داخلی)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاه باید بازراه‌اندازی شود. یا اکنون بازراه‌اندازی کنید یا لغو کنید."</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"هدفون سیمی"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"هدفون"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"‏بلندگوی USB"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"فیش میکروفون"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"‏میکروفون USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"روشن"</string>
@@ -738,7 +734,7 @@
     <string name="back_navigation_animation" msgid="8105467568421689484">"پویانمایی‌های اشاره برگشت پیش‌گویانه"</string>
     <string name="back_navigation_animation_summary" msgid="741292224121599456">"پویانمایی‌های سیستم را برای اشاره برگشت پیش‌گویانه فعال کنید."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏این تنظیم پویانمایی‌های سیستم را برای پویانمایی اشاره برگشت پیش‌بینانه فعال می‌کند. این تنظیم مستلزم تنظیم شدن enableOnBackInvokedCallback مربوط به هر برنامه روی صحیح در فایل مانیفست است."</string>
-    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>٪"</string>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"‎%%<xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="not_specified" msgid="5423502443185110328">"نامشخص"</string>
     <string name="neuter" msgid="2075249330106127310">"خنثی"</string>
     <string name="feminine" msgid="1529155595310784757">"مؤنث"</string>

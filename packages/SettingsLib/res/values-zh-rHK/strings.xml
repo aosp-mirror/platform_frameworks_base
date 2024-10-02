@@ -100,7 +100,7 @@
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"使用中。右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"左耳機：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"此手機"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"此平板電腦"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此電腦 (內置)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"麥克風 (內置)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已啟用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"你的裝置必須重新開機，才能套用此變更。請立即重新開機或取消。"</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有線耳機"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"耳機"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB 喇叭"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"麥克風插孔"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB 麥克風"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"開啟"</string>

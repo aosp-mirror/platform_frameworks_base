@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"આ ટૅબ્લેટ"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"આ કમ્પ્યૂટર (આંતરિક)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"માઇક્રોફોન (આંતરિક)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"બંધ છે"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ચાલુ છે"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"આ ફેરફારને લાગુ કરવા માટે તમારા ડિવાઇસને રીબૂટ કરવાની જરૂર છે. હમણાં જ રીબૂટ કરો કે રદ કરો."</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"વાયરવાળો હૅડફોન"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"હૅડફોન"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB સ્પીકર"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"માઇક જૅક"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB માઇક"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ચાલુ"</string>
