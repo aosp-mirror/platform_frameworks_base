@@ -30,29 +30,32 @@ import java.util.Objects;
  */
 public class BubbleInfo implements Parcelable {
 
-    private String mKey; // Same key as the Notification
+    private final String mKey; // Same key as the Notification
     private int mFlags;  // Flags from BubbleMetadata
     @Nullable
-    private String mShortcutId;
-    private int mUserId;
-    private String mPackageName;
+    private final String mShortcutId;
+    private final int mUserId;
+    private final String mPackageName;
     /**
      * All notification bubbles require a shortcut to be set on the notification, however, the
      * app could still specify an Icon and PendingIntent to use for the bubble. In that case
      * this icon will be populated. If the bubble is entirely shortcut based, this will be null.
      */
     @Nullable
-    private Icon mIcon;
+    private final Icon mIcon;
     @Nullable
-    private String mTitle;
+    private final String mTitle;
     @Nullable
-    private String mAppName;
-    private boolean mIsImportantConversation;
-    private boolean mShowAppBadge;
+    private final String mAppName;
+    private final boolean mIsImportantConversation;
+    private final boolean mShowAppBadge;
+    @Nullable
+    private final ParcelableFlyoutMessage mParcelableFlyoutMessage;
 
     public BubbleInfo(String key, int flags, @Nullable String shortcutId, @Nullable Icon icon,
             int userId, String packageName, @Nullable String title, @Nullable String appName,
-            boolean isImportantConversation, boolean showAppBadge) {
+            boolean isImportantConversation, boolean showAppBadge,
+            @Nullable ParcelableFlyoutMessage flyoutMessage) {
         mKey = key;
         mFlags = flags;
         mShortcutId = shortcutId;
@@ -63,6 +66,7 @@ public class BubbleInfo implements Parcelable {
         mAppName = appName;
         mIsImportantConversation = isImportantConversation;
         mShowAppBadge = showAppBadge;
+        mParcelableFlyoutMessage = flyoutMessage;
     }
 
     private BubbleInfo(Parcel source) {
@@ -76,6 +80,8 @@ public class BubbleInfo implements Parcelable {
         mAppName = source.readString();
         mIsImportantConversation = source.readBoolean();
         mShowAppBadge = source.readBoolean();
+        mParcelableFlyoutMessage = source.readParcelable(
+                ParcelableFlyoutMessage.class.getClassLoader(), ParcelableFlyoutMessage.class);
     }
 
     public String getKey() {
@@ -120,6 +126,11 @@ public class BubbleInfo implements Parcelable {
 
     public boolean showAppBadge() {
         return mShowAppBadge;
+    }
+
+    @Nullable
+    public ParcelableFlyoutMessage getParcelableFlyoutMessage() {
+        return mParcelableFlyoutMessage;
     }
 
     /**
@@ -180,6 +191,7 @@ public class BubbleInfo implements Parcelable {
         parcel.writeString(mAppName);
         parcel.writeBoolean(mIsImportantConversation);
         parcel.writeBoolean(mShowAppBadge);
+        parcel.writeParcelable(mParcelableFlyoutMessage, flags);
     }
 
     @NonNull

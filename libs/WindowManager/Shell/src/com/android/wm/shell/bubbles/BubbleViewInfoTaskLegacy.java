@@ -181,7 +181,7 @@ public class BubbleViewInfoTaskLegacy extends
         @Nullable BubbleExpandedView expandedView;
         int dotColor;
         Path dotPath;
-        @Nullable Bubble.FlyoutMessage flyoutMessage;
+        Bubble.FlyoutMessage flyoutMessage;
         Bitmap bubbleBitmap;
         Bitmap badgeBitmap;
 
@@ -220,6 +220,10 @@ public class BubbleViewInfoTaskLegacy extends
                 // if we failed to update common fields return null
                 return null;
             }
+
+            // set the flyout message but don't load the avatar because we can't pass it on the
+            // binder to launcher
+            info.flyoutMessage = b.getFlyoutMessage();
 
             return info;
         }
