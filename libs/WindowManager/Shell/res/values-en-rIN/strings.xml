@@ -126,8 +126,11 @@
     <string name="manage_windows_text" msgid="5567366688493093920">"Manage windows"</string>
     <string name="close_text" msgid="4986518933445178928">"Close"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Close menu"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"Open menu"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Open menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maximise screen"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Snap screen"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"This app can\'t be resized"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maximise"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Snap left"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Snap right"</string>
 </resources>

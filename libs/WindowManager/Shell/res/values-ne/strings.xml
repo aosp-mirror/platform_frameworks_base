@@ -123,12 +123,14 @@
     <string name="screenshot_text" msgid="1477704010087786671">"स्क्रिनसट"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ब्राउजरमा खोल्नुहोस्"</string>
     <string name="new_window_text" msgid="6318648868380652280">"नयाँ विन्डो"</string>
-    <!-- no translation found for manage_windows_text (5567366688493093920) -->
-    <skip />
+    <string name="manage_windows_text" msgid="5567366688493093920">"विन्डोहरू व्यवस्थापन गर्नुहोस्"</string>
     <string name="close_text" msgid="4986518933445178928">"बन्द गर्नुहोस्"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेनु बन्द गर्नुहोस्"</string>
-    <string name="expand_menu_text" msgid="3847736164494181168">"मेनु खोल्नुहोस्"</string>
+    <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"मेनु खोल्नुहोस्"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"स्क्रिन ठुलो बनाउनुहोस्"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"स्क्रिन स्न्याप गर्नुहोस्"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"यो एपको आकार बदल्न मिल्दैन"</string>
+    <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"ठुलो बनाउनुहोस्"</string>
+    <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"बायाँतिर स्न्याप गर्नुहोस्"</string>
+    <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"दायाँतिर स्न्याप गर्नुहोस्"</string>
 </resources>
