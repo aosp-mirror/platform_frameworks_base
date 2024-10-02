@@ -127,6 +127,7 @@ import com.android.internal.widget.ILockSettings;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor.BiometricAuthenticated;
 import com.android.keyguard.logging.KeyguardUpdateMonitorLogger;
+import com.android.keyguard.logging.SimLogger;
 import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -266,6 +267,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private ActiveUnlockConfig mActiveUnlockConfig;
     @Mock
     private KeyguardUpdateMonitorLogger mKeyguardUpdateMonitorLogger;
+    @Mock
+    private SimLogger mSimLogger;
     @Mock
     private SessionTracker mSessionTracker;
     @Mock
@@ -2234,6 +2237,36 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnSimStateChanged_LockedToNotReadyToLocked() {
+        int validSubId = 10;
+        int slotId = 0;
+
+        KeyguardUpdateMonitorCallback keyguardUpdateMonitorCallback = spy(
+                KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback);
+        // Initially locked
+        mKeyguardUpdateMonitor.handleSimStateChange(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+
+        reset(keyguardUpdateMonitorCallback);
+        // Not ready, with invalid sub id
+        mKeyguardUpdateMonitor.handleSimStateChange(SubscriptionManager.INVALID_SUBSCRIPTION_ID,
+                slotId, TelephonyManager.SIM_STATE_NOT_READY);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, slotId,
+                TelephonyManager.SIM_STATE_NOT_READY);
+
+        reset(keyguardUpdateMonitorCallback);
+        // Back to PIN required, which notifies listeners
+        mKeyguardUpdateMonitor.handleSimStateChange(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+        verify(keyguardUpdateMonitorCallback).onSimStateChanged(validSubId, slotId,
+                TelephonyManager.SIM_STATE_PIN_REQUIRED);
+    }
+
+    @Test
     public void onAuthEnrollmentChangesCallbacksAreNotified() {
         KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
         ArgumentCaptor<AuthController.Callback> authCallback = ArgumentCaptor.forClass(
@@ -2487,7 +2520,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
                     mInteractionJankMonitor, mLatencyTracker, mActiveUnlockConfig,
-                    mKeyguardUpdateMonitorLogger, mUiEventLogger, () -> mSessionTracker,
+                    mKeyguardUpdateMonitorLogger, mSimLogger, mUiEventLogger, () -> mSessionTracker,
                     mTrustManager, mSubscriptionManager, mUserManager,
                     mDreamManager, mDevicePolicyManager, mSensorPrivacyManager, mTelephonyManager,
                     mPackageManager, mFingerprintManager, mBiometricManager,
