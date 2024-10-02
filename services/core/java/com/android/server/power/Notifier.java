@@ -164,6 +164,7 @@ public class Notifier {
     }
 
     private final SparseArray<Interactivity> mInteractivityByGroupId = new SparseArray<>();
+    private SparseBooleanArray mDisplayInteractivities = new SparseBooleanArray();
 
     // The current global interactive state.  This is set as soon as an interactive state
     // transition begins so as to capture the reason that it happened.  At some point
@@ -690,6 +691,42 @@ public class Notifier {
     }
 
     /**
+     * Update the interactivities of the displays in given DisplayGroup.
+     *
+     * @param groupId The group id of the DisplayGroup to update display interactivities for.
+     */
+    private void updateDisplayInteractivities(int groupId, boolean interactive) {
+        final int[] displayIds = mDisplayManagerInternal.getDisplayIdsForGroup(groupId);
+        for (int displayId : displayIds) {
+            mDisplayInteractivities.put(displayId, interactive);
+        }
+
+    }
+
+    private void resetDisplayInteractivities() {
+        final SparseArray<int[]> displaysByGroupId =
+                mDisplayManagerInternal.getDisplayIdsByGroupsIds();
+        SparseBooleanArray newDisplayInteractivities = new SparseBooleanArray();
+        for (int i = 0; i < displaysByGroupId.size(); i++) {
+            final int groupId = displaysByGroupId.keyAt(i);
+            for (int displayId : displaysByGroupId.get(i)) {
+                // If we already know display interactivity, use that
+                if (mDisplayInteractivities.indexOfKey(displayId) > 0) {
+                    newDisplayInteractivities.put(
+                            displayId, mDisplayInteractivities.get(displayId));
+                } else { // If display is new to Notifier, use the power group's interactive value
+                    final Interactivity groupInteractivity = mInteractivityByGroupId.get(groupId);
+                    // If group Interactivity hasn't been initialized, assume group is interactive
+                    final boolean groupInteractive =
+                            groupInteractivity == null || groupInteractivity.isInteractive;
+                    newDisplayInteractivities.put(displayId, groupInteractive);
+                }
+            }
+        }
+        mDisplayInteractivities = newDisplayInteractivities;
+    }
+
+    /**
      * Called when an individual PowerGroup changes wakefulness.
      */
     public void onGroupWakefulnessChangeStarted(int groupId, int wakefulness, int changeReason,
@@ -717,6 +754,12 @@ public class Notifier {
             handleEarlyInteractiveChange(groupId);
             mWakefulnessSessionObserver.onWakefulnessChangeStarted(groupId, wakefulness,
                     changeReason, eventTime);
+
+            // Update input on which displays are interactive
+            if (mFlags.isPerDisplayWakeByTouchEnabled()) {
+                updateDisplayInteractivities(groupId, isInteractive);
+                mInputManagerInternal.setDisplayInteractivities(mDisplayInteractivities);
+            }
         }
     }
 
@@ -728,6 +771,16 @@ public class Notifier {
     public void onGroupRemoved(int groupId) {
         mInteractivityByGroupId.remove(groupId);
         mWakefulnessSessionObserver.removePowerGroup(groupId);
+    }
+
+    /**
+     * Called when a PowerGroup has been changed.
+     */
+    public void onGroupChanged() {
+        if (mFlags.isPerDisplayWakeByTouchEnabled()) {
+            resetDisplayInteractivities();
+            mInputManagerInternal.setDisplayInteractivities(mDisplayInteractivities);
+        }
     }
 
     /**
