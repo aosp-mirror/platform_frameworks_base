@@ -69,6 +69,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
@@ -92,6 +93,8 @@ import org.mockito.stubbing.Answer;
 import org.testng.Assert;
 
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
 public class FullScreenMagnificationControllerTest {
@@ -1440,16 +1443,39 @@ public class FullScreenMagnificationControllerTest {
 
     @Test
     public void persistScale_setValueWhenScaleIsOne_nothingChanged() {
+        register(TEST_DISPLAY);
         final float persistedScale =
                 mFullScreenMagnificationController.getPersistedScale(TEST_DISPLAY);
 
         PointF pivotPoint = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
-        mFullScreenMagnificationController.setScale(DISPLAY_0, 1.0f, pivotPoint.x, pivotPoint.y,
+        mFullScreenMagnificationController.setScale(TEST_DISPLAY, 1.0f, pivotPoint.x, pivotPoint.y,
                 false, SERVICE_ID_1);
         mFullScreenMagnificationController.persistScale(TEST_DISPLAY);
 
+        // persistScale may post a task to a background thread. Let's wait for it completes.
+        waitForBackgroundThread();
         Assert.assertEquals(mFullScreenMagnificationController.getPersistedScale(TEST_DISPLAY),
                 persistedScale);
+    }
+
+    @Test
+    public void persistScale_setValuesOnMultipleDisplays() {
+        register(DISPLAY_0);
+        register(DISPLAY_1);
+        final PointF pivotPoint = INITIAL_BOUNDS_LOWER_RIGHT_2X_CENTER;
+        mFullScreenMagnificationController.setScale(DISPLAY_0, 3.0f, pivotPoint.x, pivotPoint.y,
+                false, SERVICE_ID_1);
+        mFullScreenMagnificationController.persistScale(DISPLAY_0);
+        mFullScreenMagnificationController.setScale(DISPLAY_1, 4.0f, pivotPoint.x, pivotPoint.y,
+                false, SERVICE_ID_1);
+        mFullScreenMagnificationController.persistScale(DISPLAY_1);
+
+        // persistScale may post a task to a background thread. Let's wait for it completes.
+        waitForBackgroundThread();
+        Assert.assertEquals(mFullScreenMagnificationController.getPersistedScale(DISPLAY_0),
+                3.0f);
+        Assert.assertEquals(mFullScreenMagnificationController.getPersistedScale(DISPLAY_1),
+                4.0f);
     }
 
     @Test
@@ -1492,6 +1518,15 @@ public class FullScreenMagnificationControllerTest {
                 /* centerX= */ anyFloat(),
                 /* centerY= */ anyFloat()
         );
+    }
+
+    private static void waitForBackgroundThread() {
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        BackgroundThread.getHandler().post(() -> future.complete(null));
+        try {
+            future.get();
+        } catch (InterruptedException | ExecutionException ignore) {
+        }
     }
 
     private void setScaleToMagnifying() {
