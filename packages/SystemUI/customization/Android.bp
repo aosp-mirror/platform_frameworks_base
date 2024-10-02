@@ -36,6 +36,7 @@ android_library {
         "SystemUIPluginLib",
         "SystemUIUnfoldLib",
         "kotlinx_coroutines",
+        "monet",
         "dagger2",
         "jsr330",
     ],

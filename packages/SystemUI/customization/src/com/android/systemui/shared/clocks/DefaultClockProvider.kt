@@ -34,7 +34,7 @@ class DefaultClockProvider(
     val layoutInflater: LayoutInflater,
     val resources: Resources,
     val hasStepClockAnimation: Boolean = false,
-    val migratedClocks: Boolean = false
+    val migratedClocks: Boolean = false,
 ) : ClockProvider {
     private var messageBuffers: ClockMessageBuffers? = null
 
