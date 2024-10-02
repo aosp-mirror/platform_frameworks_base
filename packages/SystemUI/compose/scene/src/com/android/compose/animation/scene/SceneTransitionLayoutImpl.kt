@@ -31,7 +31,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ApproachLayoutModifierNode
 import androidx.compose.ui.layout.ApproachMeasureScope
 import androidx.compose.ui.layout.LookaheadScope
@@ -71,7 +70,6 @@ internal class SceneTransitionLayoutImpl(
      * animations.
      */
     internal val animationScope: CoroutineScope,
-    internal val gestureFilter: (startedPosition: Offset) -> Boolean,
 ) {
     /**
      * The map of [Scene]s.
