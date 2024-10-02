@@ -1827,6 +1827,12 @@
     <!-- Name of the alarm status bar icon. -->
     <string name="status_bar_alarm">Alarm</string>
 
+    <!-- Format string for the content description of the icon that indicates that a Mode is on.
+       For example, if the mode name is Bedtime, this will be "Bedtime is on". This content
+       description will be associated to the mode icon in status bar, smartspace, and everyone else
+       where it might be displayed without text. [CHAR LIMIT=NONE] -->
+    <string name="active_mode_content_description"><xliff:g id="modeName" example="Do Not Disturb">%1$s</xliff:g> is on</string>
+
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
     <string name="wallet_title">Wallet</string>
