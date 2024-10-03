@@ -150,6 +150,7 @@ public class VirtualDeviceManagerServiceTest {
     private static final String NONBLOCKED_APP_PACKAGE_NAME = "com.someapp";
     private static final String PERMISSION_CONTROLLER_PACKAGE_NAME =
             "com.android.permissioncontroller";
+    private static final String VIRTUAL_DEVICE_OWNER_PACKAGE = "com.android.virtualdevice.test";
     private static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
     private static final String VENDING_PACKAGE_NAME = "com.android.vending";
     private static final String GOOGLE_DIALER_PACKAGE_NAME = "com.google.android.dialer";
@@ -296,11 +297,10 @@ public class VirtualDeviceManagerServiceTest {
     private Intent createRestrictedActivityBlockedIntent(Set<String> displayCategories,
             String targetDisplayCategory) {
         when(mDisplayManagerInternalMock.createVirtualDisplay(any(), any(), any(), any(),
-                eq(NONBLOCKED_APP_PACKAGE_NAME))).thenReturn(DISPLAY_ID_1);
+                eq(VIRTUAL_DEVICE_OWNER_PACKAGE))).thenReturn(DISPLAY_ID_1);
         VirtualDisplayConfig config = new VirtualDisplayConfig.Builder("display", 640, 480,
                 420).setDisplayCategories(displayCategories).build();
-        mDeviceImpl.createVirtualDisplay(config, mVirtualDisplayCallback,
-                NONBLOCKED_APP_PACKAGE_NAME);
+        mDeviceImpl.createVirtualDisplay(config, mVirtualDisplayCallback);
         GenericWindowPolicyController gwpc = mDeviceImpl.getDisplayWindowPolicyControllerForTest(
                 DISPLAY_ID_1);
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
@@ -1950,7 +1950,7 @@ public class VirtualDeviceManagerServiceTest {
                         mVirtualDeviceLog,
                         new Binder(),
                         new AttributionSource(
-                                ownerUid, "com.android.virtualdevice.test", "virtualdevice"),
+                                ownerUid, VIRTUAL_DEVICE_OWNER_PACKAGE, "virtualdevice"),
                         virtualDeviceId,
                         mInputController,
                         mCameraAccessController,
@@ -1971,8 +1971,7 @@ public class VirtualDeviceManagerServiceTest {
     private void addVirtualDisplay(VirtualDeviceImpl virtualDevice, int displayId) {
         when(mDisplayManagerInternalMock.createVirtualDisplay(any(), eq(mVirtualDisplayCallback),
                 eq(virtualDevice), any(), any())).thenReturn(displayId);
-        virtualDevice.createVirtualDisplay(VIRTUAL_DISPLAY_CONFIG, mVirtualDisplayCallback,
-                NONBLOCKED_APP_PACKAGE_NAME);
+        virtualDevice.createVirtualDisplay(VIRTUAL_DISPLAY_CONFIG, mVirtualDisplayCallback);
         final String uniqueId = UNIQUE_ID + displayId;
         doAnswer(inv -> {
             final DisplayInfo displayInfo = new DisplayInfo();

@@ -44,8 +44,6 @@ import android.content.AttributionSource;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManagerInternal;
-import android.hardware.display.IVirtualDisplayCallback;
-import android.hardware.display.VirtualDisplayConfig;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -502,37 +500,6 @@ public class VirtualDeviceManagerService extends SystemService {
                     "virtual_devices.value_virtual_devices_created_with_uid_count",
                     attributionSource.getUid());
             return virtualDevice;
-        }
-
-        @Override // Binder call
-        public int createVirtualDisplay(VirtualDisplayConfig virtualDisplayConfig,
-                IVirtualDisplayCallback callback, IVirtualDevice virtualDevice, String packageName)
-                throws RemoteException {
-            Objects.requireNonNull(virtualDisplayConfig);
-            final int callingUid = getCallingUid();
-            if (!PermissionUtils.validateCallingPackageName(getContext(), packageName)) {
-                throw new SecurityException(
-                        "Package name " + packageName + " does not belong to calling uid "
-                                + callingUid);
-            }
-            VirtualDeviceImpl virtualDeviceImpl;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDeviceImpl = mVirtualDevices.get(virtualDevice.getDeviceId());
-                if (virtualDeviceImpl == null) {
-                    throw new SecurityException(
-                            "Invalid VirtualDevice (deviceId = " + virtualDevice.getDeviceId()
-                                    + ")");
-                }
-            }
-            if (virtualDeviceImpl.getOwnerUid() != callingUid) {
-                throw new SecurityException(
-                        "uid " + callingUid
-                                + " is not the owner of the supplied VirtualDevice (deviceId = "
-                                + virtualDevice.getDeviceId() + ")");
-            }
-
-            return virtualDeviceImpl.createVirtualDisplay(
-                    virtualDisplayConfig, callback, packageName);
         }
 
         @Override // Binder call
