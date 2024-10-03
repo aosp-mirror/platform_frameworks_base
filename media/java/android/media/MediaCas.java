@@ -508,18 +508,20 @@ public final class MediaCas implements AutoCloseable {
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
             new TunerResourceManager.ResourcesReclaimListener() {
-            @Override
-            public void onReclaimResources() {
-                synchronized (mSessionMap) {
-                    List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
-                    for (Session casSession: sessionList) {
-                        casSession.close();
+                @Override
+                public void onReclaimResources() {
+                    synchronized (mSessionMap) {
+                        List<Session> sessionList = new ArrayList<>(mSessionMap.keySet());
+                        for (Session casSession : sessionList) {
+                            casSession.close();
+                        }
+                    }
+                    if (mEventHandler != null) {
+                        mEventHandler.sendMessage(
+                                mEventHandler.obtainMessage(EventHandler.MSG_CAS_RESOURCE_LOST));
                     }
                 }
-                mEventHandler.sendMessage(mEventHandler.obtainMessage(
-                        EventHandler.MSG_CAS_RESOURCE_LOST));
-            }
-        };
+            };
 
     /**
      * Describe a CAS plugin with its CA_system_ID and string name.
