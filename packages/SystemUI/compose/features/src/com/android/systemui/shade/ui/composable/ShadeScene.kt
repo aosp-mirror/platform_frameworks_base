@@ -40,7 +40,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -89,7 +88,6 @@ import com.android.systemui.media.controls.ui.composable.shouldElevateMedia
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.view.MediaHost
-import com.android.systemui.media.controls.ui.view.MediaHostState
 import com.android.systemui.media.controls.ui.view.MediaHostState.Companion.COLLAPSED
 import com.android.systemui.media.controls.ui.view.MediaHostState.Companion.EXPANDED
 import com.android.systemui.media.dagger.MediaModule.QS_PANEL
@@ -117,7 +115,6 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 object Shade {
@@ -128,23 +125,13 @@ object Shade {
     }
 
     object Dimensions {
-        val ScrimCornerSize = 32.dp
         val HorizontalPadding = 16.dp
         val ScrimOverscrollLimit = 32.dp
         const val ScrimVisibilityThreshold = 5f
     }
-
-    object Shapes {
-        val Scrim =
-            RoundedCornerShape(
-                topStart = Dimensions.ScrimCornerSize,
-                topEnd = Dimensions.ScrimCornerSize,
-            )
-    }
 }
 
 /** The shade scene shows scrolling list of notifications and some of the quick setting tiles. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class ShadeScene
 @Inject
@@ -197,11 +184,11 @@ constructor(
         )
 
     init {
-        qqsMediaHost.expansion = MediaHostState.EXPANDED
+        qqsMediaHost.expansion = EXPANDED
         qqsMediaHost.showsOnlyActiveMedia = true
         qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
 
-        qsMediaHost.expansion = MediaHostState.EXPANDED
+        qsMediaHost.expansion = EXPANDED
         qsMediaHost.showsOnlyActiveMedia = false
         qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
     }
@@ -329,8 +316,7 @@ private fun SceneScope.SingleShade(
         modifier =
             modifier.thenIf(shouldPunchHoleBehindScrim) {
                 // Render the scene to an offscreen buffer so that BlendMode.DstOut only clears this
-                // scene
-                // (and not the one under it) during a scene transition.
+                // scene (and not the one under it) during a scene transition.
                 Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             }
     ) {
@@ -382,8 +368,8 @@ private fun SceneScope.SingleShade(
                     stackScrollView = notificationStackScrollView,
                     viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { maxNotifScrimTop.toFloat() },
-                    shadeMode = ShadeMode.Single,
                     shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+                    supportNestedScrolling = true,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
                     modifier =
@@ -601,7 +587,7 @@ private fun SceneScope.SplitShade(
                     maxScrimTop = { 0f },
                     shouldPunchHoleBehindScrim = false,
                     shouldReserveSpaceForNavBar = false,
-                    shadeMode = ShadeMode.Split,
+                    supportNestedScrolling = false,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
                     modifier =
