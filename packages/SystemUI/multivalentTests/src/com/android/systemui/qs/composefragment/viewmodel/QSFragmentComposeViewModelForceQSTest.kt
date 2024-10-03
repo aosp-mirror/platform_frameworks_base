@@ -26,10 +26,11 @@ import com.android.systemui.statusbar.sysuiStatusBarStateController
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @SmallTest
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 @RunWithLooper
 class QSFragmentComposeViewModelForceQSTest(private val testData: TestData) :
     AbstractQSFragmentComposeViewModelTest() {
@@ -75,7 +76,7 @@ class QSFragmentComposeViewModelForceQSTest(private val testData: TestData) :
     companion object {
         private const val EXPANSION = 0.3f
 
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun createTestData(): List<TestData> {
             return statusBarStates.flatMap { statusBarState ->
