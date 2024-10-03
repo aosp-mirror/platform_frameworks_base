@@ -1637,16 +1637,16 @@ public class Notification implements Parcelable
     public static final String EXTRA_PROGRESS_SEGMENTS = "android.progressSegments";
 
     /**
-     * {@link #extras} key: an arraylist of {@link android.app.Notification.ProgressStyle.Step}
+     * {@link #extras} key: an arraylist of {@link ProgressStyle.Point}
      * bundles provided by a
      * {@link android.app.Notification.ProgressStyle} notification as supplied to
-     * {@link ProgressStyle#setProgressSteps}
-     * or {@link ProgressStyle#addProgressStep(ProgressStyle.Step)}.
+     * {@link ProgressStyle#setProgressPoints}
+     * or {@link ProgressStyle#addProgressPoint(ProgressStyle.Point)}.
      * This extra is a parcelable array list of bundles.
      * @hide
      */
     @FlaggedApi(Flags.FLAG_API_RICH_ONGOING)
-    public static final String EXTRA_PROGRESS_STEPS = "android.progressSteps";
+    public static final String EXTRA_PROGRESS_POINTS = "android.progressPoints";
 
     /**
      * {@link #extras} key: whether the progress bar should be styled by its progress as
@@ -11159,7 +11159,7 @@ public class Notification implements Parcelable
 
     /**
      * A Notification Style used to to define a notification whose expanded state includes
-     * a highly customizable progress bar with segments, steps, a custom tracker icon,
+     * a highly customizable progress bar with segments, points, a custom tracker icon,
      * and custom icons at the start and end of the progress bar.
      *
      * This style is suggested for use cases where the app is showing a tracker to the
@@ -11185,8 +11185,8 @@ public class Notification implements Parcelable
      *       .addProgressSegment(new Segment(552).setColor(Color.YELLOW))
      *       .addProgressSegment(new Segment(253).setColor(Color.YELLOW))
      *       .addProgressSegment(new Segment(94).setColor(Color.BLUE))
-     *       .addProgressStep(new Step(60).setColor(Color.RED))
-     *       .addProgressStep(new Step(560).setColor(Color.YELLOW))
+     *       .addProgressPoint(new Point(60).setColor(Color.RED))
+     *       .addProgressPoint(new Point(560).setColor(Color.YELLOW))
      *   )
      * </pre>
      *
@@ -11202,14 +11202,14 @@ public class Notification implements Parcelable
         private static final String KEY_ELEMENT_ID = "id";
         private static final String KEY_ELEMENT_COLOR = "colorInt";
         private static final String KEY_SEGMENT_LENGTH = "length";
-        private static final String KEY_STEP_POSITION = "position";
+        private static final String KEY_POINT_POSITION = "position";
 
         private static final int MAX_PROGRESS_SEGMENT_LIMIT = 15;
-        private static final int MAX_PROGRESS_STEP_LIMIT = 5;
+        private static final int MAX_PROGRESS_STOP_LIMIT = 5;
         private static final int DEFAULT_PROGRESS_MAX = 100;
 
         private List<Segment> mProgressSegments = new ArrayList<>();
-        private List<Step> mProgressSteps = new ArrayList<>();
+        private List<Point> mProgressPoints = new ArrayList<>();
 
         private int mProgress = 0;
 
@@ -11246,7 +11246,7 @@ public class Notification implements Parcelable
                 nonIndeterminateCheckResult = !Objects.equals(mProgress, progressStyle.mProgress)
                         || !Objects.equals(mIsStyledByProgress, progressStyle.mIsStyledByProgress)
                         || !Objects.equals(mProgressSegments, progressStyle.mProgressSegments)
-                        || !Objects.equals(mProgressSteps, progressStyle.mProgressSteps)
+                        || !Objects.equals(mProgressPoints, progressStyle.mProgressPoints)
                         || !Objects.equals(mTrackerIcon, progressStyle.mTrackerIcon);
             }
 
@@ -11300,48 +11300,47 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Gets the steps that are displayed on the progress bar.
+         * Gets the points that are displayed on the progress bar.
          *.
-         * @see #setProgressSteps
-         * @see #addProgressStep
-         * @see Step
+         * @see #setProgressPoints
+         * @see #addProgressPoint
+         * @see Point
          */
-        public @NonNull List<Step> getProgressSteps() {
-            return mProgressSteps;
+        public @NonNull List<Point> getProgressPoints() {
+            return mProgressPoints;
         }
 
         /**
-         * Replaces all the progress steps.
+         * Replaces all the progress points.
          *
-         * Steps are designated points within a progressbar to visualize
-         * distinct stages or milestones.
-         * For example, you might use steps to mark stops in a multi-stop
-         * navigation journey, where each step represents a destination.
-         * @see Step
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         * @see Point
          */
-        public @NonNull ProgressStyle setProgressSteps(@NonNull List<Step> steps) {
-            mProgressSteps = new ArrayList<>(steps);
+        public @NonNull ProgressStyle setProgressPoints(@NonNull List<Point> points) {
+            mProgressPoints = new ArrayList<>(points);
             return this;
         }
 
         /**
-         * Adds another step.
+         * Adds another point.
          *
-         * Steps are designated points within a progressbar to visualize
-         * distinct stages or milestones.
-         * For example, you might use steps to mark stops in a multi-stop
-         * navigation journey, where each step represents a destination.
+         * Points within a progress bar are used to visualize distinct stages or milestones.
          *
-         * Steps can be added in any order, as their
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
+         *
+         * Points can be added in any order, as their
          * position within the progress bar is determined by their individual
-         * {@link Step#getPosition()}.
-         * @see Step
+         * {@link Point#getPosition()}.
+         * @see Point
          */
-        public @NonNull ProgressStyle addProgressStep(@NonNull Step step) {
-            if (mProgressSteps == null) {
-                mProgressSteps = new ArrayList<>();
+        public @NonNull ProgressStyle addProgressPoint(@NonNull Point point) {
+            if (mProgressPoints == null) {
+                mProgressPoints = new ArrayList<>();
             }
-            mProgressSteps.add(step);
+            mProgressPoints.add(point);
 
             return this;
         }
@@ -11414,7 +11413,7 @@ public class Notification implements Parcelable
          * When specified, the following fields are ignored:
          * @see #setProgress
          * @see #setProgressSegments
-         * @see #setProgressSteps
+         * @see #setProgressPoints
          * @see #setProgressTrackerIcon
          * @see #setStyledByProgress
          *
@@ -11435,7 +11434,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Indicates whether the segments and steps will be styled differently
+         * Indicates whether the segments and points will be styled differently
          * based on whether they are behind or ahead of the current progress.
          * When true, segments appearing ahead of the current progress will be given a
          * slightly different appearance to indicate that it is part of the progress bar
@@ -11558,8 +11557,8 @@ public class Notification implements Parcelable
             super.addExtras(extras);
             extras.putParcelableArrayList(EXTRA_PROGRESS_SEGMENTS,
                     getProgressSegmentsAsBundleList(mProgressSegments));
-            extras.putParcelableArrayList(EXTRA_PROGRESS_STEPS,
-                    getProgressStepsAsBundleList(mProgressSteps));
+            extras.putParcelableArrayList(EXTRA_PROGRESS_POINTS,
+                    getProgressPointsAsBundleList(mProgressPoints));
 
             extras.putInt(EXTRA_PROGRESS, mProgress);
             extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mIndeterminate);
@@ -11599,8 +11598,8 @@ public class Notification implements Parcelable
             mTrackerIcon = extras.getParcelable(EXTRA_PROGRESS_TRACKER_ICON, Icon.class);
             mStartIcon = extras.getParcelable(EXTRA_PROGRESS_START_ICON, Icon.class);
             mEndIcon = extras.getParcelable(EXTRA_PROGRESS_END_ICON, Icon.class);
-            mProgressSteps = getProgressStepsFromBundleList(
-                    extras.getParcelableArrayList(EXTRA_PROGRESS_STEPS, Bundle.class));
+            mProgressPoints = getProgressPointsFromBundleList(
+                    extras.getParcelableArrayList(EXTRA_PROGRESS_POINTS, Bundle.class));
         }
 
         /**
@@ -11684,48 +11683,48 @@ public class Notification implements Parcelable
             return segments;
         }
 
-        private static @NonNull ArrayList<Bundle> getProgressStepsAsBundleList(
-                @Nullable List<Step> progressSteps) {
-            final ArrayList<Bundle> steps = new ArrayList<>();
-            if (progressSteps != null && !progressSteps.isEmpty()) {
-                for (int i = 0; i < progressSteps.size(); i++) {
-                    final Step step = progressSteps.get(i);
-                    if (step.getPosition() < 0) {
+        private static @NonNull ArrayList<Bundle> getProgressPointsAsBundleList(
+                @Nullable List<Point> progressPoints) {
+            final ArrayList<Bundle> points = new ArrayList<>();
+            if (progressPoints != null && !progressPoints.isEmpty()) {
+                for (int i = 0; i < progressPoints.size(); i++) {
+                    final Point point = progressPoints.get(i);
+                    if (point.getPosition() < 0) {
                         continue;
                     }
 
                     final Bundle bundle = new Bundle();
-                    bundle.putInt(KEY_STEP_POSITION, step.getPosition());
-                    bundle.putInt(KEY_ELEMENT_ID, step.getId());
-                    bundle.putInt(KEY_ELEMENT_COLOR, step.getColor());
+                    bundle.putInt(KEY_POINT_POSITION, point.getPosition());
+                    bundle.putInt(KEY_ELEMENT_ID, point.getId());
+                    bundle.putInt(KEY_ELEMENT_COLOR, point.getColor());
 
-                    steps.add(bundle);
+                    points.add(bundle);
                 }
             }
 
-            return steps;
+            return points;
         }
 
-        private static @NonNull List<Step> getProgressStepsFromBundleList(
-                @Nullable List<Bundle> stepBundleList) {
-            final ArrayList<Step> steps = new ArrayList<>();
+        private static @NonNull List<Point> getProgressPointsFromBundleList(
+                @Nullable List<Bundle> pointBundleList) {
+            final ArrayList<Point> points = new ArrayList<>();
 
-            if (stepBundleList != null && !stepBundleList.isEmpty()) {
-                for (int i = 0; i < stepBundleList.size(); i++) {
-                    final Bundle segmentBundle = stepBundleList.get(i);
-                    final int position = segmentBundle.getInt(KEY_STEP_POSITION);
+            if (pointBundleList != null && !pointBundleList.isEmpty()) {
+                for (int i = 0; i < pointBundleList.size(); i++) {
+                    final Bundle pointBundle = pointBundleList.get(i);
+                    final int position = pointBundle.getInt(KEY_POINT_POSITION);
                     if (position < 0) {
                         continue;
                     }
-                    final int id = segmentBundle.getInt(KEY_ELEMENT_ID);
-                    final int color = segmentBundle.getInt(KEY_ELEMENT_COLOR,
+                    final int id = pointBundle.getInt(KEY_ELEMENT_ID);
+                    final int color = pointBundle.getInt(KEY_ELEMENT_COLOR,
                             Notification.COLOR_DEFAULT);
-                    final Step step = new Step(position).setId(id).setColor(color);
-                    steps.add(step);
+                    final Point point = new Point(position).setId(id).setColor(color);
+                    points.add(point);
                 }
             }
 
-            return steps;
+            return points;
         }
 
         /**
@@ -11800,7 +11799,7 @@ public class Notification implements Parcelable
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
-                Segment segment = (Segment) o;
+                final Segment segment = (Segment) o;
                 return mLength == segment.mLength && mId == segment.mId
                         && mColor == segment.mColor;
             }
@@ -11812,13 +11811,12 @@ public class Notification implements Parcelable
         }
 
         /**
-         * A step within the progress bar, defining its position and color.
-         * Steps are designated points within a progressbar to visualize
-         * distinct stages or milestones.
-         * For example, you might use steps to mark stops in a multi-stop
-         * navigation journey, where each step represents a destination.
+         * A point within the progress bar, defining its position and color.
+         * Points within a progress bar are used to visualize distinct stages or milestones.
+         * For example, you might use points to mark stops in a multi-stop
+         * navigation journey, where each point represents a destination.
          */
-        public static final class Step {
+        public static final class Point {
 
             private int mPosition;
             private int mId;
@@ -11826,19 +11824,19 @@ public class Notification implements Parcelable
             private int mColor = Notification.COLOR_DEFAULT;
 
             /**
-             * Create a step element.
-             * The position of this step on the progress bar
+             * Create a point element.
+             * The position of this point on the progress bar
              * relative to {@link ProgressStyle#getProgressMax}
              * @param position
              * See {@link #getPosition}
              */
-            public Step(int position) {
+            public Point(int position) {
                 mPosition = position;
             }
 
             /**
-             * Gets the position of this Step.
-             * The position of this step on the progress bar
+             * Gets the position of this Point.
+             * The position of this point on the progress bar
              * relative to {@link ProgressStyle#getProgressMax}.
              */
             public int getPosition() {
@@ -11856,7 +11854,7 @@ public class Notification implements Parcelable
             /**
              * Optional ID used to uniquely identify the element across updates.
              */
-            public @NonNull Step setId(int id) {
+            public @NonNull Point setId(int id) {
                 mId = id;
                 return this;
             }
@@ -11874,7 +11872,7 @@ public class Notification implements Parcelable
             /**
              * Optional color of this Segment
              */
-            public @NonNull Step setColor(@ColorInt int color) {
+            public @NonNull Point setColor(@ColorInt int color) {
                 mColor = color;
                 return this;
             }
@@ -11886,9 +11884,9 @@ public class Notification implements Parcelable
             public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
-                Step step = (Step) o;
-                return mPosition == step.mPosition && mId == step.mId
-                        && mColor == step.mColor;
+                final Point point = (Point) o;
+                return mPosition == point.mPosition && mId == point.mId
+                        && mColor == point.mColor;
             }
 
             @Override
