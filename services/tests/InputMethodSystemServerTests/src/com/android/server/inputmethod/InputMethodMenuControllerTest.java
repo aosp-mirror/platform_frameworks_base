@@ -81,6 +81,63 @@ public class InputMethodMenuControllerTest {
                 .isEqualTo(items.size());
     }
 
+    /**
+     * Verifies that getMenuItems does not add a header or divider if all the items belong to
+     * a single input method.
+     */
+    @Test
+    public void testGetMenuItemsNoHeaderOrDividerForSingleInputMethod() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+
+        final var menuItems = getMenuItems(items);
+
+        assertThat(menuItems.stream()
+                .filter(item -> item instanceof HeaderItem || item instanceof DividerItem).toList())
+                .isEmpty();
+    }
+
+    /**
+     * Verifies that getMenuItems only adds headers for item groups with at least two items,
+     * or with a single item with a subtype name.
+     */
+    @Test
+    public void testGetMenuItemsHeaders() {
+        final var items = new ArrayList<ImeSubtypeListItem>();
+        addTestImeSubtypeListItems(items, "DefaultIme", "DefaultIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "LatinIme", "LatinIme",
+                List.of("en", "fr"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "ItalianIme", "ItalianIme",
+                List.of("it"), true /* supportsSwitchingToNextInputMethod */);
+        addTestImeSubtypeListItems(items, "SimpleIme", "SimpleIme",
+                null, true /* supportsSwitchingToNextInputMethod */);
+
+        final var menuItems = getMenuItems(items);
+
+        assertWithMessage("Must have menu items").that(menuItems).isNotEmpty();
+
+        final var headersAndDividers = menuItems.stream()
+                .filter(item -> item instanceof HeaderItem || item instanceof DividerItem)
+                .toList();
+
+        assertWithMessage("Must have header and divider items").that(headersAndDividers).hasSize(5);
+
+        assertWithMessage("First group has no header")
+                .that(menuItems.getFirst()).isInstanceOf(SubtypeItem.class);
+        assertWithMessage("Group with multiple items has divider")
+                .that(headersAndDividers.get(0)).isInstanceOf(DividerItem.class);
+        assertWithMessage("Group with multiple items has header")
+                .that(headersAndDividers.get(1)).isInstanceOf(HeaderItem.class);
+        assertWithMessage("Group with single item with subtype name has divider")
+                .that(headersAndDividers.get(2)).isInstanceOf(DividerItem.class);
+        assertWithMessage("Group with single item with subtype name has header")
+                .that(headersAndDividers.get(3)).isInstanceOf(HeaderItem.class);
+        assertWithMessage("Group with single item without subtype name has divider only")
+                .that(headersAndDividers.get(4)).isInstanceOf(DividerItem.class);
+    }
+
     /** Verifies that getMenuItems adds a divider before every header except the first one. */
     @Test
     public void testGetMenuItemsDivider() {
@@ -107,8 +164,9 @@ public class InputMethodMenuControllerTest {
                         .that(prevItem).isInstanceOf(DividerItem.class);
             } else if (item instanceof DividerItem && i < menuItems.size() - 1) {
                 final var nextItem = menuItems.get(i + 1);
-                assertWithMessage("The item after a divider should be a header")
-                        .that(nextItem).isInstanceOf(HeaderItem.class);
+                assertWithMessage("The item after a divider should be a header or subtype")
+                        .that(nextItem instanceof HeaderItem || nextItem instanceof SubtypeItem)
+                        .isTrue();
             }
         }
     }
@@ -170,7 +228,7 @@ public class InputMethodMenuControllerTest {
 
         final int selectedIndex = getSelectedIndex(menuItems, simpleImeId, 1);
 
-        // Two headers + one divider + two items
-        assertThat(selectedIndex).isEqualTo(5);
+        // One header + one divider + two items
+        assertThat(selectedIndex).isEqualTo(4);
     }
 }

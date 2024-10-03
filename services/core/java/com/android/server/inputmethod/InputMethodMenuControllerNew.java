@@ -199,8 +199,10 @@ final class InputMethodMenuControllerNew {
      * handles adding headers and dividers between groups of items from different input methods
      * as follows:
      *
+     * <li>If there is only one group, no divider or header will be added.</li>
      * <li>A divider is added before each group, except the first one.</li>
-     * <li>A header is added before each group (after the divider, if it exists).</li>
+     * <li>A header is added before each group (after the divider, if it exists) if the group has
+     * at least two items, or a single item with a subtype name.</li>
      *
      * @param items the list of input method and subtype items.
      */
@@ -212,23 +214,32 @@ final class InputMethodMenuControllerNew {
             return menuItems;
         }
 
-        String prevImeId = null;
-        for (int i = 0; i < items.size(); i++) {
-            final var item = items.get(i);
+        final var itemsArray = (ArrayList<ImeSubtypeListItem>) items;
+        final int numItems = itemsArray.size();
+        // Initialize to the last IME id to avoid headers if there is only a single IME.
+        String prevImeId = itemsArray.getLast().mImi.getId();
+        boolean firstGroup = true;
+        for (int i = 0; i < numItems; i++) {
+            final var item = itemsArray.get(i);
 
             final var imeId = item.mImi.getId();
             final boolean groupChange = !imeId.equals(prevImeId);
             if (groupChange) {
-                final boolean firstGroup = prevImeId == null;
                 if (!firstGroup) {
                     menuItems.add(DividerItem.getInstance());
                 }
-                menuItems.add(new HeaderItem(item.mImeName));
+                // Add a header if we have at least two items, or a single item with a subtype name.
+                final var nextItemId = i + 1 < numItems ? itemsArray.get(i + 1).mImi.getId() : null;
+                final boolean addHeader = item.mSubtypeName != null || imeId.equals(nextItemId);
+                if (addHeader) {
+                    menuItems.add(new HeaderItem(item.mImeName));
+                }
+                firstGroup = false;
+                prevImeId = imeId;
             }
 
             menuItems.add(new SubtypeItem(item.mImeName, item.mSubtypeName, item.mImi,
                     item.mSubtypeIndex));
-            prevImeId = imeId;
         }
 
         return menuItems;
