@@ -111,6 +111,7 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.DefaultMixedHandler;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
@@ -134,13 +135,13 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import kotlinx.coroutines.CoroutineScope;
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 import kotlinx.coroutines.MainCoroutineDispatcher;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only accessible
@@ -391,10 +392,11 @@ public abstract class WMShellModule {
             Transitions transitions,
             Optional<DesktopFullImmersiveTransitionHandler> desktopImmersiveTransitionHandler,
             WindowDecorViewModel windowDecorViewModel,
-            Optional<TaskChangeListener> taskChangeListener) {
+            Optional<TaskChangeListener> taskChangeListener,
+            FocusTransitionObserver focusTransitionObserver) {
         return new FreeformTaskTransitionObserver(
                 context, shellInit, transitions, desktopImmersiveTransitionHandler,
-                windowDecorViewModel, taskChangeListener);
+                windowDecorViewModel, taskChangeListener, focusTransitionObserver);
     }
 
     @WMSingleton

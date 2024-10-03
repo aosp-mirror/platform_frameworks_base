@@ -30,6 +30,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
@@ -50,6 +51,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
     private final Optional<DesktopFullImmersiveTransitionHandler> mImmersiveTransitionHandler;
     private final WindowDecorViewModel mWindowDecorViewModel;
     private final Optional<TaskChangeListener> mTaskChangeListener;
+    private final FocusTransitionObserver mFocusTransitionObserver;
 
     private final Map<IBinder, List<ActivityManager.RunningTaskInfo>> mTransitionToTaskInfo =
             new HashMap<>();
@@ -60,11 +62,13 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             Transitions transitions,
             Optional<DesktopFullImmersiveTransitionHandler> immersiveTransitionHandler,
             WindowDecorViewModel windowDecorViewModel,
-            Optional<TaskChangeListener> taskChangeListener) {
+            Optional<TaskChangeListener> taskChangeListener,
+            FocusTransitionObserver focusTransitionObserver) {
         mTransitions = transitions;
         mImmersiveTransitionHandler = immersiveTransitionHandler;
         mWindowDecorViewModel = windowDecorViewModel;
         mTaskChangeListener = taskChangeListener;
+        mFocusTransitionObserver = focusTransitionObserver;
         if (FreeformComponents.isFreeformEnabled(context)) {
             shellInit.addInitCallback(this::onInit, this);
         }
@@ -87,6 +91,9 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             //  Otherwise window decoration relayout won't run with the immersive state up to date.
             mImmersiveTransitionHandler.ifPresent(h -> h.onTransitionReady(transition));
         }
+        // Update focus state first to ensure the correct state can be queried from listeners.
+        // TODO(371503964): Remove this once the unified task repository is ready.
+        mFocusTransitionObserver.updateFocusState(info);
 
         final ArrayList<ActivityManager.RunningTaskInfo> taskInfoList = new ArrayList<>();
         final ArrayList<WindowContainerToken> taskParents = new ArrayList<>();
