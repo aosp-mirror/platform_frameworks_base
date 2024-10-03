@@ -23,8 +23,10 @@ import android.util.ArraySet;
  *
  * External requesters are identified by UIDs.
  * Internal requesters are identified by a reason code enumerated in UsbManagerInternal.
+ *
+ * @hide
  */
-public class UsbDataSignalDisableRequesters {
+public final class UsbDataSignalDisableRequesters {
     final ArraySet<Integer> mExternalUids = new ArraySet<>();
     final ArraySet<Integer> mInternalReasons  = new ArraySet<>();
 
