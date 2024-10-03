@@ -851,10 +851,11 @@ public abstract class WMShellModule {
     static DesktopWindowingEducationTooltipController
             provideDesktopWindowingEducationTooltipController(
             Context context,
-            AdditionalSystemViewContainer.Factory additionalSystemViewContainerFactory
+            AdditionalSystemViewContainer.Factory additionalSystemViewContainerFactory,
+            DisplayController displayController
     ) {
         return new DesktopWindowingEducationTooltipController(context,
-                additionalSystemViewContainerFactory);
+                additionalSystemViewContainerFactory, displayController);
     }
 
     @OptIn(markerClass = ExperimentalCoroutinesApi.class)
