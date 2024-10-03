@@ -3032,6 +3032,33 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateAutomaticZenRule_withTypeBedtime_replacesDisabledSleeping() {
+        ZenRule sleepingRule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID);
+        sleepingRule.enabled = false;
+        sleepingRule.userModifiedFields = 0;
+        sleepingRule.name = "ZZZZZZZ...";
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mZenModeHelper.mConfig.automaticRules.put(sleepingRule.id, sleepingRule);
+
+        AutomaticZenRule futureBedtime = new AutomaticZenRule.Builder("Bedtime (?)", CONDITION_ID)
+                .build();
+        String bedtimeRuleId = mZenModeHelper.addAutomaticZenRule(mPkg, futureBedtime,
+                ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules.keySet())
+                .containsExactly(sleepingRule.id, bedtimeRuleId);
+
+        AutomaticZenRule bedtime = new AutomaticZenRule.Builder("Bedtime (!)", CONDITION_ID)
+                .setType(TYPE_BEDTIME)
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(bedtimeRuleId, bedtime, ORIGIN_APP, "reason",
+                CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.keySet()).containsExactly(bedtimeRuleId);
+    }
+
+    @Test
     @EnableFlags(FLAG_MODES_API)
     public void testSetManualZenMode() {
         setupZenConfig();

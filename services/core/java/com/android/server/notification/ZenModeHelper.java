@@ -485,7 +485,7 @@ public class ZenModeHelper {
             populateZenRule(pkg, automaticZenRule, rule, origin, /* isNew= */ true);
             rule = maybeRestoreRemovedRule(newConfig, pkg, rule, automaticZenRule, origin);
             newConfig.automaticRules.put(rule.id, rule);
-            maybeReplaceDefaultRule(newConfig, automaticZenRule);
+            maybeReplaceDefaultRule(newConfig, null, automaticZenRule);
 
             if (setConfigLocked(newConfig, origin, reason, rule.component, true, callingUid)) {
                 return rule.id;
@@ -535,13 +535,24 @@ public class ZenModeHelper {
         return ruleToRestore;
     }
 
-    private static void maybeReplaceDefaultRule(ZenModeConfig config, AutomaticZenRule addedRule) {
+    /**
+     * Possibly delete built-in rules if a more suitable rule is added or updated.
+     *
+     * <p>Today, this is done in one case: delete a disabled "Sleeping" rule if a Bedtime Mode is
+     * added (or an existing mode is turned into {@link AutomaticZenRule#TYPE_BEDTIME}, when
+     * upgrading). Because only the {@code config_systemWellbeing} package is allowed to use rules
+     * of this type, this will not trigger wantonly.
+     *
+     * @param oldRule If non-null, {@code rule} is updating {@code oldRule}. Otherwise,
+     *                {@code rule} is being added.
+     */
+    private static void maybeReplaceDefaultRule(ZenModeConfig config, @Nullable ZenRule oldRule,
+            AutomaticZenRule rule) {
         if (!Flags.modesApi()) {
             return;
         }
-        if (addedRule.getType() == AutomaticZenRule.TYPE_BEDTIME) {
-            // Delete a built-in disabled "Sleeping" rule when a BEDTIME rule is added; it may have
-            // smarter triggers and it will prevent confusion about which one to use.
+        if (rule.getType() == AutomaticZenRule.TYPE_BEDTIME
+                && (oldRule == null || oldRule.type != rule.getType())) {
             // Note: we must not verify canManageAutomaticZenRule here, since most likely they
             // won't have the same owner (sleeping - system; bedtime - DWB).
             ZenRule sleepingRule = config.automaticRules.get(
@@ -588,6 +599,10 @@ public class ZenModeHelper {
                 // Bail out so we don't have the side effects of updating a rule (i.e. dropping
                 // condition) when no changes happen.
                 return true;
+            }
+
+            if (Flags.modesUi()) {
+                maybeReplaceDefaultRule(newConfig, oldRule, automaticZenRule);
             }
             return setConfigLocked(newConfig, origin, reason,
                     newRule.component, true, callingUid);
