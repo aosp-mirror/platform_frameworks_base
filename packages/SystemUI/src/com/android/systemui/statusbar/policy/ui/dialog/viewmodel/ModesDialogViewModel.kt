@@ -76,7 +76,7 @@ constructor(
                         // can be manually toggled on
                         mode.rule.isEnabled -> mode.isActive || mode.rule.isManualInvocationAllowed
                         // Mode was created as disabled, or disabled by the app that owns it ->
-                        // will be shown with a "Set up" text
+                        // will be shown with a "Not set" text
                         !mode.rule.isEnabled -> mode.status == ZenMode.Status.DISABLED_BY_OTHER
                         else -> false
                     }
@@ -120,7 +120,7 @@ constructor(
                         },
                         onLongClick = { openSettings(mode) },
                         onLongClickLabel =
-                            context.resources.getString(R.string.accessibility_long_click_tile)
+                            context.resources.getString(R.string.accessibility_long_click_tile),
                     )
                 }
             }
@@ -137,10 +137,10 @@ constructor(
 
     /**
      * Returns a description of the mode, which is:
-     *   * a prompt to set up the mode if it is not enabled
-     *   * if it cannot be manually activated, text that says so
-     *   * otherwise, the trigger description of the mode if it exists...
-     *   * ...or null if it doesn't
+     * * a prompt to set up the mode if it is not enabled
+     * * if it cannot be manually activated, text that says so
+     * * otherwise, the trigger description of the mode if it exists...
+     * * ...or null if it doesn't
      *
      * This description is used directly for the content description of a mode tile for screen
      * readers, and for the tile subtext will be augmented with the current status of the mode.
@@ -174,7 +174,7 @@ constructor(
                     context,
                     R.style.Theme_SystemUI_Dialog,
                     /* cancelIsNeutral= */ true,
-                    zenDialogMetricsLogger
+                    zenDialogMetricsLogger,
                 )
                 .createDialog()
         SystemUIDialog.applyFlags(dialog)

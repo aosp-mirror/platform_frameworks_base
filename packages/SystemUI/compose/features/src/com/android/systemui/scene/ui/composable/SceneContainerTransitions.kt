@@ -1,5 +1,6 @@
 package com.android.systemui.scene.ui.composable
 
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import com.android.compose.animation.scene.ProgressConverter
 import com.android.compose.animation.scene.TransitionKey
@@ -12,6 +13,8 @@ import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShad
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
 import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.bouncerToLockscreenPreview
+import com.android.systemui.scene.ui.composable.transitions.communalToBouncerTransition
+import com.android.systemui.scene.ui.composable.transitions.communalToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToSplitShadeTransition
@@ -44,6 +47,7 @@ val SceneContainerTransitions = transitions {
 
     // Overscroll progress starts linearly with some resistance (3f) and slowly approaches 0.2f
     defaultOverscrollProgressConverter = ProgressConverter.tanh(maxProgress = 0.2f, tilt = 3f)
+    defaultSwipeSpec = spring(stiffness = 300f, dampingRatio = 0.8f, visibilityThreshold = 0.5f)
 
     // Scene transitions
 
@@ -87,6 +91,8 @@ val SceneContainerTransitions = transitions {
         sharedElement(Notifications.Elements.NotificationStackPlaceholder, enabled = false)
         sharedElement(Notifications.Elements.HeadsUpNotificationPlaceholder, enabled = false)
     }
+    from(Scenes.Communal, to = Scenes.Shade) { communalToShadeTransition() }
+    from(Scenes.Communal, to = Scenes.Bouncer) { communalToBouncerTransition() }
 
     // Overlay transitions
 

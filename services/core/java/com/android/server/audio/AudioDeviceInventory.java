@@ -385,11 +385,6 @@ public class AudioDeviceInventory {
                     || !updatedDevice.getDeviceAddress().equals(ads.getDeviceAddress())) {
                 continue;
             }
-            if (mDeviceBroker.isSADevice(updatedDevice) == mDeviceBroker.isSADevice(ads)) {
-                ads.setHasHeadTracker(updatedDevice.hasHeadTracker());
-                ads.setHeadTrackerEnabled(updatedDevice.isHeadTrackerEnabled());
-                ads.setSAEnabled(updatedDevice.isSAEnabled());
-            }
             ads.setAudioDeviceCategory(updatedDevice.getAudioDeviceCategory());
 
             mDeviceBroker.postUpdatedAdiDeviceState(ads, false /*initSA*/);

@@ -2694,6 +2694,9 @@ public class InputManagerService extends IInputManager.Stub
     @SuppressWarnings("unused")
     private void notifyStylusGestureStarted(int deviceId, long eventTime) {
         mBatteryController.notifyStylusGestureStarted(deviceId, eventTime);
+        if (mDisplayManagerInternal != null) {
+            mDisplayManagerInternal.stylusGestureStarted(eventTime);
+        }
     }
 
     /**

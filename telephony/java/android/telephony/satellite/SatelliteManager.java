@@ -249,6 +249,13 @@ public final class SatelliteManager {
     public static final String KEY_PROVISION_SATELLITE_TOKENS = "provision_satellite";
 
     /**
+     * Bundle key to get the response from
+     * {@link #deprovisionSatellite(List, Executor, OutcomeReceiver)}.
+     * @hide
+     */
+    public static final String KEY_DEPROVISION_SATELLITE_TOKENS = "deprovision_satellite";
+
+    /**
      * The request was successfully processed.
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
@@ -2786,6 +2793,61 @@ public final class SatelliteManager {
             }
         } catch (RemoteException ex) {
             loge("provisionSatellite() RemoteException: " + ex);
+            executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                    new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+        }
+    }
+
+    /**
+     * Deliver the list of deprovisioned satellite subscriber infos.
+     *
+     * @param list The list of deprovisioned satellite subscriber infos.
+     * @param executor The executor on which the callback will be called.
+     * @param callback The callback object to which the result will be delivered.
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public void deprovisionSatellite(@NonNull List<SatelliteSubscriberInfo> list,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OutcomeReceiver<Boolean, SatelliteException> callback) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                ResultReceiver receiver = new ResultReceiver(null) {
+                    @Override
+                    protected void onReceiveResult(int resultCode, Bundle resultData) {
+                        if (resultCode == SATELLITE_RESULT_SUCCESS) {
+                            if (resultData.containsKey(KEY_DEPROVISION_SATELLITE_TOKENS)) {
+                                boolean isUpdated =
+                                        resultData.getBoolean(KEY_DEPROVISION_SATELLITE_TOKENS);
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onResult(isUpdated)));
+                            } else {
+                                loge("KEY_DEPROVISION_SATELLITE_TOKENS does not exist.");
+                                executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                        callback.onError(new SatelliteException(
+                                                SATELLITE_RESULT_REQUEST_FAILED))));
+                            }
+                        } else {
+                            executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                    callback.onError(new SatelliteException(resultCode))));
+                        }
+                    }
+                };
+                telephony.deprovisionSatellite(list, receiver);
+            } else {
+                loge("deprovisionSatellite() invalid telephony");
+                executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
+                        new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
+            }
+        } catch (RemoteException ex) {
+            loge("deprovisionSatellite() RemoteException: " + ex);
             executor.execute(() -> Binder.withCleanCallingIdentity(() -> callback.onError(
                     new SatelliteException(SATELLITE_RESULT_ILLEGAL_STATE))));
         }

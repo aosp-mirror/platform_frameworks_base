@@ -39,7 +39,6 @@ import com.android.systemui.scene.sceneContainerViewModelFactory
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
-import com.android.systemui.settings.displayTracker
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
@@ -82,7 +81,6 @@ class SceneContainerViewModelTest : SysuiTestCase() {
         underTest =
             kosmos.sceneContainerViewModelFactory.create(
                 view,
-                kosmos.displayTracker.defaultDisplayId,
                 { motionEventHandler ->
                     this@SceneContainerViewModelTest.motionEventHandler = motionEventHandler
                 },

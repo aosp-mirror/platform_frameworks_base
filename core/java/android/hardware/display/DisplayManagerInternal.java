@@ -455,6 +455,11 @@ public abstract class DisplayManagerInternal {
     public abstract void onPresentation(int displayId, boolean isShown);
 
     /**
+     * Called upon the usage of stylus.
+     */
+    public abstract void stylusGestureStarted(long eventTime);
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the

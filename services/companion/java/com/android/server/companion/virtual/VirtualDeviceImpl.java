@@ -42,6 +42,7 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.app.compat.CompatChanges;
 import android.companion.AssociationInfo;
+import android.companion.AssociationRequest;
 import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.IVirtualDeviceActivityListener;
@@ -152,6 +153,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_FOCUS;
 
     private static final String PERSISTENT_ID_PREFIX_CDM_ASSOCIATION = "companion:";
+
+    private static final List<String> DEVICE_PROFILES_ALLOWING_MIRROR_DISPLAYS = List.of(
+            AssociationRequest.DEVICE_PROFILE_APP_STREAMING);
 
     /**
      * Timeout until {@link #launchPendingIntent} stops waiting for an activity to be launched.
@@ -496,6 +500,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     /** Returns the device display name. */
     CharSequence getDisplayName() {
         return mAssociationInfo == null ? mParams.getName() : mAssociationInfo.getDisplayName();
+    }
+
+    String getDeviceProfile() {
+        return mAssociationInfo == null ? null : mAssociationInfo.getDeviceProfile();
     }
 
     /** Returns the public representation of the device. */
@@ -1292,6 +1300,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override
     public boolean hasCustomAudioInputSupport() throws RemoteException {
         return hasCustomAudioInputSupportInternal();
+    }
+
+    @Override
+    public boolean canCreateMirrorDisplays() {
+        return DEVICE_PROFILES_ALLOWING_MIRROR_DISPLAYS.contains(getDeviceProfile());
     }
 
     private boolean hasCustomAudioInputSupportInternal() {

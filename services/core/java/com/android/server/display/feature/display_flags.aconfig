@@ -365,3 +365,11 @@ flag {
     bug: "366112793"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "block_autobrightness_changes_on_stylus_usage"
+    namespace: "display_manager"
+    description: "Block the usage of ALS to control the display brightness when stylus is being used"
+    bug: "352411468"
+    is_fixed_read_only: true
+}

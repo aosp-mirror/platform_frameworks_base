@@ -667,9 +667,11 @@ public class ModifierShortcutManager {
     public KeyboardShortcutGroup getApplicationLaunchKeyboardShortcuts(int deviceId) {
         List<KeyboardShortcutInfo> shortcuts = new ArrayList();
         if (modifierShortcutManagerRefactor()) {
+            Context context = modifierShortcutManagerMultiuser()
+                    ? mContext.createContextAsUser(mCurrentUser, 0) : mContext;
             for (Bookmark b : mBookmarks.values()) {
                 KeyboardShortcutInfo info = shortcutInfoFromIntent(
-                        b.getShortcutChar(), b.getIntent(mContext), b.isShift());
+                        b.getShortcutChar(), b.getIntent(context), b.isShift());
                 if (info != null) {
                     shortcuts.add(info);
                 }

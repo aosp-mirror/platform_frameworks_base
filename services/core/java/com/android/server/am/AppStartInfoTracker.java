@@ -1005,7 +1005,8 @@ public final class AppStartInfoTracker {
                 case (int) AppsStartInfoProto.Package.USERS:
                     AppStartInfoContainer container =
                             new AppStartInfoContainer(mAppStartInfoHistoryListSize);
-                    int uid = container.readFromProto(proto, AppsStartInfoProto.Package.USERS);
+                    int uid = container.readFromProto(proto, AppsStartInfoProto.Package.USERS,
+                            pkgName);
                     synchronized (mLock) {
                         mData.put(pkgName, uid, container);
                     }
@@ -1403,7 +1404,7 @@ public final class AppStartInfoTracker {
             proto.end(token);
         }
 
-        int readFromProto(ProtoInputStream proto, long fieldId)
+        int readFromProto(ProtoInputStream proto, long fieldId, String packageName)
                 throws IOException, WireTypeMismatchException, ClassNotFoundException {
             long token = proto.start(fieldId);
             for (int next = proto.nextField();
@@ -1418,6 +1419,7 @@ public final class AppStartInfoTracker {
                         // have a create time.
                         ApplicationStartInfo info = new ApplicationStartInfo(0);
                         info.readFromProto(proto, AppsStartInfoProto.Package.User.APP_START_INFO);
+                        info.setPackageName(packageName);
                         mInfos.add(info);
                         break;
                     case (int) AppsStartInfoProto.Package.User.MONITORING_ENABLED:

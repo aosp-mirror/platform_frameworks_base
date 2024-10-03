@@ -3088,8 +3088,9 @@ public abstract class BatteryStats {
 
     public static final String[] HISTORY_EVENT_CHECKIN_NAMES = new String[] {
             "Enl", "Epr", "Efg", "Etp", "Esy", "Ewl", "Ejb", "Eur", "Euf", "Ecn",
-            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa", "Etw",
-            "Esw", "Ewa", "Elw", "Eec", "Esc", "Eds"
+            "Eac", "Epi", "Epu", "Eal", "Est", "Eai", "Eaa",
+            "Etw", "Esw", "Ewa", "Elw", "Esc",
+            "Eds"
     };
 
     @FunctionalInterface

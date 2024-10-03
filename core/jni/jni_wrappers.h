@@ -79,13 +79,14 @@ inline static void setJniMethodFormat(std::string value) {
     jniMethodFormat = value;
 }
 
-// Potentially translates the given JNINativeMethods if setJniMethodFormat has been set.
-// Has no effect otherwise
-inline const JNINativeMethod* maybeRenameJniMethods(const JNINativeMethod* gMethods,
-                                                    int numMethods) {
+// Register the native methods, potenially applying the jniMethodFormat if it has been set.
+static inline int jniRegisterMaybeRenamedNativeMethods(JNIEnv* env, const char* className,
+                                                       const JNINativeMethod* gMethods,
+                                                       int numMethods) {
     if (jniMethodFormat.empty()) {
-        return gMethods;
+        return jniRegisterNativeMethods(env, className, gMethods, numMethods);
     }
+
     // Make a copy of gMethods with reformatted method names.
     JNINativeMethod* modifiedMethods = new JNINativeMethod[numMethods];
     LOG_ALWAYS_FATAL_IF(!modifiedMethods, "Failed to allocate a copy of the JNI methods");
@@ -103,13 +104,17 @@ inline const JNINativeMethod* maybeRenameJniMethods(const JNINativeMethod* gMeth
         std::strcpy(modifiedNameChars, modifiedName.c_str());
         modifiedMethods[i].name = modifiedNameChars;
     }
-    return modifiedMethods;
+    int res = jniRegisterNativeMethods(env, className, modifiedMethods, numMethods);
+    for (int i = 0; i < numMethods; i++) {
+        delete[] modifiedMethods[i].name;
+    }
+    delete[] modifiedMethods;
+    return res;
 }
 
 static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
                                        const JNINativeMethod* gMethods, int numMethods) {
-    const JNINativeMethod* modifiedMethods = maybeRenameJniMethods(gMethods, numMethods);
-    int res = jniRegisterNativeMethods(env, className, modifiedMethods, numMethods);
+    int res = jniRegisterMaybeRenamedNativeMethods(env, className, gMethods, numMethods);
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
     return res;
 }

@@ -406,7 +406,7 @@ class DesktopTasksController(
         interactionJankMonitor.begin(taskSurface, context, handler,
             CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         dragToDesktopTransitionHandler.startDragToDesktopTransition(
-            taskInfo.taskId,
+            taskInfo,
             dragToDesktopValueAnimator
         )
     }

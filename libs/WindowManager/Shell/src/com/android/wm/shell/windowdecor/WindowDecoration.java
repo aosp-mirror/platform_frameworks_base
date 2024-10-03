@@ -346,7 +346,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     private void updateCaptionInsets(RelayoutParams params, WindowContainerTransaction wct,
             RelayoutResult<T> outResult, Rect taskBounds) {
-        if (!mIsCaptionVisible) {
+        if (!mIsCaptionVisible || !params.mIsInsetSource) {
             if (mWindowDecorationInsets != null) {
                 mWindowDecorationInsets.remove(wct);
                 mWindowDecorationInsets = null;
@@ -724,6 +724,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
         int mInputFeatures;
+        boolean mIsInsetSource = true;
         @InsetsSource.Flags int mInsetSourceFlags;
 
         int mShadowRadiusId;
@@ -743,6 +744,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
             mInputFeatures = 0;
+            mIsInsetSource = true;
             mInsetSourceFlags = 0;
 
             mShadowRadiusId = Resources.ID_NULL;
