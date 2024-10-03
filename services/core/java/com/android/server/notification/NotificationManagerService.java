@@ -12009,6 +12009,10 @@ public class NotificationManagerService extends SystemService {
         if (record != null && (record.getSbn().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0
                 && !record.isCanceledAfterLifetimeExtension()) {
+            // Mark that the notification is being updated due to cancelation, so it won't
+            // be updated again if the app cancels multiple times.
+            record.setCanceledAfterLifetimeExtension(true);
+
             boolean isAppForeground = pkg != null && packageImportance == IMPORTANCE_FOREGROUND;
 
             // Save the original Record's post silently value, so we can restore it after we send
@@ -12024,9 +12028,6 @@ public class NotificationManagerService extends SystemService {
             PostNotificationTracker tracker = mPostNotificationTrackerFactory.newTracker(null);
             tracker.addCleanupRunnable(() -> {
                 synchronized (mNotificationLock) {
-                    // Mark that the notification has been updated due to cancelation, so it won't
-                    // be updated again if the app cancels multiple times.
-                    record.setCanceledAfterLifetimeExtension(true);
                     // Set the post silently status to the record's previous value.
                     record.setPostSilently(savedPostSilentlyState);
                     // Remove FLAG_ONLY_ALERT_ONCE if the notification did not previously have it.
