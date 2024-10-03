@@ -354,6 +354,7 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<DesktopRepository> desktopRepository,
+            Optional<DesktopTasksController> desktopTasksController,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorViewModel) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
@@ -362,7 +363,8 @@ public abstract class WMShellModule {
                 ? shellInit
                 : null;
         return new FreeformTaskListener(context, init, shellTaskOrganizer,
-                desktopRepository, launchAdjacentController, windowDecorViewModel);
+                desktopRepository, desktopTasksController, launchAdjacentController,
+                windowDecorViewModel);
     }
 
     @WMSingleton
