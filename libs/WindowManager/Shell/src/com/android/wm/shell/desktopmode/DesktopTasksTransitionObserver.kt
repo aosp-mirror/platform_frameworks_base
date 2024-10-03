@@ -29,6 +29,7 @@ import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
@@ -67,9 +68,29 @@ class DesktopTasksTransitionObserver(
     ) {
         // TODO: b/332682201 Update repository state
         updateWallpaperToken(info)
-
         if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             handleBackNavigation(info)
+            removeTaskIfNeeded(info)
+        }
+    }
+
+    private fun removeTaskIfNeeded(info: TransitionInfo) {
+        // Since we are no longer removing all the tasks [onTaskVanished], we need to remove them by
+        // checking the transitions.
+        if (!TransitionUtil.isOpeningType(info.type)) return
+        // Remove a task from the repository if the app is launched outside of desktop.
+        for (change in info.changes) {
+            val taskInfo = change.taskInfo
+            if (taskInfo == null || taskInfo.taskId == -1) continue
+
+            if (desktopModeTaskRepository.isActiveTask(taskInfo.taskId)
+                && taskInfo.windowingMode != WINDOWING_MODE_FREEFORM
+            ) {
+                desktopModeTaskRepository.removeFreeformTask(
+                    taskInfo.displayId,
+                    taskInfo.taskId
+                )
+            }
         }
     }
 
