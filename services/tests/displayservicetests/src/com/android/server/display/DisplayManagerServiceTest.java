@@ -1658,6 +1658,70 @@ public class DisplayManagerServiceTest {
     }
 
     @Test
+    public void testGetDisplayIdsByGroupsIds() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        // Create display 1
+        FakeDisplayDevice displayDevice1 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display1 = logicalDisplayMapper.getDisplayLocked(displayDevice1);
+        final int groupId1 = display1.getDisplayInfoLocked().displayGroupId;
+        // Create display 2
+        FakeDisplayDevice displayDevice2 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display2 = logicalDisplayMapper.getDisplayLocked(displayDevice2);
+        final int groupId2 = display2.getDisplayInfoLocked().displayGroupId;
+        // Both displays should be in the same display group
+        assertEquals(groupId1, groupId2);
+        final int[] displayIds = new int[]{
+                display1.getDisplayIdLocked(), display2.getDisplayIdLocked()};
+        final SparseArray<int[]> expectedDisplayGroups = new SparseArray<>();
+        expectedDisplayGroups.put(groupId1, displayIds);
+
+        final SparseArray<int[]> displayGroups = localService.getDisplayIdsByGroupsIds();
+
+        for (int i = 0; i < expectedDisplayGroups.size(); i++) {
+            final int groupId = expectedDisplayGroups.keyAt(i);
+            assertTrue(displayGroups.contains(groupId));
+            assertArrayEquals(expectedDisplayGroups.get(groupId), displayGroups.get(groupId));
+        }
+    }
+
+    @Test
+    public void testGetDisplayIdsByGroupsIds_multipleDisplayGroups() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        // Create display 1
+        FakeDisplayDevice displayDevice1 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display1 = logicalDisplayMapper.getDisplayLocked(displayDevice1);
+        final int groupId1 = display1.getDisplayInfoLocked().displayGroupId;
+        // Create display 2
+        FakeDisplayDevice displayDevice2 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_EXTERNAL);
+        LogicalDisplay display2 = logicalDisplayMapper.getDisplayLocked(displayDevice2);
+        final int groupId2 = display2.getDisplayInfoLocked().displayGroupId;
+        // Both displays should be in different display groups
+        assertNotEquals(groupId1, groupId2);
+        final SparseArray<int[]> expectedDisplayGroups = new SparseArray<>();
+        expectedDisplayGroups.put(groupId1, new int[]{display1.getDisplayIdLocked()});
+        expectedDisplayGroups.put(groupId2, new int[]{display2.getDisplayIdLocked()});
+
+        final SparseArray<int[]> displayGroups = localService.getDisplayIdsByGroupsIds();
+
+        assertEquals(expectedDisplayGroups.size(), displayGroups.size());
+        for (int i = 0; i < expectedDisplayGroups.size(); i++) {
+            final int groupId = expectedDisplayGroups.keyAt(i);
+            assertTrue(displayGroups.contains(groupId));
+            assertArrayEquals(expectedDisplayGroups.get(groupId), displayGroups.get(groupId));
+        }
+    }
+
+    @Test
     public void testCreateVirtualDisplay_isValidProjection_notValid()
             throws RemoteException {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
