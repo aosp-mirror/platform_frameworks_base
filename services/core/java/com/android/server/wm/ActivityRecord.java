@@ -230,6 +230,7 @@ import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_COPY_TO_CLIENT;
+import static com.android.server.wm.StartingData.AFTER_TRANSACTION_IDLE;
 import static com.android.server.wm.StartingData.AFTER_TRANSACTION_REMOVE_DIRECTLY;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_PREDICT_BACK;
@@ -2635,8 +2636,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (finishing || !mHandleExitSplashScreen || mStartingSurface == null
                 || mStartingWindow == null
                 || mTransferringSplashScreenState == TRANSFER_SPLASH_SCREEN_FINISH
-                // skip copy splash screen to client if it was resized
-                || (mStartingData != null && mStartingData.mResizedFromTransfer)
+                // Skip copy splash screen to client if it was resized, or the starting data already
+                // requested to be removed after transaction commit.
+                || (mStartingData != null && (mStartingData.mResizedFromTransfer
+                        || mStartingData.mRemoveAfterTransaction != AFTER_TRANSACTION_IDLE))
                 || isRelaunching()) {
             return false;
         }
