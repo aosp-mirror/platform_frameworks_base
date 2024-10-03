@@ -19,7 +19,6 @@ package com.android.systemui.scene.ui.viewmodel
 import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.geometry.Offset
 import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
@@ -61,10 +60,8 @@ constructor(
     shadeInteractor: ShadeInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
-    gestureFilterFactory: SceneContainerGestureFilter.Factory,
     hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
     @Assisted view: View,
-    @Assisted displayId: Int,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
 
@@ -92,8 +89,6 @@ constructor(
                 },
         )
 
-    private val gestureFilter: SceneContainerGestureFilter = gestureFilterFactory.create(displayId)
-
     override suspend fun onActivated(): Nothing {
         try {
             // Sends a MotionEventHandler to the owner of the view-model so they can report
@@ -112,7 +107,6 @@ constructor(
 
             coroutineScope {
                 launch { hydrator.activate() }
-                launch { gestureFilter.activate() }
                 launch("SceneContainerHapticsViewModel") { hapticsViewModel.activate() }
             }
             awaitCancellation()
@@ -262,17 +256,6 @@ constructor(
         }
     }
 
-    /**
-     * Returns `true` if a drag gesture starting at [startPosition] should be filtered out (e.g.
-     * ignored, `false` otherwise.
-     *
-     * Invoke this and pass in the position of the `ACTION_DOWN` pointer event that began the
-     * gesture.
-     */
-    fun shouldFilterGesture(startPosition: Offset): Boolean {
-        return gestureFilter.shouldFilterGesture(startPosition)
-    }
-
     /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
     interface MotionEventHandler {
         /** Notifies that a [MotionEvent] has occurred. */
@@ -289,7 +272,6 @@ constructor(
     interface Factory {
         fun create(
             view: View,
-            displayId: Int,
             motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
         ): SceneContainerViewModel
     }
