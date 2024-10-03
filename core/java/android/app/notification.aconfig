@@ -6,6 +6,14 @@ container: "system"
 # flag relates to.
 
 flag {
+  name: "notifications_redesign_app_icons"
+  namespace: "systemui"
+  description: "Notifications Redesign: Use app icons in notification rows (not to be confused with"
+    " notifications_use_app_icons, notifications_use_app_icon_in_row which are just experiments)."
+  bug: "371174789"
+}
+
+flag {
   name: "modes_api"
   is_exported: true
   namespace: "systemui"
