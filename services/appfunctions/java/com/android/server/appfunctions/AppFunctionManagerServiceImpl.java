@@ -493,7 +493,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
             Slog.e(TAG, "Failed to bind to the AppFunctionService");
             safeExecuteAppFunctionCallback.onResult(
                     ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_TIMED_OUT,
+                            ExecuteAppFunctionResponse.RESULT_INTERNAL_ERROR,
                             "Failed to bind the AppFunctionService.",
                             /* extras= */ null));
         }
