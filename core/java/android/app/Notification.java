@@ -11613,6 +11613,30 @@ public class Notification implements Parcelable
             // actually be included.
             return true;
         }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            return getStandardView(mBuilder.getBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            final StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .hideProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
+        }
 
         private static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(
                 @Nullable List<Segment> progressSegments) {
