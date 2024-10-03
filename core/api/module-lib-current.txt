@@ -597,6 +597,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method @NonNull public static int[] getAllNetworkTypes();
+    method @FlaggedApi("android.os.mainline_vcn_platform_api") @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Set<java.lang.String> getPackagesWithCarrierPrivileges();
   }
 
 }
