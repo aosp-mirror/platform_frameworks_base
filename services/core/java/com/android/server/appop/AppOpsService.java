@@ -540,11 +540,11 @@ public class AppOpsService extends IAppOpsService.Stub {
             this.uid = uid;
         }
 
+        @SuppressWarnings("GuardedBy")
         public void clear() {
             mAppOpsCheckingService.removeUid(uid);
             for (int i = 0; i < pkgOps.size(); i++) {
-                String packageName = pkgOps.keyAt(i);
-                mAppOpsCheckingService.removePackage(packageName, UserHandle.getUserId(uid));
+                packageRemovedLocked(uid, pkgOps.keyAt(i));
             }
         }
 
