@@ -4,10 +4,10 @@ import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
-import android.net.Uri
 import android.os.Process
 import android.os.UserHandle
 import android.view.Display
+import android.view.WindowManager
 import android.view.WindowManager.ScreenshotSource
 import android.view.WindowManager.ScreenshotType
 import androidx.annotation.VisibleForTesting
@@ -26,11 +26,9 @@ data class ScreenshotData(
     var insets: Insets,
     var bitmap: Bitmap?,
     var displayId: Int,
-    /** App-provided URL representing the content the user was looking at in the screenshot. */
-    var contextUrl: Uri? = null,
 ) {
-    val packageNameString: String
-        get() = if (topComponent == null) "" else topComponent!!.packageName
+    val packageNameString
+        get() = topComponent?.packageName ?: ""
 
     fun getUserOrDefault(): UserHandle {
         return userHandle ?: Process.myUserHandle()
@@ -54,8 +52,8 @@ data class ScreenshotData(
         @VisibleForTesting
         fun forTesting() =
             ScreenshotData(
-                type = 0,
-                source = 0,
+                type = WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+                source = ScreenshotSource.SCREENSHOT_KEY_CHORD,
                 userHandle = null,
                 topComponent = null,
                 screenBounds = null,

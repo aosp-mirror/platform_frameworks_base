@@ -1436,6 +1436,8 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Para ver todos os apps, pressione a tecla de ação no teclado"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Encoberto"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Desbloquear para visualizar"</string>
+    <!-- no translation found for contextual_education_dialog_title (4630392552837487324) -->
+    <skip />
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Use o touchpad para voltar"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Deslize para a esquerda ou direita usando três dedos. Toque para aprender outros gestos."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Use o touchpad para acessar a tela inicial"</string>

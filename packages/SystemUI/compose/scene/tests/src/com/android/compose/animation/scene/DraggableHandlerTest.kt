@@ -109,8 +109,6 @@ class DraggableHandlerTest {
 
         val transitionInterceptionThreshold = 0.05f
 
-        var gestureFilter: (startedPosition: Offset) -> Boolean = DefaultGestureFilter
-
         private val layoutImpl =
             SceneTransitionLayoutImpl(
                     state = layoutState,
@@ -123,12 +121,15 @@ class DraggableHandlerTest {
                     // Use testScope and not backgroundScope here because backgroundScope does not
                     // work well with advanceUntilIdle(), which is used by some tests.
                     animationScope = testScope,
-                    gestureFilter = { startedPosition -> gestureFilter.invoke(startedPosition) },
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
         val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
         val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
+
+        var pointerInfoOwner: () -> PointersInfo = {
+            PointersInfo(startedPosition = Offset.Zero, pointersDown = 1)
+        }
 
         fun nestedScrollConnection(
             nestedScrollBehavior: NestedScrollBehavior,
@@ -140,9 +141,7 @@ class DraggableHandlerTest {
                     topOrLeftBehavior = nestedScrollBehavior,
                     bottomOrRightBehavior = nestedScrollBehavior,
                     isExternalOverscrollGesture = { isExternalOverscrollGesture },
-                    pointersInfoOwner = {
-                        PointersInfo(startedPosition = Offset.Zero, pointersDown = 1)
-                    },
+                    pointersInfoOwner = { pointerInfoOwner() },
                 )
                 .connection
 
@@ -156,9 +155,16 @@ class DraggableHandlerTest {
 
         fun downOffset(fractionOfScreen: Float) =
             if (fractionOfScreen < 0f) {
-                error("upOffset() is required, not implemented yet")
+                error("use upOffset()")
             } else {
                 Offset(x = 0f, y = down(fractionOfScreen))
+            }
+
+        fun upOffset(fractionOfScreen: Float) =
+            if (fractionOfScreen < 0f) {
+                error("use downOffset()")
+            } else {
+                Offset(x = 0f, y = up(fractionOfScreen))
             }
 
         val transitionState: TransitionState
@@ -340,13 +346,6 @@ class DraggableHandlerTest {
     fun onDragStarted_shouldStartATransition() = runGestureTest {
         onDragStarted(overSlop = down(fractionOfScreen = 0.1f))
         assertTransition(currentScene = SceneA)
-    }
-
-    @Test
-    fun onDragStarted_doesNotStartTransition_whenGestureFiltered() = runGestureTest {
-        gestureFilter = { _ -> true }
-        onDragStarted(overSlop = down(fractionOfScreen = 0.1f), expectedConsumedOverSlop = 0f)
-        assertIdle(currentScene = SceneA)
     }
 
     @Test
@@ -1132,6 +1131,45 @@ class DraggableHandlerTest {
         val transition = layoutState.currentTransition
         assertThat(transition).isNotNull()
         assertThat(transition!!.progress).isEqualTo(-0.1f)
+    }
+
+    @Test
+    fun nestedScrollUseFromSourceInfo() = runGestureTest {
+        // Start at scene C.
+        navigateToSceneC()
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+
+        // Drag from the **top** of the screen
+        pointerInfoOwner = { PointersInfo(startedPosition = Offset(0f, 0f), pointersDown = 1) }
+        assertIdle(currentScene = SceneC)
+
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
+        assertTransition(
+            currentScene = SceneC,
+            fromScene = SceneC,
+            // userAction: Swipe.Up to SceneB
+            toScene = SceneB,
+            progress = 0.1f,
+        )
+
+        // Reset to SceneC
+        nestedScroll.preFling(Velocity.Zero)
+        advanceUntilIdle()
+
+        // Drag from the **bottom** of the screen
+        pointerInfoOwner = {
+            PointersInfo(startedPosition = Offset(0f, SCREEN_SIZE), pointersDown = 1)
+        }
+        assertIdle(currentScene = SceneC)
+
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
+        assertTransition(
+            currentScene = SceneC,
+            fromScene = SceneC,
+            // userAction: Swipe(SwipeDirection.Up, fromSource = Edge.Bottom) to SceneA
+            toScene = SceneA,
+            progress = 0.1f,
+        )
     }
 
     @Test

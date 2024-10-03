@@ -306,3 +306,10 @@ flag {
     description: "Allow entering desktop mode by default on freeform displays"
     bug: "361419732"
 }
+
+flag {
+    name: "enable_desktop_app_launch_alttab_transitions"
+    namespace: "lse_desktop_experience"
+    description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
+    bug: "370735595"
+}

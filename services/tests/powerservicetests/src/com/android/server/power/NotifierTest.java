@@ -268,7 +268,7 @@ public class NotifierTest {
     }
 
     @Test
-    public void testOnGlobalWakefulnessChangeStarted() throws Exception {
+    public void testOnGlobalWakefulnessChangeStarted() {
         createNotifier();
         // GIVEN system is currently non-interactive
         when(mPowerManagerFlags.isPerDisplayWakeByTouchEnabled()).thenReturn(false);
@@ -291,6 +291,96 @@ public class NotifierTest {
         expectedDisplayInteractivities.put(displayId2, true);
         verify(mInputManagerInternal).setDisplayInteractivities(expectedDisplayInteractivities);
         verify(mInputMethodManagerInternal).setInteractive(/* interactive= */ true);
+    }
+
+    @Test
+    public void testOnGroupWakefulnessChangeStarted_newPowerGroup_perDisplayWakeDisabled() {
+        createNotifier();
+        // GIVEN power group is not yet known to Notifier and per-display wake by touch is disabled
+        final int groupId = 123;
+        final int changeReason = PowerManager.WAKE_REASON_TAP;
+        when(mPowerManagerFlags.isPerDisplayWakeByTouchEnabled()).thenReturn(false);
+
+        // WHEN a power group wakefulness change starts
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_AWAKE, changeReason, /* eventTime= */ 999);
+        mTestLooper.dispatchAll();
+
+        // THEN window manager policy is informed that device has started waking up
+        verify(mPolicy).startedWakingUp(groupId, changeReason);
+        verify(mDisplayManagerInternal, never()).getDisplayIds();
+        verify(mInputManagerInternal, never()).setDisplayInteractivities(any());
+    }
+
+    @Test
+    public void testOnGroupWakefulnessChangeStarted_interactivityNoChange_perDisplayWakeDisabled() {
+        createNotifier();
+        // GIVEN power group is not interactive and per-display wake by touch is disabled
+        final int groupId = 234;
+        final int changeReason = PowerManager.GO_TO_SLEEP_REASON_TIMEOUT;
+        when(mPowerManagerFlags.isPerDisplayWakeByTouchEnabled()).thenReturn(false);
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_ASLEEP, changeReason, /* eventTime= */ 999);
+        mTestLooper.dispatchAll();
+        verify(mPolicy, times(1)).startedGoingToSleep(groupId, changeReason);
+
+        // WHEN a power wakefulness change to not interactive starts
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_ASLEEP, changeReason, /* eventTime= */ 999);
+        mTestLooper.dispatchAll();
+
+        // THEN policy is only informed once of non-interactive wakefulness change
+        verify(mPolicy, times(1)).startedGoingToSleep(groupId, changeReason);
+        verify(mDisplayManagerInternal, never()).getDisplayIds();
+        verify(mInputManagerInternal, never()).setDisplayInteractivities(any());
+    }
+
+    @Test
+    public void testOnGroupWakefulnessChangeStarted_interactivityChange_perDisplayWakeDisabled() {
+        createNotifier();
+        // GIVEN power group is not interactive and per-display wake by touch is disabled
+        final int groupId = 345;
+        final int firstChangeReason = PowerManager.GO_TO_SLEEP_REASON_TIMEOUT;
+        when(mPowerManagerFlags.isPerDisplayWakeByTouchEnabled()).thenReturn(false);
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_ASLEEP, firstChangeReason, /* eventTime= */ 999);
+        mTestLooper.dispatchAll();
+
+        // WHEN a power wakefulness change to interactive starts
+        final int secondChangeReason = PowerManager.WAKE_REASON_TAP;
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_AWAKE, secondChangeReason, /* eventTime= */ 999);
+        mTestLooper.dispatchAll();
+
+        // THEN policy is informed of the change
+        verify(mPolicy).startedWakingUp(groupId, secondChangeReason);
+        verify(mDisplayManagerInternal, never()).getDisplayIds();
+        verify(mInputManagerInternal, never()).setDisplayInteractivities(any());
+    }
+
+    @Test
+    public void testOnGroupWakefulnessChangeStarted_perDisplayWakeByTouchEnabled() {
+        createNotifier();
+        // GIVEN per-display wake by touch flag is enabled
+        when(mPowerManagerFlags.isPerDisplayWakeByTouchEnabled()).thenReturn(true);
+        final int groupId = 456;
+        final int displayId1 = 1001;
+        final int displayId2 = 1002;
+        final int[] displays = new int[]{displayId1, displayId2};
+        when(mDisplayManagerInternal.getDisplayIds()).thenReturn(IntArray.wrap(displays));
+        when(mDisplayManagerInternal.getDisplayIdsForGroup(groupId)).thenReturn(displays);
+        final int changeReason = PowerManager.WAKE_REASON_TAP;
+
+        // WHEN power group wakefulness change started
+        mNotifier.onGroupWakefulnessChangeStarted(
+                groupId, WAKEFULNESS_AWAKE, changeReason, /* eventTime= */ 999);
+        mTestLooper.dispatchAll();
+
+        // THEN native input manager is updated that the displays are interactive
+        final SparseBooleanArray expectedDisplayInteractivities = new SparseBooleanArray();
+        expectedDisplayInteractivities.put(displayId1, true);
+        expectedDisplayInteractivities.put(displayId2, true);
+        verify(mInputManagerInternal).setDisplayInteractivities(expectedDisplayInteractivities);
     }
 
     @Test

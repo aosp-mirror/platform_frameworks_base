@@ -178,3 +178,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "handwriting_unsupported_show_soft_input_fix"
+  namespace: "text"
+  description: "Don't show soft keyboard on stylus input if text field doesn't support handwriting and getShowSoftInputOnFocus() returns false."
+  bug: "363180475"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}

@@ -63,6 +63,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInte
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.bouncer.ui.BouncerView;
+import com.android.systemui.bouncer.util.BouncerTestUtilsKt;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
@@ -1552,8 +1553,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean shouldDismissOnMenuPressed() {
-        return mPrimaryBouncerView.getDelegate() != null
-                && mPrimaryBouncerView.getDelegate().shouldDismissOnMenuPressed();
+        return (mPrimaryBouncerView.getDelegate() != null
+                && mPrimaryBouncerView.getDelegate().shouldDismissOnMenuPressed()) || (
+                ComposeBouncerFlags.INSTANCE.isEnabled() && BouncerTestUtilsKt.shouldEnableMenuKey(
+                        mContext.getResources()));
     }
 
     public boolean interceptMediaKey(KeyEvent event) {

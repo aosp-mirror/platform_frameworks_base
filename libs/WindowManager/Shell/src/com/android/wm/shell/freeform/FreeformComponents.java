@@ -35,6 +35,7 @@ public class FreeformComponents {
     public final ShellTaskOrganizer.TaskListener mTaskListener;
     public final Optional<Transitions.TransitionHandler> mTransitionHandler;
     public final Optional<Transitions.TransitionObserver> mTransitionObserver;
+    public final Optional<FreeformTaskTransitionStarterInitializer> mTransitionStarterInitializer;
 
     /**
      * Creates an instance with the given components.
@@ -42,10 +43,12 @@ public class FreeformComponents {
     public FreeformComponents(
             ShellTaskOrganizer.TaskListener taskListener,
             Optional<Transitions.TransitionHandler> transitionHandler,
-            Optional<Transitions.TransitionObserver> transitionObserver) {
+            Optional<Transitions.TransitionObserver> transitionObserver,
+            Optional<FreeformTaskTransitionStarterInitializer> transitionStarterInitializer) {
         mTaskListener = taskListener;
         mTransitionHandler = transitionHandler;
         mTransitionObserver = transitionObserver;
+        mTransitionStarterInitializer = transitionStarterInitializer;
     }
 
     /**

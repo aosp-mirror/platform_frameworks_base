@@ -4,6 +4,13 @@ container: "system"
 # NOTE: Keep alphabetized to help limit merge conflicts from multiple simultaneous editors.
 
 flag {
+    name: "a11y_expansion_state_api"
+    namespace: "accessibility"
+    description: "Enables new APIs for an app to convey if a node is expanded or collapsed."
+    bug: "362782536"
+}
+
+flag {
     name: "a11y_overlay_callbacks"
     is_exported: true
     namespace: "accessibility"

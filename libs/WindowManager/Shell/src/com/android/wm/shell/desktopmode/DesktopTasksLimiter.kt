@@ -208,15 +208,15 @@ class DesktopTasksLimiter (
     fun addAndGetMinimizeTaskChangesIfNeeded(
             displayId: Int,
             wct: WindowContainerTransaction,
-            newFrontTaskInfo: RunningTaskInfo,
+            newFrontTaskId: Int,
     ): RunningTaskInfo? {
         ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksLimiter: addMinimizeBackTaskChangesIfNeeded, newFrontTask=%d",
-                newFrontTaskInfo.taskId)
+            newFrontTaskId)
         val newTaskListOrderedFrontToBack = createOrderedTaskListWithGivenTaskInFront(
                 taskRepository.getActiveNonMinimizedOrderedTasks(displayId),
-                newFrontTaskInfo.taskId)
+            newFrontTaskId)
         val taskToMinimize = getTaskToMinimizeIfNeeded(newTaskListOrderedFrontToBack)
         if (taskToMinimize != null) {
             wct.reorder(taskToMinimize.token, false /* onTop */)

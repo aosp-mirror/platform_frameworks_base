@@ -3,6 +3,8 @@ package com.android.systemui.screenshot
 import android.content.ComponentName
 import android.graphics.Bitmap
 import android.net.Uri
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import android.view.Display.TYPE_EXTERNAL
 import android.view.Display.TYPE_INTERNAL
@@ -15,6 +17,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.util.ScreenshotRequest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.FakeDisplayRepository
 import com.android.systemui.display.data.repository.display
@@ -75,6 +78,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_severalDisplays_callsControllerForEachOne() =
         testScope.runTest {
             val internalDisplay = display(TYPE_INTERNAL, id = 0)
@@ -106,6 +110,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_providedImageType_callsOnlyDefaultDisplayController() =
         testScope.runTest {
             val internalDisplay = display(TYPE_INTERNAL, id = 0)
@@ -115,7 +120,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             screenshotExecutor.executeScreenshots(
                 createScreenshotRequest(TAKE_SCREENSHOT_PROVIDED_IMAGE),
                 onSaved,
-                callback
+                callback,
             )
 
             verify(controllerFactory).create(eq(internalDisplay))
@@ -137,6 +142,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_onlyVirtualDisplays_noInteractionsWithControllers() =
         testScope.runTest {
             setDisplays(display(TYPE_VIRTUAL, id = 0), display(TYPE_VIRTUAL, id = 1))
@@ -149,6 +155,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_allowedTypes_allCaptured() =
         testScope.runTest {
             whenever(controllerFactory.create(any())).thenReturn(controller)
@@ -157,7 +164,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
                 display(TYPE_INTERNAL, id = 0),
                 display(TYPE_EXTERNAL, id = 1),
                 display(TYPE_OVERLAY, id = 2),
-                display(TYPE_WIFI, id = 3)
+                display(TYPE_WIFI, id = 3),
             )
             val onSaved = { _: Uri? -> }
             screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
@@ -168,6 +175,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_reportsOnFinishedOnlyWhenBothFinished() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -193,6 +201,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_oneFinishesOtherFails_reportFailsOnlyAtTheEnd() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -220,6 +229,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_allDisplaysFail_reportsFail() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -243,6 +253,58 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
 
             verify(callback, never()).onFinish()
             verify(callback).reportError()
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_fromOverview_honorsDisplay() =
+        testScope.runTest {
+            val displayId = 1
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = displayId))
+            val onSaved = { _: Uri? -> }
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(
+                    displayId = displayId,
+                    source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW,
+                ),
+                onSaved,
+                callback,
+            )
+
+            val dataCaptor = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller).handleScreenshot(dataCaptor.capture(), any(), any())
+
+            assertThat(dataCaptor.value.displayId).isEqualTo(displayId)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_fromOverviewInvalidDisplay_usesDefault() =
+        testScope.runTest {
+            setDisplays(
+                display(TYPE_INTERNAL, id = Display.DEFAULT_DISPLAY),
+                display(TYPE_EXTERNAL, id = 1),
+            )
+            val onSaved = { _: Uri? -> }
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(
+                    displayId = 5,
+                    source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW,
+                ),
+                onSaved,
+                callback,
+            )
+
+            val dataCaptor = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller).handleScreenshot(dataCaptor.capture(), any(), any())
+
+            assertThat(dataCaptor.value.displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+
             screenshotExecutor.onDestroy()
         }
 
@@ -319,6 +381,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_errorFromProcessor_logsScreenshotRequested() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -336,6 +399,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
     fun executeScreenshots_errorFromProcessor_logsUiError() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -379,7 +443,8 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
-    fun executeScreenshots_errorFromScreenshotController_reportsRequested() =
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_errorFromScreenshotController_multidisplay_reportsRequested() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
             val onSaved = { _: Uri? -> }
@@ -399,7 +464,27 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
-    fun executeScreenshots_errorFromScreenshotController_reportsError() =
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_errorFromScreenshotController_reportsRequested() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri? -> }
+            whenever(controller.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            val screenshotRequested =
+                eventLogger.logs.filter {
+                    it.eventId == ScreenshotEvent.SCREENSHOT_REQUESTED_KEY_OTHER.id
+                }
+            assertThat(screenshotRequested).hasSize(1)
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_errorFromScreenshotController_multidisplay_reportsError() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
             val onSaved = { _: Uri? -> }
@@ -419,7 +504,27 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
-    fun executeScreenshots_errorFromScreenshotController_showsErrorNotification() =
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_errorFromScreenshotController_reportsError() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri? -> }
+            whenever(controller.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            val screenshotRequested =
+                eventLogger.logs.filter {
+                    it.eventId == ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED.id
+                }
+            assertThat(screenshotRequested).hasSize(1)
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @DisableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_errorFromScreenshotController_multidisplay_showsErrorNotification() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
             val onSaved = { _: Uri? -> }
@@ -432,6 +537,21 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
 
             verify(notificationsController0).notifyScreenshotError(any())
             verify(notificationsController1).notifyScreenshotError(any())
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_errorFromScreenshotController_showsErrorNotification() =
+        testScope.runTest {
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
+            val onSaved = { _: Uri? -> }
+            whenever(controller.handleScreenshot(any(), any(), any()))
+                .thenThrow(IllegalStateException::class.java)
+
+            screenshotExecutor.executeScreenshots(createScreenshotRequest(), onSaved, callback)
+
+            verify(notificationsController0).notifyScreenshotError(any())
             screenshotExecutor.onDestroy()
         }
 
@@ -459,9 +579,14 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         runCurrent()
     }
 
-    private fun createScreenshotRequest(type: Int = WindowManager.TAKE_SCREENSHOT_FULLSCREEN) =
-        ScreenshotRequest.Builder(type, WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER)
+    private fun createScreenshotRequest(
+        type: Int = WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+        source: Int = WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER,
+        displayId: Int = Display.DEFAULT_DISPLAY,
+    ) =
+        ScreenshotRequest.Builder(type, source)
             .setTopComponent(topComponent)
+            .setDisplayId(displayId)
             .also {
                 if (type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
                     it.setBitmap(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))
