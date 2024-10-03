@@ -291,7 +291,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
                 desktopTasksLimiter.addAndGetMinimizeTaskChangesIfNeeded(
                         displayId = DEFAULT_DISPLAY,
                         wct = wct,
-                        newFrontTaskInfo = setUpFreeformTask())
+                        newFrontTaskId = setUpFreeformTask().taskId)
 
         assertThat(minimizedTaskId).isNull()
         assertThat(wct.hierarchyOps).isEmpty() // No reordering operations added
@@ -307,7 +307,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
                 desktopTasksLimiter.addAndGetMinimizeTaskChangesIfNeeded(
                         displayId = DEFAULT_DISPLAY,
                         wct = wct,
-                        newFrontTaskInfo = setUpFreeformTask())
+                        newFrontTaskId = setUpFreeformTask().taskId)
 
         assertThat(minimizedTaskId).isEqualTo(tasks.first())
         assertThat(wct.hierarchyOps.size).isEqualTo(1)
@@ -325,7 +325,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
                 desktopTasksLimiter.addAndGetMinimizeTaskChangesIfNeeded(
                         displayId = 0,
                         wct = wct,
-                        newFrontTaskInfo = setUpFreeformTask())
+                        newFrontTaskId = setUpFreeformTask().taskId)
 
         assertThat(minimizedTaskId).isNull()
         assertThat(wct.hierarchyOps).isEmpty() // No reordering operations added

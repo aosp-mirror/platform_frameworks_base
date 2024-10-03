@@ -25,6 +25,8 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.PowerStats;
 import com.android.server.power.stats.format.WakelockPowerStatsLayout;
 
+import java.util.Arrays;
+
 class WakelockPowerStatsCollector extends PowerStatsCollector {
 
     public interface WakelockDurationRetriever {
@@ -89,6 +91,9 @@ class WakelockPowerStatsCollector extends PowerStatsCollector {
             return null;
         }
 
+        Arrays.fill(mPowerStats.stats, 0);
+        mPowerStats.uidStats.clear();
+
         long elapsedRealtime = mClock.elapsedRealtime();
         mPowerStats.durationMs = elapsedRealtime - mLastCollectionTime;
 
@@ -101,7 +106,6 @@ class WakelockPowerStatsCollector extends PowerStatsCollector {
 
         mLastWakelockDurationMs = wakelockDurationMillis;
 
-        mPowerStats.uidStats.clear();
         mWakelockDurationRetriever.retrieveUidWakelockDuration((uid, durationMs) -> {
             if (!mFirstCollection) {
                 long[] uidStats = mPowerStats.uidStats.get(uid);

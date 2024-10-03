@@ -1947,7 +1947,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         mCleanupTransaction = mController.mAtm.mWindowManager.mTransactionFactory.get();
         buildCleanupTransaction(mCleanupTransaction, info);
         if (mController.getTransitionPlayer() != null && mIsPlayerEnabled) {
-            mController.dispatchLegacyAppTransitionStarting(info, mStatusBarTransitionDelay);
+            mController.dispatchLegacyAppTransitionStarting(participantDisplays,
+                    mStatusBarTransitionDelay);
             try {
                 ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Calling onTransitionReady: %s", info);

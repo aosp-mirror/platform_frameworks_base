@@ -132,7 +132,6 @@ fun SceneContainer(
             state = state,
             modifier = modifier.fillMaxSize(),
             swipeSourceDetector = viewModel.edgeDetector,
-            gestureFilter = viewModel::shouldFilterGesture,
         ) {
             sceneByKey.forEach { (sceneKey, scene) ->
                 scene(

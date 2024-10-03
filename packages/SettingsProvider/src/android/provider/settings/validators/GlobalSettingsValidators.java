@@ -186,7 +186,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.STEM_PRIMARY_BUTTON_SHORT_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(
-                Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 1));
+                Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 2));
         VALIDATORS.put(
                 Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(

@@ -60,6 +60,7 @@ class DesktopModeTaskRepository (
      * @property minimizedTasks task ids for active freeform tasks that are currently minimized.
      * @property closingTasks task ids for tasks that are going to close, but are currently visible.
      * @property freeformTasksInZOrder list of current freeform task ids ordered from top to bottom
+     * @property fullImmersiveTaskId the task id of the desktop task that is in full-immersive mode.
      * (top is at index 0).
      */
     private data class DesktopTaskData(
@@ -69,13 +70,15 @@ class DesktopModeTaskRepository (
         // TODO(b/332682201): Remove when the repository state is updated via TransitionObserver
         val closingTasks: ArraySet<Int> = ArraySet(),
         val freeformTasksInZOrder: ArrayList<Int> = ArrayList(),
+        var fullImmersiveTaskId: Int? = null,
     ) {
         fun deepCopy(): DesktopTaskData = DesktopTaskData(
             activeTasks = ArraySet(activeTasks),
             visibleTasks = ArraySet(visibleTasks),
             minimizedTasks = ArraySet(minimizedTasks),
             closingTasks = ArraySet(closingTasks),
-            freeformTasksInZOrder = ArrayList(freeformTasksInZOrder)
+            freeformTasksInZOrder = ArrayList(freeformTasksInZOrder),
+            fullImmersiveTaskId = fullImmersiveTaskId
         )
     }
 
@@ -300,6 +303,23 @@ class DesktopModeTaskRepository (
         }
     }
 
+    /** Set whether the given task is the full-immersive task in this display. */
+    fun setTaskInFullImmersiveState(displayId: Int, taskId: Int, immersive: Boolean) {
+        val desktopData = desktopTaskDataByDisplayId.getOrCreate(displayId)
+        if (immersive) {
+            desktopData.fullImmersiveTaskId = taskId
+        } else {
+            if (desktopData.fullImmersiveTaskId == taskId) {
+                desktopData.fullImmersiveTaskId = null
+            }
+        }
+    }
+
+    /* Whether the task is in full-immersive state. */
+    fun isTaskInFullImmersiveState(taskId: Int): Boolean {
+        return desktopTaskDataSequence().any { taskId == it.fullImmersiveTaskId }
+    }
+
     private fun notifyVisibleTaskListeners(displayId: Int, visibleTasksCount: Int) {
         visibleTasksListeners.forEach { (listener, executor) ->
             executor.execute { listener.onTasksVisibilityChanged(displayId, visibleTasksCount) }
@@ -330,8 +350,17 @@ class DesktopModeTaskRepository (
 
     /** Minimizes the task for [taskId] and [displayId] */
     fun minimizeTask(displayId: Int, taskId: Int) {
-        logD("Minimize Task: display=%d, task=%d", displayId, taskId)
-        desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
+        if (displayId == INVALID_DISPLAY) {
+            // When a task vanishes it doesn't have a displayId. Find the display of the task and
+            // mark it as minimized.
+            getDisplayIdForTask(taskId)?.let {
+                minimizeTask(it, taskId)
+            } ?: logW("Minimize task: No display id found for task: taskId=%d", taskId)
+        } else {
+            logD("Minimize Task: display=%d, task=%d", displayId, taskId)
+            desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
+        }
+
         if (Flags.enableDesktopWindowingPersistence()) {
             updatePersistentRepository(displayId)
         }

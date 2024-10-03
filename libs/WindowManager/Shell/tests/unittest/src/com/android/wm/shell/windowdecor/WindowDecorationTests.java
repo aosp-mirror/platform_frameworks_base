@@ -47,6 +47,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -246,6 +247,7 @@ public class WindowDecorationTests extends ShellTestCase {
         // Density is 2. Shadow radius is 10px. Caption height is 64px.
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mIsCaptionVisible = true;
 
         windowDecor.relayout(taskInfo);
 
@@ -319,6 +321,7 @@ public class WindowDecorationTests extends ShellTestCase {
         taskInfo.configuration.densityDpi = DisplayMetrics.DENSITY_DEFAULT * 2;
 
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mIsCaptionVisible = true;
 
         windowDecor.relayout(taskInfo);
 
@@ -571,11 +574,7 @@ public class WindowDecorationTests extends ShellTestCase {
                 .build();
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
-        assertTrue(mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, statusBars())
-                .isVisible());
-        assertTrue(mInsetsState.sourceSize() == 1);
-        assertTrue(mInsetsState.sourceAt(0).getType() == statusBars());
-
+        mRelayoutParams.mIsCaptionVisible = true;
         windowDecor.relayout(taskInfo);
 
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
@@ -623,33 +622,6 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void testRelayout_captionHidden_insetsRemoved() {
-        final Display defaultDisplay = mock(Display.class);
-        doReturn(defaultDisplay).when(mMockDisplayController)
-                .getDisplay(Display.DEFAULT_DISPLAY);
-
-        final ActivityManager.RunningTaskInfo taskInfo = new TestRunningTaskInfoBuilder()
-                .setDisplayId(Display.DEFAULT_DISPLAY)
-                .setVisible(true)
-                .setBounds(new Rect(0, 0, 1000, 1000))
-                .build();
-        taskInfo.isFocused = true;
-        // Caption visible at first.
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), true /* visible */));
-        final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
-        windowDecor.relayout(taskInfo);
-
-        // Hide caption so insets are removed.
-        windowDecor.onInsetsStateChanged(createInsetsState(statusBars(), false /* visible */));
-
-        verify(mMockWindowContainerTransaction).removeInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(captionBar()));
-        verify(mMockWindowContainerTransaction).removeInsetsSource(eq(taskInfo.token), any(),
-                eq(0) /* index */, eq(mandatorySystemGestures()));
-    }
-
-    @Test
     public void testRelayout_captionHidden_neverWasVisible_insetsNotRemoved() {
         final Display defaultDisplay = mock(Display.class);
         doReturn(defaultDisplay).when(mMockDisplayController)
@@ -661,9 +633,8 @@ public class WindowDecorationTests extends ShellTestCase {
                 .setBounds(new Rect(0, 0, 1000, 1000))
                 .build();
         // Hidden from the beginning, so no insets were ever added.
-        when(mMockDisplayController.getInsetsState(taskInfo.displayId))
-                .thenReturn(createInsetsState(statusBars(), false /* visible */));
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mIsCaptionVisible = false;
         windowDecor.relayout(taskInfo);
 
         // Never added.
@@ -692,7 +663,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
 
         // Relayout will add insets.
-        mInsetsState.getOrCreateSource(STATUS_BAR_INSET_SOURCE_ID, captionBar()).setVisible(true);
+        mRelayoutParams.mIsCaptionVisible = true;
         windowDecor.relayout(taskInfo);
         verify(mMockWindowContainerTransaction).addInsetsSource(eq(taskInfo.token), any(),
                 eq(0) /* index */, eq(captionBar()), any(), any(), anyInt());
@@ -740,6 +711,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
                 .setDisplayId(Display.DEFAULT_DISPLAY)
                 .setVisible(true);
+        mRelayoutParams.mIsCaptionVisible = true;
 
         // Relayout twice with different bounds.
         final ActivityManager.RunningTaskInfo firstTaskInfo =
@@ -767,6 +739,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final TestRunningTaskInfoBuilder builder = new TestRunningTaskInfoBuilder()
                 .setDisplayId(Display.DEFAULT_DISPLAY)
                 .setVisible(true);
+        mRelayoutParams.mIsCaptionVisible = true;
 
         // Relayout twice with the same bounds.
         final ActivityManager.RunningTaskInfo firstTaskInfo =
@@ -797,6 +770,7 @@ public class WindowDecorationTests extends ShellTestCase {
         final ActivityManager.RunningTaskInfo taskInfo =
                 builder.setToken(token).setBounds(new Rect(0, 0, 1000, 1000)).build();
         final TestWindowDecoration windowDecor = createWindowDecoration(taskInfo);
+        mRelayoutParams.mIsCaptionVisible = true;
         mRelayoutParams.mInsetSourceFlags =
                 FLAG_FORCE_CONSUMING | FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
         windowDecor.relayout(taskInfo);
@@ -901,76 +875,61 @@ public class WindowDecorationTests extends ShellTestCase {
     }
 
     @Test
-    public void onStatusBarVisibilityChange_fullscreen_shownToHidden_hidesCaption() {
+    public void onStatusBarVisibilityChange() {
         final ActivityManager.RunningTaskInfo task = createTaskInfo();
         task.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         when(mMockDisplayController.getInsetsState(task.displayId))
                 .thenReturn(createInsetsState(statusBars(), true /* visible */));
-        final TestWindowDecoration decor = createWindowDecoration(task);
+        final TestWindowDecoration decor = spy(createWindowDecoration(task));
         decor.relayout(task);
-        assertTrue(decor.mIsCaptionVisible);
+        assertTrue(decor.mIsStatusBarVisible);
 
         decor.onInsetsStateChanged(createInsetsState(statusBars(), false /* visible */));
 
-        assertFalse(decor.mIsCaptionVisible);
+        verify(decor, times(2)).relayout(task);
     }
 
     @Test
-    public void onStatusBarVisibilityChange_fullscreen_hiddenToShown_showsCaption() {
+    public void onStatusBarVisibilityChange_noChange_doesNotRelayout() {
         final ActivityManager.RunningTaskInfo task = createTaskInfo();
         task.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
         when(mMockDisplayController.getInsetsState(task.displayId))
-                .thenReturn(createInsetsState(statusBars(), false /* visible */));
-        final TestWindowDecoration decor = createWindowDecoration(task);
+                .thenReturn(createInsetsState(statusBars(), true /* visible */));
+        final TestWindowDecoration decor = spy(createWindowDecoration(task));
         decor.relayout(task);
-        assertFalse(decor.mIsCaptionVisible);
 
         decor.onInsetsStateChanged(createInsetsState(statusBars(), true /* visible */));
 
-        assertTrue(decor.mIsCaptionVisible);
+        verify(decor, times(1)).relayout(task);
     }
 
     @Test
-    public void onStatusBarVisibilityChange_freeform_shownToHidden_keepsCaption() {
-        final ActivityManager.RunningTaskInfo task = createTaskInfo();
-        task.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
-        when(mMockDisplayController.getInsetsState(task.displayId))
-                .thenReturn(createInsetsState(statusBars(), true /* visible */));
-        final TestWindowDecoration decor = createWindowDecoration(task);
-        decor.relayout(task);
-        assertTrue(decor.mIsCaptionVisible);
-
-        decor.onInsetsStateChanged(createInsetsState(statusBars(), false /* visible */));
-
-        assertTrue(decor.mIsCaptionVisible);
-    }
-
-    @Test
-    public void onKeyguardStateChange_hiddenToShownAndOccluding_hidesCaption() {
+    public void onKeyguardStateChange() {
         final ActivityManager.RunningTaskInfo task = createTaskInfo();
         when(mMockDisplayController.getInsetsState(task.displayId))
                 .thenReturn(createInsetsState(statusBars(), true /* visible */));
-        final TestWindowDecoration decor = createWindowDecoration(task);
+        final TestWindowDecoration decor = spy(createWindowDecoration(task));
         decor.relayout(task);
-        assertTrue(decor.mIsCaptionVisible);
+        assertFalse(decor.mIsKeyguardVisibleAndOccluded);
 
         decor.onKeyguardStateChanged(true /* visible */, true /* occluding */);
 
-        assertFalse(decor.mIsCaptionVisible);
+        assertTrue(decor.mIsKeyguardVisibleAndOccluded);
+        verify(decor, times(2)).relayout(task);
     }
 
     @Test
-    public void onKeyguardStateChange_showingAndOccludingToHidden_showsCaption() {
+    public void onKeyguardStateChange_noChange_doesNotRelayout() {
         final ActivityManager.RunningTaskInfo task = createTaskInfo();
         when(mMockDisplayController.getInsetsState(task.displayId))
                 .thenReturn(createInsetsState(statusBars(), true /* visible */));
-        final TestWindowDecoration decor = createWindowDecoration(task);
-        decor.onKeyguardStateChanged(true /* visible */, true /* occluding */);
-        assertFalse(decor.mIsCaptionVisible);
+        final TestWindowDecoration decor = spy(createWindowDecoration(task));
+        decor.relayout(task);
+        assertFalse(decor.mIsKeyguardVisibleAndOccluded);
 
-        decor.onKeyguardStateChanged(false /* visible */, false /* occluding */);
+        decor.onKeyguardStateChanged(false /* visible */, true /* occluding */);
 
-        assertTrue(decor.mIsCaptionVisible);
+        verify(decor, times(1)).relayout(task);
     }
 
     private ActivityManager.RunningTaskInfo createTaskInfo() {

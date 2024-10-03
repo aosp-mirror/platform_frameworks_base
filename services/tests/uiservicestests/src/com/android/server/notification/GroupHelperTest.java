@@ -2662,6 +2662,17 @@ public class GroupHelperTest extends UiServiceTestCase {
         when(n.isColorized()).thenReturn(true);
         when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
         assertThat(GroupHelper.getSection(notification_colorFg)).isNull();
+
+        NotificationRecord notification_media = spy(getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW));
+        n = mock(Notification.class);
+        sbn = spy(getSbn("package", 0, "0", UserHandle.SYSTEM));
+        when(notification_media.isConversation()).thenReturn(false);
+        when(notification_media.getNotification()).thenReturn(n);
+        when(notification_media.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(n);
+        when(n.isMediaNotification()).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_media)).isNull();
     }
 
     @Test
@@ -2756,7 +2767,7 @@ public class GroupHelperTest extends UiServiceTestCase {
     @Test
     @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_CONVERSATIONS})
     public void testNonGroupableNotifications_forceGroupConversations() {
-        // Check that there is no valid section for: calls, foreground services
+        // Check that there is no valid section for: calls, foreground services, media notifications
         NotificationRecord notification_call = spy(getNotificationRecord(mPkg, 0, "", mUser,
                 "", false, IMPORTANCE_LOW));
         Notification n = mock(Notification.class);
@@ -2780,6 +2791,17 @@ public class GroupHelperTest extends UiServiceTestCase {
         when(n.isColorized()).thenReturn(true);
         when(n.isStyle(Notification.CallStyle.class)).thenReturn(false);
         assertThat(GroupHelper.getSection(notification_colorFg)).isNull();
+
+        NotificationRecord notification_media = spy(getNotificationRecord(mPkg, 0, "", mUser,
+                "", false, IMPORTANCE_LOW));
+        n = mock(Notification.class);
+        sbn = spy(getSbn("package", 0, "0", UserHandle.SYSTEM));
+        when(notification_media.isConversation()).thenReturn(false);
+        when(notification_media.getNotification()).thenReturn(n);
+        when(notification_media.getSbn()).thenReturn(sbn);
+        when(sbn.getNotification()).thenReturn(n);
+        when(n.isMediaNotification()).thenReturn(true);
+        assertThat(GroupHelper.getSection(notification_media)).isNull();
     }
 
     @Test

@@ -480,6 +480,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for use by SIM events.
+     */
+    @Provides
+    @SysUISingleton
+    @SimLog
+    public static LogBuffer provideSimLogBuffer(LogBufferFactory factory) {
+        return factory.create("SimLog", 500);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
      */
     @Provides
@@ -653,6 +663,14 @@ public class LogModule {
     @DisplayMetricsRepoLog
     public static LogBuffer provideDisplayMetricsRepoLogBuffer(LogBufferFactory factory) {
         return factory.create("DisplayMetricsRepo", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for focus related logs. */
+    @Provides
+    @SysUISingleton
+    @FocusedDisplayRepoLog
+    public static LogBuffer provideFocusedDisplayRepoLogBuffer(LogBufferFactory factory) {
+        return factory.create("FocusedDisplayRepo", 50);
     }
 
     /** Provides a {@link LogBuffer} for the scene framework. */

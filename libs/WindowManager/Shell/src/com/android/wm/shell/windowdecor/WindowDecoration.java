@@ -144,8 +144,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     TaskDragResizer mTaskDragResizer;
     boolean mIsCaptionVisible;
 
-    private boolean mIsStatusBarVisible;
-    private boolean mIsKeyguardVisibleAndOccluded;
+    boolean mIsStatusBarVisible;
+    boolean mIsKeyguardVisibleAndOccluded;
 
     /** The most recent set of insets applied to this window decoration. */
     private WindowDecorationInsets mWindowDecorationInsets;
@@ -241,7 +241,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
         rootView = null; // Clear it just in case we use it accidentally
 
-        updateCaptionVisibility(outResult.mRootView);
+        updateCaptionVisibility(outResult.mRootView, params);
 
         final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
         outResult.mWidth = taskBounds.width();
@@ -527,17 +527,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     }
 
     /**
-     * Checks if task has entered/exited immersive mode and requires a change in caption visibility.
+     * Update caption visibility state and views.
      */
-    private void updateCaptionVisibility(View rootView) {
-        // Caption should always be visible in freeform mode. When not in freeform, align with the
-        // status bar except when showing over keyguard (where it should not shown).
-        //  TODO(b/356405803): Investigate how it's possible for the status bar visibility to be
-        //   false while a freeform window is open if the status bar is always forcibly-shown. It
-        //   may be that the InsetsState (from which |mIsStatusBarVisible| is set) still contains
-        //   an invisible insets source in immersive cases even if the status bar is shown?
-        mIsCaptionVisible = mTaskInfo.isFreeform()
-                || (mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded);
+    private void updateCaptionVisibility(View rootView, @NonNull RelayoutParams params) {
+        mIsCaptionVisible = params.mIsCaptionVisible;
         setCaptionVisibility(rootView, mIsCaptionVisible);
     }
 
@@ -737,6 +730,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCornerRadius;
 
         int mCaptionTopPadding;
+        boolean mIsCaptionVisible;
 
         Configuration mWindowDecorConfig;
 
@@ -755,6 +749,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCornerRadius = 0;
 
             mCaptionTopPadding = 0;
+            mIsCaptionVisible = false;
 
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;

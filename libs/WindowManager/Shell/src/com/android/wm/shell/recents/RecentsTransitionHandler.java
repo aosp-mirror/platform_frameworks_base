@@ -52,7 +52,6 @@ import android.util.ArrayMap;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
-import android.view.Display;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
@@ -908,6 +907,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                     // as they are on top of everything else. So cancel the merge here.
                     cancel(false /* toHome */, false /* withScreenshots */,
                             "task #" + taskInfo.taskId + " is always_on_top");
+                    return;
+                }
+                if (TransitionUtil.isClosingType(change.getMode())
+                        && taskInfo != null && taskInfo.lastParentTaskIdBeforePip > 0) {
+                    // Pinned task is closing as a side effect of the removal of its original Task,
+                    // such transition should be handled by PiP. So cancel the merge here.
+                    cancel(false /* toHome */, false /* withScreenshots */,
+                            "task #" + taskInfo.taskId + " is removed with its original parent");
                     return;
                 }
                 final boolean isRootTask = taskInfo != null
