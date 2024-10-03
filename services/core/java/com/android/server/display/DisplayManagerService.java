@@ -5666,6 +5666,11 @@ public final class DisplayManagerService extends SystemService {
                 displayPowerController.stylusGestureStarted(eventTime);
             }
         }
+
+        @Override
+        public boolean isDisplayReadyForMirroring(int displayId) {
+            return mExternalDisplayPolicy.isDisplayReadyForMirroring(displayId);
+        }
     }
 
     class DesiredDisplayModeSpecsObserver
