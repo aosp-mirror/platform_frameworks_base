@@ -10172,6 +10172,22 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Returns whether the display with the given ID is trusted.
+     */
+    @Override
+    public boolean isDisplayTrusted(int displayId) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                DisplayContent dc = mRoot.getDisplayContent(displayId);
+                return dc != null && dc.isTrusted();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     @RequiresPermission(ACCESS_SURFACE_FLINGER)
     @Override
     public boolean replaceContentOnDisplay(int displayId, SurfaceControl sc) {

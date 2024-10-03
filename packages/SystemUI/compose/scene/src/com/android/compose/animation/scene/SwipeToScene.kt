@@ -41,7 +41,28 @@ internal fun Modifier.swipeToScene(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
 ): Modifier {
-    return this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
+    return if (draggableHandler.enabled()) {
+        this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
+    } else {
+        this
+    }
+}
+
+private fun DraggableHandlerImpl.enabled(): Boolean {
+    return isDrivingTransition || contentForSwipes().shouldEnableSwipes(orientation)
+}
+
+private fun DraggableHandlerImpl.contentForSwipes(): Content {
+    return layoutImpl.contentForUserActions()
+}
+
+/** Whether swipe should be enabled in the given [orientation]. */
+private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
+    if (userActions.isEmpty()) {
+        return false
+    }
+
+    return userActions.keys.any { it is Swipe.Resolved && it.direction.orientation == orientation }
 }
 
 private data class SwipeToSceneElement(
@@ -64,7 +85,6 @@ private class SwipeToSceneNode(
         delegate(
             MultiPointerDraggableNode(
                 orientation = draggableHandler.orientation,
-                enabled = ::enabled,
                 startDragImmediately = ::startDragImmediately,
                 onDragStarted = draggableHandler::onDragStarted,
                 onFirstPointerDown = ::onFirstPointerDown,
@@ -124,22 +144,6 @@ private class SwipeToSceneNode(
 
     override fun onCancelPointerInput() = multiPointerDraggableNode.onCancelPointerInput()
 
-    private fun enabled(): Boolean {
-        return draggableHandler.isDrivingTransition ||
-            contentForSwipes().shouldEnableSwipes(multiPointerDraggableNode.orientation)
-    }
-
-    private fun contentForSwipes(): Content {
-        return draggableHandler.layoutImpl.contentForUserActions()
-    }
-
-    /** Whether swipe should be enabled in the given [orientation]. */
-    private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
-        return userActions.keys.any {
-            it is Swipe.Resolved && it.direction.orientation == orientation
-        }
-    }
-
     private fun startDragImmediately(startedPosition: Offset): Boolean {
         // Immediately start the drag if the user can't swipe in the other direction and the gesture
         // handler can intercept it.
@@ -152,7 +156,7 @@ private class SwipeToSceneNode(
                 Orientation.Vertical -> Orientation.Horizontal
                 Orientation.Horizontal -> Orientation.Vertical
             }
-        return contentForSwipes().shouldEnableSwipes(oppositeOrientation)
+        return draggableHandler.contentForSwipes().shouldEnableSwipes(oppositeOrientation)
     }
 }
 

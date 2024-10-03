@@ -54,6 +54,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -186,6 +187,35 @@ class AppHandleEducationControllerTest : ShellTestCase() {
         waitForBufferDelay()
 
         verify(mockTooltipController, never()).showEducationTooltip(any(), any())
+      }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  fun init_appHandleExpanded_shouldMarkFeatureViewed() =
+      testScope.runTest {
+        setShouldShowAppHandleEducation(false)
+
+        // Simulate app handle visible and expanded.
+        testCaptionStateFlow.value = createAppHandleState(isHandleMenuExpanded = true)
+        // Wait for some time before verifying
+        waitForBufferDelay()
+
+        verify(mockDataStoreRepository, times(1)).updateFeatureUsedTimestampMillis(eq(true))
+      }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  fun init_showFirstTooltip_shouldMarkEducationViewed() =
+      testScope.runTest {
+        // App handle is visible. Should show education tooltip.
+        setShouldShowAppHandleEducation(true)
+
+        // Simulate app handle visible.
+        testCaptionStateFlow.value = createAppHandleState()
+        // Wait for first tooltip to showup.
+        waitForBufferDelay()
+
+        verify(mockDataStoreRepository, times(1)).updateEducationViewedTimestampMillis(eq(true))
       }
 
   @Test

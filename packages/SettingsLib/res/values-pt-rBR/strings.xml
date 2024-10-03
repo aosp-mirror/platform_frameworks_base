@@ -585,7 +585,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Este computador (interno)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Microfone (interno)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Alto-falante da base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
@@ -688,9 +687,11 @@
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necessário reinicializar o dispositivo para que a mudança seja aplicada. Faça isso agora ou cancele."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Fones de ouvido com fio"</string>
     <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Fone de ouvido"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"Alto-falante USB"</string>
+    <!-- no translation found for media_transfer_usb_audio_name (1789292056757821355) -->
+    <skip />
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Entrada para microfone"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Microfone USB"</string>
+    <!-- no translation found for media_transfer_usb_device_mic_name (7171789543226269822) -->
+    <skip />
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Ativado"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desativado"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Alteração de rede da operadora"</string>

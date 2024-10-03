@@ -1073,7 +1073,8 @@ public class DisplayPolicy {
 
         final String systemUiPermission =
                 mService.isCallerVirtualDeviceOwner(mDisplayContent.getDisplayId(), callingUid)
-                        // Allow virtual device owners to add system windows on their displays.
+                        && mDisplayContent.isTrusted()
+                        // Virtual device owners can add system windows on their trusted displays.
                         ? android.Manifest.permission.CREATE_VIRTUAL_DEVICE
                         : android.Manifest.permission.STATUS_BAR_SERVICE;
 

@@ -8449,6 +8449,29 @@
     <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
                 android:protectionLevel="signature"/>
 
+    <!-- @SystemApi
+        @FlaggedApi("android.content.pm.verification_service")
+        Allows app to be the verification agent to verify packages.
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.VERIFICATION_AGENT"
+        android:protectionLevel="signature|privileged"
+        android:featureFlag="android.content.pm.verification_service" />
+
+    <!-- @SystemApi
+        @FlaggedApi("android.content.pm.verification_service")
+        Must be required by a privileged {@link android.content.pm.verify.pkg.VerifierService}
+        to ensure that only the system can bind to it.
+        This permission should not be held by anything other than the system.
+        <p>Not for use by third-party applications. </p>
+        <p>Protection level: signature
+        @hide
+    -->
+    <permission android:name="android.permission.BIND_VERIFICATION_AGENT"
+        android:protectionLevel="internal"
+        android:featureFlag="android.content.pm.verification_service" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->

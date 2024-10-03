@@ -630,6 +630,13 @@ flag {
 }
 
 flag {
+    name: "screenshot_multidisplay_focus_change"
+    namespace: "systemui"
+    description: "Only capture a single display when screenshotting"
+    bug: "362720389"
+}
+
+flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
