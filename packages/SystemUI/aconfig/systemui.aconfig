@@ -1401,10 +1401,13 @@ flag {
 }
 
 flag {
-   name: "compose_haptic_sliders"
+   name: "haptics_for_compose_sliders"
    namespace: "systemui"
    description: "Adding haptic component infrastructure to sliders in Compose."
    bug: "341968766"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
