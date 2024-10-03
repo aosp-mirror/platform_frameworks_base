@@ -373,6 +373,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     //The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS
     static final int DOUBLE_PRESS_PRIMARY_NOTHING = 0;
     static final int DOUBLE_PRESS_PRIMARY_SWITCH_RECENT_APP = 1;
+    static final int DOUBLE_PRESS_PRIMARY_LAUNCH_DEFAULT_FITNESS_APP = 2;
 
     // Must match: config_triplePressOnStemPrimaryBehavior in config.xml
     // The config value can be overridden using Settings.Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS
@@ -1595,6 +1596,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (!keyguardActive) {
                     performStemPrimaryDoublePressSwitchToRecentTask();
                 }
+                break;
+            case DOUBLE_PRESS_PRIMARY_LAUNCH_DEFAULT_FITNESS_APP:
+                final int stemPrimaryKeyDeviceId = INVALID_INPUT_DEVICE_ID;
+                handleKeyGestureInKeyGestureController(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_FITNESS,
+                        stemPrimaryKeyDeviceId, KEYCODE_STEM_PRIMARY, /* metaState= */ 0);
                 break;
         }
     }
@@ -7244,6 +7251,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "DOUBLE_PRESS_PRIMARY_NOTHING";
             case DOUBLE_PRESS_PRIMARY_SWITCH_RECENT_APP:
                 return "DOUBLE_PRESS_PRIMARY_SWITCH_RECENT_APP";
+            case DOUBLE_PRESS_PRIMARY_LAUNCH_DEFAULT_FITNESS_APP:
+                return "DOUBLE_PRESS_PRIMARY_LAUNCH_DEFAULT_FITNESS_APP";
             default:
                 return Integer.toString(behavior);
         }

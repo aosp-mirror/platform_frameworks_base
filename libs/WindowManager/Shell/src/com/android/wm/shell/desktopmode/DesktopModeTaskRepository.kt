@@ -350,8 +350,17 @@ class DesktopModeTaskRepository (
 
     /** Minimizes the task for [taskId] and [displayId] */
     fun minimizeTask(displayId: Int, taskId: Int) {
-        logD("Minimize Task: display=%d, task=%d", displayId, taskId)
-        desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
+        if (displayId == INVALID_DISPLAY) {
+            // When a task vanishes it doesn't have a displayId. Find the display of the task and
+            // mark it as minimized.
+            getDisplayIdForTask(taskId)?.let {
+                minimizeTask(it, taskId)
+            } ?: logW("Minimize task: No display id found for task: taskId=%d", taskId)
+        } else {
+            logD("Minimize Task: display=%d, task=%d", displayId, taskId)
+            desktopTaskDataByDisplayId.getOrCreate(displayId).minimizedTasks.add(taskId)
+        }
+
         if (Flags.enableDesktopWindowingPersistence()) {
             updatePersistentRepository(displayId)
         }

@@ -104,6 +104,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
     @Mock
     private Animator mAnimator;
+    @Mock
+    private Animator mEndAnimator;
     private ArgumentCaptor<Animator.AnimatorListener> mAnimatorListenerCaptor =
             ArgumentCaptor.forClass(Animator.AnimatorListener.class);
 
@@ -123,7 +125,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         when(mClipboardOverlayView.getEnterAnimation()).thenReturn(mAnimator);
-        when(mClipboardOverlayView.getExitAnimation()).thenReturn(mAnimator);
+        when(mClipboardOverlayView.getExitAnimation()).thenReturn(mEndAnimator);
         when(mClipboardOverlayView.getFadeOutAnimation()).thenReturn(mAnimator);
         when(mClipboardOverlayWindow.getWindowInsets()).thenReturn(
                 getImeInsets(new Rect(0, 0, 0, 0)));
@@ -318,11 +320,11 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mOverlayController.setClipData(mSampleClipData, "");
 
         mCallbacks.onShareButtonTapped();
-        verify(mAnimator).addListener(mAnimatorListenerCaptor.capture());
-        mAnimatorListenerCaptor.getValue().onAnimationEnd(mAnimator);
+        verify(mEndAnimator).addListener(mAnimatorListenerCaptor.capture());
+        mAnimatorListenerCaptor.getValue().onAnimationEnd(mEndAnimator);
 
         verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHARE_TAPPED, 0, "");
-        verify(mClipboardOverlayView, times(1)).getFadeOutAnimation();
+        verify(mClipboardOverlayView, times(1)).getExitAnimation();
     }
 
     @Test
@@ -343,8 +345,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         initController();
 
         mCallbacks.onDismissButtonTapped();
-        verify(mAnimator).addListener(mAnimatorListenerCaptor.capture());
-        mAnimatorListenerCaptor.getValue().onAnimationEnd(mAnimator);
+        verify(mEndAnimator).addListener(mAnimatorListenerCaptor.capture());
+        mAnimatorListenerCaptor.getValue().onAnimationEnd(mEndAnimator);
 
         // package name is null since we haven't actually set a source for this test
         verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_DISMISS_TAPPED, 0, null);
@@ -403,14 +405,18 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         mOverlayController.setClipData(mSampleClipData, "first.package");
         mCallbacks.onShareButtonTapped();
+        verify(mEndAnimator).addListener(mAnimatorListenerCaptor.capture());
+        mAnimatorListenerCaptor.getValue().onAnimationEnd(mEndAnimator);
 
         mOverlayController.setClipData(mSampleClipData, "second.package");
         mCallbacks.onShareButtonTapped();
+        verify(mEndAnimator, times(2)).addListener(mAnimatorListenerCaptor.capture());
+        mAnimatorListenerCaptor.getValue().onAnimationEnd(mEndAnimator);
 
-        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHARE_TAPPED, 0, "first.package");
-        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHARE_TAPPED, 0, "second.package");
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "first.package");
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHARE_TAPPED, 0, "first.package");
         verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "second.package");
+        verify(mUiEventLogger).log(CLIPBOARD_OVERLAY_SHARE_TAPPED, 0, "second.package");
         verifyNoMoreInteractions(mUiEventLogger);
     }
 

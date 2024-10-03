@@ -145,7 +145,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
 
             fakeInputManager.addPhysicalKeyboard(
                 PHYSICAL_NOT_FULL_KEYBOARD_ID,
-                isFullKeyboard = false
+                isFullKeyboard = false,
             )
             assertThat(isKeyboardConnected).isFalse()
 
@@ -223,7 +223,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
             backlightListenerCaptor.value.onBacklightChanged(
                 current = 1,
                 max = 5,
-                triggeredByKeyPress = false
+                triggeredByKeyPress = false,
             )
             assertThat(backlight).isNull()
         }
@@ -239,7 +239,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
             backlightListenerCaptor.value.onBacklightChanged(
                 current = 1,
                 max = 5,
-                triggeredByKeyPress = true
+                triggeredByKeyPress = true,
             )
             assertThat(backlight).isNotNull()
         }
@@ -318,15 +318,75 @@ class KeyboardRepositoryTest : SysuiTestCase() {
         }
     }
 
+    @Test
+    fun connectedKeyboards_emitsAllKeyboards() {
+        testScope.runTest {
+            val firstKeyboard = Keyboard(vendorId = 1, productId = 1)
+            val secondKeyboard = Keyboard(vendorId = 2, productId = 2)
+            captureDeviceListener()
+            val keyboards by collectLastValueImmediately(underTest.connectedKeyboards)
+
+            fakeInputManager.addPhysicalKeyboard(
+                PHYSICAL_FULL_KEYBOARD_ID,
+                vendorId = firstKeyboard.vendorId,
+                productId = firstKeyboard.productId,
+            )
+            assertThat(keyboards)
+                .containsExactly(Keyboard(firstKeyboard.vendorId, firstKeyboard.productId))
+
+            fakeInputManager.addPhysicalKeyboard(
+                ANOTHER_PHYSICAL_FULL_KEYBOARD_ID,
+                vendorId = secondKeyboard.vendorId,
+                productId = secondKeyboard.productId,
+            )
+            assertThat(keyboards)
+                .containsExactly(
+                    Keyboard(firstKeyboard.vendorId, firstKeyboard.productId),
+                    Keyboard(secondKeyboard.vendorId, secondKeyboard.productId),
+                )
+        }
+    }
+
+    @Test
+    fun connectedKeyboards_emitsOnlyFullPhysicalKeyboards() {
+        testScope.runTest {
+            captureDeviceListener()
+            val keyboards by collectLastValueImmediately(underTest.connectedKeyboards)
+
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addDevice(VIRTUAL_FULL_KEYBOARD_ID, SOURCE_KEYBOARD)
+            fakeInputManager.addPhysicalKeyboard(
+                PHYSICAL_NOT_FULL_KEYBOARD_ID,
+                isFullKeyboard = false,
+            )
+
+            assertThat(keyboards).hasSize(1)
+        }
+    }
+
+    @Test
+    fun connectedKeyboards_emitsOnlyConnectedKeyboards() {
+        testScope.runTest {
+            captureDeviceListener()
+            val keyboards by collectLastValueImmediately(underTest.connectedKeyboards)
+
+            fakeInputManager.addPhysicalKeyboard(PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.addPhysicalKeyboard(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+            fakeInputManager.removeDevice(ANOTHER_PHYSICAL_FULL_KEYBOARD_ID)
+
+            assertThat(keyboards).hasSize(1)
+        }
+    }
+
     private fun KeyboardBacklightListener.onBacklightChanged(
         current: Int,
         max: Int,
-        triggeredByKeyPress: Boolean = true
+        triggeredByKeyPress: Boolean = true,
     ) {
         onKeyboardBacklightChanged(
             /* deviceId= */ 0,
             TestBacklightState(current, max),
-            triggeredByKeyPress
+            triggeredByKeyPress,
         )
     }
 
@@ -343,7 +403,7 @@ class KeyboardRepositoryTest : SysuiTestCase() {
 
     private class TestBacklightState(
         private val brightnessLevel: Int,
-        private val maxBrightnessLevel: Int
+        private val maxBrightnessLevel: Int,
     ) : KeyboardBacklightState() {
         override fun getBrightnessLevel() = brightnessLevel
 

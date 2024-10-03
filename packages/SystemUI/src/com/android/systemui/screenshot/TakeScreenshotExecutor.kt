@@ -202,10 +202,10 @@ constructor(
     // Return the single display to be screenshot based upon the request.
     private suspend fun getDisplayToScreenshot(screenshotRequest: ScreenshotRequest): Display {
         return when (screenshotRequest.source) {
-            // TODO(b/367394043): Overview requests should use a display ID provided in
-            //  ScreenshotRequest.
             ScreenshotSource.SCREENSHOT_OVERVIEW ->
-                displayRepository.getDisplay(Display.DEFAULT_DISPLAY)
+                // Show on the display where overview was shown if available.
+                displayRepository.getDisplay(screenshotRequest.displayId)
+                    ?: displayRepository.getDisplay(Display.DEFAULT_DISPLAY)
                     ?: error("Can't find default display")
 
             // Key chord and vendor gesture occur on the device itself, so screenshot the device's

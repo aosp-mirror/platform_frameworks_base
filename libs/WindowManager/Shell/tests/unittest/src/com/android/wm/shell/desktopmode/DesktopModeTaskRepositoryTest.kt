@@ -820,6 +820,18 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun minimizeTask_withInvalidDisplay_minimizesCorrectTask() {
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 0)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 0)
+
+        repo.minimizeTask(displayId = INVALID_DISPLAY, taskId = 0)
+
+        assertThat(repo.isMinimizedTask(taskId = 0)).isTrue()
+        assertThat(repo.isMinimizedTask(taskId = 1)).isFalse()
+        assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
+    }
+
+    @Test
     fun unminimizeTask_unminimizesTask() {
         repo.minimizeTask(displayId = 0, taskId = 0)
 

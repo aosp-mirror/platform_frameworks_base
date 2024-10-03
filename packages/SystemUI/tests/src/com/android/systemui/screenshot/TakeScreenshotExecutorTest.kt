@@ -257,6 +257,58 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_fromOverview_honorsDisplay() =
+        testScope.runTest {
+            val displayId = 1
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = displayId))
+            val onSaved = { _: Uri? -> }
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(
+                    displayId = displayId,
+                    source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW,
+                ),
+                onSaved,
+                callback,
+            )
+
+            val dataCaptor = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller).handleScreenshot(dataCaptor.capture(), any(), any())
+
+            assertThat(dataCaptor.value.displayId).isEqualTo(displayId)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_fromOverviewInvalidDisplay_usesDefault() =
+        testScope.runTest {
+            setDisplays(
+                display(TYPE_INTERNAL, id = Display.DEFAULT_DISPLAY),
+                display(TYPE_EXTERNAL, id = 1),
+            )
+            val onSaved = { _: Uri? -> }
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(
+                    displayId = 5,
+                    source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW,
+                ),
+                onSaved,
+                callback,
+            )
+
+            val dataCaptor = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller).handleScreenshot(dataCaptor.capture(), any(), any())
+
+            assertThat(dataCaptor.value.displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
     fun onDestroy_propagatedToControllers() =
         testScope.runTest {
             setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = 1))
@@ -527,9 +579,14 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
         runCurrent()
     }
 
-    private fun createScreenshotRequest(type: Int = WindowManager.TAKE_SCREENSHOT_FULLSCREEN) =
-        ScreenshotRequest.Builder(type, WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER)
+    private fun createScreenshotRequest(
+        type: Int = WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+        source: Int = WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER,
+        displayId: Int = Display.DEFAULT_DISPLAY,
+    ) =
+        ScreenshotRequest.Builder(type, source)
             .setTopComponent(topComponent)
+            .setDisplayId(displayId)
             .also {
                 if (type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
                     it.setBitmap(Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888))

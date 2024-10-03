@@ -326,6 +326,11 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     logGesture(mInRejectedExclusion
                             ? SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED_REJECTED
                             : SysUiStatsLog.BACK_GESTURE__TYPE__COMPLETED);
+                    if (!mInRejectedExclusion) {
+                        // Log successful back gesture to contextual edu stats
+                        mOverviewProxyService.updateContextualEduStats(mIsTrackpadThreeFingerSwipe,
+                                GestureType.BACK);
+                    }
                 }
 
                 @Override
@@ -1153,8 +1158,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                         if (mAllowGesture) {
                             if (mBackAnimation != null) {
                                 mBackAnimation.onThresholdCrossed();
-                                mOverviewProxyService.updateContextualEduStats(
-                                        mIsTrackpadThreeFingerSwipe, GestureType.BACK);
                             } else {
                                 pilferPointers();
                             }
