@@ -68,11 +68,9 @@ import com.android.systemui.statusbar.notification.icon.IconPack;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.row.data.repository.NotificationRowRepository;
 import com.android.systemui.statusbar.notification.row.shared.HeadsUpStatusBarModel;
 import com.android.systemui.statusbar.notification.row.shared.NotificationContentModel;
 import com.android.systemui.statusbar.notification.row.shared.NotificationRowContentBinderRefactor;
-import com.android.systemui.statusbar.notification.row.shared.RichOngoingContentModel;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
 import com.android.systemui.util.ListenerSet;
 
@@ -99,7 +97,7 @@ import java.util.Objects;
  * At the moment, there are many things here that shouldn't be and vice-versa. Hopefully we can
  * clean this up in the future.
  */
-public final class NotificationEntry extends ListEntry implements NotificationRowRepository {
+public final class NotificationEntry extends ListEntry {
 
     private final String mKey;
     private StatusBarNotification mSbn;
@@ -160,8 +158,6 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
     private final MutableStateFlow<CharSequence> mHeadsUpStatusBarText =
             StateFlowKt.MutableStateFlow(null);
     private final MutableStateFlow<CharSequence> mHeadsUpStatusBarTextPublic =
-            StateFlowKt.MutableStateFlow(null);
-    private final MutableStateFlow<RichOngoingContentModel> mRichOngoingContentModel =
             StateFlowKt.MutableStateFlow(null);
 
     // indicates when this entry's view was first attached to a window
@@ -969,12 +965,6 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
         return mHeadsUpStatusBarTextPublic;
     }
 
-    /** Gets the current RON content model, which may be null */
-    @NonNull
-    public StateFlow<RichOngoingContentModel> getRichOngoingContentModel() {
-        return mRichOngoingContentModel;
-    }
-
     /**
      * Sets the text to be displayed on the StatusBar, when this notification is the top pinned
      * heads up, and its content is sensitive right now.
@@ -1069,7 +1059,6 @@ public final class NotificationEntry extends ListEntry implements NotificationRo
         HeadsUpStatusBarModel headsUpStatusBarModel = contentModel.getHeadsUpStatusBarModel();
         this.mHeadsUpStatusBarText.setValue(headsUpStatusBarModel.getPrivateText());
         this.mHeadsUpStatusBarTextPublic.setValue(headsUpStatusBarModel.getPublicText());
-        this.mRichOngoingContentModel.setValue(contentModel.getRichOngoingContentModel());
     }
 
     /** Information about a suggestion that is being edited. */
