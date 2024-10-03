@@ -48,8 +48,13 @@ constructor(
     @FocusedDisplayRepoLog logBuffer: LogBuffer,
 ) {
     val focusedTask: Flow<Int> =
-        conflatedCallbackFlow {
-                val listener = FocusTransitionListener { displayId -> trySend(displayId) }
+        conflatedCallbackFlow<Int> {
+                val listener =
+                    object : FocusTransitionListener {
+                        override fun onFocusedDisplayChanged(displayId: Int) {
+                            trySend(displayId)
+                        }
+                    }
                 transitions.setFocusTransitionListener(listener, backgroundExecutor)
                 awaitClose { transitions.unsetFocusTransitionListener(listener) }
             }
