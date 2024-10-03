@@ -19,11 +19,12 @@ package com.android.systemui.volume.dialog.ui.viewmodel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
 
 class VolumeDialogViewModel @AssistedInject constructor() : ExclusiveActivatable() {
 
     override suspend fun onActivated(): Nothing {
-        TODO("Not yet implemented")
+        awaitCancellation()
     }
 
     @AssistedFactory
