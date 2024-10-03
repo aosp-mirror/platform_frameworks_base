@@ -160,11 +160,11 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         context.orCreateTestableResources.addOverride(
             com.android.internal.R.string.status_bar_alarm_clock,
-            ALARM_SLOT
+            ALARM_SLOT,
         )
         context.orCreateTestableResources.addOverride(
             com.android.internal.R.string.status_bar_managed_profile,
-            MANAGED_PROFILE_SLOT
+            MANAGED_PROFILE_SLOT,
         )
         whenever(devicePolicyManager.resources).thenReturn(devicePolicyManagerResources)
         whenever(devicePolicyManagerResources.getString(anyString(), any())).thenReturn("")
@@ -430,8 +430,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
                     eq(mContext.packageName),
                     eq(android.R.drawable.ic_lock_lock),
                     any(), // non-null
-                    eq("Bedtime Mode"),
-                    eq(StatusBarIcon.Shape.FIXED_SPACE)
+                    eq("Bedtime Mode is on"),
+                    eq(StatusBarIcon.Shape.FIXED_SPACE),
                 )
 
             zenModeRepository.deactivateMode("bedtime")
@@ -443,8 +443,8 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
                     eq(null),
                     eq(android.R.drawable.ic_media_play),
                     any(), // non-null
-                    eq("Other Mode"),
-                    eq(StatusBarIcon.Shape.FIXED_SPACE)
+                    eq("Other Mode is on"),
+                    eq(StatusBarIcon.Shape.FIXED_SPACE),
                 )
 
             zenModeRepository.deactivateMode("other")
@@ -538,7 +538,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             privacyLogger,
             fakeConnectedDisplayStateProvider,
             kosmos.zenModeInteractor,
-            JavaAdapter(testScope.backgroundScope)
+            JavaAdapter(testScope.backgroundScope),
         )
     }
 
