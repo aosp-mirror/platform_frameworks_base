@@ -1120,7 +1120,7 @@
     <string name="zen_mode_off">Off</string>
 
     <!-- Modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
-    <string name="zen_mode_set_up">Set up</string>
+    <string name="zen_mode_set_up">Not set</string>
 
     <!-- Modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
