@@ -5646,6 +5646,21 @@ public final class DisplayManagerService extends SystemService {
         public void onPresentation(int displayId, boolean isShown) {
             mExternalDisplayPolicy.onPresentation(displayId, isShown);
         }
+
+        @Override
+        public void stylusGestureStarted(long eventTime) {
+            if (mFlags.isBlockAutobrightnessChangesOnStylusUsage()) {
+                DisplayPowerController displayPowerController;
+                synchronized (mSyncRoot) {
+                    displayPowerController = mDisplayPowerControllers.get(
+                            Display.DEFAULT_DISPLAY);
+                }
+                // We assume that the stylus is being used on the default display. This should
+                // be changed to the displayId on which it is being used once we start getting this
+                // information from the input manager service
+                displayPowerController.stylusGestureStarted(eventTime);
+            }
+        }
     }
 
     class DesiredDisplayModeSpecsObserver
