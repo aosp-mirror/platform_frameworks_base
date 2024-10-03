@@ -287,6 +287,9 @@ import android.app.servertransaction.StopActivityItem;
 import android.app.servertransaction.TopResumedActivityChangeItem;
 import android.app.servertransaction.TransferSplashScreenViewStateItem;
 import android.app.usage.UsageEvents.Event;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -465,6 +468,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // How long we wait until giving up on an activity telling us it has
     // finished destroying itself.
     private static final int DESTROY_TIMEOUT = 10 * 1000;
+
+    @ChangeId
+    @Overridable
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long UNIVERSAL_RESIZABLE_BY_DEFAULT = 357141415;
 
     final ActivityTaskManagerService mAtmService;
     final ActivityCallerState mCallerState;
@@ -3182,11 +3190,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * will be ignored.
      */
     boolean isUniversalResizeable() {
-        return mWmService.mConstants.mIgnoreActivityOrientationRequest
-                && info.applicationInfo.category != ApplicationInfo.CATEGORY_GAME
-                // If the user preference respects aspect ratio, then it becomes non-resizable.
-                && !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
-                        .shouldApplyUserMinAspectRatioOverride();
+        if (info.applicationInfo.category == ApplicationInfo.CATEGORY_GAME) {
+            return false;
+        }
+        final boolean compatEnabled = Flags.universalResizableByDefault()
+                && mDisplayContent != null && mDisplayContent.getConfiguration()
+                    .smallestScreenWidthDp >= WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP
+                && mDisplayContent.getIgnoreOrientationRequest()
+                && info.isChangeEnabled(UNIVERSAL_RESIZABLE_BY_DEFAULT);
+        if (!compatEnabled && !mWmService.mConstants.mIgnoreActivityOrientationRequest) {
+            return false;
+        }
+        // If the user preference respects aspect ratio, then it becomes non-resizable.
+        return !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
+                .shouldApplyUserMinAspectRatioOverride();
     }
 
     boolean isResizeable() {
@@ -8182,7 +8199,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @ActivityInfo.ScreenOrientation
     protected int getOverrideOrientation() {
         int candidateOrientation = super.getOverrideOrientation();
-        if (isUniversalResizeable() && ActivityInfo.isFixedOrientation(candidateOrientation)) {
+        if (ActivityInfo.isFixedOrientation(candidateOrientation) && isUniversalResizeable()) {
             candidateOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
         return mAppCompatController.getOrientationPolicy()
