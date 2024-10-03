@@ -169,7 +169,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.TestableFlagResolver;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.os.AtomsProto;
@@ -744,54 +743,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(policy.allowReminders()).isFalse();
         assertThat(policy.allowRepeatCallers()).isFalse();
         assertThat(policy.allowPriorityChannels()).isFalse();
-    }
-
-    @Test
-    public void testZenUpgradeNotification() {
-        /**
-         * Commit a485ec65b5ba947d69158ad90905abf3310655cf disabled DND status change
-         * notification on watches. So, assume that the device is not watch.
-         */
-        when(mContext.getPackageManager()).thenReturn(mPackageManager);
-        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_WATCH)).thenReturn(false);
-
-        // shows zen upgrade notification if stored settings says to shows,
-        // zen has not been updated, boot is completed
-        // and we're setting zen mode on
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
-        mZenModeHelper.mIsSystemServicesReady = true;
-        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-
-        verify(mNotificationManager, times(1)).notify(eq(ZenModeHelper.TAG),
-                eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
-        assertEquals(0, Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, -1));
-    }
-
-    @Test
-    public void testNoZenUpgradeNotification() {
-        // doesn't show upgrade notification if stored settings says don't show
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
-        mZenModeHelper.mIsSystemServicesReady = true;
-        mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-
-        verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
-                eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
-    }
-
-    @Test
-    public void testNoZenUpgradeNotificationZenUpdated() {
-        // doesn't show upgrade notification since zen was already updated
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
-        Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 1);
-        mZenModeHelper.mIsSystemServicesReady = true;
-        mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
-
-        verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
-                eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
     }
 
     @Test
