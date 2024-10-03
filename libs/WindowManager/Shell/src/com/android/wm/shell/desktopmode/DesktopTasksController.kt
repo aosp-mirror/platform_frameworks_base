@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
 import android.app.KeyguardManager
 import android.app.PendingIntent
@@ -44,6 +44,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
@@ -51,6 +52,10 @@ import android.window.RemoteTransition
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
+import android.window.flags.DesktopModeFlags
+import android.window.flags.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
+import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+import android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import androidx.annotation.BinderThread
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
@@ -86,10 +91,6 @@ import com.android.wm.shell.shared.ShellSharedConstants
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
-import android.window.flags.DesktopModeFlags
-import android.window.flags.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
-import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
-import android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
@@ -1498,6 +1499,22 @@ class DesktopTasksController(
         }
     }
 
+    fun removeDesktop(displayId: Int) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
+
+        val tasksToRemove = taskRepository.removeDesktop(displayId)
+        val wct = WindowContainerTransaction()
+        tasksToRemove.forEach {
+            val task = shellTaskOrganizer.getRunningTaskInfo(it)
+            if (task != null) {
+                wct.removeTask(task.token)
+            } else {
+                recentTasksController?.removeBackgroundTask(it)
+            }
+        }
+        if (!wct.isEmpty) transitions.startTransition(TRANSIT_CLOSE, wct, null)
+    }
+
     /** Enter split by using the focused desktop task in given `displayId`. */
     fun enterSplit(displayId: Int, leftOrTop: Boolean) {
         getFocusedFreeformTask(displayId)?.let { requestSplit(it, leftOrTop) }
@@ -2023,6 +2040,12 @@ class DesktopTasksController(
         override fun moveToDesktop(taskId: Int, transitionSource: DesktopModeTransitionSource) {
             executeRemoteCallWithTaskPermission(controller, "moveTaskToDesktop") { c ->
                 c.moveTaskToDesktop(taskId, transitionSource = transitionSource)
+            }
+        }
+
+        override fun removeDesktop(displayId: Int) {
+            executeRemoteCallWithTaskPermission(controller, "removeDesktop") { c ->
+                c.removeDesktop(displayId)
             }
         }
     }
