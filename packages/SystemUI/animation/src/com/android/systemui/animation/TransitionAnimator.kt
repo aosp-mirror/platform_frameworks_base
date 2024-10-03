@@ -357,26 +357,13 @@ class TransitionAnimator(
                         Log.d(TAG, "Animation ended")
                     }
 
-                    // onAnimationEnd is called at the end of the animation, on a Choreographer
-                    // animation tick. During dialog launches, the following calls will move the
-                    // animated content from the dialog overlay back to its original position, and
-                    // this change must be reflected in the next frame given that we then sync the
-                    // next frame of both the content and dialog ViewRoots. During SysUI activity
-                    // launches, we will instantly collapse the shade at the end of the transition.
-                    // However, if those are rendered by Compose, whose compositions are also
-                    // scheduled on a Choreographer frame, any state change made *right now* won't
-                    // be reflected in the next frame given that a Choreographer frame can't
-                    // schedule another and have it happen in the same frame. So we post the
-                    // forwarded calls to [Controller.onLaunchAnimationEnd] in the main executor,
-                    // leaving this Choreographer frame, ensuring that any state change applied by
-                    // onTransitionAnimationEnd() will be reflected in the same frame.
-                    mainExecutor.execute {
-                        controller.onTransitionAnimationEnd(isExpandingFullyAbove)
-                        transitionContainerOverlay.remove(windowBackgroundLayer)
+                    // TODO(b/330672236): Post this to the main thread instead so that it does not
+                    // flicker with Flexiglass enabled.
+                    controller.onTransitionAnimationEnd(isExpandingFullyAbove)
+                    transitionContainerOverlay.remove(windowBackgroundLayer)
 
-                        if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
-                            openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
-                        }
+                    if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
+                        openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
                     }
                 }
             }
