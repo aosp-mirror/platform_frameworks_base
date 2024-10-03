@@ -76,6 +76,8 @@ constructor(
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
 
+    val allContentKeys: List<ContentKey> = sceneInteractor.allContentKeys
+
     private val hapticsViewModel = hapticsViewModelFactory.create(view)
 
     /**

@@ -199,7 +199,7 @@ private fun QuickSettingsContent(
     QuickSettingsTheme {
         val context = LocalContext.current
 
-        LaunchedEffect(key1 = context) {
+        LaunchedEffect(context) {
             if (qsView == null) {
                 qsSceneAdapter.inflate(context)
             }
