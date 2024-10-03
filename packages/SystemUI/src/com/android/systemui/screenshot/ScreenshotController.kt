@@ -174,7 +174,6 @@ internal constructor(
         if (screenshot.type == TAKE_SCREENSHOT_FULLSCREEN && screenshot.bitmap == null) {
             val bounds = fullScreenRect
             screenshot.bitmap = imageCapture.captureDisplay(display.displayId, bounds)
-            screenshot.screenBounds = bounds
         }
 
         val currentBitmap = screenshot.bitmap
@@ -235,22 +234,26 @@ internal constructor(
 
         window.attachWindow()
 
+        var bounds =
+            screenshot.originalScreenBounds ?: Rect(0, 0, currentBitmap.width, currentBitmap.height)
+
         val showFlash: Boolean
         if (screenshot.type == TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            if (aspectRatiosMatch(currentBitmap, screenshot.insets, screenshot.screenBounds)) {
+            if (
+                aspectRatiosMatch(
+                    currentBitmap,
+                    screenshot.originalInsets,
+                    screenshot.originalScreenBounds,
+                )
+            ) {
                 showFlash = false
             } else {
                 showFlash = true
-                screenshot.insets = Insets.NONE
-                screenshot.screenBounds = Rect(0, 0, currentBitmap.width, currentBitmap.height)
+                bounds = Rect(0, 0, currentBitmap.width, currentBitmap.height)
             }
         } else {
             showFlash = true
         }
-
-        // screenshot.screenBounds is expected to be non-null in all cases at this point
-        val bounds =
-            screenshot.screenBounds ?: Rect(0, 0, currentBitmap.width, currentBitmap.height)
 
         viewProxy.prepareEntranceAnimation {
             startAnimation(bounds, showFlash) {
