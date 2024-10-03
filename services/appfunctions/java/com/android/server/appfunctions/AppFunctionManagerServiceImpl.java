@@ -437,55 +437,10 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         targetUser,
                         mServiceConfig.getExecuteAppFunctionCancellationTimeoutMillis(),
                         cancellationSignal,
-                        new RunServiceCallCallback<IAppFunctionService>() {
-                            @Override
-                            public void onServiceConnected(
-                                    @NonNull IAppFunctionService service,
-                                    @NonNull
-                                            ServiceUsageCompleteListener
-                                                    serviceUsageCompleteListener) {
-                                try {
-                                    service.executeAppFunction(
-                                            requestInternal.getClientRequest(),
-                                            cancellationCallback,
-                                            new IExecuteAppFunctionCallback.Stub() {
-                                                @Override
-                                                public void onResult(
-                                                        ExecuteAppFunctionResponse response) {
-                                                    safeExecuteAppFunctionCallback.onResult(
-                                                            response);
-                                                    serviceUsageCompleteListener.onCompleted();
-                                                }
-                                            });
-                                } catch (Exception e) {
-                                    safeExecuteAppFunctionCallback.onResult(
-                                            ExecuteAppFunctionResponse.newFailure(
-                                                    ExecuteAppFunctionResponse
-                                                            .RESULT_APP_UNKNOWN_ERROR,
-                                                    e.getMessage(),
-                                                    /* extras= */ null));
-                                    serviceUsageCompleteListener.onCompleted();
-                                }
-                            }
-
-                            @Override
-                            public void onFailedToConnect() {
-                                Slog.e(TAG, "Failed to connect to service");
-                                safeExecuteAppFunctionCallback.onResult(
-                                        ExecuteAppFunctionResponse.newFailure(
-                                                ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
-                                                "Failed to connect to AppFunctionService",
-                                                /* extras= */ null));
-                            }
-
-                            @Override
-                            public void onCancelled() {
-                                // Do not forward the result back to the caller once it has been
-                                // canceled. The caller does not need a notification and should
-                                // proceed after initiating a cancellation.
-                                safeExecuteAppFunctionCallback.disable();
-                            }
-                        },
+                        RunAppFunctionServiceCallback.create(
+                                requestInternal,
+                                cancellationCallback,
+                                safeExecuteAppFunctionCallback),
                         callerBinder);
 
         if (!bindServiceResult) {
