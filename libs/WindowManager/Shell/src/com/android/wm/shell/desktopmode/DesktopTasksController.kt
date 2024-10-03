@@ -581,7 +581,7 @@ class DesktopTasksController(
     fun moveTaskToFront(taskInfo: RunningTaskInfo) {
         logV("moveTaskToFront taskId=%s", taskInfo.taskId)
         val wct = WindowContainerTransaction()
-        wct.reorder(taskInfo.token, true)
+        wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
         val taskToMinimize =
             addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo.taskId)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
