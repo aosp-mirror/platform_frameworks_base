@@ -376,7 +376,7 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"အက်ပ်လုပ်ဆောင်မှု ရှည်ကြာလျှင် စကရင်ပြန်စသည်"</string>
     <string name="pointer_location" msgid="7516929526199520173">"မြား၏တည်နေရာ"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"လက်ရှိထိတွေ့မှုဒေတာကို ဖန်သားပေါ်တွင်ထပ်၍ ပြသသည်"</string>
-    <string name="show_touches" msgid="8437666942161289025">"တို့ခြင်းများကို ပြပါ"</string>
+    <string name="show_touches" msgid="8437666942161289025">"တို့ချက်များ ပြရန်"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"တို့ခြင်းများအတွက် အမြင်ဖြင့် တုံ့ပြန်မှုပြသည်"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"ကီးနှိပ်မှုများ ပြပါ"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ပကတိကီးနှိပ်မှုများအတွက် ရုပ်မြင်အကြံပြုချက် ပြပါ"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ယခုလေးတင်"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ဤဖုန်း"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ဤတက်ဘလက်"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ဤကွန်ပျူတာ (စက်တွင်း)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"မိုက်ခရိုဖုန်း (စက်တွင်း)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ပိတ်ထားသည်"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ဖွင့်ထားသည်"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ဤအပြောင်းအလဲ ထည့်သွင်းရန် သင့်စက်ကို ပြန်လည်စတင်ရမည်။ ယခု ပြန်လည်စတင်ပါ သို့မဟုတ် ပယ်ဖျက်ပါ။"</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"ကြိုးတပ်နားကြပ်"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"နားကြပ်"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB စပီကာ"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"မိုက်ဂျက်ပင်"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB မိုက်"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ဖွင့်"</string>

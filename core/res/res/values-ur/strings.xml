@@ -2439,7 +2439,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"آپ کے چہرے کا ماڈل مزید پہچانا نہیں جا سکتا۔ فیس اَن لاک کو دوبارہ سیٹ اپ کریں۔"</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"سیٹ اپ کریں"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"ابھی نہیں"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"<xliff:g id="USER_NAME">%s</xliff:g> کیلئے الارم"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"‫<xliff:g id="USER_NAME">%s</xliff:g> کیلئے الارم"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"صارف سوئچ کریں"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"خاموش کریں"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"آواز کو خاموش کرنے کے لیے تھپتھپائیں"</string>

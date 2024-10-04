@@ -376,7 +376,7 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"মুখ্য থ্রেডে অ্যাপগুলির দীর্ঘ কার্যকলাপের ক্ষেত্রে স্ক্রিন ফ্ল্যাশ করে"</string>
     <string name="pointer_location" msgid="7516929526199520173">"পয়েন্টারের লোকেশন"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"স্ক্রিন ওভারলে বর্তমান স্পর্শ ডেটা দেখাচ্ছে"</string>
-    <string name="show_touches" msgid="8437666942161289025">"আলতো চাপ দেখান"</string>
+    <string name="show_touches" msgid="8437666942161289025">"ট্যাপ দেখান"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"আলতো চাপ দিলে ভিজ্যুয়াল প্রতিক্রিয়া দেখান"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"প্রেস করা কী দেখুন"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"ফিজিক্যাল কী প্রেস করা হলে ভিজুয়াল ফিডব্যাক দেখুন"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"এখনই"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"এই ফোন"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"এই ট্যাবলেট"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"এই কম্পিউটার (ইন্টার্নাল)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"মাইক্রোফোন (ইন্টার্নাল)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"বন্ধ করা আছে"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"চালু করা আছে"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"এই পরিবর্তনটি প্রয়োগ করার জন্য আপনার ডিভাইসটি অবশ্যই রিবুট করতে হবে। এখনই রিবুট করুন বা বাতিল করুন।"</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"তারযুক্ত হেডফোন"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"হেডফোন"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB স্পিকার"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"মাইকের জ্যাক"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB মাইক"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"চালু আছে"</string>

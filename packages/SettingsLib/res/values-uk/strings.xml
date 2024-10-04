@@ -287,8 +287,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Дозволити розблокування завантажувача"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Дозволити виробникові розблоковувати пристрій?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЗАСТЕРЕЖЕННЯ. Функції захисту пристрою не працюватимуть, поки ввімкнено це налаштування."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"Вибрати додаток для фіктивних місцезнаходжень"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Додаток для фіктивних місцезнаходжень не вибрано"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"Вибрати додаток для фіктивних місцеположень"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Додаток для фіктивних місцеположень не вибрано"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Додаток для фіктивних місцезнаходжень: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Мережі"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сертифікація бездрот. екрана"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Щойно"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Цей телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Цей планшет"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Цей комп’ютер (внутрішній)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"Мікрофон (внутрішній)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Вимкнено"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Увімкнено"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Щоб застосувати ці зміни, потрібний перезапуск. Перезапустіть пристрій або скасуйте зміни."</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Дротові навушники"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Навушники"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB-динамік"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Гніздо для мікрофона"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB-мікрофон"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Увімкнено"</string>

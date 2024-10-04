@@ -1179,10 +1179,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ஸ்பீக்கர்கள் &amp; டிஸ்ப்ளேக்கள்"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"பரிந்துரைக்கப்படும் சாதனங்கள்"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"உள்ளீடு"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"வெளியீடு"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"மீடியாவை வேறொரு சாதனத்திற்கு மாற்ற \'பகிரப்படும் அமர்வை\' நிறுத்தவும்"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"நிறுத்து"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
@@ -1293,8 +1291,7 @@
     <string name="add" msgid="81036585205287996">"சேர்"</string>
     <string name="manage_users" msgid="1823875311934643849">"பயனர்களை நிர்வகித்தல்"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"பிரிக்கப்பட்ட திரைக்குள் இந்த அறிவிப்பை இழுத்துவிட முடியாது"</string>
-    <!-- no translation found for dream_overlay_location_active (6484763493158166618) -->
-    <skip />
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"இருப்பிடம் இயக்கத்திலுள்ளது"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"வைஃபை கிடைக்கவில்லை"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"முன்னுரிமைப் பயன்முறை"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"அலாரம் அமைக்கப்பட்டுள்ளது"</string>
@@ -1351,8 +1348,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"பூட்டுத் திரையை பிரத்தியேகமாக்கு"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"பூட்டுத் திரையைப் பிரத்தியேகப்படுத்த அன்லாக் செய்யுங்கள்"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"வைஃபை கிடைக்கவில்லை"</string>
-    <!-- no translation found for location_active_dream_overlay_content_description (6208885541020673916) -->
-    <skip />
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"இருப்பிடம் இயக்கத்திலுள்ளது"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"கேமரா தடுக்கப்பட்டுள்ளது"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"கேமராவும் மைக்ரோஃபோனும் தடுக்கப்பட்டுள்ளன"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"மைக்ரோஃபோன் தடுக்கப்பட்டுள்ளது"</string>
@@ -1400,6 +1396,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"சுருக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"விரிவாக்குவதற்கான ஐகான்"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"அல்லது"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"இழுப்பதற்கான ஹேண்டில்"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"கீபோர்டைப் பயன்படுத்திச் செல்லுதல்"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"கீபோர்டு ஷார்ட்கட்கள் குறித்துத் தெரிந்துகொள்ளுங்கள்"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"டச்பேடைப் பயன்படுத்திச் செல்லுதல்"</string>
@@ -1408,8 +1405,7 @@
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"டச்பேட் சைகைகள், கீபோர்டு ஷார்ட்கட்கள் மற்றும் பலவற்றைத் தெரிந்துகொள்ளுங்கள்"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"பின்செல்வதற்கான சைகை"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"முகப்பிற்குச் செல்வதற்கான சைகை"</string>
-    <!-- no translation found for touchpad_tutorial_recent_apps_gesture_button (8919227647650347359) -->
-    <skip />
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"முடிந்தது"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"பின்செல்"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"பின்செல்ல, உங்கள் டச்பேடில் எங்கு வேண்டுமானாலும் இடது அல்லது வலதுபுறமாக மூன்று விரல்களால் ஸ்வைப் செய்யவும்.\n\nஇதற்கு நீங்கள் கீபோர்டு ஷார்ட்கட் செயல்பாடுகள் + Esc பட்டனையும் பயன்படுத்தலாம்."</string>
@@ -1419,14 +1415,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"எப்போது வேண்டுமானாலும் உங்கள் முகப்புத் திரைக்குச் செல்ல, மூன்று விரல்களால் திரையின் கீழிருந்து மேல்நோக்கி ஸ்வைப் செய்யவும்."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"அற்புதம்!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"முகப்புக்குச் செல்வதற்கான சைகையை நிறைவுசெய்துவிட்டீர்கள்."</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_action_title (934906836867137906) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6012057247259983871) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_title (8481920554139332593) -->
-    <skip />
-    <!-- no translation found for touchpad_recent_apps_gesture_success_body (4334263906697493273) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"உங்கள் டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"அருமை!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"சமீபத்தில் பயன்படுத்திய ஆப்ஸுக்கான சைகை பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"ஆக்‌ஷன் பட்டன்"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ஆப்ஸை அணுக உங்கள் கீபோர்டில் உள்ள ஆக்‌ஷன் பட்டனை அழுத்துங்கள்."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"வாழ்த்துகள்!"</string>
@@ -1450,14 +1442,10 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"அனைத்து ஆப்ஸையும் பார்க்க உங்கள் கீபோர்டைப் பயன்படுத்துங்கள்"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"எப்போது வேண்டுமானாலும் ஆக்ஷன் பட்டனை அழுத்தலாம். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_title (910988771011857460) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_description (4453123359258743230) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_button (3947537827396916005) -->
-    <skip />
-    <!-- no translation found for accessibility_deprecate_extra_dim_dialog_toast (165474092660941104) -->
-    <skip />
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"மிகக் குறைவான வெளிச்சம் அம்சம் இப்போது ஒளிர்வு ஸ்லைடரின் ஒரு பகுதியாகும்"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"இப்போது ஒளிர்வு அளவைக் குறைப்பதன் மூலம் திரையை மிகக் குறைவான வெளிச்சத்தில் பயன்படுத்தலாம்.\n\nஇந்த அம்சம் ஒளிர்வு ஸ்லைடர் அம்சத்தின் ஒரு பகுதி என்பதால் மிகக் குறைவான வெளிச்சத்திற்கான ஷார்ட்கட்கள் அகற்றப்படுகின்றன."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"மிகக் குறைவான வெளிச்சத்திற்கான ஷார்ட்கட்களை அகற்றும்"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"மிகக் குறைவான வெளிச்சத்திற்கான ஷார்ட்கட்கள் அகற்றப்பட்டன"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"இணைப்புநிலை"</string>
     <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"மாற்றுத்திறன் வசதி"</string>
     <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"யூட்டிலிட்டி சேவைகள்"</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package android.app;
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-import android.os.IRemoteCallback;
+package com.android.systemui.keyguard.ui.viewmodel
 
-/** {@hide} */
-interface IUserSwitchObserver {
-    void onBeforeUserSwitching(int newUserId);
-    oneway void onUserSwitching(int newUserId, IRemoteCallback reply);
-    oneway void onUserSwitchComplete(int newUserId);
-    oneway void onForegroundProfileSwitch(int newProfileId);
-    oneway void onLockedBootComplete(int newUserId);
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+val Kosmos.occludedToAlternateBouncerTransitionViewModel by Fixture {
+    OccludedToAlternateBouncerTransitionViewModel(animationFlow = keyguardTransitionAnimationFlow)
 }

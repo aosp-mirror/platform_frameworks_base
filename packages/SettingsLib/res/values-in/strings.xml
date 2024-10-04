@@ -288,7 +288,7 @@
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Izinkan buka kunci OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"PERINGATAN: Fitur perlindungan perangkat tidak akan berfungsi di perangkat ini saat setelan diaktifkan."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Pilih aplikasi lokasi palsu"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Tidak ada aplikasi lokasi palsu yang disetel"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Tidak ada aplikasi lokasi simulasi yang disetel"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikasi lokasi palsu: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Jaringan"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Sertifikasi layar nirkabel"</string>
@@ -582,8 +582,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Baru saja"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ponsel ini"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tablet ini"</string>
-    <!-- no translation found for media_transfer_this_device_name_desktop (7912386128141470452) -->
-    <skip />
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Komputer ini (internal)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
     <string name="media_transfer_internal_mic" msgid="797333824290228595">"Mikrofon (internal)"</string>
@@ -687,12 +686,9 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Nonaktif"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktif"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Perangkat Anda harus di-reboot agar perubahan ini diterapkan. Reboot sekarang atau batalkan."</string>
-    <!-- no translation found for media_transfer_wired_headphone_name (8698668536022665254) -->
-    <skip />
-    <!-- no translation found for media_transfer_headphone_name (1131962659136578852) -->
-    <skip />
-    <!-- no translation found for media_transfer_usb_speaker_name (4736537022543593896) -->
-    <skip />
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Headphone berkabel"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Headphone"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"Speaker USB"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Colokan mikrofon"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Mikrofon USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Aktif"</string>
