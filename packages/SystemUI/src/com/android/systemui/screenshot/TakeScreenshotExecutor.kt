@@ -28,6 +28,7 @@ import com.android.systemui.Flags.screenshotMultidisplayFocusChange
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.data.repository.DisplayRepository
+import com.android.systemui.display.data.repository.FocusedDisplayRepository
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_CAPTURE_FAILED
 import com.android.systemui.screenshot.ScreenshotEvent.SCREENSHOT_DISMISSED_OTHER
@@ -83,6 +84,7 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val screenshotNotificationControllerFactory: ScreenshotNotificationsController.Factory,
     private val headlessScreenshotHandler: HeadlessScreenshotHandler,
+    private val focusedDisplayRepository: FocusedDisplayRepository,
 ) : TakeScreenshotExecutor {
     private val displays = displayRepository.displays
     private var screenshotController: InteractiveScreenshotHandler? = null
@@ -216,13 +218,12 @@ constructor(
                     ?: error("Can't find default display")
 
             // All other invocations use the focused display
-            else -> focusedDisplay()
+            else ->
+                displayRepository.getDisplay(focusedDisplayRepository.focusedDisplayId.value)
+                    ?: displayRepository.getDisplay(Display.DEFAULT_DISPLAY)
+                    ?: error("Can't find default display")
         }
     }
-
-    // TODO(b/367394043): Determine the focused display here.
-    private suspend fun focusedDisplay() =
-        displayRepository.getDisplay(Display.DEFAULT_DISPLAY) ?: error("Can't find default display")
 
     /** Propagates the close system dialog signal to the ScreenshotController. */
     override fun onCloseSystemDialogsReceived() {
