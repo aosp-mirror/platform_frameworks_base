@@ -13,29 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@file:JvmName("RavenizerMain")
+package com.android.ravenwoodtest.coretest;
 
-package com.android.platform.test.ravenwood.ravenizer
+import static org.junit.Assert.assertThrows;
 
-import com.android.hoststubgen.LogLevel
-import com.android.hoststubgen.executableName
-import com.android.hoststubgen.log
-import com.android.hoststubgen.runMainWithBoilerplate
+import org.junit.Test;
 
-/**
- * Entry point.
- */
-fun main(args: Array<String>) {
-    executableName = "Ravenizer"
-    log.setConsoleLogLevel(LogLevel.Info)
+public class RavenwoodMockitoTest {
 
-    runMainWithBoilerplate {
-        val options = RavenizerOptions.parseArgs(args)
-
-        log.i("$executableName started")
-        log.v("Options: $options")
-
-        // Run.
-        Ravenizer().run(options)
+    @Test
+    public void checkMockitoClasses() {
+        // DexMaker should not exist
+        assertThrows(
+                ClassNotFoundException.class,
+                () -> Class.forName("com.android.dx.DexMaker"));
+        // Mockito 2 should not exist
+        assertThrows(
+                ClassNotFoundException.class,
+                () -> Class.forName("org.mockito.Matchers"));
     }
 }
