@@ -1046,6 +1046,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 openInBrowserCaptor.capture(),
                 any(),
+                any(),
                 any()
         );
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
@@ -1073,6 +1074,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 openInBrowserCaptor.capture(),
+                any(),
                 any(),
                 any()
         );
@@ -1118,6 +1120,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 ArgumentCaptor.forClass(Function0.class);
         createHandleMenu(decoration);
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),
