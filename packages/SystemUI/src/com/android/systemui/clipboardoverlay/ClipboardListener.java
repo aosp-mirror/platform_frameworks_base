@@ -25,6 +25,7 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 
 import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
 
+import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -59,18 +60,21 @@ public class ClipboardListener extends CoreStartable
     private final ClipboardOverlayControllerFactory mOverlayFactory;
     private final ClipboardToast mClipboardToast;
     private final ClipboardManager mClipboardManager;
+    private final KeyguardManager mKeyguardManager;
     private final UiEventLogger mUiEventLogger;
     private ClipboardOverlayController mClipboardOverlayController;
 
     @Inject
     public ClipboardListener(Context context, DeviceConfigProxy deviceConfigProxy,
             ClipboardOverlayControllerFactory overlayFactory, ClipboardManager clipboardManager,
-            ClipboardToast clipboardToast,UiEventLogger uiEventLogger) {
+            ClipboardToast clipboardToast, KeyguardManager keyguardManager,
+            UiEventLogger uiEventLogger) {
         super(context);
         mDeviceConfig = deviceConfigProxy;
         mOverlayFactory = overlayFactory;
         mClipboardToast = clipboardToast;
         mClipboardManager = clipboardManager;
+        mKeyguardManager = keyguardManager;
         mUiEventLogger = uiEventLogger;
     }
 
@@ -96,8 +100,11 @@ public class ClipboardListener extends CoreStartable
             return;
         }
 
-        if (!isUserSetupComplete()) {
-            // just show a toast, user should not access intents from this state
+        // user should not access intents before setup or while device is locked
+        if (mKeyguardManager.isDeviceLocked()
+                || !isUserSetupComplete()
+                || clipData == null // shouldn't happen, but just in case
+                || clipData.getItemCount() == 0) {
             if (shouldShowToast(clipData)) {
                 mUiEventLogger.log(CLIPBOARD_TOAST_SHOWN, 0, clipSource);
                 mClipboardToast.showCopiedToast();

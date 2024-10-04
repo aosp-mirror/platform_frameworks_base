@@ -23,6 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.provider.DeviceConfig;
@@ -51,6 +52,8 @@ public class ClipboardOverlayEventTest extends SysuiTestCase {
     @Mock
     private ClipboardOverlayController mOverlayController;
     @Mock
+    private KeyguardManager mKeyguardManager;
+    @Mock
     private ClipboardToast mClipboardToast;
     @Mock
     private UiEventLogger mUiEventLogger;
@@ -78,7 +81,7 @@ public class ClipboardOverlayEventTest extends SysuiTestCase {
 
         mClipboardListener = new ClipboardListener(getContext(), deviceConfigProxy,
                 mClipboardOverlayControllerFactory, mClipboardManager, mClipboardToast,
-                mUiEventLogger);
+                mKeyguardManager, mUiEventLogger);
     }
 
     @Test
