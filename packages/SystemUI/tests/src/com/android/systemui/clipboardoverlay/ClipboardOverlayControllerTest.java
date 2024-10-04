@@ -19,6 +19,7 @@ package com.android.systemui.clipboardoverlay;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.systemui.Flags.FLAG_CLIPBOARD_SHARED_TRANSITIONS;
+import static com.android.systemui.Flags.FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ACTION_SHOWN;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_DISMISS_TAPPED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_EXPANDED_FROM_MINIMIZED;
@@ -164,6 +165,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE)
     public void test_setClipData_invalidImageData_legacy() {
         initController();
 
@@ -236,6 +238,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE)
     public void test_setClipData_invalidImageData() {
         initController();
 
