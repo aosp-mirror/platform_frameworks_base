@@ -317,7 +317,7 @@ class ScreenshotAnimationController(
     }
 
     private fun getAdjustedVelocity(requestedVelocity: Float?): Float {
-        return if (requestedVelocity == null) {
+        return if (requestedVelocity == null || abs(requestedVelocity) < .005f) {
             val isLTR = view.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
             // dismiss to the left in LTR locales, to the right in RTL
             if (isLTR) -MINIMUM_VELOCITY else MINIMUM_VELOCITY
