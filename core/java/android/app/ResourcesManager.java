@@ -1980,6 +1980,7 @@ public class ResourcesManager {
     public void registerAllResourcesReference(@NonNull Resources resources) {
         if (android.content.res.Flags.registerResourcePaths()) {
             synchronized (mLock) {
+                cleanupReferences(mAllResourceReferences, mAllResourceReferencesQueue);
                 mAllResourceReferences.add(
                         new WeakReference<>(resources, mAllResourceReferencesQueue));
             }
