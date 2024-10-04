@@ -69,6 +69,8 @@ import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
+import com.android.internal.annotations.CachedProperty;
+import com.android.internal.annotations.CachedPropertyDefaults;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -90,6 +92,7 @@ import java.util.Set;
  */
 @SystemService(Context.USER_SERVICE)
 @android.ravenwood.annotation.RavenwoodKeepPartialClass
+@CachedPropertyDefaults()
 public class UserManager {
 
     private static final String TAG = "UserManager";
@@ -107,6 +110,9 @@ public class UserManager {
 
     /** Whether the device is in headless system user mode; null until cached. */
     private static Boolean sIsHeadlessSystemUser = null;
+
+    /** Generated class containing IpcDataCaches. */
+    private final Object mIpcDataCache = new UserManagerCache();
 
     /** Maximum length of username.
      * @hide
@@ -3766,62 +3772,18 @@ public class UserManager {
         return isUserUnlocked(user.getIdentifier());
     }
 
-    private static final String CACHE_KEY_IS_USER_UNLOCKED_PROPERTY =
-        PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_SYSTEM, "is_user_unlocked");
-
-    private final PropertyInvalidatedCache<Integer, Boolean> mIsUserUnlockedCache =
-            new PropertyInvalidatedCache<Integer, Boolean>(
-                32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
-                @Override
-                public Boolean recompute(Integer query) {
-                    try {
-                        return mService.isUserUnlocked(query);
-                    } catch (RemoteException re) {
-                        throw re.rethrowFromSystemServer();
-                    }
-                }
-                @Override
-                public boolean bypass(Integer query) {
-                    return query < 0;
-                }
-            };
-
-    // Uses IS_USER_UNLOCKED_PROPERTY for invalidation as the APIs have the same dependencies.
-    private final PropertyInvalidatedCache<Integer, Boolean> mIsUserUnlockingOrUnlockedCache =
-            new PropertyInvalidatedCache<Integer, Boolean>(
-                32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
-                @Override
-                public Boolean recompute(Integer query) {
-                    try {
-                        return mService.isUserUnlockingOrUnlocked(query);
-                    } catch (RemoteException re) {
-                        throw re.rethrowFromSystemServer();
-                    }
-                }
-                @Override
-                public boolean bypass(Integer query) {
-                    return query < 0;
-                }
-            };
-
     /** @hide */
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @CachedProperty(modsFlagOnOrNone = {}, api = "is_user_unlocked")
     public boolean isUserUnlocked(@UserIdInt int userId) {
-        return mIsUserUnlockedCache.query(userId);
-    }
-
-    /** @hide */
-    public void disableIsUserUnlockedCache() {
-        mIsUserUnlockedCache.disableLocal();
-        mIsUserUnlockingOrUnlockedCache.disableLocal();
+        return ((UserManagerCache) mIpcDataCache).isUserUnlocked(mService::isUserUnlocked, userId);
     }
 
     /** @hide */
     public static final void invalidateIsUserUnlockedCache() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_IS_USER_UNLOCKED_PROPERTY);
+        UserManagerCache.invalidateUserUnlocked();
     }
 
     /**
@@ -3852,8 +3814,10 @@ public class UserManager {
     /** @hide */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
+    @CachedProperty(modsFlagOnOrNone = {}, api = "is_user_unlocked")
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
-        return mIsUserUnlockingOrUnlockedCache.query(userId);
+        return ((UserManagerCache) mIpcDataCache)
+                .isUserUnlockingOrUnlocked(mService::isUserUnlockingOrUnlocked, userId);
     }
 
     /**
@@ -5686,31 +5650,9 @@ public class UserManager {
         }
     }
 
-    private static final String CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY =
-        PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_SYSTEM, "quiet_mode_enabled");
-
-    private final PropertyInvalidatedCache<Integer, Boolean> mQuietModeEnabledCache =
-            new PropertyInvalidatedCache<Integer, Boolean>(
-                32, CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY) {
-                @Override
-                public Boolean recompute(Integer query) {
-                    try {
-                        return mService.isQuietModeEnabled(query);
-                    } catch (RemoteException re) {
-                        throw re.rethrowFromSystemServer();
-                    }
-                }
-                @Override
-                public boolean bypass(Integer query) {
-                    return query < 0;
-                }
-            };
-
-
     /** @hide */
     public static final void invalidateQuietModeEnabledCache() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_QUIET_MODE_ENABLED_PROPERTY);
+        UserManagerCache.invalidateQuietModeEnabled();
     }
 
     /**
@@ -5719,13 +5661,15 @@ public class UserManager {
      * @param userHandle The user handle of the profile to be queried.
      * @return true if the profile is in quiet mode, false otherwise.
      */
+    @CachedProperty(modsFlagOnOrNone = {})
     public boolean isQuietModeEnabled(UserHandle userHandle) {
-        if (android.multiuser.Flags.cacheQuietModeState()){
+        if (android.multiuser.Flags.cacheQuietModeState()) {
             final int userId = userHandle.getIdentifier();
             if (userId < 0) {
                 return false;
             }
-            return mQuietModeEnabledCache.query(userId);
+            return ((UserManagerCache) mIpcDataCache).isQuietModeEnabled(
+                    (UserHandle uh) -> mService.isQuietModeEnabled(uh.getIdentifier()), userHandle);
         }
         try {
             return mService.isQuietModeEnabled(userHandle.getIdentifier());
@@ -6424,41 +6368,21 @@ public class UserManager {
                 Settings.Global.DEVICE_DEMO_MODE, 0) > 0;
     }
 
-    private static final String CACHE_KEY_USER_SERIAL_NUMBER_PROPERTY =
-        PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_SYSTEM, "user_serial_number");
-
-    private final PropertyInvalidatedCache<Integer, Integer> mUserSerialNumberCache =
-            new PropertyInvalidatedCache<Integer, Integer>(
-                32, CACHE_KEY_USER_SERIAL_NUMBER_PROPERTY) {
-                @Override
-                public Integer recompute(Integer query) {
-                    try {
-                        return mService.getUserSerialNumber(query);
-                    } catch (RemoteException re) {
-                        throw re.rethrowFromSystemServer();
-                    }
-                }
-                @Override
-                public boolean bypass(Integer query) {
-                    return query <= 0;
-                }
-            };
-
-
     /** @hide */
     public static final void invalidateUserSerialNumberCache() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_USER_SERIAL_NUMBER_PROPERTY);
+        UserManagerCache.invalidateUserSerialNumber();
     }
 
     /**
      * Returns a serial number on this device for a given userId. User handles can be recycled
-     * when deleting and creating users, but serial numbers are not reused until the device is wiped.
+     * when deleting and creating users, but serial numbers are not reused until the device is
+     * wiped.
      * @param userId
      * @return a serial number associated with that user, or -1 if the userId is not valid.
      * @hide
      */
     @UnsupportedAppUsage
+    @CachedProperty(modsFlagOnOrNone = {})
     public int getUserSerialNumber(@UserIdInt int userId) {
         // Read only flag should is to fix early access to this API
         // cacheUserSerialNumber to be removed after the
@@ -6470,7 +6394,8 @@ public class UserManager {
             if (userId == UserHandle.USER_SYSTEM) {
                return UserHandle.USER_SERIAL_SYSTEM;
             }
-            return mUserSerialNumberCache.query(userId);
+            return ((UserManagerCache) mIpcDataCache).getUserSerialNumber(
+                    mService::getUserSerialNumber, userId);
         }
         try {
             return mService.getUserSerialNumber(userId);
