@@ -3209,7 +3209,11 @@ public final class ContactsContract {
                     return new DefaultAccountAndState(DEFAULT_ACCOUNT_STATE_NOT_SET, null);
                 }
 
-                private static boolean isCloudOrSimAccount(@DefaultAccountState int state) {
+                /**
+                 *
+                 * @hide
+                 */
+                public static boolean isCloudOrSimAccount(@DefaultAccountState int state) {
                     return state == DEFAULT_ACCOUNT_STATE_CLOUD
                             || state == DEFAULT_ACCOUNT_STATE_SIM;
                 }
@@ -3287,23 +3291,20 @@ public final class ContactsContract {
                 Bundle response = nullSafeCall(resolver, ContactsContract.AUTHORITY_URI,
                         QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD, null, null);
 
-                int defaultContactsAccountState = response.getInt(KEY_DEFAULT_ACCOUNT_STATE, -1);
-                if (defaultContactsAccountState
-                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_CLOUD) {
+                int defaultAccountState = response.getInt(KEY_DEFAULT_ACCOUNT_STATE, -1);
+                if (DefaultAccountAndState.isCloudOrSimAccount(defaultAccountState)) {
                     String accountName = response.getString(Settings.ACCOUNT_NAME);
                     String accountType = response.getString(Settings.ACCOUNT_TYPE);
                     if (TextUtils.isEmpty(accountName) || TextUtils.isEmpty(accountType)) {
                         throw new IllegalStateException(
                                 "account name and type cannot be null or empty");
                     }
-                    return new DefaultAccountAndState(
-                            DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_CLOUD,
+                    return new DefaultAccountAndState(defaultAccountState,
                             new Account(accountName, accountType));
-                } else if (defaultContactsAccountState
-                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_LOCAL
-                        || defaultContactsAccountState
+                } else if (defaultAccountState == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_LOCAL
+                        || defaultAccountState
                         == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_NOT_SET) {
-                    return new DefaultAccountAndState(defaultContactsAccountState, /*cloudAccount=*/
+                    return new DefaultAccountAndState(defaultAccountState, /*account=*/
                             null);
                 } else {
                     throw new IllegalStateException("Invalid default account state");
@@ -3348,12 +3349,11 @@ public final class ContactsContract {
                 Bundle extras = new Bundle();
 
                 extras.putInt(KEY_DEFAULT_ACCOUNT_STATE, defaultAccountAndState.getState());
-                if (defaultAccountAndState.getState()
-                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_CLOUD) {
-                    Account cloudAccount = defaultAccountAndState.getAccount();
-                    assert cloudAccount != null;
-                    extras.putString(Settings.ACCOUNT_NAME, cloudAccount.name);
-                    extras.putString(Settings.ACCOUNT_TYPE, cloudAccount.type);
+                if (DefaultAccountAndState.isCloudOrSimAccount(defaultAccountAndState.getState())) {
+                    Account account = defaultAccountAndState.getAccount();
+                    assert account != null;
+                    extras.putString(Settings.ACCOUNT_NAME, account.name);
+                    extras.putString(Settings.ACCOUNT_TYPE, account.type);
                 }
                 nullSafeCall(resolver, ContactsContract.AUTHORITY_URI,
                         SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD, null, extras);
