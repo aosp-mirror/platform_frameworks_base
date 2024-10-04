@@ -86,9 +86,17 @@ void BackdropFilterDrawable::onDraw(SkCanvas* canvas) {
         backdropImage = SkImages::MakeWithFilter(backdropImage, backdropFilter, imageSubset,
                                                  imageSubset, &mOutSubset, &mOutOffset);
     }
-    canvas->drawImageRect(backdropImage, SkRect::Make(mOutSubset), mDstBounds,
+
+    // backdropImage & mOutSubset are in post-pre-rotation space, whereas mDstBounds is in
+    // prerotation space. So map dst bounds to post-pre-rotation space & draw there
+    SkRect dst;
+    canvas->getTotalMatrix().mapRect(&dst, mDstBounds);
+    canvas->save();
+    canvas->resetMatrix();
+    canvas->drawImageRect(backdropImage, SkRect::Make(mOutSubset), dst,
                           SkSamplingOptions(SkFilterMode::kLinear), &mPaint,
-                          SkCanvas::kStrict_SrcRectConstraint);
+                          SkCanvas::kFast_SrcRectConstraint);
+    canvas->restore();
 }
 
 }  // namespace skiapipeline
