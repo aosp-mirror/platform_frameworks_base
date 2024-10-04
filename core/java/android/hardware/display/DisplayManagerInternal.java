@@ -92,10 +92,9 @@ public abstract class DisplayManagerInternal {
             boolean waitForNegativeProximity);
 
     /**
-     * Returns {@code true} if the proximity sensor screen-off function is available for the given
-     * display.
+     * Returns {@code true} if the proximity sensor screen-off function is available.
      */
-    public abstract boolean isProximitySensorAvailable(int displayId);
+    public abstract boolean isProximitySensorAvailable();
 
     /**
      * Registers a display group listener which will be informed of the addition, removal, or change
