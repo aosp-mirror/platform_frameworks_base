@@ -19,8 +19,7 @@ package com.android.systemui.display.data.repository
 import android.annotation.MainThread
 import android.view.Display.DEFAULT_DISPLAY
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.FocusedDisplayRepoLog
@@ -43,15 +42,15 @@ import kotlinx.coroutines.flow.stateIn
 class FocusedDisplayRepository
 @Inject
 constructor(
-    @Application val scope: CoroutineScope,
-    @Main private val mainExecutor: Executor,
+    @Background val backgroundScope: CoroutineScope,
+    @Background private val backgroundExecutor: Executor,
     transitions: ShellTransitions,
     @FocusedDisplayRepoLog logBuffer: LogBuffer,
 ) {
     val focusedTask: Flow<Int> =
         conflatedCallbackFlow {
                 val listener = FocusTransitionListener { displayId -> trySend(displayId) }
-                transitions.setFocusTransitionListener(listener, mainExecutor)
+                transitions.setFocusTransitionListener(listener, backgroundExecutor)
                 awaitClose { transitions.unsetFocusTransitionListener(listener) }
             }
             .onEach {
@@ -65,5 +64,5 @@ constructor(
 
     /** Provides the currently focused display. */
     val focusedDisplayId: StateFlow<Int>
-        get() = focusedTask.stateIn(scope, SharingStarted.Eagerly, DEFAULT_DISPLAY)
+        get() = focusedTask.stateIn(backgroundScope, SharingStarted.Eagerly, DEFAULT_DISPLAY)
 }
