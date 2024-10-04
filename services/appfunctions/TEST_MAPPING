@@ -6,13 +6,5 @@
     {
       "name": "CtsAppFunctionTestCases"
     }
-  ],
-  "postsubmit": [
-    {
-      "name": "FrameworksAppFunctionsTests"
-    },
-    {
-      "name": "CtsAppFunctionTestCases"
-    }
   ]
 }
