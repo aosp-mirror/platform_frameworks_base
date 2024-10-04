@@ -25,6 +25,7 @@ import static com.android.systemui.flags.Flags.CLIPBOARD_MINIMIZED_LAYOUT;
 
 import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
 
+import android.app.KeyguardManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -60,6 +61,7 @@ public class ClipboardListener implements
     private final ClipboardToast mClipboardToast;
     private final ClipboardManager mClipboardManager;
     private final FeatureFlags mFeatureFlags;
+    private final KeyguardManager mKeyguardManager;
     private final UiEventLogger mUiEventLogger;
     private ClipboardOverlay mClipboardOverlay;
 
@@ -69,12 +71,14 @@ public class ClipboardListener implements
             ClipboardToast clipboardToast,
             ClipboardManager clipboardManager,
             FeatureFlags featureFlags,
+            KeyguardManager keyguardManager,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mOverlayProvider = clipboardOverlayControllerProvider;
         mClipboardToast = clipboardToast;
         mClipboardManager = clipboardManager;
         mFeatureFlags = featureFlags;
+        mKeyguardManager = keyguardManager;
         mUiEventLogger = uiEventLogger;
     }
 
@@ -97,7 +101,9 @@ public class ClipboardListener implements
             return;
         }
 
-        if (!isUserSetupComplete() // user should not access intents from this state
+        // user should not access intents before setup or while device is locked
+        if (mKeyguardManager.isDeviceLocked()
+                || !isUserSetupComplete()
                 || clipData == null // shouldn't happen, but just in case
                 || clipData.getItemCount() == 0) {
             if (shouldShowToast(clipData)) {
