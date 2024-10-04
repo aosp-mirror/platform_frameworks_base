@@ -25,6 +25,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.window.BackNavigationInfo.typeToString;
+import static android.window.SystemOverrideOnBackInvokedCallback.OVERRIDE_UNDEFINED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -446,7 +447,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 new OnBackInvokedCallbackInfo(
                         callback,
                         OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                        /* isAnimationCallback = */ false));
+                        /* isAnimationCallback = */ false, OVERRIDE_UNDEFINED));
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
@@ -467,7 +468,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 new OnBackInvokedCallbackInfo(
                         callback,
                         OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                        /* isAnimationCallback = */ true));
+                        /* isAnimationCallback = */ true, OVERRIDE_UNDEFINED));
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNotNull();
@@ -608,7 +609,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 new OnBackInvokedCallbackInfo(
                         callback,
                         OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                        /* isAnimationCallback = */ false));
+                        /* isAnimationCallback = */ false, OVERRIDE_UNDEFINED));
 
         BackNavigationInfo backNavigationInfo = startBackNavigation();
         assertThat(backNavigationInfo).isNull();
@@ -722,7 +723,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 new OnBackInvokedCallbackInfo(
                         callback,
                         OnBackInvokedDispatcher.PRIORITY_SYSTEM,
-                        /* isAnimationCallback = */ false));
+                        /* isAnimationCallback = */ false, OVERRIDE_UNDEFINED));
         return callback;
     }
 
@@ -732,7 +733,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
                 new OnBackInvokedCallbackInfo(
                         callback,
                         OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                        /* isAnimationCallback = */ false));
+                        /* isAnimationCallback = */ false, OVERRIDE_UNDEFINED));
         return callback;
     }
 
