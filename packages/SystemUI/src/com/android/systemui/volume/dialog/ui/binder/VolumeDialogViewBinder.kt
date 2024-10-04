@@ -16,32 +16,144 @@
 
 package com.android.systemui.volume.dialog.ui.binder
 
+import android.app.Dialog
+import android.view.Gravity
 import android.view.View
+import com.android.internal.view.RotationPolicy
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
+import com.android.systemui.volume.SystemUIInterpolators
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
+import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
+import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
+import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogResourcesViewModel
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
+import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 
+/** Binds the root view of the Volume Dialog. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogScope
 class VolumeDialogViewBinder
 @Inject
-constructor(private val volumeDialogViewModelFactory: VolumeDialogViewModel.Factory) {
+constructor(
+    private val volumeResources: VolumeDialogResourcesViewModel,
+    private val gravityViewModel: VolumeDialogGravityViewModel,
+    private val viewModelFactory: VolumeDialogViewModel.Factory,
+    private val jankListenerFactory: JankListenerFactory,
+    private val tracer: VolumeTracer,
+) {
 
-    fun bind(view: View) {
+    fun bind(dialog: Dialog, view: View) {
+        view.alpha = 0f
         view.repeatWhenAttached {
             view.viewModel(
                 traceName = "VolumeDialogViewBinder",
                 minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { volumeDialogViewModelFactory.create() },
+                factory = { viewModelFactory.create() },
             ) { viewModel ->
-                view.setSnapshotBinding {}
+                animateVisibility(view, dialog, viewModel.dialogVisibilityModel)
 
                 awaitCancellation()
             }
         }
+    }
+
+    private fun CoroutineScope.animateVisibility(
+        view: View,
+        dialog: Dialog,
+        visibilityModel: Flow<VolumeDialogVisibilityModel>,
+    ) {
+        visibilityModel
+            .mapLatest {
+                when (it) {
+                    is VolumeDialogVisibilityModel.Visible -> {
+                        tracer.traceVisibilityEnd(it)
+                        calculateTranslationX(view)?.let(view::setTranslationX)
+                        view.animateShow(volumeResources.dialogShowDurationMillis.first())
+                    }
+                    is VolumeDialogVisibilityModel.Dismissed -> {
+                        tracer.traceVisibilityEnd(it)
+                        view.animateHide(
+                            duration = volumeResources.dialogHideDurationMillis.first(),
+                            translationX = calculateTranslationX(view),
+                        )
+                        dialog.dismiss()
+                    }
+                    is VolumeDialogVisibilityModel.Invisible -> {
+                        // do nothing
+                    }
+                }
+            }
+            .launchIn(this)
+    }
+
+    private suspend fun calculateTranslationX(view: View): Float? {
+        return if (view.display.rotation == RotationPolicy.NATURAL_ROTATION) {
+            val dialogGravity = gravityViewModel.dialogGravity.first()
+            val isGravityLeft = (dialogGravity and Gravity.LEFT) == Gravity.LEFT
+            if (isGravityLeft) {
+                -1
+            } else {
+                1
+            } * view.width / 2.0f
+        } else {
+            null
+        }
+    }
+
+    private suspend fun View.animateShow(duration: Long) {
+        animate()
+            .alpha(1f)
+            .translationX(0f)
+            .setDuration(duration)
+            .setInterpolator(SystemUIInterpolators.LogDecelerateInterpolator())
+            .suspendAnimate(jankListenerFactory.show(this, duration))
+        /* TODO(b/369993851)
+        .withEndAction(Runnable {
+            if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
+                if (mRingerIcon != null) {
+                    mRingerIcon.postOnAnimationDelayed(
+                        getSinglePressFor(mRingerIcon), 1500
+                    )
+                }
+            }
+        })
+         */
+    }
+
+    private suspend fun View.animateHide(duration: Long, translationX: Float?) {
+        val animator =
+            animate()
+                .alpha(0f)
+                .setDuration(duration)
+                .setInterpolator(SystemUIInterpolators.LogAccelerateInterpolator())
+        /*  TODO(b/369993851)
+        .withEndAction(
+            Runnable {
+                mHandler.postDelayed(
+                    Runnable {
+                        hideRingerDrawer()
+
+                    },
+                    50
+                )
+            }
+        )
+         */
+        if (translationX != null) {
+            animator.translationX(translationX)
+        }
+        animator.suspendAnimate(jankListenerFactory.dismiss(this, duration))
     }
 }

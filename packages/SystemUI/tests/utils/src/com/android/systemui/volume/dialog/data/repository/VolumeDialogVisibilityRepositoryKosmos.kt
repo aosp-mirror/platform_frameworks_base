@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.domain.interactor
+package com.android.systemui.volume.dialog.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.volume.dialog.data.repository.volumeDialogVisibilityRepository
-import com.android.systemui.volume.dialog.utils.volumeTracer
+import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
 
-val Kosmos.volumeDialogVisibilityInteractor by
-    Kosmos.Fixture {
-        VolumeDialogVisibilityInteractor(
-            applicationCoroutineScope,
-            volumeDialogCallbacksInteractor,
-            volumeTracer,
-            volumeDialogVisibilityRepository,
-        )
-    }
+val Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }

@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
+/** Exposes dialog [GravityInt] for use in the UI layer. */
 @VolumeDialogScope
 class VolumeDialogGravityViewModel
 @Inject

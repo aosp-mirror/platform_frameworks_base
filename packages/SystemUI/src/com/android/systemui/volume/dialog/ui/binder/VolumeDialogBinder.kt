@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
+/** Binds the Volume Dialog itself. */
 @VolumeDialogScope
 class VolumeDialogBinder
 @Inject
@@ -47,9 +48,13 @@ constructor(
         with(dialog) {
             setupWindow(window!!)
             dialog.setContentView(R.layout.volume_dialog)
+            dialog.setCanceledOnTouchOutside(true)
 
             settingsButtonViewBinder.bind(dialog.requireViewById(R.id.settings_container))
-            volumeDialogViewBinder.bind(dialog.requireViewById(R.id.volume_dialog_container))
+            volumeDialogViewBinder.bind(
+                dialog,
+                dialog.requireViewById(R.id.volume_dialog_container),
+            )
         }
     }
 

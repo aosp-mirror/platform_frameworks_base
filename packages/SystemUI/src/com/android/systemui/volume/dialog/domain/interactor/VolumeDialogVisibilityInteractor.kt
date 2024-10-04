@@ -20,8 +20,12 @@ import android.annotation.SuppressLint
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
+import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel.Dismissed
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel.Visible
+import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -30,13 +34,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 
 private val MAX_DIALOG_SHOW_TIME: Duration = 3.seconds
 
@@ -53,14 +55,13 @@ class VolumeDialogVisibilityInteractor
 constructor(
     @VolumeDialogPlugin coroutineScope: CoroutineScope,
     callbacksInteractor: VolumeDialogCallbacksInteractor,
+    private val tracer: VolumeTracer,
+    private val repository: VolumeDialogVisibilityRepository,
 ) {
 
     @SuppressLint("SharedFlowCreation")
     private val mutableDismissDialogEvents = MutableSharedFlow<Unit>()
-    private val mutableDialogVisibility =
-        MutableStateFlow<VolumeDialogVisibilityModel>(VolumeDialogVisibilityModel.Invisible)
-
-    val dialogVisibility: Flow<VolumeDialogVisibilityModel> = mutableDialogVisibility.asStateFlow()
+    val dialogVisibility: Flow<VolumeDialogVisibilityModel> = repository.dialogVisibility
 
     init {
         merge(
@@ -70,12 +71,11 @@ constructor(
                 },
                 callbacksInteractor.event,
             )
-            .onEach { event ->
-                VolumeDialogVisibilityModel.fromEvent(event)?.let { model ->
-                    mutableDialogVisibility.value = model
-                    if (model is VolumeDialogVisibilityModel.Visible) {
-                        resetDismissTimeout()
-                    }
+            .mapNotNull { it.toVisibilityModel() }
+            .onEach { model ->
+                updateVisibility { model }
+                if (model is VolumeDialogVisibilityModel.Visible) {
+                    resetDismissTimeout()
                 }
             }
             .launchIn(coroutineScope)
@@ -86,9 +86,9 @@ constructor(
      * [dialogVisibility].
      */
     fun dismissDialog(reason: Int) {
-        mutableDialogVisibility.update {
-            if (it is VolumeDialogVisibilityModel.Dismissed) {
-                it
+        updateVisibility { visibilityModel ->
+            if (visibilityModel is VolumeDialogVisibilityModel.Dismissed) {
+                visibilityModel
             } else {
                 VolumeDialogVisibilityModel.Dismissed(reason)
             }
@@ -98,5 +98,20 @@ constructor(
     /** Resets current dialog timeout. */
     suspend fun resetDismissTimeout() {
         mutableDismissDialogEvents.emit(Unit)
+    }
+
+    private fun updateVisibility(
+        update: (VolumeDialogVisibilityModel) -> VolumeDialogVisibilityModel
+    ) {
+        repository.updateVisibility { update(it).also(tracer::traceVisibilityStart) }
+    }
+
+    private fun VolumeDialogEventModel.toVisibilityModel(): VolumeDialogVisibilityModel? {
+        return when (this) {
+            is VolumeDialogEventModel.DismissRequested -> Dismissed(reason)
+            is VolumeDialogEventModel.ShowRequested ->
+                Visible(reason, keyguardLocked, lockTaskModeState)
+            else -> null
+        }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.domain.model
+package com.android.systemui.volume.dialog.shared.model
 
 /** Models current Volume Dialog visibility state. */
 sealed interface VolumeDialogVisibilityModel {
@@ -30,19 +30,4 @@ sealed interface VolumeDialogVisibilityModel {
 
     /** Dialog has been shown and then dismissed. */
     data class Dismissed(val reason: Int) : Invisible
-
-    companion object {
-
-        /**
-         * Creates [VolumeDialogVisibilityModel] from appropriate events and returns null otherwise.
-         */
-        fun fromEvent(event: VolumeDialogEventModel): VolumeDialogVisibilityModel? {
-            return when (event) {
-                is VolumeDialogEventModel.DismissRequested -> Dismissed(event.reason)
-                is VolumeDialogEventModel.ShowRequested ->
-                    Visible(event.reason, event.keyguardLocked, event.lockTaskModeState)
-                else -> null
-            }
-        }
-    }
 }
