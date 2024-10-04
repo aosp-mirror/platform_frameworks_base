@@ -399,6 +399,10 @@ constructor(
     fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) =
         widgetRepository.updateWidgetOrder(widgetIdToRankMap)
 
+    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+        widgetRepository.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
+    }
+
     /** Request to unpause work profile that is currently in quiet mode. */
     fun unpauseWorkProfile() {
         managedProfileController.setWorkModeEnabled(true)
@@ -449,6 +453,7 @@ constructor(
                             providerInfo = widget.providerInfo,
                             appWidgetHost = appWidgetHost,
                             inQuietMode = isQuietModeEnabled(widget.providerInfo.profile),
+                            size = CommunalContentSize.toSize(widget.spanY),
                         )
                     }
                     is CommunalWidgetContentModel.Pending -> {
@@ -457,6 +462,7 @@ constructor(
                             rank = widget.rank,
                             componentName = widget.componentName,
                             icon = widget.icon,
+                            size = CommunalContentSize.toSize(widget.spanY),
                         )
                     }
                 }

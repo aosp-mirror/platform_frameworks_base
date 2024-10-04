@@ -21,6 +21,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
 import android.os.UserManager
+import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.common.data.repository.PackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
 import com.android.systemui.communal.data.backup.CommunalBackupUtils
@@ -82,7 +83,7 @@ interface CommunalWidgetRepository {
      *
      * @param widgetIdToRankMap mapping of the widget ids to the rank of the widget.
      */
-    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {}
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>)
 
     /**
      * Restores the database by reading a state file from disk and updating the widget ids according
@@ -96,10 +97,13 @@ interface CommunalWidgetRepository {
     /**
      * Update the spanY of a widget in the database.
      *
-     * @param widgetId id of the widget to update.
+     * @param appWidgetId id of the widget to update.
      * @param spanY new spanY value for the widget.
+     * @param widgetIdToRankMap mapping of the widget ids to its rank. Allows re-ordering widgets
+     *   alongside the resize, in case resizing also requires re-ordering. This ensures the
+     *   re-ordering is done in the same database transaction as the resize.
      */
-    fun updateWidgetSpanY(widgetId: Int, spanY: Int)
+    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>)
 }
 
 @SysUISingleton
@@ -135,15 +139,17 @@ constructor(
                     componentName = widget.componentName,
                     rank = rank.rank,
                     providerInfo = providers[widget.widgetId],
+                    spanY = widget.spanY,
                 )
             }
         }
 
-    override fun updateWidgetSpanY(widgetId: Int, spanY: Int) {
+    override fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+        if (!communalWidgetResizing()) return
         bgScope.launch {
-            communalWidgetDao.updateWidgetSpanY(widgetId, spanY)
+            communalWidgetDao.resizeWidget(appWidgetId, spanY, widgetIdToRankMap)
             logger.i({ "Updated spanY of widget $int1 to $int2." }) {
-                int1 = widgetId
+                int1 = appWidgetId
                 int2 = spanY
             }
             backupManager.dataChanged()
@@ -445,7 +451,7 @@ constructor(
         val appWidgetId: Int,
         val componentName: String,
         val rank: Int,
+        val spanY: Int,
         var providerInfo: AppWidgetProviderInfo? = null,
-        var spanY: Int = 3,
     )
 }
