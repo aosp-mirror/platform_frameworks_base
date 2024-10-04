@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 
-private val maxDialogShowTime: Duration = 3.seconds
+private val MAX_DIALOG_SHOW_TIME: Duration = 3.seconds
 
 /**
  * Handles Volume Dialog visibility state. It might change from several sources:
@@ -65,7 +65,7 @@ constructor(
     init {
         merge(
                 mutableDismissDialogEvents.mapLatest {
-                    delay(maxDialogShowTime)
+                    delay(MAX_DIALOG_SHOW_TIME)
                     VolumeDialogEventModel.DismissRequested(Events.DISMISS_REASON_TIMEOUT)
                 },
                 callbacksInteractor.event,
