@@ -2643,13 +2643,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   fun onDesktopDragMove_endsOutsideValidDragArea_snapsToValidBounds() {
     val task = setUpFreeformTask()
+    val spyController = spy(controller)
     val mockSurface = mock(SurfaceControl::class.java)
     val mockDisplayLayout = mock(DisplayLayout::class.java)
     whenever(displayController.getDisplayLayout(task.displayId)).thenReturn(mockDisplayLayout)
     whenever(mockDisplayLayout.stableInsets()).thenReturn(Rect(0, 100, 2000, 2000))
-    controller.onDragPositioningMove(task, mockSurface, 200f, Rect(100, -100, 500, 1000))
+    spyController.onDragPositioningMove(task, mockSurface, 200f, Rect(100, -100, 500, 1000))
 
-    controller.onDragPositioningEnd(
+    whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+      .thenReturn(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+    spyController.onDragPositioningEnd(
         task,
         mockSurface,
         Point(100, -100), /* position */
