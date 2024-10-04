@@ -156,7 +156,7 @@ class DragDropController {
             SurfaceControl surface, int touchSource, int touchDeviceId, int touchPointerId,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
         if (DEBUG_DRAG) {
-            Slog.d(TAG_WM, "perform drag: win=" + window + " surface=" + surface + " flags=" +
+            Slog.d(TAG_WM, "perform drag: win=" + window + " surface=" + surface + " flags=0x" +
                     Integer.toHexString(flags) + " data=" + data + " touch(" + touchX + ","
                     + touchY + ") thumb center(" + thumbCenterX + "," + thumbCenterY + ")");
         }
