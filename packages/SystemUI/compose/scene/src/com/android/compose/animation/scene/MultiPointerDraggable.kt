@@ -42,8 +42,10 @@ import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
 import androidx.compose.ui.node.DelegatingNode
 import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.ObserverModifierNode
 import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.currentValueOf
+import androidx.compose.ui.node.observeReads
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
@@ -77,6 +79,7 @@ import kotlinx.coroutines.launch
 @Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
+    enabled: () -> Boolean,
     startDragImmediately: (startedPosition: Offset) -> Boolean,
     onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
     onFirstPointerDown: () -> Unit = {},
@@ -86,6 +89,7 @@ internal fun Modifier.multiPointerDraggable(
     this.then(
         MultiPointerDraggableElement(
             orientation,
+            enabled,
             startDragImmediately,
             onDragStarted,
             onFirstPointerDown,
@@ -96,6 +100,7 @@ internal fun Modifier.multiPointerDraggable(
 
 private data class MultiPointerDraggableElement(
     private val orientation: Orientation,
+    private val enabled: () -> Boolean,
     private val startDragImmediately: (startedPosition: Offset) -> Boolean,
     private val onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
@@ -106,6 +111,7 @@ private data class MultiPointerDraggableElement(
     override fun create(): MultiPointerDraggableNode =
         MultiPointerDraggableNode(
             orientation = orientation,
+            enabled = enabled,
             startDragImmediately = startDragImmediately,
             onDragStarted = onDragStarted,
             onFirstPointerDown = onFirstPointerDown,
@@ -115,6 +121,7 @@ private data class MultiPointerDraggableElement(
 
     override fun update(node: MultiPointerDraggableNode) {
         node.orientation = orientation
+        node.enabled = enabled
         node.startDragImmediately = startDragImmediately
         node.onDragStarted = onDragStarted
         node.onFirstPointerDown = onFirstPointerDown
@@ -124,6 +131,7 @@ private data class MultiPointerDraggableElement(
 
 internal class MultiPointerDraggableNode(
     orientation: Orientation,
+    enabled: () -> Boolean,
     var startDragImmediately: (startedPosition: Offset) -> Boolean,
     var onDragStarted:
         (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
@@ -134,10 +142,21 @@ internal class MultiPointerDraggableNode(
     DelegatingNode(),
     PointerInputModifierNode,
     CompositionLocalConsumerModifierNode,
+    ObserverModifierNode,
     SpaceVectorConverter {
     private val pointerTracker = delegate(SuspendingPointerInputModifierNode { pointerTracker() })
     private val pointerInput = delegate(SuspendingPointerInputModifierNode { pointerInput() })
     private val velocityTracker = VelocityTracker()
+    private var previousEnabled: Boolean = false
+
+    var enabled: () -> Boolean = enabled
+        set(value) {
+            // Reset the pointer input whenever enabled changed.
+            if (value != field) {
+                field = value
+                pointerInput.resetPointerInputHandler()
+            }
+        }
 
     private var converter = SpaceVectorConverter(orientation)
 
@@ -158,6 +177,21 @@ internal class MultiPointerDraggableNode(
                 pointerInput.resetPointerInputHandler()
             }
         }
+
+    override fun onAttach() {
+        previousEnabled = enabled()
+        onObservedReadsChanged()
+    }
+
+    override fun onObservedReadsChanged() {
+        observeReads {
+            val newEnabled = enabled()
+            if (newEnabled != previousEnabled) {
+                pointerInput.resetPointerInputHandler()
+            }
+            previousEnabled = newEnabled
+        }
+    }
 
     override fun onCancelPointerInput() {
         pointerTracker.onCancelPointerInput()
@@ -220,7 +254,9 @@ internal class MultiPointerDraggableNode(
                         velocityTracker.resetTracking()
                         velocityTracker.addPointerInputChange(firstPointerDown)
                         startedPosition = firstPointerDown.position
-                        onFirstPointerDown()
+                        if (enabled()) {
+                            onFirstPointerDown()
+                        }
                     }
 
                     // Changes with at least one pointer
@@ -259,6 +295,10 @@ internal class MultiPointerDraggableNode(
     }
 
     private suspend fun PointerInputScope.pointerInput() {
+        if (!enabled()) {
+            return
+        }
+
         val currentContext = currentCoroutineContext()
         awaitPointerEventScope {
             while (currentContext.isActive) {

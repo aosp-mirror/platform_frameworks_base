@@ -108,7 +108,7 @@ public class DimmerAnimationHelper {
     }
 
     // Sets the requested layer to reparent the dim to without applying it immediately
-    void setRequestedGeometryParent(WindowContainer<?> geometryParent) {
+    void setRequestedGeometryParent(@Nullable WindowContainer<?> geometryParent) {
         if (geometryParent != null) {
             mRequestedProperties.mGeometryParent = geometryParent;
         }

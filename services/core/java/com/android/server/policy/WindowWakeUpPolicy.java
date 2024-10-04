@@ -25,6 +25,7 @@ import static android.os.PowerManager.WAKE_REASON_WAKE_MOTION;
 import static android.view.KeyEvent.KEYCODE_POWER;
 
 import static com.android.server.policy.Flags.supportInputWakeupDelegate;
+import static com.android.server.power.feature.flags.Flags.perDisplayWakeByTouch;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -107,13 +108,14 @@ class WindowWakeUpPolicy {
     /**
      * Wakes up from a key event.
      *
+     * @param displayId the id of the display to wake.
      * @param eventTime the timestamp of the event in {@link SystemClock#uptimeMillis()}.
      * @param keyCode the {@link android.view.KeyEvent} key code of the key event.
      * @param isDown {@code true} if the event's action is {@link KeyEvent#ACTION_DOWN}.
      * @return {@code true} if the policy allows the requested wake up and the request has been
      *      executed; {@code false} otherwise.
      */
-    boolean wakeUpFromKey(long eventTime, int keyCode, boolean isDown) {
+    boolean wakeUpFromKey(int displayId, long eventTime, int keyCode, boolean isDown) {
         final boolean wakeAllowedDuringTheaterMode =
                 keyCode == KEYCODE_POWER
                         ? mAllowTheaterModeWakeFromPowerKey
@@ -127,6 +129,7 @@ class WindowWakeUpPolicy {
             return true;
         }
         wakeUp(
+                displayId,
                 eventTime,
                 keyCode == KEYCODE_POWER ? WAKE_REASON_POWER_BUTTON : WAKE_REASON_WAKE_KEY,
                 keyCode == KEYCODE_POWER ? "POWER" : "KEY");
@@ -136,12 +139,13 @@ class WindowWakeUpPolicy {
     /**
      * Wakes up from a motion event.
      *
+     * @param displayId the id of the display to wake.
      * @param eventTime the timestamp of the event in {@link SystemClock#uptimeMillis()}.
      * @param isDown {@code true} if the event's action is {@link MotionEvent#ACTION_DOWN}.
      * @return {@code true} if the policy allows the requested wake up and the request has been
      *      executed; {@code false} otherwise.
      */
-    boolean wakeUpFromMotion(long eventTime, int source, boolean isDown) {
+    boolean wakeUpFromMotion(int displayId, long eventTime, int source, boolean isDown) {
         if (!canWakeUp(mAllowTheaterModeWakeFromMotion)) {
             if (DEBUG) Slog.d(TAG, "Unable to wake up from motion.");
             return false;
@@ -150,7 +154,7 @@ class WindowWakeUpPolicy {
                 && mInputWakeUpDelegate.wakeUpFromMotion(eventTime, source, isDown)) {
             return true;
         }
-        wakeUp(eventTime, WAKE_REASON_WAKE_MOTION, "MOTION");
+        wakeUp(displayId, eventTime, WAKE_REASON_WAKE_MOTION, "MOTION");
         return true;
     }
 
@@ -166,7 +170,7 @@ class WindowWakeUpPolicy {
             if (DEBUG) Slog.d(TAG, "Unable to wake up from camera cover.");
             return false;
         }
-        wakeUp(eventTime, WAKE_REASON_CAMERA_LAUNCH, "CAMERA_COVER");
+        wakeUp(Display.DEFAULT_DISPLAY, eventTime, WAKE_REASON_CAMERA_LAUNCH, "CAMERA_COVER");
         return true;
     }
 
@@ -181,22 +185,24 @@ class WindowWakeUpPolicy {
             if (DEBUG) Slog.d(TAG, "Unable to wake up from lid.");
             return false;
         }
-        wakeUp(mClock.uptimeMillis(), WAKE_REASON_LID, "LID");
+        wakeUp(Display.DEFAULT_DISPLAY, mClock.uptimeMillis(), WAKE_REASON_LID, "LID");
         return true;
     }
 
     /**
      * Wakes up to prevent sleeping when opening camera through power button.
      *
+     * @param displayId the id of the display to wake.
      * @return {@code true} if the policy allows the requested wake up and the request has been
      *      executed; {@code false} otherwise.
      */
-    boolean wakeUpFromPowerKeyCameraGesture() {
+    boolean wakeUpFromPowerKeyCameraGesture(int displayId) {
         if (!canWakeUp(mAllowTheaterModeWakeFromPowerKey)) {
             if (DEBUG) Slog.d(TAG, "Unable to wake up from power key camera gesture.");
             return false;
         }
-        wakeUp(mClock.uptimeMillis(), WAKE_REASON_CAMERA_LAUNCH, "CAMERA_GESTURE_PREVENT_LOCK");
+        wakeUp(displayId, mClock.uptimeMillis(), WAKE_REASON_CAMERA_LAUNCH,
+                "CAMERA_GESTURE_PREVENT_LOCK");
         return true;
     }
 
@@ -211,7 +217,7 @@ class WindowWakeUpPolicy {
             if (DEBUG) Slog.d(TAG, "Unable to wake up from gesture.");
             return false;
         }
-        wakeUp(mClock.uptimeMillis(), WAKE_REASON_GESTURE, "GESTURE");
+        wakeUp(Display.DEFAULT_DISPLAY, mClock.uptimeMillis(), WAKE_REASON_GESTURE, "GESTURE");
         return true;
     }
 
@@ -234,7 +240,11 @@ class WindowWakeUpPolicy {
     }
 
     /** Wakes up {@link PowerManager}. */
-    private void wakeUp(long wakeTime, @WakeReason int reason, String details) {
-        mPowerManager.wakeUp(wakeTime, reason, "android.policy:" + details);
+    private void wakeUp(int displayId, long wakeTime, @WakeReason int reason, String details) {
+        if (perDisplayWakeByTouch()) {
+            mPowerManager.wakeUp(wakeTime, reason, "android.policy:" + details, displayId);
+        } else {
+            mPowerManager.wakeUp(wakeTime, reason, "android.policy:" + details);
+        }
     }
 }

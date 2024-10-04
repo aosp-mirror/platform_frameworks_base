@@ -132,8 +132,16 @@ flag {
 }
 
 flag {
-  namespace: "virtual_devices"
-  name: "camera_timestamp_from_surface"
-  description: "Pass the surface timestamp to the capture result"
-  bug: "351341245"
+    namespace: "virtual_devices"
+    name: "camera_timestamp_from_surface"
+    description: "Pass the surface timestamp to the capture result"
+    bug: "351341245"
+}
+
+flag {
+    namespace: "virtual_devices"
+    name: "enable_limited_vdm_role"
+    description: "New VDM role without trusted displays or input"
+    bug: "370657575"
+    is_exported: true
 }

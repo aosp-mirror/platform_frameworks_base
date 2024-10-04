@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
 import static org.junit.Assert.assertEquals;
@@ -50,6 +51,7 @@ import android.app.KeyguardManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.platform.test.annotations.DisableFlags;
@@ -441,6 +443,40 @@ public class RecentTasksControllerTest extends ShellTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE)
+    public void testGetRecentTasks_hasDesktopTasks_persistenceEnabled_freeformTaskHaveBoundsSet() {
+        ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
+        ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
+
+        t1.lastNonFullscreenBounds = new Rect(100, 200, 300, 400);
+        t2.lastNonFullscreenBounds = new Rect(150, 250, 350, 450);
+        setRawList(t1, t2);
+
+        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopModeTaskRepository.isActiveTask(2)).thenReturn(true);
+
+        ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
+                MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
+
+        assertEquals(1, recentTasks.size());
+        GroupedRecentTaskInfo freeformGroup = recentTasks.get(0);
+
+        // Check bounds
+        assertEquals(t1.lastNonFullscreenBounds, freeformGroup.getTaskInfoList().get(
+                0).configuration.windowConfiguration.getAppBounds());
+        assertEquals(t2.lastNonFullscreenBounds, freeformGroup.getTaskInfoList().get(
+                1).configuration.windowConfiguration.getAppBounds());
+
+        // Check position in parent
+        assertEquals(new Point(t1.lastNonFullscreenBounds.left,
+                        t1.lastNonFullscreenBounds.top),
+                freeformGroup.getTaskInfoList().get(0).positionInParent);
+        assertEquals(new Point(t2.lastNonFullscreenBounds.left,
+                        t2.lastNonFullscreenBounds.top),
+                freeformGroup.getTaskInfoList().get(1).positionInParent);
+    }
+
+    @Test
     public void testRemovedTaskRemovesSplit() {
         ActivityManager.RecentTaskInfo t1 = makeTaskInfo(1);
         ActivityManager.RecentTaskInfo t2 = makeTaskInfo(2);
@@ -623,6 +659,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     private ActivityManager.RecentTaskInfo makeTaskInfo(int taskId) {
         ActivityManager.RecentTaskInfo info = new ActivityManager.RecentTaskInfo();
         info.taskId = taskId;
+        info.lastNonFullscreenBounds = new Rect();
         return info;
     }
 

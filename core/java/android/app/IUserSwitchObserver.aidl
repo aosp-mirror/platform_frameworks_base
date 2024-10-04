@@ -19,10 +19,10 @@ package android.app;
 import android.os.IRemoteCallback;
 
 /** {@hide} */
-oneway interface IUserSwitchObserver {
+interface IUserSwitchObserver {
     void onBeforeUserSwitching(int newUserId);
-    void onUserSwitching(int newUserId, IRemoteCallback reply);
-    void onUserSwitchComplete(int newUserId);
-    void onForegroundProfileSwitch(int newProfileId);
-    void onLockedBootComplete(int newUserId);
+    oneway void onUserSwitching(int newUserId, IRemoteCallback reply);
+    oneway void onUserSwitchComplete(int newUserId);
+    oneway void onForegroundProfileSwitch(int newProfileId);
+    oneway void onLockedBootComplete(int newUserId);
 }

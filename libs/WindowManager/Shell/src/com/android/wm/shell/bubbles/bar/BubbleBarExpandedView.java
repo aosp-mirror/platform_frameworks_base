@@ -353,6 +353,11 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         if (isDragging != mIsDragging) {
             mIsDragging = isDragging;
             updateSamplingState();
+
+            if (isDragging && mPositioner.isImeVisible()) {
+                // Hide the IME when dragging begins
+                mManager.hideCurrentInputMethod();
+            }
         }
     }
 

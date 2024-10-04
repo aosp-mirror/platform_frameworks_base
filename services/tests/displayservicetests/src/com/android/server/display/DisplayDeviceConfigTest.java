@@ -157,6 +157,7 @@ public final class DisplayDeviceConfigTest {
                 .getIdleScreenRefreshRateTimeoutLuxThresholdPoint());
         assertNull(mDisplayDeviceConfig.getTempSensor().name);
         assertTrue(mDisplayDeviceConfig.isAutoBrightnessAvailable());
+        assertEquals(0, mDisplayDeviceConfig.getIdleStylusTimeoutMillis());
     }
 
     @Test
@@ -253,6 +254,7 @@ public final class DisplayDeviceConfigTest {
                 .getLux().intValue());
         assertEquals(800, idleScreenRefreshRateTimeoutLuxThresholdPoints.get(1)
                 .getTimeout().intValue());
+        assertEquals(1000, mDisplayDeviceConfig.getIdleStylusTimeoutMillis());
     }
 
     @Test
@@ -1479,6 +1481,7 @@ public final class DisplayDeviceConfigTest {
                 +               "</point>\n"
                 +           "</map>\n"
                 +       "</luxToBrightnessMapping>\n"
+                +       "<idleStylusTimeoutMillis>1000</idleStylusTimeoutMillis>\n"
                 +   "</autoBrightness>\n"
                 +  getPowerThrottlingConfig()
                 +   "<highBrightnessMode enabled=\"true\">\n"
