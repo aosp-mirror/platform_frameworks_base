@@ -1867,27 +1867,33 @@ public final class WindowContainerTransaction implements Parcelable {
             switch (type) {
                 case HIERARCHY_OP_TYPE_REPARENT: return "reparent";
                 case HIERARCHY_OP_TYPE_REORDER: return "reorder";
-                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "ChildrenTasksReparent";
-                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "SetLaunchRoot";
-                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "SetAdjacentRoot";
-                case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "LaunchTask";
-                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "SetAdjacentFlagRoot";
+                case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT: return "childrenTasksReparent";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: return "setLaunchRoot";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS: return "setAdjacentRoot";
+                case HIERARCHY_OP_TYPE_LAUNCH_TASK: return "launchTask";
+                case HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT: return "setAdjacentFlagRoot";
                 case HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT:
-                    return "SetDisableLaunchAdjacent";
-                case HIERARCHY_OP_TYPE_PENDING_INTENT: return "PendingIntent";
-                case HIERARCHY_OP_TYPE_START_SHORTCUT: return "StartShortcut";
+                    return "setDisableLaunchAdjacent";
+                case HIERARCHY_OP_TYPE_PENDING_INTENT: return "pendingIntent";
+                case HIERARCHY_OP_TYPE_START_SHORTCUT: return "startShortcut";
+                case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: return "restoreTransientOrder";
                 case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: return "addInsetsFrameProvider";
                 case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER:
                     return "removeInsetsFrameProvider";
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: return "setAlwaysOnTop";
-                case HIERARCHY_OP_TYPE_REMOVE_TASK: return "RemoveTask";
+                case HIERARCHY_OP_TYPE_REMOVE_TASK: return "removeTask";
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: return "finishActivity";
-                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "ClearAdjacentRoot";
+                case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "clearAdjacentRoot";
                 case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
                     return "setReparentLeafTaskIfRelaunch";
                 case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
                     return "addTaskFragmentOperation";
+                case HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK:
+                    return "movePipActivityToPinnedTask";
+                case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE: return "setIsTrimmable";
+                case HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION: return "restoreBackNav";
                 case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES: return "setExcludeInsetsTypes";
+                case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE: return "setKeyguardState";
                 default: return "HOP(" + type + ")";
             }
         }

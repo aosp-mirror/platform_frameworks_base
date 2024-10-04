@@ -2119,7 +2119,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * For all tasks at or below this container call the callback.
+     * Calls the given {@param callback} for all tasks in depth-first top-down z-order at or below
+     * this container.
      *
      * @param callback Calls the {@link ToBooleanFunction#apply} method for each task found and
      *                 stops the search if {@link ToBooleanFunction#apply} returns {@code true}.
