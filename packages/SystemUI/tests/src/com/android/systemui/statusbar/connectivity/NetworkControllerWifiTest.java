@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.connectivity;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -250,6 +251,17 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         assertEquals(testSsid, mNetworkController.mWifiSignalController.mCurrentState.ssid);
     }
 
+    private Network newWifiNetwork(WifiInfo wifiInfo) {
+        final Network network = mock(Network.class);
+        final NetworkCapabilities wifiCaps =
+                new NetworkCapabilities.Builder()
+                        .addTransportType(TRANSPORT_WIFI)
+                        .setTransportInfo(wifiInfo)
+                        .build();
+        when(mMockCm.getNetworkCapabilities(network)).thenReturn(wifiCaps);
+        return network;
+    }
+
     @Test
     public void testVcnWithUnderlyingWifi() {
         String testSsid = "Test VCN SSID";
@@ -266,11 +278,19 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
             setWifiLevelForVcn(testLevel);
 
             setConnectivityViaCallbackInNetworkControllerForVcn(
-                    NetworkCapabilities.TRANSPORT_CELLULAR, true, true, mVcnTransportInfo);
+                    NetworkCapabilities.TRANSPORT_CELLULAR,
+                    true,
+                    true,
+                    mVcnTransportInfo,
+                    newWifiNetwork(mWifiInfo));
             verifyLastMobileDataIndicatorsForVcn(true, testLevel, TelephonyIcons.ICON_CWF, true);
 
             setConnectivityViaCallbackInNetworkControllerForVcn(
-                    NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
+                    NetworkCapabilities.TRANSPORT_CELLULAR,
+                    false,
+                    true,
+                    mVcnTransportInfo,
+                    newWifiNetwork(mWifiInfo));
             verifyLastMobileDataIndicatorsForVcn(true, testLevel, TelephonyIcons.ICON_CWF, false);
         }
     }
@@ -391,13 +411,15 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     protected void setWifiLevelForVcn(int level) {
-        when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
-        when(mVcnTransportInfo.makeCopy(anyLong())).thenReturn(mVcnTransportInfo);
         when(mWifiInfo.getRssi()).thenReturn(calculateRssiForLevel(level));
         when(mWifiInfo.isCarrierMerged()).thenReturn(true);
         when(mWifiInfo.getSubscriptionId()).thenReturn(1);
         setConnectivityViaCallbackInWifiTrackerForVcn(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
+                NetworkCapabilities.TRANSPORT_CELLULAR,
+                false,
+                true,
+                mVcnTransportInfo,
+                newWifiNetwork(mWifiInfo));
     }
 
     private int calculateRssiForLevel(int level) {
@@ -409,13 +431,15 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     protected void setWifiStateForVcn(boolean connected, String ssid) {
-        when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
-        when(mVcnTransportInfo.makeCopy(anyLong())).thenReturn(mVcnTransportInfo);
         when(mWifiInfo.getSSID()).thenReturn(ssid);
         when(mWifiInfo.isCarrierMerged()).thenReturn(true);
         when(mWifiInfo.getSubscriptionId()).thenReturn(1);
         setConnectivityViaCallbackInWifiTrackerForVcn(
-                NetworkCapabilities.TRANSPORT_CELLULAR, false, connected, mVcnTransportInfo);
+                NetworkCapabilities.TRANSPORT_CELLULAR,
+                false,
+                connected,
+                mVcnTransportInfo,
+                newWifiNetwork(mWifiInfo));
     }
 
     protected void verifyLastQsDataDirection(boolean in, boolean out) {

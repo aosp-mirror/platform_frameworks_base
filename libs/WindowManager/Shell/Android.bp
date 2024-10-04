@@ -197,6 +197,7 @@ java_library {
 android_library {
     name: "WindowManager-Shell",
     srcs: [
+        "src/com/android/wm/shell/EventLogTags.logtags",
         ":wm_shell_protolog_src",
         // TODO(b/168581922) protologtool do not support kotlin(*.kt)
         ":wm_shell-sources-kt",

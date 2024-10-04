@@ -19,6 +19,8 @@ package com.android.wm.shell.desktopmode
 import android.app.ActivityManager.RunningTaskInfo
 import android.os.Binder
 import android.os.Handler
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.AndroidTestingRunner
 import android.view.Display.DEFAULT_DISPLAY
@@ -33,6 +35,7 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
@@ -243,6 +246,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_activeNonMinimizedTasksStillAround_doesNothing() {
         desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
         desktopTaskRepo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
@@ -256,6 +260,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_noMinimizedTasks_doesNothing() {
         val wct = WindowContainerTransaction()
         desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
@@ -265,6 +270,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_onlyMinimizedTasksLeft_removesAllMinimizedTasks() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
@@ -280,6 +286,20 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         assertThat(wct.hierarchyOps[0].container).isEqualTo(task1.token.asBinder())
         assertThat(wct.hierarchyOps[1].type).isEqualTo(HIERARCHY_OP_TYPE_REMOVE_TASK)
         assertThat(wct.hierarchyOps[1].container).isEqualTo(task2.token.asBinder())
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    fun removeLeftoverMinimizedTasks_onlyMinimizedTasksLeft_backNavEnabled_doesNothing() {
+        val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
+        desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task2.taskId)
+
+        val wct = WindowContainerTransaction()
+        desktopTasksLimiter.leftoverMinimizedTasksRemover.onActiveTasksChanged(DEFAULT_DISPLAY)
+
+        assertThat(wct.hierarchyOps).isEmpty()
     }
 
     @Test
