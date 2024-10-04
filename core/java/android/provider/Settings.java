@@ -20164,6 +20164,12 @@ public final class Settings {
             public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
 
             /**
+             * Phone switching has finished account match step.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_ACCOUNTS_MATCHED = 12;
+
+            /**
              * Phone switching request source
              * @hide
              */
