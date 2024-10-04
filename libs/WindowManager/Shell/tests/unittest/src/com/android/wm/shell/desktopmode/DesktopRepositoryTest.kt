@@ -56,9 +56,9 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
-class DesktopModeTaskRepositoryTest : ShellTestCase() {
+class DesktopRepositoryTest : ShellTestCase() {
 
-    private lateinit var repo: DesktopModeTaskRepository
+    private lateinit var repo: DesktopRepository
     private lateinit var shellInit: ShellInit
     private lateinit var datastoreScope: CoroutineScope
 
@@ -71,7 +71,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         datastoreScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
 
-        repo = DesktopModeTaskRepository(context, shellInit, persistentRepository, datastoreScope)
+        repo = DesktopRepository(context, shellInit, persistentRepository, datastoreScope)
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
             Desktop.getDefaultInstance()
         )
@@ -940,7 +940,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         assertThat(repo.isTaskInFullImmersiveState(taskId = 2)).isTrue()
     }
 
-    class TestListener : DesktopModeTaskRepository.ActiveTasksListener {
+    class TestListener : DesktopRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0
         var activeChangesOnSecondaryDisplay = 0
         override fun onActiveTasksChanged(displayId: Int) {
@@ -952,7 +952,7 @@ class DesktopModeTaskRepositoryTest : ShellTestCase() {
         }
     }
 
-    class TestVisibilityListener : DesktopModeTaskRepository.VisibleTasksListener {
+    class TestVisibilityListener : DesktopRepository.VisibleTasksListener {
         var visibleTasksCountOnDefaultDisplay = 0
         var visibleTasksCountOnSecondaryDisplay = 0
 

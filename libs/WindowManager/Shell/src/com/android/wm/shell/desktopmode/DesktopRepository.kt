@@ -42,8 +42,8 @@ import java.util.function.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/** Tracks task data for Desktop Mode. */
-class DesktopModeTaskRepository (
+/** Tracks desktop data for Android Desktop Windowing. */
+class DesktopRepository (
     private val context: Context,
     shellInit: ShellInit,
     private val persistentRepository: DesktopPersistentRepository,
@@ -467,10 +467,9 @@ class DesktopModeTaskRepository (
         }
     }
 
-
     internal fun dump(pw: PrintWriter, prefix: String) {
         val innerPrefix = "$prefix  "
-        pw.println("${prefix}DesktopModeTaskRepository")
+        pw.println("${prefix}DesktopRepository")
         dumpDesktopTaskData(pw, innerPrefix)
         pw.println("${innerPrefix}activeTasksListeners=${activeTasksListeners.size}")
         pw.println("${innerPrefix}visibleTasksListeners=${visibleTasksListeners.size}")
@@ -512,10 +511,9 @@ class DesktopModeTaskRepository (
     }
 
     companion object {
-        private const val TAG = "DesktopModeTaskRepository"
+        private const val TAG = "DesktopRepository"
     }
 }
 
 private fun <T> Iterable<T>.toDumpString(): String =
     joinToString(separator = ", ", prefix = "[", postfix = "]")
-

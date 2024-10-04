@@ -48,7 +48,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -82,7 +82,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
-    private DesktopModeTaskRepository mDesktopModeTaskRepository;
+    private DesktopRepository mDesktopRepository;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
     @Mock
@@ -120,7 +120,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
                 mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopModeTaskRepository), mTaskStackTransitionObserver,
+                Optional.of(mDesktopRepository), mTaskStackTransitionObserver,
                 mMainExecutor);
         mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,

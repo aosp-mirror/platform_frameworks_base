@@ -62,7 +62,7 @@ class DesktopTasksTransitionObserverTest {
     private val transitions = mock<Transitions>()
     private val context = mock<Context>()
     private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
-    private val taskRepository = mock<DesktopModeTaskRepository>()
+    private val taskRepository = mock<DesktopRepository>()
 
     private lateinit var transitionObserver: DesktopTasksTransitionObserver
     private lateinit var shellInit: ShellInit

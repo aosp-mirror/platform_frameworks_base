@@ -40,7 +40,7 @@ import com.android.wm.shell.transition.Transitions
 class DesktopMixedTransitionHandler(
     private val context: Context,
     private val transitions: Transitions,
-    private val desktopTaskRepository: DesktopModeTaskRepository,
+    private val desktopRepository: DesktopRepository,
     private val freeformTaskTransitionHandler: FreeformTaskTransitionHandler,
     private val closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler,
     private val interactionJankMonitor: InteractionJankMonitor,
@@ -138,7 +138,7 @@ class DesktopMixedTransitionHandler(
 
     private fun isLastDesktopTask(change: TransitionInfo.Change): Boolean =
         change.taskInfo?.let {
-            desktopTaskRepository.getActiveNonMinimizedTaskCount(it.displayId) == 1
+            desktopRepository.getActiveNonMinimizedTaskCount(it.displayId) == 1
         } ?: false
 
     private fun findCloseDesktopTaskChange(info: TransitionInfo): TransitionInfo.Change? {

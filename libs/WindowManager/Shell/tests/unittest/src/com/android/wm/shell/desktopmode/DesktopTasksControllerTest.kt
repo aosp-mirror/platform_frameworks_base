@@ -201,7 +201,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
-  private lateinit var taskRepository: DesktopModeTaskRepository
+  private lateinit var taskRepository: DesktopRepository
   private lateinit var desktopTasksLimiter: DesktopTasksLimiter
   private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
   private lateinit var testScope: CoroutineScope
@@ -232,7 +232,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
     shellInit = spy(ShellInit(testExecutor))
-    taskRepository = DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
+    taskRepository = DesktopRepository(context, shellInit, persistentRepository, testScope)
     desktopTasksLimiter =
         DesktopTasksLimiter(
             transitions,

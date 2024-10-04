@@ -73,7 +73,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SingleInstanceRemoteListener
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository.VisibleTasksListener
+import com.android.wm.shell.desktopmode.DesktopRepository.VisibleTasksListener
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.DragStartState
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.DragToDesktopStateListener
@@ -134,7 +134,7 @@ class DesktopTasksController(
     private val desktopModeDragAndDropTransitionHandler: DesktopModeDragAndDropTransitionHandler,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val dragToDesktopTransitionHandler: DragToDesktopTransitionHandler,
-    private val taskRepository: DesktopModeTaskRepository,
+    private val taskRepository: DesktopRepository,
     private val desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver,
     private val launchAdjacentController: LaunchAdjacentController,
     private val recentsTransitionHandler: RecentsTransitionHandler,

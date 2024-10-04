@@ -98,7 +98,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var handler: DesktopActivityOrientationChangeHandler
     private lateinit var shellInit: ShellInit
-    private lateinit var taskRepository: DesktopModeTaskRepository
+    private lateinit var taskRepository: DesktopRepository
     private lateinit var testScope: CoroutineScope
     // Mock running tasks are registered here so we can get the list from mock shell task organizer.
     private val runningTasks = mutableListOf<RunningTaskInfo>()
@@ -116,7 +116,7 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
         taskRepository =
-            DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
+            DesktopRepository(context, shellInit, persistentRepository, testScope)
         whenever(shellTaskOrganizer.getRunningTasks(anyInt())).thenAnswer { runningTasks }
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
         whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(

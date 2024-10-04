@@ -93,7 +93,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -193,14 +193,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
-    private final DesktopModeTaskRepository mDesktopRepository;
+    private final DesktopRepository mDesktopRepository;
 
     DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -232,7 +232,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -1591,7 +1591,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @NonNull Context userContext,
                 DisplayController displayController,
                 SplitScreenController splitScreenController,
-                DesktopModeTaskRepository desktopRepository,
+                DesktopRepository desktopRepository,
                 ShellTaskOrganizer taskOrganizer,
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,

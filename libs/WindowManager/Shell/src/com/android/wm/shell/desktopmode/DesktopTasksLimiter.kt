@@ -44,7 +44,7 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  */
 class DesktopTasksLimiter (
         transitions: Transitions,
-        private val taskRepository: DesktopModeTaskRepository,
+        private val taskRepository: DesktopRepository,
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val maxTasksLimit: Int,
         private val interactionJankMonitor: InteractionJankMonitor,
@@ -160,7 +160,7 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
+    inner class LeftoverMinimizedTasksRemover : DesktopRepository.ActiveTasksListener {
         override fun onActiveTasksChanged(displayId: Int) {
             // If back navigation is enabled, we shouldn't remove the leftover tasks
             if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
