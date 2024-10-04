@@ -112,6 +112,7 @@ import com.android.wm.shell.desktopmode.DesktopWallpaperActivity;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -124,6 +125,7 @@ import com.android.wm.shell.sysui.KeyguardChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.ExclusionRegionListener;
 import com.android.wm.shell.windowdecor.extension.InsetsStateKt;
@@ -133,20 +135,21 @@ import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import kotlin.Pair;
 import kotlin.Unit;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
 /**
  * View model for the window decoration with a caption and shadows. Works with
  * {@link DesktopModeWindowDecoration}.
  */
 
-public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
+public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
+        FocusTransitionListener {
     private static final String TAG = "DesktopModeWindowDecorViewModel";
 
     private final DesktopModeWindowDecoration.Factory mDesktopModeWindowDecorFactory;
@@ -216,6 +219,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
             };
     private final TaskPositionerFactory mTaskPositionerFactory;
+    private final FocusTransitionObserver mFocusTransitionObserver;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -242,7 +246,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             Optional<DesktopTasksLimiter> desktopTasksLimiter,
             AppHandleEducationController appHandleEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
-            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler) {
+            Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
+            FocusTransitionObserver focusTransitionObserver) {
         this(
                 context,
                 shellExecutor,
@@ -274,7 +279,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 appHandleEducationController,
                 windowDecorCaptionHandleRepository,
                 activityOrientationChangeHandler,
-                new TaskPositionerFactory());
+                new TaskPositionerFactory(),
+                focusTransitionObserver);
     }
 
     @VisibleForTesting
@@ -309,7 +315,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             AppHandleEducationController appHandleEducationController,
             WindowDecorCaptionHandleRepository windowDecorCaptionHandleRepository,
             Optional<DesktopActivityOrientationChangeHandler> activityOrientationChangeHandler,
-            TaskPositionerFactory taskPositionerFactory) {
+            TaskPositionerFactory taskPositionerFactory,
+            FocusTransitionObserver focusTransitionObserver) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -369,6 +376,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             }
         };
         mTaskPositionerFactory = taskPositionerFactory;
+        mFocusTransitionObserver = focusTransitionObserver;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -401,6 +409,16 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         onToDesktop(taskId, desktopModeTransitionSource);
                         return Unit.INSTANCE;
                     });
+        }
+        mFocusTransitionObserver.setLocalFocusTransitionListener(this, mMainExecutor);
+    }
+
+    @Override
+    public void onFocusedTaskChanged(int taskId, boolean isFocusedOnDisplay,
+            boolean isFocusedGlobally) {
+        final WindowDecoration decor = mWindowDecorByTaskId.get(taskId);
+        if (decor != null) {
+            decor.relayout(decor.mTaskInfo, isFocusedGlobally);
         }
     }
 
@@ -447,7 +465,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             removeTaskFromEventReceiver(oldTaskInfo.displayId);
             incrementEventReceiverTasks(taskInfo.displayId);
         }
-        decoration.relayout(taskInfo);
+        decoration.relayout(taskInfo, decoration.mHasGlobalFocus);
         mActivityOrientationChangeHandler.ifPresent(handler ->
                 handler.handleActivityOrientationChange(oldTaskInfo, taskInfo));
     }
@@ -486,7 +504,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         } else {
             decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
-                    false /* shouldSetTaskPositionAndCrop */);
+                    false /* shouldSetTaskPositionAndCrop */,
+                    mFocusTransitionObserver.hasGlobalFocus(taskInfo));
         }
     }
 
@@ -499,7 +518,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) return;
 
         decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */,
-                false /* shouldSetTaskPositionAndCrop */);
+                false /* shouldSetTaskPositionAndCrop */,
+                mFocusTransitionObserver.hasGlobalFocus(taskInfo));
     }
 
     @Override
@@ -895,7 +915,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
 
         private void moveTaskToFront(RunningTaskInfo taskInfo) {
-            if (!taskInfo.isFocused) {
+            if (!mFocusTransitionObserver.hasGlobalFocus(taskInfo)) {
                 mDesktopTasksController.moveTaskToFront(taskInfo);
             }
         }
@@ -1516,7 +1536,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.setExclusionRegionListener(mExclusionRegionListener);
         windowDecoration.setDragPositioningCallback(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */);
+                false /* applyStartTransactionOnDraw */, false /* shouldSetTaskPositionAndCrop */,
+                mFocusTransitionObserver.hasGlobalFocus(taskInfo));
         if (!Flags.enableHandleInputFix()) {
             incrementEventReceiverTasks(taskInfo.displayId);
         }

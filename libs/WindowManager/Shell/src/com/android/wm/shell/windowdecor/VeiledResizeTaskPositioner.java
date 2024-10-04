@@ -106,7 +106,7 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
             // Capture CUJ for re-sizing window in DW mode.
             mInteractionJankMonitor.begin(mDesktopWindowDecoration.mTaskSurface,
                     mDesktopWindowDecoration.mContext, mHandler, CUJ_DESKTOP_MODE_RESIZE_WINDOW);
-            if (!mDesktopWindowDecoration.mTaskInfo.isFocused) {
+            if (!mDesktopWindowDecoration.mHasGlobalFocus) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true /* onTop */,
                         true /* includingParents */);
