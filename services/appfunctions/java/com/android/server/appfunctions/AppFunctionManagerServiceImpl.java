@@ -438,7 +438,7 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
                         targetUser,
                         mServiceConfig.getExecuteAppFunctionCancellationTimeoutMillis(),
                         cancellationSignal,
-                        RunAppFunctionServiceCallback.create(
+                        new RunAppFunctionServiceCallback(
                                 requestInternal,
                                 cancellationCallback,
                                 safeExecuteAppFunctionCallback),
