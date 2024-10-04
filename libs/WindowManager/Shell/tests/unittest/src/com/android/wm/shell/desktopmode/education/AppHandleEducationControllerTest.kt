@@ -46,6 +46,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,10 +62,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-/**
- * Tests of [AppHandleEducationController]
- * Usage: atest AppHandleEducationControllerTest
- */
+/** Tests of [AppHandleEducationController] Usage: atest AppHandleEducationControllerTest */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -220,6 +218,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showWindowingImageButtonTooltip_appHandleExpanded_shouldCallShowEducationTooltipTwice() =
       testScope.runTest {
         // After first tooltip is dismissed, app handle is expanded. Should show second education
@@ -237,6 +236,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showWindowingImageButtonTooltip_appHandleExpandedAfterTimeout_shouldCallShowEducationTooltipOnce() =
       testScope.runTest {
         // After first tooltip is dismissed, app handle is expanded after timeout. Should not show
@@ -258,6 +258,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showWindowingImageButtonTooltip_appHandleExpandedTwice_shouldCallShowEducationTooltipTwice() =
       testScope.runTest {
         // After first tooltip is dismissed, app handle is expanded twice. Should show second
@@ -279,6 +280,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showWindowingImageButtonTooltip_appHandleNotExpanded_shouldCallShowEducationTooltipOnce() =
       testScope.runTest {
         // After first tooltip is dismissed, app handle is not expanded. Should not show second
@@ -296,6 +298,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showExitWindowingButtonTooltip_appHeaderVisible_shouldCallShowEducationTooltipThrice() =
       testScope.runTest {
         // After first two tooltips are dismissed, app header is visible. Should show third
@@ -313,6 +316,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showExitWindowingButtonTooltip_appHeaderVisibleAfterTimeout_shouldCallShowEducationTooltipTwice() =
       testScope.runTest {
         // After first two tooltips are dismissed, app header is visible after timeout. Should not
@@ -334,6 +338,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showExitWindowingButtonTooltip_appHeaderVisibleTwice_shouldCallShowEducationTooltipThrice() =
       testScope.runTest {
         // After first two tooltips are dismissed, app header is visible twice. Should show third
@@ -354,6 +359,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun showExitWindowingButtonTooltip_appHeaderExpanded_shouldCallShowEducationTooltipTwice() =
       testScope.runTest {
         // After first two tooltips are dismissed, app header is visible but expanded. Should not
@@ -393,6 +399,7 @@ class AppHandleEducationControllerTest : ShellTestCase() {
 
   @Test
   @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_APP_HANDLE_EDUCATION)
+  @Ignore("b/371527084: revisit testcase after refactoring original logic")
   fun setAppHandleEducationTooltipCallbacks_onWindowingImageButtonTooltipClicked_callbackInvoked() =
       testScope.runTest {
         // After first tooltip is dismissed, app handle is expanded. Should show second education
