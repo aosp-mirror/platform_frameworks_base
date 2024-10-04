@@ -60,7 +60,6 @@ import java.util.concurrent.Executor
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.function.Consumer
-import javax.inject.Provider
 import kotlin.math.abs
 
 /** Controls the state and flow for screenshots. */
@@ -73,7 +72,7 @@ internal constructor(
     screenshotNotificationsControllerFactory: ScreenshotNotificationsController.Factory,
     screenshotActionsControllerFactory: ScreenshotActionsController.Factory,
     actionExecutorFactory: ActionExecutor.Factory,
-    screenshotSoundControllerProvider: Provider<ScreenshotSoundController?>,
+    private val screenshotSoundController: ScreenshotSoundController,
     private val uiEventLogger: UiEventLogger,
     private val imageExporter: ImageExporter,
     private val imageCapture: ImageCapture,
@@ -98,7 +97,6 @@ internal constructor(
     private val actionExecutor: ActionExecutor
     private val copyBroadcastReceiver: BroadcastReceiver
 
-    private var screenshotSoundController: ScreenshotSoundController? = null
     private var screenBitmap: Bitmap? = null
     private var screenshotTakenInPortrait = false
     private var screenshotAnimation: Animator? = null
@@ -136,14 +134,6 @@ internal constructor(
 
         actionExecutor = actionExecutorFactory.create(window.window, viewProxy) { finishDismiss() }
         actionsController = screenshotActionsControllerFactory.getController(actionExecutor)
-
-        // Sound is only reproduced from the controller of the default display.
-        screenshotSoundController =
-            if (display.displayId == Display.DEFAULT_DISPLAY) {
-                screenshotSoundControllerProvider.get()
-            } else {
-                null
-            }
 
         copyBroadcastReceiver =
             object : BroadcastReceiver() {
@@ -302,7 +292,7 @@ internal constructor(
     // Any cleanup needed when the service is being destroyed.
     override fun onDestroy() {
         removeWindow()
-        releaseMediaPlayer()
+        screenshotSoundController.releaseScreenshotSoundAsync()
         releaseContext()
         bgExecutor.shutdown()
     }
@@ -311,10 +301,6 @@ internal constructor(
     private fun releaseContext() {
         broadcastDispatcher.unregisterReceiver(copyBroadcastReceiver)
         context.release()
-    }
-
-    private fun releaseMediaPlayer() {
-        screenshotSoundController?.releaseScreenshotSoundAsync()
     }
 
     /** Update resources on configuration change. Reinflate for theme/color changes. */
@@ -442,18 +428,13 @@ internal constructor(
         viewProxy.stopInputListening()
     }
 
-    private fun playCameraSoundIfNeeded() {
-        // the controller is not-null only on the default display controller
-        screenshotSoundController?.playScreenshotSoundAsync()
-    }
-
     /**
      * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
      * failure).
      */
     private fun saveScreenshotAndToast(screenshot: ScreenshotData, finisher: Consumer<Uri?>) {
         // Play the shutter sound to notify that we've taken a screenshot
-        playCameraSoundIfNeeded()
+        screenshotSoundController.playScreenshotSoundAsync()
 
         saveScreenshotInBackground(screenshot, UUID.randomUUID(), finisher) {
             result: ImageExporter.Result ->
@@ -482,7 +463,7 @@ internal constructor(
             viewProxy.createScreenshotDropInAnimation(screenRect, showFlash).apply {
                 doOnEnd { onAnimationComplete?.run() }
                 // Play the shutter sound to notify that we've taken a screenshot
-                playCameraSoundIfNeeded()
+                screenshotSoundController.playScreenshotSoundAsync()
                 if (LogConfig.DEBUG_ANIM) {
                     Log.d(TAG, "starting post-screenshot animation")
                 }
