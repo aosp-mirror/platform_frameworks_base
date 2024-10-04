@@ -17,6 +17,7 @@
 package com.android.server.notification;
 
 import static android.app.Flags.sortSectionByTime;
+import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.Notification.FLAG_INSISTENT;
 import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
@@ -42,6 +43,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -1641,7 +1643,7 @@ public final class NotificationAttentionHelper {
             }
 
             // recent conversation
-            if (record.isConversation()
+            if ((record.isConversation() || isConversationMessage(record))
                     && record.getNotification().getWhen() > mLastAvalancheTriggerTimestamp) {
                 return true;
             }
@@ -1655,6 +1657,21 @@ public final class NotificationAttentionHelper {
             }
 
             return false;
+        }
+
+        // Relaxed signals for conversations messages
+        private boolean isConversationMessage(final NotificationRecord record) {
+            if (!CATEGORY_MESSAGE.equals(record.getSbn().getNotification().category)) {
+                return false;
+            }
+            if (record.getChannel().isDemoted()) {
+                return false;
+            }
+            final ShortcutInfo shortcut = record.getShortcutInfo();
+            if (shortcut == null) {
+                return false;
+            }
+            return true;
         }
     }
 
