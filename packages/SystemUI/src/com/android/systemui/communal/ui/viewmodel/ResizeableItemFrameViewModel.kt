@@ -25,8 +25,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.dropWhile
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
@@ -45,7 +44,10 @@ data class ResizeInfo(
     val spans: Int,
     /** The drag handle which was used to resize the element. */
     val fromHandle: DragHandle,
-)
+) {
+    /** Whether we are expanding. If false, then we are shrinking. */
+    val isExpanding = spans > 0
+}
 
 class ResizeableItemFrameViewModel : ExclusiveActivatable() {
     private data class GridLayoutInfo(
@@ -73,7 +75,7 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
                 snapshotFlow { bottomDragState.settledValue }
                     .map { ResizeInfo(it, DragHandle.BOTTOM) },
             )
-            .dropWhile { it.spans == 0 }
+            .filter { it.spans != 0 }
             .distinctUntilChanged()
 
     /**
@@ -86,9 +88,13 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
         viewportHeightPx: Int,
         maxItemSpan: Int,
         minItemSpan: Int,
-        currentRow: Int,
-        currentSpan: Int,
+        currentRow: Int?,
+        currentSpan: Int?,
     ) {
+        if (currentSpan == null || currentRow == null) {
+            gridLayoutInfo.value = null
+            return
+        }
         require(maxItemSpan >= minItemSpan) {
             "Maximum item span of $maxItemSpan cannot be less than the minimum span of $minItemSpan"
         }
@@ -114,10 +120,10 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
 
     private fun calculateAnchorsForHandle(
         handle: DragHandle,
-        layoutInfo: GridLayoutInfo,
+        layoutInfo: GridLayoutInfo?,
     ): DraggableAnchors<Int> {
 
-        if (!isDragAllowed(handle, layoutInfo)) {
+        if (layoutInfo == null || !isDragAllowed(handle, layoutInfo)) {
             return DraggableAnchors { 0 at 0f }
         }
 
@@ -188,7 +194,6 @@ class ResizeableItemFrameViewModel : ExclusiveActivatable() {
     override suspend fun onActivated(): Nothing {
         coroutineScope("ResizeableItemFrameViewModel.onActivated") {
             gridLayoutInfo
-                .filterNotNull()
                 .onEach { layoutInfo ->
                     topDragState.updateAnchors(
                         calculateAnchorsForHandle(DragHandle.TOP, layoutInfo)
