@@ -33,6 +33,9 @@ object Scenes {
     /** The communal scene shows the glanceable hub when device is locked and docked. */
     @JvmField val Communal = SceneKey("communal")
 
+    /** The dream scene shows up when a dream activity is showing. */
+    @JvmField val Dream = SceneKey("dream")
+
     /**
      * "Gone" is not a real scene but rather the absence of scenes when we want to skip showing any
      * content from the scene framework.
