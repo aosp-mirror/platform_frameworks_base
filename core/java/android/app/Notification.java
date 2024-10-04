@@ -809,6 +809,10 @@ public class Notification implements Parcelable
         return false;
     }
 
+    private static boolean isStandardLayout(int layoutId) {
+        return STANDARD_LAYOUTS.contains(layoutId);
+    }
+
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_"}, value = {
             FLAG_SHOW_LIGHTS,
@@ -5983,9 +5987,9 @@ public class Notification implements Parcelable
                 }
             }
             boolean contentViewUsesHeader = mN.contentView == null
-                    || STANDARD_LAYOUTS.contains(mN.contentView.getLayoutId());
+                    || isStandardLayout(mN.contentView.getLayoutId());
             boolean bigContentViewUsesHeader = mN.bigContentView == null
-                    || STANDARD_LAYOUTS.contains(mN.bigContentView.getLayoutId());
+                    || isStandardLayout(mN.bigContentView.getLayoutId());
             return contentViewUsesHeader && bigContentViewUsesHeader;
         }
 
@@ -6781,7 +6785,7 @@ public class Notification implements Parcelable
                 return false;
             }
             if (fullyCustomViewRequiresDecoration(false)
-                    && STANDARD_LAYOUTS.contains(customContent.getLayoutId())) {
+                    && isStandardLayout(customContent.getLayoutId())) {
                 // If the app's custom views are objects returned from Builder.create*ContentView()
                 // then the app is most likely attempting to spoof the user.  Even if they are not,
                 // the result would be broken (b/189189308) so we will ignore it.
