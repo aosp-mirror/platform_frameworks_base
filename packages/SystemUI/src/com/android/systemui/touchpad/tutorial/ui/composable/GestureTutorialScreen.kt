@@ -38,9 +38,9 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionSta
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
 
@@ -76,9 +76,9 @@ class DistanceBasedGestureMonitorProvider(
 
 fun GestureState.toTutorialActionState(): TutorialActionState {
     return when (this) {
-        NOT_STARTED -> TutorialActionState.NOT_STARTED
-        IN_PROGRESS -> TutorialActionState.IN_PROGRESS
-        FINISHED -> TutorialActionState.FINISHED
+        NotStarted -> TutorialActionState.NotStarted
+        is InProgress -> TutorialActionState.InProgress()
+        Finished -> TutorialActionState.Finished
     }
 }
 
@@ -90,7 +90,7 @@ fun GestureTutorialScreen(
     onBack: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
-    var gestureState by remember { mutableStateOf(NOT_STARTED) }
+    var gestureState: GestureState by remember { mutableStateOf(NotStarted) }
     var easterEggTriggered by remember { mutableStateOf(false) }
     val gestureMonitor =
         gestureMonitorProvider.rememberGestureMonitor(
@@ -143,7 +143,7 @@ private fun TouchpadGesturesHandlingBox(
                 .pointerInteropFilter(
                     onTouchEvent = { event ->
                         // FINISHED is the final state so we don't need to process touches anymore
-                        if (gestureState == FINISHED) {
+                        if (gestureState == Finished) {
                             false
                         } else {
                             gestureHandler.onMotionEvent(event)
