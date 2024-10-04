@@ -30,6 +30,7 @@ import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.AOD;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.GONE;
@@ -1211,6 +1212,16 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         mNotificationStackScrollLayoutController.setMaxAlphaForKeyguard(alpha,
                                 "mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha()");
                     }, mMainDispatcher);
+        }
+
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                    Edge.Companion.create(AOD, LOCKSCREEN)),
+                    (TransitionStep step) -> {
+                    if (step.getTransitionState() == TransitionState.FINISHED) {
+                        updateExpandedHeightToMaxHeight();
+                    }
+                }, mMainDispatcher);
         }
 
         // Ensures that flags are updated when an activity launches
