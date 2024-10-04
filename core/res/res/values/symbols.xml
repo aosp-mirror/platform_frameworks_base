@@ -2141,6 +2141,7 @@
   <java-symbol type="integer" name="config_vibrationWaveformRampStepDuration" />
   <java-symbol type="bool" name="config_ignoreVibrationsOnWirelessCharger" />
   <java-symbol type="integer" name="config_vibrationWaveformRampDownDuration" />
+  <java-symbol type="integer" name="config_vibrationPipelineMaxDuration" />
   <java-symbol type="integer" name="config_radioScanningTimeout" />
   <java-symbol type="integer" name="config_requestVibrationParamsTimeout" />
   <java-symbol type="array" name="config_requestVibrationParamsForUsages" />

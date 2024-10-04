@@ -135,3 +135,13 @@ flag {
         purpose: PURPOSE_FEATURE
     }
 }
+
+flag {
+    namespace: "haptics"
+    name: "vibration_pipeline_enabled"
+    description: "Enables functionality to pipeline vibration effects to avoid cancelling short vibrations"
+    bug: "344494220"
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
