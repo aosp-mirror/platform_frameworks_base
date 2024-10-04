@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.window.data.repository
 import android.app.StatusBarManager.WINDOW_STATE_HIDDEN
 import android.app.StatusBarManager.WINDOW_STATE_SHOWING
 import android.app.StatusBarManager.WINDOW_STATUS_BAR
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -33,12 +34,14 @@ import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.reset
 
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(AndroidJUnit4::class)
 class StatusBarWindowStateRepositoryStoreTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope

@@ -21,6 +21,7 @@ import android.app.StatusBarManager.DISABLE_CLOCK
 import android.app.StatusBarManager.DISABLE_NONE
 import android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS
 import android.app.StatusBarManager.DISABLE_SYSTEM_INFO
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -31,8 +32,10 @@ import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith;
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class CollapsedStatusBarInteractorTest : SysuiTestCase() {
     val kosmos = testKosmos()
     val testScope = kosmos.testScope
