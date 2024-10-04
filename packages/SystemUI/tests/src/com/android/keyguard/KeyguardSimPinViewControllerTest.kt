@@ -80,8 +80,9 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
         `when`(telephonyManager.createForSubscriptionId(anyInt())).thenReturn(telephonyManager)
         `when`(telephonyManager.supplyIccLockPin(anyString())).thenReturn(mock())
         simPinView =
-            LayoutInflater.from(context).inflate(R.layout.keyguard_sim_pin_view, null)
-                as KeyguardSimPinView
+            LayoutInflater.from(context)
+                .inflate(R.layout.keyguard_sim_pin_view, null)
+                .requireViewById(R.id.keyguard_sim_pin_view) as KeyguardSimPinView
         val fakeFeatureFlags = FakeFeatureFlags()
         val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
 
