@@ -707,8 +707,10 @@ public class BinaryTransparencyService extends SystemService {
                 private void printModuleDetails(ModuleInfo moduleInfo, final PrintWriter pw) {
                     pw.println("--- Module Details ---");
                     pw.println("Module name: " + moduleInfo.getName());
-                    pw.println("Module visibility: "
-                            + (moduleInfo.isHidden() ? "hidden" : "visible"));
+                    if (!android.content.pm.Flags.removeHiddenModuleUsage()) {
+                        pw.println("Module visibility: "
+                        + (moduleInfo.isHidden() ? "hidden" : "visible"));
+                    }
                 }
 
                 private void printAppDetails(PackageInfo packageInfo,

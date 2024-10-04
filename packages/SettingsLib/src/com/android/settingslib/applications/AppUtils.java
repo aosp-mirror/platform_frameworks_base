@@ -137,6 +137,7 @@ public class AppUtils {
 
     /**
      * Returns a boolean indicating whether the given package is a hidden system module
+     * TODO(b/382016780): to be removed after flag cleanup.
      */
     public static boolean isHiddenSystemModule(Context context, String packageName) {
         return ApplicationsState.getInstance((Application) context.getApplicationContext())
