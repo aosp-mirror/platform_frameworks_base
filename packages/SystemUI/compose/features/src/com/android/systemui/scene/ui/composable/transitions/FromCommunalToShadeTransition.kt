@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.data.repository
+package com.android.systemui.scene.ui.composable.transitions
 
-import android.view.windowManagerService
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.compose.animation.scene.TransitionBuilder
 
-val Kosmos.systemGestureExclusionRepository by Fixture {
-    SystemGestureExclusionRepository(windowManager = windowManagerService)
+fun TransitionBuilder.communalToShadeTransition() {
+    toShadeTransition()
 }

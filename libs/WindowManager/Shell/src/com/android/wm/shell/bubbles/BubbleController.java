@@ -2001,6 +2001,10 @@ public class BubbleController implements ConfigurationChangeListener,
             // in bubble bar mode, let the request to show the expanded view come from launcher.
             // only collapse here if we're collapsing.
             if (mLayerView != null && !isExpanded) {
+                if (mBubblePositioner.isImeVisible()) {
+                    // If we're collapsing, hide the IME
+                    hideCurrentInputMethod();
+                }
                 mLayerView.collapse();
             }
         }

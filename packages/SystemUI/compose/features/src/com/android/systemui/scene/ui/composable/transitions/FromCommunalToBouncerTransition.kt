@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.domain.interactor
+package com.android.systemui.scene.ui.composable.transitions
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.scene.data.repository.systemGestureExclusionRepository
+import com.android.compose.animation.scene.TransitionBuilder
 
-val Kosmos.systemGestureExclusionInteractor by Fixture {
-    SystemGestureExclusionInteractor(repository = systemGestureExclusionRepository)
+fun TransitionBuilder.communalToBouncerTransition() {
+    toBouncerTransition()
 }

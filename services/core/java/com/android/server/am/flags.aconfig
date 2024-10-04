@@ -214,3 +214,10 @@ flag {
     description: "Defer submitting display events to frozen processes."
     bug: "326315985"
 }
+
+flag {
+    name: "reset_on_fork_enabled"
+    namespace: "system_performance"
+    description: "Set reset_on_fork flag."
+    bug: "370988407"
+}

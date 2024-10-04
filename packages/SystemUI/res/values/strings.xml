@@ -1120,7 +1120,7 @@
     <string name="zen_mode_off">Off</string>
 
     <!-- Modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
-    <string name="zen_mode_set_up">Set up</string>
+    <string name="zen_mode_set_up">Not set</string>
 
     <!-- Modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
@@ -1826,6 +1826,12 @@
 
     <!-- Name of the alarm status bar icon. -->
     <string name="status_bar_alarm">Alarm</string>
+
+    <!-- Format string for the content description of the icon that indicates that a Mode is on.
+       For example, if the mode name is Bedtime, this will be "Bedtime is on". This content
+       description will be associated to the mode icon in status bar, smartspace, and everyone else
+       where it might be displayed without text. [CHAR LIMIT=NONE] -->
+    <string name="active_mode_content_description"><xliff:g id="modeName" example="Do Not Disturb">%1$s</xliff:g> is on</string>
 
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->

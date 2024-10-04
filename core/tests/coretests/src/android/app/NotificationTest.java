@@ -2301,13 +2301,13 @@ public class NotificationTest {
 
     @Test
     @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
-    public void progressStyle_onProgressStepChange_visiblyDifferent() {
+    public void progressStyle_onProgressPointChange_visiblyDifferent() {
         final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.ProgressStyle()
-                        .addProgressStep(new Notification.ProgressStyle.Step(10)));
+                        .addProgressPoint(new Notification.ProgressStyle.Point(10)));
         final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.ProgressStyle()
-                        .addProgressStep(new Notification.ProgressStyle.Step(12)));
+                        .addProgressPoint(new Notification.ProgressStyle.Point(12)));
 
         assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
                 .isTrue();
@@ -2315,13 +2315,13 @@ public class NotificationTest {
 
     @Test
     @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
-    public void indeterminateProgressStyle_onProgressStepChange_visiblyNotDifferent() {
+    public void indeterminateProgressStyle_onProgressPointChange_visiblyNotDifferent() {
         final Notification.Builder nProgress1 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
-                        .addProgressStep(new Notification.ProgressStyle.Step(10)));
+                        .addProgressPoint(new Notification.ProgressStyle.Point(10)));
         final Notification.Builder nProgress2 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.ProgressStyle().setProgressIndeterminate(true)
-                        .addProgressStep(new Notification.ProgressStyle.Step(12)));
+                        .addProgressPoint(new Notification.ProgressStyle.Point(12)));
 
         assertThat(Notification.areStyledNotificationsVisiblyDifferent(nProgress1, nProgress2))
                 .isFalse();
