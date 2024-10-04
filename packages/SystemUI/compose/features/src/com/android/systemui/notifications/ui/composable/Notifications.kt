@@ -25,6 +25,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollBy
@@ -451,12 +452,14 @@ fun SceneScope.NotificationScrollingStack(
         }
     }
 
+    val flingBehavior = ScrollableDefaults.flingBehavior()
     val scrimNestedScrollConnection =
         shadeSession.rememberSession(
             scrimOffset,
             maxScrimTop,
             minScrimTop,
             isCurrentGestureOverscroll,
+            flingBehavior,
         ) {
             NotificationScrimNestedScrollConnection(
                 scrimOffset = { scrimOffset.value },
@@ -469,6 +472,7 @@ fun SceneScope.NotificationScrollingStack(
                 contentHeight = { stackHeight.intValue.toFloat() },
                 minVisibleScrimHeight = minVisibleScrimHeight,
                 isCurrentGestureOverscroll = { isCurrentGestureOverscroll.value },
+                flingBehavior = flingBehavior,
             )
         }
 
