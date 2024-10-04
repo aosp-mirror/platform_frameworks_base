@@ -598,6 +598,13 @@ public class PhonePipMenuController implements PipMenuController,
                 break;
             case PipTransitionState.CHANGED_PIP_BOUNDS:
                 updateMenuLayout(mPipBoundsState.getBounds());
+                hideMenu();
+                break;
+            case PipTransitionState.CHANGING_PIP_BOUNDS:
+                hideMenu();
+                break;
+            case PipTransitionState.SCHEDULED_BOUNDS_CHANGE:
+                hideMenu();
                 break;
         }
     }
