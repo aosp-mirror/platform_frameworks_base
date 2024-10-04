@@ -106,7 +106,6 @@ static const int TEXT_CENTER_VALUE = INT_MAX;
 static const int TEXT_MISSING_VALUE = INT_MIN;
 static const char EXIT_PROP_NAME[] = "service.bootanim.exit";
 static const char PROGRESS_PROP_NAME[] = "service.bootanim.progress";
-static const char DISPLAYS_PROP_NAME[] = "persist.service.bootanim.displays";
 static const char CLOCK_ENABLED_PROP_NAME[] = "persist.sys.bootanim.clock.enabled";
 static const int ANIM_ENTRY_NAME_MAX = ANIM_PATH_MAX + 1;
 static const int MAX_CHECK_EXIT_INTERVAL_US = 50000;
@@ -514,50 +513,9 @@ status_t BootAnimation::readyToRun() {
         return NAME_NOT_FOUND;
     }
 
-    // this system property specifies multi-display IDs to show the boot animation
-    // multiple ids can be set with comma (,) as separator, for example:
-    // setprop persist.boot.animation.displays 19260422155234049,19261083906282754
-    Vector<PhysicalDisplayId> physicalDisplayIds;
-    char displayValue[PROPERTY_VALUE_MAX] = "";
-    property_get(DISPLAYS_PROP_NAME, displayValue, "");
-    bool isValid = displayValue[0] != '\0';
-    if (isValid) {
-        char *p = displayValue;
-        while (*p) {
-            if (!isdigit(*p) && *p != ',') {
-                isValid = false;
-                break;
-            }
-            p ++;
-        }
-        if (!isValid)
-            SLOGE("Invalid syntax for the value of system prop: %s", DISPLAYS_PROP_NAME);
-    }
-    if (isValid) {
-        std::istringstream stream(displayValue);
-        for (PhysicalDisplayId id; stream >> id.value; ) {
-            physicalDisplayIds.add(id);
-            if (stream.peek() == ',')
-                stream.ignore();
-        }
-
-        // the first specified display id is used to retrieve mDisplayToken
-        for (const auto id : physicalDisplayIds) {
-            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
-                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
-                    mDisplayToken = token;
-                    break;
-                }
-            }
-        }
-    }
-
-    // If the system property is not present or invalid, display 0 is used
+    mDisplayToken = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
     if (mDisplayToken == nullptr) {
-        mDisplayToken = SurfaceComposerClient::getPhysicalDisplayToken(ids.front());
-        if (mDisplayToken == nullptr) {
-            return NAME_NOT_FOUND;
-        }
+        return NAME_NOT_FOUND;
     }
 
     DisplayMode displayMode;
@@ -577,17 +535,8 @@ status_t BootAnimation::readyToRun() {
             ISurfaceComposerClient::eOpaque);
 
     SurfaceComposerClient::Transaction t;
-    if (isValid) {
-        // In the case of multi-display, boot animation shows on the specified displays
-        for (const auto id : physicalDisplayIds) {
-            if (std::find(ids.begin(), ids.end(), id) != ids.end()) {
-                if (const auto token = SurfaceComposerClient::getPhysicalDisplayToken(id)) {
-                    t.setDisplayLayerStack(token, ui::DEFAULT_LAYER_STACK);
-                }
-            }
-        }
-        t.setLayerStack(control, ui::DEFAULT_LAYER_STACK);
-    }
+    t.setDisplayLayerStack(mDisplayToken, ui::DEFAULT_LAYER_STACK);
+    t.setLayerStack(control, ui::DEFAULT_LAYER_STACK);
 
     t.setLayer(control, 0x40000000)
         .apply();
