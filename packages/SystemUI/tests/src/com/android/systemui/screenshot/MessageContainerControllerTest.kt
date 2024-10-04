@@ -47,7 +47,7 @@ class MessageContainerControllerTest : SysuiTestCase() {
     lateinit var screenshotView: ViewGroup
 
     val userHandle = UserHandle.of(5)
-    val screenshotData = ScreenshotData.forTesting()
+    val screenshotData = ScreenshotData.forTesting(userHandle = userHandle)
 
     val appName = "app name"
     lateinit var workProfileData: WorkProfileMessageController.WorkProfileFirstRunData
@@ -61,7 +61,7 @@ class MessageContainerControllerTest : SysuiTestCase() {
                 workProfileMessageController,
                 profileMessageController,
                 screenshotDetectionController,
-                TestScope(UnconfinedTestDispatcher())
+                TestScope(UnconfinedTestDispatcher()),
             )
         screenshotView = ConstraintLayout(mContext)
         workProfileData = WorkProfileMessageController.WorkProfileFirstRunData(appName, icon)
@@ -83,8 +83,6 @@ class MessageContainerControllerTest : SysuiTestCase() {
         container.addView(detectionNoticeView)
 
         messageContainer.setView(screenshotView)
-
-        screenshotData.userHandle = userHandle
     }
 
     @Test
@@ -92,7 +90,7 @@ class MessageContainerControllerTest : SysuiTestCase() {
         val profileData =
             ProfileMessageController.ProfileFirstRunData(
                 LabeledIcon(appName, icon),
-                ProfileMessageController.FirstRunProfile.PRIVATE
+                ProfileMessageController.FirstRunProfile.PRIVATE,
             )
         whenever(profileMessageController.onScreenshotTaken(eq(userHandle))).thenReturn(profileData)
         messageContainer.onScreenshotTaken(screenshotData)

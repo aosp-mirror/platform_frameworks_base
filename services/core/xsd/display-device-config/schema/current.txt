@@ -8,12 +8,14 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getDarkeningLightDebounceIdleMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceMillis();
     method public boolean getEnabled();
+    method public final java.math.BigInteger getIdleStylusTimeoutMillis();
     method public final java.util.List<com.android.server.display.config.LuxToBrightnessMapping> getLuxToBrightnessMapping();
     method public final void setBrighteningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setBrighteningLightDebounceMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceMillis(java.math.BigInteger);
     method public void setEnabled(boolean);
+    method public final void setIdleStylusTimeoutMillis(java.math.BigInteger);
   }
 
   public enum AutoBrightnessModeName {

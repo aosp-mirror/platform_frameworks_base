@@ -15,17 +15,17 @@ import com.android.internal.util.ScreenshotRequest
 
 /** [ScreenshotData] represents the current state of a single screenshot being acquired. */
 data class ScreenshotData(
-    @ScreenshotType var type: Int,
-    @ScreenshotSource var source: Int,
+    @ScreenshotType val type: Int,
+    @ScreenshotSource val source: Int,
     /** UserHandle for the owner of the app being screenshotted, if known. */
-    var userHandle: UserHandle?,
+    val userHandle: UserHandle?,
     /** ComponentName of the top-most app in the screenshot. */
-    var topComponent: ComponentName?,
+    val topComponent: ComponentName?,
     var screenBounds: Rect?,
-    var taskId: Int,
+    val taskId: Int,
     var insets: Insets,
     var bitmap: Bitmap?,
-    var displayId: Int,
+    val displayId: Int,
 ) {
     val packageNameString
         get() = topComponent?.packageName ?: ""
@@ -50,16 +50,21 @@ data class ScreenshotData(
             )
 
         @VisibleForTesting
-        fun forTesting() =
+        fun forTesting(
+            userHandle: UserHandle? = null,
+            source: Int = ScreenshotSource.SCREENSHOT_KEY_CHORD,
+            topComponent: ComponentName? = null,
+            bitmap: Bitmap? = null,
+        ) =
             ScreenshotData(
                 type = WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
-                source = ScreenshotSource.SCREENSHOT_KEY_CHORD,
-                userHandle = null,
-                topComponent = null,
+                source = source,
+                userHandle = userHandle,
+                topComponent = topComponent,
                 screenBounds = null,
                 taskId = 0,
                 insets = Insets.NONE,
-                bitmap = null,
+                bitmap = bitmap,
                 displayId = Display.DEFAULT_DISPLAY,
             )
     }
