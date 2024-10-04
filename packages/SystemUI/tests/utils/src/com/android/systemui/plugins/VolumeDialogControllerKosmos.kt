@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog
+package com.android.systemui.plugins
 
-import android.app.Dialog
-import android.content.Context
-import android.os.Bundle
-import android.view.ContextThemeWrapper
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.res.R
-import javax.inject.Inject
+import com.android.systemui.kosmos.Kosmos
+import org.mockito.kotlin.mock
 
-class NewVolumeDialog @Inject constructor(@Application context: Context) :
-    Dialog(ContextThemeWrapper(context, R.style.volume_dialog_theme)) {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.volume_dialog)
-    }
-}
+val Kosmos.fakeVolumeDialogController by Kosmos.Fixture { FakeVolumeDialogController(mock {}) }
+var Kosmos.volumeDialogController: VolumeDialogController by
+    Kosmos.Fixture { fakeVolumeDialogController }

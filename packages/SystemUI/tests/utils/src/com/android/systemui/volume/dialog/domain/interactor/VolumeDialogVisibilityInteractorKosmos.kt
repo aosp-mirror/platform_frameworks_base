@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.ui.viewmodel
+package com.android.systemui.volume.dialog.domain.interactor
 
-import com.android.systemui.lifecycle.ExclusiveActivatable
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import kotlinx.coroutines.awaitCancellation
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.applicationCoroutineScope
 
-class VolumeDialogViewModel @AssistedInject constructor() : ExclusiveActivatable() {
-
-    override suspend fun onActivated(): Nothing {
-        awaitCancellation()
+val Kosmos.volumeDialogVisibilityInteractor by
+    Kosmos.Fixture {
+        VolumeDialogVisibilityInteractor(applicationCoroutineScope, volumeDialogCallbacksInteractor)
     }
-
-    @AssistedFactory
-    interface Factory {
-        fun create(): VolumeDialogViewModel
-    }
-}

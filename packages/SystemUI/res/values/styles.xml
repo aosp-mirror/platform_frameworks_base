@@ -540,6 +540,7 @@
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
     <style name="volume_dialog_theme" parent="Theme.SystemUI">
         <item name="android:windowIsFloating">true</item>
+        <item name="android:showWhenLocked">true</item>
     </style>
 
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
