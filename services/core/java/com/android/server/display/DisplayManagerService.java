@@ -5233,9 +5233,10 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public boolean isProximitySensorAvailable(int displayId) {
+        public boolean isProximitySensorAvailable() {
             synchronized (mSyncRoot) {
-                return mDisplayPowerControllers.get(displayId).isProximitySensorAvailable();
+                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                        .isProximitySensorAvailable();
             }
         }
 
