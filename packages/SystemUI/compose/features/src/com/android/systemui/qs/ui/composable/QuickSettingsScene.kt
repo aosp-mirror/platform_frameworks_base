@@ -100,7 +100,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.session.ui.composable.SaveableSession
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.Scene
-import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
 import com.android.systemui.shade.ui.composable.Shade
@@ -114,11 +113,9 @@ import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.roundToInt
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
-@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class QuickSettingsScene
 @Inject
@@ -427,7 +424,7 @@ private fun SceneScope.QuickSettingsScene(
             maxScrimTop = { screenHeight },
             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
             shouldIncludeHeadsUpSpace = false,
-            shadeMode = ShadeMode.Single,
+            supportNestedScrolling = true,
             modifier =
                 Modifier.fillMaxWidth()
                     .offset { IntOffset(x = 0, y = screenHeight.roundToInt()) }
