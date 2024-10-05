@@ -8778,13 +8778,14 @@ public class TelephonyManager {
      *   Authentication error, no memory space available in EFMUK
      *
      * @throws UnsupportedOperationException If the device does not have
-     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
+     *          authType.
      */
     // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
     // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
     // it's not public API.
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
-    public String getIccAuthentication(int appType,@AuthType int authType, String data) {
+    public String getIccAuthentication(int appType, @AuthType int authType, String data) {
         return getIccAuthentication(getSubId(), appType, authType, data);
     }
 
@@ -8809,10 +8810,14 @@ public class TelephonyManager {
      *   Key freshness failure
      *   Authentication error, no memory space available
      *   Authentication error, no memory space available in EFMUK
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION} or doesn't support given
+     *          authType.
      * @hide
      */
     @UnsupportedAppUsage
-    public String getIccAuthentication(int subId, int appType,@AuthType int authType, String data) {
+    public String getIccAuthentication(int subId, int appType, @AuthType int authType,
+            String data) {
         try {
             IPhoneSubInfo info = getSubscriberInfoService();
             if (info == null)
