@@ -163,7 +163,6 @@ public class LowPowerStandbyControllerTest {
         addLocalServiceMock(ActivityManagerInternal.class, mActivityManagerInternalMock);
 
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
-        when(mIPowerManagerMock.isDisplayInteractive(anyInt())).thenReturn(true);
 
         when(mDeviceConfigWrapperMock.enableCustomPolicy()).thenReturn(true);
         when(mDeviceConfigWrapperMock.enableStandbyPorts()).thenReturn(true);
@@ -900,13 +899,11 @@ public class LowPowerStandbyControllerTest {
 
     private void setInteractive() throws Exception {
         when(mIPowerManagerMock.isInteractive()).thenReturn(true);
-        when(mIPowerManagerMock.isDisplayInteractive(anyInt())).thenReturn(true);
         mContextSpy.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
     }
 
     private void setNonInteractive() throws Exception {
         when(mIPowerManagerMock.isInteractive()).thenReturn(false);
-        when(mIPowerManagerMock.isDisplayInteractive(anyInt())).thenReturn(false);
         mContextSpy.sendBroadcast(new Intent(Intent.ACTION_SCREEN_OFF));
     }
 

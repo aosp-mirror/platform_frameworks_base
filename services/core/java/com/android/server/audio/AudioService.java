@@ -286,6 +286,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -4030,7 +4031,6 @@ public class AudioService extends IAudioService.Stub
                             && isFullVolumeDevice(device);
                     boolean tvConditions = mHdmiTvClient != null
                             && mHdmiSystemAudioSupported
-                            && isFullVolumeDevice(device)
                             && !isAbsoluteVolumeDevice(device)
                             && !isA2dpAbsoluteVolumeDevice(device);
 

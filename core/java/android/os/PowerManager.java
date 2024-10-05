@@ -1344,9 +1344,6 @@ public final class PowerManager {
      * @see #ON_AFTER_RELEASE
      */
     public WakeLock newWakeLock(int levelAndFlags, String tag) {
-        if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()) {
-            return newWakeLock(levelAndFlags, tag, mContext.getDisplayId());
-        }
         validateWakeLockParameters(levelAndFlags, tag);
         return new WakeLock(levelAndFlags, tag, mContext.getOpPackageName(),
                 Display.INVALID_DISPLAY);
@@ -1737,10 +1734,6 @@ public final class PowerManager {
      */
     public boolean isWakeLockLevelSupported(int level) {
         try {
-            if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()) {
-                return mService.isWakeLockLevelSupportedWithDisplayId(
-                        level, mContext.getDisplayId());
-            }
             return mService.isWakeLockLevelSupported(level);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1804,9 +1797,6 @@ public final class PowerManager {
      * @see android.content.Intent#ACTION_SCREEN_OFF
      */
     public boolean isInteractive() {
-        if (android.companion.virtualdevice.flags.Flags.displayPowerManagerApis()) {
-            return isInteractive(mContext.getDisplayId());
-        }
         return mInteractiveCache.query(null);
     }
 
