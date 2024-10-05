@@ -610,7 +610,7 @@ final class SettingsState {
                                 flag.getPackageName(),
                                 flag.getFlagName(),
                                 flag.getServerFlagValue(),
-                                false);
+                                StorageRequestMessage.SERVER_ON_REBOOT);
                     }
 
                     if (flag.getHasLocalOverride()) {
@@ -619,7 +619,7 @@ final class SettingsState {
                                 flag.getPackageName(),
                                 flag.getFlagName(),
                                 flag.getLocalFlagValue(),
-                                true);
+                                StorageRequestMessage.LOCAL_ON_REBOOT);
                     }
                 }
 

@@ -58,10 +58,8 @@ class AppCompatOrientationPolicy {
                 && displayContent.getIgnoreOrientationRequest();
         final boolean shouldApplyUserFullscreenOverride = mAppCompatOverrides
                 .getAppCompatAspectRatioOverrides().shouldApplyUserFullscreenOverride();
-        final AppCompatCameraPolicy cameraPolicy = AppCompatCameraPolicy
-                .getAppCompatCameraPolicy(mActivityRecord);
-        final boolean shouldCameraCompatControlOrientation = cameraPolicy != null
-                && cameraPolicy.shouldCameraCompatControlOrientation(mActivityRecord);
+        final boolean shouldCameraCompatControlOrientation =
+                AppCompatCameraPolicy.shouldCameraCompatControlOrientation(mActivityRecord);
         if (shouldApplyUserFullscreenOverride && isIgnoreOrientationRequestEnabled
                 // Do not override orientation to fullscreen for camera activities.
                 // Fixed-orientation activities are rarely tested in other orientations, and it
@@ -98,7 +96,7 @@ class AppCompatOrientationPolicy {
         if (displayContent != null
                 && mAppCompatOverrides.getAppCompatCameraOverrides()
                     .isOverrideOrientationOnlyForCameraEnabled()
-                && !displayContent.mAppCompatCameraPolicy
+                && !AppCompatCameraPolicy
                     .isActivityEligibleForOrientationOverride(mActivityRecord)) {
             return candidate;
         }
@@ -213,5 +211,4 @@ class AppCompatOrientationPolicy {
         }
         return false;
     }
-
 }

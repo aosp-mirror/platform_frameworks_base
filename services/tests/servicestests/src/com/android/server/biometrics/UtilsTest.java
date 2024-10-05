@@ -217,7 +217,13 @@ public class UtilsTest {
         doNothing().when(mContext).enforceCallingOrSelfPermission(
                 eq(SET_BIOMETRIC_DIALOG_ADVANCED), any());
 
-        assertTrue(Utils.isValidAuthenticatorConfig(mContext, Authenticators.MANDATORY_BIOMETRICS));
+        if (Flags.mandatoryBiometrics()) {
+            assertTrue(Utils.isValidAuthenticatorConfig(mContext,
+                    Authenticators.MANDATORY_BIOMETRICS));
+        } else {
+            assertFalse(Utils.isValidAuthenticatorConfig(mContext,
+                    Authenticators.MANDATORY_BIOMETRICS));
+        }
 
         // The rest of the bits are not allowed to integrate with the public APIs
         for (int i = 8; i < 32; i++) {

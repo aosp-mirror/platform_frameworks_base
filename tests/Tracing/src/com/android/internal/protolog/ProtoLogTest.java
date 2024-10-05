@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog;
 
+import static org.junit.Assert.assertThrows;
+
 import android.platform.test.annotations.Presubmit;
 
 import com.android.internal.protolog.common.IProtoLogGroup;
@@ -44,8 +46,29 @@ public class ProtoLogTest {
                 .containsExactly(TEST_GROUP_1, TEST_GROUP_2);
     }
 
+    @Test
+    public void throwOnRegisteringDuplicateGroup() {
+        final var assertion = assertThrows(RuntimeException.class,
+                () -> ProtoLog.init(TEST_GROUP_1, TEST_GROUP_1, TEST_GROUP_2));
+
+        Truth.assertThat(assertion).hasMessageThat().contains("" + TEST_GROUP_1.getId());
+        Truth.assertThat(assertion).hasMessageThat().contains("duplicate");
+    }
+
+    @Test
+    public void throwOnRegisteringGroupsWithIdCollisions() {
+        final var assertion = assertThrows(RuntimeException.class,
+                () -> ProtoLog.init(TEST_GROUP_1, TEST_GROUP_WITH_COLLISION, TEST_GROUP_2));
+
+        Truth.assertThat(assertion).hasMessageThat()
+            .contains("" + TEST_GROUP_WITH_COLLISION.getId());
+        Truth.assertThat(assertion).hasMessageThat().contains("collision");
+    }
+
     private static final IProtoLogGroup TEST_GROUP_1 = new ProtoLogGroup("TEST_TAG_1", 1);
     private static final IProtoLogGroup TEST_GROUP_2 = new ProtoLogGroup("TEST_TAG_2", 2);
+    private static final IProtoLogGroup TEST_GROUP_WITH_COLLISION =
+            new ProtoLogGroup("TEST_TAG_WITH_COLLISION", 1);
 
     private static class ProtoLogGroup implements IProtoLogGroup {
         private final boolean mEnabled;

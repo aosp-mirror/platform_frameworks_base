@@ -48,7 +48,7 @@ constructor(
 ) {
 
     companion object {
-        const val DEFAULT_DIALOG_TIMEOUT_MILLIS = 3500
+        const val DEFAULT_DIALOG_TIMEOUT_MILLIS = 5000
     }
 
     private val timeoutMillis: Long

@@ -203,6 +203,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
             Flags::normalBrightnessForDozeParameter
     );
+    private final FlagState mBlockAutobrightnessChangesOnStylusUsage = new FlagState(
+            Flags.FLAG_BLOCK_AUTOBRIGHTNESS_CHANGES_ON_STYLUS_USAGE,
+            Flags::blockAutobrightnessChangesOnStylusUsage
+    );
 
     private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
             Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
@@ -436,6 +440,13 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return {@code true} if autobrightness is to be blocked when stylus is being used
+     */
+    public boolean isBlockAutobrightnessChangesOnStylusUsage() {
+        return mBlockAutobrightnessChangesOnStylusUsage.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -479,6 +490,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
+        pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
     }
 
     private static class FlagState {

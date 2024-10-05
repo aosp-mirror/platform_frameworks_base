@@ -24,6 +24,7 @@ import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
+import android.window.flags.DesktopModeFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
@@ -43,7 +44,7 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  */
 class DesktopTasksLimiter (
         transitions: Transitions,
-        private val taskRepository: DesktopModeTaskRepository,
+        private val taskRepository: DesktopRepository,
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val maxTasksLimit: Int,
         private val interactionJankMonitor: InteractionJankMonitor,
@@ -159,8 +160,10 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
+    inner class LeftoverMinimizedTasksRemover : DesktopRepository.ActiveTasksListener {
         override fun onActiveTasksChanged(displayId: Int) {
+            // If back navigation is enabled, we shouldn't remove the leftover tasks
+            if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
             val wct = WindowContainerTransaction()
             removeLeftoverMinimizedTasks(displayId, wct)
             shellTaskOrganizer.applyTransaction(wct)
@@ -208,15 +211,15 @@ class DesktopTasksLimiter (
     fun addAndGetMinimizeTaskChangesIfNeeded(
             displayId: Int,
             wct: WindowContainerTransaction,
-            newFrontTaskInfo: RunningTaskInfo,
+            newFrontTaskId: Int,
     ): RunningTaskInfo? {
         ProtoLog.v(
                 ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
                 "DesktopTasksLimiter: addMinimizeBackTaskChangesIfNeeded, newFrontTask=%d",
-                newFrontTaskInfo.taskId)
+            newFrontTaskId)
         val newTaskListOrderedFrontToBack = createOrderedTaskListWithGivenTaskInFront(
                 taskRepository.getActiveNonMinimizedOrderedTasks(displayId),
-                newFrontTaskInfo.taskId)
+            newFrontTaskId)
         val taskToMinimize = getTaskToMinimizeIfNeeded(newTaskListOrderedFrontToBack)
         if (taskToMinimize != null) {
             wct.reorder(taskToMinimize.token, false /* onTop */)

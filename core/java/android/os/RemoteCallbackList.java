@@ -92,9 +92,9 @@ public class RemoteCallbackList<E extends IInterface> {
     /**
      * Add a new callback to the list.  This callback will remain in the list
      * until a corresponding call to {@link #unregister} or its hosting process
-     * goes away.  If the callback was already registered (determined by
+     * goes away. If the callback was already registered (determined by
      * checking to see if the {@link IInterface#asBinder callback.asBinder()}
-     * object is already in the list), then it will be left as-is.
+     * object is already in the list), then it will be replaced with the new callback.
      * Registrations are not counted; a single call to {@link #unregister}
      * will remove a callback after any number calls to register it.
      *
@@ -106,7 +106,7 @@ public class RemoteCallbackList<E extends IInterface> {
      *
      * @param cookie Optional additional data to be associated with this
      * callback.
-     * 
+     *
      * @return Returns true if the callback was successfully added to the list.
      * Returns false if it was not added, either because {@link #kill} had
      * previously been called or the callback's process has gone away.

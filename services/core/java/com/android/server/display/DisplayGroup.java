@@ -87,4 +87,14 @@ public class DisplayGroup {
     int getIdLocked(int index) {
         return mDisplays.get(index).getDisplayIdLocked();
     }
+
+    /** Returns the IDs of the {@link LogicalDisplay}s belonging to the DisplayGroup. */
+    int[] getIdsLocked() {
+        final int numDisplays = mDisplays.size();
+        final int[] displayIds = new int[numDisplays];
+        for (int i = 0; i < numDisplays; i++) {
+            displayIds[i] = mDisplays.get(i).getDisplayIdLocked();
+        }
+        return displayIds;
+    }
 }

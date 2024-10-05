@@ -71,7 +71,7 @@ class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     @Mock private lateinit var accessibilityManagerWrapper: AccessibilityManagerWrapper
     @get:Rule val mockitoRule = MockitoJUnit.rule()
     private var toastContent = ""
-    private val timeoutMillis = 3500L
+    private val timeoutMillis = 5000L
 
     @Before
     fun setUp() {

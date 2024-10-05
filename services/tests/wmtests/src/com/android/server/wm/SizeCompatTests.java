@@ -4881,6 +4881,25 @@ public class SizeCompatTests extends WindowTestsBase {
         assertNotEquals(SCREEN_ORIENTATION_UNSPECIFIED, mActivity.getOverrideOrientation());
     }
 
+
+    @Test
+    @EnableCompatChanges({ActivityRecord.UNIVERSAL_RESIZABLE_BY_DEFAULT})
+    public void testUniversalResizeableByDefault() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT);
+        mDisplayContent.setIgnoreOrientationRequest(false);
+        setUpApp(mDisplayContent);
+        assertFalse(mActivity.isUniversalResizeable());
+
+        mDisplayContent.setIgnoreOrientationRequest(true);
+        final int swDp = mDisplayContent.getConfiguration().smallestScreenWidthDp;
+        if (swDp < WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP) {
+            final int height = 100 + (int) (mDisplayContent.getDisplayMetrics().density
+                    * WindowManager.LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP);
+            resizeDisplay(mDisplayContent, 100 + height, height);
+        }
+        assertTrue(mActivity.isUniversalResizeable());
+    }
+
     @Test
     public void testClearSizeCompat_resetOverrideConfig() {
         final int origDensity = 480;

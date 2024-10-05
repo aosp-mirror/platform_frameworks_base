@@ -156,7 +156,7 @@ public class TrustedPresentationListenerController {
 
     Listeners mRegisteredListeners = new Listeners();
 
-    private InputWindowHandle[] mLastWindowHandles;
+    private Pair<InputWindowHandle[], WindowInfosListener.DisplayInfo[]> mLastWindowHandles;
 
     private void startHandlerThreadIfNeeded() {
         synchronized (mHandlerThreadLock) {
@@ -222,10 +222,10 @@ public class TrustedPresentationListenerController {
             @Override
             public void onWindowInfosChanged(InputWindowHandle[] windowHandles,
                     DisplayInfo[] displayInfos) {
-                mHandler.post(() -> computeTpl(windowHandles));
+                mHandler.post(() -> computeTpl(new Pair<>(windowHandles, displayInfos)));
             }
         };
-        mLastWindowHandles = mWindowInfosListener.register().first;
+        mLastWindowHandles = mWindowInfosListener.register();
     }
 
     private void unregisterWindowInfosListener() {
@@ -238,28 +238,52 @@ public class TrustedPresentationListenerController {
         mLastWindowHandles = null;
     }
 
-    private void computeTpl(InputWindowHandle[] windowHandles) {
+    private void computeTpl(
+            Pair<InputWindowHandle[], WindowInfosListener.DisplayInfo[]> windowHandles) {
         mLastWindowHandles = windowHandles;
-        if (mLastWindowHandles == null || mLastWindowHandles.length == 0
+        if (mLastWindowHandles == null || mLastWindowHandles.first.length == 0
                 || mRegisteredListeners.isEmpty()) {
             return;
         }
 
         Rect tmpRect = new Rect();
+        RectF tmpRectF = new RectF();
+        Rect tmpLogicalDisplaySize = new Rect();
         Matrix tmpInverseMatrix = new Matrix();
         float[] tmpMatrix = new float[9];
         Region coveredRegionsAbove = new Region();
         long currTimeMs = System.currentTimeMillis();
-        ProtoLog.v(WM_DEBUG_TPL, "Checking %d windows", mLastWindowHandles.length);
+        ProtoLog.v(WM_DEBUG_TPL, "Checking %d windows", mLastWindowHandles.first.length);
 
         ArrayMap<ITrustedPresentationListener, Pair<IntArray, IntArray>> listenerUpdates =
                 new ArrayMap<>();
-        for (var windowHandle : mLastWindowHandles) {
+        for (var windowHandle : mLastWindowHandles.first) {
             if (!windowHandle.canOccludePresentation) {
                 ProtoLog.v(WM_DEBUG_TPL, "Skipping %s", windowHandle.name);
                 continue;
             }
-            tmpRect.set(windowHandle.frame);
+            var displayFound = false;
+            tmpRectF.set(windowHandle.frame);
+            for (var displayHandle : mLastWindowHandles.second) {
+                if (displayHandle.mDisplayId == windowHandle.displayId) {
+                    // Transform the window frame into display logical space and then
+                    // crop by the logical display size
+                    displayHandle.mTransform.mapRect(tmpRectF);
+                    tmpRectF.round(tmpRect);
+                    tmpLogicalDisplaySize.set(0, 0, displayHandle.mLogicalSize.getWidth(),
+                            displayHandle.mLogicalSize.getHeight());
+                    tmpRect.intersect(tmpLogicalDisplaySize);
+                    displayFound = true;
+                    break;
+                }
+            }
+
+            if (!displayFound) {
+                ProtoLog.v(WM_DEBUG_TPL, "Skipping %s, no associated display %d", windowHandle.name,
+                        windowHandle.displayId);
+                continue;
+            }
+
             var listeners = mRegisteredListeners.get(windowHandle.getWindowToken());
             if (listeners != null) {
                 Region region = new Region();

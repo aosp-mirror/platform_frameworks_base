@@ -901,6 +901,23 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         setEnterInstanceId(instanceId);
     }
 
+
+    @Override
+    public void setExcludeImeInsets(boolean exclude) {
+        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            if (mRootTaskInfo == null) {
+                ProtoLog.e(WM_SHELL_SPLIT_SCREEN, "setExcludeImeInsets: mRootTaskInfo is null");
+                return;
+            }
+            ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
+                    "setExcludeImeInsets: root taskId=%s exclude=%s",
+                    mRootTaskInfo.taskId, exclude);
+            wct.setExcludeImeInsets(mRootTaskInfo.token, exclude);
+            mTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
     /**
      * Checks if either of the apps in the desired split launch is currently in Pip. If so, it will
      * launch the non-pipped app as a fullscreen app, otherwise no-op.
@@ -1717,6 +1734,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(mMainStage.mRootTaskInfo.token, mRootTaskInfo.token, true);
         wct.reparent(mSideStage.mRootTaskInfo.token, mRootTaskInfo.token, true);
+
         // Make the stages adjacent to each other so they occlude what's behind them.
         wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
         setRootForceTranslucent(true, wct);

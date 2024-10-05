@@ -51,7 +51,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyZeroInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -134,7 +134,7 @@ class SceneContainerHapticsViewModelTest() : SysuiTestCase() {
             runCurrent()
 
             // THEN the view does not play a haptic feedback constant
-            verifyZeroInteractions(view)
+            verifyNoMoreInteractions(view)
         }
 
     @EnableFlags(Flags.FLAG_MSDL_FEEDBACK, Flags.FLAG_DUAL_SHADE)
@@ -202,7 +202,7 @@ class SceneContainerHapticsViewModelTest() : SysuiTestCase() {
             runCurrent()
 
             // THEN the view does not play a haptic feedback constant
-            verifyZeroInteractions(view)
+            verifyNoMoreInteractions(view)
         }
 
     private fun createTransitionState(from: SceneKey, to: ContentKey) =

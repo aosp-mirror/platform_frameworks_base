@@ -1661,33 +1661,49 @@ public final class DisplayManagerService extends SystemService {
         return false;
     }
 
+    private boolean hasVideoOutputPermission(String func) {
+        return checkCallingPermission(CAPTURE_VIDEO_OUTPUT, func)
+                || hasSecureVideoOutputPermission(func);
+    }
+
+    private boolean hasSecureVideoOutputPermission(String func) {
+        return checkCallingPermission(CAPTURE_SECURE_VIDEO_OUTPUT, func);
+    }
+
+    private boolean canCreateMirrorDisplays(IVirtualDevice virtualDevice) {
+        if (virtualDevice == null) {
+            return false;
+        }
+        try {
+            return virtualDevice.canCreateMirrorDisplays();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to query virtual device for permissions", e);
+            return false;
+        }
+    }
+
     private boolean canProjectVideo(IMediaProjection projection) {
-        if (projection != null) {
-            try {
-                if (projection.canProjectVideo()) {
-                    return true;
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to query projection service for permissions", e);
-            }
+        if (projection == null) {
+            return false;
         }
-        if (checkCallingPermission(CAPTURE_VIDEO_OUTPUT, "canProjectVideo()")) {
-            return true;
+        try {
+            return projection.canProjectVideo();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to query projection service for permissions", e);
+            return false;
         }
-        return canProjectSecureVideo(projection);
     }
 
     private boolean canProjectSecureVideo(IMediaProjection projection) {
-        if (projection != null) {
-            try {
-                if (projection.canProjectSecureVideo()) {
-                    return true;
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to query projection service for permissions", e);
-            }
+        if (projection == null) {
+            return false;
         }
-        return checkCallingPermission(CAPTURE_SECURE_VIDEO_OUTPUT, "canProjectSecureVideo()");
+        try {
+            return projection.canProjectSecureVideo();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to query projection service for permissions", e);
+            return false;
+        }
     }
 
     private boolean checkCallingPermission(String permission, String func) {
@@ -1793,7 +1809,8 @@ public final class DisplayManagerService extends SystemService {
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) != 0) {
             // Only a valid media projection or a virtual device can create a mirror virtual
             // display.
-            if (!canProjectVideo(projection) && virtualDevice == null) {
+            if (!canProjectVideo(projection) && !canCreateMirrorDisplays(virtualDevice)
+                    && !hasVideoOutputPermission("createVirtualDisplayInternal")) {
                 throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
                         + "CAPTURE_SECURE_VIDEO_OUTPUT permission, or an appropriate "
                         + "MediaProjection token in order to create a screen sharing virtual "
@@ -1803,7 +1820,8 @@ public final class DisplayManagerService extends SystemService {
             }
         }
         if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
-            if (!canProjectSecureVideo(projection)) {
+            if (!canProjectSecureVideo(projection)
+                    && !hasSecureVideoOutputPermission("createVirtualDisplayInternal")) {
                 throw new SecurityException("Requires CAPTURE_SECURE_VIDEO_OUTPUT "
                         + "or an appropriate MediaProjection token to create a "
                         + "secure virtual display.");
@@ -2090,16 +2108,6 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                         DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
             }
-        }
-    }
-
-    private void setVirtualDisplayStateInternal(IBinder appToken, boolean isOn) {
-        synchronized (mSyncRoot) {
-            if (mVirtualDisplayAdapter == null) {
-                return;
-            }
-
-            mVirtualDisplayAdapter.setVirtualDisplayStateLocked(appToken, isOn);
         }
     }
 
@@ -4615,16 +4623,6 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void setVirtualDisplayState(IVirtualDisplayCallback callback, boolean isOn) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                setVirtualDisplayStateInternal(callback.asBinder(), isOn);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override // Binder call
         public void setVirtualDisplayRotation(IVirtualDisplayCallback callback,
                 @Surface.Rotation int rotation) {
             if (!android.companion.virtualdevice.flags.Flags.virtualDisplayRotationApi()) {
@@ -5589,6 +5587,20 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
+        public int[] getDisplayIdsForGroup(int groupId) {
+            synchronized (mSyncRoot) {
+                return mLogicalDisplayMapper.getDisplayIdsForGroupLocked(groupId);
+            }
+        }
+
+        @Override
+        public SparseArray<int[]> getDisplayIdsByGroupsIds() {
+            synchronized (mSyncRoot) {
+                return mLogicalDisplayMapper.getDisplayIdsByGroupIdLocked();
+            }
+        }
+
+        @Override
         public IntArray getDisplayIds() {
             IntArray displayIds = new IntArray();
             synchronized (mSyncRoot) {
@@ -5633,6 +5645,21 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void onPresentation(int displayId, boolean isShown) {
             mExternalDisplayPolicy.onPresentation(displayId, isShown);
+        }
+
+        @Override
+        public void stylusGestureStarted(long eventTime) {
+            if (mFlags.isBlockAutobrightnessChangesOnStylusUsage()) {
+                DisplayPowerController displayPowerController;
+                synchronized (mSyncRoot) {
+                    displayPowerController = mDisplayPowerControllers.get(
+                            Display.DEFAULT_DISPLAY);
+                }
+                // We assume that the stylus is being used on the default display. This should
+                // be changed to the displayId on which it is being used once we start getting this
+                // information from the input manager service
+                displayPowerController.stylusGestureStarted(eventTime);
+            }
         }
     }
 

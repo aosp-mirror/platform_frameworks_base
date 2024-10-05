@@ -17,6 +17,7 @@
 package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -30,6 +31,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 import android.window.IWindowContainerToken;
 import android.window.TransitionInfo;
@@ -37,16 +40,21 @@ import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
+import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
 
 /**
  * Tests of {@link FreeformTaskTransitionObserver}
@@ -54,10 +62,15 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class FreeformTaskTransitionObserverTest {
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Mock
     private ShellInit mShellInit;
     @Mock
     private Transitions mTransitions;
+    @Mock
+    private DesktopFullImmersiveTransitionHandler mDesktopFullImmersiveTransitionHandler;
     @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
 
@@ -74,7 +87,9 @@ public class FreeformTaskTransitionObserverTest {
         doReturn(pm).when(context).getPackageManager();
 
         mTransitionObserver = new FreeformTaskTransitionObserver(
-                context, mShellInit, mTransitions, mWindowDecorViewModel);
+                context, mShellInit, mTransitions,
+                Optional.of(mDesktopFullImmersiveTransitionHandler),
+                mWindowDecorViewModel);
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
                     Runnable.class);
@@ -221,6 +236,19 @@ public class FreeformTaskTransitionObserverTest {
 
         verify(mWindowDecorViewModel).destroyWindowDecoration(change1.getTaskInfo());
         verify(mWindowDecorViewModel).destroyWindowDecoration(change2.getTaskInfo());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void onTransitionReady_forwardsToDesktopImmersiveHandler() {
+        final IBinder transition = mock(IBinder.class);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CHANGE, 0).build();
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+
+        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition);
     }
 
     private static TransitionInfo.Change createChange(int mode, int taskId, int windowingMode) {
