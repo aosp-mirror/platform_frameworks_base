@@ -368,6 +368,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * belongs to.
          */
         boolean isCallerVirtualDeviceOwner(int displayId, int callingUid);
+
+        /**
+         * Returns whether the display with the given ID is trusted.
+         */
+        boolean isDisplayTrusted(int displayId);
     }
 
     /**

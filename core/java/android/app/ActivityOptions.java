@@ -68,6 +68,8 @@ import android.window.RemoteTransition;
 import android.window.SplashScreen;
 import android.window.WindowContainerToken;
 
+import com.android.window.flags.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -109,35 +111,64 @@ public class ActivityOptions extends ComponentOptions {
             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS,
             MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE})
     public @interface BackgroundActivityStartMode {}
+
     /**
-     * No explicit value chosen. The system will decide whether to grant privileges.
+     * The system determines whether to grant background activity start privileges. This is the
+     * default behavior if no explicit mode is specified.
      */
     public static final int MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED = 0;
     /**
-     * Allow the {@link PendingIntent} to use the background activity start privileges.
+     * Grants the {@link PendingIntent} background activity start privileges.
+     *
+     * This behaves the same as {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOWED_ALWAYS}, except it
+     * does not grant background activity launch permissions based on the privileged permission
+     * <code>START_ACTIVITIES_FROM_BACKGROUND</code>.
+     *
+     * @deprecated Use {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE} to allow starts
+     * only when the app is visible or {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS} to
+     * allow starts at any time (see <a
+     * href="https://developer.android.com/guide/components/activities/background-starts">
+     * Restrictions on starting activities from the background</a>).
      */
+    @Deprecated
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOWED = 1;
     /**
-     * Deny the {@link PendingIntent} to use the background activity start privileges.
+     * Denies the {@link PendingIntent} any background activity start privileges.
      */
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_DENIED = 2;
     /**
-     * Allow the {@link PendingIntent} to use ALL background activity start privileges, including
-     * special permissions that will allow starts at any time.
+     * Grants the {@link PendingIntent} all background activity start privileges, including
+     * those normally reserved for privileged contexts (e.g., companion apps or those with the
+     * {@code START_ACTIVITIES_FROM_BACKGROUND} permission).
      *
-     * @hide
+     * <p><b>Caution:</b> This mode should be used sparingly. Most apps should use
+     * {@link #MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE} instead, relying on notifications
+     * or foreground services for background interactions to minimize user disruption. However,
+     * this mode  is necessary for specific use cases, such as companion apps responding to
+     * prompts from a connected device.
+     *
+     * <p>For more information on background activity start restrictions, see:
+     * <a href="https://developer.android.com/guide/components/activities/background-starts">
+     * Restrictions on starting activities from  the background</a>
      */
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS = 3;
     /**
-     * Allow the {@link PendingIntent} to use background activity start privileges based on
-     * visibility of the app.
+     * Grants the {@link PendingIntent} background activity start privileges only when the app
+     * has a visible window (i.e., is visible to the user). This is the recommended mode for most
+     * apps to minimize disruption to the user experience.
      *
-     * @hide
+     * <p>For more information on background activity start restrictions, see:
+     * <a href="https://developer.android.com/guide/components/activities/background-starts">
+     * Restrictions on starting activities from the background</a>
      */
+    @FlaggedApi(Flags.FLAG_BAL_ADDITIONAL_START_MODES)
     public static final int MODE_BACKGROUND_ACTIVITY_START_ALLOW_IF_VISIBLE = 4;
     /**
-     * Special behavior for compatibility.
-     * Similar to {@link #MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED}
+     * Provides compatibility with previous Android versions regarding background activity starts.
+     * Similar to {@link #MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED}.
      *
      * @hide
      */

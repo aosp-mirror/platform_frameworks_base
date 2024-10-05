@@ -3444,4 +3444,15 @@ interface ITelephony {
      */
     boolean overrideCarrierRoamingNtnEligibilityChanged(
             in boolean status, in boolean resetRequired);
+
+    /**
+     * Deliver the list of deprovisioned satellite subscriber infos.
+     *
+     * @param list The list of deprovisioned satellite subscriber infos.
+     * @param result The result receiver that returns whether deliver success or fail.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void deprovisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
 }

@@ -152,6 +152,8 @@ public final class SurfaceControl implements Parcelable {
             long nativeObject, int priority);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
+    private static native void nativeSetCrop(long transactionObj, long nativeObject,
+            float l, float t, float r, float b);
     private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
             float cornerRadius);
     private static native void nativeSetBackgroundBlurRadius(long transactionObj, long nativeObject,
@@ -3448,6 +3450,29 @@ public final class SurfaceControl implements Parcelable {
                         "setWindowCrop", this, sc, "w=" + width + " h=" + height);
             }
             nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, width, height);
+            return this;
+        }
+
+        /**
+         * Bounds the surface and its children to the bounds specified. Size of the surface will be
+         * ignored and only the crop and buffer size will be used to determine the bounds of the
+         * surface. If no crop is specified and the surface has no buffer, the surface bounds is
+         * only constrained by the size of its parent bounds.
+         *
+         * @param sc   SurfaceControl to set crop of.
+         * @param crop Bounds of the crop to apply.
+         * @return this This transaction for chaining
+         * @hide
+         */
+        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, float top, float left,
+                float bottom, float right) {
+            checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCrop", this, sc, "crop={" + top + ", " + left + ", " +
+                        bottom + ", " + right + "}");
+            }
+            nativeSetCrop(mNativeObject, sc.mNativeObject, top, left, bottom, right);
             return this;
         }
 

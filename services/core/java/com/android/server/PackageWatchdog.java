@@ -47,6 +47,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.LongArrayQueue;
 import android.util.Slog;
@@ -199,6 +200,13 @@ public class PackageWatchdog {
     // This allows boot loop information to persist in the case of an fs-checkpoint being
     // aborted.
     private static final String METADATA_FILE = "/metadata/watchdog/mitigation_count.txt";
+
+    /**
+     * EventLog tags used when logging into the event log. Note the values must be sync with
+     * frameworks/base/services/core/java/com/android/server/EventLogTags.logtags to get correct
+     * name translation.
+     */
+    private static final int LOG_TAG_RESCUE_NOTE = 2900;
 
     private static final Object sPackageWatchdogLock = new Object();
     @GuardedBy("sPackageWatchdogLock")
@@ -2024,7 +2032,7 @@ public class PackageWatchdog {
             } else {
                 int count = getCount() + 1;
                 setCount(count);
-                EventLogTags.writeRescueNote(Process.ROOT_UID, count, window);
+                EventLog.writeEvent(LOG_TAG_RESCUE_NOTE, Process.ROOT_UID, count, window);
                 if (Flags.recoverabilityDetection()) {
                     // After a reboot (e.g. by WARM_REBOOT or mainline rollback) we apply
                     // mitigations without waiting for DEFAULT_BOOT_LOOP_TRIGGER_COUNT.

@@ -1120,7 +1120,7 @@
     <string name="zen_mode_off">Off</string>
 
     <!-- Modes: label for a mode that needs to be set up [CHAR LIMIT=35] -->
-    <string name="zen_mode_set_up">Set up</string>
+    <string name="zen_mode_set_up">Not set</string>
 
     <!-- Modes: label for a mode that cannot be manually turned on [CHAR LIMIT=35] -->
     <string name="zen_mode_no_manual_invocation">Manage in settings</string>
@@ -1826,6 +1826,12 @@
 
     <!-- Name of the alarm status bar icon. -->
     <string name="status_bar_alarm">Alarm</string>
+
+    <!-- Format string for the content description of the icon that indicates that a Mode is on.
+       For example, if the mode name is Bedtime, this will be "Bedtime is on". This content
+       description will be associated to the mode icon in status bar, smartspace, and everyone else
+       where it might be displayed without text. [CHAR LIMIT=NONE] -->
+    <string name="active_mode_content_description"><xliff:g id="modeName" example="Do Not Disturb">%1$s</xliff:g> is on</string>
 
     <!-- Wallet strings -->
     <!-- Wallet empty state, title [CHAR LIMIT=32] -->
@@ -3746,9 +3752,9 @@
 
     <!-- TOUCHPAD TUTORIAL-->
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_back_gesture_button">Back gesture</string>
+    <string name="touchpad_tutorial_back_gesture_button">Go back</string>
     <!-- Label for button opening tutorial for back gesture on touchpad [CHAR LIMIT=NONE] -->
-    <string name="touchpad_tutorial_home_gesture_button">Home gesture</string>
+    <string name="touchpad_tutorial_home_gesture_button">Go home</string>
     <!-- Label for button opening tutorial for "view recent apps" gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_recent_apps_gesture_button">View recent apps</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
@@ -3757,26 +3763,25 @@
     <!-- Touchpad back gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_action_title">Go back</string>
     <!-- Touchpad back gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_back_gesture_guidance">To go back, swipe left or right using three fingers anywhere on the touchpad.\n\nYou can also use the keyboard shortcut
-Action + ESC for this.</string>
+    <string name="touchpad_back_gesture_guidance">Swipe left or right using three fingers on your touchpad</string>
     <!-- Screen title after back gesture was done successfully [CHAR LIMIT=NONE] -->
-    <string name="touchpad_back_gesture_success_title">Great job!</string>
+    <string name="touchpad_back_gesture_success_title">Nice!</string>
     <!-- Text shown to the user after they complete back gesture tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_back_gesture_success_body">You completed the go back gesture.</string>
     <!-- HOME GESTURE -->
     <!-- Touchpad home gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_home_gesture_action_title">Go home</string>
     <!-- Touchpad home gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_home_gesture_guidance">To go to your home screen at any time, swipe up with three fingers from the bottom of your screen.</string>
+    <string name="touchpad_home_gesture_guidance">Swipe up with three fingers on your touchpad</string>
     <!-- Screen title after home gesture was done successfully [CHAR LIMIT=NONE] -->
-    <string name="touchpad_home_gesture_success_title">Nice!</string>
+    <string name="touchpad_home_gesture_success_title">Great job!</string>
     <!-- Text shown to the user after they complete home gesture tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_home_gesture_success_body">You completed the go home gesture.</string>
+    <string name="touchpad_home_gesture_success_body">You completed the go home gesture</string>
     <!-- RECENT APPS GESTURE -->
     <!-- Touchpad recent apps gesture action name in tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_recent_apps_gesture_action_title">View recent apps</string>
     <!-- Touchpad recent apps gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
-    <string name="touchpad_recent_apps_gesture_guidance">Swipe up and hold using three fingers on your touchpad.</string>
+    <string name="touchpad_recent_apps_gesture_guidance">Swipe up and hold using three fingers on your touchpad</string>
     <!-- Screen title after recent apps gesture was done successfully [CHAR LIMIT=NONE] -->
     <string name="touchpad_recent_apps_gesture_success_title">Great job!</string>
     <!-- Text shown to the user after they complete recent apps gesture tutorial [CHAR LIMIT=NONE] -->
@@ -3784,13 +3789,13 @@ Action + ESC for this.</string>
 
     <!-- KEYBOARD TUTORIAL-->
     <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
-    <string name="tutorial_action_key_title">Action key</string>
+    <string name="tutorial_action_key_title">View all apps</string>
     <!-- Action key tutorial guidance[CHAR LIMIT=NONE] -->
-    <string name="tutorial_action_key_guidance">To access your apps, press the action key on your keyboard.</string>
+    <string name="tutorial_action_key_guidance">Press the action key on your keyboard</string>
     <!-- Screen title after action key pressed successfully [CHAR LIMIT=NONE] -->
-    <string name="tutorial_action_key_success_title">Congratulations!</string>
+    <string name="tutorial_action_key_success_title">Well done!</string>
     <!-- Text shown to the user after they complete action key tutorial [CHAR LIMIT=NONE] -->
-    <string name="tutorial_action_key_success_body">You completed the action key gesture.\n\nAction + / shows all the shortcuts you have available.</string>
+    <string name="tutorial_action_key_success_body">You completed the view all apps gesture</string>
 
     <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
     <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>

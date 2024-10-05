@@ -24,12 +24,16 @@ import android.testing.TestableContext
 import android.testing.TestableLooper
 import android.testing.TestableResources
 import android.view.MotionEvent
+import android.view.Surface.ROTATION_180
+import android.view.Surface.ROTATION_90
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipArrowDirection
 import com.google.common.truth.Truth.assertThat
@@ -42,9 +46,11 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -52,6 +58,8 @@ import org.mockito.kotlin.verify
 class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
   @Mock private lateinit var mockWindowManager: WindowManager
   @Mock private lateinit var mockViewContainerFactory: AdditionalSystemViewContainer.Factory
+  @Mock private lateinit var mockDisplayController: DisplayController
+  @Mock private lateinit var mockPopupWindow: AdditionalSystemViewContainer
   private lateinit var testableResources: TestableResources
   private lateinit var testableContext: TestableContext
   private lateinit var tooltipController: DesktopWindowingEducationTooltipController
@@ -69,7 +77,8 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
         Context.LAYOUT_INFLATER_SERVICE, context.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
     testableContext.addMockSystemService(WindowManager::class.java, mockWindowManager)
     tooltipController =
-        DesktopWindowingEducationTooltipController(testableContext, mockViewContainerFactory)
+        DesktopWindowingEducationTooltipController(
+            testableContext, mockViewContainerFactory, mockDisplayController)
   }
 
   @Test
@@ -216,6 +225,25 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
     tooltipViewArgumentCaptor.lastValue.performClick()
 
     verify(mockLambda).invoke()
+  }
+
+  @Test
+  fun showEducationTooltip_displayRotationChanged_hidesTooltip() {
+    whenever(
+            mockViewContainerFactory.create(any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(mockPopupWindow)
+    val tooltipViewConfig = createTooltipConfig()
+
+    tooltipController.showEducationTooltip(tooltipViewConfig = tooltipViewConfig, taskId = 123)
+    tooltipController.onDisplayChange(
+        /* displayId= */ 123,
+        /* fromRotation= */ ROTATION_90,
+        /* toRotation= */ ROTATION_180,
+        /* newDisplayAreaInfo= */ null,
+        WindowContainerTransaction())
+
+    verify(mockPopupWindow, times(1)).releaseView()
+    verify(mockDisplayController, atLeastOnce()).removeDisplayChangingController(any())
   }
 
   private fun createTooltipConfig(

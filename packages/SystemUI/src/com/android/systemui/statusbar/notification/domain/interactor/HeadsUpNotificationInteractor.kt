@@ -39,10 +39,10 @@ class HeadsUpNotificationInteractor
 @Inject
 constructor(
     private val headsUpRepository: HeadsUpRepository,
-    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
-    private val shadeInteractor: ShadeInteractor,
+    faceAuthInteractor: DeviceEntryFaceAuthInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    shadeInteractor: ShadeInteractor,
 ) {
 
     /** The top-ranked heads up row, regardless of pinned state */
@@ -56,8 +56,7 @@ constructor(
             }
             .distinctUntilChanged()
 
-    /** Set of currently pinned top-level heads up rows to be displayed. */
-    val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
+    private val activeHeadsUpRows: Flow<Set<Pair<HeadsUpRowKey, Boolean>>> by lazy {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
@@ -67,13 +66,31 @@ constructor(
                         repositories.map { repo ->
                             repo.isPinned.map { isPinned -> repo to isPinned }
                         }
-                    combine(toCombine) { pairs ->
-                        pairs.filter { (_, isPinned) -> isPinned }.map { (repo, _) -> repo }.toSet()
-                    }
+                    combine(toCombine) { pairs -> pairs.toSet() }
                 } else {
                     // if the set is empty, there are no flows to combine
                     flowOf(emptySet())
                 }
+            }
+        }
+    }
+
+    /** Set of currently active top-level heads up rows to be displayed. */
+    val activeHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            activeHeadsUpRows.map { it.map { (repo, _) -> repo }.toSet() }
+        }
+    }
+
+    /** Set of currently pinned top-level heads up rows to be displayed. */
+    val pinnedHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            activeHeadsUpRows.map {
+                it.filter { (_, isPinned) -> isPinned }.map { (repo, _) -> repo }.toSet()
             }
         }
     }

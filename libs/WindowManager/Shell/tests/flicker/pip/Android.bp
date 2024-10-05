@@ -122,6 +122,7 @@ android_test {
     instrumentation_target_package: "com.android.wm.shell.flicker.pip",
     test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*.kt"],
+    exclude_srcs: [":WMShellFlickerTestsPipApps-src"],
     static_libs: ["WMShellFlickerTestsBase"],
     data: ["trace_config/*"],
 }

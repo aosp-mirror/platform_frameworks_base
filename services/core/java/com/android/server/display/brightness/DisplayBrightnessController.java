@@ -501,6 +501,13 @@ public final class DisplayBrightnessController {
         return true;
     }
 
+    /**
+     * Notifies if the stylus is currently being used or not.
+     */
+    public void setStylusBeingUsed(boolean isEnabled) {
+        // Todo(b/369977976) - Disable the auto-brightness strategy
+    }
+
     @VisibleForTesting
     static class Injector {
         DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(Context context,

@@ -32,6 +32,7 @@ import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 
 /**
  * Models the UI state for the user actions that the user can perform to navigate to other scenes.
@@ -50,7 +51,9 @@ constructor(
         combine(
                 shadeInteractor.shadeMode,
                 qsSceneAdapter.isCustomizerShowing,
-                sceneBackInteractor.backScene.map { it ?: SceneFamilies.Home },
+                sceneBackInteractor.backScene
+                    .filter { it != Scenes.Shade }
+                    .map { it ?: SceneFamilies.Home },
             ) { shadeMode, isCustomizerShowing, backScene ->
                 buildMap<UserAction, UserActionResult> {
                     if (!isCustomizerShowing) {

@@ -77,10 +77,12 @@ public abstract class Pip2Module {
             PipTaskListener pipTaskListener,
             @NonNull PipScheduler pipScheduler,
             @NonNull PipTransitionState pipStackListenerController,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipUiStateChangeController pipUiStateChangeController) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
-                pipScheduler, pipStackListenerController, pipUiStateChangeController);
+                pipScheduler, pipStackListenerController, pipDisplayLayoutState,
+                pipUiStateChangeController);
     }
 
     @WMSingleton

@@ -17,7 +17,7 @@
 package com.android.systemui.qs.panels.ui.compose.infinitegrid
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.approachLayout
 import kotlin.math.roundToInt
 
 /**
@@ -27,17 +27,22 @@ import kotlin.math.roundToInt
  * [squishiness] on the measure/layout pass.
  *
  * The squished composable will be center aligned.
+ *
+ * Use an [approachLayout] to indicate that this should be measured in the lookahead step without
+ * using squishiness. If a parent of this node needs to determine unsquished height, they should
+ * also use an approachLayout tracking the squishiness.
  */
 fun Modifier.verticalSquish(squishiness: () -> Float): Modifier {
-    return layout { measurable, constraints ->
-        val placeable = measurable.measure(constraints)
-        val actualHeight = placeable.height
-        val squishedHeight = actualHeight * squishiness()
-        // Center the content by moving it UP (squishedHeight < actualHeight)
-        val scroll = (squishedHeight - actualHeight) / 2
+    return approachLayout(isMeasurementApproachInProgress = { squishiness() < 1 }) { measurable, _
+        ->
+        val squishinessValue = squishiness()
+        val expectedHeight = lookaheadSize.height
 
-        layout(placeable.width, squishedHeight.roundToInt()) {
-            placeable.place(0, scroll.roundToInt())
-        }
+        val placeable = measurable.measure(lookaheadConstraints)
+        val squishedHeight = (expectedHeight * squishinessValue).roundToInt()
+        // Center the content by moving it UP (squishedHeight < actualHeight)
+        val scroll = (squishedHeight - expectedHeight) / 2
+
+        layout(placeable.width, squishedHeight) { placeable.place(0, scroll) }
     }
 }

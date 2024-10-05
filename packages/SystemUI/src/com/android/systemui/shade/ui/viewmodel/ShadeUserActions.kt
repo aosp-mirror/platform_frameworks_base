@@ -30,41 +30,47 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerEdge
 fun singleShadeActions(
     requireTwoPointersForTopEdgeForQs: Boolean = false
 ): Array<Pair<UserAction, UserActionResult>> {
+    val shadeUserActionResult = UserActionResult(Scenes.Shade, isIrreversible = true)
+    val qsSceneUserActionResult = UserActionResult(Scenes.QuickSettings, isIrreversible = true)
     return arrayOf(
         // Swiping down, not from the edge, always goes to shade.
-        Swipe.Down to Scenes.Shade,
-        swipeDown(pointerCount = 2) to Scenes.Shade,
+        Swipe.Down to shadeUserActionResult,
+        swipeDown(pointerCount = 2) to shadeUserActionResult,
 
         // Swiping down from the top edge.
         swipeDownFromTop(pointerCount = 1) to
             if (requireTwoPointersForTopEdgeForQs) {
-                Scenes.Shade
+                shadeUserActionResult
             } else {
-                Scenes.QuickSettings
+                qsSceneUserActionResult
             },
-        swipeDownFromTop(pointerCount = 2) to Scenes.QuickSettings,
+        swipeDownFromTop(pointerCount = 2) to qsSceneUserActionResult,
     )
 }
 
 /** Returns collection of [UserAction] to [UserActionResult] pairs for opening the split shade. */
 fun splitShadeActions(): Array<Pair<UserAction, UserActionResult>> {
-    val splitShadeSceneKey = UserActionResult(Scenes.Shade, ToSplitShade)
+    val shadeUserActionResult = UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true)
     return arrayOf(
         // Swiping down, not from the edge, always goes to shade.
-        Swipe.Down to splitShadeSceneKey,
-        swipeDown(pointerCount = 2) to splitShadeSceneKey,
+        Swipe.Down to shadeUserActionResult,
+        swipeDown(pointerCount = 2) to shadeUserActionResult,
         // Swiping down from the top edge goes to QS.
-        swipeDownFromTop(pointerCount = 1) to splitShadeSceneKey,
-        swipeDownFromTop(pointerCount = 2) to splitShadeSceneKey,
+        swipeDownFromTop(pointerCount = 1) to shadeUserActionResult,
+        swipeDownFromTop(pointerCount = 2) to shadeUserActionResult,
     )
 }
 
 /** Returns collection of [UserAction] to [UserActionResult] pairs for opening the dual shade. */
 fun dualShadeActions(): Array<Pair<UserAction, UserActionResult>> {
+    val notifShadeUserActionResult =
+        UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
+    val qsShadeuserActionResult =
+        UserActionResult.ShowOverlay(Overlays.QuickSettingsShade, isIrreversible = true)
     return arrayOf(
-        Swipe.Down to Overlays.NotificationsShade,
+        Swipe.Down to notifShadeUserActionResult,
         Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
-            Overlays.QuickSettingsShade,
+            qsShadeuserActionResult,
     )
 }
 

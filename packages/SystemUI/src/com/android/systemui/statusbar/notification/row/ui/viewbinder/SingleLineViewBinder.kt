@@ -24,14 +24,14 @@ import com.android.systemui.statusbar.notification.row.ui.viewmodel.SingleLineVi
 object SingleLineViewBinder {
     @JvmStatic
     fun bind(viewModel: SingleLineViewModel?, view: HybridNotificationView?) {
-        if (viewModel?.isConversation() == true && view is HybridConversationNotificationView) {
+        if (view is HybridConversationNotificationView) {
             if (AsyncHybridViewInflation.isUnexpectedlyInLegacyMode()) return
 
-            viewModel.conversationData?.avatar?.let { view.setAvatar(it) }
+            viewModel?.conversationData?.avatar?.let { view.setAvatar(it) }
             view.setText(
-                viewModel.titleText,
-                viewModel.contentText,
-                viewModel.conversationData?.conversationSenderName
+                viewModel?.titleText,
+                viewModel?.contentText,
+                viewModel?.conversationData?.conversationSenderName,
             )
         } else {
             // bind the title and content text views
@@ -39,7 +39,7 @@ object SingleLineViewBinder {
                 bind(
                     /* title = */ viewModel?.titleText,
                     /* text = */ viewModel?.contentText,
-                    /* contentView = */ null
+                    /* contentView = */ null,
                 )
             }
         }

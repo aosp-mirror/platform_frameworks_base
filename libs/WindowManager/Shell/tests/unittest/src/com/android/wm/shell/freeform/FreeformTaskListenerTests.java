@@ -18,15 +18,19 @@ package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.platform.test.annotations.EnableFlags;
 import android.view.SurfaceControl;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -37,7 +41,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.LaunchAdjacentController;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -69,7 +73,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     @Mock
     private SurfaceControl mMockSurfaceControl;
     @Mock
-    private DesktopModeTaskRepository mDesktopModeTaskRepository;
+    private DesktopRepository mDesktopRepository;
     @Mock
     private LaunchAdjacentController mLaunchAdjacentController;
     private FreeformTaskListener mFreeformTaskListener;
@@ -85,7 +89,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
                 mContext,
                 mShellInit,
                 mTaskOrganizer,
-                Optional.of(mDesktopModeTaskRepository),
+                Optional.of(mDesktopRepository),
                 mLaunchAdjacentController,
                 mWindowDecorViewModel);
     }
@@ -98,7 +102,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onFocusTaskChanged(task);
 
-        verify(mDesktopModeTaskRepository)
+        verify(mDesktopRepository)
             .addOrMoveFreeformTaskToTop(task.displayId, task.taskId);
     }
 
@@ -110,7 +114,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
 
         mFreeformTaskListener.onFocusTaskChanged(fullscreenTask);
 
-        verify(mDesktopModeTaskRepository, never())
+        verify(mDesktopRepository, never())
                 .addOrMoveFreeformTaskToTop(fullscreenTask.displayId, fullscreenTask.taskId);
     }
 
@@ -137,6 +141,40 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onTaskInfoChanged(task);
 
         verify(mLaunchAdjacentController).setLaunchAdjacentEnabled(true);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    public void onTaskVanished_nonClosingTask_isMinimized() {
+        ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isVisible = true;
+
+        mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
+
+        task.isVisible = false;
+        task.displayId = INVALID_DISPLAY;
+        mFreeformTaskListener.onTaskVanished(task);
+
+        verify(mDesktopRepository).minimizeTask(task.displayId, task.taskId);
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    public void onTaskVanished_closingTask_isNotMinimized() {
+        ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isVisible = true;
+
+        mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
+
+        when(mDesktopRepository.isClosingTask(task.taskId)).thenReturn(true);
+        task.isVisible = false;
+        task.displayId = INVALID_DISPLAY;
+        mFreeformTaskListener.onTaskVanished(task);
+
+        verify(mDesktopRepository, never()).minimizeTask(task.displayId, task.taskId);
+        verify(mDesktopRepository).removeFreeformTask(task.displayId, task.taskId);
     }
 
     @After

@@ -179,15 +179,23 @@ class AppCompatActivityRobot {
                 .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
-    void enableTreatmentForTopActivity(boolean enabled) {
-        doReturn(enabled).when(mDisplayContent.mAppCompatCameraPolicy)
-                .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
+    void enableFullscreenCameraCompatTreatmentForTopActivity(boolean enabled) {
+        if (mDisplayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+            doReturn(enabled).when(
+                    mDisplayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy)
+                        .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
+        }
     }
 
-    void setTopActivityCameraActive(boolean enabled) {
+    void setIsCameraRunningAndWindowingModeEligibleFullscreen(boolean enabled) {
         doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
                 .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()),
                         /* mustBeFullscreen= */ eq(true));
+    }
+
+    void setIsCameraRunningAndWindowingModeEligibleFreeform(boolean enabled) {
+        doReturn(enabled).when(getTopCameraCompatFreeformPolicy())
+                .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()));
     }
 
     void setTopActivityEligibleForOrientationOverride(boolean enabled) {
@@ -508,8 +516,13 @@ class AppCompatActivityRobot {
     }
 
     private DisplayRotationCompatPolicy getTopDisplayRotationCompatPolicy() {
-        return mActivityStack.top().mDisplayContent
-                .mAppCompatCameraPolicy.mDisplayRotationCompatPolicy;
+        return mActivityStack.top().mDisplayContent.mAppCompatCameraPolicy
+                .mDisplayRotationCompatPolicy;
+    }
+
+    private CameraCompatFreeformPolicy getTopCameraCompatFreeformPolicy() {
+        return mActivityStack.top().mDisplayContent.mAppCompatCameraPolicy
+                .mCameraCompatFreeformPolicy;
     }
 
     // We add the activity to the stack and spyOn() on its properties.

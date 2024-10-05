@@ -15,8 +15,12 @@
  */
 package android.app.appfunctions
 
+import android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DEFAULT
+import android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DISABLED
+import android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_ENABLED
 import android.app.appsearch.AppSearchSchema
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertFailsWith
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -108,32 +112,43 @@ class AppFunctionRuntimeMetadataTest {
 
         assertThat(runtimeMetadata.packageName).isEqualTo("com.pkg")
         assertThat(runtimeMetadata.functionId).isEqualTo("funcId")
-        assertThat(runtimeMetadata.enabled).isNull()
+        assertThat(runtimeMetadata.enabled).isEqualTo(APP_FUNCTION_STATE_DEFAULT)
         assertThat(runtimeMetadata.appFunctionStaticMetadataQualifiedId)
             .isEqualTo("android\$apps-db/app_functions#com.pkg/funcId")
     }
 
     @Test
-    fun setEnabled_true() {
+    fun setEnabled_enabled() {
         val runtimeMetadata =
-            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(true).build()
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(APP_FUNCTION_STATE_ENABLED).build()
 
-        assertThat(runtimeMetadata.enabled).isTrue()
+        assertThat(runtimeMetadata.enabled).isEqualTo(APP_FUNCTION_STATE_ENABLED)
     }
 
     @Test
-    fun setEnabled_false() {
+    fun setEnabled_disabled() {
         val runtimeMetadata =
-            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(false).build()
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(
+                APP_FUNCTION_STATE_DISABLED).build()
 
-        assertThat(runtimeMetadata.enabled).isFalse()
+        assertThat(runtimeMetadata.enabled).isEqualTo(APP_FUNCTION_STATE_DISABLED)
     }
 
     @Test
-    fun setEnabled_null() {
+    fun setEnabled_default() {
         val runtimeMetadata =
-            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(null).build()
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId").setEnabled(
+                APP_FUNCTION_STATE_DEFAULT).build()
 
-        assertThat(runtimeMetadata.enabled).isNull()
+        assertThat(runtimeMetadata.enabled).isEqualTo(APP_FUNCTION_STATE_DEFAULT)
+    }
+
+    @Test
+    fun setEnabled_illegalArgument() {
+        val runtimeMetadataBuilder =
+            AppFunctionRuntimeMetadata.Builder("com.pkg", "funcId")
+        assertFailsWith<IllegalArgumentException>("Value of EnabledState is unsupported.") {
+            runtimeMetadataBuilder.setEnabled(-1)
+        }
     }
 }

@@ -106,7 +106,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -163,7 +163,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock
-    private DesktopModeTaskRepository mMockDesktopRepository;
+    private DesktopRepository mMockDesktopRepository;
     @Mock
     private Choreographer mMockChoreographer;
     @Mock
@@ -619,6 +619,27 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void updateRelayoutParams_header_notAnInsetsSourceInFullyImmersive() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        final RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                /* applyStartTransactionOnDraw= */ true,
+                /* shouldSetTaskPositionAndCrop */ false,
+                /* isStatusBarVisible */ true,
+                /* isKeyguardVisibleAndOccluded */ false,
+                /* inFullImmersiveMode */ true,
+                new InsetsState());
+
+        assertThat(relayoutParams.mIsInsetSource).isFalse();
+    }
+
+    @Test
     @DisableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     public void updateRelayoutParams_header_statusBarInvisible_captionVisible() {
         final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
@@ -1025,6 +1046,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 openInBrowserCaptor.capture(),
                 any(),
+                any(),
                 any()
         );
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
@@ -1052,6 +1074,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 openInBrowserCaptor.capture(),
+                any(),
                 any(),
                 any()
         );
@@ -1097,6 +1120,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 ArgumentCaptor.forClass(Function0.class);
         createHandleMenu(decoration);
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),

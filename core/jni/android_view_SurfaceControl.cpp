@@ -48,6 +48,7 @@
 #include <ui/DisplayMode.h>
 #include <ui/DisplayedFrameStats.h>
 #include <ui/DynamicDisplayInfo.h>
+#include <ui/FloatRect.h>
 #include <ui/FrameStats.h>
 #include <ui/GraphicTypes.h>
 #include <ui/HdrCapabilities.h>
@@ -989,6 +990,15 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
     Rect crop(l, t, r, b);
+    transaction->setCrop(ctrl, crop);
+}
+
+static void nativeSetCrop(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                          jfloat l, jfloat t, jfloat r, jfloat b) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    FloatRect crop(l, t, r, b);
     transaction->setCrop(ctrl, crop);
 }
 
@@ -2347,6 +2357,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFrameRateSelectionPriority },
     {"nativeSetWindowCrop", "(JJIIII)V",
             (void*)nativeSetWindowCrop },
+    {"nativeSetCrop", "(JJFFFF)V",
+            (void*)nativeSetCrop },
     {"nativeSetCornerRadius", "(JJF)V",
             (void*)nativeSetCornerRadius },
     {"nativeSetBackgroundBlurRadius", "(JJI)V",

@@ -1067,6 +1067,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
         @Override
         public void onDestroy() {
+            mUserSwitcherController.removeUserSwitchCallback(mUserSwitchCallback);
+
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(mView);
             constraintSet.clear(mUserSwitcherViewGroup.getId());
@@ -1075,6 +1077,8 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
 
             mView.removeView(mUserSwitcherViewGroup);
             mView.removeView(mUserSwitcher);
+            mUserSwitcher = null;
+            mUserSwitcherViewGroup = null;
         }
 
         private void findLargeUserIcon(int userId, Consumer<Drawable> consumer) {
@@ -1102,6 +1106,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                 return;
             }
 
+            if (mUserSwitcherViewGroup == null) {
+                return;
+            }
+
             mUserSwitcherViewGroup.setAlpha(0f);
             ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f);
             int yTrans = mView.getResources().getDimensionPixelSize(R.dimen.pin_view_trans_y_entry);
@@ -1110,14 +1118,18 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    mUserSwitcherViewGroup.setAlpha(1f);
-                    mUserSwitcherViewGroup.setTranslationY(0f);
+                    if (mUserSwitcherViewGroup != null) {
+                        mUserSwitcherViewGroup.setAlpha(1f);
+                        mUserSwitcherViewGroup.setTranslationY(0f);
+                    }
                 }
             });
             animator.addUpdateListener(animation -> {
-                float value = (float) animation.getAnimatedValue();
-                mUserSwitcherViewGroup.setAlpha(value);
-                mUserSwitcherViewGroup.setTranslationY(yTrans - yTrans * value);
+                if (mUserSwitcherViewGroup != null) {
+                    float value = (float) animation.getAnimatedValue();
+                    mUserSwitcherViewGroup.setAlpha(value);
+                    mUserSwitcherViewGroup.setTranslationY(yTrans - yTrans * value);
+                }
             });
             animator.start();
         }
@@ -1146,6 +1158,10 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
             final UserRecord currentUser = mUserSwitcherController.getCurrentUserRecord();
             if (currentUser == null) {
                 Log.e(TAG, "Current user in user switcher is null.");
+                return;
+            }
+            if (mUserSwitcher == null) {
+                Log.w(TAG, "User switcher is not inflated, cannot setupUserSwitcher");
                 return;
             }
             final String currentUserName = mUserSwitcherController.getCurrentUserName();

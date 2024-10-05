@@ -5,7 +5,8 @@
     { "name": "hoststubgen-test-tiny-test" },
     { "name": "hoststubgen-invoke-test" },
     { "name": "RavenwoodMockitoTest_device" },
-    { "name": "RavenwoodBivalentTest_device" },
+    // TODO(b/371215487): Re-enable when the test is fixed.
+    // { "name": "RavenwoodBivalentTest_device" },
 
     { "name": "RavenwoodBivalentInstTest_nonself_inst" },
     { "name": "RavenwoodBivalentInstTest_self_inst_device" },

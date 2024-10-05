@@ -97,6 +97,12 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Camera issues?\nTap to refit"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Didn’t fix it?\nTap to revert"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"No camera issues? Tap to dismiss."</string>
+    <!-- no translation found for windowing_app_handle_education_tooltip (6398482412956375783) -->
+    <skip />
+    <!-- no translation found for windowing_desktop_mode_image_button_education_tooltip (6285279585554484957) -->
+    <skip />
+    <!-- no translation found for windowing_desktop_mode_exit_education_tooltip (6685429075790085337) -->
+    <skip />
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"See and do more"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Drag in another app for split screen"</string>
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"Double-tap outside an app to reposition it"</string>
@@ -129,7 +135,8 @@
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Open menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Maximise screen"</string>
     <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Snap screen"</string>
-    <string name="desktop_mode_non_resizable_snap_text" msgid="1049800446363800707">"This app can\'t be resized"</string>
+    <!-- no translation found for desktop_mode_non_resizable_snap_text (3771776422751387878) -->
+    <skip />
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Maximise"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Snap left"</string>
     <string name="desktop_mode_maximize_menu_snap_right_button_text" msgid="7117751068945657304">"Snap right"</string>

@@ -445,7 +445,7 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   using namespace android;
 
   if (pool->getError() == NO_INIT) {
-    printer->Print("String pool is unitialized.\n");
+    printer->Print("String pool is uninitialized.\n");
     return;
   } else if (pool->getError() != NO_ERROR) {
     printer->Print("String pool is corrupt/invalid.\n");
