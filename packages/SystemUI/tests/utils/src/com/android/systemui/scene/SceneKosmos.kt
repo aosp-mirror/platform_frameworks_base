@@ -28,6 +28,7 @@ var Kosmos.sceneKeys by Fixture {
         Scenes.Bouncer,
         Scenes.Gone,
         Scenes.Communal,
+        Scenes.Dream,
     )
 }
 
@@ -49,9 +50,10 @@ var Kosmos.sceneContainerConfig by Fixture {
             Scenes.Gone to 0,
             Scenes.Lockscreen to 0,
             Scenes.Communal to 1,
-            Scenes.Shade to 2,
-            Scenes.QuickSettings to 3,
-            Scenes.Bouncer to 4,
+            Scenes.Dream to 2,
+            Scenes.Shade to 3,
+            Scenes.QuickSettings to 4,
+            Scenes.Bouncer to 5,
         )
 
     SceneContainerConfig(

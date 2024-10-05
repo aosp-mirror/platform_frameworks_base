@@ -275,7 +275,10 @@ public class TaskInfo {
     public int parentTaskId;
 
     /**
-     * Whether this task is focused.
+     * Whether this task is focused on the display. This means the task receives input events that
+     * target the display.
+     * CAUTION: This can be true for multiple tasks especially when multiple displays are connected
+     * in the system.
      * @hide
      */
     public boolean isFocused;

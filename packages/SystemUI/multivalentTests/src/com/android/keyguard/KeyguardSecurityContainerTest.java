@@ -61,6 +61,7 @@ import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.UserSwitcherController.UserSwitchCallback;
 import com.android.systemui.user.data.source.UserRecord;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
@@ -70,6 +71,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -96,6 +99,9 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
     private UserSwitcherController mUserSwitcherController;
     @Mock
     private FalsingA11yDelegate mFalsingA11yDelegate;
+    @Captor
+    private ArgumentCaptor<UserSwitchCallback> mUserSwitchCallbackCaptor =
+            ArgumentCaptor.forClass(UserSwitchCallback.class);
 
     private KeyguardSecurityContainer mKeyguardSecurityContainer;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
@@ -357,6 +363,18 @@ public class KeyguardSecurityContainerTest extends SysuiTestCase {
         // THEN the UserSwitcher anchor should be clickable
         ViewGroup anchor = mKeyguardSecurityContainer.findViewById(R.id.user_switcher_anchor);
         assertThat(anchor.isClickable()).isTrue();
+    }
+
+    @Test
+    public void goingOutOfUserSwitcherRemovesCallback() {
+        // WHEN UserSwitcherViewMode is initialized
+        setupUserSwitcher();
+        verify(mUserSwitcherController).addUserSwitchCallback(mUserSwitchCallbackCaptor.capture());
+
+        // Back to default mode, as SIM PIN would be
+        initMode(MODE_DEFAULT);
+        verify(mUserSwitcherController).removeUserSwitchCallback(
+                mUserSwitchCallbackCaptor.getValue());
     }
 
     @Test

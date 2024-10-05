@@ -58,13 +58,13 @@ class PolicyRequestProcessorTest {
             ScreenshotData(
                 TAKE_SCREENSHOT_FULLSCREEN,
                 SCREENSHOT_KEY_CHORD,
-                null,
+                UserHandle.CURRENT,
                 topComponent = null,
                 screenBounds = Rect(0, 0, 1, 1),
                 taskId = -1,
                 insets = Insets.NONE,
                 bitmap = null,
-                displayId = DEFAULT_DISPLAY
+                displayId = DEFAULT_DISPLAY,
             )
 
         /* Create a policy request processor with no capture policies */
@@ -75,7 +75,7 @@ class PolicyRequestProcessorTest {
                 policies = emptyList(),
                 defaultOwner = UserHandle.of(PERSONAL),
                 defaultComponent = ComponentName("default", "Component"),
-                displayTasks = fullScreenWork
+                displayTasks = fullScreenWork,
             )
 
         val result = runBlocking { requestProcessor.process(request) }

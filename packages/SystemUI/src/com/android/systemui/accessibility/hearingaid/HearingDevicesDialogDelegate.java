@@ -280,6 +280,14 @@ public class HearingDevicesDialogDelegate implements SystemUIDialog.Delegate,
         if (mLocalBluetoothManager == null) {
             return;
         }
+
+        // Remove the default padding of the system ui dialog
+        View container = dialog.findViewById(android.R.id.custom);
+        if (container != null && container.getParent() != null) {
+            View containerParent = (View) container.getParent();
+            containerParent.setPadding(0, 0, 0, 0);
+        }
+
         mUiEventLogger.log(HearingDevicesUiEvent.HEARING_DEVICES_DIALOG_SHOW, mLaunchSourceId);
         mPairButton = dialog.requireViewById(R.id.pair_new_device_button);
         mDeviceList = dialog.requireViewById(R.id.device_list);

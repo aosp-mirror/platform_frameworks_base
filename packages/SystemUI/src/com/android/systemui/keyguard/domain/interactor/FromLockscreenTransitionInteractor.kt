@@ -189,6 +189,7 @@ constructor(
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
+                    keyguardInteractor.isKeyguardOccluded,
                 )
                 .collect {
                     (
@@ -196,7 +197,8 @@ constructor(
                         startedStep,
                         currentTransitionInfo,
                         statusBarState,
-                        isKeyguardUnlocked) ->
+                        isKeyguardUnlocked,
+                        isKeyguardOccluded) ->
                     val id = transitionId
                     if (id != null) {
                         if (startedStep.to == KeyguardState.PRIMARY_BOUNCER) {
@@ -236,9 +238,13 @@ constructor(
                             if (nextState == TransitionState.CANCELED) {
                                 transitionRepository.startTransition(
                                     TransitionInfo(
-                                        ownerName = name,
+                                        ownerName =
+                                            "$name " +
+                                                "(on behalf of FromPrimaryBouncerInteractor)",
                                         from = KeyguardState.PRIMARY_BOUNCER,
-                                        to = KeyguardState.LOCKSCREEN,
+                                        to =
+                                            if (isKeyguardOccluded) KeyguardState.OCCLUDED
+                                            else KeyguardState.LOCKSCREEN,
                                         modeOnCanceled = TransitionModeOnCanceled.REVERSE,
                                         animator =
                                             getDefaultAnimatorForTransitionsToState(

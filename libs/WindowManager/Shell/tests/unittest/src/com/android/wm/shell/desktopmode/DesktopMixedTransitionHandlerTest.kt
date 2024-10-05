@@ -60,7 +60,7 @@ import org.mockito.kotlin.whenever
 class DesktopMixedTransitionHandlerTest : ShellTestCase() {
 
     @Mock lateinit var transitions: Transitions
-    @Mock lateinit var desktopTaskRepository: DesktopModeTaskRepository
+    @Mock lateinit var desktopRepository: DesktopRepository
     @Mock lateinit var freeformTaskTransitionHandler: FreeformTaskTransitionHandler
     @Mock lateinit var closeDesktopTaskTransitionHandler: CloseDesktopTaskTransitionHandler
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
@@ -75,7 +75,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
             DesktopMixedTransitionHandler(
                 context,
                 transitions,
-                desktopTaskRepository,
+                desktopRepository,
                 freeformTaskTransitionHandler,
                 closeDesktopTaskTransitionHandler,
                 interactionJankMonitor,
@@ -144,7 +144,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     fun startAnimation_withClosingDesktopTask_callsCloseTaskHandler() {
         val transition = mock<IBinder>()
         val transitionInfo = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
-        whenever(desktopTaskRepository.getActiveNonMinimizedTaskCount(any())).thenReturn(2)
+        whenever(desktopRepository.getActiveNonMinimizedTaskCount(any())).thenReturn(2)
         whenever(
                 closeDesktopTaskTransitionHandler.startAnimation(any(), any(), any(), any(), any())
             )
@@ -167,7 +167,7 @@ class DesktopMixedTransitionHandlerTest : ShellTestCase() {
     fun startAnimation_withClosingLastDesktopTask_dispatchesTransition() {
         val transition = mock<IBinder>()
         val transitionInfo = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM))
-        whenever(desktopTaskRepository.getActiveNonMinimizedTaskCount(any())).thenReturn(1)
+        whenever(desktopRepository.getActiveNonMinimizedTaskCount(any())).thenReturn(1)
         whenever(transitions.dispatchTransition(any(), any(), any(), any(), any(), any()))
             .thenReturn(mock())
 

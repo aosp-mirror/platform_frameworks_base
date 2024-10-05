@@ -282,7 +282,8 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
             robot.activity().createActivityWithComponentInNewTaskAndDisplay();
             robot.checkFixedOrientationLetterboxAspectRatioForTopParent(/* expected */ 1.5f);
 
-            robot.activity().enableTreatmentForTopActivity(/* enabled */ true);
+            robot.activity().enableFullscreenCameraCompatTreatmentForTopActivity(
+                    /* enabled */ true);
             robot.checkAspectRatioForTopParentIsSplitScreenRatio(/* expected */ true);
         });
     }
@@ -308,6 +309,12 @@ public class AppCompatAspectRatioOverridesTest extends WindowTestsBase {
         void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
             super.onPostDisplayContentCreation(displayContent);
             spyOn(displayContent.mAppCompatCameraPolicy);
+            if (displayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy);
+            }
+            if (displayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
+            }
         }
 
         @Override

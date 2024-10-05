@@ -1401,10 +1401,13 @@ flag {
 }
 
 flag {
-   name: "compose_haptic_sliders"
+   name: "haptics_for_compose_sliders"
    namespace: "systemui"
    description: "Adding haptic component infrastructure to sliders in Compose."
    bug: "341968766"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -1466,6 +1469,16 @@ flag {
    namespace: "systemui"
    description: "Ensure MediaProjection Dialog appears behind the lockscreen"
    bug: "351409536"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "check_lockscreen_gone_transition"
+   namespace: "systemui"
+   description: "Run notification pipeline when the lockscreen is not in gone transition for avoiding janky frames during unlocking animation"
+   bug: "358301118"
    metadata {
        purpose: PURPOSE_BUGFIX
    }

@@ -519,6 +519,7 @@ public class NotificationManagerService extends SystemService {
 
     private static final long DELAY_FORCE_REGROUP_TIME = 3000;
 
+
     private static final String ACTION_NOTIFICATION_TIMEOUT =
             NotificationManagerService.class.getSimpleName() + ".TIMEOUT";
     private static final int REQUEST_CODE_TIMEOUT = 1;
@@ -2583,7 +2584,7 @@ public class NotificationManagerService extends SystemService {
                 mShowReviewPermissionsNotification,
                 Clock.systemUTC());
         mRankingHelper = new RankingHelper(getContext(), mRankingHandler, mPreferencesHelper,
-                mZenModeHelper, mUsageStats, extractorNames, mPlatformCompat);
+                mZenModeHelper, mUsageStats, extractorNames, mPlatformCompat, groupHelper);
         mSnoozeHelper = snoozeHelper;
         mGroupHelper = groupHelper;
         mHistoryManager = historyManager;
@@ -6871,22 +6872,9 @@ public class NotificationManagerService extends SystemService {
             }
             if (android.service.notification.Flags.notificationClassification()
                     && adjustments.containsKey(KEY_TYPE)) {
-                NotificationChannel newChannel = null;
-                int type = adjustments.getInt(KEY_TYPE);
-                if (TYPE_NEWS == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), NEWS_ID, false);
-                } else if (TYPE_PROMOTION == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), PROMOTIONS_ID, false);
-                } else if (TYPE_SOCIAL_MEDIA == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), SOCIAL_MEDIA_ID, false);
-                } else if (TYPE_CONTENT_RECOMMENDATION == type) {
-                    newChannel = mPreferencesHelper.getNotificationChannel(
-                            r.getSbn().getPackageName(), r.getUid(), RECS_ID, false);
-                }
-                if (newChannel == null) {
+                final NotificationChannel newChannel = getClassificationChannelLocked(r,
+                        adjustments);
+                if (newChannel == null || newChannel.getId().equals(r.getChannel().getId())) {
                     adjustments.remove(KEY_TYPE);
                 } else {
                     // swap app provided type with the real thing
@@ -6900,6 +6888,27 @@ public class NotificationManagerService extends SystemService {
                         r.getLifespanMs(System.currentTimeMillis()));
             }
         }
+    }
+
+    @GuardedBy("mNotificationLock")
+    @Nullable
+    private NotificationChannel getClassificationChannelLocked(NotificationRecord r,
+            Bundle adjustments) {
+        int type = adjustments.getInt(KEY_TYPE);
+        if (TYPE_NEWS == type) {
+            return mPreferencesHelper.getNotificationChannel(
+                    r.getSbn().getPackageName(), r.getUid(), NEWS_ID, false);
+        } else if (TYPE_PROMOTION == type) {
+            return mPreferencesHelper.getNotificationChannel(
+                    r.getSbn().getPackageName(), r.getUid(), PROMOTIONS_ID, false);
+        } else if (TYPE_SOCIAL_MEDIA == type) {
+            return mPreferencesHelper.getNotificationChannel(
+                    r.getSbn().getPackageName(), r.getUid(), SOCIAL_MEDIA_ID, false);
+        } else if (TYPE_CONTENT_RECOMMENDATION == type) {
+            return mPreferencesHelper.getNotificationChannel(
+                    r.getSbn().getPackageName(), r.getUid(), RECS_ID, false);
+        }
+        return null;
     }
 
     @SuppressWarnings("GuardedBy")
@@ -12009,6 +12018,10 @@ public class NotificationManagerService extends SystemService {
         if (record != null && (record.getSbn().getNotification().flags
                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0
                 && !record.isCanceledAfterLifetimeExtension()) {
+            // Mark that the notification is being updated due to cancelation, so it won't
+            // be updated again if the app cancels multiple times.
+            record.setCanceledAfterLifetimeExtension(true);
+
             boolean isAppForeground = pkg != null && packageImportance == IMPORTANCE_FOREGROUND;
 
             // Save the original Record's post silently value, so we can restore it after we send
@@ -12024,9 +12037,6 @@ public class NotificationManagerService extends SystemService {
             PostNotificationTracker tracker = mPostNotificationTrackerFactory.newTracker(null);
             tracker.addCleanupRunnable(() -> {
                 synchronized (mNotificationLock) {
-                    // Mark that the notification has been updated due to cancelation, so it won't
-                    // be updated again if the app cancels multiple times.
-                    record.setCanceledAfterLifetimeExtension(true);
                     // Set the post silently status to the record's previous value.
                     record.setPostSilently(savedPostSilentlyState);
                     // Remove FLAG_ONLY_ALERT_ONCE if the notification did not previously have it.

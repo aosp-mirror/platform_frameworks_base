@@ -198,13 +198,10 @@ flag {
 
 flag {
     name: "logcat_longer_timeout"
-    namespace: "backstage_power"
+    namespace: "stability"
     description: "Wait longer during the logcat gathering operation"
     bug: "292533246"
     is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
 }
 
 flag {

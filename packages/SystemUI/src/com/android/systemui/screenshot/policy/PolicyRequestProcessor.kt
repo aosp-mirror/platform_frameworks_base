@@ -92,7 +92,7 @@ class PolicyRequestProcessor(
                         updates.component,
                         updates.owner,
                         type.taskId,
-                        type.taskBounds
+                        type.taskBounds,
                     )
                 is FullScreen ->
                     replaceWithScreenshot(
@@ -122,7 +122,7 @@ class PolicyRequestProcessor(
             componentName = topMainRootTask?.topActivity ?: defaultComponent,
             taskId = topMainRootTask?.taskId,
             owner = defaultOwner,
-            displayId = original.displayId
+            displayId = original.displayId,
         )
     }
 
@@ -141,14 +141,14 @@ class PolicyRequestProcessor(
             userHandle = owner,
             taskId = taskId,
             topComponent = componentName,
-            screenBounds = taskBounds
+            screenBounds = taskBounds,
         )
     }
 
     private suspend fun replaceWithScreenshot(
         original: ScreenshotData,
         componentName: ComponentName?,
-        owner: UserHandle?,
+        owner: UserHandle,
         displayId: Int,
         taskId: Int? = null,
     ): ScreenshotData {

@@ -84,9 +84,9 @@ constructor(
     private fun fullyExpandedDuringSceneChange(change: ChangeScene): Boolean {
         // The lockscreen stack is visible during all transitions away from the lockscreen, so keep
         // the stack expanded until those transitions finish.
-        return if (change.isFrom({ it == Scenes.Lockscreen }, to = { true })) {
+        return if (change.isTransitioning(from = Scenes.Lockscreen)) {
             true
-        } else if (change.isFrom({ it == Scenes.Shade }, to = { it == Scenes.Lockscreen })) {
+        } else if (change.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)) {
             false
         } else {
             (expandedInScene(change.fromScene) && expandedInScene(change.toScene))
@@ -101,11 +101,11 @@ constructor(
         return if (fullyExpandedDuringSceneChange(change)) {
             1f
         } else if (
-            change.isBetween({ it == Scenes.Gone }, { it == Scenes.Shade }) ||
-                change.isFrom({ it == Scenes.Shade }, to = { it == Scenes.Lockscreen })
+            change.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
+                change.isTransitioning(from = Scenes.Gone, to = Scenes.Lockscreen)
         ) {
             shadeExpansion
-        } else if (change.isBetween({ it == Scenes.Gone }, { it == Scenes.QuickSettings })) {
+        } else if (change.isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings)) {
             // during QS expansion, increase fraction at same rate as scrim alpha,
             // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
             (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA - EXPANSION_FOR_DELAYED_STACK_FADE_IN)
@@ -213,7 +213,11 @@ constructor(
 
     private val qsAllowsClipping: Flow<Boolean> =
         combine(shadeInteractor.shadeMode, shadeInteractor.qsExpansion) { shadeMode, qsExpansion ->
-                qsExpansion < 0.5f || shadeMode != ShadeMode.Single
+                when (shadeMode) {
+                    is ShadeMode.Dual -> false
+                    is ShadeMode.Split -> true
+                    is ShadeMode.Single -> qsExpansion < 0.5f
+                }
             }
             .distinctUntilChanged()
 
@@ -325,9 +329,3 @@ constructor(
         fun create(): NotificationScrollViewModel
     }
 }
-
-private fun ChangeScene.isBetween(a: (SceneKey) -> Boolean, b: (SceneKey) -> Boolean): Boolean =
-    (a(fromScene) && b(toScene)) || (b(fromScene) && a(toScene))
-
-private fun ChangeScene.isFrom(from: (SceneKey) -> Boolean, to: (SceneKey) -> Boolean): Boolean =
-    from(fromScene) && to(toScene)

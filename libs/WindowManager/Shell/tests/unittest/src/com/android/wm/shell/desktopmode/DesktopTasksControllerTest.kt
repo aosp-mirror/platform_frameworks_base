@@ -201,7 +201,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
   private lateinit var mockitoSession: StaticMockitoSession
   private lateinit var controller: DesktopTasksController
   private lateinit var shellInit: ShellInit
-  private lateinit var taskRepository: DesktopModeTaskRepository
+  private lateinit var taskRepository: DesktopRepository
   private lateinit var desktopTasksLimiter: DesktopTasksLimiter
   private lateinit var recentsTransitionStateListener: RecentsTransitionStateListener
   private lateinit var testScope: CoroutineScope
@@ -232,7 +232,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
     shellInit = spy(ShellInit(testExecutor))
-    taskRepository = DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
+    taskRepository = DesktopRepository(context, shellInit, persistentRepository, testScope)
     desktopTasksLimiter =
         DesktopTasksLimiter(
             transitions,
@@ -2643,13 +2643,17 @@ class DesktopTasksControllerTest : ShellTestCase() {
   @Test
   fun onDesktopDragMove_endsOutsideValidDragArea_snapsToValidBounds() {
     val task = setUpFreeformTask()
+    val spyController = spy(controller)
     val mockSurface = mock(SurfaceControl::class.java)
     val mockDisplayLayout = mock(DisplayLayout::class.java)
     whenever(displayController.getDisplayLayout(task.displayId)).thenReturn(mockDisplayLayout)
     whenever(mockDisplayLayout.stableInsets()).thenReturn(Rect(0, 100, 2000, 2000))
-    controller.onDragPositioningMove(task, mockSurface, 200f, Rect(100, -100, 500, 1000))
+    spyController.onDragPositioningMove(task, mockSurface, 200f, Rect(100, -100, 500, 1000))
 
-    controller.onDragPositioningEnd(
+    whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+    whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+      .thenReturn(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+    spyController.onDragPositioningEnd(
         task,
         mockSurface,
         Point(100, -100), /* position */

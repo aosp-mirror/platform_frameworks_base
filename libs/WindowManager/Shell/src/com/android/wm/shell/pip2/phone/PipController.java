@@ -324,10 +324,16 @@ public class PipController implements ConfigurationChangeListener,
             int launcherRotation, Rect hotseatKeepClearArea) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "getSwipePipToHomeBounds: %s", componentName);
-        // preemptively add the keep clear area for Hotseat, so that it is taken into account
-        // when calculating the entry destination bounds of PiP window
+        // Preemptively add the keep clear area for Hotseat, so that it is taken into account
+        // when calculating the entry destination bounds of PiP window.
         mPipBoundsState.setNamedUnrestrictedKeepClearArea(
                 PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, hotseatKeepClearArea);
+
+        // Set the display layout rotation early to calculate final orientation bounds that
+        // the animator expects, this will also be used to detect the fixed rotation when
+        // Shell resolves the type of the animation we are undergoing.
+        mPipDisplayLayoutState.rotateTo(launcherRotation);
+
         mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, pictureInPictureParams,
                 mPipBoundsAlgorithm);
         return mPipBoundsAlgorithm.getEntryDestinationBounds();

@@ -1791,28 +1791,6 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
-    public void performHapticFeedback_usesServiceAsToken() throws Exception {
-        VibratorManagerService service = createSystemReadyService();
-
-        HalVibration vibration =
-                performHapticFeedbackAndWaitUntilFinished(
-                        service, HapticFeedbackConstants.SCROLL_TICK, /* always= */ true);
-
-        assertTrue(vibration.callerToken == service);
-    }
-
-    @Test
-    public void performHapticFeedbackForInputDevice_usesServiceAsToken() throws Exception {
-        VibratorManagerService service = createSystemReadyService();
-
-        HalVibration vibration = performHapticFeedbackForInputDeviceAndWaitUntilFinished(
-                service, HapticFeedbackConstants.SCROLL_TICK, /* inputDeviceId= */ 0,
-                InputDevice.SOURCE_ROTARY_ENCODER, /* always= */ true);
-
-        assertTrue(vibration.callerToken == service);
-    }
-
-    @Test
     @RequiresFlagsEnabled(android.os.vibrator.Flags.FLAG_VENDOR_VIBRATION_EFFECTS)
     public void vibrate_vendorEffectsWithoutPermission_doesNotVibrate() throws Exception {
         // Deny permission to vibrate with vendor effects
@@ -2144,6 +2122,27 @@ public class VibratorManagerServiceTest {
         // Cancel UNKNOWN vibration when all vibrations are being cancelled.
         service.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, service);
         assertTrue(waitUntil(s -> !s.isVibrating(1), service, TEST_TIMEOUT_MILLIS));
+    }
+
+    @Test
+    public void cancelVibrate_externalVibration_cancelWithDifferentToken() {
+        mockVibrators(1);
+        mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_EXTERNAL_CONTROL);
+        createSystemReadyService();
+
+        IBinder vibrationBinderToken = mock(IBinder.class);
+        ExternalVibration externalVibration = new ExternalVibration(UID, PACKAGE_NAME,
+                AUDIO_ALARM_ATTRS,
+                mock(IExternalVibrationController.class), vibrationBinderToken);
+        ExternalVibrationScale scale = mExternalVibratorService.onExternalVibrationStart(
+                externalVibration);
+
+        IBinder cancelBinderToken = mock(IBinder.class);
+        mService.cancelVibrate(VibrationAttributes.USAGE_FILTER_MATCH_ALL, cancelBinderToken);
+
+        assertNotEquals(ExternalVibrationScale.ScaleLevel.SCALE_MUTE, scale.scaleLevel);
+        assertEquals(Arrays.asList(false, true, false),
+                mVibratorProviders.get(1).getExternalControlStates());
     }
 
     @Test
