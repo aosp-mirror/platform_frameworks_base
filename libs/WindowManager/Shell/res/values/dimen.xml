@@ -624,4 +624,12 @@
     <!-- The offset from the left edge of the entering page for the cross-activity animation -->
     <dimen name="cross_activity_back_entering_start_offset">96dp</dimen>
 
+    <!-- The open by default settings dialog menu width. -->
+    <dimen name="open_by_default_settings_dialog_width">348dp</dimen>
+    <!-- The open by default settings dialog menu height. -->
+    <dimen name="open_by_default_settings_dialog_height">380dp</dimen>
+    <!-- The height of radio buttons in the open by default settings dialog. -->
+    <dimen name="open_by_default_settings_dialog_radio_button_height">64dp</dimen>
+    <!-- The width of radio buttons in the open by default settings dialog. -->
+    <dimen name="open_by_default_settings_dialog_radio_button_width">316dp</dimen>
 </resources>

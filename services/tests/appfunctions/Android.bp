@@ -36,6 +36,7 @@ android_test {
         "androidx.test.core",
         "androidx.test.runner",
         "androidx.test.ext.truth",
+        "kotlin-test",
         "platform-test-annotations",
         "services.appfunctions",
         "servicestests-core-utils",

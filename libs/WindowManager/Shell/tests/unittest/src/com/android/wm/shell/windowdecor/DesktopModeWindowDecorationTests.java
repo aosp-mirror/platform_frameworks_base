@@ -106,7 +106,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -163,7 +163,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     @Mock
     private ShellTaskOrganizer mMockShellTaskOrganizer;
     @Mock
-    private DesktopModeTaskRepository mMockDesktopRepository;
+    private DesktopRepository mMockDesktopRepository;
     @Mock
     private Choreographer mMockChoreographer;
     @Mock
@@ -1046,6 +1046,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 openInBrowserCaptor.capture(),
                 any(),
+                any(),
                 any()
         );
         openInBrowserCaptor.getValue().invoke(new Intent(Intent.ACTION_MAIN, TEST_URI1));
@@ -1073,6 +1074,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 any(),
                 any(),
                 openInBrowserCaptor.capture(),
+                any(),
                 any(),
                 any()
         );
@@ -1118,6 +1120,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 ArgumentCaptor.forClass(Function0.class);
         createHandleMenu(decoration);
         verify(mMockHandleMenu).show(
+                any(),
                 any(),
                 any(),
                 any(),

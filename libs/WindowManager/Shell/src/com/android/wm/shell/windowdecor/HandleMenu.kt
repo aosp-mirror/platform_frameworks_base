@@ -120,6 +120,7 @@ class HandleMenu(
         onNewWindowClickListener: () -> Unit,
         onManageWindowsClickListener: () -> Unit,
         openInBrowserClickListener: (Intent) -> Unit,
+        onOpenByDefaultClickListener: () -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit,
     ) {
@@ -135,6 +136,7 @@ class HandleMenu(
             onNewWindowClickListener = onNewWindowClickListener,
             onManageWindowsClickListener = onManageWindowsClickListener,
             openInBrowserClickListener = openInBrowserClickListener,
+            onOpenByDefaultClickListener = onOpenByDefaultClickListener,
             onCloseMenuClickListener = onCloseMenuClickListener,
             onOutsideTouchListener = onOutsideTouchListener,
         )
@@ -153,6 +155,7 @@ class HandleMenu(
         onNewWindowClickListener: () -> Unit,
         onManageWindowsClickListener: () -> Unit,
         openInBrowserClickListener: (Intent) -> Unit,
+        onOpenByDefaultClickListener: () -> Unit,
         onCloseMenuClickListener: () -> Unit,
         onOutsideTouchListener: () -> Unit
     ) {
@@ -174,6 +177,7 @@ class HandleMenu(
             this.onOpenInBrowserClickListener = {
                 openInBrowserClickListener.invoke(openInBrowserIntent!!)
             }
+            this.onOpenByDefaultClickListener = onOpenByDefaultClickListener
             this.onCloseMenuClickListener = onCloseMenuClickListener
             this.onOutsideTouchListener = onOutsideTouchListener
         }
@@ -448,7 +452,8 @@ class HandleMenu(
         private val openInBrowserPill = rootView.requireViewById<View>(R.id.open_in_browser_pill)
         private val browserBtn = openInBrowserPill.requireViewById<Button>(
             R.id.open_in_browser_button)
-
+        private val openByDefaultBtn = openInBrowserPill.requireViewById<ImageButton>(
+            R.id.open_by_default_button)
         private val decorThemeUtil = DecorThemeUtil(context)
         private val animator = HandleMenuAnimator(rootView, menuWidth, captionHeight.toFloat())
 
@@ -461,6 +466,7 @@ class HandleMenu(
         var onNewWindowClickListener: (() -> Unit)? = null
         var onManageWindowsClickListener: (() -> Unit)? = null
         var onOpenInBrowserClickListener: (() -> Unit)? = null
+        var onOpenByDefaultClickListener: (() -> Unit)? = null
         var onCloseMenuClickListener: (() -> Unit)? = null
         var onOutsideTouchListener: (() -> Unit)? = null
 
@@ -469,6 +475,9 @@ class HandleMenu(
             splitscreenBtn.setOnClickListener { onToSplitScreenClickListener?.invoke() }
             desktopBtn.setOnClickListener { onToDesktopClickListener?.invoke() }
             browserBtn.setOnClickListener { onOpenInBrowserClickListener?.invoke() }
+            openByDefaultBtn.setOnClickListener {
+                onOpenByDefaultClickListener?.invoke()
+            }
             collapseMenuButton.setOnClickListener { onCloseMenuClickListener?.invoke() }
             newWindowBtn.setOnClickListener { onNewWindowClickListener?.invoke() }
             manageWindowBtn.setOnClickListener { onManageWindowsClickListener?.invoke() }
@@ -634,6 +643,8 @@ class HandleMenu(
                 setTextColor(style.textColor)
                 compoundDrawableTintList = ColorStateList.valueOf(style.textColor)
             }
+
+            openByDefaultBtn.imageTintList = ColorStateList.valueOf(style.textColor)
         }
 
         private data class MenuStyle(

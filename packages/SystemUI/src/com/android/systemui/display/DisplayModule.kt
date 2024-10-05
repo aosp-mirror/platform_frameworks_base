@@ -20,6 +20,8 @@ import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.display.data.repository.DeviceStateRepositoryImpl
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.DisplayRepositoryImpl
+import com.android.systemui.display.data.repository.FocusedDisplayRepository
+import com.android.systemui.display.data.repository.FocusedDisplayRepositoryImpl
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractorImpl
 import dagger.Binds
@@ -39,4 +41,9 @@ interface DisplayModule {
     fun bindsDeviceStateRepository(
         deviceStateRepository: DeviceStateRepositoryImpl
     ): DeviceStateRepository
+
+    @Binds
+    fun bindsFocusedDisplayRepository(
+        focusedDisplayRepository: FocusedDisplayRepositoryImpl
+    ): FocusedDisplayRepository
 }

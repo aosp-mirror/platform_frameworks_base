@@ -2637,6 +2637,63 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testBeepVolume_politeNotif_AvalancheStrategy_exempt_msgCategory() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS_ATTN_UPDATE);
+        TestableFlagResolver flagResolver = new TestableFlagResolver();
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME1, 50);
+        flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
+        initAttentionHelper(flagResolver);
+
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+
+        // Create a conversation group with GROUP_ALERT_SUMMARY behavior
+        // Where the summary is not MessagingStyle
+        final String groupKey = "grup_name";
+        final String shortcutId = "shortcut";
+        NotificationRecord summary = getBeepyNotificationRecord(groupKey, GROUP_ALERT_SUMMARY);
+        summary.getNotification().flags |= Notification.FLAG_GROUP_SUMMARY;
+        summary.getNotification().category = Notification.CATEGORY_MESSAGE;
+        ShortcutInfo.Builder sb = new ShortcutInfo.Builder(getContext());
+        summary.setShortcutInfo(sb.setId(shortcutId).build());
+
+        // Should beep at 100% volume
+        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        verifyBeepVolume(1.0f);
+        assertNotEquals(-1, summary.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // Post child notifications with GROUP_ALERT_SUMMARY
+        NotificationRecord child = getConversationNotificationRecord(mId, false /* insistent */,
+                false /* once */, true /* noisy */, false /* buzzy*/, false /* lights */, true,
+                true, false, groupKey, Notification.GROUP_ALERT_SUMMARY, false, mUser, mPkg,
+                shortcutId);
+
+        // Should not beep
+        mAttentionHelper.buzzBeepBlinkLocked(child, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(child.isInterruptive());
+        assertEquals(-1, child.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // 2nd update for summary should beep at 50% volume
+        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        verifyBeepVolume(0.5f);
+        assertNotEquals(-1, summary.getLastAudiblyAlertedMs());
+        Mockito.reset(mRingtonePlayer);
+
+        // 3rd update for summary should not beep
+        mAttentionHelper.buzzBeepBlinkLocked(summary, DEFAULT_SIGNALS);
+        verifyNeverBeep();
+        assertFalse(summary.isInterruptive());
+        assertEquals(-1, summary.getLastAudiblyAlertedMs());
+    }
+
+    @Test
     public void testBeepVolume_politeNotif_exemptEmergency() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
         mSetFlagsRule.disableFlags(Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS);

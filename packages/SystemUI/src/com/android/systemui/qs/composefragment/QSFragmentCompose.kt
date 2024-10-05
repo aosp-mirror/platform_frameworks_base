@@ -52,8 +52,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
@@ -66,6 +66,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -288,7 +291,7 @@ constructor(
                 transitions =
                     transitions {
                         from(QuickQuickSettings, QuickSettings) {
-                            quickQuickSettingsToQuickSettings()
+                            quickQuickSettingsToQuickSettings(viewModel::inFirstPage::get)
                         }
                     },
             )
@@ -533,6 +536,10 @@ constructor(
 
             onDispose { qqsVisible.value = false }
         }
+        val squishiness by
+            viewModel.containerViewModel.quickQuickSettingsViewModel.squishinessViewModel
+                .squishiness
+                .collectAsStateWithLifecycle()
         Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
             Box(
                 modifier =
@@ -546,7 +553,16 @@ constructor(
                                 topFromRoot + coordinates.size.height,
                             )
                         }
-                        .onSizeChanged { size -> qqsHeight.value = size.height }
+                        // Use an approach layout to determien the height without squishiness, as
+                        // that's the value that NPVC and QuickSettingsController care about
+                        // (measured height).
+                        .approachLayout(isMeasurementApproachInProgress = { squishiness < 1f }) {
+                            measurable,
+                            constraints ->
+                            qqsHeight.value = lookaheadSize.height
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                        }
                         .padding(top = { qqsPadding }, bottom = { bottomPadding.roundToPx() })
             ) {
                 val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
@@ -704,6 +720,14 @@ object SceneKeys {
             else -> QuickSettings
         }
     }
+
+    val QqsTileElementMatcher =
+        object : ElementMatcher {
+            override fun matches(key: ElementKey, content: ContentKey): Boolean {
+                return content == SceneKeys.QuickQuickSettings &&
+                    ElementKeys.TileElementMatcher.matches(key, content)
+            }
+        }
 }
 
 suspend fun synchronizeQsState(state: MutableSceneTransitionLayoutState, expansion: Flow<Float>) {

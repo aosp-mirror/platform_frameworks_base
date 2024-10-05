@@ -18,7 +18,7 @@ data class ScreenshotData(
     @ScreenshotType val type: Int,
     @ScreenshotSource val source: Int,
     /** UserHandle for the owner of the app being screenshotted, if known. */
-    val userHandle: UserHandle?,
+    val userHandle: UserHandle,
     /** ComponentName of the top-most app in the screenshot. */
     val topComponent: ComponentName?,
     var screenBounds: Rect?,
@@ -40,7 +40,7 @@ data class ScreenshotData(
             ScreenshotData(
                 type = request.type,
                 source = request.source,
-                userHandle = if (request.userId >= 0) UserHandle.of(request.userId) else null,
+                userHandle = UserHandle.of(request.userId),
                 topComponent = request.topComponent,
                 screenBounds = request.boundsInScreen,
                 taskId = request.taskId,
@@ -51,7 +51,7 @@ data class ScreenshotData(
 
         @VisibleForTesting
         fun forTesting(
-            userHandle: UserHandle? = null,
+            userHandle: UserHandle = UserHandle.CURRENT,
             source: Int = ScreenshotSource.SCREENSHOT_KEY_CHORD,
             topComponent: ComponentName? = null,
             bitmap: Bitmap? = null,

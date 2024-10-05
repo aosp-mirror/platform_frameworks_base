@@ -20,7 +20,8 @@ import android.annotation.SuppressLint
 import android.os.Handler
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.plugins.VolumeDialogController
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogStateModel
 import javax.inject.Inject
@@ -40,12 +41,12 @@ private const val BUFFER_CAPACITY = 16
  *
  * @see VolumeDialogController.Callbacks
  */
-@VolumeDialog
+@VolumeDialogPluginScope
 class VolumeDialogCallbacksInteractor
 @Inject
 constructor(
     private val volumeDialogController: VolumeDialogController,
-    @VolumeDialog private val coroutineScope: CoroutineScope,
+    @VolumeDialogPlugin private val coroutineScope: CoroutineScope,
     @Background private val bgHandler: Handler,
 ) {
 
