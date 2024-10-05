@@ -103,7 +103,7 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
@@ -155,7 +155,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private final ActivityTaskManager mActivityTaskManager;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellTaskOrganizer mTaskOrganizer;
-    private final DesktopModeTaskRepository mDesktopRepository;
+    private final DesktopRepository mDesktopRepository;
     private final ShellController mShellController;
     private final Context mContext;
     private final @ShellMainThread Handler mMainHandler;
@@ -227,7 +227,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,
@@ -288,7 +288,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             ShellCommandHandler shellCommandHandler,
             IWindowManager windowManager,
             ShellTaskOrganizer taskOrganizer,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,

@@ -17,7 +17,8 @@
 package com.android.systemui.volume.dialog.domain.interactor
 
 import com.android.systemui.plugins.VolumeDialogController
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogStateModel
 import javax.inject.Inject
@@ -35,13 +36,13 @@ import kotlinx.coroutines.flow.stateIn
  *
  * @see [VolumeDialogController]
  */
-@VolumeDialog
+@VolumeDialogPluginScope
 class VolumeDialogStateInteractor
 @Inject
 constructor(
     volumeDialogCallbacksInteractor: VolumeDialogCallbacksInteractor,
     private val volumeDialogController: VolumeDialogController,
-    @VolumeDialog private val coroutineScope: CoroutineScope,
+    @VolumeDialogPlugin private val coroutineScope: CoroutineScope,
 ) {
 
     val volumeDialogState: Flow<VolumeDialogStateModel> =

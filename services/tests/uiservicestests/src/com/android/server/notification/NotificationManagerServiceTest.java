@@ -3206,7 +3206,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // Send two cancelations.
         mBinderService.cancelNotificationWithTag(mPkg, mPkg, sbn.getTag(), sbn.getId(),
                 sbn.getUserId());
-        waitForIdle();
         mBinderService.cancelNotificationWithTag(mPkg, mPkg, sbn.getTag(), sbn.getId(),
                 sbn.getUserId());
         waitForIdle();

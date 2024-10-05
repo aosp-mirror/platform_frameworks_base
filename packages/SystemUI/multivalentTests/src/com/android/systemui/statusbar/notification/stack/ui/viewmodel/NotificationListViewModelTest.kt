@@ -506,7 +506,7 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
     @EnableSceneContainer
     fun pinnedHeadsUpRows_filtersForPinnedItems() =
         testScope.runTest {
-            val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRows)
+            val pinnedHeadsUpRows by collectLastValue(underTest.pinnedHeadsUpRowKeys)
 
             // WHEN there are no pinned rows
             val rows =

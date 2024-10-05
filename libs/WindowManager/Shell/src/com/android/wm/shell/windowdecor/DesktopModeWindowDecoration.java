@@ -87,13 +87,14 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AppToWebUtils;
 import com.android.wm.shell.apptoweb.AssistContentRequester;
+import com.android.wm.shell.apptoweb.OpenByDefaultDialog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -163,6 +164,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private MaximizeMenu mMaximizeMenu;
 
+    private OpenByDefaultDialog mOpenByDefaultDialog;
+
     private ResizeVeil mResizeVeil;
     private Bitmap mAppIconBitmap;
     private Bitmap mResizeVeilBitmap;
@@ -193,14 +196,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
-    private final DesktopModeTaskRepository mDesktopRepository;
+    private final DesktopRepository mDesktopRepository;
 
     DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -232,7 +235,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -446,6 +449,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
         if (isHandleMenuActive()) {
             mHandleMenu.relayout(startT, mResult.mCaptionX);
+        }
+
+        if (isOpenByDefaultDialogActive()) {
+            mOpenByDefaultDialog.relayout(taskInfo);
         }
 
         final boolean inFullImmersive = mDesktopRepository
@@ -940,6 +947,33 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mHandleMenu != null;
     }
 
+    boolean isOpenByDefaultDialogActive() {
+        return mOpenByDefaultDialog != null;
+    }
+
+    void createOpenByDefaultDialog() {
+        mOpenByDefaultDialog = new OpenByDefaultDialog(
+                mContext,
+                mTaskInfo,
+                mTaskSurface,
+                mDisplayController,
+                mSurfaceControlTransactionSupplier,
+                new OpenByDefaultDialog.DialogLifecycleListener() {
+                    @Override
+                    public void onDialogCreated() {
+                        closeHandleMenu();
+                    }
+
+                    @Override
+                    public void onDialogDismissed() {
+                        mOpenByDefaultDialog = null;
+                    }
+                },
+                mAppIconBitmap,
+                mAppName
+        );
+    }
+
     boolean shouldResizeListenerHandleEvent(@NonNull MotionEvent e, @NonNull Point offset) {
         return mDragResizeListener != null && mDragResizeListener.shouldHandleEvent(e, offset);
     }
@@ -1234,6 +1268,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 /* openInBrowserClickListener= */ (intent) -> {
                     mOpenInBrowserClickListener.accept(intent);
                     onCapturedLinkExpired();
+                    return Unit.INSTANCE;
+                },
+                /* onOpenByDefaultClickListener= */ () -> {
+                    if (!isOpenByDefaultDialogActive()) {
+                        createOpenByDefaultDialog();
+                    }
                     return Unit.INSTANCE;
                 },
                 /* onCloseMenuClickListener= */ () -> {
@@ -1591,7 +1631,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @NonNull Context userContext,
                 DisplayController displayController,
                 SplitScreenController splitScreenController,
-                DesktopModeTaskRepository desktopRepository,
+                DesktopRepository desktopRepository,
                 ShellTaskOrganizer taskOrganizer,
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,

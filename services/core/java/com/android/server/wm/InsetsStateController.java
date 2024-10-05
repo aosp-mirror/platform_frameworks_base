@@ -458,6 +458,12 @@ class InsetsStateController {
         mDisplayContent.notifyInsetsChanged(mDispatchInsetsChanged);
     }
 
+    void notifyInsetsChanged(ArraySet<WindowState> changedWindows) {
+        for (int i = changedWindows.size() - 1; i >= 0; i--) {
+            mDispatchInsetsChanged.accept(changedWindows.valueAt(i));
+        }
+    }
+
     /**
      * Checks if the control target has pending controls.
      *

@@ -7531,6 +7531,7 @@ public final class ViewRootImpl implements ViewParent,
                         if (keyEvent.isCanceled()) {
                             animationCallback.onBackCancelled();
                         } else {
+                            dispatcher.tryInvokeSystemNavigationObserverCallback();
                             topCallback.onBackInvoked();
                         }
                         break;
@@ -7538,6 +7539,7 @@ public final class ViewRootImpl implements ViewParent,
             } else if (topCallback != null) {
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
                     if (!keyEvent.isCanceled()) {
+                        dispatcher.tryInvokeSystemNavigationObserverCallback();
                         topCallback.onBackInvoked();
                     } else {
                         Log.d(mTag, "Skip onBackInvoked(), reason: keyEvent.isCanceled=true");

@@ -2350,6 +2350,21 @@ public final class Settings {
             "android.settings.ALL_APPS_NOTIFICATION_SETTINGS_FOR_REVIEW";
 
     /**
+     * Activity Action: Show the permission screen for allowing apps to post promoted notifications.
+     * <p>
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_NOTIFICATION_PROMOTION_SETTINGS
+            = "android.settings.APP_NOTIFICATION_PROMOTION_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
@@ -17798,12 +17813,6 @@ public final class Settings {
         public static final String FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT =
                 "force_non_debuggable_final_build_for_compat";
 
-        /**
-         * Flag to enable the use of ApplicationInfo for getting not-launched status.
-         *
-         * @hide
-         */
-        public static final String ENABLE_USE_APP_INFO_NOT_LAUNCHED = "use_app_info_not_launched";
 
         /**
          * Current version of signed configuration applied.
@@ -20147,6 +20156,12 @@ public final class Settings {
              * @hide
              */
             public static final int PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS = 11;
+
+            /**
+             * Phone switching has finished account match step.
+             * @hide
+             */
+            public static final int PHONE_SWITCHING_STATUS_ACCOUNTS_MATCHED = 12;
 
             /**
              * Phone switching request source

@@ -176,8 +176,8 @@ class SceneContainerViewModelTest : SysuiTestCase() {
             sceneContainerConfig.sceneKeys
                 .filter { it != currentScene }
                 .filter {
-                    // Moving to the Communal scene is not currently falsing protected.
-                    it != Scenes.Communal
+                    // Moving to the Communal and Dream scene is not currently falsing protected.
+                    it != Scenes.Communal && it != Scenes.Dream
                 }
                 .forEach { toScene ->
                     assertWithMessage("Protected scene $toScene not properly protected")

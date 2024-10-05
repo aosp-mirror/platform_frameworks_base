@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
@@ -39,7 +37,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.CancellationException;
@@ -55,7 +52,7 @@ import java.util.concurrent.TimeoutException;
  * VibrationThread. The only thread-safe methods for calling from other threads are the "notify"
  * methods (which should never be used from the VibrationThread thread).
  */
-final class VibrationStepConductor implements IBinder.DeathRecipient {
+final class VibrationStepConductor {
     private static final boolean DEBUG = VibrationThread.DEBUG;
     private static final String TAG = VibrationThread.TAG;
 
@@ -342,42 +339,6 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
                 mPendingVibrateSteps += nextSteps.get(i).isCleanUp() ? 0 : 1;
             }
             mNextSteps.addAll(nextSteps);
-        }
-    }
-
-    /**
-     * Binder death notification. VibrationThread registers this when it's running a conductor.
-     * Note that cancellation could theoretically happen immediately, before the conductor has
-     * started, but in this case it will be processed in the first signals loop.
-     */
-    @Override
-    public void binderDied() {
-        if (DEBUG) {
-            Slog.d(TAG, "Binder died, cancelling vibration...");
-        }
-        notifyCancelled(new Vibration.EndInfo(Status.CANCELLED_BINDER_DIED),
-                /* immediate= */ false);
-    }
-
-    /**
-     * Returns true if successfully linked this conductor to the death of the binder that requested
-     * the vibration.
-     */
-    public boolean linkToDeath() {
-        try {
-            mVibration.callerToken.linkToDeath(this, 0);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error linking vibration to token death", e);
-            return false;
-        }
-        return true;
-    }
-
-    public void unlinkToDeath() {
-        try {
-            mVibration.callerToken.unlinkToDeath(this, 0);
-        } catch (NoSuchElementException e) {
-            Slog.wtf(TAG, "Failed to unlink vibration to token death", e);
         }
     }
 

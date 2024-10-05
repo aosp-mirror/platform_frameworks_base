@@ -69,7 +69,7 @@ import com.android.wm.shell.desktopmode.DesktopMixedTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
 import com.android.wm.shell.desktopmode.DesktopTasksTransitionObserver;
@@ -245,7 +245,7 @@ public abstract class WMShellModule {
             IWindowManager windowManager,
             ShellCommandHandler shellCommandHandler,
             ShellTaskOrganizer taskOrganizer,
-            @DynamicOverride DesktopModeTaskRepository desktopRepository,
+            @DynamicOverride DesktopRepository desktopRepository,
             DisplayController displayController,
             ShellController shellController,
             DisplayInsetsController displayInsetsController,
@@ -352,7 +352,7 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorViewModel) {
         // TODO(b/238217847): Temporarily add this check here until we can remove the dynamic
@@ -361,7 +361,7 @@ public abstract class WMShellModule {
                 ? shellInit
                 : null;
         return new FreeformTaskListener(context, init, shellTaskOrganizer,
-                desktopModeTaskRepository, launchAdjacentController, windowDecorViewModel);
+                desktopRepository, launchAdjacentController, windowDecorViewModel);
     }
 
     @WMSingleton
@@ -620,7 +620,7 @@ public abstract class WMShellModule {
             DesktopModeDragAndDropTransitionHandler desktopModeDragAndDropTransitionHandler,
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
             DragToDesktopTransitionHandler dragToDesktopTransitionHandler,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            @DynamicOverride DesktopRepository desktopRepository,
             DesktopModeLoggerTransitionObserver desktopModeLoggerTransitionObserver,
             LaunchAdjacentController launchAdjacentController,
             RecentsTransitionHandler recentsTransitionHandler,
@@ -636,7 +636,7 @@ public abstract class WMShellModule {
                 returnToDragStartAnimator, enterDesktopTransitionHandler,
                 exitDesktopTransitionHandler, desktopModeDragAndDropTransitionHandler,
                 toggleResizeDesktopTaskTransitionHandler,
-                dragToDesktopTransitionHandler, desktopModeTaskRepository,
+                dragToDesktopTransitionHandler, desktopRepository,
                 desktopModeLoggerTransitionObserver, launchAdjacentController,
                 recentsTransitionHandler, multiInstanceHelper, mainExecutor, desktopTasksLimiter,
                 recentTasksController.orElse(null), interactionJankMonitor, mainHandler);
@@ -647,7 +647,7 @@ public abstract class WMShellModule {
     static Optional<DesktopTasksLimiter> provideDesktopTasksLimiter(
             Context context,
             Transitions transitions,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            @DynamicOverride DesktopRepository desktopRepository,
             ShellTaskOrganizer shellTaskOrganizer,
             InteractionJankMonitor interactionJankMonitor,
             @ShellMainThread Handler handler) {
@@ -660,7 +660,7 @@ public abstract class WMShellModule {
         return Optional.of(
                 new DesktopTasksLimiter(
                         transitions,
-                        desktopModeTaskRepository,
+                        desktopRepository,
                         shellTaskOrganizer,
                         maxTaskLimit,
                         interactionJankMonitor,
@@ -739,13 +739,14 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     @DynamicOverride
-    static DesktopModeTaskRepository provideDesktopModeTaskRepository(
+
+    static DesktopRepository provideDesktopRepository(
             Context context,
             ShellInit shellInit,
             DesktopPersistentRepository desktopPersistentRepository,
             @ShellMainThread CoroutineScope mainScope
     ) {
-        return new DesktopModeTaskRepository(context, shellInit, desktopPersistentRepository,
+        return new DesktopRepository(context, shellInit, desktopPersistentRepository,
                 mainScope);
     }
 
@@ -757,12 +758,12 @@ public abstract class WMShellModule {
             ShellTaskOrganizer shellTaskOrganizer,
             TaskStackListenerImpl taskStackListener,
             ToggleResizeDesktopTaskTransitionHandler toggleResizeDesktopTaskTransitionHandler,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository
+            @DynamicOverride DesktopRepository desktopRepository
     ) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.of(new DesktopActivityOrientationChangeHandler(
                     context, shellInit, shellTaskOrganizer, taskStackListener,
-                    toggleResizeDesktopTaskTransitionHandler, desktopModeTaskRepository));
+                    toggleResizeDesktopTaskTransitionHandler, desktopRepository));
         }
         return Optional.empty();
     }
@@ -771,12 +772,12 @@ public abstract class WMShellModule {
     @Provides
     static Optional<DesktopTasksTransitionObserver> provideDesktopTasksTransitionObserver(
             Context context,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             Transitions transitions,
             ShellTaskOrganizer shellTaskOrganizer,
             ShellInit shellInit
     ) {
-        return desktopModeTaskRepository.flatMap(repository ->
+        return desktopRepository.flatMap(repository ->
                 Optional.of(new DesktopTasksTransitionObserver(
                         context, repository, transitions, shellTaskOrganizer, shellInit))
         );
@@ -787,7 +788,7 @@ public abstract class WMShellModule {
     static Optional<DesktopMixedTransitionHandler> provideDesktopMixedTransitionHandler(
             Context context,
             Transitions transitions,
-            @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
+            @DynamicOverride DesktopRepository desktopRepository,
             FreeformTaskTransitionHandler freeformTaskTransitionHandler,
             CloseDesktopTaskTransitionHandler closeDesktopTaskTransitionHandler,
             InteractionJankMonitor interactionJankMonitor,
@@ -801,7 +802,7 @@ public abstract class WMShellModule {
                 new DesktopMixedTransitionHandler(
                         context,
                         transitions,
-                        desktopModeTaskRepository,
+                        desktopRepository,
                         freeformTaskTransitionHandler,
                         closeDesktopTaskTransitionHandler,
                         interactionJankMonitor,

@@ -44,6 +44,7 @@ import dagger.multibindings.IntoMap
         [
             BouncerSceneModule::class,
             CommunalSceneModule::class,
+            DreamSceneModule::class,
             EmptySceneModule::class,
             GoneSceneModule::class,
             LockscreenSceneModule::class,
@@ -98,6 +99,7 @@ interface SceneContainerFrameworkModule {
                     listOfNotNull(
                         Scenes.Gone,
                         Scenes.Communal,
+                        Scenes.Dream,
                         Scenes.Lockscreen,
                         Scenes.Bouncer,
                         Scenes.QuickSettings.takeUnless { DualShade.isEnabled },
@@ -114,9 +116,10 @@ interface SceneContainerFrameworkModule {
                             Scenes.Gone to 0,
                             Scenes.Lockscreen to 0,
                             Scenes.Communal to 1,
-                            Scenes.Shade to 2.takeUnless { DualShade.isEnabled },
-                            Scenes.QuickSettings to 3.takeUnless { DualShade.isEnabled },
-                            Scenes.Bouncer to 4,
+                            Scenes.Dream to 2,
+                            Scenes.Shade to 3.takeUnless { DualShade.isEnabled },
+                            Scenes.QuickSettings to 4.takeUnless { DualShade.isEnabled },
+                            Scenes.Bouncer to 5,
                         )
                         .filterValues { it != null }
                         .mapValues { checkNotNull(it.value) },

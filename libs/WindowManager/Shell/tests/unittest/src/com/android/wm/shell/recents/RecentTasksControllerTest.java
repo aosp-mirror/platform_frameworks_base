@@ -70,7 +70,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -109,7 +109,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
-    private DesktopModeTaskRepository mDesktopModeTaskRepository;
+    private DesktopRepository mDesktopRepository;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
     @Mock
@@ -146,7 +146,7 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopModeTaskRepository), mTaskStackTransitionObserver,
+                Optional.of(mDesktopRepository), mTaskStackTransitionObserver,
                 mMainExecutor);
         mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
@@ -305,8 +305,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
         setRawList(t1, t2, t3, t4);
 
-        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(3)).thenReturn(true);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
@@ -344,8 +344,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 new SplitBounds(new Rect(), new Rect(), 1, 2, SNAP_TO_2_50_50);
         mRecentTasksController.addSplitPair(t1.taskId, t2.taskId, pair1Bounds);
 
-        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isActiveTask(5)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(5)).thenReturn(true);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
@@ -384,8 +384,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ActivityManager.RecentTaskInfo t4 = makeTaskInfo(4);
         setRawList(t1, t2, t3, t4);
 
-        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(3)).thenReturn(true);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
@@ -412,10 +412,10 @@ public class RecentTasksControllerTest extends ShellTestCase {
         ActivityManager.RecentTaskInfo t5 = makeTaskInfo(5);
         setRawList(t1, t2, t3, t4, t5);
 
-        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isActiveTask(3)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isActiveTask(5)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isMinimizedTask(3)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(3)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(5)).thenReturn(true);
+        when(mDesktopRepository.isMinimizedTask(3)).thenReturn(true);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);
@@ -452,8 +452,8 @@ public class RecentTasksControllerTest extends ShellTestCase {
         t2.lastNonFullscreenBounds = new Rect(150, 250, 350, 450);
         setRawList(t1, t2);
 
-        when(mDesktopModeTaskRepository.isActiveTask(1)).thenReturn(true);
-        when(mDesktopModeTaskRepository.isActiveTask(2)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(1)).thenReturn(true);
+        when(mDesktopRepository.isActiveTask(2)).thenReturn(true);
 
         ArrayList<GroupedRecentTaskInfo> recentTasks = mRecentTasksController.getRecentTasks(
                 MAX_VALUE, RECENT_IGNORE_UNAVAILABLE, 0);

@@ -29,7 +29,7 @@ import android.window.flags.DesktopModeFlags;
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.LaunchAdjacentController;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
@@ -49,7 +49,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
 
     private final Context mContext;
     private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
+    private final Optional<DesktopRepository> mDesktopRepository;
     private final WindowDecorViewModel mWindowDecorationViewModel;
     private final LaunchAdjacentController mLaunchAdjacentController;
 
@@ -64,13 +64,13 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             Context context,
             ShellInit shellInit,
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             LaunchAdjacentController launchAdjacentController,
             WindowDecorViewModel windowDecorationViewModel) {
         mContext = context;
         mShellTaskOrganizer = shellTaskOrganizer;
         mWindowDecorationViewModel = windowDecorationViewModel;
-        mDesktopModeTaskRepository = desktopModeTaskRepository;
+        mDesktopRepository = desktopRepository;
         mLaunchAdjacentController = launchAdjacentController;
         if (shellInit != null) {
             shellInit.addInitCallback(this::onInit, this);
@@ -102,7 +102,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         }
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
                 if (taskInfo.isVisible) {
                     repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
@@ -121,7 +121,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         mTasks.remove(taskInfo.taskId);
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 // TODO: b/370038902 - Handle Activity#finishAndRemoveTask.
                 if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()
                         || repository.isClosingTask(taskInfo.taskId)) {
@@ -150,7 +150,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         mWindowDecorationViewModel.onTaskInfoChanged(taskInfo);
         state.mTaskInfo = taskInfo;
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {
                     repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
                 } else if (repository.isClosingTask(taskInfo.taskId)) {
@@ -182,7 +182,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                 "Freeform Task Focus Changed: #%d focused=%b",
                 taskInfo.taskId, taskInfo.isFocused);
         if (DesktopModeStatus.canEnterDesktopMode(mContext) && taskInfo.isFocused) {
-            mDesktopModeTaskRepository.ifPresent(repository -> {
+            mDesktopRepository.ifPresent(repository -> {
                 repository.addOrMoveFreeformTaskToTop(taskInfo.displayId, taskInfo.taskId);
             });
         }
