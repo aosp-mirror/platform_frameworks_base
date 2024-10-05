@@ -30,6 +30,7 @@ import android.util.AtomicFile
 import android.util.Slog
 import android.util.Xml
 import com.android.internal.os.BackgroundThread
+import com.android.server.pm.verify.pkg.VerifierController
 import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import libcore.io.IoUtils
@@ -195,7 +196,8 @@ class PackageInstallerSessionTest {
             /* isApplied */ false,
             /* stagedSessionErrorCode */ PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE,
             /* stagedSessionErrorMessage */ "some error",
-            /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar"))
+            /* preVerifiedDomains */ DomainSet(setOf("com.foo", "com.bar")),
+            /* VerifierController */ mock(VerifierController::class.java)
         )
     }
 
@@ -249,7 +251,8 @@ class PackageInstallerSessionTest {
                                 mock(StagingManager::class.java),
                                 mTmpDir,
                                 mock(PackageSessionProvider::class.java),
-                                mock(SilentUpdatePolicy::class.java)
+                                mock(SilentUpdatePolicy::class.java),
+                                mock(VerifierController::class.java)
                             )
                             ret.add(session)
                         } catch (e: Exception) {
