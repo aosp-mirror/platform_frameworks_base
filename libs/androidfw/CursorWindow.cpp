@@ -139,6 +139,7 @@ fail_silent:
     return UNKNOWN_ERROR;
 }
 
+#ifdef __linux__
 status_t CursorWindow::createFromParcel(Parcel* parcel, CursorWindow** outWindow) {
     *outWindow = nullptr;
 
@@ -240,6 +241,7 @@ fail:
 fail_silent:
     return UNKNOWN_ERROR;
 }
+#endif
 
 status_t CursorWindow::clear() {
     if (mReadOnly) {

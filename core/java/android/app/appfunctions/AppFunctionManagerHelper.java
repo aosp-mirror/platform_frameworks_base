@@ -16,6 +16,8 @@
 
 package android.app.appfunctions;
 
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DEFAULT;
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_ENABLED;
 import static android.app.appfunctions.AppFunctionRuntimeMetadata.PROPERTY_APP_FUNCTION_STATIC_METADATA_QUALIFIED_ID;
 import static android.app.appfunctions.AppFunctionRuntimeMetadata.PROPERTY_ENABLED;
 import static android.app.appfunctions.AppFunctionStaticMetadataHelper.APP_FUNCTION_INDEXER_PACKAGE;
@@ -166,15 +168,18 @@ public class AppFunctionManagerHelper {
             if (runtimeMetadataResults.isEmpty()) {
                 throw new IllegalArgumentException("App function not found.");
             }
-            boolean[] enabled =
+            long enabled =
                     runtimeMetadataResults
                             .getFirst()
                             .getGenericDocument()
-                            .getPropertyBooleanArray(PROPERTY_ENABLED);
-            if (enabled != null && enabled.length != 0) {
-                return enabled[0];
+                            .getPropertyLong(PROPERTY_ENABLED);
+            // If enabled is not equal to APP_FUNCTION_STATE_DEFAULT, it means it IS overridden and
+            // we should return the overridden value.
+            if (enabled != APP_FUNCTION_STATE_DEFAULT) {
+                return enabled == APP_FUNCTION_STATE_ENABLED;
             }
-            // Runtime metadata not found. Using the default value in the static metadata.
+            // Runtime metadata not found or enabled is equal to APP_FUNCTION_STATE_DEFAULT.
+            // Using the default value in the static metadata.
             return joinedStaticRuntimeResults
                     .getFirst()
                     .getGenericDocument()

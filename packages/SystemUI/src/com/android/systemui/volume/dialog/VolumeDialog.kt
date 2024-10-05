@@ -20,15 +20,39 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.ContextThemeWrapper
+import android.view.MotionEvent
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
+import com.android.systemui.volume.Events
+import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
+import com.android.systemui.volume.dialog.ui.binder.VolumeDialogBinder
 import javax.inject.Inject
 
-class VolumeDialog @Inject constructor(@Application context: Context) :
-    Dialog(ContextThemeWrapper(context, R.style.volume_dialog_theme)) {
+class VolumeDialog
+@Inject
+constructor(
+    @Application context: Context,
+    private val dialogBinder: VolumeDialogBinder,
+    private val visibilityInteractor: VolumeDialogVisibilityInteractor,
+) : Dialog(ContextThemeWrapper(context, R.style.volume_dialog_theme)) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.volume_dialog)
+        dialogBinder.bind(this)
+    }
+
+    /**
+     * NOTE: This will be called with ACTION_OUTSIDE MotionEvents for touches that occur outside of
+     * the touchable region of the volume dialog (as returned by [.onComputeInternalInsets]) even if
+     * those touches occurred within the bounds of the volume dialog.
+     */
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (isShowing) {
+            if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                visibilityInteractor.dismissDialog(Events.DISMISS_REASON_TOUCH_OUTSIDE)
+                return true
+            }
+        }
+        return false
     }
 }

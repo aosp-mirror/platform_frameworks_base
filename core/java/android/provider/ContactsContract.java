@@ -3027,6 +3027,46 @@ public final class ContactsContract {
          */
         @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
         public static final class DefaultAccount {
+            /**
+             * Key in the outgoing Bundle for the default account list.
+             *
+             * @hide
+             */
+            public static final String KEY_ELIGIBLE_DEFAULT_ACCOUNTS =
+                    "key_eligible_default_accounts";
+            /**
+             * The method to invoke in order to query eligiblie default accounts.
+             *
+             * @hide
+             */
+            public static final String QUERY_ELIGIBLE_DEFAULT_ACCOUNTS_METHOD =
+                    "queryEligibleDefaultAccounts";
+            /**
+             * Key in the Bundle for the default account state.
+             *
+             * @hide
+             */
+            public static final String KEY_DEFAULT_ACCOUNT_STATE =
+                    "key_default_account_state";
+            /**
+             * The method to invoke in order to set the default account.
+             *
+             * @hide
+             */
+            public static final String SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
+                    "setDefaultAccountForNewContacts";
+            /**
+             * The method to invoke in order to query the default account.
+             *
+             * @hide
+             */
+            public static final String QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
+                    "queryDefaultAccountForNewContacts";
+
+            private DefaultAccount() {
+
+            }
+
 
             /**
              * Represents the state of the default account, and the actual {@link Account} if it's
@@ -3227,6 +3267,94 @@ public final class ContactsContract {
                                 DEFAULT_ACCOUNT_STATE_SIM})
                 public @interface DefaultAccountState {
                 }
+            }
+
+            /**
+             * Get the account that is set as the default account for new contacts, which should be
+             * initially selected when creating a new contact on contact management apps.
+             *
+             * @param resolver the ContentResolver to query.
+             *
+             * @return the default account state for new contacts.
+             * @throws RuntimeException if failed to look up the default account.
+             * @throws IllegalStateException if the default account is in an invalid state.
+             */
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            public static @NonNull DefaultAccountAndState getDefaultAccountForNewContacts(
+                    @NonNull ContentResolver resolver) {
+                Bundle response = nullSafeCall(resolver, ContactsContract.AUTHORITY_URI,
+                        QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD, null, null);
+
+                int defaultContactsAccountState = response.getInt(KEY_DEFAULT_ACCOUNT_STATE, -1);
+                if (defaultContactsAccountState
+                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_CLOUD) {
+                    String accountName = response.getString(Settings.ACCOUNT_NAME);
+                    String accountType = response.getString(Settings.ACCOUNT_TYPE);
+                    if (TextUtils.isEmpty(accountName) || TextUtils.isEmpty(accountType)) {
+                        throw new IllegalStateException(
+                                "account name and type cannot be null or empty");
+                    }
+                    return new DefaultAccountAndState(
+                            DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_CLOUD,
+                            new Account(accountName, accountType));
+                } else if (defaultContactsAccountState
+                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_LOCAL
+                        || defaultContactsAccountState
+                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_NOT_SET) {
+                    return new DefaultAccountAndState(defaultContactsAccountState, /*cloudAccount=*/
+                            null);
+                } else {
+                    throw new IllegalStateException("Invalid default account state");
+                }
+            }
+
+            /**
+             * Sets the default account that should be initially selected when creating a new
+             * contact on
+             * contact management apps. Apps can only set one of
+             * The following accounts as the default account:
+             * <ol>
+             *   <li> local account
+             *   <li> cloud account that are eligible to be set as default account.
+             * </ol>
+             *
+             * @param resolver               the ContentResolver to query.
+             * @param defaultAccountAndState the default account and state to be set. To set the
+             *                               local
+             *                               account as the
+             *                               default account, this parameter should be
+             *                               {@link DefaultAccountAndState#ofLocal()}. To set the a
+             *                               cloud
+             *                               account as the default account, this parameter should
+             *                               be
+             *                               {@link DefaultAccountAndState#ofCloud(Account)}. To
+             *                               set
+             *                               the
+             *                               default account to a "not set" state, this parameter
+             *                               should
+             *                               be {@link DefaultAccountAndState#ofNotSet()}.
+             *
+             * @throws RuntimeException if it fails to set the default account.
+             *
+             * @hide
+             */
+            @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS)
+            @FlaggedApi(Flags.FLAG_NEW_DEFAULT_ACCOUNT_API_ENABLED)
+            @SystemApi
+            public static void setDefaultAccountForNewContacts(@NonNull ContentResolver resolver,
+                    @NonNull DefaultAccountAndState defaultAccountAndState) {
+                Bundle extras = new Bundle();
+
+                extras.putInt(KEY_DEFAULT_ACCOUNT_STATE, defaultAccountAndState.getState());
+                if (defaultAccountAndState.getState()
+                        == DefaultAccountAndState.DEFAULT_ACCOUNT_STATE_CLOUD) {
+                    Account cloudAccount = defaultAccountAndState.getAccount();
+                    assert cloudAccount != null;
+                    extras.putString(Settings.ACCOUNT_NAME, cloudAccount.name);
+                    extras.putString(Settings.ACCOUNT_TYPE, cloudAccount.type);
+                }
+                nullSafeCall(resolver, ContactsContract.AUTHORITY_URI,
+                        SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD, null, extras);
             }
         }
 
@@ -9053,30 +9181,6 @@ public final class ContactsContract {
          * @hide
          */
         public static final String KEY_DEFAULT_ACCOUNT = "key_default_account";
-
-        /**
-         * Key in the Bundle for the default account state.
-         *
-         * @hide
-         */
-        public static final String KEY_DEFAULT_ACCOUNT_STATE =
-                "key_default_contacts_account_state";
-
-        /**
-         * The method to invoke in order to set the default account.
-         *
-         * @hide
-         */
-        public static final String SET_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
-                "setDefaultAccountForNewContacts";
-
-        /**
-         * The method to invoke in order to query the default account.
-         *
-         * @hide
-         */
-        public static final String QUERY_DEFAULT_ACCOUNT_FOR_NEW_CONTACTS_METHOD =
-                "queryDefaultAccountForNewContacts";
 
         /**
          * Get the account that is set as the default account for new contacts, which should be

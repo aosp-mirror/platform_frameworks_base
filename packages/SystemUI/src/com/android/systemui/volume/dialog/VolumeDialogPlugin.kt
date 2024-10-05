@@ -18,12 +18,10 @@ package com.android.systemui.volume.dialog
 
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.VolumeDialog
-import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
 import com.android.systemui.volume.dialog.dagger.VolumeDialogPluginComponent
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
@@ -34,31 +32,17 @@ constructor(
     private val volumeDialogPluginComponentFactory: VolumeDialogPluginComponent.Factory,
 ) : VolumeDialog {
 
-    private var volumeDialogPluginComponent: VolumeDialogPluginComponent? = null
     private var job: Job? = null
 
     override fun init(windowType: Int, callback: VolumeDialog.Callback?) {
         job =
             applicationCoroutineScope.launch {
                 coroutineScope {
-                    volumeDialogPluginComponent = volumeDialogPluginComponentFactory.create(this)
-                }
-            }
-    }
+                    val component = volumeDialogPluginComponentFactory.create(this)
 
-    private fun showDialog() {
-        val volumeDialogPluginComponent =
-            volumeDialogPluginComponent ?: error("Creating dialog before init was called")
-        volumeDialogPluginComponent.coroutineScope().launch {
-            coroutineScope {
-                val volumeDialogComponent: VolumeDialogComponent =
-                    volumeDialogPluginComponent.volumeDialogComponentFactory().create(this)
-                with(volumeDialogComponent.volumeDialog()) {
-                    setOnDismissListener { volumeDialogComponent.coroutineScope().cancel() }
-                    show()
+                    component.viewModel().activate()
                 }
             }
-        }
     }
 
     override fun destroy() {

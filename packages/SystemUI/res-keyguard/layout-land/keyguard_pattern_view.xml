@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2024, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- This is the screen that shows the 9 circle unlock widget and instructs
+     the user how to unlock their device, or make an emergency call.  This
+     is the landscape layout.  -->
+<com.android.keyguard.KeyguardPatternView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/keyguard_pattern_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal|bottom"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:orientation="horizontal">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:layoutDirection="ltr"
+        android:orientation="vertical">
+
+        <include layout="@layout/keyguard_bouncer_message_area"/>
+
+        <com.android.systemui.bouncer.ui.BouncerMessageView
+            android:id="@+id/bouncer_message_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            androidprv:layout_constraintBottom_toTopOf="@+id/lockPatternView"
+            androidprv:layout_constraintTop_toTopOf="parent"
+            androidprv:layout_constraintVertical_chainStyle="packed" />
+
+        <include
+            android:id="@+id/keyguard_selector_fade_container"
+            layout="@layout/keyguard_eca"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/keyguard_eca_bottom_margin"
+            android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            androidprv:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pattern_container"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:layoutDirection="ltr"
+        android:orientation="vertical">
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/pattern_top_guideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            androidprv:layout_constraintGuide_percent="0" />
+
+        <com.android.internal.widget.LockPatternView
+            android:id="@+id/lockPatternView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            androidprv:layout_constraintDimensionRatio="1.0"
+            androidprv:layout_constraintVertical_bias="1.0"
+            androidprv:layout_constraintLeft_toLeftOf="parent"
+            androidprv:layout_constraintRight_toRightOf="parent"
+            androidprv:layout_constraintBottom_toBottomOf="parent"
+            androidprv:layout_constraintTop_toBottomOf="@id/pattern_top_guideline"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.android.keyguard.KeyguardPatternView>

@@ -100,3 +100,19 @@ fun String.shouldByBypassed(): Boolean {
         // TODO -- anything else?
     )
 }
+
+/**
+ * Files that should be removed when "--strip-mockito" is set.
+ */
+fun String.isMockitoFile(): Boolean {
+    return this.startsWithAny(
+        "org/mockito/", // Mockito
+        "com/android/dx/", // DexMaker
+        "mockito-extensions/", // DexMaker overrides
+    )
+}
+
+fun includeUnsupportedMockito(classes: ClassNodes): Boolean {
+    return classes.findClass("com/android/dx/DexMaker") != null
+            || classes.findClass("org/mockito/Matchers") != null
+}

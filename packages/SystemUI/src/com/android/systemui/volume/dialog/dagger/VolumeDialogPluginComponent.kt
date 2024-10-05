@@ -19,6 +19,7 @@ package com.android.systemui.volume.dialog.dagger
 import com.android.systemui.volume.dialog.dagger.module.VolumeDialogPluginModule
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
+import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogPluginViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
@@ -31,15 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 @Subcomponent(modules = [VolumeDialogPluginModule::class])
 interface VolumeDialogPluginComponent {
 
-    /**
-     * Provides a coroutine scope to use inside [VolumeDialogPluginScope].
-     * [com.android.systemui.volume.dialog.VolumeDialogPlugin] manages the lifecycle of this scope.
-     * It's cancelled when the dialog is disposed. This helps to free occupied resources when volume
-     * dialog is not shown.
-     */
-    @VolumeDialogPlugin fun coroutineScope(): CoroutineScope
-
-    fun volumeDialogComponentFactory(): VolumeDialogComponent.Factory
+    fun viewModel(): VolumeDialogPluginViewModel
 
     @Subcomponent.Factory
     interface Factory {

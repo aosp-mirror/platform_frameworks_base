@@ -709,7 +709,7 @@ public class Notifier {
         SparseBooleanArray newDisplayInteractivities = new SparseBooleanArray();
         for (int i = 0; i < displaysByGroupId.size(); i++) {
             final int groupId = displaysByGroupId.keyAt(i);
-            for (int displayId : displaysByGroupId.get(i)) {
+            for (int displayId : displaysByGroupId.get(groupId)) {
                 // If we already know display interactivity, use that
                 if (mDisplayInteractivities.indexOfKey(displayId) > 0) {
                     newDisplayInteractivities.put(

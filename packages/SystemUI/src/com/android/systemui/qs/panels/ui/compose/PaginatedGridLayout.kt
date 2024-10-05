@@ -31,8 +31,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -75,6 +77,11 @@ constructor(
             }
 
         val pagerState = rememberPagerState(0) { pages.size }
+
+        // Used to track if this is currently in the first page or not, for animations
+        LaunchedEffect(key1 = pagerState) {
+            snapshotFlow { pagerState.currentPage == 0 }.collect { viewModel.inFirstPage = it }
+        }
 
         Column {
             HorizontalPager(

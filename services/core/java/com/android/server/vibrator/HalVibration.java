@@ -19,15 +19,16 @@ package com.android.server.vibrator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.CombinedVibration;
-import android.os.IBinder;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
+import android.os.vibrator.PrebakedSegment;
+import android.os.vibrator.VibrationEffectSegment;
 import android.util.SparseArray;
 
-import com.android.internal.util.FrameworkStatsLog;
-
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.IntFunction;
 
 /**
  * Represents a vibration defined by a {@link CombinedVibration} that will be performed by
@@ -36,7 +37,6 @@ import java.util.concurrent.CountDownLatch;
 final class HalVibration extends Vibration {
 
     public final SparseArray<VibrationEffect> mFallbacks = new SparseArray<>();
-    public final IBinder callerToken;
 
     /** A {@link CountDownLatch} to enable waiting for completion. */
     private final CountDownLatch mCompletionLatch = new CountDownLatch(1);
@@ -56,10 +56,9 @@ final class HalVibration extends Vibration {
     private int mScaleLevel;
     private float mAdaptiveScale;
 
-    HalVibration(@NonNull IBinder callerToken, @NonNull CombinedVibration effect,
-            @NonNull VibrationSession.CallerInfo callerInfo) {
+    HalVibration(@NonNull VibrationSession.CallerInfo callerInfo,
+            @NonNull CombinedVibration effect) {
         super(callerInfo);
-        this.callerToken = callerToken;
         mOriginalEffect = effect;
         mEffectToPlay = effect;
         mScaleLevel = VibrationScaler.SCALE_NONE;
@@ -87,11 +86,11 @@ final class HalVibration extends Vibration {
     }
 
     /**
-     * Add a fallback {@link VibrationEffect} to be played when given effect id is not supported,
-     * which might be necessary for replacement in realtime.
+     * Add a fallback {@link VibrationEffect} to be played for each predefined effect id, which
+     * might be necessary for replacement in realtime.
      */
-    public void addFallback(int effectId, VibrationEffect effect) {
-        mFallbacks.put(effectId, effect);
+    public void fillFallbacks(IntFunction<VibrationEffect> fallbackProvider) {
+        fillFallbacksForEffect(mEffectToPlay, fallbackProvider);
     }
 
     /**
@@ -131,11 +130,6 @@ final class HalVibration extends Vibration {
         // No need to update fallback effects, they are already configured per device.
     }
 
-    @Override
-    public boolean isRepeating() {
-        return mOriginalEffect.getDuration() == Long.MAX_VALUE;
-    }
-
     /** Return the effect that should be played by this vibration. */
     public CombinedVibration getEffectToPlay() {
         return mEffectToPlay;
@@ -146,20 +140,9 @@ final class HalVibration extends Vibration {
         // Clear the original effect if it's the same as the effect that was played, for simplicity
         CombinedVibration originalEffect =
                 Objects.equals(mOriginalEffect, mEffectToPlay) ? null : mOriginalEffect;
-        return new Vibration.DebugInfoImpl(getStatus(), stats, mEffectToPlay, originalEffect,
-                mScaleLevel, mAdaptiveScale, callerInfo);
-    }
-
-    @Override
-    public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
-        int vibrationType = mEffectToPlay.hasVendorEffects()
-                ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__VENDOR
-                : isRepeating()
-                        ? FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED
-                        : FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
-        return new VibrationStats.StatsInfo(
-                callerInfo.uid, vibrationType, callerInfo.attrs.getUsage(), getStatus(),
-                stats, completionUptimeMillis);
+        return new Vibration.DebugInfoImpl(getStatus(), callerInfo,
+                VibrationStats.StatsInfo.findVibrationType(mEffectToPlay), stats, mEffectToPlay,
+                originalEffect, mScaleLevel, mAdaptiveScale);
     }
 
     /**
@@ -174,6 +157,42 @@ final class HalVibration extends Vibration {
         return callerInfo.uid == vib.callerInfo.uid && callerInfo.attrs.isFlagSet(
                 VibrationAttributes.FLAG_PIPELINED_EFFECT)
                 && vib.callerInfo.attrs.isFlagSet(VibrationAttributes.FLAG_PIPELINED_EFFECT)
-                && !isRepeating();
+                && (mOriginalEffect.getDuration() != Long.MAX_VALUE);
+    }
+
+    private void fillFallbacksForEffect(CombinedVibration effect,
+            IntFunction<VibrationEffect> fallbackProvider) {
+        if (effect instanceof CombinedVibration.Mono) {
+            fillFallbacksForEffect(((CombinedVibration.Mono) effect).getEffect(), fallbackProvider);
+        } else if (effect instanceof CombinedVibration.Stereo) {
+            SparseArray<VibrationEffect> effects =
+                    ((CombinedVibration.Stereo) effect).getEffects();
+            for (int i = 0; i < effects.size(); i++) {
+                fillFallbacksForEffect(effects.valueAt(i), fallbackProvider);
+            }
+        } else if (effect instanceof CombinedVibration.Sequential) {
+            List<CombinedVibration> effects =
+                    ((CombinedVibration.Sequential) effect).getEffects();
+            for (int i = 0; i < effects.size(); i++) {
+                fillFallbacksForEffect(effects.get(i), fallbackProvider);
+            }
+        }
+    }
+
+    private void fillFallbacksForEffect(VibrationEffect effect,
+            IntFunction<VibrationEffect> fallbackProvider) {
+        if (!(effect instanceof VibrationEffect.Composed composed)) {
+            return;
+        }
+        int segmentCount = composed.getSegments().size();
+        for (int i = 0; i < segmentCount; i++) {
+            VibrationEffectSegment segment = composed.getSegments().get(i);
+            if ((segment instanceof PrebakedSegment prebaked) && prebaked.shouldFallback()) {
+                VibrationEffect fallback = fallbackProvider.apply(prebaked.getEffectId());
+                if (fallback != null) {
+                    mFallbacks.put(prebaked.getEffectId(), fallback);
+                }
+            }
+        }
     }
 }

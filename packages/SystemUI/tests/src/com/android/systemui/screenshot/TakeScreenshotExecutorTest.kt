@@ -20,6 +20,7 @@ import com.android.internal.util.ScreenshotRequest
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.data.repository.FakeDisplayRepository
+import com.android.systemui.display.data.repository.FakeFocusedDisplayRepository
 import com.android.systemui.display.data.repository.display
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
@@ -58,6 +59,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
     private val testScope = TestScope(UnconfinedTestDispatcher())
     private val eventLogger = UiEventLoggerFake()
     private val headlessHandler = mock<HeadlessScreenshotHandler>()
+    private val focusedDisplayRepository = FakeFocusedDisplayRepository()
 
     private val screenshotExecutor =
         TakeScreenshotExecutorImpl(
@@ -68,6 +70,7 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
             eventLogger,
             notificationControllerFactory,
             headlessHandler,
+            focusedDisplayRepository,
         )
 
     @Before
@@ -294,6 +297,59 @@ class TakeScreenshotExecutorTest : SysuiTestCase() {
                 createScreenshotRequest(
                     displayId = 5,
                     source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW,
+                ),
+                onSaved,
+                callback,
+            )
+
+            val dataCaptor = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller).handleScreenshot(dataCaptor.capture(), any(), any())
+
+            assertThat(dataCaptor.value.displayId).isEqualTo(Display.DEFAULT_DISPLAY)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_keyOther_usesFocusedDisplay() =
+        testScope.runTest {
+            val displayId = 1
+            setDisplays(display(TYPE_INTERNAL, id = 0), display(TYPE_EXTERNAL, id = displayId))
+            val onSaved = { _: Uri? -> }
+            focusedDisplayRepository.emit(displayId)
+
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(
+                    source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER
+                ),
+                onSaved,
+                callback,
+            )
+
+            val dataCaptor = ArgumentCaptor<ScreenshotData>()
+
+            verify(controller).handleScreenshot(dataCaptor.capture(), any(), any())
+
+            assertThat(dataCaptor.value.displayId).isEqualTo(displayId)
+
+            screenshotExecutor.onDestroy()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_SCREENSHOT_MULTIDISPLAY_FOCUS_CHANGE)
+    fun executeScreenshots_keyOtherInvalidDisplay_usesDefault() =
+        testScope.runTest {
+            setDisplays(
+                display(TYPE_INTERNAL, id = Display.DEFAULT_DISPLAY),
+                display(TYPE_EXTERNAL, id = 1),
+            )
+            focusedDisplayRepository.emit(5) // invalid display
+            val onSaved = { _: Uri? -> }
+            screenshotExecutor.executeScreenshots(
+                createScreenshotRequest(
+                    source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER
                 ),
                 onSaved,
                 callback,
