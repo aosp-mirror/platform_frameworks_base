@@ -22,10 +22,13 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.os.IBinder
 import android.util.Slog
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
+import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT
@@ -194,6 +197,110 @@ class DesktopTilingWindowDecoration(
             leftTaskResizingHelper?.desktopModeWindowDecoration?.getLeash() ?: return tilingManager
         tilingManager?.generateViewHost(relativeLeash)
         return tilingManager
+    }
+
+    fun onDividerHandleMoved(dividerBounds: Rect, t: SurfaceControl.Transaction): Boolean {
+        val leftTiledTask = leftTaskResizingHelper ?: return false
+        val rightTiledTask = rightTaskResizingHelper ?: return false
+        val stableBounds = Rect()
+        val displayLayout = displayController.getDisplayLayout(displayId)
+        displayLayout?.getStableBounds(stableBounds)
+
+        if (stableBounds.isEmpty) return false
+
+        val leftBounds = leftTiledTask.bounds
+        val rightBounds = rightTiledTask.bounds
+        val newLeftBounds =
+            Rect(leftBounds.left, leftBounds.top, dividerBounds.left, leftBounds.bottom)
+        val newRightBounds =
+            Rect(dividerBounds.right, rightBounds.top, rightBounds.right, rightBounds.bottom)
+
+        // If one of the apps is getting smaller or bigger than size constraint, ignore finger move.
+        if (
+            isResizeWithinSizeConstraints(
+                newLeftBounds,
+                newRightBounds,
+                leftBounds,
+                rightBounds,
+                stableBounds,
+            )
+        ) {
+            return false
+        }
+
+        // The final new bounds for each app has to be registered to make sure a startAnimate
+        // when the new bounds are different from old bounds, otherwise hide the veil without
+        // waiting for an animation as no animation will run when no bounds are changed.
+        leftTiledTask.newBounds.set(newLeftBounds)
+        rightTiledTask.newBounds.set(newRightBounds)
+        if (!isResizing) {
+            leftTiledTask.showVeil(t)
+            rightTiledTask.showVeil(t)
+            isResizing = true
+        } else {
+            leftTiledTask.updateVeil(t)
+            rightTiledTask.updateVeil(t)
+        }
+
+        // Applies showing/updating veil for both apps and moving the divider into its new position.
+        t.apply()
+        return true
+    }
+
+    fun onDividerHandleDragEnd(dividerBounds: Rect, t: SurfaceControl.Transaction) {
+        val leftTiledTask = leftTaskResizingHelper ?: return
+        val rightTiledTask = rightTaskResizingHelper ?: return
+
+        if (leftTiledTask.newBounds == leftTiledTask.bounds) {
+            leftTiledTask.hideVeil()
+            rightTiledTask.hideVeil()
+            isResizing = false
+            return
+        }
+        leftTiledTask.bounds.set(leftTiledTask.newBounds)
+        rightTiledTask.bounds.set(rightTiledTask.newBounds)
+        onDividerHandleMoved(dividerBounds, t)
+        isResizing = false
+        val wct = WindowContainerTransaction()
+        wct.setBounds(leftTiledTask.taskInfo.token, leftTiledTask.bounds)
+        wct.setBounds(rightTiledTask.taskInfo.token, rightTiledTask.bounds)
+        transitions.startTransition(TRANSIT_CHANGE, wct, this)
+    }
+
+    override fun startAnimation(
+        transition: IBinder,
+        info: TransitionInfo,
+        startTransaction: Transaction,
+        finishTransaction: Transaction,
+        finishCallback: Transitions.TransitionFinishCallback,
+    ): Boolean {
+        val leftTiledTask = leftTaskResizingHelper ?: return false
+        val rightTiledTask = rightTaskResizingHelper ?: return false
+        for (change in info.getChanges()) {
+            val sc: SurfaceControl = change.getLeash()
+            val endBounds =
+                if (change.taskInfo?.taskId == leftTiledTask.taskInfo.taskId) {
+                    leftTiledTask.bounds
+                } else {
+                    rightTiledTask.bounds
+                }
+            startTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
+            finishTransaction.setWindowCrop(sc, endBounds.width(), endBounds.height())
+        }
+
+        startTransaction.apply()
+        leftTiledTask.hideVeil()
+        rightTiledTask.hideVeil()
+        finishCallback.onTransitionFinished(null)
+        return true
+    }
+
+    // TODO(b/361505243) bring tasks to front here when the empty request info bug is fixed.
+    override fun handleRequest(
+        transition: IBinder,
+        request: TransitionRequestInfo,
+    ): WindowContainerTransaction? {
+        return null
     }
 
     class AppResizingHelper(

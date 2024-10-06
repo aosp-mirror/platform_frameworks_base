@@ -15,12 +15,16 @@
  */
 package com.android.wm.shell.windowdecor.tiling
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Rect
+import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
+import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -80,7 +84,9 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
     private val surfaceControlMock: SurfaceControl = mock()
     private val transaction: SurfaceControl.Transaction = mock()
     private val tiledTaskHelper: DesktopTilingWindowDecoration.AppResizingHelper = mock()
-
+    private val transition: IBinder = mock()
+    private val info: TransitionInfo = mock()
+    private val finishCallback: Transitions.TransitionFinishCallback = mock()
     private lateinit var tilingDecoration: DesktopTilingWindowDecoration
 
     private val split_divider_width = 10
@@ -306,6 +312,80 @@ class DesktopTilingWindowDecorationTest : ShellTestCase() {
         assertThat(tilingDecoration.moveTiledPairToFront(task3)).isFalse()
         assertThat(tilingDecoration.moveTiledPairToFront(task1)).isTrue()
         verify(transitions, times(1)).startTransition(eq(TRANSIT_TO_FRONT), any(), eq(null))
+    }
+
+    @Test
+    fun taskTiledTasks_NotResized_BeforeTouchEndArrival() {
+        // Setup
+        val task1 = createFreeformTask()
+        val task2 = createFreeformTask()
+        val stableBounds = STABLE_BOUNDS_MOCK
+        whenever(displayController.getDisplayLayout(any())).thenReturn(displayLayout)
+        whenever(displayLayout.getStableBounds(any())).thenAnswer { i ->
+            (i.arguments.first() as Rect).set(stableBounds)
+        }
+        whenever(context.resources).thenReturn(resources)
+        whenever(resources.getDimensionPixelSize(any())).thenReturn(split_divider_width)
+        desktopWindowDecoration.mTaskInfo = task1
+        task1.minWidth = 0
+        task1.minHeight = 0
+        initTiledTaskHelperMock(task1)
+        desktopWindowDecoration.mDecorWindowContext = context
+        whenever(resources.getBoolean(any())).thenReturn(true)
+
+        // Act
+        tilingDecoration.onAppTiled(
+            task1,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.RIGHT,
+            BOUNDS,
+        )
+        tilingDecoration.onAppTiled(
+            task2,
+            desktopWindowDecoration,
+            DesktopTasksController.SnapPosition.LEFT,
+            BOUNDS,
+        )
+
+        tilingDecoration.leftTaskResizingHelper = tiledTaskHelper
+        tilingDecoration.rightTaskResizingHelper = tiledTaskHelper
+        tilingDecoration.onDividerHandleMoved(BOUNDS, transaction)
+
+        // Assert
+        verify(transaction, times(1)).apply()
+        // Show should be called twice for each tiled app, to show the veil and the icon for each
+        // of them.
+        verify(tiledTaskHelper, times(2)).showVeil(any())
+
+        // Move again
+        tilingDecoration.onDividerHandleMoved(BOUNDS, transaction)
+        verify(tiledTaskHelper, times(2)).updateVeil(any())
+        verify(transitions, never()).startTransition(any(), any(), any())
+
+        // End moving, no startTransition because bounds did not change.
+        tiledTaskHelper.newBounds.set(BOUNDS)
+        tilingDecoration.onDividerHandleDragEnd(BOUNDS, transaction)
+        verify(tiledTaskHelper, times(2)).hideVeil()
+        verify(transitions, never()).startTransition(any(), any(), any())
+
+        // Move then end again with bounds changing to ensure startTransition is called.
+        tilingDecoration.onDividerHandleMoved(BOUNDS, transaction)
+        tilingDecoration.onDividerHandleDragEnd(BOUNDS, transaction)
+        verify(transitions, times(1))
+            .startTransition(eq(TRANSIT_CHANGE), any(), eq(tilingDecoration))
+        // No hide veil until start animation is called.
+        verify(tiledTaskHelper, times(2)).hideVeil()
+
+        tilingDecoration.startAnimation(transition, info, transaction, transaction, finishCallback)
+        // the startAnimation function should hide the veils.
+        verify(tiledTaskHelper, times(4)).hideVeil()
+    }
+
+    private fun initTiledTaskHelperMock(taskInfo: ActivityManager.RunningTaskInfo) {
+        whenever(tiledTaskHelper.bounds).thenReturn(BOUNDS)
+        whenever(tiledTaskHelper.taskInfo).thenReturn(taskInfo)
+        whenever(tiledTaskHelper.newBounds).thenReturn(Rect(BOUNDS))
+        whenever(tiledTaskHelper.desktopModeWindowDecoration).thenReturn(desktopWindowDecoration)
     }
 
     private fun assertRectEqual(rect1: Rect, rect2: Rect) {
