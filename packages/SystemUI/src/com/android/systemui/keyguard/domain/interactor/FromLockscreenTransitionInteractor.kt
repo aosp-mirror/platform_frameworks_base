@@ -189,6 +189,7 @@ constructor(
                     internalTransitionInteractor.currentTransitionInfoInternal,
                     keyguardInteractor.statusBarState,
                     keyguardInteractor.isKeyguardDismissible,
+                    keyguardInteractor.isKeyguardOccluded,
                 )
                 .collect {
                     (
@@ -196,7 +197,8 @@ constructor(
                         startedStep,
                         currentTransitionInfo,
                         statusBarState,
-                        isKeyguardUnlocked) ->
+                        isKeyguardUnlocked,
+                        isKeyguardOccluded) ->
                     val id = transitionId
                     if (id != null) {
                         if (startedStep.to == KeyguardState.PRIMARY_BOUNCER) {
@@ -210,13 +212,18 @@ constructor(
                                 } else {
                                     TransitionState.RUNNING
                                 }
-                            transitionRepository.updateTransition(
-                                id,
-                                // This maps the shadeExpansion to a much faster curve, to match
-                                // the existing logic
-                                1f - MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
-                                nextState,
-                            )
+
+                            // startTransition below will issue the CANCELED directly
+                            if (nextState != TransitionState.CANCELED) {
+                                transitionRepository.updateTransition(
+                                    id,
+                                    // This maps the shadeExpansion to a much faster curve, to match
+                                    // the existing logic
+                                    1f -
+                                        MathUtils.constrainedMap(0f, 1f, 0.95f, 1f, shadeExpansion),
+                                    nextState,
+                                )
+                            }
 
                             if (
                                 nextState == TransitionState.CANCELED ||
@@ -231,14 +238,19 @@ constructor(
                             if (nextState == TransitionState.CANCELED) {
                                 transitionRepository.startTransition(
                                     TransitionInfo(
-                                        ownerName = name,
+                                        ownerName =
+                                            "$name " +
+                                                "(on behalf of FromPrimaryBouncerInteractor)",
                                         from = KeyguardState.PRIMARY_BOUNCER,
-                                        to = KeyguardState.LOCKSCREEN,
+                                        to =
+                                            if (isKeyguardOccluded) KeyguardState.OCCLUDED
+                                            else KeyguardState.LOCKSCREEN,
+                                        modeOnCanceled = TransitionModeOnCanceled.REVERSE,
                                         animator =
                                             getDefaultAnimatorForTransitionsToState(
                                                     KeyguardState.LOCKSCREEN
                                                 )
-                                                .apply { duration = 0 },
+                                                .apply { duration = 100L },
                                     )
                                 )
                             }

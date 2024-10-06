@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"مکالمه‌ها"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"پاک کردن همه اعلان‌های بی‌صدا"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"اعلان‌ها توسط «مزاحم نشوید» موقتاً متوقف شدند"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"اکنون شروع کنید"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"اعلانی موجود نیست"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"اعلان جدیدی وجود ندارد"</string>
@@ -1022,7 +1024,7 @@
     <string name="privacy_type_location" msgid="7991481648444066703">"مکان"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"میکروفون"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"ضبط صفحه‌نمایش"</string>
-    <string name="music_controls_no_title" msgid="4166497066552290938">"بدون عنوان"</string>
+    <string name="music_controls_no_title" msgid="4166497066552290938">"بی‌عنوان"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"آماده‌به‌کار"</string>
     <string name="font_scaling_dialog_title" msgid="6273107303850248375">"اندازه قلم"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"کوچک‌تر کردن"</string>
@@ -1396,8 +1398,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"نماد جمع کردن"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"نماد ازهم بازکردن"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"یا"</string>
-    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
-    <skip />
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"دستگیره کشاندن"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"پیمایش کردن بااستفاده از صفحه‌کلید"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"آشنایی با میان‌برهای صفحه‌کلید"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"پیمایش کردن بااستفاده از صفحه لمسی"</string>

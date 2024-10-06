@@ -1250,6 +1250,7 @@
          a watch, setting this config is no-op.
             0 - Nothing
             1 - Switch to the recent app
+            2 - Launch the default fitness app
     -->
     <integer name="config_doublePressOnStemPrimaryBehavior">0</integer>
 
@@ -1527,6 +1528,11 @@
         flow. This should be true if gatekeeper / weaver credentials can still be checked after a
         factory reset. -->
     <bool name="config_enableCredentialFactoryResetProtection">true</bool>
+
+    <!-- If true, then work around broken Weaver HALs that don't work reliably before the device has
+         fully booted. Setting this to true weakens a security feature; it should be done only when
+         necessary, though it is still better than not using Weaver at all. -->
+    <bool name="config_disableWeaverOnUnsecuredUsers">false</bool>
 
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
@@ -2308,10 +2314,6 @@
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
-
-    <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
-         on grouped devices. -->
-    <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
 
     <!-- Flag indicating current media Output Switcher version. -->
     <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
@@ -6182,6 +6184,10 @@
     <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
         is enabled and activity is connected to the camera in fullscreen. -->
     <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
+
+    <!-- Which aspect ratio to use when camera compat treatment is enabled and an activity eligible
+        for treatment is connected to the camera. -->
+    <item name="config_windowManagerCameraCompatAspectRatio" format="float" type="dimen">1.0</item>
 
     <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
          handled. If true, the configuration change will be sent but activities will not be

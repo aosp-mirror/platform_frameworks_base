@@ -12,15 +12,6 @@ package {
 }
 
 filegroup {
-    name: "ravenwood-annotations",
-    srcs: [
-        "annotations-src/**/*.java",
-    ],
-    path: "annotations-src",
-    visibility: ["//visibility:public"],
-}
-
-filegroup {
     name: "ravenwood-services-policies",
     srcs: [
         "texts/ravenwood-services-policies.txt",
@@ -49,14 +40,6 @@ filegroup {
     srcs: [
         "texts/ravenwood-annotation-allowed-classes.txt",
     ],
-    visibility: ["//visibility:public"],
-}
-
-java_library {
-    name: "ravenwood-annotations-lib",
-    srcs: [":ravenwood-annotations"],
-    sdk_version: "core_current",
-    host_supported: true,
     visibility: ["//visibility:public"],
 }
 

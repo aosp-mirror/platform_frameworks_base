@@ -1,8 +1,16 @@
 package: "android.app"
 container: "system"
+
 flag {
   name: "remove_next_wallpaper_component"
   namespace: "systemui"
   description: "Remove deprecated field WallpaperData#nextWallpaperComponent. Only effective after rebooting."
   bug: "365991991"
+}
+
+flag {
+  name: "fix_wallpaper_changed"
+  namespace: "systemui"
+  description: "Fixes timing of wallpaper changed notification and adds extra information. Only effective after rebooting."
+  bug: "369814294"
 }

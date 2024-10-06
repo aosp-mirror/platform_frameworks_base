@@ -10,3 +10,14 @@ flag {
          purpose: PURPOSE_BUGFIX
      }
 }
+
+flag {
+     namespace: "systemui"
+     name: "enable_current_mode_type_binder_cache"
+     description: "Enables the use of binder caching for current running mode type."
+     bug: "362572732"
+     is_fixed_read_only: true
+     metadata {
+         purpose: PURPOSE_BUGFIX
+     }
+}

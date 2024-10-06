@@ -369,7 +369,7 @@
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"సూర్యోదయం వరకు"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"<xliff:g id="TIME">%s</xliff:g>కి"</string>
     <string name="quick_settings_secondary_label_until" msgid="1883981263191927372">"<xliff:g id="TIME">%s</xliff:g> వరకు"</string>
-    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"ముదురు రంగు రూపం"</string>
+    <string name="quick_settings_ui_mode_night_label" msgid="1398928270610780470">"డార్క్ థీమ్‌"</string>
     <string name="quick_settings_dark_mode_secondary_label_battery_saver" msgid="4990712734503013251">"బ్యాటరీ సేవర్"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at_sunset" msgid="6017379738102015710">"సూర్యాస్తమయానికి"</string>
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"సూర్యోదయం వరకు"</string>
@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించండి"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"నోటిఫికేషన్‌లు లేవు"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"కొత్త నోటిఫికేషన్‌లు ఏవీ లేవు"</string>
@@ -1396,8 +1398,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"కుదించండి చిహ్నం"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"విస్తరించండి చిహ్నం"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"లేదా"</string>
-    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
-    <skip />
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"లాగే హ్యాండిల్"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"మీ కీబోర్డ్ ఉపయోగించి నావిగేట్ చేయండి"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"కీబోర్డ్ షార్ట్‌కట్‌ల గురించి తెలుసుకోండి"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"మీ టచ్‌ప్యాడ్‌ని ఉపయోగించి నావిగేట్ చేయండి"</string>

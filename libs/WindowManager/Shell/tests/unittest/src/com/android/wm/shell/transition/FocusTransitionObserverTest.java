@@ -18,7 +18,7 @@ package com.android.wm.shell.transition;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
-import static android.view.WindowManager.TRANSIT_TO_FRONT;
+import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -97,50 +97,38 @@ public class FocusTransitionObserverTest extends ShellTestCase {
     }
 
     @Test
-    public void testTransitionWithMovedToFrontFlagChangesDisplayFocus() throws RemoteException {
+    public void testOnlyDisplayChangeAffectsDisplayFocus() throws RemoteException {
         final IBinder binder = mock(IBinder.class);
         final SurfaceControl.Transaction tx = mock(SurfaceControl.Transaction.class);
 
-        // Open a task on the default display, which doesn't change display focus because the
-        // default display already has it.
+        // Open a task on the secondary display, but it doesn't change display focus because it only
+        // has a task change.
         TransitionInfo info = mock(TransitionInfo.class);
         final List<TransitionInfo.Change> changes = new ArrayList<>();
-        setupChange(changes, 123 /* taskId */, TRANSIT_OPEN, DEFAULT_DISPLAY,
+        setupTaskChange(changes, 123 /* taskId */, TRANSIT_OPEN, SECONDARY_DISPLAY_ID,
                 true /* focused */);
         when(info.getChanges()).thenReturn(changes);
         mFocusTransitionObserver.onTransitionReady(binder, info, tx, tx);
         verify(mListener, never()).onFocusedDisplayChanged(SECONDARY_DISPLAY_ID);
         clearInvocations(mListener);
 
-        // Open a new task on the secondary display and verify display focus changes to the display.
+        // Moving the secondary display to front must change display focus to it.
         changes.clear();
-        setupChange(changes, 456 /* taskId */, TRANSIT_OPEN, SECONDARY_DISPLAY_ID,
-                true /* focused */);
+        setupDisplayToTopChange(changes, SECONDARY_DISPLAY_ID);
         when(info.getChanges()).thenReturn(changes);
         mFocusTransitionObserver.onTransitionReady(binder, info, tx, tx);
-        verify(mListener, times(1)).onFocusedDisplayChanged(SECONDARY_DISPLAY_ID);
-        clearInvocations(mListener);
+        verify(mListener, times(1))
+                .onFocusedDisplayChanged(SECONDARY_DISPLAY_ID);
 
-        // Open the first task to front and verify display focus goes back to the default display.
+        // Moving the secondary display to front must change display focus back to it.
         changes.clear();
-        setupChange(changes, 123 /* taskId */, TRANSIT_TO_FRONT, DEFAULT_DISPLAY,
-                true /* focused */);
+        setupDisplayToTopChange(changes, DEFAULT_DISPLAY);
         when(info.getChanges()).thenReturn(changes);
         mFocusTransitionObserver.onTransitionReady(binder, info, tx, tx);
         verify(mListener, times(1)).onFocusedDisplayChanged(DEFAULT_DISPLAY);
-        clearInvocations(mListener);
-
-        // Open another task on the default display and verify no display focus switch as it's
-        // already on the default display.
-        changes.clear();
-        setupChange(changes, 789 /* taskId */, TRANSIT_OPEN, DEFAULT_DISPLAY,
-                true /* focused */);
-        when(info.getChanges()).thenReturn(changes);
-        mFocusTransitionObserver.onTransitionReady(binder, info, tx, tx);
-        verify(mListener, never()).onFocusedDisplayChanged(DEFAULT_DISPLAY);
     }
 
-    private void setupChange(List<TransitionInfo.Change> changes, int taskId,
+    private void setupTaskChange(List<TransitionInfo.Change> changes, int taskId,
             @TransitionMode int mode, int displayId, boolean focused) {
         TransitionInfo.Change change = mock(TransitionInfo.Change.class);
         RunningTaskInfo taskInfo = mock(RunningTaskInfo.class);
@@ -150,6 +138,14 @@ public class FocusTransitionObserverTest extends ShellTestCase {
         taskInfo.displayId = displayId;
         when(change.getTaskInfo()).thenReturn(taskInfo);
         when(change.getMode()).thenReturn(mode);
+        changes.add(change);
+    }
+
+    private void setupDisplayToTopChange(List<TransitionInfo.Change> changes, int displayId) {
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        when(change.hasFlags(FLAG_MOVED_TO_TOP)).thenReturn(true);
+        when(change.hasFlags(FLAG_IS_DISPLAY)).thenReturn(true);
+        when(change.getEndDisplayId()).thenReturn(displayId);
         changes.add(change);
     }
 }

@@ -24,14 +24,21 @@ import android.testing.TestableContext
 import android.testing.TestableLooper
 import android.testing.TestableResources
 import android.view.MotionEvent
+import android.view.Surface.ROTATION_180
+import android.view.Surface.ROTATION_90
 import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
+import android.window.WindowContainerTransaction
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTestCase
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipArrowDirection
+import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipColorScheme
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -42,9 +49,11 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -52,6 +61,8 @@ import org.mockito.kotlin.verify
 class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
   @Mock private lateinit var mockWindowManager: WindowManager
   @Mock private lateinit var mockViewContainerFactory: AdditionalSystemViewContainer.Factory
+  @Mock private lateinit var mockDisplayController: DisplayController
+  @Mock private lateinit var mockPopupWindow: AdditionalSystemViewContainer
   private lateinit var testableResources: TestableResources
   private lateinit var testableContext: TestableContext
   private lateinit var tooltipController: DesktopWindowingEducationTooltipController
@@ -69,7 +80,8 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
         Context.LAYOUT_INFLATER_SERVICE, context.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
     testableContext.addMockSystemService(WindowManager::class.java, mockWindowManager)
     tooltipController =
-        DesktopWindowingEducationTooltipController(testableContext, mockViewContainerFactory)
+        DesktopWindowingEducationTooltipController(
+            testableContext, mockViewContainerFactory, mockDisplayController)
   }
 
   @Test
@@ -218,8 +230,55 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
     verify(mockLambda).invoke()
   }
 
+  @Test
+  fun showEducationTooltip_displayRotationChanged_hidesTooltip() {
+    whenever(
+            mockViewContainerFactory.create(any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(mockPopupWindow)
+    val tooltipViewConfig = createTooltipConfig()
+
+    tooltipController.showEducationTooltip(tooltipViewConfig = tooltipViewConfig, taskId = 123)
+    tooltipController.onDisplayChange(
+        /* displayId= */ 123,
+        /* fromRotation= */ ROTATION_90,
+        /* toRotation= */ ROTATION_180,
+        /* newDisplayAreaInfo= */ null,
+        WindowContainerTransaction(),
+    )
+
+    verify(mockPopupWindow, times(1)).releaseView()
+    verify(mockDisplayController, atLeastOnce()).removeDisplayChangingController(any())
+  }
+
+  @Test
+  fun showEducationTooltip_setTooltipColorScheme_correctColorsAreSet() {
+    val tooltipColorScheme =
+        TooltipColorScheme(
+            container = Color.Red.toArgb(), text = Color.Blue.toArgb(), icon = Color.Green.toArgb())
+    val tooltipViewConfig = createTooltipConfig(tooltipColorScheme = tooltipColorScheme)
+
+    tooltipController.showEducationTooltip(tooltipViewConfig = tooltipViewConfig, taskId = 123)
+
+    verify(mockViewContainerFactory, times(1))
+        .create(
+            windowManagerWrapper = any(),
+            taskId = anyInt(),
+            x = anyInt(),
+            y = anyInt(),
+            width = anyInt(),
+            height = anyInt(),
+            flags = anyInt(),
+            view = tooltipViewArgumentCaptor.capture())
+    val tooltipTextView =
+        tooltipViewArgumentCaptor.lastValue.findViewById<TextView>(R.id.tooltip_text)
+    assertThat(tooltipTextView.textColors.defaultColor).isEqualTo(Color.Blue.toArgb())
+  }
+
   private fun createTooltipConfig(
       @LayoutRes tooltipViewLayout: Int = R.layout.desktop_windowing_education_top_arrow_tooltip,
+      tooltipColorScheme: TooltipColorScheme =
+          TooltipColorScheme(
+              container = Color.Red.toArgb(), text = Color.Red.toArgb(), icon = Color.Red.toArgb()),
       tooltipViewGlobalCoordinates: Point = Point(0, 0),
       tooltipText: String = "This is a tooltip",
       arrowDirection: TooltipArrowDirection = TooltipArrowDirection.UP,
@@ -228,6 +287,7 @@ class DesktopWindowingEducationTooltipControllerTest : ShellTestCase() {
   ) =
       DesktopWindowingEducationTooltipController.EducationViewConfig(
           tooltipViewLayout = tooltipViewLayout,
+          tooltipColorScheme = tooltipColorScheme,
           tooltipViewGlobalCoordinates = tooltipViewGlobalCoordinates,
           tooltipText = tooltipText,
           arrowDirection = arrowDirection,

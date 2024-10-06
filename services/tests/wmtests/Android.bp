@@ -29,7 +29,7 @@ genrule {
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
         "--protolog-class com.android.internal.protolog.ProtoLog " +
-        "--loggroups-class com.android.internal.protolog.ProtoLogGroup " +
+        "--loggroups-class com.android.internal.protolog.WmProtoLogGroups " +
         "--loggroups-jar $(location :protolog-groups) " +
         // Used for the ProtoLogIntegrationTest, where don't test decoding or writing to file
         // so the parameters below are irrelevant.

@@ -417,6 +417,7 @@ class LegacyMediaDataManagerImpl(
     override fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (useQsMediaPlayer && isMediaNotification(sbn)) {
             var isNewlyActiveEntry = false
+            var isConvertingToActive = false
             Assert.isMainThread()
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
@@ -433,9 +434,10 @@ class LegacyMediaDataManagerImpl(
                 // Resume -> active conversion; move to new key
                 val oldData = mediaEntries.remove(oldKey)!!
                 isNewlyActiveEntry = true
+                isConvertingToActive = true
                 mediaEntries.put(key, oldData)
             }
-            loadMediaData(key, sbn, oldKey, isNewlyActiveEntry)
+            loadMediaData(key, sbn, oldKey, isNewlyActiveEntry, isConvertingToActive)
         } else {
             onNotificationRemoved(key)
         }
@@ -535,10 +537,11 @@ class LegacyMediaDataManagerImpl(
         sbn: StatusBarNotification,
         oldKey: String?,
         isNewlyActiveEntry: Boolean = false,
+        isConvertingToActive: Boolean = false,
     ) {
         if (Flags.mediaLoadMetadataViaMediaDataLoader()) {
             applicationScope.launch {
-                loadMediaDataWithLoader(key, sbn, oldKey, isNewlyActiveEntry)
+                loadMediaDataWithLoader(key, sbn, oldKey, isNewlyActiveEntry, isConvertingToActive)
             }
         } else {
             backgroundExecutor.execute { loadMediaDataInBg(key, sbn, oldKey, isNewlyActiveEntry) }
@@ -550,10 +553,11 @@ class LegacyMediaDataManagerImpl(
         sbn: StatusBarNotification,
         oldKey: String?,
         isNewlyActiveEntry: Boolean = false,
+        isConvertingToActive: Boolean = false,
     ) =
         withContext(backgroundDispatcher) {
             val lastActive = systemClock.elapsedRealtime()
-            val result = mediaDataLoader.get().loadMediaData(key, sbn)
+            val result = mediaDataLoader.get().loadMediaData(key, sbn, isConvertingToActive)
             if (result == null) {
                 Log.d(TAG, "No result from loadMediaData")
                 return@withContext

@@ -26,6 +26,10 @@ import androidx.test.filters.SmallTest
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.desktopmode.education.data.AppHandleEducationDatastoreRepository
+import com.android.wm.shell.util.GMAIL_PACKAGE_NAME
+import com.android.wm.shell.util.YOUTUBE_PACKAGE_NAME
+import com.android.wm.shell.util.createAppHandleState
+import com.android.wm.shell.util.createTaskInfo
 import com.android.wm.shell.util.createWindowingEducationProto
 import com.google.common.truth.Truth.assertThat
 import kotlin.Int.Companion.MAX_VALUE
@@ -38,6 +42,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
+/** Tests of [AppHandleEducationFilter]
+ * Usage: atest AppHandleEducationFilterTest */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class AppHandleEducationFilterTest : ShellTestCase() {
@@ -76,7 +82,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(GMAIL_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
 
     assertThat(result).isTrue()
   }
@@ -91,9 +97,11 @@ class AppHandleEducationFilterTest : ShellTestCase() {
         createWindowingEducationProto(
             appUsageStats = mapOf(YOUTUBE_PACKAGE_NAME to 4),
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
+    val captionState =
+        createAppHandleState(createTaskInfo(runningTaskPackageName = YOUTUBE_PACKAGE_NAME))
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(YOUTUBE_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(captionState)
 
     assertThat(result).isFalse()
   }
@@ -110,7 +118,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(GMAIL_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
 
     assertThat(result).isFalse()
   }
@@ -125,7 +133,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(GMAIL_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
 
     assertThat(result).isFalse()
   }
@@ -140,7 +148,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(GMAIL_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
 
     assertThat(result).isFalse()
   }
@@ -156,7 +164,7 @@ class AppHandleEducationFilterTest : ShellTestCase() {
             appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(GMAIL_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
 
     assertThat(result).isFalse()
   }
@@ -179,15 +187,26 @@ class AppHandleEducationFilterTest : ShellTestCase() {
         .thenReturn(mapOf(GMAIL_PACKAGE_NAME to UsageStats().apply { mAppLaunchCount = 2 }))
     `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
 
-    val result = educationFilter.shouldShowAppHandleEducation(GMAIL_PACKAGE_NAME)
+    val result = educationFilter.shouldShowAppHandleEducation(createAppHandleState())
 
     // Result should be false as queried usage stats should be considered to determine the result
     // instead of cached stats
     assertThat(result).isFalse()
   }
 
-  companion object {
-    private const val GMAIL_PACKAGE_NAME = "com.google.android.gm"
-    private const val YOUTUBE_PACKAGE_NAME = "com.google.android.youtube"
+  @Test
+  fun shouldShowAppHandleEducation_appHandleMenuExpanded_returnsFalse() = runTest {
+    val windowingEducationProto =
+        createWindowingEducationProto(
+            appUsageStats = mapOf(GMAIL_PACKAGE_NAME to 4),
+            appUsageStatsLastUpdateTimestampMillis = Long.MAX_VALUE)
+    // Simulate app handle menu is expanded
+    val captionState = createAppHandleState(isHandleMenuExpanded = true)
+    `when`(datastoreRepository.windowingEducationProto()).thenReturn(windowingEducationProto)
+
+    val result = educationFilter.shouldShowAppHandleEducation(captionState)
+
+    // We should not show app handle education if app menu is expanded
+    assertThat(result).isFalse()
   }
 }

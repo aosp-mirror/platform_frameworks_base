@@ -110,12 +110,12 @@ public class ProtoLogConfigurationServiceImpl extends IProtoLogConfigurationServ
     private final ViewerConfigFileTracer mViewerConfigFileTracer;
 
     public ProtoLogConfigurationServiceImpl() {
-        this(ProtoLogDataSource::new, ProtoLogConfigurationServiceImpl::dumpTransitionTraceConfig);
+        this(ProtoLogDataSource::new, ProtoLogConfigurationServiceImpl::dumpViewerConfig);
     }
 
     @VisibleForTesting
     public ProtoLogConfigurationServiceImpl(@NonNull ProtoLogDataSourceBuilder dataSourceBuilder) {
-        this(dataSourceBuilder, ProtoLogConfigurationServiceImpl::dumpTransitionTraceConfig);
+        this(dataSourceBuilder, ProtoLogConfigurationServiceImpl::dumpViewerConfig);
     }
 
     @VisibleForTesting
@@ -375,7 +375,7 @@ public class ProtoLogConfigurationServiceImpl extends IProtoLogConfigurationServ
         mRunningInstances.remove(instanceIdx);
     }
 
-    private static void dumpTransitionTraceConfig(@NonNull ProtoLogDataSource dataSource,
+    private static void dumpViewerConfig(@NonNull ProtoLogDataSource dataSource,
             @NonNull String viewerConfigFilePath) {
         Utils.dumpViewerConfig(dataSource, () -> {
             try {

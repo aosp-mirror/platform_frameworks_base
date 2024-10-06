@@ -203,13 +203,16 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 messagingStyle = mConversationProcessor
                         .processNotification(entry, builder, mLogger);
             }
-            result.mInflatedSingleLineViewModel = SingleLineViewInflater
+            SingleLineViewModel viewModel = SingleLineViewInflater
                     .inflateSingleLineViewModel(
                             entry.getSbn().getNotification(),
                             messagingStyle,
                             builder,
                             row.getContext()
                     );
+            // If the messagingStyle is null, we want to inflate the normal view
+            isConversation = viewModel.isConversation();
+            result.mInflatedSingleLineViewModel = viewModel;
             result.mInflatedSingleLineView =
                     SingleLineViewInflater.inflatePrivateSingleLineView(
                             isConversation,

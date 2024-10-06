@@ -19,10 +19,12 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.data.repository.DEFAULT_REVEAL_DURATION
 import com.android.systemui.keyguard.data.repository.LightRevealScrimRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.shared.model.ScreenPowerState
+import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
@@ -50,10 +52,28 @@ constructor(
         scope.launch {
             transitionInteractor.startedKeyguardTransitionStep.collect {
                 scrimLogger.d(TAG, "listenForStartedKeyguardTransitionStep", it)
-                lightRevealScrimRepository.startRevealAmountAnimator(willBeRevealedInState(it.to))
+                val animationDuration =
+                    if (it.to == KeyguardState.AOD && isLastSleepDueToFold) {
+                        // Do not animate the scrim when folding as we want to cover the screen
+                        // with the scrim immediately while displays are switching.
+                        // This is needed to play the fold to AOD animation which starts with
+                        // fully black screen (see FoldAodAnimationController)
+                        0L
+                    } else {
+                        DEFAULT_REVEAL_DURATION
+                    }
+
+                lightRevealScrimRepository.startRevealAmountAnimator(
+                    willBeRevealedInState(it.to),
+                    duration = animationDuration
+                )
             }
         }
     }
+
+    private val isLastSleepDueToFold: Boolean
+        get() = powerInteractor.get().detailedWakefulness.value
+            .lastSleepReason == WakeSleepReason.FOLD
 
     /**
      * Whenever a keyguard transition starts, sample the latest reveal effect from the repository

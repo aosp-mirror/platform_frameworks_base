@@ -108,6 +108,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
         private final ImageView mIconView;
         private final ImageView mGearIcon;
         private final View mGearView;
+        private final View mDividerView;
 
         DeviceItemViewHolder(@NonNull View itemView, Context context) {
             super(itemView);
@@ -118,6 +119,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
             mIconView = itemView.requireViewById(R.id.bluetooth_device_icon);
             mGearIcon = itemView.requireViewById(R.id.gear_icon_image);
             mGearView = itemView.requireViewById(R.id.gear_icon);
+            mDividerView = itemView.requireViewById(R.id.divider);
         }
 
         public void bindView(DeviceItem item, HearingDeviceItemCallback callback) {
@@ -153,6 +155,7 @@ public class HearingDevicesListAdapter extends RecyclerView.Adapter<RecyclerView
 
             mGearIcon.getDrawable().mutate().setTint(tintColor);
             mGearView.setOnClickListener(view -> callback.onDeviceItemGearClicked(item, view));
+            mDividerView.setBackgroundColor(tintColor);
         }
     }
 }

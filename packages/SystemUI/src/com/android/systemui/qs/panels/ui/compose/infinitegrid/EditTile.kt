@@ -606,6 +606,7 @@ private fun AvailableTileGridCell(
             SmallTileContent(
                 icon = cell.tile.icon,
                 color = colors.icon,
+                animateToEnd = true,
                 modifier = Modifier.align(Alignment.Center),
             )
         }
@@ -652,6 +653,7 @@ fun EditTile(
             SmallTileContent(
                 icon = tileViewModel.icon,
                 color = colors.icon,
+                animateToEnd = true,
                 modifier = Modifier.align(Alignment.Center),
             )
         }

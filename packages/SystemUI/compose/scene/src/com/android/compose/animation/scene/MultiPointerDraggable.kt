@@ -213,8 +213,9 @@ internal class MultiPointerDraggableNode(
 
     internal fun pointersInfo(): PointersInfo {
         return PointersInfo(
+            // This may be null, i.e. when the user uses TalkBack
             startedPosition = startedPosition,
-            // Note: We could have 0 pointers during fling or for other reasons.
+            // We could have 0 pointers during fling or for other reasons.
             pointersDown = pointersDown.coerceAtLeast(1),
         )
     }
@@ -325,13 +326,17 @@ internal class MultiPointerDraggableNode(
                                             velocityTracker.calculateVelocity(maxVelocity)
                                         }
                                         .toFloat(),
-                                onFling = { controller.onStop(it, canChangeContent = true) },
+                                onFling = {
+                                    controller.onStop(it, canChangeContent = true).invoke()
+                                },
                             )
                         },
                         onDragCancel = { controller ->
                             startFlingGesture(
                                 initialVelocity = 0f,
-                                onFling = { controller.onStop(it, canChangeContent = true) },
+                                onFling = {
+                                    controller.onStop(it, canChangeContent = true).invoke()
+                                },
                             )
                         },
                         swipeDetector = swipeDetector,
@@ -353,7 +358,10 @@ internal class MultiPointerDraggableNode(
      *
      * Note: Inspired by [androidx.compose.foundation.gestures.ScrollableNode.onDragStopped]
      */
-    private fun startFlingGesture(initialVelocity: Float, onFling: (velocity: Float) -> Float) {
+    private fun startFlingGesture(
+        initialVelocity: Float,
+        onFling: suspend (velocity: Float) -> Float,
+    ) {
         // Note: [AwaitPointerEventScope] is annotated as @RestrictsSuspension, we need another
         // CoroutineScope to run the fling gestures.
         // We do not need to cancel this [Job], the source will take care of emitting an
@@ -415,7 +423,7 @@ internal class MultiPointerDraggableNode(
      */
     private suspend inline fun dispatchFlingEvents(
         availableOnPreFling: Float,
-        onFling: (velocity: Float) -> Float,
+        onFling: suspend (velocity: Float) -> Float,
     ): Float {
         // PreFling phase
         val consumedByPreFling =

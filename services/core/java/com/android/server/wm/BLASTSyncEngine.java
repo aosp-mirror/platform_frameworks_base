@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import android.annotation.NonNull;

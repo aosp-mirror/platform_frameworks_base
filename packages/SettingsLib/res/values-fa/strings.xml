@@ -239,10 +239,10 @@
     <string name="category_work" msgid="4014193632325996115">"کاری"</string>
     <string name="category_private" msgid="4244892185452788977">"خصوصی"</string>
     <string name="category_clone" msgid="1554511758987195974">"همسانه‌سازی"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های برنامه‌نویسان"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های برنامه‌نویس"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"گزینه‌های توسعه‌دهندگان"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"فعال کردن گزینه‌های توسعه‌دهندگان"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تنظیم گزینه‌های مربوط به طراحی برنامه"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"گزینه‌های برنامه‌نویس برای این کاربر موجود نیست"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"گزینه‌های توسعه‌دهندگان برای این کاربر موجود نیست"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"‏تنظیمات VPN برای این کاربر در دسترس نیست"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"تنظیمات اشتراک‌گذاری اینترنت برای این کاربر در دسترس نیست"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"تنظیمات نام تقطه دسترسی برای این کاربر در دسترس نیست"</string>
@@ -287,8 +287,8 @@
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"اجازه دهید قفل بوت‌لودر باز شود"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"‏بازکردن سازنده تجهیزات اصلی مجاز (OEM) است؟"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"اخطار: قابلیت‌های حفاظتی دستگاه وقتی این تنظیم روشن است در این دستگاه کار نمی‌کند."</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"انتخاب برنامه موقعیت مکانی ساختگی"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"هیچ برنامه موقعیت مکانی ساختگی تنظیم نشده است"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"انتخاب برنامه مکان ساختگی"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"برنامه مکان ساختگی تنظیم نشده است"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
@@ -376,7 +376,7 @@
     <string name="strict_mode_summary" msgid="1838248687233554654">"چشمک زدن صفحه هنگام انجام عملیات طولانی توسط برنامه‌ها در رشته اصلی"</string>
     <string name="pointer_location" msgid="7516929526199520173">"محل اشاره‌گر"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"هم‌پوشانی صفحه‌نمایش با نمایش داده لمسی فعلی"</string>
-    <string name="show_touches" msgid="8437666942161289025">"نمایش ضربه‌ها"</string>
+    <string name="show_touches" msgid="8437666942161289025">"نمایش تک‌ضرب‌ها"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"نمایش بازخورد تصویری برای ضربه‌ها"</string>
     <string name="show_key_presses" msgid="6360141722735900214">"نمایش فشار کلیدها"</string>
     <string name="show_key_presses_summary" msgid="725387457373015024">"نمایش بازخورد بصری برای فشار دادن کلیدهای فیزیکی"</string>

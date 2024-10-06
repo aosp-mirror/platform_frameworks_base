@@ -222,8 +222,6 @@ class ExpandableNotificationRowBuilder(
                     Mockito.mock(NotifRemoteViewCache::class.java, STUB_ONLY),
                     remoteInputManager,
                     conversationProcessor,
-                    Mockito.mock(RichOngoingNotificationContentExtractor::class.java, STUB_ONLY),
-                    Mockito.mock(RichOngoingNotificationViewInflater::class.java, STUB_ONLY),
                     Mockito.mock(Executor::class.java, STUB_ONLY),
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,

@@ -6,4 +6,13 @@
     <item type="id" name="weather_clock_weather_icon" />
     <item type="id" name="weather_clock_temperature" />
     <item type="id" name="weather_clock_alarm_dnd" />
+
+    <item type="id" name="HOUR_DIGIT_PAIR"/>
+    <item type="id" name="MINUTE_DIGIT_PAIR"/>
+    <item type="id" name="HOUR_FIRST_DIGIT"/>
+    <item type="id" name="HOUR_SECOND_DIGIT"/>
+    <item type="id" name="MINUTE_FIRST_DIGIT"/>
+    <item type="id" name="MINUTE_SECOND_DIGIT"/>
+    <item type="id" name="TIME_FULL_FORMAT"/>
+    <item type="id" name="DATE_FORMAT"/>
 </resources>

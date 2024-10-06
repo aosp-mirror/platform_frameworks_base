@@ -483,6 +483,32 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(statusBar.isVisible());
     }
 
+    /**
+     * Verifies that the InsetsSourceProvider frame cannot be updated by WindowState before
+     * relayout is called.
+     */
+    @SetupWindows(addWindows = { W_STATUS_BAR })
+    @Test
+    public void testUpdateSourceFrameBeforeRelayout() {
+        final WindowState statusBar = mStatusBarWindow;
+        statusBar.mHasSurface = true;
+        assertTrue(statusBar.isVisible());
+        final int statusBarId = InsetsSource.createId(null, 0, statusBars());
+        final var statusBarProvider = mDisplayContent.getInsetsStateController()
+                .getOrCreateSourceProvider(statusBarId, statusBars());
+        statusBarProvider.setWindowContainer(statusBar, null /* frameProvider */,
+                        null /* imeFrameProvider */);
+
+        statusBar.updateSourceFrame(new Rect(0, 0, 500, 200));
+        assertTrue("InsetsSourceProvider frame should not be updated before relayout",
+                statusBarProvider.getSourceFrame().isEmpty());
+
+        makeWindowVisible(statusBar);
+        statusBar.updateSourceFrame(new Rect(0, 0, 500, 100));
+        assertEquals("InsetsSourceProvider frame should be updated after relayout",
+                new Rect(0, 0, 500, 100), statusBarProvider.getSourceFrame());
+    }
+
     @Test
     public void testIsSelfOrAncestorWindowAnimating() {
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");

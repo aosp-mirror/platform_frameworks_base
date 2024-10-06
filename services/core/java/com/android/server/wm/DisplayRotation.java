@@ -27,8 +27,8 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.DisplayRotationProto.FIXED_TO_USER_ROTATION_MODE;
 import static com.android.server.wm.DisplayRotationProto.FROZEN_TO_USER_ROTATION;

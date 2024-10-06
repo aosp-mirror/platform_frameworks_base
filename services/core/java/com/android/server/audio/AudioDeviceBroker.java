@@ -384,11 +384,12 @@ public class AudioDeviceBroker {
     /**
      * Indicates if a Bluetooth SCO activation request owner is controlling
      * the SCO audio state itself or not.
-     * @param uid the UI of the SOC request owner app
+     * @param uid the UID of the SOC request owner app
      * @return true if we should control SCO audio state, false otherwise
      */
     private boolean shouldStartScoForUid(int uid) {
-        return !(uid == Process.BLUETOOTH_UID || uid == Process.PHONE_UID);
+        return !(UserHandle.isSameApp(uid, Process.BLUETOOTH_UID)
+                || UserHandle.isSameApp(uid, Process.PHONE_UID));
     }
 
     @GuardedBy("mDeviceStateLock")

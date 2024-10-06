@@ -879,6 +879,14 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     );
                     break;
 
+                case BiometricPrompt.DISMISSED_REASON_ERROR_NO_WM:
+                    mClientReceiver.onError(
+                            getEligibleModalities(),
+                            BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                            0 /* vendorCode */
+                    );
+                    break;
+
                 default:
                     Slog.w(TAG, "Unhandled reason: " + reason);
                     break;

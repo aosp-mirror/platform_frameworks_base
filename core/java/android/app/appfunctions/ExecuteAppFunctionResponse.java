@@ -96,8 +96,14 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
      */
     public static final int RESULT_INVALID_ARGUMENT = 4;
 
-    /** The operation was timed out. */
-    public static final int RESULT_TIMED_OUT = 5;
+    /** The caller tried to execute a disabled app function. */
+    public static final int RESULT_DISABLED = 5;
+
+    /**
+     * The operation was cancelled. Use this error code to report that a cancellation is done after
+     * receiving a cancellation signal.
+     */
+    public static final int RESULT_CANCELLED = 6;
 
     /** The result code of the app function execution. */
     @ResultCode private final int mResultCode;
@@ -273,7 +279,8 @@ public final class ExecuteAppFunctionResponse implements Parcelable {
                 RESULT_APP_UNKNOWN_ERROR,
                 RESULT_INTERNAL_ERROR,
                 RESULT_INVALID_ARGUMENT,
-                RESULT_TIMED_OUT,
+                RESULT_DISABLED,
+                RESULT_CANCELLED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}

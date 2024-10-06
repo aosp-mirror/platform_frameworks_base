@@ -56,6 +56,7 @@ import android.tracing.perfetto.InitArguments;
 import android.tracing.perfetto.Producer;
 import android.tracing.perfetto.TracingContext;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.Slog;
@@ -351,6 +352,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
     }
 
     private void registerGroupsLocally(@NonNull IProtoLogGroup[] protoLogGroups) {
+        // Verify we don't have id collisions, if we do we want to know as soon as possible and
+        // we might want to manually specify an id for the group with a collision
+        verifyNoCollisionsOrDuplicates(protoLogGroups);
+
         final var groupsLoggingToLogcat = new ArrayList<String>();
         for (IProtoLogGroup protoLogGroup : protoLogGroups) {
             mLogGroups.put(protoLogGroup.name(), protoLogGroup);
@@ -366,6 +371,19 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
             // successfully decoded until this completes.
             mBackgroundLoggingService.execute(() -> mViewerConfigReader
                     .loadViewerConfig(groupsLoggingToLogcat.toArray(new String[0])));
+        }
+    }
+
+    private void verifyNoCollisionsOrDuplicates(@NonNull IProtoLogGroup[] protoLogGroups) {
+        final var groupId = new ArraySet<Integer>();
+
+        for (IProtoLogGroup protoLogGroup : protoLogGroups) {
+            if (groupId.contains(protoLogGroup.getId())) {
+                throw new RuntimeException(
+                        "Group with same id (" + protoLogGroup.getId() + ") registered twice. "
+                                + "Potential duplicate or hash id collision.");
+            }
+            groupId.add(protoLogGroup.getId());
         }
     }
 
@@ -399,13 +417,10 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
                 return -1;
             }
             case "enable-text" -> {
-                if (mViewerConfigReader != null) {
-                    mViewerConfigReader.loadViewerConfig(groups, logger);
-                }
-                return setTextLogging(true, logger, groups);
+                return startLoggingToLogcat(groups, logger);
             }
             case "disable-text" -> {
-                return setTextLogging(false, logger, groups);
+                return stopLoggingToLogcat(groups, logger);
             }
             default -> {
                 return unknownCommand(pw);
@@ -896,7 +911,7 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
     }
 
-    private static class Message {
+    protected static class Message {
         @Nullable
         private final Long mMessageHash;
         private final int mMessageMask;
@@ -921,12 +936,17 @@ public class PerfettoProtoLogImpl extends IProtoLogClient.Stub implements IProto
         }
 
         @Nullable
-        private String getMessage() {
+        protected Long getMessageHash() {
+            return mMessageHash;
+        }
+
+        @Nullable
+        protected String getMessage() {
             return mMessageString;
         }
 
         @Nullable
-        private String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
+        protected String getMessage(@NonNull ProtoLogViewerConfigReader viewerConfigReader) {
             if (mMessageString != null) {
                 return mMessageString;
             }

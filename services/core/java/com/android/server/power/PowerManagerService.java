@@ -125,7 +125,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
-import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.EventLogTags;
 import com.android.server.LockGuard;
 import com.android.server.ServiceThread;
@@ -133,6 +132,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -743,6 +743,7 @@ public final class PowerManagerService extends SystemService
                 int reason, int uid, int opUid, String opPackageName, String details) {
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
+            mInjector.invalidateIsInteractiveCaches();
             if (wakefulness == WAKEFULNESS_AWAKE) {
                 // Kick user activity to prevent newly awake group from timing out instantly.
                 // The dream may end without user activity if the dream app crashes / is updated,
@@ -2035,7 +2036,7 @@ public final class PowerManagerService extends SystemService
     }
 
     @SuppressWarnings("deprecation")
-    private boolean isWakeLockLevelSupportedInternal(int level) {
+    private boolean isWakeLockLevelSupportedInternal(int level, int displayId) {
         synchronized (mLock) {
             switch (level) {
                 case PowerManager.PARTIAL_WAKE_LOCK:
@@ -2047,7 +2048,8 @@ public final class PowerManagerService extends SystemService
                     return true;
 
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                    return mSystemReady && mDisplayManagerInternal.isProximitySensorAvailable();
+                    return mSystemReady
+                            && mDisplayManagerInternal.isProximitySensorAvailable(displayId);
                 case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
                     return mSystemReady && mFeatureFlags.isEarlyScreenTimeoutDetectorEnabled()
                             && mScreenTimeoutOverridePolicy != null;
@@ -2264,7 +2266,6 @@ public final class PowerManagerService extends SystemService
             int opUid, String opPackageName, String details) {
         mPowerGroups.get(groupId).setWakefulnessLocked(wakefulness, eventTime, uid, reason, opUid,
                 opPackageName, details);
-        mInjector.invalidateIsInteractiveCaches();
     }
 
     @SuppressWarnings("deprecation")
@@ -2329,8 +2330,6 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, traceMethodName);
         try {
             // Phase 2: Handle wakefulness change and bookkeeping.
-            // Under lock, invalidate before set ensures caches won't return stale values.
-            mInjector.invalidateIsInteractiveCaches();
             mWakefulnessRaw = newWakefulness;
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
@@ -2428,6 +2427,7 @@ public final class PowerManagerService extends SystemService
     void onPowerGroupEventLocked(int event, PowerGroup powerGroup) {
         mWakefulnessChanging = true;
         mDirty |= DIRTY_WAKEFULNESS;
+        mInjector.invalidateIsInteractiveCaches();
         final int groupId = powerGroup.getGroupId();
         if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mPowerGroups.delete(groupId);
@@ -2445,6 +2445,8 @@ public final class PowerManagerService extends SystemService
                     mClock.uptimeMillis());
         } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mNotifier.onGroupRemoved(groupId);
+        } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_CHANGED) {
+            mNotifier.onGroupChanged();
         }
 
         if (oldWakefulness != newWakefulness) {
@@ -3973,6 +3975,9 @@ public final class PowerManagerService extends SystemService
 
     private boolean isInteractiveInternal(int displayId, int uid) {
         synchronized (mLock) {
+            if (!mSystemReady) {
+                return isGloballyInteractiveInternal();
+            }
             DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
             if (displayInfo == null) {
                 Slog.w(TAG, "Did not find DisplayInfo for displayId " + displayId);
@@ -5973,7 +5978,17 @@ public final class PowerManagerService extends SystemService
         public boolean isWakeLockLevelSupported(int level) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return isWakeLockLevelSupportedInternal(level);
+                return isWakeLockLevelSupportedInternal(level, Display.DEFAULT_DISPLAY);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isWakeLockLevelSupportedWithDisplayId(int level, int displayId) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isWakeLockLevelSupportedInternal(level, displayId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

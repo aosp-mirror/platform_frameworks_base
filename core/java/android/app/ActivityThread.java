@@ -1960,8 +1960,12 @@ public final class ActivityThread extends ClientTransactionHandler
 
         @Override
         public void dumpCacheInfo(ParcelFileDescriptor pfd, String[] args) {
-            PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
-            IoUtils.closeQuietly(pfd);
+            try {
+                PropertyInvalidatedCache.dumpCacheInfo(pfd, args);
+                BroadcastStickyCache.dump(pfd);
+            } finally {
+                IoUtils.closeQuietly(pfd);
+            }
         }
 
         private File getDatabasesDir(Context context) {
@@ -6281,7 +6285,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         r.activity.mConfigChangeFlags |= configChanges;
-        r.mPreserveWindow = tmp.mPreserveWindow;
+        r.mPreserveWindow = r.activity.mWindowAdded && tmp.mPreserveWindow;
 
         r.activity.mChangingConfigurations = true;
 

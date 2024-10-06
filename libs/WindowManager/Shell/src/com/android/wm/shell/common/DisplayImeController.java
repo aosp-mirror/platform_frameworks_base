@@ -157,6 +157,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    private void dispatchImeRequested(int displayId, boolean isRequested) {
+        synchronized (mPositionProcessors) {
+            for (ImePositionProcessor pp : mPositionProcessors) {
+                pp.onImeRequested(displayId, isRequested);
+            }
+        }
+    }
+
     @ImePositionProcessor.ImeAnimationFlags
     private int dispatchStartPositioning(int displayId, int hiddenTop, int shownTop,
             boolean show, boolean isFloating, SurfaceControl.Transaction t) {
@@ -398,11 +406,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         public void setImeInputTargetRequestedVisibility(boolean visible) {
             if (android.view.inputmethod.Flags.refactorInsetsController()) {
                 mImeRequestedVisible = visible;
+                dispatchImeRequested(mDisplayId, mImeRequestedVisible);
+
                 // In the case that the IME becomes visible, but we have the control with leash
                 // already (e.g., when focussing an editText in activity B, while and editText in
                 // activity A is focussed), we will not get a call of #insetsControlChanged, and
                 // therefore have to start the show animation from here
                 startAnimation(mImeRequestedVisible /* show */, false /* forceRestart */);
+
+                setVisibleDirectly(mImeRequestedVisible || mAnimation != null);
             }
         }
 
@@ -444,6 +456,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if (imeSource == null || mImeSourceControl == null) {
                 return;
             }
+            // TODO(b/353463205): For hide: this still has the statsToken from the previous show
+            //  request
             final var statsToken = mImeSourceControl.getImeStatsToken();
 
             startAnimation(show, forceRestart, statsToken);
@@ -540,6 +554,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     show ? ANIMATION_DURATION_SHOW_MS : ANIMATION_DURATION_HIDE_MS);
             if (seek) {
                 mAnimation.setCurrentFraction((seekValue - startY) / (endY - startY));
+            } else {
+                // In some cases the value in onAnimationStart is zero, therefore setting it
+                // explicitly to startY
+                mAnimation.setCurrentFraction(0);
             }
 
             mAnimation.addUpdateListener(animation -> {
@@ -621,6 +639,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                                 ImeTracker.PHASE_WM_ANIMATION_RUNNING);
                         t.hide(animatingLeash);
                         removeImeSurface(mDisplayId);
+                        if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                            setVisibleDirectly(false /* visible */);
+                        }
                         ImeTracker.forLogging().onHidden(mStatsToken);
                     } else if (mAnimationDirection == DIRECTION_SHOW && !mCancelled) {
                         ImeTracker.forLogging().onShown(mStatsToken);
@@ -645,13 +666,13 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     animatingControl.release(SurfaceControl::release);
                 }
             });
-            if (!show) {
+            if (!android.view.inputmethod.Flags.refactorInsetsController() && !show) {
                 // When going away, queue up insets change first, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(false /* visible */);
             }
             mAnimation.start();
-            if (show) {
+            if (!android.view.inputmethod.Flags.refactorInsetsController() && show) {
                 // When showing away, queue up insets change last, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(true /* visible */);
@@ -694,6 +715,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 IME_ANIMATION_NO_ALPHA,
         })
         @interface ImeAnimationFlags {
+        }
+
+        /**
+         * Called when the IME was requested by an app
+         *
+         * @param isRequested {@code true} if the IME was requested to be visible
+         */
+        default void onImeRequested(int displayId, boolean isRequested) {
         }
 
         /**

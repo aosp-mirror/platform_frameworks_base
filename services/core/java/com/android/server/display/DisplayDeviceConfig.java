@@ -377,6 +377,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *              </point>
  *            </map>
  *          </luxToBrightnessMapping>
+ *          <idleStylusTimeoutMillis>10000</idleStylusTimeoutMillis>
  *      </autoBrightness>
  *
  *      <screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease>
@@ -708,6 +709,10 @@ public class DisplayDeviceConfig {
 
     private static final int KEEP_CURRENT_BRIGHTNESS = -1;
 
+    // The default value to 0 which will signify that the stylus usage immediately stopped
+    // after it was started. This will make the system behave as if the stylus was never used
+    private static final int DEFAULT_IDLE_STYLUS_TIMEOUT_MILLIS = 0;
+
     private final Context mContext;
 
     // The details of the ambient light sensor associated with this display.
@@ -753,6 +758,9 @@ public class DisplayDeviceConfig {
 
     @Nullable
     private DisplayBrightnessMappingConfig mDisplayBrightnessMapping;
+
+    private int mIdleStylusTimeoutMillis =
+            DEFAULT_IDLE_STYLUS_TIMEOUT_MILLIS;
 
     private float mBacklightMinimum = Float.NaN;
     private float mBacklightMaximum = Float.NaN;
@@ -1730,6 +1738,7 @@ public class DisplayDeviceConfig {
                 + ", mDisplayBrightnessMapping= " + mDisplayBrightnessMapping
                 + ", mDdcAutoBrightnessAvailable= " + mDdcAutoBrightnessAvailable
                 + ", mAutoBrightnessAvailable= " + mAutoBrightnessAvailable
+                + ", mIdleStylusTimeoutMillis= " + mIdleStylusTimeoutMillis
                 + "\n"
                 + "mDefaultLowBlockingZoneRefreshRate= " + mDefaultLowBlockingZoneRefreshRate
                 + ", mDefaultHighBlockingZoneRefreshRate= " + mDefaultHighBlockingZoneRefreshRate
@@ -2389,7 +2398,16 @@ public class DisplayDeviceConfig {
         loadAutoBrightnessDarkeningLightDebounceIdle(autoBrightness);
         mDisplayBrightnessMapping = new DisplayBrightnessMappingConfig(mContext, mFlags,
                 autoBrightness, getBacklightToBrightnessSpline());
+        loadIdleStylusTimeoutMillis(autoBrightness);
         loadEnableAutoBrightness(autoBrightness);
+    }
+
+    /**
+     * Gets the timeout post the stylus usage after which the automatic brightness will be enabled
+     * again
+     */
+    public int getIdleStylusTimeoutMillis() {
+        return mIdleStylusTimeoutMillis;
     }
 
     /**
@@ -2921,6 +2939,16 @@ public class DisplayDeviceConfig {
             levels[i + 1] = (float) lux[i];
         }
         return levels;
+    }
+
+    private void loadIdleStylusTimeoutMillis(AutoBrightness autoBrightness) {
+        if (autoBrightness == null) {
+            return;
+        }
+        BigInteger idleStylusTimeoutMillis = autoBrightness.getIdleStylusTimeoutMillis();
+        if (idleStylusTimeoutMillis != null) {
+            mIdleStylusTimeoutMillis = idleStylusTimeoutMillis.intValue();
+        }
     }
 
     private void loadEnableAutoBrightness(AutoBrightness autobrightness) {

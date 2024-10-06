@@ -551,11 +551,10 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
           return false;
         }
 
-        FeatureFlagAttribute flag;
-        flag.name = pb_config_value.value().item().flag_name();
-        flag.negated = pb_config_value.value().item().flag_negated();
-        ResourceConfigValue* config_value =
-            entry->FindOrCreateFlagDisabledValue(std::move(flag), config, pb_config.product());
+        ResourceConfigValue* config_value = entry->FindOrCreateFlagDisabledValue(
+            FeatureFlagAttribute{.name = pb_config_value.value().item().flag_name(),
+                                 .negated = pb_config_value.value().item().flag_negated()},
+            config, pb_config.product());
         if (config_value->value != nullptr) {
           *out_error = "duplicate configuration in resource table";
           return false;
@@ -563,7 +562,6 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
         config_value->value = DeserializeValueFromPb(pb_config_value.value(), src_pool, config,
                                                      &out_table->string_pool, files, out_error);
-
         if (config_value->value == nullptr) {
           return false;
         }
@@ -896,6 +894,9 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
         LOG(FATAL) << "unknown compound value: " << (int)pb_compound_value.value_case();
         break;
     }
+    value->SetFlagStatus((FlagStatus)pb_compound_value.flag_status());
+    value->SetFlag(FeatureFlagAttribute{.name = pb_compound_value.flag_name(),
+                                        .negated = pb_compound_value.flag_negated()});
   } else {
     LOG(FATAL) << "unknown value: " << (int)pb_value.value_case();
     return {};
@@ -1052,10 +1053,8 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
   if (item) {
     item->SetFlagStatus((FlagStatus)pb_item.flag_status());
     if (!pb_item.flag_name().empty()) {
-      FeatureFlagAttribute flag;
-      flag.name = pb_item.flag_name();
-      flag.negated = pb_item.flag_negated();
-      item->SetFlag(std::move(flag));
+      item->SetFlag(
+          FeatureFlagAttribute{.name = pb_item.flag_name(), .negated = pb_item.flag_negated()});
     }
   }
   return item;

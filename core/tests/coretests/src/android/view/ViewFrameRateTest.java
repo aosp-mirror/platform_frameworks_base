@@ -22,6 +22,7 @@ import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_ANIMATION_BUGFIX_25Q1;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VELOCITY_MAPPING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_FRAME_RATE_VIEW_ENABLING_READ_ONLY;
 import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
@@ -46,6 +47,8 @@ import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.sysprop.ViewProperties;
 import android.util.DisplayMetrics;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
@@ -1021,6 +1024,30 @@ public class ViewFrameRateTest {
             assertEquals(host.getFrameContentVelocity(),
                     ((View) childView.getParent()).getFrameContentVelocity());
         });
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_FRAME_RATE_ANIMATION_BUGFIX_25Q1)
+    public void boostWhenApplyLegacyAnimation() throws Throwable {
+        if (!ViewProperties.vrr_enabled().orElse(true)) {
+            return;
+        }
+        waitForFrameRateCategoryToSettle();
+        mActivityRule.runOnUiThread(() -> {
+            TranslateAnimation translateAnimation = new TranslateAnimation(
+                    Animation.RELATIVE_TO_PARENT, 0f, // fromXDelta
+                    Animation.RELATIVE_TO_PARENT, 0f, // toXDelta
+                    Animation.RELATIVE_TO_PARENT, 1f, // fromYDelta (100%p)
+                    Animation.RELATIVE_TO_PARENT, 0f  // toYDelta
+            );
+            translateAnimation.setDuration(600);
+
+            mMovingView.startAnimation(translateAnimation);
+
+            runAfterDraw(() -> assertEquals(FRAME_RATE_CATEGORY_HIGH_HINT,
+                    mViewRoot.getLastPreferredFrameRateCategory()));
+        });
+        waitForAfterDraw();
     }
 
     private void runAfterDraw(@NonNull Runnable runnable) {

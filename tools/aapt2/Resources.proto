@@ -302,6 +302,11 @@ message CompoundValue {
     Plural plural = 5;
     MacroBody macro = 6;
   }
+
+  // The status of the flag the value is behind if any
+  uint32 flag_status = 7;
+  bool flag_negated = 8;
+  string flag_name = 9;
 }
 
 // Message holding a boolean, so it can be optionally encoded.

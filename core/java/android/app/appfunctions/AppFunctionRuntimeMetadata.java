@@ -16,11 +16,15 @@
 
 package android.app.appfunctions;
 
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DEFAULT;
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_DISABLED;
+import static android.app.appfunctions.AppFunctionManager.APP_FUNCTION_STATE_ENABLED;
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.appfunctions.AppFunctionManager.EnabledState;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 
@@ -162,15 +166,13 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
      * Returns if the function is set to be enabled or not. If not set, the {@link
      * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT} value would be used.
      */
-    @Nullable
-    public Boolean getEnabled() {
-        // We can't use getPropertyBoolean here. getPropertyBoolean returns false instead of null
-        // if the value is missing.
-        boolean[] enabled = getPropertyBooleanArray(PROPERTY_ENABLED);
-        if (enabled == null || enabled.length == 0) {
-            return null;
-        }
-        return enabled[0];
+    @EnabledState
+    public int getEnabled() {
+        // getPropertyLong returns the first long associated with the given path or default value 0
+        // if there is no such value or the value is of a different type.
+        // APP_FUNCTION_STATE_DEFAULT also equals 0 which means the returned value will be 0 when an
+        // app as either never changed the enabled bit at runtime or has reset it to the default.
+        return (int) getPropertyLong(PROPERTY_ENABLED);
     }
 
     /** Returns the qualified id linking to the static metadata of the app function. */
@@ -204,19 +206,27 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
                             packageName, functionId));
         }
 
+        public Builder(AppFunctionRuntimeMetadata original) {
+            this(original.getPackageName(), original.getFunctionId());
+            setEnabled(original.getEnabled());
+        }
+
         /**
          * Sets an indicator specifying if the function is enabled or not. This would override the
          * default enabled state in the static metadata ({@link
-         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to
-         * null to clear the override.
+         * AppFunctionStaticMetadataHelper#STATIC_PROPERTY_ENABLED_BY_DEFAULT}). Sets this to null
+         * to clear the override.
+         * TODO(369683073) Replace the tristate Boolean with IntDef EnabledState.
          */
         @NonNull
-        public Builder setEnabled(@Nullable Boolean enabled) {
-            if (enabled == null) {
-                setPropertyBoolean(PROPERTY_ENABLED);
-            } else {
-                setPropertyBoolean(PROPERTY_ENABLED, enabled);
+        public Builder setEnabled(@EnabledState int enabledState) {
+            if (enabledState != APP_FUNCTION_STATE_DEFAULT
+                    && enabledState != APP_FUNCTION_STATE_ENABLED
+                    && enabledState != APP_FUNCTION_STATE_DISABLED) {
+                throw new IllegalArgumentException(
+                        "Value of EnabledState is unsupported.");
             }
+            setPropertyLong(PROPERTY_ENABLED, enabledState);
             return this;
         }
 

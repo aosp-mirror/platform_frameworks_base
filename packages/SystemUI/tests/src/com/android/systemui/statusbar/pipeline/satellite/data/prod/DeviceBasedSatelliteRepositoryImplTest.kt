@@ -621,7 +621,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             val signalStrength by collectLastValue(underTest.signalStrength)
 
             // THEN we have not yet talked to satellite manager, since we are well before MIN_UPTIME
-            Mockito.verifyZeroInteractions(satelliteManager)
+            Mockito.verifyNoMoreInteractions(satelliteManager)
 
             // WHEN enough time has passed
             systemClock.advanceTime(MIN_UPTIME)

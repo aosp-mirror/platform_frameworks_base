@@ -18,8 +18,9 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -35,13 +36,14 @@ class PriorityNestedScrollConnectionTest {
     private var canStartPostFling = false
     private var canContinueScroll = false
     private var isStarted = false
-    private var lastScroll: Offset? = null
-    private var returnOnScroll = Offset.Zero
-    private var lastStop: Velocity? = null
-    private var returnOnStop = Velocity.Zero
+    private var lastScroll: Float? = null
+    private var returnOnScroll = 0f
+    private var lastStop: Float? = null
+    private var returnOnStop = 0f
 
     private val scrollConnection =
         PriorityNestedScrollConnection(
+            orientation = Orientation.Vertical,
             canStartPreScroll = { _, _ -> canStartPreScroll },
             canStartPostScroll = { _, _ -> canStartPostScroll },
             canStartPostFling = { canStartPostFling },
@@ -54,14 +56,9 @@ class PriorityNestedScrollConnectionTest {
             },
             onStop = {
                 lastStop = it
-                returnOnStop
+                { returnOnStop }
             },
         )
-
-    private val offset1 = Offset(1f, 1f)
-    private val offset2 = Offset(2f, 2f)
-    private val velocity1 = Velocity(1f, 1f)
-    private val velocity2 = Velocity(2f, 2f)
 
     @Test
     fun step1_priorityModeShouldStartOnlyOnPreScroll() = runTest {
@@ -70,7 +67,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag,
+            source = UserInput,
         )
         assertThat(isStarted).isEqualTo(false)
 
@@ -80,7 +77,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostFling(consumed = Velocity.Zero, available = Velocity.Zero)
         assertThat(isStarted).isEqualTo(false)
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
         assertThat(isStarted).isEqualTo(true)
     }
 
@@ -89,7 +86,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag,
+            source = UserInput,
         )
     }
 
@@ -97,7 +94,7 @@ class PriorityNestedScrollConnectionTest {
     fun step1_priorityModeShouldStartOnlyOnPostScroll() = runTest {
         canStartPostScroll = true
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
         assertThat(isStarted).isEqualTo(false)
 
         scrollConnection.onPreFling(available = Velocity.Zero)
@@ -115,7 +112,7 @@ class PriorityNestedScrollConnectionTest {
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag,
+            source = UserInput,
         )
         assertThat(isStarted).isEqualTo(false)
 
@@ -128,12 +125,12 @@ class PriorityNestedScrollConnectionTest {
         canStartPostScroll = true
 
         scrollConnection.onPostScroll(
-            consumed = offset1,
-            available = offset2,
-            source = NestedScrollSource.Drag,
+            consumed = Offset(1f, 1f),
+            available = Offset(2f, 2f),
+            source = UserInput,
         )
 
-        assertThat(lastScroll).isEqualTo(offset2)
+        assertThat(lastScroll).isEqualTo(2f)
     }
 
     @Test
@@ -141,13 +138,13 @@ class PriorityNestedScrollConnectionTest {
         startPriorityModePostScroll()
         canContinueScroll = true
 
-        scrollConnection.onPreScroll(available = offset1, source = NestedScrollSource.Drag)
-        assertThat(lastScroll).isEqualTo(offset1)
+        scrollConnection.onPreScroll(available = Offset(1f, 1f), source = UserInput)
+        assertThat(lastScroll).isEqualTo(1f)
 
         canContinueScroll = false
-        scrollConnection.onPreScroll(available = offset2, source = NestedScrollSource.Drag)
-        assertThat(lastScroll).isNotEqualTo(offset2)
-        assertThat(lastScroll).isEqualTo(offset1)
+        scrollConnection.onPreScroll(available = Offset(2f, 2f), source = UserInput)
+        assertThat(lastScroll).isNotEqualTo(2f)
+        assertThat(lastScroll).isEqualTo(1f)
     }
 
     @Test
@@ -155,7 +152,7 @@ class PriorityNestedScrollConnectionTest {
         startPriorityModePostScroll()
         canContinueScroll = false
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
 
         assertThat(lastStop).isNotNull()
     }
@@ -184,22 +181,22 @@ class PriorityNestedScrollConnectionTest {
     fun receive_onPostFling() = runTest {
         canStartPostFling = true
 
-        scrollConnection.onPostFling(consumed = velocity1, available = velocity2)
+        scrollConnection.onPostFling(consumed = Velocity(1f, 1f), available = Velocity(2f, 2f))
 
-        assertThat(lastStop).isEqualTo(velocity2)
+        assertThat(lastStop).isEqualTo(2f)
     }
 
     @Test
     fun step1_priorityModeShouldStartOnlyOnPostFling() = runTest {
         canStartPostFling = true
 
-        scrollConnection.onPreScroll(available = Offset.Zero, source = NestedScrollSource.Drag)
+        scrollConnection.onPreScroll(available = Offset.Zero, source = UserInput)
         assertThat(isStarted).isEqualTo(false)
 
         scrollConnection.onPostScroll(
             consumed = Offset.Zero,
             available = Offset.Zero,
-            source = NestedScrollSource.Drag,
+            source = UserInput,
         )
         assertThat(isStarted).isEqualTo(false)
 

@@ -52,9 +52,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
@@ -62,12 +61,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
@@ -180,6 +181,7 @@ constructor(
         qqsMediaHost.init(MediaHierarchyManager.LOCATION_QQS)
         qsMediaHost.init(MediaHierarchyManager.LOCATION_QS)
         setListenerCollections()
+        lifecycleScope.launch { viewModel.activate() }
     }
 
     override fun onCreateView(
@@ -190,58 +192,22 @@ constructor(
         val context = inflater.context
         val composeView =
             ComposeView(context).apply {
-                setBackPressedDispatcher()
-                setContent {
-                    PlatformTheme {
-                        val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
-
-                        AnimatedVisibility(
-                            visible = visible,
-                            modifier =
-                                Modifier.windowInsetsPadding(WindowInsets.navigationBars)
-                                    .thenIf(notificationScrimClippingParams.isEnabled) {
-                                        Modifier.notificationScrimClip(
-                                            notificationScrimClippingParams.leftInset,
-                                            notificationScrimClippingParams.top,
-                                            notificationScrimClippingParams.rightInset,
-                                            notificationScrimClippingParams.bottom,
-                                            notificationScrimClippingParams.radius,
+                repeatWhenAttached {
+                    repeatOnLifecycle(Lifecycle.State.CREATED) {
+                        setViewTreeOnBackPressedDispatcherOwner(
+                            object : OnBackPressedDispatcherOwner {
+                                override val onBackPressedDispatcher =
+                                    OnBackPressedDispatcher().apply {
+                                        setOnBackInvokedDispatcher(
+                                            it.viewRootImpl.onBackInvokedDispatcher
                                         )
                                     }
-                                    .graphicsLayer { elevation = 4.dp.toPx() },
-                        ) {
-                            val isEditing by
-                                viewModel.containerViewModel.editModeViewModel.isEditing
-                                    .collectAsStateWithLifecycle()
-                            val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                            AnimatedContent(
-                                targetState = isEditing,
-                                transitionSpec = {
-                                    fadeIn(animationSpecEditMode) togetherWith
-                                        fadeOut(animationSpecEditMode)
-                                },
-                                label = "EditModeAnimatedContent",
-                            ) { editing ->
-                                if (editing) {
-                                    val qqsPadding by
-                                        viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
-                                    EditMode(
-                                        viewModel = viewModel.containerViewModel.editModeViewModel,
-                                        modifier =
-                                            Modifier.fillMaxWidth()
-                                                .padding(top = { qqsPadding })
-                                                .padding(
-                                                    horizontal = {
-                                                        QuickSettingsShade.Dimensions.Padding
-                                                            .roundToPx()
-                                                    }
-                                                ),
-                                    )
-                                } else {
-                                    CollapsableQuickSettingsSTL()
-                                }
+
+                                override val lifecycle: Lifecycle =
+                                    this@repeatWhenAttached.lifecycle
                             }
-                        }
+                        )
+                        setContent { this@QSFragmentCompose.Content() }
                     }
                 }
             }
@@ -260,6 +226,58 @@ constructor(
         return frame
     }
 
+    @Composable
+    private fun Content() {
+        PlatformTheme {
+            val visible by viewModel.qsVisible.collectAsStateWithLifecycle()
+
+            AnimatedVisibility(
+                visible = visible,
+                modifier =
+                    Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
+                        notificationScrimClippingParams.isEnabled
+                    ) {
+                        Modifier.notificationScrimClip(
+                            notificationScrimClippingParams.leftInset,
+                            notificationScrimClippingParams.top,
+                            notificationScrimClippingParams.rightInset,
+                            notificationScrimClippingParams.bottom,
+                            notificationScrimClippingParams.radius,
+                        )
+                    },
+            ) {
+                val isEditing by
+                    viewModel.containerViewModel.editModeViewModel.isEditing
+                        .collectAsStateWithLifecycle()
+                val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                AnimatedContent(
+                    targetState = isEditing,
+                    transitionSpec = {
+                        fadeIn(animationSpecEditMode) togetherWith fadeOut(animationSpecEditMode)
+                    },
+                    label = "EditModeAnimatedContent",
+                ) { editing ->
+                    if (editing) {
+                        val qqsPadding by viewModel.qqsHeaderHeight.collectAsStateWithLifecycle()
+                        EditMode(
+                            viewModel = viewModel.containerViewModel.editModeViewModel,
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .padding(top = { qqsPadding })
+                                    .padding(
+                                        horizontal = {
+                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
+                                        }
+                                    ),
+                        )
+                    } else {
+                        CollapsableQuickSettingsSTL()
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * STL that contains both QQS (tiles) and QS (brightness, tiles, footer actions), but no Edit
      * mode. It tracks [QSFragmentComposeViewModel.expansionState] to drive the transition between
@@ -273,7 +291,7 @@ constructor(
                 transitions =
                     transitions {
                         from(QuickQuickSettings, QuickSettings) {
-                            quickQuickSettingsToQuickSettings()
+                            quickQuickSettingsToQuickSettings(viewModel::inFirstPage::get)
                         }
                     },
             )
@@ -331,7 +349,7 @@ constructor(
     }
 
     override fun setOverscrolling(overscrolling: Boolean) {
-        viewModel.stackScrollerOverscrollingValue = overscrolling
+        viewModel.isStackScrollerOverscrolling = overscrolling
     }
 
     override fun setExpanded(qsExpanded: Boolean) {
@@ -410,11 +428,11 @@ constructor(
         qsTransitionFraction: Float,
         qsSquishinessFraction: Float,
     ) {
-        super.setTransitionToFullShadeProgress(
-            isTransitioningToFullShade,
-            qsTransitionFraction,
-            qsSquishinessFraction,
-        )
+        viewModel.isTransitioningToFullShade = isTransitioningToFullShade
+        viewModel.lockscreenToShadeProgressValue = qsTransitionFraction
+        if (isTransitioningToFullShade) {
+            viewModel.squishinessFractionValue = qsSquishinessFraction
+        }
     }
 
     override fun setFancyClipping(
@@ -518,6 +536,10 @@ constructor(
 
             onDispose { qqsVisible.value = false }
         }
+        val squishiness by
+            viewModel.containerViewModel.quickQuickSettingsViewModel.squishinessViewModel
+                .squishiness
+                .collectAsStateWithLifecycle()
         Column(modifier = Modifier.sysuiResTag("quick_qs_panel")) {
             Box(
                 modifier =
@@ -531,7 +553,16 @@ constructor(
                                 topFromRoot + coordinates.size.height,
                             )
                         }
-                        .onSizeChanged { size -> qqsHeight.value = size.height }
+                        // Use an approach layout to determien the height without squishiness, as
+                        // that's the value that NPVC and QuickSettingsController care about
+                        // (measured height).
+                        .approachLayout(isMeasurementApproachInProgress = { squishiness < 1f }) {
+                            measurable,
+                            constraints ->
+                            qqsHeight.value = lookaheadSize.height
+                            val placeable = measurable.measure(constraints)
+                            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                        }
                         .padding(top = { qqsPadding }, bottom = { bottomPadding.roundToPx() })
             ) {
                 val qsEnabled by viewModel.qsEnabled.collectAsStateWithLifecycle()
@@ -648,23 +679,6 @@ constructor(
     }
 }
 
-private fun View.setBackPressedDispatcher() {
-    repeatWhenAttached {
-        repeatOnLifecycle(Lifecycle.State.CREATED) {
-            setViewTreeOnBackPressedDispatcherOwner(
-                object : OnBackPressedDispatcherOwner {
-                    override val onBackPressedDispatcher =
-                        OnBackPressedDispatcher().apply {
-                            setOnBackInvokedDispatcher(it.viewRootImpl.onBackInvokedDispatcher)
-                        }
-
-                    override val lifecycle: Lifecycle = this@repeatWhenAttached.lifecycle
-                }
-            )
-        }
-    }
-}
-
 private suspend inline fun <Listener : Any, Data> setListenerJob(
     listenerFlow: MutableStateFlow<Listener?>,
     dataFlow: Flow<Data>,
@@ -706,6 +720,14 @@ object SceneKeys {
             else -> QuickSettings
         }
     }
+
+    val QqsTileElementMatcher =
+        object : ElementMatcher {
+            override fun matches(key: ElementKey, content: ContentKey): Boolean {
+                return content == SceneKeys.QuickQuickSettings &&
+                    ElementKeys.TileElementMatcher.matches(key, content)
+            }
+        }
 }
 
 suspend fun synchronizeQsState(state: MutableSceneTransitionLayoutState, expansion: Flow<Float>) {

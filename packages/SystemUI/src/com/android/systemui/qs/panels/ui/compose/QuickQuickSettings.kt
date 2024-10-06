@@ -41,6 +41,7 @@ fun SceneScope.QuickQuickSettings(
     val sizedTiles by
         viewModel.tileViewModels.collectAsStateWithLifecycle(initialValue = emptyList())
     val tiles = sizedTiles.fastMap { it.tile }
+    val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
 
     DisposableEffect(tiles) {
         val token = Any()
@@ -62,6 +63,7 @@ fun SceneScope.QuickQuickSettings(
                 tile = it.tile,
                 iconOnly = it.isIcon,
                 modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                squishiness = { squishiness },
             )
         }
     }

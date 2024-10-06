@@ -1090,7 +1090,7 @@ public class ParsingPackageUtils {
             case TAG_PERMISSION_GROUP:
                 return parsePermissionGroup(input, pkg, res, parser);
             case TAG_PERMISSION:
-                return parsePermission(input, pkg, res, parser);
+                return parsePermission(input, pkg, res, parser, flags);
             case TAG_PERMISSION_TREE:
                 return parsePermissionTree(input, pkg, res, parser);
             case TAG_USES_PERMISSION:
@@ -1329,10 +1329,10 @@ public class ParsingPackageUtils {
     }
 
     private static ParseResult<ParsingPackage> parsePermission(ParseInput input,
-            ParsingPackage pkg, Resources res, XmlResourceParser parser)
+            ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
             throws XmlPullParserException, IOException {
         ParseResult<ParsedPermission> result = ParsedPermissionUtils.parsePermission(
-                pkg, res, parser, sUseRoundIcon, input);
+                pkg, res, parser, sUseRoundIcon, input, flags);
         if (result.isError()) {
             return input.error(result);
         }

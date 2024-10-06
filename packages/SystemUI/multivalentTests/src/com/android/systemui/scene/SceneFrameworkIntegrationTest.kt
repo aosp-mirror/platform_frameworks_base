@@ -50,9 +50,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
-import com.android.systemui.scene.domain.resolver.homeSceneFamilyResolver
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.fakeSceneDataSource
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
@@ -185,7 +183,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     fun swipeUpOnShadeScene_withAuthMethodSwipe_lockscreenNotDismissed_goesToLockscreen() =
         testScope.runTest {
             val actions by collectLastValue(kosmos.shadeUserActionsViewModel.actions)
-            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
             kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
             kosmos.assertCurrentScene(Scenes.Lockscreen)
 
@@ -195,9 +192,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
-            assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
-            assertThat(homeScene).isEqualTo(Scenes.Lockscreen)
-            kosmos.emulateUserDrivenTransition(to = homeScene)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Lockscreen)
+            kosmos.emulateUserDrivenTransition(to = Scenes.Lockscreen)
         }
 
     @Test
@@ -205,7 +201,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val actions by collectLastValue(kosmos.shadeUserActionsViewModel.actions)
             val canSwipeToEnter by collectLastValue(kosmos.deviceEntryInteractor.canSwipeToEnter)
-            val homeScene by collectLastValue(kosmos.homeSceneFamilyResolver.resolvedScene)
 
             kosmos.setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
 
@@ -222,9 +217,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
             val upDestinationSceneKey =
                 (actions?.get(Swipe.Up) as? UserActionResult.ChangeScene)?.toScene
-            assertThat(upDestinationSceneKey).isEqualTo(SceneFamilies.Home)
-            assertThat(homeScene).isEqualTo(Scenes.Gone)
-            kosmos.emulateUserDrivenTransition(to = homeScene)
+            assertThat(upDestinationSceneKey).isEqualTo(Scenes.Gone)
+            kosmos.emulateUserDrivenTransition(to = Scenes.Gone)
         }
 
     @Test

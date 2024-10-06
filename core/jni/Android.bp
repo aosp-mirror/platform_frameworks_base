@@ -73,6 +73,12 @@ cc_library_shared_for_libandroid_runtime {
 
     srcs: [
         "android_animation_PropertyValuesHolder.cpp",
+        "android_database_CursorWindow.cpp",
+        "android_database_SQLiteCommon.cpp",
+        "android_database_SQLiteConnection.cpp",
+        "android_database_SQLiteGlobal.cpp",
+        "android_database_SQLiteDebug.cpp",
+        "android_database_SQLiteRawStatement.cpp",
         "android_os_SystemClock.cpp",
         "android_os_SystemProperties.cpp",
         "android_os_Trace.cpp",
@@ -157,12 +163,6 @@ cc_library_shared_for_libandroid_runtime {
                 "android_opengl_GLES31.cpp",
                 "android_opengl_GLES31Ext.cpp",
                 "android_opengl_GLES32.cpp",
-                "android_database_CursorWindow.cpp",
-                "android_database_SQLiteCommon.cpp",
-                "android_database_SQLiteConnection.cpp",
-                "android_database_SQLiteGlobal.cpp",
-                "android_database_SQLiteDebug.cpp",
-                "android_database_SQLiteRawStatement.cpp",
                 "android_graphics_GraphicBuffer.cpp",
                 "android_graphics_SurfaceTexture.cpp",
                 "android_view_CompositionSamplingListener.cpp",
@@ -427,6 +427,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libnativehelper_jvm",
                 "libpiex",
                 "libpng",
+                "libsqlite",
                 "libtiff_directory",
                 "libui-types",
                 "libutils",
@@ -442,12 +443,6 @@ cc_library_shared_for_libandroid_runtime {
         host_linux: {
             srcs: [
                 "android_content_res_ApkAssets.cpp",
-                "android_database_CursorWindow.cpp",
-                "android_database_SQLiteCommon.cpp",
-                "android_database_SQLiteConnection.cpp",
-                "android_database_SQLiteGlobal.cpp",
-                "android_database_SQLiteDebug.cpp",
-                "android_database_SQLiteRawStatement.cpp",
                 "android_hardware_input_InputApplicationHandle.cpp",
                 "android_os_MessageQueue.cpp",
                 "android_os_Parcel.cpp",
@@ -463,7 +458,6 @@ cc_library_shared_for_libandroid_runtime {
             ],
             static_libs: [
                 "libbinderthreadstateutils",
-                "libsqlite",
                 "libgui_window_info_static",
             ],
             shared_libs: [

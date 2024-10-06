@@ -41,6 +41,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     int mTheme = Theme.LIGHT;
     boolean mInActionDown = false;
     boolean mDebug = false;
+    boolean mHasClickAreas = false;
     Point mActionDownPoint = new Point(0, 0);
     AndroidRemoteContext mARContext = new AndroidRemoteContext();
 
@@ -85,6 +86,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mDocument = value;
         mDocument.initializeContext(mARContext);
         setContentDescription(mDocument.getDocument().getContentDescription());
+        updateClickAreas();
         requestLayout();
         invalidate();
     }
@@ -94,23 +96,33 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
-        Set<CoreDocument.ClickAreaRepresentation> clickAreas = mDocument
-                .getDocument().getClickAreas();
-        removeAllViews();
-        for (CoreDocument.ClickAreaRepresentation area : clickAreas) {
-            ClickAreaView viewArea = new ClickAreaView(getContext(), mDebug,
-                    area.getId(), area.getContentDescription(),
-                    area.getMetadata());
-            int w = (int) area.width();
-            int h = (int) area.height();
-            FrameLayout.LayoutParams param = new FrameLayout.LayoutParams(w, h);
-            param.width = w;
-            param.height = h;
-            param.leftMargin = (int) area.getLeft();
-            param.topMargin = (int) area.getTop();
-            viewArea.setOnClickListener(view1
-                    -> mDocument.getDocument().performClick(area.getId()));
-            addView(viewArea, param);
+        updateClickAreas();
+    }
+
+    private void updateClickAreas() {
+        if (USE_VIEW_AREA_CLICK && mDocument != null) {
+            mHasClickAreas = false;
+            Set<CoreDocument.ClickAreaRepresentation> clickAreas = mDocument
+                    .getDocument().getClickAreas();
+            removeAllViews();
+            for (CoreDocument.ClickAreaRepresentation area : clickAreas) {
+                ClickAreaView viewArea = new ClickAreaView(getContext(), mDebug,
+                        area.getId(), area.getContentDescription(),
+                        area.getMetadata());
+                int w = (int) area.width();
+                int h = (int) area.height();
+                FrameLayout.LayoutParams param = new FrameLayout.LayoutParams(w, h);
+                param.width = w;
+                param.height = h;
+                param.leftMargin = (int) area.getLeft();
+                param.topMargin = (int) area.getTop();
+                viewArea.setOnClickListener(view1
+                        -> mDocument.getDocument().performClick(area.getId()));
+                addView(viewArea, param);
+            }
+            if (!clickAreas.isEmpty()) {
+                mHasClickAreas = true;
+            }
         }
     }
 
@@ -133,6 +145,38 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         mARContext.setNamedColorOverride(colorName, colorValue);
     }
 
+    public RemoteComposeDocument getDocument() {
+        return mDocument;
+    }
+
+    public void setLocalString(String name, String content) {
+        mARContext.setNamedStringOverride(name, content);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
+    public void clearLocalString(String name) {
+        mARContext.clearNamedStringOverride(name);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
+    public void setLocalInt(String name, int content) {
+        mARContext.setNamedIntegerOverride(name, content);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
+    public void clearLocalInt(String name) {
+        mARContext.clearNamedIntegerOverride(name);
+        if (mDocument != null) {
+            mDocument.invalidate();
+        }
+    }
+
     public interface ClickCallbacks {
         void click(int id, String metadata);
     }
@@ -153,7 +197,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (USE_VIEW_AREA_CLICK) {
+        if (USE_VIEW_AREA_CLICK && mHasClickAreas) {
             return super.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
@@ -180,11 +224,13 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     @Override
     public boolean performClick() {
-        if (USE_VIEW_AREA_CLICK) {
+        if (USE_VIEW_AREA_CLICK && mHasClickAreas) {
             return super.performClick();
         }
-        mDocument.getDocument().onClick((float) mActionDownPoint.x, (float) mActionDownPoint.y);
+        mDocument.getDocument().onClick(mARContext,
+                 (float) mActionDownPoint.x, (float) mActionDownPoint.y);
         super.performClick();
+        invalidate();
         return true;
     }
 
@@ -213,9 +259,10 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
         if (mDocument == null) {
             return;
         }
+        int preWidth = getWidth();
+        int preHeight = getHeight();
         int w = measureDimension(widthMeasureSpec, mDocument.getWidth());
         int h = measureDimension(heightMeasureSpec, mDocument.getHeight());
-        mDocument.getDocument().invalidateMeasure();
 
         if (!USE_VIEW_AREA_CLICK) {
             if (mDocument.getDocument().getContentSizing() == RootContentBehavior.SIZING_SCALE) {
@@ -225,6 +272,9 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             }
         }
         setMeasuredDimension(w, h);
+        if (preWidth != w || preHeight != h) {
+            mDocument.getDocument().invalidateMeasure();
+        }
     }
 
     private int mCount;

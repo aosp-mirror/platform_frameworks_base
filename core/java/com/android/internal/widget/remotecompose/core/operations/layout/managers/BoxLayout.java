@@ -22,7 +22,6 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
@@ -42,7 +41,6 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
     public static final int TOP = 4;
     public static final int BOTTOM = 5;
 
-    public static final BoxLayout.Companion COMPANION = new BoxLayout.Companion();
 
     int mHorizontalPositioning;
     int mVerticalPositioning;
@@ -127,63 +125,63 @@ public class BoxLayout extends LayoutManager implements ComponentStartOperation 
             }
             m.setX(tx);
             m.setY(ty);
-            m.setVisibility(child.mVisibility);
         }
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        @Override
-        public String name() {
-            return "BoxLayout";
-        }
+    public static String name() {
+        return "BoxLayout";
+    }
 
-        @Override
-        public int id() {
-            return Operations.LAYOUT_BOX;
-        }
+    public static int id() {
+        return Operations.LAYOUT_BOX;
+    }
 
-        public void apply(WireBuffer buffer, int componentId, int animationId,
-                          int horizontalPositioning, int verticalPositioning) {
-            buffer.start(Operations.LAYOUT_BOX);
-            buffer.writeInt(componentId);
-            buffer.writeInt(animationId);
-            buffer.writeInt(horizontalPositioning);
-            buffer.writeInt(verticalPositioning);
-        }
+    public static void apply(WireBuffer buffer, int componentId, int animationId,
+                             int horizontalPositioning, int verticalPositioning) {
+        buffer.start(Operations.LAYOUT_BOX);
+        buffer.writeInt(componentId);
+        buffer.writeInt(animationId);
+        buffer.writeInt(horizontalPositioning);
+        buffer.writeInt(verticalPositioning);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int componentId = buffer.readInt();
-            int animationId = buffer.readInt();
-            int horizontalPositioning = buffer.readInt();
-            int verticalPositioning = buffer.readInt();
-            operations.add(new BoxLayout(null, componentId, animationId,
-                    horizontalPositioning, verticalPositioning));
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int componentId = buffer.readInt();
+        int animationId = buffer.readInt();
+        int horizontalPositioning = buffer.readInt();
+        int verticalPositioning = buffer.readInt();
+        operations.add(new BoxLayout(null, componentId, animationId,
+                horizontalPositioning, verticalPositioning));
+    }
 
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Layout Operations", id(), name())
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
                 .description("Box layout implementation.\n\n"
-                      + "Child components are laid out independently from one another,\n"
-                      + " and painted in their hierarchy order (first children drawn"
-                      + "before the latter). Horizontal and Vertical positioning"
-                      + "are supported.")
+                        + "Child components are laid out independently from one another,\n"
+                        + " and painted in their hierarchy order (first children drawn"
+                        + "before the latter). Horizontal and Vertical positioning"
+                        + "are supported.")
                 .examplesDimension(150, 100)
                 .exampleImage("Top", "layout-BoxLayout-start-top.png")
                 .exampleImage("Center", "layout-BoxLayout-center-center.png")
                 .exampleImage("Bottom", "layout-BoxLayout-end-bottom.png")
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .field(INT, "ANIMATION_ID", "id used to match components,"
-                      + " for animation purposes")
+                        + " for animation purposes")
                 .field(INT, "HORIZONTAL_POSITIONING", "horizontal positioning value")
-                    .possibleValues("START", BoxLayout.START)
-                    .possibleValues("CENTER", BoxLayout.CENTER)
-                    .possibleValues("END", BoxLayout.END)
+                .possibleValues("START", BoxLayout.START)
+                .possibleValues("CENTER", BoxLayout.CENTER)
+                .possibleValues("END", BoxLayout.END)
                 .field(INT, "VERTICAL_POSITIONING", "vertical positioning value")
-                    .possibleValues("TOP", BoxLayout.TOP)
-                    .possibleValues("CENTER", BoxLayout.CENTER)
-                    .possibleValues("BOTTOM", BoxLayout.BOTTOM);
-        }
+                .possibleValues("TOP", BoxLayout.TOP)
+                .possibleValues("CENTER", BoxLayout.CENTER)
+                .possibleValues("BOTTOM", BoxLayout.BOTTOM);
+    }
+
+
+    @Override
+    public void write(WireBuffer buffer) {
+        apply(buffer, mComponentId, mAnimationId,
+                mHorizontalPositioning, mVerticalPositioning);
     }
 }

@@ -55,6 +55,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.TrustGrantFlags;
 import com.android.keyguard.ViewMediatorCallback;
+import com.android.systemui.DejankUtils;
 import com.android.systemui.Flags;
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -63,6 +64,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInte
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags;
 import com.android.systemui.bouncer.ui.BouncerView;
+import com.android.systemui.bouncer.util.BouncerTestUtilsKt;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
@@ -1202,6 +1204,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     @Override
     public void hide(long startTime, long fadeoutDuration) {
         Trace.beginSection("StatusBarKeyguardViewManager#hide");
+        if (Flags.checkLockscreenGoneTransition()) {
+            DejankUtils.notifyRendererOfExpensiveFrame(
+                    mNotificationShadeWindowController.getWindowRootView(),
+                    "StatusBarKeyguardViewManager#hide");
+        }
         mKeyguardStateController.notifyKeyguardState(false,
                 mKeyguardStateController.isOccluded());
         launchPendingWakeupAction();
@@ -1552,8 +1559,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean shouldDismissOnMenuPressed() {
-        return mPrimaryBouncerView.getDelegate() != null
-                && mPrimaryBouncerView.getDelegate().shouldDismissOnMenuPressed();
+        return (mPrimaryBouncerView.getDelegate() != null
+                && mPrimaryBouncerView.getDelegate().shouldDismissOnMenuPressed()) || (
+                ComposeBouncerFlags.INSTANCE.isEnabled() && BouncerTestUtilsKt.shouldEnableMenuKey(
+                        mContext.getResources()));
     }
 
     public boolean interceptMediaKey(KeyEvent event) {

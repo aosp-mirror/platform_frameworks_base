@@ -61,8 +61,13 @@ public class ApplicationSharedMemoryTest {
     @Test
     public void canRead() {
         ApplicationSharedMemory instance = ApplicationSharedMemory.getInstance();
-        instance.getLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis();
-        // Don't actually care about the value of the above.
+        try {
+            instance.getLatestNetworkTimeUnixEpochMillisAtZeroElapsedRealtimeMillis();
+            // Don't actually care about the value of the above.
+        } catch (java.time.DateTimeException e) {
+            // This exception is okay during testing.  It means there was no time source, which
+            // could be because of network problems or a feature being flagged off.
+        }
     }
 
     /** Application processes should not have mutable access. */

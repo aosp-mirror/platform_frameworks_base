@@ -60,8 +60,8 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.server.pm.PackageArchiver.isArchivingEnabled;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -1029,6 +1029,7 @@ class ActivityStarter {
                 if (requestCode >= 0 && !sourceRecord.finishing) {
                     resultRecord = sourceRecord;
                 }
+                request.logMessage.append(" (sr=" + System.identityHashCode(sourceRecord) + ")");
             }
         }
 
@@ -2758,10 +2759,7 @@ class ActivityStarter {
             mInTask = null;
             // Launch ResolverActivity in the source task, so that it stays in the task bounds
             // when in freeform workspace.
-            // Also put noDisplay activities in the source task. These by itself can be placed
-            // in any task/root-task, however it could launch other activities like
-            // ResolverActivity, and we want those to stay in the original task.
-            if ((mStartActivity.isResolverOrDelegateActivity() || mStartActivity.noDisplay)
+            if (mStartActivity.isResolverOrDelegateActivity()
                     && mSourceRecord != null && mSourceRecord.inFreeformWindowingMode()) {
                 mAddingToTask = true;
             }

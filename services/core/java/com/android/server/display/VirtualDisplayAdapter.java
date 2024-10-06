@@ -207,13 +207,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         return device;
     }
 
-    void setVirtualDisplayStateLocked(IBinder appToken, boolean isOn) {
-        VirtualDisplayDevice device = mVirtualDisplayDevices.get(appToken);
-        if (device != null) {
-            device.setDisplayState(isOn);
-        }
-    }
-
     DisplayDevice getDisplayDevice(IBinder appToken) {
         return mVirtualDisplayDevices.get(appToken);
     }
@@ -273,7 +266,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
         private boolean mStopped;
         private int mPendingChanges;
         private Display.Mode mMode;
-        private boolean mIsDisplayOn;
         private int mDisplayIdToMirror;
         private boolean mIsWindowManagerMirroring;
         private DisplayCutout mDisplayCutout;
@@ -299,9 +291,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
             mCallback = callback;
             mProjection = projection;
             mMediaProjectionCallback = mediaProjectionCallback;
-            mDisplayState = Display.STATE_UNKNOWN;
+            mDisplayState = Display.STATE_ON;
             mPendingChanges |= PENDING_SURFACE_CHANGE;
-            mIsDisplayOn = surface != null;
             mDisplayIdToMirror = virtualDisplayConfig.getDisplayIdToMirror();
             mIsWindowManagerMirroring = virtualDisplayConfig.isWindowManagerMirroringEnabled();
         }
@@ -394,6 +385,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 float sdrBrightnessState, DisplayOffloadSessionImpl displayOffloadSession) {
             if (state != mDisplayState) {
                 mDisplayState = state;
+                mInfo = null;
+                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
                 if (state == Display.STATE_OFF) {
                     mCallback.dispatchDisplayPaused();
                 } else {
@@ -416,12 +409,13 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
         public void setSurfaceLocked(Surface surface) {
             if (!mStopped && mSurface != surface) {
-                if ((mSurface != null) != (surface != null)) {
+                if (mDisplayState == Display.STATE_ON
+                        && ((mSurface == null) != (surface == null))) {
+                    mInfo = null;
                     sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
                 }
                 sendTraversalRequestLocked();
                 mSurface = surface;
-                mInfo = null;
                 mPendingChanges |= PENDING_SURFACE_CHANGE;
             }
         }
@@ -436,14 +430,6 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mDensityDpi = densityDpi;
                 mInfo = null;
                 mPendingChanges |= PENDING_RESIZE;
-            }
-        }
-
-        void setDisplayState(boolean isOn) {
-            if (mIsDisplayOn != isOn) {
-                mIsDisplayOn = isOn;
-                mInfo = null;
-                sendDisplayDeviceEventLocked(this, DISPLAY_DEVICE_EVENT_CHANGED);
             }
         }
 
@@ -567,7 +553,11 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.touch = ((mFlags & VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH) == 0) ?
                         DisplayDeviceInfo.TOUCH_NONE : DisplayDeviceInfo.TOUCH_VIRTUAL;
 
-                mInfo.state = mIsDisplayOn ? Display.STATE_ON : Display.STATE_OFF;
+                if (mSurface == null) {
+                    mInfo.state = Display.STATE_OFF;
+                } else {
+                    mInfo.state = mDisplayState;
+                }
 
                 mInfo.ownerUid = mOwnerUid;
                 mInfo.ownerPackageName = mOwnerPackageName;

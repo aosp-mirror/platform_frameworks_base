@@ -299,3 +299,19 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "ensure_keyguard_does_transition_starting"
+  namespace: "windowing_frontend"
+  description: "Ensure that keyguard is the one starting transitions, instead of delegating to Core"
+  bug: "364930619"
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_priority_system_navigation_observer"
+    namespace: "systemui"
+    description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
+}

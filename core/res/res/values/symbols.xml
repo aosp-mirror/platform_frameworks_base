@@ -3937,7 +3937,6 @@
   <java-symbol type="string" name="notification_channel_usb" />
   <java-symbol type="string" name="notification_channel_heavy_weight_app" />
   <java-symbol type="string" name="notification_channel_system_changes" />
-  <java-symbol type="string" name="notification_channel_do_not_disturb" />
   <java-symbol type="string" name="notification_channel_accessibility_magnification" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
   <java-symbol type="string" name="notification_channel_display" />
@@ -3989,6 +3988,7 @@
   <java-symbol type="string" name="foreground_service_multiple_separator" />
 
   <java-symbol type="bool" name="config_enableCredentialFactoryResetProtection" />
+  <java-symbol type="bool" name="config_disableWeaverOnUnsecuredUsers" />
 
   <!-- ETWS primary messages -->
   <java-symbol type="string" name="etws_primary_default_message_earthquake" />
@@ -4163,11 +4163,6 @@
 
   <!-- For Wear devices -->
   <java-symbol type="array" name="config_wearActivityModeRadios" />
-
-  <java-symbol type="string" name="zen_upgrade_notification_title" />
-  <java-symbol type="string" name="zen_upgrade_notification_content" />
-  <java-symbol type="string" name="zen_upgrade_notification_visd_title" />
-  <java-symbol type="string" name="zen_upgrade_notification_visd_content" />
 
   <java-symbol type="string" name="review_notification_settings_title" />
   <java-symbol type="string" name="review_notification_settings_text" />
@@ -4778,6 +4773,7 @@
   <java-symbol type="bool" name="config_isCompatFakeFocusEnabled" />
   <java-symbol type="bool" name="config_isWindowManagerCameraCompatTreatmentEnabled" />
   <java-symbol type="bool" name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled" />
+  <java-symbol type="dimen" name="config_windowManagerCameraCompatAspectRatio" />
   <java-symbol type="bool" name="config_skipActivityRelaunchWhenDocking" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
@@ -5100,8 +5096,6 @@
   <java-symbol type="integer" name="config_hotwordDetectedResultMaxBundleSize" />
 
   <java-symbol type="dimen" name="config_wallpaperDimAmount" />
-
-  <java-symbol type="bool" name="config_volumeAdjustmentForRemoteGroupSessions" />
 
   <java-symbol type="integer" name="config_mediaOutputSwitchDialogVersion" />
 

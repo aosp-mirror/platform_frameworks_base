@@ -37,6 +37,7 @@ public class InputMediaDeviceTest {
     private final int BUILTIN_MIC_ID = 1;
     private final int WIRED_HEADSET_ID = 2;
     private final int USB_HEADSET_ID = 3;
+    private final int BT_HEADSET_ID = 4;
     private final int MAX_VOLUME = 1;
     private final int CURRENT_VOLUME = 0;
     private final boolean IS_VOLUME_FIXED = true;
@@ -76,7 +77,7 @@ public class InputMediaDeviceTest {
                         IS_VOLUME_FIXED);
         assertThat(builtinMediaDevice).isNotNull();
         assertThat(builtinMediaDevice.getName())
-                .isEqualTo(mContext.getString(R.string.media_transfer_internal_mic));
+                .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name_desktop));
     }
 
     @Test
@@ -107,5 +108,20 @@ public class InputMediaDeviceTest {
         assertThat(usbMediaDevice).isNotNull();
         assertThat(usbMediaDevice.getName())
                 .isEqualTo(mContext.getString(R.string.media_transfer_usb_device_mic_name));
+    }
+
+    @Test
+    public void getName_returnCorrectName_btHeadset() {
+        InputMediaDevice btMediaDevice =
+                InputMediaDevice.create(
+                        mContext,
+                        String.valueOf(BT_HEADSET_ID),
+                        AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        IS_VOLUME_FIXED);
+        assertThat(btMediaDevice).isNotNull();
+        assertThat(btMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_bt_device_mic_name));
     }
 }

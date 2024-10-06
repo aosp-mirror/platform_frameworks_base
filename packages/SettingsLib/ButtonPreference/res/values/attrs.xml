@@ -18,5 +18,15 @@
 <resources>
     <declare-styleable name="ButtonPreference">
         <attr name="android:gravity" />
+        <attr name="buttonPreferenceType" format="enum">
+            <enum name="filled" value="0"/>
+            <enum name="tonal" value="1"/>
+            <enum name="outline" value="2"/>
+        </attr>
+        <attr name="buttonPreferenceSize" format="enum">
+            <enum name="normal" value="0"/>
+            <enum name="large" value="1"/>
+            <enum name="extra" value="2"/>
+        </attr>
     </declare-styleable>
 </resources>

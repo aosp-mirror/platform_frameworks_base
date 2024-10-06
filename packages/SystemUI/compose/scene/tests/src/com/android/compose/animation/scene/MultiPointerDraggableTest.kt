@@ -45,6 +45,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.nestedscroll.SuspendedValue
 import com.google.common.truth.Truth.assertThat
 import kotlin.properties.Delegates
 import kotlinx.coroutines.coroutineScope
@@ -71,9 +72,9 @@ class MultiPointerDraggableTest {
             return delta
         }
 
-        override fun onStop(velocity: Float, canChangeContent: Boolean): Float {
+        override fun onStop(velocity: Float, canChangeContent: Boolean): SuspendedValue<Float> {
             onStop.invoke(velocity)
-            return velocity
+            return { velocity }
         }
     }
 

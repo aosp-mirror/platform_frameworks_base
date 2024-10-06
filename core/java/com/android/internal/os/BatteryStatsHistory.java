@@ -48,6 +48,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -1745,9 +1746,12 @@ public class BatteryStatsHistory {
                     mHistoryAddTmp.setTo(mHistoryLastWritten);
                     mHistoryAddTmp.wakelockTag = null;
                     mHistoryAddTmp.wakeReasonTag = null;
+                    mHistoryAddTmp.powerStats = null;
+                    mHistoryAddTmp.processStateChange = null;
                     mHistoryAddTmp.eventCode = HistoryItem.EVENT_NONE;
                     mHistoryAddTmp.states &= ~HistoryItem.STATE_CPU_RUNNING_FLAG;
                     writeHistoryItem(wakeElapsedTimeMs, uptimeMs, mHistoryAddTmp);
+
                 }
             }
             mHistoryCur.states |= HistoryItem.STATE_CPU_RUNNING_FLAG;
@@ -2450,6 +2454,20 @@ public class BatteryStatsHistory {
             mHistoryTags.put(entry.getValue() & ~BatteryStatsHistory.TAG_FIRST_OCCURRENCE_FLAG,
                     entry.getKey());
         }
+    }
+
+    /**
+     * Prints battery stats history for debugging.
+     */
+    public void dump(PrintWriter pw, long startTimeMs, long endTimeMs) {
+        BatteryStats.HistoryPrinter printer = new BatteryStats.HistoryPrinter();
+        try (BatteryStatsHistoryIterator iterate = iterate(startTimeMs, endTimeMs)) {
+            while (iterate.hasNext()) {
+                HistoryItem next = iterate.next();
+                printer.printNextItem(pw, next, 0, false, true);
+            }
+        }
+        pw.flush();
     }
 
     /**

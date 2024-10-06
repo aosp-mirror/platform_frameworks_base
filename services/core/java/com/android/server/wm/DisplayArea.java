@@ -24,7 +24,7 @@ import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.FEATURE_ID;
 import static com.android.server.wm.DisplayAreaProto.IS_IGNORING_ORIENTATION_REQUEST;

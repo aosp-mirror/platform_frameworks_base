@@ -25,6 +25,7 @@ import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.systemui.communal.nano.CommunalHubState
+import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetModule.Companion.DEFAULT_WIDGETS
 import com.android.systemui.dagger.SysUISingleton
@@ -153,14 +154,15 @@ interface CommunalWidgetDao {
 
     @Query(
         "INSERT INTO communal_widget_table" +
-            "(widget_id, component_name, item_id, user_serial_number) " +
-            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber)"
+            "(widget_id, component_name, item_id, user_serial_number, span_y) " +
+            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber, :spanY)"
     )
     fun insertWidget(
         widgetId: Int,
         componentName: String,
         itemId: Long,
         userSerialNumber: Int,
+        spanY: Int = 3,
     ): Long
 
     @Query("INSERT INTO communal_item_rank_table(rank) VALUES(:rank)")
@@ -168,6 +170,9 @@ interface CommunalWidgetDao {
 
     @Query("UPDATE communal_item_rank_table SET rank = :order WHERE uid = :itemUid")
     fun updateItemRank(itemUid: Long, order: Int)
+
+    @Query("UPDATE communal_widget_table SET span_y = :spanY WHERE widget_id = :widgetId")
+    fun updateWidgetSpanY(widgetId: Int, spanY: Int)
 
     @Query("DELETE FROM communal_widget_table") fun clearCommunalWidgetsTable()
 
@@ -189,12 +194,14 @@ interface CommunalWidgetDao {
         provider: ComponentName,
         rank: Int? = null,
         userSerialNumber: Int,
+        spanY: Int = CommunalContentSize.HALF.span,
     ): Long {
         return addWidget(
             widgetId = widgetId,
             componentName = provider.flattenToString(),
             rank = rank,
             userSerialNumber = userSerialNumber,
+            spanY = spanY,
         )
     }
 
@@ -204,6 +211,7 @@ interface CommunalWidgetDao {
         componentName: String,
         rank: Int? = null,
         userSerialNumber: Int,
+        spanY: Int = 3,
     ): Long {
         val widgets = getWidgetsNow()
 
@@ -224,6 +232,7 @@ interface CommunalWidgetDao {
             componentName = componentName,
             itemId = insertItemRank(newRank),
             userSerialNumber = userSerialNumber,
+            spanY = spanY,
         )
     }
 
@@ -246,7 +255,8 @@ interface CommunalWidgetDao {
         clearCommunalItemRankTable()
 
         state.widgets.forEach {
-            addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber)
+            val spanY = if (it.spanY != 0) it.spanY else CommunalContentSize.HALF.span
+            addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber, spanY)
         }
     }
 }
