@@ -16,12 +16,14 @@
 
 package com.android.ravenwoodtest.servicestest;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
 import android.hardware.SerialManager;
 import android.hardware.SerialManagerInternal;
+import android.platform.test.annotations.DisabledOnRavenwood;
 import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -56,13 +58,16 @@ public class RavenwoodServicesTest {
     }
 
     @Test
+    @DisabledOnRavenwood(reason="AOSP is missing resources support")
     public void testSimple() {
         // Verify that we can obtain a manager, and talk to the backend service, and that no
         // serial ports are configured by default
         final SerialManager service = (SerialManager)
                 mRavenwood.getContext().getSystemService(Context.SERIAL_SERVICE);
         final String[] ports = service.getSerialPorts();
-        assertEquals(0, ports.length);
+        final String[] refPorts = mRavenwood.getContext().getResources().getStringArray(
+                com.android.internal.R.array.config_serialPorts);
+        assertArrayEquals(refPorts, ports);
     }
 
     @Test

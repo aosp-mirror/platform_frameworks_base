@@ -189,22 +189,13 @@ public final class DeviceConfigService extends Binder {
 
       public static HashMap<String, String> getAllFlags(IContentProvider provider) {
         HashMap<String, String> allFlags = new HashMap<String, String>();
-        try {
-            Bundle args = new Bundle();
-            args.putInt(Settings.CALL_METHOD_USER_KEY,
-                ActivityManager.getService().getCurrentUser().id);
-            Bundle b = provider.call(new AttributionSource(Process.myUid(),
-                    resolveCallingPackage(), null), Settings.AUTHORITY,
-                    Settings.CALL_METHOD_LIST_CONFIG, null, args);
-            if (b != null) {
-                Map<String, String> flagsToValues =
-                    (HashMap) b.getSerializable(Settings.NameValueTable.VALUE);
-                allFlags.putAll(flagsToValues);
+        for (DeviceConfig.Properties properties : DeviceConfig.getAllProperties()) {
+            List<String> keys = new ArrayList<>(properties.getKeyset());
+            for (String flagName : properties.getKeyset()) {
+                String fullName = properties.getNamespace() + "/" + flagName;
+                allFlags.put(fullName, properties.getString(flagName, null));
             }
-        } catch (RemoteException e) {
-            throw new RuntimeException("Failed in IPC", e);
         }
-
         return allFlags;
       }
 

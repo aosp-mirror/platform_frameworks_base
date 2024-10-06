@@ -15,12 +15,12 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkClassLoadHook {
     private TinyFrameworkClassLoadHook() {
     }

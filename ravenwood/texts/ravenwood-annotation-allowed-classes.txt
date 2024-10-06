@@ -9,17 +9,13 @@ com.android.internal.logging.testing.FakeMetricsLogger
 com.android.internal.logging.testing.UiEventLoggerFake
 com.android.internal.os.AndroidPrintStream
 com.android.internal.os.BatteryStatsHistory
-com.android.internal.os.BatteryStatsHistory$TraceDelegate
-com.android.internal.os.BatteryStatsHistory$VarintParceler
 com.android.internal.os.BatteryStatsHistoryIterator
 com.android.internal.os.Clock
 com.android.internal.os.LongArrayMultiStateCounter
-com.android.internal.os.LongArrayMultiStateCounter$LongArrayContainer
 com.android.internal.os.LongMultiStateCounter
 com.android.internal.os.MonotonicClock
 com.android.internal.os.PowerProfile
 com.android.internal.os.PowerStats
-com.android.internal.os.PowerStats$Descriptor
 com.android.internal.os.RuntimeInit
 com.android.internal.power.EnergyConsumerStats
 com.android.internal.power.ModemPowerProfile
@@ -39,12 +35,14 @@ android.util.ContainerHelpers
 android.util.DataUnit
 android.util.DayOfMonthCursor
 android.util.DebugUtils
+android.util.DisplayMetrics
 android.util.Dumpable
 android.util.DumpableContainer
 android.util.EmptyArray
 android.util.EventLog
 android.util.FloatProperty
 android.util.FloatMath
+android.util.Half
 android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
@@ -98,10 +96,12 @@ android.util.SparseDoubleArray
 android.util.SparseIntArray
 android.util.SparseLongArray
 android.util.SparseSetArray
+android.util.StateSet
 android.util.StringBuilderPrinter
 android.util.TeeWriter
 android.util.TimeUtils
 android.util.TimingsTraceLog
+android.util.TypedValue
 android.util.UtilConfig
 android.util.Xml
 
@@ -119,15 +119,9 @@ android.os.BadTypeParcelableException
 android.os.BaseBundle
 android.os.BatteryConsumer
 android.os.BatteryStats
-android.os.BatteryStats$HistoryItem
-android.os.BatteryStats$HistoryStepDetails
-android.os.BatteryStats$HistoryTag
-android.os.BatteryStats$LongCounter
-android.os.BatteryStats$ProcessStateChange
 android.os.BatteryUsageStats
 android.os.BatteryUsageStatsQuery
 android.os.Binder
-android.os.Binder$IdentitySupplier
 android.os.BluetoothBatteryStats
 android.os.Broadcaster
 android.os.Build
@@ -138,19 +132,17 @@ android.os.ConditionVariable
 android.os.DeadObjectException
 android.os.DeadSystemException
 android.os.FileUtils
-android.os.FileUtils$MemoryPipe
 android.os.Handler
 android.os.HandlerExecutor
 android.os.HandlerThread
 android.os.IBinder
+android.os.LocaleList
 android.os.Looper
 android.os.Message
 android.os.MessageQueue
 android.os.PackageTagsList
 android.os.Parcel
 android.os.ParcelFileDescriptor
-android.os.ParcelFileDescriptor$AutoCloseInputStream
-android.os.ParcelFileDescriptor$AutoCloseOutputStream
 android.os.ParcelFormatException
 android.os.ParcelUuid
 android.os.Parcelable
@@ -164,7 +156,6 @@ android.os.RemoteCallbackList
 android.os.RemoteException
 android.os.ResultReceiver
 android.os.ServiceManager
-android.os.ServiceManager$ServiceNotFoundException
 android.os.ServiceSpecificException
 android.os.StrictMode
 android.os.SystemClock
@@ -175,23 +166,20 @@ android.os.TimestampedValue
 android.os.Trace
 android.os.TransactionTooLargeException
 android.os.UserBatteryConsumer
-android.os.UserBatteryConsumer$Builder
 android.os.UidBatteryConsumer
-android.os.UidBatteryConsumer$Builder
 android.os.UserHandle
 android.os.UserManager
 android.os.VibrationAttributes
-android.os.VibrationAttributes$Builder
 android.os.WakeLockStats
 android.os.WorkSource
 
 android.content.ClipData
-android.content.ClipData$Item
 android.content.ClipDescription
 android.content.ClipboardManager
 android.content.ComponentName
 android.content.ContentUris
 android.content.ContentValues
+android.content.Context
 android.content.ContextWrapper
 android.content.Intent
 android.content.IntentFilter
@@ -202,17 +190,39 @@ android.content.pm.ApplicationInfo
 android.content.pm.ComponentInfo
 android.content.pm.PackageInfo
 android.content.pm.PackageItemInfo
-android.content.pm.PackageManager$Flags
-android.content.pm.PackageManager$PackageInfoFlags
-android.content.pm.PackageManager$ApplicationInfoFlags
-android.content.pm.PackageManager$ComponentInfoFlags
-android.content.pm.PackageManager$ResolveInfoFlags
+android.content.pm.PackageManager
 android.content.pm.PathPermission
 android.content.pm.ProviderInfo
 android.content.pm.ResolveInfo
 android.content.pm.ServiceInfo
 android.content.pm.Signature
 android.content.pm.UserInfo
+
+android.content.res.ApkAssets
+android.content.res.AssetFileDescriptor
+android.content.res.AssetManager
+android.content.res.ColorStateList
+android.content.res.ConfigurationBoundResourceCache
+android.content.res.Configuration
+android.content.res.CompatibilityInfo
+android.content.res.ComplexColor
+android.content.res.ConstantState
+android.content.res.DrawableCache
+android.content.res.Element
+android.content.res.FontResourcesParser
+android.content.res.FontScaleConverter
+android.content.res.FontScaleConverterImpl
+android.content.res.FontScaleConverterFactory
+android.content.res.Resources
+android.content.res.ResourceId
+android.content.res.ResourcesImpl
+android.content.res.ResourcesKey
+android.content.res.StringBlock
+android.content.res.TagCounter
+android.content.res.ThemedResourceCache
+android.content.res.TypedArray
+android.content.res.Validator
+android.content.res.XmlBlock
 
 android.database.AbstractCursor
 android.database.CharArrayBuffer
@@ -226,7 +236,6 @@ android.database.CursorWrapper
 android.database.DataSetObservable
 android.database.DataSetObserver
 android.database.MatrixCursor
-android.database.MatrixCursor$RowBuilder
 android.database.MergeCursor
 android.database.Observable
 android.database.SQLException
@@ -234,7 +243,6 @@ android.database.sqlite.SQLiteClosable
 android.database.sqlite.SQLiteException
 
 android.text.TextUtils
-android.text.TextUtils$SimpleStringSplitter
 
 android.accounts.Account
 
@@ -244,7 +252,11 @@ android.graphics.ColorSpace
 android.graphics.Insets
 android.graphics.Interpolator
 android.graphics.Matrix
+android.graphics.Matrix44
+android.graphics.Outline
+android.graphics.ParcelableColorSpace
 android.graphics.Path
+android.graphics.PixelFormat
 android.graphics.Point
 android.graphics.PointF
 android.graphics.Rect
@@ -254,15 +266,18 @@ android.content.ContentProvider
 
 android.app.ActivityManager
 android.app.ActivityOptions
+android.app.ApplicationPackageManager
 android.app.BroadcastOptions
 android.app.ComponentOptions
 android.app.Instrumentation
+android.app.LocaleConfig
+android.app.ResourcesManager
+android.app.WindowConfiguration
 
 android.metrics.LogMaker
 
 android.view.Display
-android.view.Display$HdrCapabilities
-android.view.Display$Mode
+android.view.DisplayAdjustments
 android.view.DisplayInfo
 android.view.inputmethod.InputBinding
 
@@ -274,9 +289,17 @@ android.telephony.CellSignalStrength
 android.telephony.ModemActivityInfo
 android.telephony.ServiceState
 
+android.os.connectivity.CellularBatteryStats
 android.os.connectivity.WifiActivityEnergyInfo
+android.os.connectivity.WifiBatteryStats
 
 com.android.server.LocalServices
+
+com.android.internal.graphics.cam.Cam
+com.android.internal.graphics.cam.CamUtils
+com.android.internal.graphics.cam.Frame
+com.android.internal.graphics.cam.HctSolver
+com.android.internal.graphics.ColorUtils
 
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
@@ -302,6 +325,7 @@ com.android.internal.util.ProcFileReader
 com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
 com.android.internal.util.SizedInputStream
+com.android.internal.util.RateLimitingCache
 com.android.internal.util.StringPool
 com.android.internal.util.TokenBucket
 com.android.internal.util.XmlPullParserWrapper

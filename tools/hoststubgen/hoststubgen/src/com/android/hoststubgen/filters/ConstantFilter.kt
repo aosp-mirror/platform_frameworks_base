@@ -26,23 +26,17 @@ import com.android.hoststubgen.HostStubGenInternalException
  * @param policy the policy. Cannot be a "substitute" policy.
  */
 class ConstantFilter(
-        policy: FilterPolicy,
-        val reason: String
+    policy: FilterPolicy,
+    private val reason: String
 ) : OutputFilter() {
-    val classPolicy: FilterPolicy
-    val fieldPolicy: FilterPolicy
-    val methodPolicy: FilterPolicy
+
+    private val classPolicy: FilterPolicy
+    private val fieldPolicy: FilterPolicy
+    private val methodPolicy: FilterPolicy
 
     init {
-        if (policy.isSubstitute) {
-            throw HostStubGenInternalException(
-                    "ConstantFilter doesn't allow substitution policies.")
-        }
-        if (policy.isClassWidePolicy) {
-            // We prevent it, because there's no point in using class-wide policies because
-            // all members get othe same policy too anyway.
-            throw HostStubGenInternalException(
-                    "ConstantFilter doesn't allow class-wide policies.")
+        if (!policy.isUsableWithDefault) {
+            throw HostStubGenInternalException("ConstantFilter doesn't support $policy.")
         }
         methodPolicy = policy
 
@@ -63,10 +57,10 @@ class ConstantFilter(
     }
 
     override fun getPolicyForMethod(
-            className: String,
-            methodName: String,
-            descriptor: String,
-            ): FilterPolicyWithReason {
+        className: String,
+        methodName: String,
+        descriptor: String,
+    ): FilterPolicyWithReason {
         return methodPolicy.withReason(reason)
     }
 }

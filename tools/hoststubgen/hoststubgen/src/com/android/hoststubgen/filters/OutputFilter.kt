@@ -35,10 +35,6 @@ abstract class OutputFilter {
      * using it.
      */
     open var outermostFilter: OutputFilter = this
-        get() = field
-        set(value) {
-            field = value
-        }
 
     abstract fun getPolicyForClass(className: String): FilterPolicyWithReason
 
@@ -60,13 +56,13 @@ abstract class OutputFilter {
     }
 
     /**
-     * Return a "native substitution class" name for a given class.
+     * Return a "redirection class" name for a given class.
      *
-     * The result will be in a "human readable" form. (e.g. uses '.'s instead of '/'s)
+     * The result will be in a JVM internal form. (e.g. uses '/'s instead of '.'s)
      *
-     * (which corresponds to @HostSideTestNativeSubstitutionClass of the standard annotations.)
+     * (which corresponds to @HostSideTestRedirectClass of the standard annotations.)
      */
-    open fun getNativeSubstitutionClass(className: String): String? {
+    open fun getRedirectionClass(className: String): String? {
         return null
     }
 
@@ -88,5 +84,36 @@ abstract class OutputFilter {
     open fun getMethodCallHooks(className: String, methodName: String, descriptor: String):
             List<String> {
         return emptyList()
+    }
+
+    /**
+     * Take a class (internal) name. If the class needs to be renamed, return the new name.
+     * This is used by [FilterRemapper].
+     */
+    open fun remapType(className: String): String? {
+        return null
+    }
+
+    data class MethodReplaceTarget(val className: String, val methodName: String)
+
+    /**
+     * Return if this filter may return non-null from [getMethodCallReplaceTo].
+     * (Used for a small optimization)
+     */
+    open fun hasAnyMethodCallReplace(): Boolean {
+        return false
+    }
+
+    /**
+     * If a method call should be forwarded to another method, return the target's class / method.
+     */
+    open fun getMethodCallReplaceTo(
+        callerClassName: String,
+        callerMethodName: String,
+        className: String,
+        methodName: String,
+        descriptor: String,
+    ): MethodReplaceTarget? {
+        return null
     }
 }

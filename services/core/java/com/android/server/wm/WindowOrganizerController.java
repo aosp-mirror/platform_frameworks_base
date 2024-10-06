@@ -774,7 +774,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         } finally {
             if (deferTransitionReady) {
-                transition.continueTransitionReady();
+                if (transition.isCollecting()) {
+                    transition.continueTransitionReady();
+                } else {
+                    Slog.wtf(TAG, "Too late, transition : " + transition.getSyncId()
+                            + " state: " + transition.getState() + " is not collecting");
+                }
             }
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             mService.continueWindowLayout();

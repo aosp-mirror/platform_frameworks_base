@@ -1152,60 +1152,60 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
 
 // ----------------------------------------------------------------------------
 
-static jint android_os_Binder_getCallingPid()
+static jint android_os_Binder_getCallingPid(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getCallingPid();
 }
 
-static jint android_os_Binder_getCallingUid()
+static jint android_os_Binder_getCallingUid(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jboolean android_os_Binder_isDirectlyHandlingTransactionNative() {
+static jboolean android_os_Binder_isDirectlyHandlingTransactionNative(CRITICAL_JNI_PARAMS) {
     return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
-static jlong android_os_Binder_clearCallingIdentity()
+static jlong android_os_Binder_clearCallingIdentity(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->clearCallingIdentity();
 }
 
-static void android_os_Binder_restoreCallingIdentity(jlong token)
+static void android_os_Binder_restoreCallingIdentity(CRITICAL_JNI_PARAMS_COMMA jlong token)
 {
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
-static jboolean android_os_Binder_hasExplicitIdentity() {
+static jboolean android_os_Binder_hasExplicitIdentity(CRITICAL_JNI_PARAMS) {
     return IPCThreadState::self()->hasExplicitIdentity();
 }
 
-static void android_os_Binder_setThreadStrictModePolicy(jint policyMask)
+static void android_os_Binder_setThreadStrictModePolicy(CRITICAL_JNI_PARAMS_COMMA jint policyMask)
 {
     IPCThreadState::self()->setStrictModePolicy(policyMask);
 }
 
-static jint android_os_Binder_getThreadStrictModePolicy()
+static jint android_os_Binder_getThreadStrictModePolicy(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getStrictModePolicy();
 }
 
-static jlong android_os_Binder_setCallingWorkSourceUid(jint workSource)
+static jlong android_os_Binder_setCallingWorkSourceUid(CRITICAL_JNI_PARAMS_COMMA jint workSource)
 {
     return IPCThreadState::self()->setCallingWorkSourceUid(workSource);
 }
 
-static jlong android_os_Binder_getCallingWorkSourceUid()
+static jlong android_os_Binder_getCallingWorkSourceUid(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getCallingWorkSourceUid();
 }
 
-static jlong android_os_Binder_clearCallingWorkSource()
+static jlong android_os_Binder_clearCallingWorkSource(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->clearCallingWorkSource();
 }
 
-static void android_os_Binder_restoreCallingWorkSource(jlong token)
+static void android_os_Binder_restoreCallingWorkSource(CRITICAL_JNI_PARAMS_COMMA jlong token)
 {
     IPCThreadState::self()->restoreCallingWorkSource(token);
 }

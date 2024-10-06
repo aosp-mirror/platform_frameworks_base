@@ -4935,10 +4935,14 @@ public class AlarmManagerService extends SystemService {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
             final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
             synchronized (mLock) {
                 String pkgList[] = null;
-                switch (intent.getAction()) {
+                switch (action) {
                     case Intent.ACTION_QUERY_PACKAGE_RESTART:
                         pkgList = intent.getStringArrayExtra(Intent.EXTRA_PACKAGES);
                         for (String packageName : pkgList) {

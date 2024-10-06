@@ -18,6 +18,10 @@ package com.android.internal.os;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodRedirect;
+import android.ravenwood.annotation.RavenwoodRedirectionClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 
 import com.android.internal.util.Preconditions;
 
@@ -55,18 +59,15 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @hide
  */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-        "com.android.platform.test.ravenwood.nativesubstitution.LongArrayMultiStateCounter_host")
+@RavenwoodKeepWholeClass
+@RavenwoodRedirectionClass("LongArrayMultiStateCounter_host")
 public final class LongArrayMultiStateCounter implements Parcelable {
 
     /**
      * Container for a native equivalent of a long[].
      */
-    @android.ravenwood.annotation.RavenwoodKeepWholeClass
-    @android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-            "com.android.platform.test.ravenwood.nativesubstitution"
-            + ".LongArrayMultiStateCounter_host$LongArrayContainer_host")
+    @RavenwoodKeepWholeClass
+    @RavenwoodRedirectionClass("LongArrayContainer_host")
     public static class LongArrayContainer {
         private static NativeAllocationRegistry sRegistry;
 
@@ -81,7 +82,7 @@ public final class LongArrayMultiStateCounter implements Parcelable {
             registerNativeAllocation();
         }
 
-        @android.ravenwood.annotation.RavenwoodReplace
+        @RavenwoodReplace
         private void registerNativeAllocation() {
             if (sRegistry == null) {
                 synchronized (LongArrayMultiStateCounter.class) {
@@ -140,18 +141,23 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         }
 
         @CriticalNative
+        @RavenwoodRedirect
         private static native long native_init(int length);
 
         @CriticalNative
+        @RavenwoodRedirect
         private static native long native_getReleaseFunc();
 
         @FastNative
+        @RavenwoodRedirect
         private static native void native_setValues(long nativeObject, long[] array);
 
         @FastNative
+        @RavenwoodRedirect
         private static native void native_getValues(long nativeObject, long[] array);
 
         @FastNative
+        @RavenwoodRedirect
         private static native boolean native_combineValues(long nativeObject, long[] array,
                 int[] indexMap);
     }
@@ -175,7 +181,7 @@ public final class LongArrayMultiStateCounter implements Parcelable {
         registerNativeAllocation();
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
+    @RavenwoodReplace
     private void registerNativeAllocation() {
         if (sRegistry == null) {
             synchronized (LongArrayMultiStateCounter.class) {
@@ -374,57 +380,73 @@ public final class LongArrayMultiStateCounter implements Parcelable {
 
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native long native_init(int stateCount, int arrayLength);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native long native_getReleaseFunc();
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_setEnabled(long nativeObject, boolean enabled,
             long timestampMs);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_setState(long nativeObject, int state, long timestampMs);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_copyStatesFrom(long nativeObjectTarget,
             long nativeObjectSource);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_setValues(long nativeObject, int state,
             long longArrayContainerNativeObject);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_updateValues(long nativeObject,
             long longArrayContainerNativeObject, long timestampMs);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_incrementValues(long nativeObject,
             long longArrayContainerNativeObject, long timestampMs);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_addCounts(long nativeObject,
             long longArrayContainerNativeObject);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_reset(long nativeObject);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native void native_getCounts(long nativeObject,
             long longArrayContainerNativeObject, int state);
 
     @FastNative
+    @RavenwoodRedirect
     private static native String native_toString(long nativeObject);
 
     @FastNative
+    @RavenwoodRedirect
     private static native void native_writeToParcel(long nativeObject, Parcel dest, int flags);
 
     @FastNative
+    @RavenwoodRedirect
     private static native long native_initFromParcel(Parcel parcel);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native int native_getStateCount(long nativeObject);
 
     @CriticalNative
+    @RavenwoodRedirect
     private static native int native_getArrayLength(long nativeObject);
 }
