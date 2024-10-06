@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor.education
 
+import android.annotation.ColorInt
 import android.annotation.DimenRes
 import android.annotation.LayoutRes
 import android.content.Context
@@ -32,6 +33,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.window.DisplayAreaInfo
 import android.window.WindowContainerTransaction
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.wm.shell.R
@@ -120,6 +122,7 @@ class DesktopWindowingEducationTooltipController(
                 hideEducationTooltip()
                 tooltipViewConfig.onEducationClickAction()
               }
+              setTooltipColorScheme(tooltipViewConfig.tooltipColorScheme)
             }
 
     val tooltipDimens = tooltipDimens(tooltipView = tooltipView, tooltipViewConfig.arrowDirection)
@@ -189,6 +192,21 @@ class DesktopWindowingEducationTooltipController(
             view = tooltipView)
   }
 
+  private fun View.setTooltipColorScheme(tooltipColorScheme: TooltipColorScheme) {
+    requireViewById<LinearLayout>(R.id.tooltip_container).apply {
+      background.setTint(tooltipColorScheme.container)
+    }
+    requireViewById<ImageView>(R.id.arrow_icon).apply {
+      val wrappedDrawable = DrawableCompat.wrap(this.drawable)
+      DrawableCompat.setTint(wrappedDrawable, tooltipColorScheme.container)
+    }
+    requireViewById<TextView>(R.id.tooltip_text).apply { setTextColor(tooltipColorScheme.text) }
+    requireViewById<ImageView>(R.id.tooltip_icon).apply {
+      val wrappedDrawable = DrawableCompat.wrap(this.drawable)
+      DrawableCompat.setTint(wrappedDrawable, tooltipColorScheme.icon)
+    }
+  }
+
   private fun tooltipViewGlobalCoordinates(
       tooltipViewGlobalCoordinates: Point,
       arrowDirection: TooltipArrowDirection,
@@ -255,11 +273,25 @@ class DesktopWindowingEducationTooltipController(
    */
   data class EducationViewConfig(
       @LayoutRes val tooltipViewLayout: Int,
+      val tooltipColorScheme: TooltipColorScheme,
       val tooltipViewGlobalCoordinates: Point,
       val tooltipText: String,
       val arrowDirection: TooltipArrowDirection,
       val onEducationClickAction: () -> Unit,
       val onDismissAction: () -> Unit,
+  )
+
+  /**
+   * Color scheme of education view:
+   *
+   * @property container Color of the container of the tooltip.
+   * @property text Text color of the [TextView] of education tooltip.
+   * @property icon Color to be filled in tooltip's icon.
+   */
+  data class TooltipColorScheme(
+      @ColorInt val container: Int,
+      @ColorInt val text: Int,
+      @ColorInt val icon: Int,
   )
 
   /** Direction of arrow of the tooltip */
