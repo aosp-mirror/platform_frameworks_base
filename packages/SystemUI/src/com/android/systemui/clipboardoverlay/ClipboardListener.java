@@ -19,6 +19,7 @@ package com.android.systemui.clipboardoverlay;
 import static android.content.ClipDescription.CLASSIFICATION_COMPLETE;
 
 import static com.android.systemui.Flags.clipboardNoninteractiveOnLockscreen;
+import static com.android.systemui.Flags.overrideSuppressOverlayCondition;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN;
@@ -63,6 +64,7 @@ public class ClipboardListener implements
     private final ClipboardManager mClipboardManager;
     private final KeyguardManager mKeyguardManager;
     private final UiEventLogger mUiEventLogger;
+    private final ClipboardOverlaySuppressionController mClipboardOverlaySuppressionController;
     private ClipboardOverlay mClipboardOverlay;
 
     @Inject
@@ -71,13 +73,15 @@ public class ClipboardListener implements
             ClipboardToast clipboardToast,
             UserScopedService<ClipboardManager> clipboardManager,
             KeyguardManager keyguardManager,
-            UiEventLogger uiEventLogger) {
+            UiEventLogger uiEventLogger,
+            ClipboardOverlaySuppressionController clipboardOverlaySuppressionController) {
         mContext = context;
         mOverlayProvider = clipboardOverlayControllerProvider;
         mClipboardToast = clipboardToast;
         mClipboardManager = clipboardManager.forUser(UserHandle.CURRENT);
         mKeyguardManager = keyguardManager;
         mUiEventLogger = uiEventLogger;
+        mClipboardOverlaySuppressionController = clipboardOverlaySuppressionController;
     }
 
     @Override
@@ -94,9 +98,17 @@ public class ClipboardListener implements
         String clipSource = mClipboardManager.getPrimaryClipSource();
         ClipData clipData = mClipboardManager.getPrimaryClip();
 
-        if (shouldSuppressOverlay(clipData, clipSource, Build.IS_EMULATOR)) {
-            Log.i(TAG, "Clipboard overlay suppressed.");
-            return;
+        if (overrideSuppressOverlayCondition()) {
+            if (mClipboardOverlaySuppressionController.shouldSuppressOverlay(clipData, clipSource,
+                    Build.IS_EMULATOR)) {
+                Log.i(TAG, "Clipboard overlay suppressed.");
+                return;
+            }
+        } else {
+            if (shouldSuppressOverlay(clipData, clipSource, Build.IS_EMULATOR)) {
+                Log.i(TAG, "Clipboard overlay suppressed.");
+                return;
+            }
         }
 
         // user should not access intents before setup or while device is locked

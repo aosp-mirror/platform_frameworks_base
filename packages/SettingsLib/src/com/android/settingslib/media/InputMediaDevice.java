@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO;
 import static android.media.AudioDeviceInfo.TYPE_BUILTIN_MIC;
 import static android.media.AudioDeviceInfo.TYPE_USB_ACCESSORY;
 import static android.media.AudioDeviceInfo.TYPE_USB_DEVICE;
@@ -90,7 +91,8 @@ public class InputMediaDevice extends MediaDevice {
                             TYPE_WIRED_HEADSET,
                             TYPE_USB_DEVICE,
                             TYPE_USB_HEADSET,
-                            TYPE_USB_ACCESSORY ->
+                            TYPE_USB_ACCESSORY,
+                            TYPE_BLUETOOTH_SCO ->
                     true;
             default -> false;
         };
@@ -98,14 +100,15 @@ public class InputMediaDevice extends MediaDevice {
 
     @Override
     public @NonNull String getName() {
-        CharSequence name =
-                switch (mAudioDeviceInfoType) {
-                    case TYPE_WIRED_HEADSET ->
-                            mContext.getString(R.string.media_transfer_wired_device_mic_name);
-                    case TYPE_USB_DEVICE, TYPE_USB_HEADSET, TYPE_USB_ACCESSORY ->
-                            mContext.getString(R.string.media_transfer_usb_device_mic_name);
-                    default -> mContext.getString(R.string.media_transfer_internal_mic);
-                };
+        CharSequence name = switch (mAudioDeviceInfoType) {
+            case TYPE_WIRED_HEADSET -> mContext.getString(
+                    R.string.media_transfer_wired_device_mic_name);
+            case TYPE_USB_DEVICE, TYPE_USB_HEADSET, TYPE_USB_ACCESSORY -> mContext.getString(
+                    R.string.media_transfer_usb_device_mic_name);
+            case TYPE_BLUETOOTH_SCO -> mContext.getString(
+                    R.string.media_transfer_bt_device_mic_name);
+            default -> mContext.getString(R.string.media_transfer_this_device_name_desktop);
+        };
         return name.toString();
     }
 

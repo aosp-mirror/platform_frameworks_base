@@ -36,7 +36,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.statusbar.ActionClickLogger;
@@ -50,7 +52,10 @@ import com.android.systemui.statusbar.notification.row.NotificationContentView;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,7 +76,13 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
     @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     @Mock private ActivityStarter mActivityStarter;
+    @Mock private Lazy<DeviceUnlockedInteractor> mDeviceUnlockedInteractorLazy;
+    @Mock private Lazy<SceneInteractor> mSceneInteractorLazy;
+    @Mock private JavaAdapter mJavaAdapter;
     private final FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
+
+    @Mock private DeviceUnlockedInteractor mDeviceUnlockedInteractor;
+    @Mock private SceneInteractor mSceneInteractor;
 
     private int mCurrentUserId = 0;
     private StatusBarRemoteInputCallback mRemoteInputCallback;
@@ -90,7 +101,8 @@ public class StatusBarRemoteInputCallbackTest extends SysuiTestCase {
                 mKeyguardStateController, mStatusBarStateController, mStatusBarKeyguardViewManager,
                 mActivityStarter, mShadeController,
                 new CommandQueue(mContext, new FakeDisplayTracker(mContext)),
-                mock(ActionClickLogger.class), mFakeExecutor));
+                mock(ActionClickLogger.class), mFakeExecutor, mDeviceUnlockedInteractorLazy,
+                mSceneInteractorLazy, mJavaAdapter));
         mRemoteInputCallback.mChallengeReceiver = mRemoteInputCallback.new ChallengeReceiver();
     }
 

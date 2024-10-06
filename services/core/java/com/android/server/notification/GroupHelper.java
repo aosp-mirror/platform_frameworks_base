@@ -832,8 +832,9 @@ public class GroupHelper {
                                       FullyQualifiedGroupKey newGroup) { }
 
     /**
-     * Called when a notification channel is updated, so that this helper can adjust
-     * the aggregate groups by moving children if their section has changed.
+     * Called when a notification channel is updated (channel attributes have changed),
+     * so that this helper can adjust the aggregate groups by moving children
+     * if their section has changed.
      * see {@link #onNotificationPostedWithDelay(NotificationRecord, List, Map)}
      * @param userId the userId of the channel
      * @param pkgName the channel's package
@@ -853,24 +854,48 @@ public class GroupHelper {
                 }
             }
 
-            // The list of notification operations required after the channel update
-            final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
+            regroupNotifications(userId, pkgName, notificationsToCheck);
+        }
+    }
 
-            // Check any already auto-grouped notifications that may need to be re-grouped
-            // after the channel update
-            notificationsToMove.addAll(
-                    getAutogroupedNotificationsMoveOps(userId, pkgName,
-                        notificationsToCheck));
+    /**
+     * Called when an individuial notification's channel is updated (moved to a new channel),
+     * so that this helper can adjust the aggregate groups by moving children
+     * if their section has changed.
+     * see {@link #onNotificationPostedWithDelay(NotificationRecord, List, Map)}
+     *
+     * @param record the notification which had its channel updated
+     */
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_FORCE_GROUPING)
+    public void onChannelUpdated(final NotificationRecord record) {
+        synchronized (mAggregatedNotifications) {
+            ArrayMap<String, NotificationRecord> notificationsToCheck = new ArrayMap<>();
+            notificationsToCheck.put(record.getKey(), record);
+            regroupNotifications(record.getUserId(), record.getSbn().getPackageName(),
+                    notificationsToCheck);
+        }
+    }
 
-            // Check any ungrouped notifications that may need to be auto-grouped
-            // after the channel update
-            notificationsToMove.addAll(
-                    getUngroupedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
+    @GuardedBy("mAggregatedNotifications")
+    private void regroupNotifications(int userId, String pkgName,
+            ArrayMap<String, NotificationRecord> notificationsToCheck) {
+        // The list of notification operations required after the channel update
+        final ArrayList<NotificationMoveOp> notificationsToMove = new ArrayList<>();
 
-            // Batch move to new section
-            if (!notificationsToMove.isEmpty()) {
-                moveNotificationsToNewSection(userId, pkgName, notificationsToMove);
-            }
+        // Check any already auto-grouped notifications that may need to be re-grouped
+        // after the channel update
+        notificationsToMove.addAll(
+                getAutogroupedNotificationsMoveOps(userId, pkgName,
+                    notificationsToCheck));
+
+        // Check any ungrouped notifications that may need to be auto-grouped
+        // after the channel update
+        notificationsToMove.addAll(
+                getUngroupedNotificationsMoveOps(userId, pkgName, notificationsToCheck));
+
+        // Batch move to new section
+        if (!notificationsToMove.isEmpty()) {
+            moveNotificationsToNewSection(userId, pkgName, notificationsToMove);
         }
     }
 
@@ -1432,6 +1457,10 @@ public class GroupHelper {
             boolean isCall = record.getImportance() > NotificationManager.IMPORTANCE_MIN
                 && notification.isStyle(Notification.CallStyle.class);
             if (isColorizedFGS || isCall) {
+                return false;
+            }
+
+            if (record.getSbn().getNotification().isMediaNotification()) {
                 return false;
             }
 

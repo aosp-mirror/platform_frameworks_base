@@ -17,8 +17,9 @@
 package com.android.systemui.scene.ui.viewmodel
 
 import android.view.MotionEvent
+import android.view.View
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.geometry.Offset
+import com.android.app.tracing.coroutines.launch
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.DefaultEdgeDetector
 import com.android.compose.animation.scene.ObservableTransitionState
@@ -59,8 +60,8 @@ constructor(
     shadeInteractor: ShadeInteractor,
     private val splitEdgeDetector: SplitEdgeDetector,
     private val logger: SceneLogger,
-    gestureFilterFactory: SceneContainerGestureFilter.Factory,
-    @Assisted displayId: Int,
+    hapticsViewModelFactory: SceneContainerHapticsViewModel.Factory,
+    @Assisted view: View,
     @Assisted private val motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
 ) : ExclusiveActivatable() {
 
@@ -71,6 +72,8 @@ constructor(
 
     /** Whether the container is visible. */
     val isVisible: Boolean by hydrator.hydratedStateOf("isVisible", sceneInteractor.isVisible)
+
+    private val hapticsViewModel = hapticsViewModelFactory.create(view)
 
     /**
      * The [SwipeSourceDetector] to use for defining which edges of the screen can be defined in the
@@ -85,8 +88,6 @@ constructor(
                     if (it is ShadeMode.Dual) splitEdgeDetector else DefaultEdgeDetector
                 },
         )
-
-    private val gestureFilter: SceneContainerGestureFilter = gestureFilterFactory.create(displayId)
 
     override suspend fun onActivated(): Nothing {
         try {
@@ -106,7 +107,7 @@ constructor(
 
             coroutineScope {
                 launch { hydrator.activate() }
-                launch { gestureFilter.activate() }
+                launch("SceneContainerHapticsViewModel") { hapticsViewModel.activate() }
             }
             awaitCancellation()
         } finally {
@@ -255,17 +256,6 @@ constructor(
         }
     }
 
-    /**
-     * Returns `true` if a drag gesture starting at [startPosition] should be filtered out (e.g.
-     * ignored, `false` otherwise.
-     *
-     * Invoke this and pass in the position of the `ACTION_DOWN` pointer event that began the
-     * gesture.
-     */
-    fun shouldFilterGesture(startPosition: Offset): Boolean {
-        return gestureFilter.shouldFilterGesture(startPosition)
-    }
-
     /** Defines interface for classes that can handle externally-reported [MotionEvent]s. */
     interface MotionEventHandler {
         /** Notifies that a [MotionEvent] has occurred. */
@@ -281,7 +271,7 @@ constructor(
     @AssistedFactory
     interface Factory {
         fun create(
-            displayId: Int,
+            view: View,
             motionEventHandlerReceiver: (MotionEventHandler?) -> Unit,
         ): SceneContainerViewModel
     }

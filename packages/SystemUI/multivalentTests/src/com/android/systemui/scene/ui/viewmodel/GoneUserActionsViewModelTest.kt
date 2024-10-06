@@ -106,7 +106,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers()))
-                .isEqualTo(UserActionResult(Scenes.QuickSettings))
+                .isEqualTo(UserActionResult(Scenes.QuickSettings, isIrreversible = true))
         }
 
     @Test
@@ -118,7 +118,7 @@ class GoneUserActionsViewModelTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(userActions?.get(swipeDownFromTopWithTwoFingers()))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
         }
 
     @Test

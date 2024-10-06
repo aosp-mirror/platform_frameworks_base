@@ -41,8 +41,9 @@ class TouchpadGestureHandlerTest : SysuiTestCase() {
         TouchpadGestureHandler(
             BackGestureMonitor(
                 gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
-                gestureStateChangedCallback = { gestureState = it }
-            )
+                gestureStateChangedCallback = { gestureState = it },
+            ),
+            EasterEggGestureMonitor {},
         )
 
     @Test

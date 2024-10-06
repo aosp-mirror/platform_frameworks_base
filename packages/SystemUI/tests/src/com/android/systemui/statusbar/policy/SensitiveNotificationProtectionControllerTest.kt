@@ -73,7 +73,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verifyNoMoreInteractions
-import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.MockitoAnnotations
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
@@ -207,7 +206,7 @@ class SensitiveNotificationProtectionControllerTest : SysuiTestCase() {
         mediaProjectionCallback.onStart(mediaProjectionInfo)
 
         controller.registerSensitiveStateListener(listener1)
-        verifyZeroInteractions(listener1)
+        verifyNoMoreInteractions(listener1)
 
         mediaProjectionCallback.onStop(mediaProjectionInfo)
 

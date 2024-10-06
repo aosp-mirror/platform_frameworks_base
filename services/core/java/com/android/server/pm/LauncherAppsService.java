@@ -716,7 +716,7 @@ public class LauncherAppsService extends SystemService {
                     visiblePackages.add(info.getActivityInfo().packageName);
                 }
                 final List<ApplicationInfo> installedPackages =
-                        mPackageManagerInternal.getInstalledApplicationsCrossUser(
+                        mPackageManagerInternal.getInstalledApplications(
                                 /* flags= */ 0, user.getIdentifier(), callingUid);
                 for (ApplicationInfo applicationInfo : installedPackages) {
                     if (!visiblePackages.contains(applicationInfo.packageName)) {

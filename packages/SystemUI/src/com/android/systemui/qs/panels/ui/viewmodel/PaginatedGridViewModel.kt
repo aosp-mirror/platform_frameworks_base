@@ -43,4 +43,10 @@ constructor(
             SharingStarted.WhileSubscribed(),
             paginatedGridInteractor.defaultRows,
         )
+
+    /*
+     * Tracks whether the current HorizontalPager (using this viewmodel) is in the first page.
+     * This requires it to be a `@SysUISingleton` to be shared between viewmodels.
+     */
+    var inFirstPage = true
 }

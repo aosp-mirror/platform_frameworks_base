@@ -86,6 +86,7 @@ class DeviceSettingsConfigTest {
         assertThat(fromParcel.moreSettingsHelpItem?.packageName).isEqualTo("package_name_2")
         assertThat(fromParcel.moreSettingsHelpItem?.className).isEqualTo("class_name_2")
         assertThat(fromParcel.moreSettingsHelpItem?.intentAction).isEqualTo("intent_action_2")
+        assertThat(fromParcel.extras.getString("key1")).isEqualTo("value1")
     }
 
     private fun writeAndRead(item: DeviceSettingsConfig): DeviceSettingsConfig {

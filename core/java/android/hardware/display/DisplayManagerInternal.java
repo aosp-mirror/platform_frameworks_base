@@ -431,6 +431,17 @@ public abstract class DisplayManagerInternal {
      */
     public abstract IntArray getDisplayGroupIds();
 
+
+    /**
+     * Get all display ids belonging to the display group with given id.
+     */
+    public abstract int[] getDisplayIdsForGroup(int groupId);
+
+    /**
+     * Get the mapping of display group ids to the display ids that belong to them.
+     */
+    public abstract SparseArray<int[]> getDisplayIdsByGroupsIds();
+
     /**
      * Get all available display ids.
      */
@@ -442,6 +453,11 @@ public abstract class DisplayManagerInternal {
      * @param isShown whether presentation is shown.
      */
     public abstract void onPresentation(int displayId, boolean isShown);
+
+    /**
+     * Called upon the usage of stylus.
+     */
+    public abstract void stylusGestureStarted(long eventTime);
 
     /**
      * Describes the requested power state of the display.

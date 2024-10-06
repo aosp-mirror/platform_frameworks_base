@@ -274,7 +274,8 @@ public class BubbleController implements ConfigurationChangeListener,
     private final DragAndDropController mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
-
+    /** Used to track previous navigation mode to detect switch to buttons navigation. */
+    private boolean mIsPrevNavModeGestures;
     /** Used to send updates to the views from {@link #mBubbleDataListener}. */
     private BubbleViewCallback mBubbleViewCallback;
 
@@ -356,6 +357,7 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         };
         mExpandedViewManager = BubbleExpandedViewManager.fromBubbleController(this);
+        mIsPrevNavModeGestures = ContextUtils.isGestureNavigationMode(mContext);
     }
 
     private void registerOneHandedState(OneHandedController oneHanded) {
@@ -589,6 +591,13 @@ public class BubbleController implements ConfigurationChangeListener,
      */
     private void sendInitialListenerUpdate() {
         if (mBubbleStateListener != null) {
+            boolean isCurrentNavModeGestures = ContextUtils.isGestureNavigationMode(mContext);
+            if (mIsPrevNavModeGestures && !isCurrentNavModeGestures) {
+                BubbleBarLocation navButtonsLocation = ContextUtils.isRtl(mContext)
+                        ? BubbleBarLocation.RIGHT : BubbleBarLocation.LEFT;
+                mBubblePositioner.setBubbleBarLocation(navButtonsLocation);
+            }
+            mIsPrevNavModeGestures = isCurrentNavModeGestures;
             BubbleBarUpdate update = mBubbleData.getInitialStateForBubbleBar();
             mBubbleStateListener.onBubbleStateChange(update);
         }
@@ -2001,6 +2010,10 @@ public class BubbleController implements ConfigurationChangeListener,
             // in bubble bar mode, let the request to show the expanded view come from launcher.
             // only collapse here if we're collapsing.
             if (mLayerView != null && !isExpanded) {
+                if (mBubblePositioner.isImeVisible()) {
+                    // If we're collapsing, hide the IME
+                    hideCurrentInputMethod();
+                }
                 mLayerView.collapse();
             }
         }

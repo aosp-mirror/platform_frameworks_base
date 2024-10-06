@@ -25,6 +25,7 @@ import static com.android.server.crashrecovery.CrashRecoveryUtils.dumpCrashRecov
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -46,6 +47,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.LongArrayQueue;
 import android.util.Slog;
@@ -91,6 +93,7 @@ import java.util.concurrent.TimeUnit;
  * Monitors the health of packages on the system and notifies interested observers when packages
  * fail. On failure, the registered observer with the least user impacting mitigation will
  * be notified.
+ * @hide
  */
 public class PackageWatchdog {
     private static final String TAG = "PackageWatchdog";
@@ -108,13 +111,25 @@ public class PackageWatchdog {
     private static final long NUMBER_OF_NATIVE_CRASH_POLLS = 10;
 
 
+    /** Reason for package failure could not be determined. */
     public static final int FAILURE_REASON_UNKNOWN = 0;
+
+    /** The package had a native crash. */
     public static final int FAILURE_REASON_NATIVE_CRASH = 1;
+
+    /** The package failed an explicit health check. */
     public static final int FAILURE_REASON_EXPLICIT_HEALTH_CHECK = 2;
+
+    /** The app crashed. */
     public static final int FAILURE_REASON_APP_CRASH = 3;
+
+    /** The app was not responding. */
     public static final int FAILURE_REASON_APP_NOT_RESPONDING = 4;
+
+    /** The device was boot looping. */
     public static final int FAILURE_REASON_BOOT_LOOP = 5;
 
+    /** @hide */
     @IntDef(prefix = { "FAILURE_REASON_" }, value = {
             FAILURE_REASON_UNKNOWN,
             FAILURE_REASON_NATIVE_CRASH,
@@ -186,7 +201,15 @@ public class PackageWatchdog {
     // aborted.
     private static final String METADATA_FILE = "/metadata/watchdog/mitigation_count.txt";
 
-    @GuardedBy("PackageWatchdog.class")
+    /**
+     * EventLog tags used when logging into the event log. Note the values must be sync with
+     * frameworks/base/services/core/java/com/android/server/EventLogTags.logtags to get correct
+     * name translation.
+     */
+    private static final int LOG_TAG_RESCUE_NOTE = 2900;
+
+    private static final Object sPackageWatchdogLock = new Object();
+    @GuardedBy("sPackageWatchdogLock")
     private static PackageWatchdog sPackageWatchdog;
 
     private final Object mLock = new Object();
@@ -278,8 +301,8 @@ public class PackageWatchdog {
     }
 
     /** Creates or gets singleton instance of PackageWatchdog. */
-    public static PackageWatchdog getInstance(Context context) {
-        synchronized (PackageWatchdog.class) {
+    public static  @NonNull PackageWatchdog getInstance(@NonNull Context context) {
+        synchronized (sPackageWatchdogLock) {
             if (sPackageWatchdog == null) {
                 new PackageWatchdog(context);
             }
@@ -290,6 +313,7 @@ public class PackageWatchdog {
     /**
      * Called during boot to notify when packages are ready on the device so we can start
      * binding.
+     * @hide
      */
     public void onPackagesReady() {
         synchronized (mLock) {
@@ -311,6 +335,7 @@ public class PackageWatchdog {
      *
      * <p>Observers are expected to call this on boot. It does not specify any packages but
      * it will resume observing any packages requested from a previous boot.
+     * @hide
      */
     public void registerHealthObserver(PackageHealthObserver observer) {
         synchronized (mLock) {
@@ -344,6 +369,7 @@ public class PackageWatchdog {
      *
      * <p>If {@code durationMs} is less than 1, a default monitoring duration
      * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
+     * @hide
      */
     public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
             long durationMs) {
@@ -407,6 +433,7 @@ public class PackageWatchdog {
      * Unregisters {@code observer} from listening to package failure.
      * Additionally, this stops observing any packages that may have previously been observed
      * even from a previous boot.
+     * @hide
      */
     public void unregisterHealthObserver(PackageHealthObserver observer) {
         mLongTaskHandler.post(() -> {
@@ -425,7 +452,7 @@ public class PackageWatchdog {
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
-    public void onPackageFailure(List<VersionedPackage> packages,
+    public void onPackageFailure(@NonNull List<VersionedPackage> packages,
             @FailureReasons int failureReason) {
         if (packages == null) {
             Slog.w(TAG, "Could not resolve a list of failing packages");
@@ -566,6 +593,7 @@ public class PackageWatchdog {
      *
      * Note: PackageWatchdog considers system_server restart loop as bootloop. Full reboots
      * are not counted in bootloop.
+     * @hide
      */
     @SuppressWarnings("GuardedBy")
     public void noteBoot() {
@@ -620,7 +648,7 @@ public class PackageWatchdog {
     // TODO(b/120598832): Optimize write? Maybe only write a separate smaller file? Also
     // avoid holding lock?
     // This currently adds about 7ms extra to shutdown thread
-    /** Writes the package information to file during shutdown. */
+    /** @hide Writes the package information to file during shutdown. */
     public void writeNow() {
         synchronized (mLock) {
             // Must only run synchronous tasks as this runs on the ShutdownThread and no other
@@ -674,6 +702,7 @@ public class PackageWatchdog {
      * Since this method can eventually trigger a rollback, it should be called
      * only once boot has completed {@code onBootCompleted} and not earlier, because the install
      * session must be entirely completed before we try to rollback.
+     * @hide
      */
     public void scheduleCheckAndMitigateNativeCrashes() {
         Slog.i(TAG, "Scheduling " + mNumberOfNativeCrashPollsRemaining + " polls to check "
@@ -695,7 +724,9 @@ public class PackageWatchdog {
         return mPackagesExemptFromImpactLevelThreshold;
     }
 
-    /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}. */
+    /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}.
+     * @hide
+     */
     @Retention(SOURCE)
     @IntDef(value = {PackageHealthObserverImpact.USER_IMPACT_LEVEL_0,
                      PackageHealthObserverImpact.USER_IMPACT_LEVEL_10,
@@ -787,7 +818,7 @@ public class PackageWatchdog {
          * Identifier for the observer, should not change across device updates otherwise the
          * watchdog may drop observing packages with the old name.
          */
-        String getUniqueIdentifier();
+        @NonNull String getUniqueIdentifier();
 
         /**
          * An observer will not be pruned if this is set, even if the observer is not explicitly
@@ -804,7 +835,7 @@ public class PackageWatchdog {
          * <p> A persistent observer may choose to start observing certain failing packages, even if
          * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
          */
-        default boolean mayObservePackage(String packageName) {
+        default boolean mayObservePackage(@NonNull String packageName) {
             return false;
         }
     }
@@ -1240,7 +1271,7 @@ public class PackageWatchdog {
         }
     }
 
-    /** Convert a {@code LongArrayQueue} to a String of comma-separated values. */
+    /** @hide Convert a {@code LongArrayQueue} to a String of comma-separated values. */
     public static String longArrayQueueToString(LongArrayQueue queue) {
         if (queue.size() > 0) {
             StringBuilder sb = new StringBuilder();
@@ -1254,7 +1285,7 @@ public class PackageWatchdog {
         return "";
     }
 
-    /** Parse a comma-separated String of longs into a LongArrayQueue. */
+    /** @hide Parse a comma-separated String of longs into a LongArrayQueue. */
     public static LongArrayQueue parseLongArrayQueue(String commaSeparatedValues) {
         LongArrayQueue result = new LongArrayQueue();
         if (!TextUtils.isEmpty(commaSeparatedValues)) {
@@ -1268,7 +1299,17 @@ public class PackageWatchdog {
 
 
     /** Dump status of every observer in mAllObservers. */
-    public void dump(PrintWriter pw) {
+    public void dump(@NonNull PrintWriter pw) {
+        if (Flags.synchronousRebootInRescueParty() && RescueParty.isRecoveryTriggeredReboot()) {
+            dumpInternal(pw);
+        } else {
+            synchronized (mLock) {
+                dumpInternal(pw);
+            }
+        }
+    }
+
+    private void dumpInternal(@NonNull PrintWriter pw) {
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
         ipw.println("Package Watchdog status");
         ipw.increaseIndent();
@@ -1395,6 +1436,7 @@ public class PackageWatchdog {
         /**
          * Increments failure counts of {@code packageName}.
          * @returns {@code true} if failure threshold is exceeded, {@code false} otherwise
+         * @hide
          */
         @GuardedBy("mLock")
         public boolean onPackageFailureLocked(String packageName) {
@@ -1514,6 +1556,7 @@ public class PackageWatchdog {
         }
     }
 
+    /** @hide */
     @Retention(SOURCE)
     @IntDef(value = {
             HealthCheckState.ACTIVE,
@@ -1603,7 +1646,9 @@ public class PackageWatchdog {
             updateHealthCheckStateLocked();
         }
 
-        /** Writes the salient fields to disk using {@code out}. */
+        /** Writes the salient fields to disk using {@code out}.
+         * @hide
+         */
         @GuardedBy("mLock")
         public void writeLocked(TypedXmlSerializer out) throws IOException {
             out.startTag(null, TAG_PACKAGE);
@@ -1987,7 +2032,7 @@ public class PackageWatchdog {
             } else {
                 int count = getCount() + 1;
                 setCount(count);
-                EventLogTags.writeRescueNote(Process.ROOT_UID, count, window);
+                EventLog.writeEvent(LOG_TAG_RESCUE_NOTE, Process.ROOT_UID, count, window);
                 if (Flags.recoverabilityDetection()) {
                     // After a reboot (e.g. by WARM_REBOOT or mainline rollback) we apply
                     // mitigations without waiting for DEFAULT_BOOT_LOOP_TRIGGER_COUNT.

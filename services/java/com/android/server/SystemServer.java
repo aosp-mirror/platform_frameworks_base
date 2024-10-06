@@ -109,7 +109,7 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.protolog.ProtoLogConfigurationServiceImpl;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -1114,7 +1114,7 @@ public final class SystemServer implements Dumpable {
         }
 
         t.traceBegin("InitializeProtoLog");
-        ProtoLog.init(ProtoLogGroup.values());
+        ProtoLog.init(WmProtoLogGroups.values());
         t.traceEnd();
 
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and

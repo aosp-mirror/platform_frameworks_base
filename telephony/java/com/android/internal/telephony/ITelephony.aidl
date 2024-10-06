@@ -3433,4 +3433,26 @@ interface ITelephony {
      * @hide
      */
     ComponentName getTestEuiccUiComponent();
+
+    /**
+     * This API can be used only for test purpose to override the carrier romaing Ntn eligibility
+     *
+     * @param status to update Ntn Eligibility.
+     * @param resetRequired to reset the overridden flag in satellite controller.
+     * @return {@code true} if the shell command is successful, {@code false} otherwise.
+     * @hide
+     */
+    boolean overrideCarrierRoamingNtnEligibilityChanged(
+            in boolean status, in boolean resetRequired);
+
+    /**
+     * Deliver the list of deprovisioned satellite subscriber infos.
+     *
+     * @param list The list of deprovisioned satellite subscriber infos.
+     * @param result The result receiver that returns whether deliver success or fail.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+            + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
+    void deprovisionSatellite(in List<SatelliteSubscriberInfo> list, in ResultReceiver result);
 }

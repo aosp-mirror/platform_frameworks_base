@@ -67,13 +67,14 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
@@ -130,7 +131,7 @@ import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.LauncherAppsService.LauncherAppsServiceInternal;
@@ -571,7 +572,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     // {@link #applySyncTransaction} with Shell transition.
                     // We still want to apply and merge the transaction to the active sync
                     // because {@code shouldApplyIndependently} is {@code false}.
-                    ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+                    ProtoLog.w(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                             "TaskFragmentTransaction changes are not collected in transition"
                                     + " because there is an ongoing sync for"
                                     + " applySyncTransaction().");
@@ -1447,6 +1448,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (mService.mBackNavigationController.restoreBackNavigation()) {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
+                break;
+            }
+            case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                if (container == null) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                container.setExcludeInsetsTypes(hop.getExcludeInsetsTypes());
                 break;
             }
         }

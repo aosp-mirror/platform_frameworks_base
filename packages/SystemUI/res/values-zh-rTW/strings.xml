@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"對話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有靜音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"「零打擾」模式已將通知設為暫停"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"沒有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"沒有新通知"</string>
@@ -1179,10 +1181,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"喇叭和螢幕"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"建議的裝置"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"輸入"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"輸出"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"停止共用的工作階段，即可將媒體移至其他裝置"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"停止"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"廣播功能的運作方式"</string>
@@ -1398,8 +1398,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"收合圖示"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"展開圖示"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"或"</string>
-    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
-    <skip />
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"拖曳控點"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用鍵盤操作"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"學習鍵盤快速鍵"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"使用觸控板操作"</string>
@@ -1421,7 +1420,7 @@
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"查看最近使用的應用程式"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"在觸控板上用三指向上滑動並按住。"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"太棒了！"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"你已完成「查看最近使用的應用程式」手勢的教學課程。"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"你已完成「查看最近使用的應用程式」手勢教學課程。"</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"快捷操作鍵"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"如要存取應用程式，請按下鍵盤上的快捷操作鍵。"</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"恭喜！"</string>
@@ -1446,7 +1445,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"使用鍵盤查看所有應用程式"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"你隨時可以按下快捷操作鍵。輕觸即可進一步瞭解手勢。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"「超暗」已併入亮度滑桿"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"現在只要將亮度調得更低，螢幕就會變得更暗。\n\n這項功能已併入亮度滑桿，因此系統將移除「超暗」捷徑。"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"現在你可以將亮度調得比以往更低，把螢幕變得更暗。\n\n超暗功能現已併入亮度滑桿，因此系統將移除功能捷徑。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"移除「超暗」捷徑"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"「超暗」捷徑已移除"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"連線"</string>

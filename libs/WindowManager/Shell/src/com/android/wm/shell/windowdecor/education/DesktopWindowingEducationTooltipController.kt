@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.windowdecor.education
 
+import android.annotation.ColorInt
 import android.annotation.DimenRes
 import android.annotation.LayoutRes
 import android.content.Context
@@ -30,9 +31,14 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.window.DisplayAreaInfo
+import android.window.WindowContainerTransaction
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.wm.shell.R
+import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.shared.animation.PhysicsAnimator
 import com.android.wm.shell.windowdecor.WindowManagerWrapper
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
@@ -44,7 +50,8 @@ import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystem
 class DesktopWindowingEducationTooltipController(
     private val context: Context,
     private val additionalSystemViewContainerFactory: AdditionalSystemViewContainer.Factory,
-) {
+    private val displayController: DisplayController,
+) : OnDisplayChangingListener {
   // TODO: b/369384567 - Set tooltip color scheme to match LT/DT of app theme
   private var tooltipView: View? = null
   private var animator: PhysicsAnimator<View>? = null
@@ -52,6 +59,20 @@ class DesktopWindowingEducationTooltipController(
     PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_LOW_BOUNCY)
   }
   private var popupWindow: AdditionalSystemViewContainer? = null
+
+  override fun onDisplayChange(
+      displayId: Int,
+      fromRotation: Int,
+      toRotation: Int,
+      newDisplayAreaInfo: DisplayAreaInfo?,
+      t: WindowContainerTransaction?
+  ) {
+    // Exit if the rotation hasn't changed or is changed by 180 degrees. [fromRotation] and
+    // [toRotation] can be one of the [@Surface.Rotation] values.
+    if ((fromRotation % 2 == toRotation % 2)) return
+    hideEducationTooltip()
+    // TODO: b/370820018 - Update tooltip position on orientation change instead of dismissing
+  }
 
   /**
    * Shows education tooltip.
@@ -64,6 +85,7 @@ class DesktopWindowingEducationTooltipController(
     tooltipView = createEducationTooltipView(tooltipViewConfig, taskId)
     animator = createAnimator()
     animateShowTooltipTransition()
+    displayController.addDisplayChangingController(this)
   }
 
   /** Hide the current education view if visible */
@@ -100,6 +122,7 @@ class DesktopWindowingEducationTooltipController(
                 hideEducationTooltip()
                 tooltipViewConfig.onEducationClickAction()
               }
+              setTooltipColorScheme(tooltipViewConfig.tooltipColorScheme)
             }
 
     val tooltipDimens = tooltipDimens(tooltipView = tooltipView, tooltipViewConfig.arrowDirection)
@@ -145,6 +168,7 @@ class DesktopWindowingEducationTooltipController(
     animator = null
     popupWindow?.releaseView()
     popupWindow = null
+    displayController.removeDisplayChangingController(this)
   }
 
   private fun createTooltipPopupWindow(
@@ -166,6 +190,21 @@ class DesktopWindowingEducationTooltipController(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             view = tooltipView)
+  }
+
+  private fun View.setTooltipColorScheme(tooltipColorScheme: TooltipColorScheme) {
+    requireViewById<LinearLayout>(R.id.tooltip_container).apply {
+      background.setTint(tooltipColorScheme.container)
+    }
+    requireViewById<ImageView>(R.id.arrow_icon).apply {
+      val wrappedDrawable = DrawableCompat.wrap(this.drawable)
+      DrawableCompat.setTint(wrappedDrawable, tooltipColorScheme.container)
+    }
+    requireViewById<TextView>(R.id.tooltip_text).apply { setTextColor(tooltipColorScheme.text) }
+    requireViewById<ImageView>(R.id.tooltip_icon).apply {
+      val wrappedDrawable = DrawableCompat.wrap(this.drawable)
+      DrawableCompat.setTint(wrappedDrawable, tooltipColorScheme.icon)
+    }
   }
 
   private fun tooltipViewGlobalCoordinates(
@@ -234,11 +273,25 @@ class DesktopWindowingEducationTooltipController(
    */
   data class EducationViewConfig(
       @LayoutRes val tooltipViewLayout: Int,
+      val tooltipColorScheme: TooltipColorScheme,
       val tooltipViewGlobalCoordinates: Point,
       val tooltipText: String,
       val arrowDirection: TooltipArrowDirection,
       val onEducationClickAction: () -> Unit,
       val onDismissAction: () -> Unit,
+  )
+
+  /**
+   * Color scheme of education view:
+   *
+   * @property container Color of the container of the tooltip.
+   * @property text Text color of the [TextView] of education tooltip.
+   * @property icon Color to be filled in tooltip's icon.
+   */
+  data class TooltipColorScheme(
+      @ColorInt val container: Int,
+      @ColorInt val text: Int,
+      @ColorInt val icon: Int,
   )
 
   /** Direction of arrow of the tooltip */

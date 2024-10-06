@@ -186,7 +186,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.STEM_PRIMARY_BUTTON_SHORT_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(
-                Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 1));
+                Global.STEM_PRIMARY_BUTTON_DOUBLE_PRESS, new InclusiveIntegerRangeValidator(0, 2));
         VALIDATORS.put(
                 Global.STEM_PRIMARY_BUTTON_TRIPLE_PRESS, new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(
@@ -434,7 +434,7 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(Global.Wearable.PHONE_SWITCHING_STATUS,
                 new InclusiveIntegerRangeValidator(
                         Global.Wearable.PHONE_SWITCHING_STATUS_NOT_STARTED,
-                        Global.Wearable.PHONE_SWITCHING_STATUS_IN_PROGRESS_MIGRATION_SUCCESS));
+                        Global.Wearable.PHONE_SWITCHING_STATUS_ACCOUNTS_MATCHED));
         VALIDATORS.put(Global.Wearable.REDUCE_MOTION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Global.Wearable.RTL_SWIPE_TO_DISMISS_ENABLED_DEV, BOOLEAN_VALIDATOR);
         VALIDATORS.put(

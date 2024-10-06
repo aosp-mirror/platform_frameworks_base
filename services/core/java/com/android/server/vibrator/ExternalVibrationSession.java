@@ -56,24 +56,26 @@ final class ExternalVibrationSession extends Vibration
     }
 
     @Override
+    public long getCreateUptimeMillis() {
+        return stats.getCreateUptimeMillis();
+    }
+
+    @Override
     public CallerInfo getCallerInfo() {
         return callerInfo;
     }
 
     @Override
-    public VibrationSession.DebugInfo getDebugInfo() {
-        return new Vibration.DebugInfoImpl(getStatus(), stats, /* playedEffect= */ null,
-                /* originalEffect= */ null, mScale.scaleLevel, mScale.adaptiveHapticsScale,
-                callerInfo);
+    public IBinder getCallerToken() {
+        return mExternalVibration.getToken();
     }
 
     @Override
-    public VibrationStats.StatsInfo getStatsInfo(long completionUptimeMillis) {
-        return new VibrationStats.StatsInfo(
-                mExternalVibration.getUid(),
-                FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__EXTERNAL,
-                mExternalVibration.getVibrationAttributes().getUsage(), getStatus(), stats,
-                completionUptimeMillis);
+    public VibrationSession.DebugInfo getDebugInfo() {
+        return new Vibration.DebugInfoImpl(getStatus(), callerInfo,
+                FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__EXTERNAL, stats,
+                /* playedEffect= */ null, /* originalEffect= */ null, mScale.scaleLevel,
+                mScale.adaptiveHapticsScale);
     }
 
     @Override
@@ -83,6 +85,12 @@ final class ExternalVibrationSession extends Vibration
         int usage = mExternalVibration.getVibrationAttributes().getUsage();
         return usage == VibrationAttributes.USAGE_RINGTONE
                 || usage == VibrationAttributes.USAGE_ALARM;
+    }
+
+    @Override
+    public boolean wasEndRequested() {
+        // End request is immediate, so just check if vibration has already ended.
+        return hasEnded();
     }
 
     @Override
@@ -104,10 +112,12 @@ final class ExternalVibrationSession extends Vibration
 
     @Override
     public void binderDied() {
+        Runnable callback;
         synchronized (mLock) {
-            if (mBinderDeathCallback != null) {
-                mBinderDeathCallback.run();
-            }
+            callback = mBinderDeathCallback;
+        }
+        if (callback != null) {
+            callback.run();
         }
     }
 
@@ -129,6 +139,16 @@ final class ExternalVibrationSession extends Vibration
         // Notify external client that this vibration should stop sending data to the vibrator.
         mExternalVibration.mute();
         end(new EndInfo(status, endedBy));
+    }
+
+    @Override
+    public void notifyVibratorCallback(int vibratorId, long vibrationId) {
+        // ignored, external control does not expect callbacks from the vibrator
+    }
+
+    @Override
+    public void notifySyncedVibratorsCallback(long vibrationId) {
+        // ignored, external control does not expect callbacks from the vibrator manager
     }
 
     boolean isHoldingSameVibration(ExternalVibration vib) {

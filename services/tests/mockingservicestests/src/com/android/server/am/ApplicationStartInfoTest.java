@@ -39,6 +39,7 @@ import android.content.pm.PackageManagerInternal;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Parcel;
 import android.os.Process;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
@@ -578,6 +579,50 @@ public class ApplicationStartInfoTest {
         // previous one, thereby ensuring it was loaded from disk.
         assertNotNull(mAppStartInfoTracker.mMonotonicClock);
         assertTrue(mAppStartInfoTracker.mMonotonicClock.monotonicTime() >= originalMonotonicTime);
+    }
+
+    /**
+     * Test to confirm that parcel read and write implementations match, correctly loading records
+     * with the same values and leaving no data unread.
+     */
+    @Test
+    public void testParcelReadWriteMatch() throws Exception {
+        // Create a start info records with all fields set.
+        ApplicationStartInfo startInfo = new ApplicationStartInfo(1234L);
+        startInfo.setPid(123);
+        startInfo.setRealUid(987);
+        startInfo.setPackageUid(654);
+        startInfo.setDefiningUid(321);
+        startInfo.setReason(ApplicationStartInfo.START_REASON_LAUNCHER);
+        startInfo.setStartupState(ApplicationStartInfo.STARTUP_STATE_FIRST_FRAME_DRAWN);
+        startInfo.setStartType(ApplicationStartInfo.START_TYPE_WARM);
+        startInfo.setLaunchMode(ApplicationStartInfo.LAUNCH_MODE_SINGLE_TOP);
+        startInfo.setPackageName(APP_1_PACKAGE_NAME);
+        startInfo.setProcessName(APP_1_PROCESS_NAME);
+        startInfo.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_LAUNCH, 999L);
+        startInfo.addStartupTimestamp(ApplicationStartInfo.START_TIMESTAMP_FIRST_FRAME, 888L);
+        startInfo.setForceStopped(true);
+        startInfo.setStartComponent(ApplicationStartInfo.START_COMPONENT_OTHER);
+        startInfo.setIntent(buildIntent(COMPONENT));
+
+        // Write the start info to a parcel.
+        Parcel parcel = Parcel.obtain();
+        startInfo.writeToParcel(parcel, 0 /* flags */);
+
+        // Set the data position back to 0 so it's ready to be read.
+        parcel.setDataPosition(0);
+
+        // Now load the record from the parcel.
+        ApplicationStartInfo startInfoFromParcel = new ApplicationStartInfo(parcel);
+
+        // Make sure there is no unread data remaining in the parcel, and confirm that the loaded
+        // start info object is equal to the one it was written from. Check dataAvail first as if
+        // that check fails then the next check will fail too, but knowing the status of this check
+        // will tell us that we're missing a read or write. Check the objects are equals second as
+        // if the avail check passes and equals fails, then we know we're reading all the data just
+        // not to the correct fields.
+        assertEquals(0, parcel.dataAvail());
+        assertTrue(startInfo.equals(startInfoFromParcel));
     }
 
     private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {

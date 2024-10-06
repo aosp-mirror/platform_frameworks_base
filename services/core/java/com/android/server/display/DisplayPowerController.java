@@ -167,11 +167,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private static final int MSG_SET_DWBC_LOGGING_ENABLED = 16;
     private static final int MSG_SET_BRIGHTNESS_FROM_OFFLOAD = 17;
     private static final int MSG_OFFLOADING_SCREEN_ON_UNBLOCKED = 18;
-
-
+    private static final int MSG_SET_STYLUS_BEING_USED = 19;
+    private static final int MSG_SET_STYLUS_USE_ENDED = 20;
 
     private static final int BRIGHTNESS_CHANGE_STATSD_REPORT_INTERVAL_MS = 500;
-
 
     // State machine constants for tracking initial brightness ramp skipping when enabled.
     private static final int RAMP_STATE_SKIP_NONE = 0;
@@ -191,6 +190,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 60, 70, 80,
         90, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200,
         1400, 1600, 1800, 2000, 2250, 2500, 2750, 3000};
+
+    private static final int STYLUS_USAGE_DEBOUNCE_TIME  = 1000;
+    private static final int NANO_SECONDS_TO_MILLI_SECONDS_RATIO  = 1_000_000;
+
     private static final int[] BRIGHTNESS_RANGE_INDEX = {
         FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__BUCKET_INDEX__RANGE_UNKNOWN,
         FrameworkStatsLog.DISPLAY_BRIGHTNESS_CHANGED__BUCKET_INDEX__RANGE_0_1,
@@ -498,6 +501,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @GuardedBy("mLock")
     private int mPendingOverrideDozeScreenStateLocked;
 
+    private long mLastStylusUsageEventTime = -1;
+
+    // The time of inactivity after which the stylus can be assumed to be no longer in use.
+    private long mIdleStylusTimeoutMillisConfig = 0;
+
     /**
      * Creates the display power controller.
      */
@@ -518,6 +526,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mSensorManager = sensorManager;
         mHandler = new DisplayControllerHandler(handler.getLooper());
         mDisplayDeviceConfig = mDisplayDevice.getDisplayDeviceConfig();
+        mIdleStylusTimeoutMillisConfig = mDisplayDeviceConfig.getIdleStylusTimeoutMillis();
         mIsEnabled = logicalDisplay.isEnabledLocked();
         mIsInTransition = logicalDisplay.isInTransitionLocked();
         mIsDisplayInternal = displayDeviceInfo.type == Display.TYPE_INTERNAL;
@@ -893,6 +902,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mPhysicalDisplayName = displayName;
                 mDisplayStatsId = mUniqueDisplayId.hashCode();
                 mDisplayDeviceConfig = config;
+                mIdleStylusTimeoutMillisConfig = mDisplayDeviceConfig.getIdleStylusTimeoutMillis();
                 mThermalBrightnessThrottlingDataId = thermalBrightnessThrottlingDataId;
                 loadFromDisplayDeviceConfig(token, info, hbmMetadata);
                 mDisplayPowerProximityStateController.notifyDisplayDeviceChanged(config);
@@ -1480,29 +1490,24 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightnessState = clampScreenBrightness(brightnessState);
         }
 
-        if (useDozeBrightness) {
-            // TODO(b/329676661): Introduce a config property to choose between this brightness
-            //  strategy and DOZE_DEFAULT
-            // On some devices, when auto-brightness is disabled and the device is dozing, we use
-            // the current brightness setting scaled by the doze scale factor
-            if ((Float.isNaN(brightnessState)
-                    || displayBrightnessState.getDisplayBrightnessStrategyName()
-                    .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME))
-                    && mFlags.isDisplayOffloadEnabled()
-                    && mDisplayOffloadSession != null
+        if (useDozeBrightness && (Float.isNaN(brightnessState)
+                || displayBrightnessState.getDisplayBrightnessStrategyName()
+                .equals(DisplayBrightnessStrategyConstants.FALLBACK_BRIGHTNESS_STRATEGY_NAME))) {
+            if (mFlags.isDisplayOffloadEnabled() && mDisplayOffloadSession != null
                     && (mAutomaticBrightnessController == null
                     || !mAutomaticBrightnessStrategy.shouldUseAutoBrightness())) {
+                // TODO(b/329676661): Introduce a config property to choose between this brightness
+                //  strategy and DOZE_DEFAULT
+                // On some devices, when auto-brightness is disabled and the device is dozing, we
+                // use the current brightness setting scaled by the doze scale factor
                 rawBrightnessState = getDozeBrightnessForOffload();
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 updateScreenBrightnessSetting = false;
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_MANUAL);
                 mTempBrightnessEvent.setFlags(
                         mTempBrightnessEvent.getFlags() | BrightnessEvent.FLAG_DOZE_SCALE);
-            }
-
-            // Use default brightness when dozing unless overridden.
-            if (Float.isNaN(brightnessState)
-                    && !mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()) {
+            } else if (!mDisplayBrightnessController.isAllowAutoBrightnessWhileDozingConfig()) {
+                // Use default brightness when dozing unless overridden.
                 rawBrightnessState = mScreenBrightnessDozeConfig;
                 brightnessState = clampScreenBrightness(rawBrightnessState);
                 mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE_DEFAULT);
@@ -2976,6 +2981,18 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mDisplayId == Display.DEFAULT_DISPLAY || mBootCompleted;
     }
 
+    public void stylusGestureStarted(long eventTimeNanoSeconds) {
+        long eventTimeMs = eventTimeNanoSeconds / NANO_SECONDS_TO_MILLI_SECONDS_RATIO;
+        if (mLastStylusUsageEventTime == -1
+                || eventTimeMs > mLastStylusUsageEventTime + STYLUS_USAGE_DEBOUNCE_TIME) {
+            synchronized (mLock) {
+                // Add a message to notify the stylus usage has started
+                mHandler.sendEmptyMessageAtTime(MSG_SET_STYLUS_BEING_USED, mClock.uptimeMillis());
+            }
+            mLastStylusUsageEventTime = eventTimeMs;
+        }
+    }
+
     private final class DisplayControllerHandler extends Handler {
         DisplayControllerHandler(Looper looper) {
             super(looper, null, true /*async*/);
@@ -3091,6 +3108,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                             Float.intBitsToFloat(msg.arg1))) {
                         updatePowerState();
                     }
+                    break;
+                case MSG_SET_STYLUS_BEING_USED:
+                    // Remove any MSG_SET_STYLUS_USE_ENDED message from the handler queue and
+                    // post a delayed MSG_SET_STYLUS_USE_ENDED message to delay the stylus
+                    // usage ended event processing
+                    mHandler.removeMessages(MSG_SET_STYLUS_USE_ENDED);
+                    Message message = mHandler.obtainMessage(MSG_SET_STYLUS_USE_ENDED);
+                    mHandler.sendMessageAtTime(message,
+                            mClock.uptimeMillis() + mIdleStylusTimeoutMillisConfig);
+                    mDisplayBrightnessController.setStylusBeingUsed(true);
+                    break;
+                case MSG_SET_STYLUS_USE_ENDED:
+                    mDisplayBrightnessController.setStylusBeingUsed(false);
+                    updatePowerState();
                     break;
             }
         }

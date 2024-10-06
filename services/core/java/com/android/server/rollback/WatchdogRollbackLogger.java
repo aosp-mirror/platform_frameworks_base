@@ -51,6 +51,7 @@ import java.util.List;
 
 /**
  * This class handles the logic for logging Watchdog-triggered rollback events.
+ * @hide
  */
 public final class WatchdogRollbackLogger {
     private static final String TAG = "WatchdogRollbackLogger";

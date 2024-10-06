@@ -68,6 +68,13 @@ flag {
 }
 
 flag {
+    name: "multiuser_widget"
+    namespace: "multiuser"
+    description: "Implement the Multiuser Widget"
+    bug: "365748524"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     is_exported: true
     namespace: "profile_experiences"
@@ -449,11 +456,20 @@ flag {
   }
 }
 
-
 flag {
     name: "caching_development_improvements"
     namespace: "multiuser"
     description: "System API to simplify caching implamentations"
     bug: "364947162"
     is_fixed_read_only: true
+}
+
+flag {
+  name: "show_custom_unlock_title_inside_private_profile"
+  namespace: "profile_experiences"
+  description: "When private space is unlocked show dynamic title in unlock factor screens based on lock factor set for the profile"
+  bug: "323835257"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

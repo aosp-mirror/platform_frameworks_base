@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.CancellationSignal;
+import android.util.Log;
 
 import java.util.function.Consumer;
 
@@ -143,7 +144,11 @@ public abstract class AppFunctionService extends Service {
      */
     @MainThread
     @Deprecated
-    public abstract void onExecuteFunction(
+    public void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
+        Log.w(
+                "AppFunctionService",
+                "Calling deprecated default implementation of onExecuteFunction");
+    }
 }

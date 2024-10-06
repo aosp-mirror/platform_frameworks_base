@@ -1735,7 +1735,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"HIDUP"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"MATI"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda berkaitan dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang berkaitan dengan keperluan kebolehaksesan anda tetapi bukan untuk kebanyakan apl."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Melihat dan melaksanakan tindakan"</string>

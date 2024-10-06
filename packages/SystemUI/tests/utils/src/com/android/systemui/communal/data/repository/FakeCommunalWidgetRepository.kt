@@ -31,7 +31,7 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
         provider: ComponentName,
         user: UserHandle,
         rank: Int?,
-        configurator: WidgetConfigurator?
+        configurator: WidgetConfigurator?,
     ) {
         coroutineScope.launch {
             val id = nextWidgetId++
@@ -91,6 +91,22 @@ class FakeCommunalWidgetRepository(private val coroutineScope: CoroutineScope) :
     override fun deleteWidget(widgetId: Int) {
         fakeDatabase.remove(widgetId)
         _communalWidgets.value = fakeDatabase.values.toList()
+    }
+
+    override fun updateWidgetSpanY(widgetId: Int, spanY: Int) {
+        coroutineScope.launch {
+            fakeDatabase[widgetId]?.let { widget ->
+                when (widget) {
+                    is CommunalWidgetContentModel.Available -> {
+                        fakeDatabase[widgetId] = widget.copy(spanY = spanY)
+                    }
+                    is CommunalWidgetContentModel.Pending -> {
+                        fakeDatabase[widgetId] = widget.copy(spanY = spanY)
+                    }
+                }
+                _communalWidgets.value = fakeDatabase.values.toList()
+            }
+        }
     }
 
     override fun restoreWidgets(oldToNewWidgetIdMap: Map<Int, Int>) {}

@@ -22,15 +22,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
+import com.android.systemui.Flags;
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.model.Edge;
 import com.android.systemui.keyguard.shared.model.KeyguardState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
@@ -85,6 +88,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private boolean mNotifPanelLaunchingActivity;
     private boolean mCommunalShowing = false;
     private boolean mLockscreenShowing = false;
+    private boolean mLockscreenInGoneTransition = false;
 
     private boolean mPipelineRunAllowed;
     private boolean mReorderingAllowed;
@@ -158,6 +162,13 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                             KeyguardState.LOCKSCREEN),
                     this::onLockscreenKeyguardStateTransitionValueChanged);
         }
+        if (Flags.checkLockscreenGoneTransition()) {
+            mJavaAdapter.alwaysCollectFlow(mKeyguardTransitionInteractor.isInTransition(
+                            Edge.create(KeyguardState.LOCKSCREEN, Scenes.Gone),
+                            Edge.create(KeyguardState.LOCKSCREEN, KeyguardState.GONE)),
+                    this::onLockscreenInGoneTransitionChanged);
+        }
+
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -239,7 +250,9 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
     private void updateAllowedStates(String field, boolean value) {
         boolean wasPipelineRunAllowed = mPipelineRunAllowed;
         boolean wasReorderingAllowed = mReorderingAllowed;
-        mPipelineRunAllowed = !isPanelCollapsingOrLaunchingActivity();
+        // No need to run notification pipeline when the lockscreen is in fading animation.
+        mPipelineRunAllowed = !(isPanelCollapsingOrLaunchingActivity()
+                || (Flags.checkLockscreenGoneTransition() && mLockscreenInGoneTransition));
         mReorderingAllowed = isReorderingAllowed();
         if (wasPipelineRunAllowed != mPipelineRunAllowed
                 || wasReorderingAllowed != mReorderingAllowed) {
@@ -330,7 +343,6 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
                     updateAllowedStates("fullyDozed", fullyDozed);
                 }
             };
-
     final WakefulnessLifecycle.Observer mWakefulnessObserver = new WakefulnessLifecycle.Observer() {
         @Override
         public void onFinishedGoingToSleep() {
@@ -353,6 +365,9 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         pw.println("pipelineRunAllowed: " + mPipelineRunAllowed);
         pw.println("  notifPanelCollapsing: " + mNotifPanelCollapsing);
         pw.println("  launchingNotifActivity: " + mNotifPanelLaunchingActivity);
+        if (Flags.checkLockscreenGoneTransition()) {
+            pw.println("  lockscreenInGoneTransition: " + mLockscreenInGoneTransition);
+        }
         pw.println("reorderingAllowed: " + mReorderingAllowed);
         pw.println("  sleepy: " + mSleepy);
         pw.println("  fullyDozed: " + mFullyDozed);
@@ -400,5 +415,16 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
 
         mLockscreenShowing = isShowing;
         updateAllowedStates("lockscreenShowing", isShowing);
+    }
+
+    private void onLockscreenInGoneTransitionChanged(boolean inGoneTransition) {
+        if (!Flags.checkLockscreenGoneTransition()) {
+            return;
+        }
+        if (inGoneTransition == mLockscreenInGoneTransition) {
+            return;
+        }
+        mLockscreenInGoneTransition = inGoneTransition;
+        updateAllowedStates("lockscreenInGoneTransition", mLockscreenInGoneTransition);
     }
 }

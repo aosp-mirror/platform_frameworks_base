@@ -47,7 +47,6 @@ import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
-import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.MagnificationSpec;
 import android.view.View;
@@ -1637,9 +1636,10 @@ public class FullScreenMagnificationController implements
      * <strong>if scale is >= {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}</strong>.
      * We assume if the scale is < {@link MagnificationConstants.PERSISTED_SCALE_MIN_VALUE}, there
      * will be no obvious magnification effect.
+     * Only the value of the default display is persisted in user's settings.
      */
     public void persistScale(int displayId) {
-        final float scale = getScale(Display.DEFAULT_DISPLAY);
+        final float scale = getScale(displayId);
         if (scale < MagnificationConstants.PERSISTED_SCALE_MIN_VALUE) {
             return;
         }

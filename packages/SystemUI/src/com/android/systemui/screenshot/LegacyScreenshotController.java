@@ -301,7 +301,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         saveScreenshotInBackground(screenshot, requestId, finisher, result -> {
             if (result.uri != null) {
                 ScreenshotSavedResult savedScreenshot = new ScreenshotSavedResult(
-                        result.uri, screenshot.getUserOrDefault(), result.timestamp);
+                        result.uri, screenshot.getUserHandle(), result.timestamp);
                 mActionsController.setCompletedScreenshot(requestId, savedScreenshot);
             }
         });

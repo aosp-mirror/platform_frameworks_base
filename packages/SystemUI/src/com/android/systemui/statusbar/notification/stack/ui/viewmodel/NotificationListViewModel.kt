@@ -356,11 +356,23 @@ constructor(
         }
     }
 
-    val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
+    val activeHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
-            headsUpNotificationInteractor.pinnedHeadsUpRows.dumpWhileCollecting("pinnedHeadsUpRows")
+            headsUpNotificationInteractor.activeHeadsUpRowKeys.dumpWhileCollecting(
+                "pinnedHeadsUpRows"
+            )
+        }
+    }
+
+    val pinnedHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            headsUpNotificationInteractor.pinnedHeadsUpRowKeys.dumpWhileCollecting(
+                "pinnedHeadsUpRows"
+            )
         }
     }
 

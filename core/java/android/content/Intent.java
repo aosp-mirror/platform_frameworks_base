@@ -1064,11 +1064,7 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         if (sender != null) {
-            if (android.service.chooser.Flags.enableChooserResult()) {
-                intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
-            } else {
-                intent.putExtra(EXTRA_CHOSEN_COMPONENT_INTENT_SENDER, sender);
-            }
+            intent.putExtra(EXTRA_CHOOSER_RESULT_INTENT_SENDER, sender);
         }
 
         // Migrate any clip data and flags from target.
@@ -6425,7 +6421,6 @@ public class Intent implements Parcelable, Cloneable {
      * activity. The IntentSender will have the extra {@link #EXTRA_CHOOSER_RESULT} describing
      * the result.
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
     public static final String EXTRA_CHOOSER_RESULT_INTENT_SENDER =
             "android.intent.extra.CHOOSER_RESULT_INTENT_SENDER";
 
@@ -6435,7 +6430,6 @@ public class Intent implements Parcelable, Cloneable {
      * An instance is supplied to the optional IntentSender provided to
      * {@link #createChooser(Intent, CharSequence, IntentSender)} when the session completes.
      */
-    @FlaggedApi(android.service.chooser.Flags.FLAG_ENABLE_CHOOSER_RESULT)
     public static final String EXTRA_CHOOSER_RESULT = "android.intent.extra.CHOOSER_RESULT";
 
     /**

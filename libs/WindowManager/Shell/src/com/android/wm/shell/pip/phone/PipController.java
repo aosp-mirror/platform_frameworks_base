@@ -592,8 +592,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
                             boolean homeTaskVisible, boolean clearedTask, boolean wasVisible) {
                         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                                "onActivityRestartAttempt: %s", task.topActivity);
-                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED) {
+                                "onActivityRestartAttempt: topActivity=%s, wasVisible=%b",
+                                task.topActivity, wasVisible);
+                        if (task.getWindowingMode() != WINDOWING_MODE_PINNED || !wasVisible) {
                             return;
                         }
                         if (mPipTaskOrganizer.isLaunchToSplit(task)) {

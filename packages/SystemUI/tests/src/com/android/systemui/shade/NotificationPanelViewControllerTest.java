@@ -49,6 +49,7 @@ import android.os.PowerManager;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -68,6 +69,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightCh
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
+
+import com.google.android.msdl.data.model.MSDLToken;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -1457,5 +1460,24 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         when(mQsController.getFalsingThreshold()).thenReturn(14);
 
         assertThat(mNotificationPanelViewController.getFalsingThreshold()).isGreaterThan(14);
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_MSDL_FEEDBACK)
+    public void performHapticFeedback_withMSDL_forGestureStart_deliversDragThresholdToken() {
+        mNotificationPanelViewController
+                .performHapticFeedback(HapticFeedbackConstants.GESTURE_START);
+
+        assertThat(mMSDLPlayer.getLatestTokenPlayed())
+                .isEqualTo(MSDLToken.SWIPE_THRESHOLD_INDICATOR);
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_MSDL_FEEDBACK)
+    public void performHapticFeedback_withMSDL_forReject_deliversFailureToken() {
+        mNotificationPanelViewController
+                .performHapticFeedback(HapticFeedbackConstants.REJECT);
+
+        assertThat(mMSDLPlayer.getLatestTokenPlayed()).isEqualTo(MSDLToken.FAILURE);
     }
 }

@@ -88,6 +88,7 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
@@ -383,6 +384,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(ModesEmptyShadeFix.FLAG_NAME)
     public void updateEmptyView_dndSuppressing() {
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
 
@@ -394,6 +396,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(ModesEmptyShadeFix.FLAG_NAME)
     public void updateEmptyView_dndNotSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
@@ -406,6 +409,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(ModesEmptyShadeFix.FLAG_NAME)
     public void updateEmptyView_noNotificationsToDndSuppressing() {
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
         when(mEmptyShadeView.willBeGone()).thenReturn(true);
@@ -717,7 +721,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, ModesEmptyShadeFix.FLAG_NAME})
     public void testReInflatesFooterViews() {
         when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
         clearInvocations(mStackScroller);
@@ -728,6 +732,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @EnableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags(ModesEmptyShadeFix.FLAG_NAME)
     public void testReInflatesEmptyShadeView() {
         when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
         clearInvocations(mStackScroller);
@@ -1189,7 +1194,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags(FooterViewRefactor.FLAG_NAME)
+    @DisableFlags({FooterViewRefactor.FLAG_NAME, ModesEmptyShadeFix.FLAG_NAME})
     public void hasFilteredOutSeenNotifs_updateEmptyShadeView() {
         mStackScroller.setHasFilteredOutSeenNotifications(true);
         mStackScroller.updateEmptyShadeView(true, false);

@@ -37,6 +37,7 @@ import static com.android.server.display.config.DisplayDeviceConfigTestUtilsKt.c
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -1308,6 +1309,38 @@ public class DisplayManagerServiceTest {
     }
 
     /**
+     * Tests that it's not allowed to create an auto-mirror virtual display without
+     * CAPTURE_VIDEO_OUTPUT permission or a virtual device that can mirror displays
+     */
+    @Test
+    public void createAutoMirrorDisplay_withoutPermissionOrAllowedVirtualDevice_throwsException()
+            throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(virtualDevice.canCreateMirrorDisplays()).thenReturn(false);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+        when(mContext.checkCallingPermission(CAPTURE_VIDEO_OUTPUT)).thenReturn(
+                PackageManager.PERMISSION_DENIED);
+
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR)
+                        .setUniqueId("uniqueId --- mirror display");
+        assertThrows(SecurityException.class, () -> {
+            localService.createVirtualDisplay(
+                    builder.build(),
+                    mMockAppToken /* callback */,
+                    virtualDevice /* virtualDeviceToken */,
+                    mock(DisplayWindowPolicyController.class),
+                    PACKAGE_NAME);
+        });
+    }
+
+    /**
      * Tests that the virtual display is added to the default display group when created with
      * VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR using a virtual device.
      */
@@ -1319,6 +1352,7 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create an auto-mirror virtual display using a virtual device.
@@ -1351,6 +1385,7 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create an auto-mirror virtual display using a virtual device.
@@ -1417,6 +1452,7 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
         when(mContext.checkCallingPermission(ADD_ALWAYS_UNLOCKED_DISPLAY))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
@@ -1452,6 +1488,7 @@ public class DisplayManagerServiceTest {
         when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(virtualDevice.canCreateMirrorDisplays()).thenReturn(true);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
         // Create an auto-mirror virtual display using a virtual device.
@@ -1521,6 +1558,47 @@ public class DisplayManagerServiceTest {
         // be invalid.
         assertEquals(localDisplayManager.getDisplayIdToMirror(secondDisplayId),
                 Display.INVALID_DISPLAY);
+    }
+
+    @Test
+    public void testGetDisplayIdsForGroup() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        // Create display 1
+        FakeDisplayDevice displayDevice1 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display1 = logicalDisplayMapper.getDisplayLocked(displayDevice1);
+        final int groupId1 = display1.getDisplayInfoLocked().displayGroupId;
+        // Create display 2
+        FakeDisplayDevice displayDevice2 =
+                createFakeDisplayDevice(displayManager, new float[]{60f}, Display.TYPE_INTERNAL);
+        LogicalDisplay display2 = logicalDisplayMapper.getDisplayLocked(displayDevice2);
+        final int groupId2 = display2.getDisplayInfoLocked().displayGroupId;
+        // Both displays should be in the same display group
+        assertEquals(groupId1, groupId2);
+        final int[] expectedDisplayIds = new int[]{
+                display1.getDisplayIdLocked(), display2.getDisplayIdLocked()};
+
+        final int[] displayIds = localService.getDisplayIdsForGroup(groupId1);
+
+        assertArrayEquals(expectedDisplayIds, displayIds);
+    }
+
+    @Test
+    public void testGetDisplayIdsForUnknownGroup() throws Exception {
+        final int unknownDisplayGroupId = 999;
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        displayManager.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+        LogicalDisplayMapper logicalDisplayMapper = displayManager.getLogicalDisplayMapper();
+        // Verify that display manager does not have display group
+        assertNull(logicalDisplayMapper.getDisplayGroupLocked(unknownDisplayGroupId));
+
+        final int[] displayIds = localService.getDisplayIdsForGroup(unknownDisplayGroupId);
+
+        assertEquals(0, displayIds.length);
     }
 
     @Test

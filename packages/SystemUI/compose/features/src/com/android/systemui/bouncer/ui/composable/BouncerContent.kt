@@ -450,7 +450,7 @@ private fun BesideUserSwitcherLayout(
                             viewModel = viewModel,
                             pinButtonRowVerticalSpacing = 12.dp,
                             centerPatternDotsVertically = true,
-                            modifier = Modifier.align(Alignment.BottomCenter).testTag("InputArea"),
+                            modifier = Modifier.align(Alignment.BottomCenter),
                         )
                     }
 
@@ -904,12 +904,9 @@ private fun UserSwitcherDropdownMenu(
         DropdownMenu(
             expanded = isExpanded,
             onDismissRequest = onDismissed,
-            offset =
-                DpOffset(
-                    x = 0.dp,
-                    y = -UserSwitcherDropdownHeight,
-                ),
-            modifier = Modifier.width(UserSwitcherDropdownWidth),
+            offset = DpOffset(x = 0.dp, y = -UserSwitcherDropdownHeight),
+            modifier =
+                Modifier.width(UserSwitcherDropdownWidth).sysuiResTag("user_switcher_dropdown"),
         ) {
             items.forEach { userSwitcherDropdownItem ->
                 DropdownMenuItem(

@@ -152,6 +152,7 @@ internal constructor(
         internal val DefaultSwipeSpec =
             spring(
                 stiffness = Spring.StiffnessMediumLow,
+                dampingRatio = Spring.DampingRatioLowBouncy,
                 visibilityThreshold = OffsetVisibilityThreshold,
             )
 

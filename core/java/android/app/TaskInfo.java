@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.view.DisplayCutout;
+import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
@@ -274,7 +275,10 @@ public class TaskInfo {
     public int parentTaskId;
 
     /**
-     * Whether this task is focused.
+     * Whether this task is focused on the display. This means the task receives input events that
+     * target the display.
+     * CAUTION: This can be true for multiple tasks especially when multiple displays are connected
+     * in the system.
      * @hide
      */
     public boolean isFocused;
@@ -327,6 +331,13 @@ public class TaskInfo {
      * @hide
      */
     public long capturedLinkTimestamp;
+
+    /**
+     * The requested visible types of insets.
+     * @hide
+     */
+    @WindowInsets.Type.InsetsType
+    public int requestedVisibleTypes;
 
     /**
      * Encapsulate specific App Compat information.
@@ -465,6 +476,7 @@ public class TaskInfo {
                 && lastNonFullscreenBounds == this.lastNonFullscreenBounds
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
+                && requestedVisibleTypes == that.requestedVisibleTypes
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo);
     }
 
@@ -539,6 +551,7 @@ public class TaskInfo {
         lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
+        requestedVisibleTypes = source.readInt();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
     }
 
@@ -591,6 +604,7 @@ public class TaskInfo {
         dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
+        dest.writeInt(requestedVisibleTypes);
         dest.writeTypedObject(appCompatTaskInfo, flags);
     }
 
@@ -633,6 +647,7 @@ public class TaskInfo {
                 + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
+                + " requestedVisibleTypes=" + requestedVisibleTypes
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + "}";
     }

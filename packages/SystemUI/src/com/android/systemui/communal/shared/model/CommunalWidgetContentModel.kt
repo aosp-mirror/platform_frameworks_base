@@ -31,6 +31,7 @@ sealed interface CommunalWidgetContentModel {
         override val appWidgetId: Int,
         val providerInfo: AppWidgetProviderInfo,
         override val rank: Int,
+        val spanY: Int = 3,
     ) : CommunalWidgetContentModel
 
     /** Widget is pending installation */
@@ -40,5 +41,6 @@ sealed interface CommunalWidgetContentModel {
         val componentName: ComponentName,
         val icon: Bitmap?,
         val user: UserHandle,
+        val spanY: Int = 3,
     ) : CommunalWidgetContentModel
 }

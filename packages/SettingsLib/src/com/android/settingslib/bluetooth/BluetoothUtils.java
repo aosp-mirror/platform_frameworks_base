@@ -709,6 +709,9 @@ public class BluetoothUtils {
     @WorkerThread
     public static boolean hasConnectedBroadcastSourceForBtDevice(
             @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
+        if (Flags.audioSharingHysteresisModeFix()) {
+            return hasActiveLocalBroadcastSourceForBtDevice(device, localBtManager);
+        }
         LocalBluetoothLeBroadcastAssistant assistant =
                 localBtManager == null
                         ? null

@@ -27,7 +27,7 @@ import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_PREPARE_BACK_NAVIGATION;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_BACK_PREVIEW;
 import static com.android.server.wm.BackNavigationProto.ANIMATION_IN_PROGRESS;
 import static com.android.server.wm.BackNavigationProto.ANIMATION_RUNNING;
 import static com.android.server.wm.BackNavigationProto.LAST_BACK_TYPE;

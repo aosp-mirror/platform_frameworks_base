@@ -15,21 +15,27 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.UTF8;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
+import com.android.internal.widget.remotecompose.core.SerializableToString;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
+import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 import java.util.List;
 
 /**
  * Operation to deal with Text data
  */
-public class TextData implements Operation {
+public class TextData implements Operation, SerializableToString {
+    private static final int OP_CODE = Operations.DATA_TEXT;
+    private static final String CLASS_NAME = "TextData";
     public int mTextId;
     public String mText;
-    public static final Companion COMPANION = new Companion();
     public static final int MAX_STRING_SIZE = 4000;
 
     public TextData(int textId, String text) {
@@ -39,7 +45,7 @@ public class TextData implements Operation {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mTextId, mText);
+        apply(buffer, mTextId, mText);
     }
 
     @Override
@@ -48,34 +54,40 @@ public class TextData implements Operation {
                 + Utils.trimString(mText, 10) + "\"";
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public String name() {
-            return "TextData";
-        }
-
-        @Override
-        public int id() {
-            return Operations.DATA_TEXT;
-        }
-
-        public void apply(WireBuffer buffer, int textId, String text) {
-            buffer.start(Operations.DATA_TEXT);
-            buffer.writeInt(textId);
-            buffer.writeUTF8(text);
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int textId = buffer.readInt();
-
-            String text = buffer.readUTF8(MAX_STRING_SIZE);
-            operations.add(new TextData(textId, text));
-        }
+    public static String name() {
+        return CLASS_NAME;
     }
+
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    public static void apply(WireBuffer buffer, int textId, String text) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(textId);
+        buffer.writeUTF8(text);
+    }
+
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int textId = buffer.readInt();
+
+        String text = buffer.readUTF8(MAX_STRING_SIZE);
+        operations.add(new TextData(textId, text));
+    }
+
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Data Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Encode a string ")
+                .field(INT, "id", "id string")
+                .field(UTF8, "text",
+                        "encode text as a string");
+    }
+
 
     @Override
     public void apply(RemoteContext context) {
@@ -85,5 +97,15 @@ public class TextData implements Operation {
     @Override
     public String deepToString(String indent) {
         return indent + toString();
+    }
+
+    @Override
+    public void serializeToString(int indent, StringSerializer serializer) {
+        serializer.append(indent, getSerializedName() + "<" + mTextId
+                + "> = \"" + mText + "\"");
+    }
+
+    private String getSerializedName() {
+        return "DATA_TEXT";
     }
 }

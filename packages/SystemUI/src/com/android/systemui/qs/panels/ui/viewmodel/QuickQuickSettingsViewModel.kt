@@ -42,6 +42,7 @@ constructor(
     tilesInteractor: CurrentTilesInteractor,
     fixedColumnsSizeViewModel: FixedColumnsSizeViewModel,
     quickQuickSettingsRowInteractor: QuickQuickSettingsRowInteractor,
+    val squishinessViewModel: TileSquishinessViewModel,
     private val iconTilesViewModel: IconTilesViewModel,
     @Application private val applicationScope: CoroutineScope,
 ) {
@@ -52,7 +53,7 @@ constructor(
         quickQuickSettingsRowInteractor.rows.stateIn(
             applicationScope,
             SharingStarted.WhileSubscribed(),
-            quickQuickSettingsRowInteractor.defaultRows
+            quickQuickSettingsRowInteractor.defaultRows,
         )
 
     val tileViewModels: StateFlow<List<SizedTile<TileViewModel>>> =
@@ -60,12 +61,7 @@ constructor(
             .flatMapLatest { columns ->
                 tilesInteractor.currentTiles.combine(rows, ::Pair).mapLatest { (tiles, rows) ->
                     tiles
-                        .map {
-                            SizedTileImpl(
-                                TileViewModel(it.tile, it.spec),
-                                it.spec.width,
-                            )
-                        }
+                        .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width) }
                         .let { splitInRowsSequence(it, columns).take(rows).toList().flatten() }
                 }
             }
@@ -73,15 +69,10 @@ constructor(
                 applicationScope,
                 SharingStarted.WhileSubscribed(),
                 tilesInteractor.currentTiles.value
-                    .map {
-                        SizedTileImpl(
-                            TileViewModel(it.tile, it.spec),
-                            it.spec.width,
-                        )
-                    }
+                    .map { SizedTileImpl(TileViewModel(it.tile, it.spec), it.spec.width) }
                     .let {
                         splitInRowsSequence(it, columns.value).take(rows.value).toList().flatten()
-                    }
+                    },
             )
 
     private val TileSpec.width: Int

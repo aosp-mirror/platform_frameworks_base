@@ -70,4 +70,12 @@ public interface CoreStartable extends Dumpable {
      * {@link #onBootCompleted()} will never be called before {@link #start()}. */
     default void onBootCompleted() {
     }
+
+    /** No op implementation that can be used when feature flagging on the Dagger Module level. */
+    CoreStartable NOP = new Nop();
+
+    class Nop implements CoreStartable {
+        @Override
+        public void start() {}
+    }
 }

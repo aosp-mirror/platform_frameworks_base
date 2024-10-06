@@ -23,12 +23,14 @@ import static com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE;
 import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.Flags.msdlFeedback;
 import static com.android.systemui.Flags.predictiveBackAnimateShade;
 import static com.android.systemui.Flags.smartspaceRelocateToBottom;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
+import static com.android.systemui.keyguard.shared.model.KeyguardState.AOD;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING_LOCKSCREEN_HOSTED;
 import static com.android.systemui.keyguard.shared.model.KeyguardState.GONE;
@@ -236,6 +238,9 @@ import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import dalvik.annotation.optimization.NeverCompile;
 
+import com.google.android.msdl.data.model.MSDLToken;
+import com.google.android.msdl.domain.MSDLPlayer;
+
 import kotlin.Unit;
 
 import kotlinx.coroutines.CoroutineDispatcher;
@@ -312,6 +317,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final StatusBarStateListener mStatusBarStateListener = new StatusBarStateListener();
     private final NotificationPanelView mView;
     private final VibratorHelper mVibratorHelper;
+    private final MSDLPlayer mMSDLPlayer;
     private final MetricsLogger mMetricsLogger;
     private final ConfigurationController mConfigurationController;
     private final Provider<FlingAnimationUtils.Builder> mFlingAnimationUtilsBuilder;
@@ -777,7 +783,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             SplitShadeStateController splitShadeStateController,
             PowerInteractor powerInteractor,
             KeyguardClockPositionAlgorithm keyguardClockPositionAlgorithm,
-            NaturalScrollingSettingObserver naturalScrollingSettingObserver) {
+            NaturalScrollingSettingObserver naturalScrollingSettingObserver,
+            MSDLPlayer msdlPlayer) {
         SceneContainerFlag.assertInLegacyMode();
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
@@ -855,6 +862,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mNotificationsDragEnabled = mResources.getBoolean(
                 R.bool.config_enableNotificationShadeDrag);
         mVibratorHelper = vibratorHelper;
+        mMSDLPlayer = msdlPlayer;
         mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mSystemClock = systemClock;
@@ -1204,6 +1212,16 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         mNotificationStackScrollLayoutController.setMaxAlphaForKeyguard(alpha,
                                 "mPrimaryBouncerToGoneTransitionViewModel.getNotificationAlpha()");
                     }, mMainDispatcher);
+        }
+
+        if (MigrateClocksToBlueprint.isEnabled()) {
+            collectFlow(mView, mKeyguardTransitionInteractor.transition(
+                    Edge.Companion.create(AOD, LOCKSCREEN)),
+                    (TransitionStep step) -> {
+                    if (step.getTransitionState() == TransitionState.FINISHED) {
+                        updateExpandedHeightToMaxHeight();
+                    }
+                }, mMainDispatcher);
         }
 
         // Ensures that flags are updated when an activity launches
@@ -2911,7 +2929,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
 
         if (!mStatusBarStateController.isDozing()) {
-            mVibratorHelper.performHapticFeedback(mView, HapticFeedbackConstants.REJECT);
+            performHapticFeedback(HapticFeedbackConstants.REJECT);
         }
     }
 
@@ -3279,7 +3297,20 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     public void performHapticFeedback(int constant) {
-        mVibratorHelper.performHapticFeedback(mView, constant);
+        if (msdlFeedback()) {
+            MSDLToken token;
+            switch (constant) {
+                case HapticFeedbackConstants.GESTURE_START ->
+                        token = MSDLToken.SWIPE_THRESHOLD_INDICATOR;
+                case HapticFeedbackConstants.REJECT -> token = MSDLToken.FAILURE;
+                default -> token = null;
+            }
+            if (token != null) {
+                mMSDLPlayer.playToken(token, null);
+            }
+        } else {
+            mVibratorHelper.performHapticFeedback(mView, constant);
+        }
     }
 
     private class ShadeHeadsUpTrackerImpl implements ShadeHeadsUpTracker {
@@ -3736,10 +3767,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void maybeVibrateOnOpening(boolean openingWithTouch) {
         if (mVibrateOnOpening && mBarState != KEYGUARD && mBarState != SHADE_LOCKED) {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
-                mVibratorHelper.performHapticFeedback(
-                        mView,
-                        HapticFeedbackConstants.GESTURE_START
-                );
+                performHapticFeedback(HapticFeedbackConstants.GESTURE_START);
                 mHasVibratedOnOpen = true;
                 mShadeLog.v("Vibrating on opening, mHasVibratedOnOpen=true");
             }

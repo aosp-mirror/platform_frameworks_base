@@ -56,6 +56,7 @@ import static androidx.window.extensions.embedding.TaskFragmentContainer.Overlay
 import android.annotation.CallbackExecutor;
 import android.app.Activity;
 import android.app.ActivityClient;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
@@ -280,7 +281,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mSplitRules.clear();
             mSplitRules.addAll(rules);
 
-            if (!Flags.aeBackStackRestore() || !mPresenter.isRebuildTaskContainersNeeded()) {
+            if (!Flags.aeBackStackRestore() || !mPresenter.isWaitingToRebuildTaskContainers()) {
                 return;
             }
 
@@ -2893,6 +2894,36 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return;
             }
             synchronized (mLock) {
+                if (mPresenter.isWaitingToRebuildTaskContainers()) {
+                    Log.w(TAG, "Rebuilding aborted, clean up and restart");
+
+                    // Retrieve the Task intent.
+                    final int taskId = getTaskId(activity);
+                    Intent taskIntent = null;
+                    final ActivityManager am = activity.getSystemService(ActivityManager.class);
+                    final List<ActivityManager.AppTask> appTasks = am.getAppTasks();
+                    for (ActivityManager.AppTask appTask : appTasks) {
+                        if (appTask.getTaskInfo().taskId == taskId) {
+                            taskIntent = appTask.getTaskInfo().baseIntent.cloneFilter();
+                            break;
+                        }
+                    }
+
+                    // Clean up and abort the restoration
+                    // TODO(b/369488857): also to remove the non-organized activities in the Task?
+                    final TransactionRecord transactionRecord =
+                            mTransactionManager.startNewTransaction();
+                    final WindowContainerTransaction wct = transactionRecord.getTransaction();
+                    mPresenter.abortTaskContainerRebuilding(wct);
+                    transactionRecord.apply(false /* shouldApplyIndependently */);
+
+                    // Start the Task root activity.
+                    if (taskIntent != null) {
+                        activity.startActivity(taskIntent);
+                    }
+                    return;
+                }
+
                 final IBinder activityToken = activity.getActivityToken();
                 final IBinder initialTaskFragmentToken =
                         getTaskFragmentTokenFromActivityClientRecord(activity);

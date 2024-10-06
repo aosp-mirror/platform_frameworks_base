@@ -33,7 +33,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
-import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -157,6 +156,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun doubleTapRequired_onKeyguard_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
             val listener = getFalsingTapListener()
@@ -184,6 +184,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun doubleTapRequired_shadeLocked_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
             val listener = getFalsingTapListener()
@@ -209,7 +210,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
                     KEYGUARD /*statusBarState*/,
                     false /*keyguardFadingAway*/,
                     false /*goingToFullShade*/,
-                    SHADE /*oldStatusBarState*/
+                    SHADE, /*oldStatusBarState*/
                 )
         }
         advanceUntilIdle()

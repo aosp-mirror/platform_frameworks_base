@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -56,6 +57,7 @@ public class BatteryUsageStatsAtomTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
+    private static final boolean DEBUG = false;
     private static final int UID_0 = 1000;
     private static final int UID_1 = 2000;
     private static final int UID_2 = 3000;
@@ -69,6 +71,10 @@ public class BatteryUsageStatsAtomTest {
 
         List<StatsEvent> actual = new ArrayList<>();
         new BatteryStatsService.StatsPerUidLogger(statsLogger).logStats(bus, actual);
+
+        if (DEBUG) {
+            System.out.println(mockingDetails(statsLogger).printInvocations());
+        }
 
         // Device-wide totals
         verify(statsLogger).buildStatsEvent(
@@ -609,7 +615,7 @@ public class BatteryUsageStatsAtomTest {
 
         BatteryUsageStats batteryUsageStats = builder.build();
         final byte[] bytes = batteryUsageStats.getStatsProto();
-        assertThat(bytes.length).isGreaterThan(40000);
+        assertThat(bytes.length).isGreaterThan(20000);
         assertThat(bytes.length).isLessThan(50000);
 
         BatteryUsageStatsAtomsProto proto;

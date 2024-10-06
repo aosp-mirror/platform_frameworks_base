@@ -214,11 +214,7 @@ internal constructor(
         saveScreenshotInBackground(screenshot, requestId, finisher) { result ->
             if (result.uri != null) {
                 val savedScreenshot =
-                    ScreenshotSavedResult(
-                        result.uri,
-                        screenshot.getUserOrDefault(),
-                        result.timestamp,
-                    )
+                    ScreenshotSavedResult(result.uri, screenshot.userHandle, result.timestamp)
                 actionsController.setCompletedScreenshot(requestId, savedScreenshot)
             }
         }
@@ -235,7 +231,7 @@ internal constructor(
         window.setFocusable(true)
         viewProxy.requestFocus()
 
-        enqueueScrollCaptureRequest(requestId, screenshot.userHandle!!)
+        enqueueScrollCaptureRequest(requestId, screenshot.userHandle)
 
         window.attachWindow()
 
@@ -267,7 +263,7 @@ internal constructor(
 
     private fun prepareViewForNewScreenshot(screenshot: ScreenshotData, oldPackageName: String?) {
         window.whenWindowAttached {
-            announcementResolver.getScreenshotAnnouncement(screenshot.userHandle!!.identifier) {
+            announcementResolver.getScreenshotAnnouncement(screenshot.userHandle.identifier) {
                 viewProxy.announceForAccessibility(it)
             }
         }
@@ -517,7 +513,7 @@ internal constructor(
                 bgExecutor,
                 requestId,
                 screenshot.bitmap,
-                screenshot.getUserOrDefault(),
+                screenshot.userHandle,
                 display.displayId,
             )
         future.addListener(
@@ -525,7 +521,7 @@ internal constructor(
                 try {
                     val result = future.get()
                     Log.d(TAG, "Saved screenshot: $result")
-                    logScreenshotResultStatus(result.uri, screenshot.userHandle!!)
+                    logScreenshotResultStatus(result.uri, screenshot.userHandle)
                     onResult.accept(result)
                     if (LogConfig.DEBUG_CALLBACK) {
                         Log.d(TAG, "finished bg processing, calling back with uri: ${result.uri}")

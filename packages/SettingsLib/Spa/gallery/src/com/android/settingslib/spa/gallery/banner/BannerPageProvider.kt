@@ -39,9 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
-import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
@@ -161,14 +159,12 @@ object BannerPageProvider : SettingsPageProvider {
         }
     }
 
-    fun buildInjectEntry(): SettingsEntryBuilder {
-        return SettingsEntryBuilder.createInject(owner = createSettingsPage())
-            .setUiLayoutFn {
-                Preference(object : PreferenceModel {
-                    override val title = TITLE
-                    override val onClick = navigator(name)
-                })
-            }
+    @Composable
+    fun Entry() {
+        Preference(object : PreferenceModel {
+            override val title = TITLE
+            override val onClick = navigator(name)
+        })
     }
 
     private const val TITLE = "Sample Banner"

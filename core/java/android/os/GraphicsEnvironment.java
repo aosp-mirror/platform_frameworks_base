@@ -598,6 +598,11 @@ public class GraphicsEnvironment {
         final String abi = chooseAbi(angleInfo);
 
         // Build a path that includes installed native libs and APK
+        // TODO (b/370113081): If the native libraries are not found in this path,
+        // the system libraries will be loaded instead.
+        // This can happen if the ANGLE APK is present,
+        // but accidentally packaged without native libraries.
+        // TBD if this should fail instead of falling back to the system version.
         final String paths = angleInfo.nativeLibraryDir
                 + File.pathSeparator
                 + angleInfo.sourceDir

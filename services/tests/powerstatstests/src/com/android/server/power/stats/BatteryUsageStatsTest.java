@@ -173,7 +173,9 @@ public class BatteryUsageStatsTest {
         assertThat(dump).containsMatch(quote("(not on battery, screen off/doze)") + "\\s*"
                 + "cpu: 123 apps: 123 duration: 456ms");
         assertThat(dump).containsMatch(
-                "UID 271: 1200 fg: 1777 bg: 2388 fgs: 1999 cached: 123\\s*"
+                quote("UID 271: 1200 "
+                        + "fg: 1777 (1s 0ms) bg: 2388 (1s 500ms) fgs: 1999 (500ms) cached: 123")
+                        + "\\s*"
                         + quote("screen=300 cpu=400 (600ms) cpu:fg=1777 (7s 771ms) "
                         + "cpu:bg=1888 (8s 881ms) cpu:fgs=1999 (9s 991ms) "
                         + "cpu:cached=123 (456ms) FOO=500 (800ms) FOO:bg=500 (800ms)") + "\\s*"
@@ -199,7 +201,9 @@ public class BatteryUsageStatsTest {
         assertThat(dump).contains("cpu: 20100 apps: 10100 duration: 20s 300ms");
         assertThat(dump).contains("FOO: 20200 apps: 10200 duration: 20s 400ms");
         assertThat(dump).containsMatch(
-                "UID 271: 1200 fg: 1777 bg: 2388 fgs: 1999 cached: 123\\s*"
+                quote("UID 271: 1200 "
+                        + "fg: 1777 (1s 0ms) bg: 2388 (1s 500ms) fgs: 1999 (500ms) cached: 123")
+                        + "\\s*"
                         + quote("screen=300 cpu=400 (600ms) cpu:fg=1777 (7s 771ms) "
                         + "cpu:bg=1888 (8s 881ms) cpu:fgs=1999 (9s 991ms) "
                         + "cpu:cached=123 (456ms) FOO=500 (800ms) FOO:bg=500 (800ms)"));
