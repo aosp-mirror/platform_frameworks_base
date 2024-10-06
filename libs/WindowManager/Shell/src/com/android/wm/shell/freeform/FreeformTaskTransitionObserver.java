@@ -49,6 +49,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
     private final Transitions mTransitions;
     private final Optional<DesktopFullImmersiveTransitionHandler> mImmersiveTransitionHandler;
     private final WindowDecorViewModel mWindowDecorViewModel;
+    private final Optional<TaskChangeListener> mTaskChangeListener;
 
     private final Map<IBinder, List<ActivityManager.RunningTaskInfo>> mTransitionToTaskInfo =
             new HashMap<>();
@@ -58,10 +59,12 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             ShellInit shellInit,
             Transitions transitions,
             Optional<DesktopFullImmersiveTransitionHandler> immersiveTransitionHandler,
-            WindowDecorViewModel windowDecorViewModel) {
+            WindowDecorViewModel windowDecorViewModel,
+            Optional<TaskChangeListener> taskChangeListener) {
         mTransitions = transitions;
         mImmersiveTransitionHandler = immersiveTransitionHandler;
         mWindowDecorViewModel = windowDecorViewModel;
+        mTaskChangeListener = taskChangeListener;
         if (Transitions.ENABLE_SHELL_TRANSITIONS && FreeformComponents.isFreeformEnabled(context)) {
             shellInit.addInitCallback(this::onInit, this);
         }
@@ -133,29 +136,39 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
+        mTaskChangeListener.ifPresent(
+            listener -> listener.onTaskOpening(change.getTaskInfo()));
         mWindowDecorViewModel.onTaskOpening(
-                change.getTaskInfo(), change.getLeash(), startT, finishT);
+            change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
 
     private void onCloseTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
+        mTaskChangeListener.ifPresent(
+            listener -> listener.onTaskClosing(change.getTaskInfo()));
         mWindowDecorViewModel.onTaskClosing(change.getTaskInfo(), startT, finishT);
+
     }
 
     private void onChangeTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
+        mTaskChangeListener.ifPresent(listener ->
+            listener.onTaskChanging(change.getTaskInfo()));
         mWindowDecorViewModel.onTaskChanging(
                 change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
+
 
     private void onToFrontTransitionReady(
             TransitionInfo.Change change,
             SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT) {
+        mTaskChangeListener.ifPresent(
+                listener -> listener.onTaskMovingToFront(change.getTaskInfo()));
         mWindowDecorViewModel.onTaskChanging(
                 change.getTaskInfo(), change.getLeash(), startT, finishT);
     }
