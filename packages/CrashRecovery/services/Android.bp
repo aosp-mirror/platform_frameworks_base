@@ -19,6 +19,7 @@ platform_filegroup {
                 "java/**/*.java",
                 "java/**/*.aidl",
                 ":statslog-crashrecovery-java-gen",
+                ":crashrecovery-platform-adaptor-srcs",
             ],
         },
     },
