@@ -17,37 +17,25 @@ package com.android.hoststubgen.filters
 
 enum class FilterPolicy {
     /**
-     * Keep the item in the stub jar file, so tests can use it.
-     */
-    Stub,
-
-    /**
-     * Keep the item in the impl jar file, but not in the stub file. Tests cannot use it directly,
-     * but indirectly.
+     * Keep the item in the jar file.
      */
     Keep,
 
     /**
-     * Only used for types. Keep the class in the stub, and also all its members.
-     * But each member can have another annotations to override it.
-     */
-    StubClass,
-
-    /**
-     * Only used for types. Keep the class in the impl, not in the stub, and also all its members.
-     * But each member can have another annotations to override it.
+     * Only usable with classes. Keep the class in the jar, and also all its members.
+     * Each member can have another policy to override it.
      */
     KeepClass,
 
     /**
-     * Same as [Stub], but replace it with a "substitution" method. Only usable with methods.
+     * Only usable with methods. Replace a method with a "substitution" method.
      */
-    SubstituteAndStub,
+    Substitute,
 
     /**
-     * Same as [Keep], but replace it with a "substitution" method. Only usable with methods.
+     * Only usable with methods. Redirect a method to a method in the substitution class.
      */
-    SubstituteAndKeep,
+    Redirect,
 
     /**
      * Only usable with methods. The item will be kept in the impl jar file, but when called,
@@ -57,7 +45,7 @@ enum class FilterPolicy {
 
     /**
      * Only usable with methods. The item will be kept in the impl jar file, but when called,
-     * it'll no-op.  Currently only supported for methods returning `void`.
+     * it'll no-op.
      */
     Ignore,
 
@@ -66,20 +54,19 @@ enum class FilterPolicy {
      */
     Remove;
 
-    val isSubstitute: Boolean
-        get() = this == SubstituteAndStub || this == SubstituteAndKeep
-
-    val needsInStub: Boolean
-        get() = this == Stub || this == StubClass || this == SubstituteAndStub
-
-    val needsInImpl: Boolean
-        get() = this != Remove
+    val needsInOutput: Boolean
+        get() {
+            return when (this) {
+                Remove -> false
+                else -> true
+            }
+        }
 
     /** Returns whether a policy can be used with classes */
     val isUsableWithClasses: Boolean
         get() {
             return when (this) {
-                Stub, StubClass, Keep, KeepClass, Remove -> true
+                Keep, KeepClass, Remove -> true
                 else -> false
             }
         }
@@ -88,7 +75,7 @@ enum class FilterPolicy {
     val isUsableWithFields: Boolean
         get() {
             return when (this) {
-                Stub, Keep, Remove -> true
+                Keep, Remove -> true
                 else -> false
             }
         }
@@ -97,16 +84,16 @@ enum class FilterPolicy {
     val isUsableWithMethods: Boolean
         get() {
             return when (this) {
-                StubClass, KeepClass -> false
+                KeepClass -> false
                 else -> true
             }
         }
 
-    /** Returns whether a policy is a class-wide one. */
-    val isClassWidePolicy: Boolean
+    /** Returns whether a policy can be used as default policy. */
+    val isUsableWithDefault: Boolean
         get() {
             return when (this) {
-                StubClass, KeepClass -> true
+                Keep, Throw, Remove -> true
                 else -> false
             }
         }
@@ -115,26 +102,24 @@ enum class FilterPolicy {
     val isSupported: Boolean
         get() {
             return when (this) {
-                // TODO: handle native method with no substitution as being unsupported
-                Stub, StubClass, Keep, KeepClass, SubstituteAndStub, SubstituteAndKeep -> true
+                Keep, KeepClass, Substitute, Redirect -> true
                 else -> false
             }
         }
 
-    fun getSubstitutionBasePolicy(): FilterPolicy {
-        return when (this) {
-            SubstituteAndKeep -> Keep
-            SubstituteAndStub -> Stub
-            else -> this
+    val isMethodRewriteBody: Boolean
+        get() {
+            return when (this) {
+                Redirect, Throw, Ignore -> true
+                else -> false
+            }
         }
-    }
 
     /**
-     * Convert {Stub,Keep}Class to the corresponding Stub or Keep.
+     * Convert KeepClass to Keep, or return itself.
      */
     fun resolveClassWidePolicy(): FilterPolicy {
         return when (this) {
-            StubClass -> Stub
             KeepClass -> Keep
             else -> this
         }

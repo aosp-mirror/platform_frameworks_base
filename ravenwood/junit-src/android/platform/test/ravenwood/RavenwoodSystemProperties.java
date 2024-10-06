@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class RavenwoodSystemProperties {
     private volatile boolean mIsImmutable;
@@ -31,45 +30,9 @@ public class RavenwoodSystemProperties {
 
     /** Set of additional keys that should be considered readable */
     private final Set<String> mKeyReadable = new HashSet<>();
-    private final Predicate<String> mKeyReadablePredicate = (key) -> {
-        final String root = getKeyRoot(key);
-
-        if (root.startsWith("debug.")) return true;
-
-        // This set is carefully curated to help identify situations where a test may
-        // accidentally depend on a default value of an obscure property whose owner hasn't
-        // decided how Ravenwood should behave.
-        if (root.startsWith("boot.")) return true;
-        if (root.startsWith("build.")) return true;
-        if (root.startsWith("product.")) return true;
-        if (root.startsWith("soc.")) return true;
-        if (root.startsWith("system.")) return true;
-
-        switch (key) {
-            case "gsm.version.baseband":
-            case "no.such.thing":
-            case "ro.bootloader":
-            case "ro.debuggable":
-            case "ro.hardware":
-            case "ro.hw_timeout_multiplier":
-            case "ro.odm.build.media_performance_class":
-            case "ro.treble.enabled":
-            case "ro.vndk.version":
-                return true;
-        }
-
-        return mKeyReadable.contains(key);
-    };
 
     /** Set of additional keys that should be considered writable */
     private final Set<String> mKeyWritable = new HashSet<>();
-    private final Predicate<String> mKeyWritablePredicate = (key) -> {
-        final String root = getKeyRoot(key);
-
-        if (root.startsWith("debug.")) return true;
-
-        return mKeyWritable.contains(key);
-    };
 
     public RavenwoodSystemProperties() {
         // TODO: load these values from build.prop generated files
@@ -119,12 +82,45 @@ public class RavenwoodSystemProperties {
         return new HashMap<>(mValues);
     }
 
-    public Predicate<String> getKeyReadablePredicate() {
-        return mKeyReadablePredicate;
+    public boolean isKeyReadable(String key) {
+        final String root = getKeyRoot(key);
+
+        if (root.startsWith("debug.")) return true;
+
+        // This set is carefully curated to help identify situations where a test may
+        // accidentally depend on a default value of an obscure property whose owner hasn't
+        // decided how Ravenwood should behave.
+        if (root.startsWith("boot.")) return true;
+        if (root.startsWith("build.")) return true;
+        if (root.startsWith("product.")) return true;
+        if (root.startsWith("soc.")) return true;
+        if (root.startsWith("system.")) return true;
+
+        switch (key) {
+            case "gsm.version.baseband":
+            case "no.such.thing":
+            case "qemu.sf.lcd_density":
+            case "ro.bootloader":
+            case "ro.debuggable":
+            case "ro.hardware":
+            case "ro.hw_timeout_multiplier":
+            case "ro.odm.build.media_performance_class":
+            case "ro.sf.lcd_density":
+            case "ro.treble.enabled":
+            case "ro.vndk.version":
+            case "ro.icu.data.path":
+                return true;
+        }
+
+        return mKeyReadable.contains(key);
     }
 
-    public Predicate<String> getKeyWritablePredicate() {
-        return mKeyWritablePredicate;
+    public boolean isKeyWritable(String key) {
+        final String root = getKeyRoot(key);
+
+        if (root.startsWith("debug.")) return true;
+
+        return mKeyWritable.contains(key);
     }
 
     private static final String[] PARTITIONS = {

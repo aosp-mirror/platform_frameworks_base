@@ -29,36 +29,65 @@ import org.objectweb.asm.tree.MethodNode
 
 
 /** Name of the class initializer method. */
-val CLASS_INITIALIZER_NAME = "<clinit>"
+const val CLASS_INITIALIZER_NAME = "<clinit>"
 
 /** Descriptor of the class initializer method. */
-val CLASS_INITIALIZER_DESC = "()V"
+const val CLASS_INITIALIZER_DESC = "()V"
 
 /** Name of constructors. */
-val CTOR_NAME = "<init>"
+const val CTOR_NAME = "<init>"
 
 /**
- * Find any of [anyAnnotations] from the list of visible / invisible annotations.
+ * Find any of [set] from the list of visible / invisible annotations.
  */
 fun findAnyAnnotation(
-        anyAnnotations: Set<String>,
-        visibleAnnotations: List<AnnotationNode>?,
-        invisibleAnnotations: List<AnnotationNode>?,
-    ): AnnotationNode? {
-    for (an in visibleAnnotations ?: emptyList()) {
-        if (anyAnnotations.contains(an.desc)) {
-            return an
-        }
-    }
-    for (an in invisibleAnnotations ?: emptyList()) {
-        if (anyAnnotations.contains(an.desc)) {
-            return an
-        }
-    }
-    return null
+    set: Set<String>,
+    visibleAnnotations: List<AnnotationNode>?,
+    invisibleAnnotations: List<AnnotationNode>?,
+): AnnotationNode? {
+    return visibleAnnotations?.find { it.desc in set }
+        ?: invisibleAnnotations?.find { it.desc in set }
 }
 
-fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): String? {
+fun ClassNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
+    return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun MethodNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
+    return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun FieldNode.findAnyAnnotation(set: Set<String>): AnnotationNode? {
+    return findAnyAnnotation(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun findAllAnnotations(
+    set: Set<String>,
+    visibleAnnotations: List<AnnotationNode>?,
+    invisibleAnnotations: List<AnnotationNode>?
+): List<AnnotationNode> {
+    return (visibleAnnotations ?: emptyList()).filter { it.desc in set } +
+            (invisibleAnnotations ?: emptyList()).filter { it.desc in set }
+}
+
+fun ClassNode.findAllAnnotations(set: Set<String>): List<AnnotationNode> {
+    return findAllAnnotations(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun MethodNode.findAllAnnotations(set: Set<String>): List<AnnotationNode> {
+    return findAllAnnotations(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun FieldNode.findAllAnnotations(set: Set<String>): List<AnnotationNode> {
+    return findAllAnnotations(set, this.visibleAnnotations, this.invisibleAnnotations)
+}
+
+fun <T> findAnnotationValueAsObject(
+    an: AnnotationNode,
+    propertyName: String,
+    expectedTypeHumanReadableName: String,
+    converter: (Any?) -> T?,
+): T? {
     for (i in 0..(an.values?.size ?: 0) - 2 step 2) {
         val name = an.values[i]
 
@@ -66,15 +95,29 @@ fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): Strin
             continue
         }
         val value = an.values[i + 1]
-        if (value is String) {
-            return value
+        if (value == null) {
+            return null
         }
-        throw ClassParseException(
-                "The type of '$name' in annotation \"${an.desc}\" must be String" +
-                        ", but is ${value?.javaClass?.canonicalName}")
+
+        try {
+            return converter(value)
+        } catch (e: ClassCastException) {
+            throw ClassParseException(
+                "The type of '$propertyName' in annotation @${an.desc} must be " +
+                        "$expectedTypeHumanReadableName, but is ${value?.javaClass?.canonicalName}")
+        }
     }
     return null
 }
+
+fun findAnnotationValueAsString(an: AnnotationNode, propertyName: String): String? {
+    return findAnnotationValueAsObject(an, propertyName, "String", {it as String})
+}
+
+fun findAnnotationValueAsType(an: AnnotationNode, propertyName: String): Type? {
+    return findAnnotationValueAsObject(an, propertyName, "Class", {it as Type})
+}
+
 
 val periodOrSlash = charArrayOf('.', '/')
 
@@ -117,6 +160,32 @@ fun resolveClassNameWithDefaultPackage(className: String, defaultPackageName: St
     return "$defaultPackageName.$className"
 }
 
+fun splitWithLastPeriod(name: String): Pair<String, String>? {
+    val pos = name.lastIndexOf('.')
+    if (pos < 0) {
+        return null
+    }
+    return Pair(name.substring(0, pos), name.substring(pos + 1))
+}
+
+fun String.startsWithAny(vararg prefixes: String): Boolean {
+    prefixes.forEach {
+        if (this.startsWith(it)) {
+            return true
+        }
+    }
+    return false
+}
+
+fun String.endsWithAny(vararg suffixes: String): Boolean {
+    suffixes.forEach {
+        if (this.endsWith(it)) {
+            return true
+        }
+    }
+    return false
+}
+
 fun String.toJvmClassName(): String {
     return this.replace('.', '/')
 }
@@ -129,23 +198,19 @@ fun String.toHumanReadableMethodName(): String {
     return this.replace('/', '.')
 }
 
+fun zipEntryNameToClassName(entryFilename: String): String? {
+    val suffix = ".class"
+    if (!entryFilename.endsWith(suffix)) {
+        return null
+    }
+    return entryFilename.substring(0, entryFilename.length - suffix.length)
+}
+
 private val numericalInnerClassName = """.*\$\d+$""".toRegex()
 
 fun isAnonymousInnerClass(cn: ClassNode): Boolean {
     // TODO: Is there a better way?
     return cn.name.matches(numericalInnerClassName)
-}
-
-/**
- * Take a class name. If it's a nested class, then return the name of its direct outer class name.
- * Otherwise, return null.
- */
-fun getDirectOuterClassName(className: String): String? {
-    val pos = className.lastIndexOf('$')
-    if (pos < 0) {
-        return null
-    }
-    return className.substring(0, pos)
 }
 
 /**
@@ -198,11 +263,11 @@ fun writeByteCodeToReturn(methodDescriptor: String, writer: MethodVisitor) {
 /**
  * Given a method descriptor, insert an [argType] as the first argument to it.
  */
-fun prependArgTypeToMethodDescriptor(methodDescriptor: String, argType: Type): String {
+fun prependArgTypeToMethodDescriptor(methodDescriptor: String, classInternalName: String): String {
     val returnType = Type.getReturnType(methodDescriptor)
     val argTypes = Type.getArgumentTypes(methodDescriptor).toMutableList()
 
-    argTypes.add(0, argType)
+    argTypes.add(0, Type.getType("L" + classInternalName + ";"))
 
     return Type.getMethodDescriptor(returnType, *argTypes.toTypedArray())
 }
@@ -268,6 +333,18 @@ fun MethodNode.isSynthetic(): Boolean {
 
 fun MethodNode.isStatic(): Boolean {
     return (this.access and Opcodes.ACC_STATIC) != 0
+}
+
+fun MethodNode.isPublic(): Boolean {
+    return (this.access and Opcodes.ACC_PUBLIC) != 0
+}
+
+fun MethodNode.isNative(): Boolean {
+    return (this.access and Opcodes.ACC_NATIVE) != 0
+}
+
+fun MethodNode.isSpecial(): Boolean {
+    return CTOR_NAME == this.name || CLASS_INITIALIZER_NAME == this.name
 }
 
 fun FieldNode.isEnum(): Boolean {

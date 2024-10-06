@@ -30,36 +30,6 @@ data class FilterPolicyWithReason (
         return FilterPolicyWithReason(policy, "$reason [inner-reason: ${this.reason}]")
     }
 
-    /**
-     * If the visibility is lower than "Keep" (meaning if it's "remove"),
-     * then return a new [FilterPolicy] with "Keep".
-     * Otherwise, return itself
-     */
-    fun promoteToKeep(promotionReason: String): FilterPolicyWithReason {
-        if (policy.needsInImpl) {
-            return this
-        }
-        val newPolicy = if (policy.isClassWidePolicy) FilterPolicy.KeepClass else FilterPolicy.Keep
-
-        return FilterPolicyWithReason(newPolicy,
-                "$promotionReason [original remove reason: ${this.reason}]")
-    }
-
-    /**
-     * If the visibility is above "Keep" (meaning if it's "stub"),
-     * then return a new [FilterPolicy] with "Keep".
-     * Otherwise, return itself
-     */
-    fun demoteToKeep(promotionReason: String): FilterPolicyWithReason {
-        if (!policy.needsInStub) {
-            return this
-        }
-        val newPolicy = if (policy.isClassWidePolicy) FilterPolicy.KeepClass else FilterPolicy.Keep
-
-        return FilterPolicyWithReason(newPolicy,
-                "$promotionReason [original stub reason: ${this.reason}]")
-    }
-
     override fun toString(): String {
         return "[$policy - reason: $reason]"
     }

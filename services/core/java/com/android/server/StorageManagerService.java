@@ -2738,7 +2738,8 @@ class StorageManagerService extends IStorageManager.Stub
         boolean smartIdleMaintEnabled = DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
             "smart_idle_maint_enabled",
-            DEFAULT_SMART_IDLE_MAINT_ENABLED);
+                DEFAULT_SMART_IDLE_MAINT_ENABLED)
+                && !SystemProperties.getBoolean("ro.boot.zufs_provisioned", false);
         if (smartIdleMaintEnabled) {
             mLifetimePercentThreshold = DeviceConfig.getInt(
                 DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,

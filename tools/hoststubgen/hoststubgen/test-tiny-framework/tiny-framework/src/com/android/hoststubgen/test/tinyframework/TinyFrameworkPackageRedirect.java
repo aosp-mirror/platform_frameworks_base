@@ -15,9 +15,9 @@
  */
 package com.android.hoststubgen.test.tinyframework;
 
-import android.hosttest.annotation.HostSideTestWholeClassStub;
+import android.hosttest.annotation.HostSideTestWholeClassKeep;
 
-@HostSideTestWholeClassStub
+@HostSideTestWholeClassKeep
 public class TinyFrameworkPackageRedirect {
     /**
      * A method that uses "unsupported" class. HostStubGen will redirect them to the "supported"

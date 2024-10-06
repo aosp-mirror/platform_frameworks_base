@@ -23,8 +23,6 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation injected to all methods processed as "ignore".
- *
- * (This annotation is only added in the impl jar, but not the stub jar)
  */
 @Target({METHOD})
 @Retention(RetentionPolicy.RUNTIME)

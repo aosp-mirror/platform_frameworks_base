@@ -15,6 +15,8 @@
  */
 package com.android.hoststubgen
 
+import java.io.File
+
 /**
  * We will not print the stack trace for exceptions implementing it.
  */
@@ -49,4 +51,22 @@ class InvalidAnnotationException(message: String) : Exception(message), UserErro
 /**
  * We use this for general "user" errors.
  */
-class HostStubGenUserErrorException(message: String) : Exception(message), UserErrorException
+class GeneralUserErrorException(message: String) : Exception(message), UserErrorException
+
+/** Base exception class for invalid command line arguments. */
+open class ArgumentsException(message: String?) : Exception(message), UserErrorException
+
+/** Thrown when the same annotation is used with different annotation arguments. */
+class DuplicateAnnotationException(annotationName: String?) :
+    ArgumentsException("Duplicate annotation specified: '$annotationName'")
+
+/** Thrown when an input file does not exist. */
+class InputFileNotFoundException(filename: String) :
+    ArgumentsException("File '$filename' not found")
+
+fun String.ensureFileExists(): String {
+    if (!File(this).exists()) {
+        throw InputFileNotFoundException(this)
+    }
+    return this
+}

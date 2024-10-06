@@ -15,21 +15,14 @@
  */
 
 #include <fcntl.h>
-#include <sys/stat.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <utils/misc.h>
+
 #include <string>
-#include <nativehelper/JNIHelp.h>
-#include <nativehelper/ScopedLocalRef.h>
-#include <nativehelper/ScopedUtfChars.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
 
-#include "jni.h"
-#include "utils/Log.h"
-#include "utils/misc.h"
-
-// Defined in ravenwood_os_constants.cpp
-void register_android_system_OsConstants(JNIEnv* env);
+#include "jni_helper.h"
 
 // ---- Exception related ----
 
@@ -50,53 +43,6 @@ static rc_t throwIfMinusOne(JNIEnv* env, const char* name, rc_t rc) {
 
 static jclass g_StructStat;
 static jclass g_StructTimespecClass;
-
-// We have to explicitly decode the string to real UTF-8, because when using GetStringUTFChars
-// we only get modified UTF-8, which is not the platform string type used in host JVM.
-struct ScopedRealUtf8Chars {
-    ScopedRealUtf8Chars(JNIEnv* env, jstring s) : valid_(false) {
-        if (s == nullptr) {
-            jniThrowNullPointerException(env);
-            return;
-        }
-        jclass clazz = env->GetObjectClass(s);
-        jmethodID getBytes = env->GetMethodID(clazz, "getBytes", "(Ljava/lang/String;)[B");
-
-        ScopedLocalRef<jstring> utf8(env, env->NewStringUTF("UTF-8"));
-        ScopedLocalRef<jbyteArray> jbytes(env,
-            (jbyteArray) env->CallObjectMethod(s, getBytes, utf8.get()));
-
-        ScopedByteArrayRO bytes(env, jbytes.get());
-        string_.append((const char *) bytes.get(), bytes.size());
-        valid_ = true;
-    }
-
-    const char* c_str() const {
-        return valid_ ? string_.c_str() : nullptr;
-    }
-
-    size_t size() const {
-        return string_.size();
-    }
-
-    const char& operator[](size_t n) const {
-        return string_[n];
-    }
-
-private:
-    std::string string_;
-    bool valid_;
-};
-
-static jclass findClass(JNIEnv* env, const char* name) {
-    ScopedLocalRef<jclass> localClass(env, env->FindClass(name));
-    jclass result = reinterpret_cast<jclass>(env->NewGlobalRef(localClass.get()));
-    if (result == NULL) {
-        ALOGE("failed to find class '%s'", name);
-        abort();
-    }
-    return result;
-}
 
 static jobject makeStructTimespec(JNIEnv* env, const struct timespec& ts) {
     static jmethodID ctor = env->GetMethodID(g_StructTimespecClass, "<init>",
@@ -214,7 +160,22 @@ static jint Linux_open(JNIEnv* env, jobject, jstring javaPath, jint flags, jint 
     return throwIfMinusOne(env, "open", TEMP_FAILURE_RETRY(open(path.c_str(), flags, mode)));
 }
 
+static void Linux_setenv(JNIEnv* env, jobject, jstring javaName, jstring javaValue,
+        jboolean overwrite) {
+    ScopedRealUtf8Chars name(env, javaName);
+    if (name.c_str() == NULL) {
+        jniThrowNullPointerException(env);
+    }
+    ScopedRealUtf8Chars value(env, javaValue);
+    if (value.c_str() == NULL) {
+        jniThrowNullPointerException(env);
+    }
+    throwIfMinusOne(env, "setenv", setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0));
+}
+
 // ---- Registration ----
+
+extern void register_android_system_OsConstants(JNIEnv* env);
 
 static const JNINativeMethod sMethods[] =
 {
@@ -227,26 +188,17 @@ static const JNINativeMethod sMethods[] =
     { "lstat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_lstat },
     { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
     { "nOpen", "(Ljava/lang/String;II)I", (void*)Linux_open },
+    { "setenv", "(Ljava/lang/String;Ljava/lang/String;Z)V", (void*)Linux_setenv },
 };
 
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
-{
-    JNIEnv* env = NULL;
-    jint result = -1;
-
-    if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        ALOGE("GetEnv failed!");
-        return result;
-    }
-    ALOG_ASSERT(env, "Could not retrieve the env!");
-
+extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
     ALOGI("%s: JNI_OnLoad", __FILE__);
 
-    g_StructStat = findClass(env, "android/system/StructStat");
-    g_StructTimespecClass = findClass(env, "android/system/StructTimespec");
+    JNIEnv* env = GetJNIEnvOrDie(vm);
+    g_StructStat = FindGlobalClassOrDie(env, "android/system/StructStat");
+    g_StructTimespecClass = FindGlobalClassOrDie(env, "android/system/StructTimespec");
 
-    jint res = jniRegisterNativeMethods(env, "com/android/ravenwood/common/RavenwoodRuntimeNative",
-            sMethods, NELEM(sMethods));
+    jint res = jniRegisterNativeMethods(env, kRuntimeNative, sMethods, NELEM(sMethods));
     if (res < 0) {
         return res;
     }

@@ -16,15 +16,14 @@
 package com.android.hoststubgen.test.tinyframework;
 
 import android.hosttest.annotation.HostSideTestKeep;
-import android.hosttest.annotation.HostSideTestStub;
 
-@HostSideTestStub
+@HostSideTestKeep
 public enum TinyFrameworkEnumComplex {
-    @HostSideTestStub
+    @HostSideTestKeep
     RED("Red", "R"),
-    @HostSideTestStub
+    @HostSideTestKeep
     GREEN("Green", "G"),
-    @HostSideTestStub
+    @HostSideTestKeep
     BLUE("Blue", "B");
 
     @HostSideTestKeep
@@ -33,18 +32,18 @@ public enum TinyFrameworkEnumComplex {
     @HostSideTestKeep
     private final String mShortName;
 
-    @HostSideTestStub
+    @HostSideTestKeep
     TinyFrameworkEnumComplex(String longName, String shortName) {
         mLongName = longName;
         mShortName = shortName;
     }
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public String getLongName() {
         return mLongName;
     }
 
-    @HostSideTestStub
+    @HostSideTestKeep
     public String getShortName() {
         return mShortName;
     }

@@ -25,6 +25,7 @@ filegroup {
         "BinderProxyCountingTestApp/src/**/*.java",
         "BinderProxyCountingTestService/src/**/*.java",
         "BinderDeathRecipientHelperApp/src/**/*.java",
+        "AppThatCallsBinderMethods/src/**/*.kt",
     ],
     visibility: ["//visibility:private"],
 }
@@ -141,6 +142,7 @@ android_test {
         ":BinderFrozenStateChangeCallbackTestApp",
         ":BinderProxyCountingTestApp",
         ":BinderProxyCountingTestService",
+        ":AppThatCallsBinderMethods",
     ],
 }
 
@@ -243,7 +245,7 @@ android_ravenwood_test {
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "androidx.test.uiautomator_uiautomator",
-        "compatibility-device-util-axt",
+        "compatibility-device-util-axt-ravenwood",
         "flag-junit",
         "platform-test-annotations",
         "flag-junit",

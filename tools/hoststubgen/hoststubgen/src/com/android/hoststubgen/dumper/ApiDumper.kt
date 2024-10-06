@@ -44,7 +44,7 @@ class ApiDumper(
         val descriptor: String,
     )
 
-    val javaStandardApiPolicy = FilterPolicy.Stub.withReason("Java standard API")
+    private val javaStandardApiPolicy = FilterPolicy.Keep.withReason("Java standard API")
 
     private val shownMethods = mutableSetOf<MethodKey>()
 
