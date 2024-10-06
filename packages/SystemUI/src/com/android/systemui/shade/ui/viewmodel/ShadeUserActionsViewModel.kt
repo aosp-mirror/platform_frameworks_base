@@ -16,11 +16,13 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
+import com.android.app.tracing.coroutines.flow.map
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.shared.model.TransitionKeys.ToSplitShade
@@ -30,6 +32,7 @@ import com.android.systemui.shade.shared.model.ShadeMode
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 
 /**
  * Models the UI state for the user actions that the user can perform to navigate to other scenes.
@@ -41,21 +44,25 @@ class ShadeUserActionsViewModel
 constructor(
     private val qsSceneAdapter: QSSceneAdapter,
     private val shadeInteractor: ShadeInteractor,
+    private val sceneBackInteractor: SceneBackInteractor,
 ) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
         combine(
                 shadeInteractor.shadeMode,
                 qsSceneAdapter.isCustomizerShowing,
-            ) { shadeMode, isCustomizerShowing ->
+                sceneBackInteractor.backScene
+                    .filter { it != Scenes.Shade }
+                    .map { it ?: SceneFamilies.Home },
+            ) { shadeMode, isCustomizerShowing, backScene ->
                 buildMap<UserAction, UserActionResult> {
                     if (!isCustomizerShowing) {
                         set(
                             Swipe(SwipeDirection.Up),
                             UserActionResult(
-                                SceneFamilies.Home,
-                                ToSplitShade.takeIf { shadeMode is ShadeMode.Split }
-                            )
+                                backScene,
+                                ToSplitShade.takeIf { shadeMode is ShadeMode.Split },
+                            ),
                         )
                     }
 

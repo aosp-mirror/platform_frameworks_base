@@ -47,6 +47,9 @@ class RavenizerOptions(
 
     /** Whether the validation failure is fatal or not. */
     var fatalValidation: SetOnce<Boolean> = SetOnce(false),
+
+    /** Whether to remove mockito and dexmaker classes. */
+    var stripMockito: SetOnce<Boolean> = SetOnce(false),
 ) {
     companion object {
 
@@ -84,6 +87,9 @@ class RavenizerOptions(
 
                         "--fatal-validation" -> ret.fatalValidation.set(true)
                         "--no-fatal-validation" -> ret.fatalValidation.set(false)
+
+                        "--strip-mockito" -> ret.stripMockito.set(true)
+                        "--no-strip-mockito" -> ret.stripMockito.set(false)
 
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }

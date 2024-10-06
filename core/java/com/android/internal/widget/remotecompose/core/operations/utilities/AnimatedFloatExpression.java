@@ -15,12 +15,15 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
+import static com.android.internal.widget.remotecompose.core.operations.utilities.NanMap.ID_REGION_ARRAY;
+import static com.android.internal.widget.remotecompose.core.operations.utilities.NanMap.ID_REGION_MASK;
+
 /**
  * high performance floating point expression evaluator used in animation
  */
 public class AnimatedFloatExpression {
     static IntMap<String> sNames = new IntMap<>();
-    public static final int OFFSET = 0x100;
+    public static final int OFFSET = 0x310_000;
     public static final float ADD = asNan(OFFSET + 1);
     public static final float SUB = asNan(OFFSET + 2);
     public static final float MUL = asNan(OFFSET + 3);
@@ -57,11 +60,18 @@ public class AnimatedFloatExpression {
     public static final float CEIL = asNan(OFFSET + 31);
 
 
-    public static final float LAST_OP = 31;
+    // Array ops
+    public static final float A_DEREF = asNan(OFFSET + 32);
+    public static final float A_MAX = asNan(OFFSET + 33);
+    public static final float A_MIN = asNan(OFFSET + 34);
+    public static final float A_SUM = asNan(OFFSET + 35);
+    public static final float A_AVG = asNan(OFFSET + 36);
+    public static final float A_LEN = asNan(OFFSET + 37);
+    public static final int LAST_OP = OFFSET + 37;
 
 
-    public static final float VAR1 = asNan(OFFSET + 27);
-    public static final float VAR2 = asNan(OFFSET + 28);
+    public static final float VAR1 = asNan(OFFSET + 38);
+    public static final float VAR2 = asNan(OFFSET + 39);
 
     // TODO CLAMP, CBRT, DEG, RAD, EXPM1, CEIL, FLOOR
     private static final float FP_PI = (float) Math.PI;
@@ -71,16 +81,23 @@ public class AnimatedFloatExpression {
     float[] mStack;
     float[] mLocalStack = new float[128];
     float[] mVar;
+    CollectionsAccess mCollectionsAccess;
 
     /**
      * is float a math operator
+     *
      * @param v
      * @return
      */
     public static boolean isMathOperator(float v) {
         if (Float.isNaN(v)) {
             int pos = fromNaN(v);
-            return pos > OFFSET && pos <= OFFSET + LAST_OP;
+            // a data variable is a type of math operator for expressions
+            // it dereference to a value
+            if (NanMap.isDataVariable(v)) {
+                return false;
+            }
+            return pos > OFFSET && pos <= LAST_OP;
         }
         return false;
     }
@@ -89,8 +106,21 @@ public class AnimatedFloatExpression {
         int eval(int sp);
     }
 
+
     /**
      * Evaluate a float expression
+     * This system works by processing an Array of float (float[])
+     * in reverse polish notation (rpn)
+     * Within that array some floats are commands
+     * they are encoded within an NaN.
+     * After processing the array the last item on the array is returned.
+     * The system supports variables allowing expressions like.
+     * sin(sqrt(x*x+y*y))/sqrt(x*x+y*y)
+     * Where x & y are passe as parameters
+     * Examples:
+     * (1+2)  (1, 2, ADD) adds two numbers returns 3
+     * eval(new float[]{ Var1, Var * }
+     *
      * @param exp
      * @param var
      * @return
@@ -110,8 +140,46 @@ public class AnimatedFloatExpression {
         return mStack[sp];
     }
 
+
     /**
      * Evaluate a float expression
+     *
+     * @param ca
+     * @param exp
+     * @param var
+     * @return
+     */
+    public float eval(CollectionsAccess ca, float[] exp, float... var) {
+        mStack = exp;
+        mVar = var;
+        mCollectionsAccess = ca;
+        int sp = -1;
+
+        for (int i = 0; i < mStack.length; i++) {
+            float v = mStack[i];
+            if (Float.isNaN(v)) {
+                int id = fromNaN(v);
+                if ((id & ID_REGION_MASK) != ID_REGION_ARRAY) {
+                    sp = mOps[id - OFFSET].eval(sp);
+                } else {
+                    mStack[++sp] = v;
+                }
+            } else {
+                mStack[++sp] = v;
+            }
+        }
+        return mStack[sp];
+    }
+
+
+    private int dereference(CollectionsAccess ca, int id, int sp) {
+        mStack[sp] = ca.getFloatValue(id, (int) (mStack[sp]));
+        return sp;
+    }
+
+    /**
+     * Evaluate a float expression
+     *
      * @param exp
      * @param len
      * @param var
@@ -135,6 +203,7 @@ public class AnimatedFloatExpression {
 
     /**
      * Evaluate a float expression
+     *
      * @param exp
      * @param var
      * @return
@@ -283,6 +352,58 @@ public class AnimatedFloatExpression {
                 mStack[sp] = (float) Math.ceil(mStack[sp]);
                 return sp;
             },
+            (sp) -> { // A_DEREF
+                int id = fromNaN(mStack[sp]);
+                mStack[sp] = mCollectionsAccess.getFloatValue(id, (int) (mStack[sp - 1]));
+                return sp - 1;
+            },
+            (sp) -> { // A_MAX
+                int id = fromNaN(mStack[sp]);
+                float[] array = mCollectionsAccess.getFloats(id);
+                float max = array[0];
+                for (int i = 1; i < array.length; i++) {
+                    max = Math.max(max, array[i]);
+                }
+                mStack[sp] = max;
+                return sp;
+            },
+            (sp) -> { // A_MIN
+                int id = fromNaN(mStack[sp]);
+                float[] array = mCollectionsAccess.getFloats(id);
+                float max = array[0];
+                for (int i = 1; i < array.length; i++) {
+                    max = Math.max(max, array[i]);
+                }
+                mStack[sp] = max;
+                return sp;
+            },
+            (sp) -> { // A_SUM
+                int id = fromNaN(mStack[sp]);
+                float[] array = mCollectionsAccess.getFloats(id);
+                float sum = 0;
+                for (int i = 0; i < array.length; i++) {
+                    sum += array[i];
+                }
+                mStack[sp] = sum;
+                return sp;
+            },
+            (sp) -> { // A_AVG
+                int id = fromNaN(mStack[sp]);
+                float[] array = mCollectionsAccess.getFloats(id);
+                float sum = 0;
+                for (int i = 0; i < array.length; i++) {
+                    sum += array[i];
+                }
+                mStack[sp] = sum / array.length;
+                return sp;
+            },
+            (sp) -> { // A_LEN
+                int id = fromNaN(mStack[sp]);
+                mStack[sp] = mCollectionsAccess.getFloatsLength(id);
+                return sp;
+            },
+
+
             (sp) -> { // first var =
                 mStack[sp] = mVar[0];
                 return sp;
@@ -331,6 +452,14 @@ public class AnimatedFloatExpression {
         sNames.put(k++, "deg");
         sNames.put(k++, "rad");
         sNames.put(k++, "ceil");
+
+        sNames.put(k++, "A_DEREF");
+        sNames.put(k++, "A_MAX");
+        sNames.put(k++, "A_MIN");
+        sNames.put(k++, "A_SUM");
+        sNames.put(k++, "A_AVG");
+        sNames.put(k++, "A_LEN");
+
         sNames.put(k++, "a[0]");
         sNames.put(k++, "a[1]");
         sNames.put(k++, "a[2]");
@@ -338,6 +467,7 @@ public class AnimatedFloatExpression {
 
     /**
      * given a float command return its math name (e.g sin, cos etc.)
+     *
      * @param f
      * @return
      */
@@ -348,6 +478,7 @@ public class AnimatedFloatExpression {
 
     /**
      * Convert an expression encoded as an array of floats int ot a string
+     *
      * @param exp
      * @param labels
      * @return
@@ -360,15 +491,21 @@ public class AnimatedFloatExpression {
                 if (isMathOperator(v)) {
                     s.append(toMathName(v));
                 } else {
+                    int id = fromNaN(v);
+                    String idString = (id > ID_REGION_ARRAY) ? ("A_" + (id & 0xFFFFF)) : "" + id;
                     s.append("[");
-                    s.append(fromNaN(v));
+                    s.append(idString);
                     s.append("]");
                 }
             } else {
-                if (labels[i] != null) {
+                if (labels != null && labels[i] != null) {
                     s.append(labels[i]);
+                    if (!labels[i].contains("_")) {
+                        s.append(v);
+                    }
+                } else {
+                    s.append(v);
                 }
-                s.append(v);
             }
             s.append(" ");
         }
@@ -423,6 +560,7 @@ public class AnimatedFloatExpression {
 
     /**
      * to be used by parser to determine if command is infix
+     *
      * @param n
      * @return
      */
@@ -432,6 +570,7 @@ public class AnimatedFloatExpression {
 
     /**
      * Convert an id into a NaN object
+     *
      * @param v
      * @return
      */
@@ -441,12 +580,12 @@ public class AnimatedFloatExpression {
 
     /**
      * Get ID from a NaN float
+     *
      * @param v
      * @return
      */
     public static int fromNaN(float v) {
         int b = Float.floatToRawIntBits(v);
-        return b & 0xFFFFF;
+        return b & 0x7FFFFF;
     }
-
 }

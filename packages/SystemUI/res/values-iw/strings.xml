@@ -573,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"שיחות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ניקוי כל ההתראות השקטות"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"התראות הושהו על ידי מצב \'נא לא להפריע\'"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"כן, אפשר להתחיל"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"אין התראות"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"אין התראות חדשות"</string>
@@ -1179,10 +1181,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"‎<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%‎‎"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"רמקולים ומסכים"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"הצעות למכשירים"</string>
-    <!-- no translation found for media_input_group_title (2057057473860783021) -->
-    <skip />
-    <!-- no translation found for media_output_group_title (6789001895863332576) -->
-    <skip />
+    <string name="media_input_group_title" msgid="2057057473860783021">"קלט"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"פלט"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"עצירת הסשן המשותף כדי להעביר מדיה למכשיר אחר"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"עצירה"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"הסבר על שידורים"</string>
@@ -1398,8 +1398,7 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"סמל הכיווץ"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"סמל ההרחבה"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"או"</string>
-    <!-- no translation found for shortcut_helper_content_description_drag_handle (5092426406009848110) -->
-    <skip />
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"נקודת האחיזה לגרירה"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ניווט באמצעות המקלדת"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"מידע על מקשי קיצור"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ניווט באמצעות לוח המגע"</string>

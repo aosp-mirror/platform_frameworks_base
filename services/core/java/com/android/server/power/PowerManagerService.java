@@ -125,7 +125,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
-import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.EventLogTags;
 import com.android.server.LockGuard;
 import com.android.server.ServiceThread;
@@ -133,6 +132,7 @@ import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -2445,6 +2445,8 @@ public final class PowerManagerService extends SystemService
                     mClock.uptimeMillis());
         } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mNotifier.onGroupRemoved(groupId);
+        } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_CHANGED) {
+            mNotifier.onGroupChanged();
         }
 
         if (oldWakefulness != newWakefulness) {

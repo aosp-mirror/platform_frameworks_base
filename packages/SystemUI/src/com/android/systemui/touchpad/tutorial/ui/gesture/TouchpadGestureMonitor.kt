@@ -38,3 +38,7 @@ private fun isNFingerTouchpadSwipe(event: MotionEvent, fingerCount: Int): Boolea
     return event.classification == MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE &&
         event.getAxisValue(MotionEvent.AXIS_GESTURE_SWIPE_FINGER_COUNT) == fingerCount.toFloat()
 }
+
+fun isTwoFingerSwipe(event: MotionEvent): Boolean {
+    return event.classification == MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE
+}

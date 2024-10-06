@@ -22,6 +22,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.nano.CommunalHubState
+import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
@@ -102,7 +103,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                     widgetId = widgetId,
                     provider = provider,
                     rank = rank,
-                    userSerialNumber = userSerialNumber
+                    userSerialNumber = userSerialNumber,
                 )
             }
             assertThat(widgets())
@@ -110,7 +111,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                     communalItemRankEntry1,
                     communalWidgetItemEntry1,
                     communalItemRankEntry2,
-                    communalWidgetItemEntry2
+                    communalWidgetItemEntry2,
                 )
         }
 
@@ -129,7 +130,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 communalWidgetDao.addWidget(
                     widgetId = widgetId,
                     provider = provider,
-                    userSerialNumber = userSerialNumber
+                    userSerialNumber = userSerialNumber,
                 )
             }
 
@@ -165,7 +166,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                     communalItemRankEntry1,
                     communalWidgetItemEntry1,
                     communalItemRankEntry2,
-                    communalWidgetItemEntry2
+                    communalWidgetItemEntry2,
                 )
 
             communalWidgetDao.deleteWidgetById(communalWidgetItemEntry1.widgetId)
@@ -251,6 +252,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                     componentName = "pk_name/cls_name_4",
                     itemId = 4L,
                     userSerialNumber = 0,
+                    spanY = 3,
                 )
             assertThat(widgets())
                 .containsExactly(
@@ -262,6 +264,68 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                     communalWidgetItemEntry2,
                     communalItemRankEntry3.copy(rank = 3),
                     communalWidgetItemEntry3,
+                )
+                .inOrder()
+        }
+
+    @Test
+    fun addWidget_withDifferentSpanY_readsCorrectValuesInDb() =
+        testScope.runTest {
+            val widgets = collectLastValue(communalWidgetDao.getWidgets())
+
+            // Add widgets with different spanY values
+            communalWidgetDao.addWidget(
+                widgetId = 1,
+                provider = ComponentName("pkg_name", "cls_name_1"),
+                rank = 0,
+                userSerialNumber = 0,
+                spanY = CommunalContentSize.FULL.span,
+            )
+            communalWidgetDao.addWidget(
+                widgetId = 2,
+                provider = ComponentName("pkg_name", "cls_name_2"),
+                rank = 1,
+                userSerialNumber = 0,
+                spanY = CommunalContentSize.HALF.span,
+            )
+            communalWidgetDao.addWidget(
+                widgetId = 3,
+                provider = ComponentName("pkg_name", "cls_name_3"),
+                rank = 2,
+                userSerialNumber = 0,
+                spanY = CommunalContentSize.THIRD.span,
+            )
+
+            // Verify that the widgets have the correct spanY values
+            assertThat(widgets())
+                .containsExactly(
+                    CommunalItemRank(uid = 1L, rank = 0),
+                    CommunalWidgetItem(
+                        uid = 1L,
+                        widgetId = 1,
+                        componentName = "pkg_name/cls_name_1",
+                        itemId = 1L,
+                        userSerialNumber = 0,
+                        spanY = CommunalContentSize.FULL.span,
+                    ),
+                    CommunalItemRank(uid = 2L, rank = 1),
+                    CommunalWidgetItem(
+                        uid = 2L,
+                        widgetId = 2,
+                        componentName = "pkg_name/cls_name_2",
+                        itemId = 2L,
+                        userSerialNumber = 0,
+                        spanY = CommunalContentSize.HALF.span,
+                    ),
+                    CommunalItemRank(uid = 3L, rank = 2),
+                    CommunalWidgetItem(
+                        uid = 3L,
+                        widgetId = 3,
+                        componentName = "pkg_name/cls_name_3",
+                        itemId = 3L,
+                        userSerialNumber = 0,
+                        spanY = CommunalContentSize.THIRD.span,
+                    ),
                 )
                 .inOrder()
         }
@@ -288,6 +352,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                         componentName = fakeWidget.componentName,
                         itemId = rank.uid,
                         userSerialNumber = fakeWidget.userSerialNumber,
+                        spanY = 3,
                     )
                 expected[rank] = widget
             }
@@ -343,6 +408,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 componentName = widgetInfo1.provider.flattenToString(),
                 itemId = communalItemRankEntry1.uid,
                 userSerialNumber = widgetInfo1.userSerialNumber,
+                spanY = 3,
             )
         val communalWidgetItemEntry2 =
             CommunalWidgetItem(
@@ -351,6 +417,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 componentName = widgetInfo2.provider.flattenToString(),
                 itemId = communalItemRankEntry2.uid,
                 userSerialNumber = widgetInfo2.userSerialNumber,
+                spanY = 3,
             )
         val communalWidgetItemEntry3 =
             CommunalWidgetItem(
@@ -359,6 +426,7 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
                 componentName = widgetInfo3.provider.flattenToString(),
                 itemId = communalItemRankEntry3.uid,
                 userSerialNumber = widgetInfo3.userSerialNumber,
+                spanY = 3,
             )
         val fakeState =
             CommunalHubState().apply {

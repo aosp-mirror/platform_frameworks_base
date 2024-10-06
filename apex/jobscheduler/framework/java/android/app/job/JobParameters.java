@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.Process;
 import android.system.SystemCleaner;
 import android.util.Log;
 
@@ -638,6 +639,12 @@ public class JobParameters implements Parcelable {
      * @hide
      */
     public void enableCleaner() {
+        // JobParameters objects are passed by reference in local Binder
+        // transactions for clients running as SYSTEM. The life cycle of the
+        // JobParameters objects are no longer controlled by the client.
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            return;
+        }
         if (mJobCleanupCallback == null) {
             initCleaner(new JobCleanupCallback(IJobCallback.Stub.asInterface(callback), jobId));
         }

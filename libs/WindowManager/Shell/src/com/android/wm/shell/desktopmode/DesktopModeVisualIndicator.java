@@ -21,6 +21,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR;
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_DESKTOP_INDICATOR;
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
+import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.RectEvaluator;
@@ -125,7 +131,7 @@ public class DesktopModeVisualIndicator {
         mContext = context;
         mTaskSurface = taskSurface;
         mRootTdaOrganizer = taskDisplayAreaOrganizer;
-        mCurrentType = IndicatorType.NO_INDICATOR;
+        mCurrentType = NO_INDICATOR;
         mDragStartState = dragStartState;
     }
 
@@ -136,8 +142,16 @@ public class DesktopModeVisualIndicator {
     @NonNull
     IndicatorType updateIndicatorType(PointF inputCoordinates) {
         final DisplayLayout layout = mDisplayController.getDisplayLayout(mTaskInfo.displayId);
+        // Perform a quick check first: any input off the left edge of the display should be split
+        // left, and split right for the right edge. This is universal across all drag event types.
+        if (inputCoordinates.x < 0) return TO_SPLIT_LEFT_INDICATOR;
+        if (inputCoordinates.x > layout.width()) return TO_SPLIT_RIGHT_INDICATOR;
         // If we are in freeform, we don't want a visible indicator in the "freeform" drag zone.
-        IndicatorType result = IndicatorType.NO_INDICATOR;
+        // In drags not originating on a freeform caption, we should default to a TO_DESKTOP
+        // indicator.
+        IndicatorType result = mDragStartState == DragStartState.FROM_FREEFORM
+                ? NO_INDICATOR
+                : TO_DESKTOP_INDICATOR;
         final int transitionAreaWidth = mContext.getResources().getDimensionPixelSize(
                 com.android.wm.shell.R.dimen.desktop_mode_transition_region_thickness);
         // Because drags in freeform use task position for indicator calculation, we need to
@@ -149,19 +163,14 @@ public class DesktopModeVisualIndicator {
                 captionHeight);
         final Region splitRightRegion = calculateSplitRightRegion(layout, transitionAreaWidth,
                 captionHeight);
-        final Region toDesktopRegion = calculateToDesktopRegion(layout, splitLeftRegion,
-                splitRightRegion, fullscreenRegion);
         if (fullscreenRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
-            result = IndicatorType.TO_FULLSCREEN_INDICATOR;
+            result = TO_FULLSCREEN_INDICATOR;
         }
         if (splitLeftRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_SPLIT_LEFT_INDICATOR;
         }
         if (splitRightRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
             result = IndicatorType.TO_SPLIT_RIGHT_INDICATOR;
-        }
-        if (toDesktopRegion.contains((int) inputCoordinates.x, (int) inputCoordinates.y)) {
-            result = IndicatorType.TO_DESKTOP_INDICATOR;
         }
         if (mDragStartState != DragStartState.DRAGGED_INTENT) {
             transitionIndicator(result);
@@ -182,7 +191,7 @@ public class DesktopModeVisualIndicator {
                     R.dimen.desktop_mode_fullscreen_region_scale);
             final float toFullscreenWidth = (layout.width() * toFullscreenScale);
             region.union(new Rect((int) ((layout.width() / 2f) - (toFullscreenWidth / 2f)),
-                    -captionHeight,
+                    Short.MIN_VALUE,
                     (int) ((layout.width() / 2f) + (toFullscreenWidth / 2f)),
                     transitionHeight));
         }
@@ -192,24 +201,9 @@ public class DesktopModeVisualIndicator {
                 || mDragStartState == DragStartState.DRAGGED_INTENT
         ) {
             region.union(new Rect(0,
-                    -captionHeight,
+                    Short.MIN_VALUE,
                     layout.width(),
                     transitionHeight));
-        }
-        return region;
-    }
-
-    @VisibleForTesting
-    Region calculateToDesktopRegion(DisplayLayout layout,
-            Region splitLeftRegion, Region splitRightRegion,
-            Region toFullscreenRegion) {
-        final Region region = new Region();
-        // If in desktop, we need no region. Otherwise it's the same for all windowing modes.
-        if (mDragStartState != DragStartState.FROM_FREEFORM) {
-            region.union(new Rect(0, 0, layout.width(), layout.height()));
-            region.op(splitLeftRegion, Region.Op.DIFFERENCE);
-            region.op(splitRightRegion, Region.Op.DIFFERENCE);
-            region.op(toFullscreenRegion, Region.Op.DIFFERENCE);
         }
         return region;
     }
@@ -311,7 +305,7 @@ public class DesktopModeVisualIndicator {
                 }
             });
         }
-        mCurrentType = IndicatorType.NO_INDICATOR;
+        mCurrentType = NO_INDICATOR;
     }
 
     /**
@@ -322,9 +316,9 @@ public class DesktopModeVisualIndicator {
         if (mView == null) {
             createView();
         }
-        if (mCurrentType == IndicatorType.NO_INDICATOR) {
+        if (mCurrentType == NO_INDICATOR) {
             fadeInIndicator(newType);
-        } else if (newType == IndicatorType.NO_INDICATOR) {
+        } else if (newType == NO_INDICATOR) {
             fadeOutIndicator(null /* finishCallback */);
         } else {
             final VisualIndicatorAnimator animator = VisualIndicatorAnimator.animateIndicatorType(

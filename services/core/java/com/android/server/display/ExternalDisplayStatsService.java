@@ -19,7 +19,6 @@ package com.android.server.display;
 import static android.media.AudioDeviceInfo.TYPE_HDMI;
 import static android.media.AudioDeviceInfo.TYPE_HDMI_ARC;
 import static android.media.AudioDeviceInfo.TYPE_USB_DEVICE;
-import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,7 +31,6 @@ import android.media.AudioManager.AudioPlaybackCallback;
 import android.media.AudioPlaybackConfiguration;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.Display;
@@ -44,6 +42,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.display.utils.DebugUtils;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 
 /**
@@ -203,8 +202,9 @@ public final class ExternalDisplayStatsService {
         }
     };
 
-    ExternalDisplayStatsService(Context context, Handler handler) {
-        this(new Injector(context, handler));
+    ExternalDisplayStatsService(Context context, Handler handler,
+            BooleanSupplier isExtendedDisplayEnabled) {
+        this(new Injector(context, handler, isExtendedDisplayEnabled));
     }
 
     @VisibleForTesting
@@ -599,25 +599,21 @@ public final class ExternalDisplayStatsService {
         private final Context mContext;
         @NonNull
         private final Handler mHandler;
+        private final BooleanSupplier mIsExtendedDisplayEnabled;
         @Nullable
         private AudioManager mAudioManager;
         @Nullable
         private PowerManager mPowerManager;
 
-        Injector(@NonNull Context context, @NonNull Handler handler) {
+        Injector(@NonNull Context context, @NonNull Handler handler,
+                BooleanSupplier isExtendedDisplayEnabled) {
             mContext = context;
             mHandler = handler;
+            mIsExtendedDisplayEnabled = isExtendedDisplayEnabled;
         }
 
         boolean isExtendedDisplayEnabled() {
-            try {
-                return 0 != Settings.Global.getInt(
-                        mContext.getContentResolver(),
-                        DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0);
-            } catch (Throwable e) {
-                // Some services might not be initialised yet to be able to call getInt
-                return false;
-            }
+            return mIsExtendedDisplayEnabled.getAsBoolean();
         }
 
         void registerInteractivityReceiver(BroadcastReceiver interactivityReceiver,

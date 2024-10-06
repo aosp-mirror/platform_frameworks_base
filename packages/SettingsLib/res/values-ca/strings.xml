@@ -692,7 +692,7 @@
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Connector per al micròfon"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"Micròfon USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Activa"</string>
-    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desactiva"</string>
+    <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Desactivat"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"S\'està canviant la xarxa de l\'operador de telefonia mòbil"</string>
     <string name="data_connection_3g" msgid="931852552688157407">"3G"</string>
     <string name="data_connection_edge" msgid="4625509456544797637">"EDGE"</string>

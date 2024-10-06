@@ -81,7 +81,7 @@ fun NotificationScrimNestedScrollConnection(
             if (scrimOffset() < minScrimOffset()) {
                 animateScrimOffset(minScrimOffset())
             }
-            0f
+            { 0f }
         },
     )
 }

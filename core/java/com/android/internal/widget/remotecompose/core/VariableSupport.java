@@ -17,7 +17,7 @@ package com.android.internal.widget.remotecompose.core;
 
 /**
  * Interface for operators that interact with variables
- * Threw this they register to listen to particular variables
+ * Through this they register to listen to particular variables
  * and are notified when they change
  */
 public interface VariableSupport {

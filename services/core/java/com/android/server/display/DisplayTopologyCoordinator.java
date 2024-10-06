@@ -16,89 +16,91 @@
 
 package com.android.server.display;
 
-import android.annotation.Nullable;
-import android.util.IndentingPrintWriter;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.DisplayInfo;
+
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /**
- * This class manages the relative placement (topology) of extended displays. It is responsible for
- * updating and persisting the topology.
+ * Manages the relative placement (topology) of extended displays. Responsible for updating and
+ * persisting the topology.
  */
 class DisplayTopologyCoordinator {
 
-    /**
-     * The topology tree
-     */
-    @Nullable
-    private TopologyTreeNode mRoot;
+    @GuardedBy("mLock")
+    private final DisplayTopology mTopology;
 
     /**
-     * The logical display ID of the primary display that will show certain UI elements.
-     * This is not necessarily the same as the default display.
+     * Check if extended displays are enabled. If not, a topology is not needed.
      */
-    private int mPrimaryDisplayId;
+    private final BooleanSupplier mIsExtendedDisplayEnabled;
+
+    private final Object mLock = new Object();
+
+    DisplayTopologyCoordinator(BooleanSupplier isExtendedDisplayEnabled) {
+        this(new Injector(), isExtendedDisplayEnabled);
+    }
+
+    @VisibleForTesting
+    DisplayTopologyCoordinator(Injector injector, BooleanSupplier isExtendedDisplayEnabled) {
+        mTopology = injector.getTopology();
+        mIsExtendedDisplayEnabled = isExtendedDisplayEnabled;
+    }
+
+    /**
+     * Add a display to the topology.
+     * @param info The display info
+     */
+    void onDisplayAdded(DisplayInfo info) {
+        if (!isDisplayAllowedInTopology(info)) {
+            return;
+        }
+        synchronized (mLock) {
+            mTopology.addDisplay(info.displayId, getWidth(info), getHeight(info));
+        }
+    }
 
     /**
      * Print the object's state and debug information into the given stream.
      * @param pw The stream to dump information to.
      */
-    public void dump(PrintWriter pw) {
-        pw.println("DisplayTopologyCoordinator:");
-        pw.println("--------------------");
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
-        ipw.increaseIndent();
-
-        ipw.println("mPrimaryDisplayId: " + mPrimaryDisplayId);
-
-        ipw.println("Topology tree:");
-        if (mRoot != null) {
-            ipw.increaseIndent();
-            mRoot.dump(ipw);
-            ipw.decreaseIndent();
+    void dump(PrintWriter pw) {
+        synchronized (mLock) {
+            mTopology.dump(pw);
         }
     }
 
-    private static class TopologyTreeNode {
+    /**
+     * @param info The display info
+     * @return The width of the display in dp
+     */
+    private double getWidth(DisplayInfo info) {
+        return info.logicalWidth * (double) DisplayMetrics.DENSITY_DEFAULT
+                / info.logicalDensityDpi;
+    }
 
-        /**
-         * The logical display ID
-         */
-        private int mDisplayId;
+    /**
+     * @param info The display info
+     * @return The height of the display in dp
+     */
+    private double getHeight(DisplayInfo info) {
+        return info.logicalHeight * (double) DisplayMetrics.DENSITY_DEFAULT
+                / info.logicalDensityDpi;
+    }
 
-        private final List<TopologyTreeNode> mChildren = new ArrayList<>();
+    private boolean isDisplayAllowedInTopology(DisplayInfo info) {
+        return mIsExtendedDisplayEnabled.getAsBoolean()
+                && info.displayGroupId == Display.DEFAULT_DISPLAY_GROUP;
+    }
 
-        /**
-         * The position of this display relative to its parent.
-         */
-        private Position mPosition;
-
-        /**
-         * The distance from the top edge of the parent display to the top edge of this display (in
-         * case of POSITION_LEFT or POSITION_RIGHT) or from the left edge of the parent display
-         * to the left edge of this display (in case of POSITION_TOP or POSITION_BOTTOM). The unit
-         * used is density-independent pixels (dp).
-         */
-        private double mOffset;
-
-        /**
-         * Print the object's state and debug information into the given stream.
-         * @param ipw The stream to dump information to.
-         */
-        void dump(IndentingPrintWriter ipw) {
-            ipw.println("Display {id=" + mDisplayId + ", position=" + mPosition
-                    + ", offset=" + mOffset + "}");
-            ipw.increaseIndent();
-            for (TopologyTreeNode child : mChildren) {
-                child.dump(ipw);
-            }
-            ipw.decreaseIndent();
-        }
-
-        private enum Position {
-            POSITION_LEFT, POSITION_TOP, POSITION_RIGHT, POSITION_BOTTOM
+    static class Injector {
+        DisplayTopology getTopology() {
+            return new DisplayTopology();
         }
     }
 }

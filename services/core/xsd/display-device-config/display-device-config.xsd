@@ -712,6 +712,12 @@
                         minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation name="final"/>
             </xs:element>
+            <!-- The time after which the stylus is to be assumed to be not under use. This will
+             enable the logic of changing the brightness with ambient light changes -->
+            <xs:element name="idleStylusTimeoutMillis" type="xs:nonNegativeInteger"
+                minOccurs="0" maxOccurs="1">
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 

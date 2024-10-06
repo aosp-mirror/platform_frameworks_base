@@ -22,6 +22,7 @@ import android.app.WindowConfiguration
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.PointF
 import android.graphics.Rect
 import android.os.RemoteException
 import android.util.DisplayMetrics
@@ -29,10 +30,13 @@ import android.util.Log
 import android.util.Pair
 import android.util.TypedValue
 import android.window.TaskSnapshot
+import android.window.TransitionInfo
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.Flags
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 /** A class that includes convenience methods.  */
@@ -161,6 +165,84 @@ object PipUtils {
             left = appBounds.left + (appBounds.width() - width) / 2
         }
         return Rect(left, top, left + width, top + height)
+    }
+
+    /**
+     * Temporary rounding "outward" (ie. -1.2 -> -2) used for crop since it is an int. We lean
+     * outward since, usually, child surfaces are, themselves, cropped, so we'd prefer to avoid
+     * inadvertently cutting out content that would otherwise be visible.
+     */
+    private fun roundOut(`val`: Float): Int {
+        return (if (`val` >= 0f) ceil(`val`) else floor(`val`)).toInt()
+    }
+
+    /**
+     * Calculates the transform and crop to apply on a Task surface in order for the config-at-end
+     * activity inside it (original-size activity transformed to match it's hint rect to the final
+     * Task bounds) to occupy the same world-space position/dimensions as it had before the
+     * transition.
+     *
+     * Usage example:
+     *     calcStartTransform(pipChange, scale, pos, crop);
+     *     t.setScale(pipChange.getLeash(), scale.x, scale.y);
+     *     t.setPosition(pipChange.getLeash(), pos.x, pos.y);
+     *     t.setCrop(pipChange.getLeash(), crop);
+     */
+    @JvmStatic
+    fun calcStartTransform(pipChange: TransitionInfo.Change, outScale: PointF,
+        outPos: PointF, outCrop: Rect) {
+        val startBounds = pipChange.startAbsBounds
+        val taskEndBounds = pipChange.endAbsBounds
+        // For now, pip activity bounds always matches task bounds. If this ever changes, we'll
+        // need to get the activity offset.
+        val endBounds = taskEndBounds
+        var hintRect = pipChange.taskInfo?.pictureInPictureParams?.sourceRectHint
+        if (hintRect == null) {
+            hintRect = Rect(startBounds)
+            hintRect.offsetTo(0, 0)
+        }
+
+        // FA = final activity bounds (absolute)
+        // FT = final task bounds (absolute)
+        // SA = start activity bounds (absolute)
+        // H = source hint (relative to start activity bounds)
+        // We want to transform the activity so that when the task is at FT, H overlaps with FA
+
+        // The scaling which takes the hint rect (H) in SA and matches it to FA
+        val hintToEndScaleX = (endBounds.width().toFloat()) / (hintRect.width().toFloat())
+        val hintToEndScaleY = (endBounds.height().toFloat()) / (hintRect.height().toFloat())
+
+        // We want to set the transform on the END TASK surface to put the start activity
+        // back to where it was.
+        // First do backwards scale (which takes FA back to H)
+        val endToHintScaleX = 1f / hintToEndScaleX
+        val endToHintScaleY = 1f / hintToEndScaleY
+        // Then top-left needs to place FA (relative to the FT) at H (relative to SA):
+        //   so -(FA.tl - FT.tl) + SA.tl + H.tl
+        //  but we have scaled up the task, so anything that was "within" the task needs to
+        //  be scaled:
+        //   so -(FA.tl - FT.tl)*endToHint + SA.tl + H.tl
+        val endTaskPosForStartX = (-(endBounds.left - taskEndBounds.left) * endToHintScaleX
+                + startBounds.left + hintRect.left)
+        val endTaskPosForStartY = (-(endBounds.top - taskEndBounds.top) * endToHintScaleY
+                + startBounds.top + hintRect.top)
+        outScale[endToHintScaleX] = endToHintScaleY
+        outPos[endTaskPosForStartX] = endTaskPosForStartY
+
+        // now need to set crop to reveal the non-hint stuff. Again, hintrect is relative, so
+        // we must apply outsets to reveal the *activity* content which is *inside* the task
+        // and thus is scaled (ie. if activity is scaled down, each task-level pixel exposes
+        // >1 activity-level pixels)
+        // For example, the topleft crop would be:
+        //   (FA.tl - FT.tl) - H.tl * hintToEnd
+        //    ^ activity within task
+        // bottomright can just use scaled activity size
+        //   tl + scale(SA.size, hintToEnd)
+        outCrop.left = roundOut((endBounds.left - taskEndBounds.left)
+                - hintRect.left * hintToEndScaleX)
+        outCrop.top = roundOut((endBounds.top - taskEndBounds.top) - hintRect.top * hintToEndScaleY)
+        outCrop.right = roundOut(outCrop.left + startBounds.width() * hintToEndScaleX)
+        outCrop.bottom = roundOut(outCrop.top + startBounds.height() * hintToEndScaleY)
     }
 
     private var isPip2ExperimentEnabled: Boolean? = null

@@ -142,6 +142,19 @@ class BackupHelper {
         }
     }
 
+    void abortTaskContainerRebuilding(@NonNull WindowContainerTransaction wct) {
+        // Clean-up the legacy states in the system
+        for (int i = mTaskFragmentInfos.size() - 1; i >= 0; i--) {
+            final TaskFragmentInfo info = mTaskFragmentInfos.valueAt(i);
+            mPresenter.deleteTaskFragment(wct, info.getFragmentToken());
+        }
+        mPresenter.setSavedState(new Bundle());
+
+        mParcelableTaskContainerDataList.clear();
+        mTaskFragmentInfos.clear();
+        mTaskFragmentParentInfos.clear();
+    }
+
     boolean hasPendingStateToRestore() {
         return !mParcelableTaskContainerDataList.isEmpty();
     }
@@ -196,6 +209,7 @@ class BackupHelper {
 
             mController.onTaskFragmentParentRestored(wct, taskContainer.getTaskId(),
                     mTaskFragmentParentInfos.get(taskContainer.getTaskId()));
+            mTaskFragmentParentInfos.remove(taskContainer.getTaskId());
             restoredAny = true;
         }
 

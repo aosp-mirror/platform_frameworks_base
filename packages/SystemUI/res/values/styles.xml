@@ -540,6 +540,7 @@
     <!-- Overridden by values-television/styles.xml with tv-specific settings -->
     <style name="volume_dialog_theme" parent="Theme.SystemUI">
         <item name="android:windowIsFloating">true</item>
+        <item name="android:showWhenLocked">true</item>
     </style>
 
     <style name="Theme.SystemUI.DayNightDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog"/>
@@ -1721,7 +1722,7 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="ContextualEduDialog" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
+    <style name="ContextualEduDialog" parent="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar">
         <!-- To make the dialog wrap to content when the education text is short -->
         <item name="windowMinWidthMajor">0%</item>
         <item name="windowMinWidthMinor">0%</item>

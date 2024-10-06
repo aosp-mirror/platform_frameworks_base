@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_DIMMER;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DIMMER;
 import static com.android.server.wm.AlphaAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
@@ -108,7 +108,7 @@ public class DimmerAnimationHelper {
     }
 
     // Sets the requested layer to reparent the dim to without applying it immediately
-    void setRequestedGeometryParent(WindowContainer<?> geometryParent) {
+    void setRequestedGeometryParent(@Nullable WindowContainer<?> geometryParent) {
         if (geometryParent != null) {
             mRequestedProperties.mGeometryParent = geometryParent;
         }

@@ -62,11 +62,11 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_LOCKTASK;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -170,6 +170,7 @@ import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.RemoteAnimationAdapter;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.window.ITaskOrganizer;
 import android.window.PictureInPictureSurfaceTransaction;
@@ -1475,7 +1476,7 @@ class Task extends TaskFragment {
             // The starting window should keep covering its task when a pure TaskFragment is added
             // because its bounds may not fill the task.
             final ActivityRecord top = getTopMostActivity();
-            if (top != null) {
+            if (top != null && !top.hasFixedRotationTransform()) {
                 top.associateStartingWindowWithTaskIfNeeded();
             }
         }
@@ -3400,6 +3401,9 @@ class Task extends TaskFragment {
         info.isTopActivityTransparent = top != null && !top.fillsParent();
         info.isTopActivityStyleFloating = top != null && top.isStyleFloating();
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
+        final WindowState windowState = top != null ? top.findMainWindow() : null;
+        info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
+                ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
     }
 
@@ -4707,8 +4711,13 @@ class Task extends TaskFragment {
                         // If the moveToFront is a part of finishing transition, then make sure
                         // the z-order of tasks are up-to-date.
                         if (topActivity.mTransitionController.inFinishingTransition(topActivity)) {
-                            Transition.assignLayers(taskDisplayArea,
-                                    taskDisplayArea.getPendingTransaction());
+                            final SurfaceControl.Transaction tx =
+                                    taskDisplayArea.getPendingTransaction();
+                            Transition.assignLayers(taskDisplayArea, tx);
+                            final SurfaceControl leash = topActivity.getFixedRotationLeash();
+                            if (leash != null) {
+                                tx.setLayer(leash, topActivity.getLastLayer());
+                            }
                         }
                     }
                 }

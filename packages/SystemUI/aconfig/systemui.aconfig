@@ -559,6 +559,13 @@ flag {
 }
 
 flag {
+    name: "volume_redesign"
+    namespace: "systemui"
+    description: "Enables Volume BC25 visuals update"
+    bug: "368308908"
+}
+
+flag {
     name: "clipboard_shared_transitions"
     namespace: "systemui"
     description: "Show shared transitions from clipboard"
@@ -620,6 +627,20 @@ flag {
     namespace: "systemui"
     description: "Simplify and refactor ScreenshotController"
     bug: "354711957"
+}
+
+flag {
+    name: "screenshot_multidisplay_focus_change"
+    namespace: "systemui"
+    description: "Only capture a single display when screenshotting"
+    bug: "362720389"
+}
+
+flag {
+    name: "screenshot_policy_split_and_desktop_mode"
+    namespace: "systemui"
+    description: "Improves screenshot policy handling for split screen and desktop mode."
+    bug: "365597999"
 }
 
 flag {
@@ -1060,6 +1081,16 @@ flag {
 }
 
 flag {
+    name: "dream_overlay_updated_font"
+    namespace: "systemui"
+    description: "Flag to enable updated font settings for dream overlay"
+    bug: "349656117"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
   name: "app_clips_backlinks"
   namespace: "systemui"
   description: "Enables Backlinks improvement feature in App Clips"
@@ -1370,10 +1401,13 @@ flag {
 }
 
 flag {
-   name: "compose_haptic_sliders"
+   name: "haptics_for_compose_sliders"
    namespace: "systemui"
    description: "Adding haptic component infrastructure to sliders in Compose."
    bug: "341968766"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
 }
 
 flag {
@@ -1424,10 +1458,27 @@ flag {
 }
 
 flag {
+   name: "override_suppress_overlay_condition"
+   namespace: "systemui"
+   description: "Allow override the conditions to suppress the clipboard overlay"
+   bug: "358473717"
+}
+
+flag {
    name: "media_projection_dialog_behind_lockscreen"
    namespace: "systemui"
    description: "Ensure MediaProjection Dialog appears behind the lockscreen"
    bug: "351409536"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "check_lockscreen_gone_transition"
+   namespace: "systemui"
+   description: "Run notification pipeline when the lockscreen is not in gone transition for avoiding janky frames during unlocking animation"
+   bug: "358301118"
    metadata {
        purpose: PURPOSE_BUGFIX
    }

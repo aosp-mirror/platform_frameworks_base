@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.Velocity
 import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.math.sign
 
+internal typealias SuspendedValue<T> = suspend () -> T
+
 /**
  * This [NestedScrollConnection] waits for a child to scroll ([onPreScroll] or [onPostScroll]), and
  * then decides (via [canStartPreScroll] or [canStartPostScroll]) if it should take over scrolling.
@@ -32,71 +34,76 @@ import kotlin.math.sign
  * Note: Call [reset] before destroying this object to make sure you always get a call to [onStop]
  * after [onStart].
  *
- * @sample com.android.compose.animation.scene.rememberSwipeToSceneNestedScrollConnection
+ * @sample LargeTopAppBarNestedScrollConnection
+ * @sample com.android.compose.animation.scene.NestedScrollHandlerImpl.nestedScrollConnection
  */
 class PriorityNestedScrollConnection(
-    private val canStartPreScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
-    private val canStartPostScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
-    private val canStartPostFling: (velocityAvailable: Velocity) -> Boolean,
+    orientation: Orientation,
+    private val canStartPreScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
+    private val canStartPostScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
+    private val canStartPostFling: (velocityAvailable: Float) -> Boolean,
     private val canContinueScroll: (source: NestedScrollSource) -> Boolean,
     private val canScrollOnFling: Boolean,
-    private val onStart: (offsetAvailable: Offset) -> Unit,
-    private val onScroll: (offsetAvailable: Offset) -> Offset,
-    private val onStop: (velocityAvailable: Velocity) -> Velocity,
-) : NestedScrollConnection {
+    private val onStart: (offsetAvailable: Float) -> Unit,
+    private val onScroll: (offsetAvailable: Float) -> Float,
+    private val onStop: (velocityAvailable: Float) -> SuspendedValue<Float>,
+) : NestedScrollConnection, SpaceVectorConverter by SpaceVectorConverter(orientation) {
 
     /** In priority mode [onPreScroll] events are first consumed by the parent, via [onScroll]. */
     private var isPriorityMode = false
 
-    private var offsetScrolledBeforePriorityMode = Offset.Zero
+    private var offsetScrolledBeforePriorityMode = 0f
 
     override fun onPostScroll(
         consumed: Offset,
         available: Offset,
         source: NestedScrollSource,
     ): Offset {
+        val availableFloat = available.toFloat()
         // The offset before the start takes into account the up and down movements, starting from
         // the beginning or from the last fling gesture.
-        val offsetBeforeStart = offsetScrolledBeforePriorityMode - available
+        val offsetBeforeStart = offsetScrolledBeforePriorityMode - availableFloat
 
         if (
             isPriorityMode ||
                 (source == NestedScrollSource.SideEffect && !canScrollOnFling) ||
-                !canStartPostScroll(available, offsetBeforeStart)
+                !canStartPostScroll(availableFloat, offsetBeforeStart)
         ) {
             // The priority mode cannot start so we won't consume the available offset.
             return Offset.Zero
         }
 
-        return onPriorityStart(available)
+        return onPriorityStart(availableFloat).toOffset()
     }
 
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         if (!isPriorityMode) {
             if (source == NestedScrollSource.UserInput || canScrollOnFling) {
-                if (canStartPreScroll(available, offsetScrolledBeforePriorityMode)) {
-                    return onPriorityStart(available)
+                val availableFloat = available.toFloat()
+                if (canStartPreScroll(availableFloat, offsetScrolledBeforePriorityMode)) {
+                    return onPriorityStart(availableFloat).toOffset()
                 }
                 // We want to track the amount of offset consumed before entering priority mode
-                offsetScrolledBeforePriorityMode += available
+                offsetScrolledBeforePriorityMode += availableFloat
             }
 
             return Offset.Zero
         }
 
+        val availableFloat = available.toFloat()
         if (!canContinueScroll(source)) {
             // Step 3a: We have lost priority and we no longer need to intercept scroll events.
-            onPriorityStop(velocity = Velocity.Zero)
+            onPriorityStop(velocity = 0f)
 
-            // We've just reset offsetScrolledBeforePriorityMode to Offset.Zero
+            // We've just reset offsetScrolledBeforePriorityMode to 0f
             // We want to track the amount of offset consumed before entering priority mode
-            offsetScrolledBeforePriorityMode += available
+            offsetScrolledBeforePriorityMode += availableFloat
 
             return Offset.Zero
         }
 
         // Step 2: We have the priority and can consume the scroll events.
-        return onScroll(available)
+        return onScroll(availableFloat).toOffset()
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
@@ -106,15 +113,16 @@ class PriorityNestedScrollConnection(
         }
         // Step 3b: The finger is lifted, we can stop intercepting scroll events and use the speed
         // of the fling gesture.
-        return onPriorityStop(velocity = available)
+        return onPriorityStop(velocity = available.toFloat()).invoke().toVelocity()
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        val availableFloat = available.toFloat()
         if (isPriorityMode) {
-            return onPriorityStop(velocity = available)
+            return onPriorityStop(velocity = availableFloat).invoke().toVelocity()
         }
 
-        if (!canStartPostFling(available)) {
+        if (!canStartPostFling(availableFloat)) {
             return Velocity.Zero
         }
 
@@ -122,11 +130,11 @@ class PriorityNestedScrollConnection(
         // given the available velocity.
         // TODO(b/291053278): Remove canStartPostFling() and instead make it possible to define the
         // overscroll behavior on the Scene level.
-        val smallOffset = Offset(available.x.sign, available.y.sign)
-        onPriorityStart(available = smallOffset)
+        val smallOffset = availableFloat.sign
+        onPriorityStart(availableOffset = smallOffset)
 
         // This is the last event of a scroll gesture.
-        return onPriorityStop(available)
+        return onPriorityStop(availableFloat).invoke().toVelocity()
     }
 
     /**
@@ -136,10 +144,10 @@ class PriorityNestedScrollConnection(
      */
     fun reset() {
         // Step 3c: To ensure that an onStop is always called for every onStart.
-        onPriorityStop(velocity = Velocity.Zero)
+        onPriorityStop(velocity = 0f)
     }
 
-    private fun onPriorityStart(available: Offset): Offset {
+    private fun onPriorityStart(availableOffset: Float): Float {
         if (isPriorityMode) {
             error("This should never happen, onPriorityStart() was called when isPriorityMode")
         }
@@ -150,17 +158,17 @@ class PriorityNestedScrollConnection(
 
         // Note: onStop will be called if we cannot continue to scroll (step 3a), or the finger is
         // lifted (step 3b), or this object has been destroyed (step 3c).
-        onStart(available)
+        onStart(availableOffset)
 
-        return onScroll(available)
+        return onScroll(availableOffset)
     }
 
-    private fun onPriorityStop(velocity: Velocity): Velocity {
+    private fun onPriorityStop(velocity: Float): SuspendedValue<Float> {
         // We can restart tracking the consumed offsets from scratch.
-        offsetScrolledBeforePriorityMode = Offset.Zero
+        offsetScrolledBeforePriorityMode = 0f
 
         if (!isPriorityMode) {
-            return Velocity.Zero
+            return { 0f }
         }
 
         isPriorityMode = false
@@ -168,37 +176,3 @@ class PriorityNestedScrollConnection(
         return onStop(velocity)
     }
 }
-
-fun PriorityNestedScrollConnection(
-    orientation: Orientation,
-    canStartPreScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
-    canStartPostScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
-    canStartPostFling: (velocityAvailable: Float) -> Boolean,
-    canContinueScroll: (source: NestedScrollSource) -> Boolean,
-    canScrollOnFling: Boolean,
-    onStart: (offsetAvailable: Float) -> Unit,
-    onScroll: (offsetAvailable: Float) -> Float,
-    onStop: (velocityAvailable: Float) -> Float,
-) =
-    with(SpaceVectorConverter(orientation)) {
-        PriorityNestedScrollConnection(
-            canStartPreScroll = { offsetAvailable: Offset, offsetBeforeStart: Offset ->
-                canStartPreScroll(offsetAvailable.toFloat(), offsetBeforeStart.toFloat())
-            },
-            canStartPostScroll = { offsetAvailable: Offset, offsetBeforeStart: Offset ->
-                canStartPostScroll(offsetAvailable.toFloat(), offsetBeforeStart.toFloat())
-            },
-            canStartPostFling = { velocityAvailable: Velocity ->
-                canStartPostFling(velocityAvailable.toFloat())
-            },
-            canContinueScroll = canContinueScroll,
-            canScrollOnFling = canScrollOnFling,
-            onStart = { offsetAvailable -> onStart(offsetAvailable.toFloat()) },
-            onScroll = { offsetAvailable: Offset ->
-                onScroll(offsetAvailable.toFloat()).toOffset()
-            },
-            onStop = { velocityAvailable: Velocity ->
-                onStop(velocityAvailable.toFloat()).toVelocity()
-            },
-        )
-    }

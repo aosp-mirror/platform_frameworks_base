@@ -1079,9 +1079,12 @@ public class ZenModeConfig implements Parcelable {
                         // in ensureManualZenRule() and setManualZenMode().
                         rt.manualRule.pkg = PACKAGE_ANDROID;
                         rt.manualRule.type = AutomaticZenRule.TYPE_OTHER;
-                        rt.manualRule.condition = new Condition(
-                                rt.manualRule.conditionId != null ? rt.manualRule.conditionId
-                                        : Uri.EMPTY, "", Condition.STATE_TRUE);
+                        // conditionId in rule must match condition.id to pass isValidManualRule().
+                        if (rt.manualRule.conditionId == null) {
+                            rt.manualRule.conditionId = Uri.EMPTY;
+                        }
+                        rt.manualRule.condition = new Condition(rt.manualRule.conditionId, "",
+                                Condition.STATE_TRUE);
                     }
                 }
                 return rt;

@@ -49,7 +49,14 @@ internal fun TwoTargetPreference(
     widget: @Composable () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(end = SettingsDimension.itemPaddingEnd),
+        modifier =
+            Modifier.fillMaxWidth()
+                .then(
+                    if (isSpaExpressiveEnabled)
+                        Modifier.background(MaterialTheme.colorScheme.surfaceBright)
+                    else Modifier
+                )
+                .padding(end = SettingsDimension.itemPaddingEnd),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isSpaExpressiveEnabled) {

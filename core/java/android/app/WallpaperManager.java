@@ -299,6 +299,14 @@ public class WallpaperManager {
             "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
 
     /**
+     * Extra passed on {@link Intent.ACTION_WALLPAPER_CHANGED} indicating if wallpaper was set from
+     * a foreground app.
+     * @hide
+     */
+    public static final String EXTRA_WHICH_WALLPAPER_CHANGED =
+            "android.service.wallpaper.extra.WHICH_WALLPAPER_CHANGED";
+
+    /**
      * The different screen orientations. {@link #getOrientation} provides their exact definition.
      * This is only used internally by the framework and the WallpaperBackupAgent.
      * @hide

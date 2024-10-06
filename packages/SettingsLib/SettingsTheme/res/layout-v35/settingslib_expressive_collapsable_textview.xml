@@ -41,9 +41,20 @@
         android:ellipsize="end"
         android:textAppearance="@style/TextAppearance.TopIntroText"/>
 
+    <com.android.settingslib.widget.LinkableTextView
+        android:id="@+id/settingslib_expressive_learn_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@android:id/title"
+        app:layout_constraintStart_toStartOf="parent"
+        android:textAlignment="viewStart"
+        android:clickable="true"
+        android:visibility="gone"
+        style="@style/SettingslibTextAppearance.LinkableTextStyle.Expressive"/>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/collapse_button"
-        app:layout_constraintTop_toBottomOf="@android:id/title"
+        app:layout_constraintTop_toBottomOf="@id/settingslib_expressive_learn_more"
         app:layout_constraintStart_toStartOf="parent"
         android:text="@string/settingslib_expressive_text_expand"
         app:icon="@drawable/settingslib_expressive_icon_expand"

@@ -156,7 +156,7 @@ class TaskContainer {
         mSplitController = splitController;
         for (ParcelableTaskFragmentContainerData tfData :
                 data.getParcelableTaskFragmentContainerDataList()) {
-            final TaskFragmentInfo info = taskFragmentInfoMap.get(tfData.mToken);
+            final TaskFragmentInfo info = taskFragmentInfoMap.remove(tfData.mToken);
             if (info != null && !info.isEmpty()) {
                 final TaskFragmentContainer container =
                         new TaskFragmentContainer(tfData, splitController, this);

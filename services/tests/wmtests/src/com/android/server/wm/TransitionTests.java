@@ -34,7 +34,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
-import static android.window.TransitionInfo.FLAG_CONFIG_AT_END;
 import static android.window.TransitionInfo.FLAG_CROSS_PROFILE_OWNER_THUMBNAIL;
 import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
@@ -2935,9 +2934,6 @@ public class TransitionTests extends WindowTestsBase {
         controller.requestStartTransition(transit, task, null, null);
         player.start();
         assertTrue(activity.isConfigurationDispatchPaused());
-        // config-at-end flag must propagate up to task if activity was promoted.
-        assertTrue(player.mLastReady.getChange(
-                task.mRemoteToken.toWindowContainerToken()).hasFlags(FLAG_CONFIG_AT_END));
         player.finish();
         assertFalse(activity.isConfigurationDispatchPaused());
     }
@@ -2966,11 +2962,9 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.requestStartTransition(transit, task, null, null);
         player.start();
-        // config-at-end flag must propagate up to task even when reparented (since config-at-end
-        // only cares about after-end state).
-        assertTrue(player.mLastReady.getChange(
-                task.mRemoteToken.toWindowContainerToken()).hasFlags(FLAG_CONFIG_AT_END));
+        assertTrue(activity.isConfigurationDispatchPaused());
         player.finish();
+        assertFalse(activity.isConfigurationDispatchPaused());
     }
 
     @Test

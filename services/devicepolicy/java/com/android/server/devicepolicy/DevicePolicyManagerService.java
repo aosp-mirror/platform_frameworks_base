@@ -8031,8 +8031,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 "DevicePolicyManager.wipeDataWithReason() from %s, organization-owned? %s",
                 adminName, calledByProfileOwnerOnOrgOwnedDevice);
 
-        wipeDataNoLock(adminComp, flags, internalReason, wipeReasonForUser, userId,
-                calledOnParentInstance, factoryReset);
+        wipeDataNoLock(adminComp, flags, internalReason, wipeReasonForUser, userId, factoryReset);
     }
 
     private String getGenericWipeReason(
@@ -8188,17 +8187,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      *                     factory reset
      */
     private void wipeDataNoLock(@Nullable ComponentName admin, int flags, String internalReason,
-            String wipeReasonForUser, int userId, boolean calledOnParentInstance,
-            @Nullable Boolean factoryReset) {
+            String wipeReasonForUser, int userId, @Nullable Boolean factoryReset) {
         wtfIfInLock();
         final String adminPackage;
         if (admin != null) {
             adminPackage = admin.getPackageName();
         } else {
-            int callerId = mInjector.binderGetCallingUid();
-            String[] adminPackages = mInjector.getPackageManager().getPackagesForUid(callerId);
+            int callerUid = mInjector.binderGetCallingUid();
+            String[] adminPackages = mInjector.getPackageManager().getPackagesForUid(callerUid);
             Preconditions.checkState(adminPackages.length > 0,
-                    "Caller %s does not have any associated packages", callerId);
+                    "Caller %s does not have any associated packages", callerUid);
             adminPackage = adminPackages[0];
         }
         mInjector.binderWithCleanCallingIdentity(() -> {
@@ -8220,32 +8218,22 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 throw new SecurityException("Cannot wipe data. " + restriction
                         + " restriction is set for user " + userId);
             }
-        });
 
-        boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
-        boolean isMainUser = userId == getMainUserId();
-        boolean wipeDevice;
-        if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
-                adminPackage,
-                userId)) {
-            // Legacy mode
-            wipeDevice = getHeadlessDeviceOwnerModeForDeviceOwner()
-                    == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER ? isMainUser : isSystemUser;
-        } else {
-            // Explicit behaviour
-            if (factoryReset) {
-                EnforcingAdmin enforcingAdmin = enforcePermissionsAndGetEnforcingAdmin(
-                        /*admin=*/ null,
-                        /*permission=*/ new String[]{MANAGE_DEVICE_POLICY_WIPE_DATA,
-                                MASTER_CLEAR},
-                        USES_POLICY_WIPE_DATA,
-                        adminPackage,
-                        factoryReset ? UserHandle.USER_ALL :
-                                getAffectedUser(calledOnParentInstance));
-                wipeDevice = true;
+            boolean isSystemUser = userId == UserHandle.USER_SYSTEM;
+            boolean isMainUser = userId == getMainUserId();
+            boolean wipeDevice;
+            if (factoryReset == null || !mInjector.isChangeEnabled(EXPLICIT_WIPE_BEHAVIOUR,
+                    adminPackage,
+                    userId)) {
+                // Legacy mode
+                wipeDevice = getHeadlessDeviceOwnerModeForDeviceOwner()
+                        == HEADLESS_DEVICE_OWNER_MODE_SINGLE_USER ? isMainUser : isSystemUser;
             } else {
-                mInjector.binderWithCleanCallingIdentity(() -> {
-                    Preconditions.checkCallAuthorization(!isSystemUser,
+                // Explicit behaviour
+                if (factoryReset) {
+                    wipeDevice = true;
+                } else {
+                    Preconditions.checkState(!isSystemUser,
                             "User %s is a system user and cannot be removed", userId);
                     boolean isLastNonHeadlessUser = getUserInfo(userId).isFull()
                             && mUserManager.getAliveUsers().stream()
@@ -8253,13 +8241,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             .noneMatch(UserInfo::isFull);
                     Preconditions.checkState(!isLastNonHeadlessUser,
                             "Removing user %s would leave the device without any active users. "
-                                    + "Consider factory resetting the device instead.",
-                            userId);
-                });
-                wipeDevice = false;
+                                    + "Consider factory resetting the device instead.", userId);
+                    wipeDevice = false;
+                }
             }
-        }
-        mInjector.binderWithCleanCallingIdentity(() -> {
+
             if (wipeDevice) {
                 forceWipeDeviceNoLock(
                         (flags & WIPE_EXTERNAL_STORAGE) != 0,
@@ -8600,7 +8586,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         /* reason= */ "reportFailedPasswordAttempt()",
                         getFailedPasswordAttemptWipeMessage(),
                         userId,
-                        /* calledOnParentInstance= */ parent,
                         // factoryReset=null to enable U- behaviour
                         /* factoryReset= */ null);
             } catch (SecurityException e) {

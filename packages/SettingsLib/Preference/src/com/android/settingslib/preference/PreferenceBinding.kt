@@ -68,10 +68,13 @@ interface PreferenceBinding {
                 preference.icon = null
             }
             val context = preference.context
+            val isPreferenceScreen = preference is PreferenceScreen
             preference.peekExtras()?.clear()
             extras(context)?.let { preference.extras.putAll(it) }
             preference.title = getPreferenceTitle(context)
-            preference.summary = getPreferenceSummary(context)
+            if (!isPreferenceScreen) {
+                preference.summary = getPreferenceSummary(context)
+            }
             preference.isEnabled = isEnabled(context)
             preference.isVisible =
                 (this as? PreferenceAvailabilityProvider)?.isAvailable(context) != false
@@ -81,7 +84,7 @@ interface PreferenceBinding {
             // dependency here. This simplifies dependency management and avoid the
             // IllegalStateException when call Preference.setDependency
             preference.dependency = null
-            if (preference !is PreferenceScreen) { // avoid recursive loop when build graph
+            if (!isPreferenceScreen) { // avoid recursive loop when build graph
                 preference.fragment = (this as? PreferenceScreenCreator)?.fragmentClass()?.name
                 preference.intent = intent(context)
             }

@@ -18,11 +18,13 @@ package com.android.wm.shell.desktopmode
 
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
+import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.platform.test.annotations.EnableFlags
 import android.view.Display.DEFAULT_DISPLAY
+import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.IWindowContainerToken
 import android.window.TransitionInfo
@@ -60,7 +62,7 @@ class DesktopTasksTransitionObserverTest {
     private val transitions = mock<Transitions>()
     private val context = mock<Context>()
     private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
-    private val taskRepository = mock<DesktopModeTaskRepository>()
+    private val taskRepository = mock<DesktopRepository>()
 
     private lateinit var transitionObserver: DesktopTasksTransitionObserver
     private lateinit var shellInit: ShellInit
@@ -110,6 +112,24 @@ class DesktopTasksTransitionObserverTest {
         verify(taskRepository, never()).minimizeTask(task.displayId, task.taskId)
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+    fun removeTasks_onTaskFullscreenLaunch_taskRemovedFromRepo() {
+        val task = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN)
+        whenever(taskRepository.getVisibleTaskCount(any())).thenReturn(1)
+        whenever(taskRepository.isActiveTask(task.taskId)).thenReturn(true)
+
+        transitionObserver.onTransitionReady(
+            transition = mock(),
+            info = createOpenTransition(task),
+            startTransaction = mock(),
+            finishTransaction = mock(),
+        )
+
+        verify(taskRepository, never()).minimizeTask(task.displayId, task.taskId)
+        verify(taskRepository).removeFreeformTask(task.displayId, task.taskId)
+    }
+
     private fun createBackNavigationTransition(
         task: RunningTaskInfo?
     ): TransitionInfo {
@@ -125,11 +145,26 @@ class DesktopTasksTransitionObserverTest {
         }
     }
 
-    private fun createTaskInfo(id: Int) =
+    private fun createOpenTransition(
+        task: RunningTaskInfo?
+    ): TransitionInfo {
+        return TransitionInfo(TRANSIT_OPEN, 0 /* flags */).apply {
+            addChange(
+                Change(mock(), mock()).apply {
+                    mode = TRANSIT_OPEN
+                    parent = null
+                    taskInfo = task
+                    flags = flags
+                }
+            )
+        }
+    }
+
+    private fun createTaskInfo(id: Int, windowingMode: Int = WINDOWING_MODE_FREEFORM) =
         RunningTaskInfo().apply {
             taskId = id
             displayId = DEFAULT_DISPLAY
-            configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FREEFORM
+            configuration.windowConfiguration.windowingMode = windowingMode
             token = WindowContainerToken(Mockito.mock(IWindowContainerToken::class.java))
             baseIntent = Intent().apply {
                 component = ComponentName("package", "component.name")

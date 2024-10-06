@@ -46,6 +46,8 @@ constructor(
 
     private val tag = "AvalancheController"
     private val debug = Compile.IS_DEBUG && Log.isLoggable(tag, Log.DEBUG)
+    var baseEntryMapStr : () -> String = { "baseEntryMapStr not initialized" }
+
     var enableAtRuntime = true
         set(value) {
             if (!value) {
@@ -116,17 +118,25 @@ constructor(
         val key = getKey(entry)
 
         if (runnable == null) {
-            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Runnable NULL, stop")
+            headsUpManagerLogger.logAvalancheUpdate(
+                caller, isEnabled, key,
+                "Runnable NULL, stop. ${getStateStr()}"
+            )
             return
         }
         if (!isEnabled) {
-            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key,
-                    "NOT ENABLED, run runnable")
+            headsUpManagerLogger.logAvalancheUpdate(
+                caller, isEnabled, key,
+                "NOT ENABLED, run runnable. ${getStateStr()}"
+            )
             runnable.run()
             return
         }
         if (entry == null) {
-            headsUpManagerLogger.logAvalancheUpdate(caller, isEnabled, key, "Entry NULL, stop")
+            headsUpManagerLogger.logAvalancheUpdate(
+                caller, isEnabled, key,
+                "Entry NULL, stop. ${getStateStr()}"
+            )
             return
         }
         if (debug) {
@@ -181,32 +191,40 @@ constructor(
         val key = getKey(entry)
 
         if (runnable == null) {
-            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key, "Runnable NULL, stop")
+            headsUpManagerLogger.logAvalancheDelete(
+                caller, isEnabled, key,
+                "Runnable NULL, stop. ${getStateStr()}"
+            )
             return
         }
         if (!isEnabled) {
-            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
-                    "NOT ENABLED, run runnable")
             runnable.run()
+            headsUpManagerLogger.logAvalancheDelete(
+                caller, isEnabled = false, key,
+                "NOT ENABLED, run runnable. ${getStateStr()}"
+            )
             return
         }
         if (entry == null) {
-            headsUpManagerLogger.logAvalancheDelete(caller, isEnabled, key,
-                    "Entry NULL, run runnable")
             runnable.run()
+            headsUpManagerLogger.logAvalancheDelete(
+                caller, isEnabled = true, key,
+                "Entry NULL, run runnable. ${getStateStr()}"
+            )
             return
         }
         val outcome: String
         if (entry in nextMap) {
-            outcome = "remove from next"
             if (entry in nextMap) nextMap.remove(entry)
             if (entry in nextList) nextList.remove(entry)
             uiEventLogger.log(ThrottleEvent.AVALANCHE_THROTTLING_HUN_REMOVED)
+            outcome = "remove from next. ${getStateStr()}"
+
         } else if (entry in debugDropSet) {
-            outcome = "remove from dropset"
             debugDropSet.remove(entry)
+            outcome = "remove from dropset. ${getStateStr()}"
+
         } else if (isShowing(entry)) {
-            outcome = "remove showing"
             previousHunKey = getKey(headsUpEntryShowing)
             // Show the next HUN before removing this one, so that we don't tell listeners
             // onHeadsUpPinnedModeChanged, which causes
@@ -214,9 +232,11 @@ constructor(
             // HUN is animating out, resulting in a flicker.
             showNext()
             runnable.run()
+            outcome = "remove showing. ${getStateStr()}"
+
         } else {
-            outcome = "run runnable for untracked shown"
             runnable.run()
+            outcome = "run runnable for untracked shown HUN. ${getStateStr()}"
         }
         headsUpManagerLogger.logAvalancheDelete(caller, isEnabled(), getKey(entry), outcome)
     }
@@ -405,7 +425,9 @@ constructor(
                 "\n\tprevious: [$previousHunKey]" +
                 "\n\tnext list: $nextListStr" +
                 "\n\tnext map: $nextMapStr" +
-                "\n\tdropped: $dropSetStr"
+                "\n\tdropped: $dropSetStr" +
+                "\nBHUM.mHeadsUpEntryMap: " +
+                baseEntryMapStr()
     }
 
     private val dropSetStr: String

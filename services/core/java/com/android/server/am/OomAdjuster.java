@@ -458,7 +458,13 @@ public class OomAdjuster {
         }
 
         void setThreadPriority(int tid, int priority) {
-            Process.setThreadPriority(tid, priority);
+            if (Flags.resetOnForkEnabled()) {
+                Process.setThreadScheduler(tid,
+                    Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK,
+                    priority);
+            } else {
+                 Process.setThreadPriority(tid, priority);
+            }
         }
 
     }

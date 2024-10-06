@@ -23,7 +23,7 @@ import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.ViewProtoEnums.DISPLAY_STATE_OFF;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONTENT_RECORDING;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONTENT_RECORDING;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;

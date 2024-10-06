@@ -294,6 +294,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
     private int[] mCpuPowerBracketMap;
     private final CpuPowerStatsCollector mCpuPowerStatsCollector;
+    private final WakelockPowerStatsCollector mWakelockPowerStatsCollector;
     private final ScreenPowerStatsCollector mScreenPowerStatsCollector;
     private final MobileRadioPowerStatsCollector mMobileRadioPowerStatsCollector;
     private final WifiPowerStatsCollector mWifiPowerStatsCollector;
@@ -399,6 +400,48 @@ public class BatteryStatsImpl extends BatteryStats {
             return true;
         }
     }
+
+    private final WakelockPowerStatsCollector.WakelockDurationRetriever mWakelockDurationRetriever =
+            new WakelockPowerStatsCollector.WakelockDurationRetriever() {
+
+                @Override
+                public long getWakelockDurationMillis() {
+                    synchronized (BatteryStatsImpl.this) {
+                        long rawRealtimeUs = mClock.uptimeMillis() * 1000;
+                        long batteryUptimeUs = getBatteryUptime(rawRealtimeUs);
+                        long screenOnTimeUs = getScreenOnTime(rawRealtimeUs,
+                                BatteryStats.STATS_SINCE_CHARGED);
+                        return (batteryUptimeUs - screenOnTimeUs) / 1000;
+                    }
+                }
+
+                @Override
+                public void retrieveUidWakelockDuration(Callback callback) {
+                    synchronized (BatteryStatsImpl.this) {
+                        long rawRealtimeUs = mClock.elapsedRealtime() * 1000;
+                        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+                            Uid u = mUidStats.valueAt(i);
+                            long wakeLockTimeUs = 0;
+                            ArrayMap<String, ? extends BatteryStats.Uid.Wakelock> wakelockStats =
+                                    u.getWakelockStats();
+                            final int wakelockStatsCount = wakelockStats.size();
+                            for (int j = 0; j < wakelockStatsCount; j++) {
+                                final BatteryStats.Uid.Wakelock wakelock = wakelockStats.valueAt(j);
+                                BatteryStats.Timer timer = wakelock.getWakeTime(
+                                        BatteryStats.WAKE_TYPE_PARTIAL);
+                                if (timer != null) {
+                                    wakeLockTimeUs += timer.getTotalTimeLocked(rawRealtimeUs,
+                                            BatteryStats.STATS_SINCE_CHARGED);
+                                }
+                            }
+
+                            if (wakeLockTimeUs != 0) {
+                                callback.onUidWakelockDuration(u.getUid(), wakeLockTimeUs / 1000);
+                            }
+                        }
+                    }
+                }
+            };
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
         return mKernelMemoryStats;
@@ -2015,7 +2058,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private class PowerStatsCollectorInjector implements CpuPowerStatsCollector.Injector,
             ScreenPowerStatsCollector.Injector, MobileRadioPowerStatsCollector.Injector,
             WifiPowerStatsCollector.Injector, BluetoothPowerStatsCollector.Injector,
-            EnergyConsumerPowerStatsCollector.Injector {
+            EnergyConsumerPowerStatsCollector.Injector, WakelockPowerStatsCollector.Injector {
         private PackageManager mPackageManager;
         private PowerStatsCollector.ConsumedEnergyRetriever mConsumedEnergyRetriever;
         private NetworkStatsManager mNetworkStatsManager;
@@ -2131,6 +2174,12 @@ public class BatteryStatsImpl extends BatteryStats {
         public LongSupplier getPhoneSignalScanDurationSupplier() {
             return () -> mPhoneSignalScanningTimer.getTotalTimeLocked(
                     mClock.elapsedRealtime() * 1000, STATS_SINCE_CHARGED) / 1000;
+        }
+
+        @Override
+        public WakelockPowerStatsCollector.WakelockDurationRetriever
+                getWakelockDurationRetriever() {
+            return mWakelockDurationRetriever;
         }
     }
 
@@ -10910,7 +10959,6 @@ public class BatteryStatsImpl extends BatteryStats {
             // Make special note of Foreground Services
             final boolean userAwareService = ActivityManager.isForegroundService(procState);
             uidRunningState = BatteryStats.mapToInternalProcessState(procState);
-
             if (mProcessState == uidRunningState && userAwareService == mInForegroundService) {
                 return;
             }
@@ -10949,8 +10997,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 final int batteryConsumerProcessState =
                         mapUidProcessStateToBatteryConsumerProcessState(uidRunningState);
-                if (mBsi.mSystemReady && mBsi.mPowerStatsCollectorEnabled.get(
-                        BatteryConsumer.POWER_COMPONENT_CPU)) {
+                if (mBsi.mSystemReady) {
                     mBsi.mHistory.recordProcessStateChange(elapsedRealtimeMs, uptimeMs, mUid,
                             batteryConsumerProcessState);
                 }
@@ -11350,6 +11397,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mCpuPowerStatsCollector = new CpuPowerStatsCollector(mPowerStatsCollectorInjector);
         mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
+
+        mWakelockPowerStatsCollector = new WakelockPowerStatsCollector(
+                mPowerStatsCollectorInjector);
+        mWakelockPowerStatsCollector.addConsumer(this::recordPowerStats);
 
         mScreenPowerStatsCollector = new ScreenPowerStatsCollector(mPowerStatsCollectorInjector);
         mScreenPowerStatsCollector.addConsumer(this::recordPowerStats);
@@ -14821,6 +14872,10 @@ public class BatteryStatsImpl extends BatteryStats {
                 mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_CPU));
         mCpuPowerStatsCollector.schedule();
 
+        mWakelockPowerStatsCollector.setEnabled(
+                mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_WAKELOCK));
+        mWakelockPowerStatsCollector.schedule();
+
         mScreenPowerStatsCollector.setEnabled(
                 mPowerStatsCollectorEnabled.get(BatteryConsumer.POWER_COMPONENT_SCREEN));
         mScreenPowerStatsCollector.schedule();
@@ -14861,6 +14916,8 @@ public class BatteryStatsImpl extends BatteryStats {
         switch (powerComponent) {
             case BatteryConsumer.POWER_COMPONENT_CPU:
                 return mCpuPowerStatsCollector;
+            case BatteryConsumer.POWER_COMPONENT_WAKELOCK:
+                return mWakelockPowerStatsCollector;
             case BatteryConsumer.POWER_COMPONENT_SCREEN:
                 return mScreenPowerStatsCollector;
             case BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO:
@@ -16402,6 +16459,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mCpuPowerStatsCollector.forceSchedule();
+        mWakelockPowerStatsCollector.forceSchedule();
         mScreenPowerStatsCollector.forceSchedule();
         mMobileRadioPowerStatsCollector.forceSchedule();
         mWifiPowerStatsCollector.forceSchedule();
@@ -16426,6 +16484,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void dumpStatsSample(PrintWriter pw) {
         mCpuPowerStatsCollector.collectAndDump(pw);
+        mWakelockPowerStatsCollector.collectAndDump(pw);
         mScreenPowerStatsCollector.collectAndDump(pw);
         mMobileRadioPowerStatsCollector.collectAndDump(pw);
         mWifiPowerStatsCollector.collectAndDump(pw);

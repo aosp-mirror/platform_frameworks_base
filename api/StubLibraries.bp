@@ -364,19 +364,14 @@ java_defaults {
 java_library {
     name: "android-non-updatable.stubs",
     defaults: ["android-non-updatable_defaults"],
-    static_libs: [
-        "android-non-updatable.stubs.from-source",
-    ],
-    product_variables: {
-        build_from_text_stub: {
-            static_libs: [
-                "android-non-updatable.stubs.from-text",
-            ],
-            exclude_static_libs: [
-                "android-non-updatable.stubs.from-source",
-            ],
-        },
-    },
+    static_libs: select(product_variable("build_from_text_stub"), {
+        true: [
+            "android-non-updatable.stubs.from-text",
+        ],
+        default: [
+            "android-non-updatable.stubs.from-source",
+        ],
+    }),
 }
 
 java_library {
@@ -390,19 +385,14 @@ java_library {
 java_library {
     name: "android-non-updatable.stubs.system",
     defaults: ["android-non-updatable_defaults"],
-    static_libs: [
-        "android-non-updatable.stubs.system.from-source",
-    ],
-    product_variables: {
-        build_from_text_stub: {
-            static_libs: [
-                "android-non-updatable.stubs.system.from-text",
-            ],
-            exclude_static_libs: [
-                "android-non-updatable.stubs.system.from-source",
-            ],
-        },
-    },
+    static_libs: select(product_variable("build_from_text_stub"), {
+        true: [
+            "android-non-updatable.stubs.system.from-text",
+        ],
+        default: [
+            "android-non-updatable.stubs.system.from-source",
+        ],
+    }),
 }
 
 java_library {
@@ -416,19 +406,14 @@ java_library {
 java_library {
     name: "android-non-updatable.stubs.module_lib",
     defaults: ["android-non-updatable_defaults"],
-    static_libs: [
-        "android-non-updatable.stubs.module_lib.from-source",
-    ],
-    product_variables: {
-        build_from_text_stub: {
-            static_libs: [
-                "android-non-updatable.stubs.module_lib.from-text",
-            ],
-            exclude_static_libs: [
-                "android-non-updatable.stubs.module_lib.from-source",
-            ],
-        },
-    },
+    static_libs: select(product_variable("build_from_text_stub"), {
+        true: [
+            "android-non-updatable.stubs.module_lib.from-text",
+        ],
+        default: [
+            "android-non-updatable.stubs.module_lib.from-source",
+        ],
+    }),
 }
 
 java_library {
@@ -442,19 +427,14 @@ java_library {
 java_library {
     name: "android-non-updatable.stubs.test",
     defaults: ["android-non-updatable_defaults"],
-    static_libs: [
-        "android-non-updatable.stubs.test.from-source",
-    ],
-    product_variables: {
-        build_from_text_stub: {
-            static_libs: [
-                "android-non-updatable.stubs.test.from-text",
-            ],
-            exclude_static_libs: [
-                "android-non-updatable.stubs.test.from-source",
-            ],
-        },
-    },
+    static_libs: select(product_variable("build_from_text_stub"), {
+        true: [
+            "android-non-updatable.stubs.test.from-text",
+        ],
+        default: [
+            "android-non-updatable.stubs.test.from-source",
+        ],
+    }),
 }
 
 java_library {
@@ -468,19 +448,14 @@ java_library {
 java_library {
     name: "android-non-updatable.stubs.system_server",
     defaults: ["android-non-updatable_defaults"],
-    static_libs: [
-        "android-non-updatable.stubs.system_server.from-source",
-    ],
-    product_variables: {
-        build_from_text_stub: {
-            static_libs: [
-                "android-non-updatable.stubs.system_server.from-text",
-            ],
-            exclude_static_libs: [
-                "android-non-updatable.stubs.system_server.from-source",
-            ],
-        },
-    },
+    static_libs: select(product_variable("build_from_text_stub"), {
+        true: [
+            "android-non-updatable.stubs.system_server.from-text",
+        ],
+        default: [
+            "android-non-updatable.stubs.system_server.from-source",
+        ],
+    }),
 }
 
 java_library {

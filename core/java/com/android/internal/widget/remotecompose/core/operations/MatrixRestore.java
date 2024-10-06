@@ -15,24 +15,30 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
 public class MatrixRestore extends PaintOperation {
-    public static final Companion COMPANION = new Companion();
-
+    private static final int OP_CODE = Operations.MATRIX_RESTORE;
+    private static final String CLASS_NAME = "MatrixRestore";
     public MatrixRestore() {
     }
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer);
+        apply(buffer);
+    }
+
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        MatrixRestore op = new MatrixRestore();
+        operations.add(op);
     }
 
     @Override
@@ -40,31 +46,27 @@ public class MatrixRestore extends PaintOperation {
         return "MatrixRestore";
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-
-            MatrixRestore op = new MatrixRestore();
-            operations.add(op);
-        }
-
-        @Override
-        public String name() {
-            return "MatrixRestore";
-        }
-
-        @Override
-        public int id() {
-            return Operations.MATRIX_RESTORE;
-        }
-
-        public void apply(WireBuffer buffer) {
-            buffer.start(Operations.MATRIX_RESTORE);
-        }
+    public static String name() {
+        return CLASS_NAME;
     }
+
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    public static void apply(WireBuffer buffer) {
+        buffer.start(OP_CODE);
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Canvas Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Restore the matrix and clip");
+    }
+
 
     @Override
     public void paint(PaintContext context) {

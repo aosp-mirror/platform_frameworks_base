@@ -103,7 +103,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
     private boolean mTrackingHeadsUp;
     private final HashSet<String> mSwipedOutKeys = new HashSet<>();
     private final HashSet<NotificationEntry> mEntriesToRemoveAfterExpand = new HashSet<>();
-    private final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
+    @VisibleForTesting
+    public final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
             = new ArraySet<>();
     private boolean mIsShadeOrQsExpanded;
     private boolean mIsQsExpanded;
@@ -630,11 +631,8 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements
             super.setEntry(entry, removeRunnable);
 
             if (NotificationThrottleHun.isEnabled()) {
-                if (!mVisualStabilityProvider.isReorderingAllowed()
-                        // We don't want to allow reordering while pulsing, but headsup need to
-                        // time out anyway
-                        && !entry.showingPulsing()) {
-                    mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                mEntriesToRemoveWhenReorderingAllowed.add(entry);
+                if (!mVisualStabilityProvider.isReorderingAllowed()) {
                     entry.setSeenInShade(true);
                 }
             }

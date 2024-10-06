@@ -16,12 +16,12 @@
 package com.android.wm.shell.windowdecor.viewholder
 
 import android.annotation.ColorInt
+import android.annotation.DrawableRes
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.Point
 import android.graphics.Rect
 import android.graphics.drawable.LayerDrawable
 import android.graphics.drawable.RippleDrawable
@@ -46,6 +46,7 @@ import com.android.internal.R.attr.materialColorSecondaryContainer
 import com.android.internal.R.attr.materialColorSurfaceContainerHigh
 import com.android.internal.R.attr.materialColorSurfaceContainerLow
 import com.android.internal.R.attr.materialColorSurfaceDim
+import com.android.window.flags.Flags
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
 import android.window.flags.DesktopModeFlags
@@ -74,7 +75,13 @@ class AppHeaderViewHolder(
         appName: CharSequence,
         appIconBitmap: Bitmap,
         onMaximizeHoverAnimationFinishedListener: () -> Unit
-) : WindowDecorationViewHolder(rootView) {
+) : WindowDecorationViewHolder<AppHeaderViewHolder.HeaderData>(rootView) {
+
+    data class HeaderData(
+        val taskInfo: RunningTaskInfo,
+        val isRequestingImmersive: Boolean,
+        val inFullImmersiveState: Boolean,
+    ) : Data()
 
     private val decorThemeUtil = DecorThemeUtil(context)
     private val lightColors = dynamicLightColorScheme(context)
@@ -151,15 +158,17 @@ class AppHeaderViewHolder(
                 onMaximizeHoverAnimationFinishedListener
     }
 
-    override fun bindData(
+    override fun bindData(data: HeaderData) {
+        bindData(data.taskInfo, data.isRequestingImmersive, data.inFullImmersiveState)
+    }
+
+    private fun bindData(
         taskInfo: RunningTaskInfo,
-        position: Point,
-        width: Int,
-        height: Int,
-        isCaptionVisible: Boolean
+        isRequestingImmersive: Boolean,
+        inFullImmersiveState: Boolean,
     ) {
         if (DesktopModeFlags.ENABLE_THEMED_APP_HEADERS.isTrue()) {
-            bindDataWithThemedHeaders(taskInfo)
+            bindDataWithThemedHeaders(taskInfo, isRequestingImmersive, inFullImmersiveState)
         } else {
             bindDataLegacy(taskInfo)
         }
@@ -198,7 +207,11 @@ class AppHeaderViewHolder(
         minimizeWindowButton.isGone = !enableMinimizeButton()
     }
 
-    private fun bindDataWithThemedHeaders(taskInfo: RunningTaskInfo) {
+    private fun bindDataWithThemedHeaders(
+        taskInfo: RunningTaskInfo,
+        requestingImmersive: Boolean,
+        inFullImmersiveState: Boolean
+    ) {
         val header = fillHeaderInfo(taskInfo)
         val headerStyle = getHeaderStyle(header)
 
@@ -241,16 +254,19 @@ class AppHeaderViewHolder(
         }
         minimizeWindowButton.isGone = !enableMinimizeButton()
         // Maximize button.
-        maximizeButtonView.setAnimationTints(
-            darkMode = header.appTheme == Theme.DARK,
-            iconForegroundColor = colorStateList,
-            baseForegroundColor = foregroundColor,
-            rippleDrawable = createRippleDrawable(
-                color = foregroundColor,
-                cornerRadius = headerButtonsRippleRadius,
-                drawableInsets = maximizeDrawableInsets
+        maximizeButtonView.apply {
+            setAnimationTints(
+                darkMode = header.appTheme == Theme.DARK,
+                iconForegroundColor = colorStateList,
+                baseForegroundColor = foregroundColor,
+                rippleDrawable = createRippleDrawable(
+                    color = foregroundColor,
+                    cornerRadius = headerButtonsRippleRadius,
+                    drawableInsets = maximizeDrawableInsets
+                )
             )
-        )
+            setIcon(getMaximizeButtonIcon(requestingImmersive, inFullImmersiveState))
+        }
         // Close button.
         closeWindowButton.apply {
             imageTintList = colorStateList
@@ -319,6 +335,32 @@ class AppHeaderViewHolder(
             maximizeWindowButton.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED)
         }
     }
+
+    @DrawableRes
+    private fun getMaximizeButtonIcon(
+        requestingImmersive: Boolean,
+        inFullImmersiveState: Boolean
+    ): Int = when {
+        shouldShowEnterFullImmersiveIcon(requestingImmersive, inFullImmersiveState) -> {
+            R.drawable.decor_desktop_mode_immersive_button_dark
+        }
+        shouldShowExitFullImmersiveIcon(requestingImmersive, inFullImmersiveState) -> {
+            R.drawable.decor_desktop_mode_immersive_exit_button_dark
+        }
+        else -> R.drawable.decor_desktop_mode_maximize_button_dark
+    }
+
+    private fun shouldShowEnterFullImmersiveIcon(
+        requestingImmersive: Boolean,
+        inFullImmersiveState: Boolean
+    ): Boolean = Flags.enableFullyImmersiveInDesktop()
+            && requestingImmersive && !inFullImmersiveState
+
+    private fun shouldShowExitFullImmersiveIcon(
+        requestingImmersive: Boolean,
+        inFullImmersiveState: Boolean
+    ): Boolean = Flags.enableFullyImmersiveInDesktop()
+            && requestingImmersive && inFullImmersiveState
 
     private fun getHeaderStyle(header: Header): HeaderStyle {
         return HeaderStyle(

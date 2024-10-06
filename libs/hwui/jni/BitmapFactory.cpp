@@ -183,14 +183,8 @@ static bool needsFineScale(const SkISize fullSize, const SkISize decodedSize,
            needsFineScale(fullSize.height(), decodedSize.height(), sampleSize);
 }
 
-static bool decodeGainmap(std::unique_ptr<SkStream> gainmapStream, const SkGainmapInfo& gainmapInfo,
+static bool decodeGainmap(std::unique_ptr<SkAndroidCodec> codec, const SkGainmapInfo& gainmapInfo,
                           sp<uirenderer::Gainmap>* outGainmap, const int sampleSize, float scale) {
-    std::unique_ptr<SkAndroidCodec> codec;
-    codec = SkAndroidCodec::MakeFromStream(std::move(gainmapStream), nullptr);
-    if (!codec) {
-        ALOGE("Can not create a codec for Gainmap.");
-        return false;
-    }
     SkColorType decodeColorType = kN32_SkColorType;
     if (codec->getInfo().colorType() == kGray_8_SkColorType) {
         decodeColorType = kGray_8_SkColorType;
@@ -613,15 +607,15 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     bool hasGainmap = false;
     SkGainmapInfo gainmapInfo;
-    std::unique_ptr<SkStream> gainmapStream = nullptr;
+    std::unique_ptr<SkAndroidCodec> gainmapCodec;
     sp<uirenderer::Gainmap> gainmap = nullptr;
     if (result == SkCodec::kSuccess) {
-        hasGainmap = codec->getAndroidGainmap(&gainmapInfo, &gainmapStream);
+        hasGainmap = codec->getGainmapAndroidCodec(&gainmapInfo, &gainmapCodec);
     }
 
     if (hasGainmap) {
         hasGainmap =
-                decodeGainmap(std::move(gainmapStream), gainmapInfo, &gainmap, sampleSize, scale);
+                decodeGainmap(std::move(gainmapCodec), gainmapInfo, &gainmap, sampleSize, scale);
     }
 
     if (!isMutable && javaBitmap == NULL) {

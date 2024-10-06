@@ -23,7 +23,10 @@ import com.android.server.RescueParty;
 import com.android.server.SystemService;
 
 
-/** This class encapsulate the lifecycle methods of CrashRecovery module. */
+/** This class encapsulate the lifecycle methods of CrashRecovery module.
+ *
+ * @hide
+ */
 public class CrashRecoveryModule {
     private static final String TAG = "CrashRecoveryModule";
 

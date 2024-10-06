@@ -2408,9 +2408,9 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"За клавиатурната подредба са зададени <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> и <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Докоснете за промяна."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Физическите клавиатури са конфигурирани"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Докоснете за преглед на клавиатурите"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Частни"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Частен"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Клониране"</string>
-    <string name="profile_label_work" msgid="3495359133038584618">"Служебни"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Служебен"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Служебни 2"</string>
     <string name="profile_label_work_3" msgid="4834572253956798917">"Служебни 3"</string>
     <string name="profile_label_test" msgid="9168641926186071947">"Тестване"</string>

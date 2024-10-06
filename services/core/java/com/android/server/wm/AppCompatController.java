@@ -16,7 +16,6 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
@@ -116,14 +115,6 @@ class AppCompatController {
     @NonNull
     AppCompatResizeOverrides getAppCompatResizeOverrides() {
         return mAppCompatOverrides.getAppCompatResizeOverrides();
-    }
-
-    @Nullable
-    AppCompatCameraPolicy getAppCompatCameraPolicy() {
-        if (mActivityRecord.mDisplayContent != null) {
-            return mActivityRecord.mDisplayContent.mAppCompatCameraPolicy;
-        }
-        return null;
     }
 
     @NonNull
