@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from YouTube app by interacting with the app UI
  *
- * To run this test: `atest WMShellFlickerTests:YouTubeEnterPipTest`
+ * To run this test: `atest WMShellFlickerTestsPipAppsCSuite:YouTubeEnterPipTest`
  *
  * Actions:
  * ```
