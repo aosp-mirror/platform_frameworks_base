@@ -16,7 +16,6 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
@@ -24,9 +23,7 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureMonitor
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
 
 @Composable
 fun HomeGestureTutorialScreen(
@@ -50,14 +47,11 @@ fun HomeGestureTutorialScreen(
                 )
         )
     val gestureMonitorProvider =
-        object : GestureMonitorProvider {
-            override fun createGestureMonitor(
-                gestureDistanceThresholdPx: Int,
-                gestureStateChangedCallback: (GestureState) -> Unit
-            ): TouchpadGestureMonitor {
-                return HomeGestureMonitor(gestureDistanceThresholdPx, gestureStateChangedCallback)
+        DistanceBasedGestureMonitorProvider(
+            monitorFactory = { distanceThresholdPx, gestureStateCallback ->
+                HomeGestureMonitor(distanceThresholdPx, gestureStateCallback)
             }
-        }
+        )
     GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
 }
 
@@ -66,7 +60,6 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
     val primaryFixedDim = LocalAndroidColorScheme.current.primaryFixedDim
     val onPrimaryFixed = LocalAndroidColorScheme.current.onPrimaryFixed
     val onPrimaryFixedVariant = LocalAndroidColorScheme.current.onPrimaryFixedVariant
-    val surfaceContainer = MaterialTheme.colorScheme.surfaceContainer
     val dynamicProperties =
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".primaryFixedDim", primaryFixedDim),
@@ -74,10 +67,9 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".onPrimaryFixedVariant", onPrimaryFixedVariant)
         )
     val screenColors =
-        remember(surfaceContainer, dynamicProperties) {
+        remember(dynamicProperties) {
             TutorialScreenConfig.Colors(
                 background = onPrimaryFixed,
-                successBackground = surfaceContainer,
                 title = primaryFixedDim,
                 animationColors = dynamicProperties,
             )

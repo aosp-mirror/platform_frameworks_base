@@ -22,6 +22,8 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.om.OverlayableInfo;
 import android.content.res.loader.AssetsProvider;
 import android.content.res.loader.ResourcesProvider;
+import android.ravenwood.annotation.RavenwoodClassLoadHook;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
@@ -45,6 +47,8 @@ import java.util.Objects;
  * making the creation of AssetManagers very cheap.
  * @hide
  */
+@RavenwoodKeepWholeClass
+@RavenwoodClassLoadHook(RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public final class ApkAssets {
 
     /**

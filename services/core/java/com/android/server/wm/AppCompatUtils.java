@@ -187,6 +187,8 @@ final class AppCompatUtils {
         appCompatTaskInfo.setTopActivityLetterboxed(top.areBoundsLetterboxed());
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode = top.mAppCompatController
                 .getAppCompatCameraOverrides().getFreeformCameraCompatMode();
+        appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController
+                .getDesktopAppCompatAspectRatioPolicy().hasMinAspectRatioOverride(task));
     }
 
     /**
@@ -247,6 +249,11 @@ final class AppCompatUtils {
             // Rounded corners should be displayed above the expanded taskbar.
             bounds.bottom = Math.min(bounds.bottom, expandedTaskbarOrNull.getFrame().top);
         }
+    }
+
+    static void offsetBounds(@NonNull Configuration inOutConfig, int offsetX, int offsetY) {
+        inOutConfig.windowConfiguration.getBounds().offset(offsetX, offsetY);
+        inOutConfig.windowConfiguration.getAppBounds().offset(offsetX, offsetY);
     }
 
     private static void clearAppCompatTaskInfo(@NonNull AppCompatTaskInfo info) {

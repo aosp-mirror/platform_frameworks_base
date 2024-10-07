@@ -22,6 +22,8 @@ import android.content.Context
 import android.graphics.Point
 import android.graphics.Rect
 import android.os.IBinder
+import android.os.SystemProperties
+import android.os.Trace
 import android.testing.AndroidTestingRunner
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
@@ -38,6 +40,7 @@ import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
+import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
@@ -86,7 +89,11 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
   @JvmField
   @Rule
   val extendedMockitoRule =
-      ExtendedMockitoRule.Builder(this).mockStatic(DesktopModeStatus::class.java).build()!!
+      ExtendedMockitoRule.Builder(this)
+          .mockStatic(DesktopModeStatus::class.java)
+          .mockStatic(SystemProperties::class.java)
+          .mockStatic(Trace::class.java)
+          .build()!!
 
   private val testExecutor = mock<ShellExecutor>()
   private val mockShellInit = mock<ShellInit>()
@@ -138,7 +145,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_FREEFORM_INTENT, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_FREEFORM_INTENT,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -152,7 +160,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -165,7 +174,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_MENU_BUTTON, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_MENU_BUTTON,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -178,7 +188,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -191,7 +202,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.KEYBOARD_SHORTCUT_ENTER, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.KEYBOARD_SHORTCUT_ENTER,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -201,7 +213,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -231,7 +244,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -261,7 +275,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -291,7 +306,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -324,7 +340,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_FROM_OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -335,7 +352,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.UNKNOWN_ENTER, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.UNKNOWN_ENTER,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -345,7 +363,51 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     callOnTransitionReady(transitionInfo)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
+  }
+
+  @Test
+  fun transitBack_previousExitReasonScreenOff_logTaskAddedAndEnterReasonScreenOn() {
+    val freeformTask = createTaskInfo(WINDOWING_MODE_FREEFORM)
+    // Previous Exit reason recorded as Screen Off
+    val sessionId = 1
+    transitionObserver.addTaskInfosToCachedMap(freeformTask)
+    transitionObserver.setLoggerSessionId(sessionId)
+    callOnTransitionReady(TransitionInfoBuilder(TRANSIT_SLEEP).build())
+    verifyTaskRemovedAndExitLogging(sessionId, ExitReason.SCREEN_OFF, DEFAULT_TASK_UPDATE)
+    // Enter desktop through back transition, this happens when user enters after dismissing
+    // keyguard
+    val change = createChange(TRANSIT_TO_FRONT, freeformTask)
+    val transitionInfo = TransitionInfoBuilder(TRANSIT_TO_BACK, 0).addChange(change).build()
+
+    callOnTransitionReady(transitionInfo)
+
+    verifyTaskAddedAndEnterLogging(EnterReason.SCREEN_ON,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
+  }
+
+  @Test
+  fun transitEndDragToDesktop_previousExitReasonScreenOff_logTaskAddedAndEnterReasonAppDrag() {
+    val freeformTask = createTaskInfo(WINDOWING_MODE_FREEFORM)
+    // Previous Exit reason recorded as Screen Off
+    val sessionId = 1
+    transitionObserver.addTaskInfosToCachedMap(freeformTask)
+    transitionObserver.setLoggerSessionId(sessionId)
+    callOnTransitionReady(TransitionInfoBuilder(TRANSIT_SLEEP).build())
+    verifyTaskRemovedAndExitLogging(sessionId, ExitReason.SCREEN_OFF, DEFAULT_TASK_UPDATE)
+
+    // Enter desktop through app handle drag. This represents cases where instead of moving to
+    // desktop right after turning the screen on, we move to fullscreen then move another task
+    // to desktop
+    val transitionInfo =
+        TransitionInfoBuilder(Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, 0)
+            .addChange(createChange(TRANSIT_TO_FRONT, freeformTask))
+            .build()
+    callOnTransitionReady(transitionInfo)
+
+    verifyTaskAddedAndEnterLogging(EnterReason.APP_HANDLE_DRAG,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -481,7 +543,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     val transitionInfo2 = TransitionInfoBuilder(TRANSIT_NONE).build()
     callOnTransitionReady(transitionInfo2)
 
-    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW, DEFAULT_TASK_UPDATE)
+    verifyTaskAddedAndEnterLogging(EnterReason.OVERVIEW,
+        DEFAULT_TASK_UPDATE.copy(visibleTaskCount = 1))
   }
 
   @Test
@@ -497,7 +560,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     callOnTransitionReady(transitionInfo)
 
     verify(desktopModeEventLogger, times(1))
-        .logTaskAdded(eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2)))
+        .logTaskAdded(eq(sessionId),
+            eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2, visibleTaskCount = 2)))
     verify(desktopModeEventLogger, never()).logSessionEnter(any(), any())
   }
 
@@ -519,7 +583,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     verify(desktopModeEventLogger, times(1))
         .logTaskInfoChanged(
-            eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(taskX = DEFAULT_TASK_X + 100)))
+            eq(sessionId),
+            eq(DEFAULT_TASK_UPDATE.copy(taskX = DEFAULT_TASK_X + 100, visibleTaskCount = 1)))
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -548,7 +613,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
             eq(sessionId),
             eq(
                 DEFAULT_TASK_UPDATE.copy(
-                    taskWidth = DEFAULT_TASK_WIDTH + 100, taskHeight = DEFAULT_TASK_HEIGHT - 100)))
+                    taskWidth = DEFAULT_TASK_WIDTH + 100, taskHeight = DEFAULT_TASK_HEIGHT - 100,
+                    visibleTaskCount = 1)))
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -572,7 +638,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
 
     verify(desktopModeEventLogger, times(1))
         .logTaskInfoChanged(
-            eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(taskX = DEFAULT_TASK_X + 100)))
+            eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(
+                taskX = DEFAULT_TASK_X + 100, visibleTaskCount = 2)))
     verifyZeroInteractions(desktopModeEventLogger)
 
     // task 2 resize
@@ -596,7 +663,9 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
                 DEFAULT_TASK_UPDATE.copy(
                     instanceId = 2,
                     taskWidth = DEFAULT_TASK_WIDTH + 100,
-                    taskHeight = DEFAULT_TASK_HEIGHT - 100)))
+                    taskHeight = DEFAULT_TASK_HEIGHT - 100,
+                    visibleTaskCount = 2)),
+            )
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -614,7 +683,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     callOnTransitionReady(transitionInfo)
 
     verify(desktopModeEventLogger, times(1))
-        .logTaskRemoved(eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2)))
+        .logTaskRemoved(eq(sessionId), eq(DEFAULT_TASK_UPDATE.copy(
+            instanceId = 2, visibleTaskCount = 1)))
     verify(desktopModeEventLogger, never()).logSessionExit(any(), any())
   }
 
@@ -632,6 +702,17 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     assertNotNull(sessionId)
     verify(desktopModeEventLogger, times(1)).logSessionEnter(eq(sessionId!!), eq(enterReason))
     verify(desktopModeEventLogger, times(1)).logTaskAdded(eq(sessionId), eq(taskUpdate))
+    ExtendedMockito.verify {
+        Trace.setCounter(
+            eq(Trace.TRACE_TAG_WINDOW_MANAGER),
+            eq(DesktopModeLoggerTransitionObserver.VISIBLE_TASKS_COUNTER_NAME),
+            eq(taskUpdate.visibleTaskCount.toLong()))
+    }
+    ExtendedMockito.verify {
+        SystemProperties.set(
+            eq(DesktopModeLoggerTransitionObserver.VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY),
+            eq(taskUpdate.visibleTaskCount.toString()))
+    }
     verifyZeroInteractions(desktopModeEventLogger)
   }
 
@@ -653,6 +734,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     const val DEFAULT_TASK_WIDTH = 200
     const val DEFAULT_TASK_X = 30
     const val DEFAULT_TASK_Y = 70
+    const val DEFAULT_VISIBLE_TASK_COUNT = 0
     val DEFAULT_TASK_UPDATE =
         TaskUpdate(
             DEFAULT_TASK_ID,
@@ -661,6 +743,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
             DEFAULT_TASK_WIDTH,
             DEFAULT_TASK_X,
             DEFAULT_TASK_Y,
+            visibleTaskCount = DEFAULT_VISIBLE_TASK_COUNT,
         )
 
     fun createTaskInfo(
@@ -674,7 +757,7 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     ) =
         ActivityManager.RunningTaskInfo().apply {
           taskId = id
-          userId = uid
+          effectiveUid = uid
           configuration.windowConfiguration.apply {
             windowingMode = windowMode
             positionInParent = Point(taskX, taskY)

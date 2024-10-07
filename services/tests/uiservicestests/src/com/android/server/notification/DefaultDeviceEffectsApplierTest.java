@@ -39,6 +39,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.KeyguardManager;
 import android.app.UiModeManager;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
@@ -46,6 +47,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.ColorDisplayManager;
 import android.os.PowerManager;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.ZenDeviceEffects;
 import android.testing.TestableContext;
@@ -64,6 +66,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 @RunWith(TestParameterInjector.class)
 public class DefaultDeviceEffectsApplierTest {
 
@@ -74,6 +79,7 @@ public class DefaultDeviceEffectsApplierTest {
     private DefaultDeviceEffectsApplier mApplier;
     @Mock PowerManager mPowerManager;
     @Mock ColorDisplayManager mColorDisplayManager;
+    @Mock KeyguardManager mKeyguardManager;
     @Mock UiModeManager mUiModeManager;
     @Mock WallpaperManager mWallpaperManager;
 
@@ -83,12 +89,15 @@ public class DefaultDeviceEffectsApplierTest {
         mContext = spy(new TestableContext(InstrumentationRegistry.getContext(), null));
         mContext.addMockSystemService(PowerManager.class, mPowerManager);
         mContext.addMockSystemService(ColorDisplayManager.class, mColorDisplayManager);
+        mContext.addMockSystemService(KeyguardManager.class, mKeyguardManager);
         mContext.addMockSystemService(UiModeManager.class, mUiModeManager);
         mContext.addMockSystemService(WallpaperManager.class, mWallpaperManager);
         when(mWallpaperManager.isWallpaperSupported()).thenReturn(true);
 
         mApplier = new DefaultDeviceEffectsApplier(mContext);
         verify(mWallpaperManager).isWallpaperSupported();
+
+        ZenLog.clear();
     }
 
     @Test
@@ -107,6 +116,41 @@ public class DefaultDeviceEffectsApplierTest {
         verify(mColorDisplayManager).setSaturationLevel(eq(0));
         verify(mWallpaperManager).setWallpaperDimAmount(eq(0.6f));
         verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void apply_logsToZenLog() {
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
+                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        ArgumentCaptor<IntentFilter> intentFilterCaptor =
+                ArgumentCaptor.forClass(IntentFilter.class);
+
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldDisplayGrayscale(true)
+                .setShouldUseNightMode(true)
+                .build();
+        mApplier.apply(effects, ORIGIN_APP);
+
+        String zenLog = getZenLog();
+        assertThat(zenLog).contains("apply_device_effect: displayGrayscale -> true");
+        assertThat(zenLog).contains("schedule_device_effect: nightMode -> true");
+        assertThat(zenLog).doesNotContain("apply_device_effect: nightMode");
+
+        verify(mContext).registerReceiver(broadcastReceiverCaptor.capture(),
+                intentFilterCaptor.capture(), anyInt());
+        BroadcastReceiver screenOffReceiver = broadcastReceiverCaptor.getValue();
+        screenOffReceiver.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
+
+        zenLog = getZenLog();
+        assertThat(zenLog).contains("apply_device_effect: nightMode -> true");
+    }
+
+    private static String getZenLog() {
+        StringWriter zenLogWriter = new StringWriter();
+        ZenLog.dump(new PrintWriter(zenLogWriter), "");
+        return zenLogWriter.toString();
     }
 
     @Test
@@ -260,6 +304,22 @@ public class DefaultDeviceEffectsApplierTest {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(false);
+
+        mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
+                origin.value());
+
+        // Effect was applied, and no broadcast receiver was registered.
+        verify(mUiModeManager).setAttentionModeThemeOverlay(eq(MODE_ATTENTION_THEME_OVERLAY_NIGHT));
+        verify(mContext, never()).registerReceiver(any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags({android.app.Flags.FLAG_MODES_API, android.app.Flags.FLAG_MODES_UI})
+    public void apply_nightModeWithScreenOnAndKeyguardShowing_appliedImmediately(
+            @TestParameter ZenChangeOrigin origin) {
+
+        when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mKeyguardManager.isKeyguardLocked()).thenReturn(true);
 
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
                 origin.value());

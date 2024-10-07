@@ -17,7 +17,6 @@
 package android.view;
 
 import static android.view.InsetsController.DEBUG;
-import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 
 import android.annotation.Nullable;
 import android.annotation.UiThread;
@@ -30,10 +29,8 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.InsetsController.AnimationType;
 import android.view.InsetsController.LayoutInsetsDuringAnimation;
-import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
-import android.view.animation.Interpolator;
 import android.view.inputmethod.ImeTracker;
 
 /**
@@ -50,8 +47,6 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     private final Handler mMainThreadHandler;
     private final InsetsAnimationControlCallbacks mCallbacks =
             new InsetsAnimationControlCallbacks() {
-
-        private final float[] mTmpFloat9 = new float[9];
 
         @Override
         @UiThread
@@ -82,19 +77,6 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
         }
 
         @Override
-        public void applySurfaceParams(SurfaceParams... params) {
-            if (DEBUG) Log.d(TAG, "applySurfaceParams");
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            for (int i = params.length - 1; i >= 0; i--) {
-                SyncRtSurfaceTransactionApplier.SurfaceParams surfaceParams = params[i];
-                applyParams(t, surfaceParams, mTmpFloat9);
-            }
-            t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
-            t.apply();
-            t.close();
-        }
-
-        @Override
         public void releaseSurfaceControlFromRt(SurfaceControl sc) {
             if (DEBUG) Log.d(TAG, "releaseSurfaceControlFromRt");
             // Since we don't push the SurfaceParams to the RT we can release directly
@@ -107,19 +89,35 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
         }
     };
 
+    private SurfaceParamsApplier mSurfaceParamsApplier = new SurfaceParamsApplier() {
+
+        private final float[] mTmpFloat9 = new float[9];
+
+        @Override
+        public void applySurfaceParams(SyncRtSurfaceTransactionApplier.SurfaceParams... params) {
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            for (int i = params.length - 1; i >= 0; i--) {
+                SyncRtSurfaceTransactionApplier.applyParams(t, params[i], mTmpFloat9);
+            }
+            t.setFrameTimelineVsync(Choreographer.getInstance().getVsyncId());
+            t.apply();
+            t.close();
+        }
+    };
+
     @UiThread
     public InsetsAnimationThreadControlRunner(SparseArray<InsetsSourceControl> controls,
             @Nullable Rect frame, InsetsState state, WindowInsetsAnimationControlListener listener,
-            @InsetsType int types, InsetsAnimationControlCallbacks controller, long durationMs,
-            Interpolator interpolator, @AnimationType int animationType,
+            @InsetsType int types, InsetsAnimationControlCallbacks controller,
+            InsetsAnimationSpec insetsAnimationSpec, @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             CompatibilityInfo.Translator translator, Handler mainThreadHandler,
             @Nullable ImeTracker.Token statsToken) {
         mMainThreadHandler = mainThreadHandler;
         mOuterCallbacks = controller;
         mControl = new InsetsAnimationControlImpl(controls, frame, state, listener, types,
-                mCallbacks, durationMs, interpolator, animationType, layoutInsetsDuringAnimation,
-                translator, statsToken);
+                mCallbacks, mSurfaceParamsApplier, insetsAnimationSpec, animationType,
+                layoutInsetsDuringAnimation, translator, statsToken);
         InsetsAnimationThread.getHandler().post(() -> {
             if (mControl.isCancelled()) {
                 return;
@@ -185,6 +183,11 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
     @Override
     public int getAnimationType() {
         return mControl.getAnimationType();
+    }
+
+    @Override
+    public SurfaceParamsApplier getSurfaceParamsApplier() {
+        return mSurfaceParamsApplier;
     }
 
     @Override

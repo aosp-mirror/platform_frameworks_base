@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -56,6 +57,7 @@ public class BatteryUsageStatsAtomTest {
     @Rule
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
+    private static final boolean DEBUG = false;
     private static final int UID_0 = 1000;
     private static final int UID_1 = 2000;
     private static final int UID_2 = 3000;
@@ -69,6 +71,10 @@ public class BatteryUsageStatsAtomTest {
 
         List<StatsEvent> actual = new ArrayList<>();
         new BatteryStatsService.StatsPerUidLogger(statsLogger).logStats(bus, actual);
+
+        if (DEBUG) {
+            System.out.println(mockingDetails(statsLogger).printInvocations());
+        }
 
         // Device-wide totals
         verify(statsLogger).buildStatsEvent(
@@ -206,22 +212,8 @@ public class BatteryUsageStatsAtomTest {
                 20,
                 1234L,
                 UID_0,
-                BatteryConsumer.PROCESS_STATE_FOREGROUND,
-                1000L,
-                "CustomConsumer1",
-                1650.0f,
-                450.0f,
-                0L
-        );
-        verify(statsLogger).buildStatsEvent(
-                1000L,
-                20000L,
-                10000L,
-                20,
-                1234L,
-                UID_0,
-                BatteryConsumer.PROCESS_STATE_BACKGROUND,
-                2000L,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0L,
                 "CustomConsumer1",
                 1650.0f,
                 450.0f,
@@ -236,10 +228,10 @@ public class BatteryUsageStatsAtomTest {
                 UID_0,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND,
                 1000L,
-                "CustomConsumer2",
+                "CustomConsumer1",
                 1650.0f,
-                500.0f,
-                800L
+                100.0f,
+                0L
         );
         verify(statsLogger).buildStatsEvent(
                 1000L,
@@ -250,6 +242,20 @@ public class BatteryUsageStatsAtomTest {
                 UID_0,
                 BatteryConsumer.PROCESS_STATE_BACKGROUND,
                 2000L,
+                "CustomConsumer1",
+                1650.0f,
+                350.0f,
+                0L
+        );
+        verify(statsLogger).buildStatsEvent(
+                1000L,
+                20000L,
+                10000L,
+                20,
+                1234L,
+                UID_0,
+                BatteryConsumer.PROCESS_STATE_UNSPECIFIED,
+                0,
                 "CustomConsumer2",
                 1650.0f,
                 500.0f,
@@ -352,21 +358,12 @@ public class BatteryUsageStatsAtomTest {
 
         for (PowerComponentUsage componentProto : consumerProto.powerComponents) {
             final int componentId = componentProto.component;
-            if (componentId < BatteryConsumer.POWER_COMPONENT_COUNT) {
-                assertEquals(message + " for component " + componentId,
-                        convertMahToDc(consumer.getConsumedPower(componentId)),
-                        componentProto.powerDeciCoulombs);
-                assertEquals(message + " for component " + componentId,
-                        consumer.getUsageDurationMillis(componentId),
-                        componentProto.durationMillis);
-            } else {
-                assertEquals(message + " for custom component " + componentId,
-                        convertMahToDc(consumer.getConsumedPowerForCustomComponent(componentId)),
-                        componentProto.powerDeciCoulombs);
-                assertEquals(message + " for custom component " + componentId,
-                        consumer.getUsageDurationForCustomComponentMillis(componentId),
-                        componentProto.durationMillis);
-            }
+            assertEquals(message + " for component " + componentId,
+                    convertMahToDc(consumer.getConsumedPower(componentId)),
+                    componentProto.powerDeciCoulombs);
+            assertEquals(message + " for component " + componentId,
+                    consumer.getUsageDurationMillis(componentId),
+                    componentProto.durationMillis);
         }
 
         for (int componentId = 0; componentId < BatteryConsumer.POWER_COMPONENT_COUNT;
@@ -506,13 +503,13 @@ public class BatteryUsageStatsAtomTest {
                         BatteryConsumer.POWER_COMPONENT_SCREEN, 300)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU, 400)
-                .setConsumedPowerForCustomComponent(
+                .setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 450)
-                .setConsumedPowerForCustomComponent(
+                .setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1, 500)
                 .setUsageDurationMillis(
                         BatteryConsumer.POWER_COMPONENT_CPU, 600)
-                .setUsageDurationForCustomComponentMillis(
+                .setUsageDurationMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + 1, 800);
 
         final BatteryConsumer.Key keyFg = uidBuilder.getKey(BatteryConsumer.POWER_COMPONENT_CPU,
@@ -532,6 +529,17 @@ public class BatteryUsageStatsAtomTest {
                 .setUsageDurationMillis(keyFgs, 8300)
                 .setConsumedPower(keyCached, 9400, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
                 .setUsageDurationMillis(keyFgs, 8400);
+
+        final BatteryConsumer.Key keyCustomFg = uidBuilder.getKey(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        final BatteryConsumer.Key keyCustomBg = uidBuilder.getKey(
+                BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND);
+        uidBuilder.setConsumedPower(
+                keyCustomFg, 100, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
+        uidBuilder.setConsumedPower(
+                keyCustomBg, 350, BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION);
 
         builder.getOrCreateUidBatteryConsumerBuilder(UID_1)
                 .setPackageWithHighestDrain("myPackage1")
@@ -554,11 +562,11 @@ public class BatteryUsageStatsAtomTest {
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CAMERA, 20150,
                         BatteryConsumer.POWER_MODEL_ENERGY_CONSUMPTION)
-                .setConsumedPowerForCustomComponent(
+                .setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20200)
                 .setUsageDurationMillis(
                         BatteryConsumer.POWER_COMPONENT_CPU, 20300)
-                .setUsageDurationForCustomComponentMillis(
+                .setUsageDurationMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 20400);
 
         // Not used; just to make sure extraneous data doesn't mess things up.
@@ -567,7 +575,7 @@ public class BatteryUsageStatsAtomTest {
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU, 10100,
                         BatteryConsumer.POWER_MODEL_POWER_PROFILE)
-                .setConsumedPowerForCustomComponent(
+                .setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200);
 
         return builder.build();
@@ -607,7 +615,7 @@ public class BatteryUsageStatsAtomTest {
 
         BatteryUsageStats batteryUsageStats = builder.build();
         final byte[] bytes = batteryUsageStats.getStatsProto();
-        assertThat(bytes.length).isGreaterThan(40000);
+        assertThat(bytes.length).isGreaterThan(20000);
         assertThat(bytes.length).isLessThan(50000);
 
         BatteryUsageStatsAtomsProto proto;

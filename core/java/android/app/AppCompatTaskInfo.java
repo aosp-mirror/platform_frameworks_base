@@ -95,6 +95,8 @@ public class AppCompatTaskInfo implements Parcelable {
     private static final int FLAG_FULLSCREEN_OVERRIDE_SYSTEM = FLAG_BASE << 7;
     /** Top activity flag for whether has activity has been overridden to fullscreen by user. */
     private static final int FLAG_FULLSCREEN_OVERRIDE_USER = FLAG_BASE << 8;
+    /** Top activity flag for whether min aspect ratio of the activity has been overridden.*/
+    public static final int FLAG_HAS_MIN_ASPECT_RATIO_OVERRIDE = FLAG_BASE << 9;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {
@@ -108,7 +110,8 @@ public class AppCompatTaskInfo implements Parcelable {
             FLAG_IS_FROM_LETTERBOX_DOUBLE_TAP,
             FLAG_ELIGIBLE_FOR_USER_ASPECT_RATIO_BUTTON,
             FLAG_FULLSCREEN_OVERRIDE_SYSTEM,
-            FLAG_FULLSCREEN_OVERRIDE_USER
+            FLAG_FULLSCREEN_OVERRIDE_USER,
+            FLAG_HAS_MIN_ASPECT_RATIO_OVERRIDE
     })
     public @interface TopActivityFlag {}
 
@@ -118,7 +121,7 @@ public class AppCompatTaskInfo implements Parcelable {
     @TopActivityFlag
     private static final int FLAGS_ORGANIZER_INTERESTED = FLAG_IS_FROM_LETTERBOX_DOUBLE_TAP
             | FLAG_ELIGIBLE_FOR_USER_ASPECT_RATIO_BUTTON | FLAG_FULLSCREEN_OVERRIDE_SYSTEM
-            | FLAG_FULLSCREEN_OVERRIDE_USER;
+            | FLAG_FULLSCREEN_OVERRIDE_USER | FLAG_HAS_MIN_ASPECT_RATIO_OVERRIDE;
 
     @TopActivityFlag
     private static final int FLAGS_COMPAT_UI_INTERESTED = FLAGS_ORGANIZER_INTERESTED
@@ -301,6 +304,21 @@ public class AppCompatTaskInfo implements Parcelable {
         setTopActivityFlag(FLAG_LETTERBOXED, enable);
     }
 
+    /**
+     * @return {@code true} if the top activity's min aspect ratio has been overridden.
+     */
+    public boolean hasMinAspectRatioOverride() {
+        return isTopActivityFlagEnabled(FLAG_HAS_MIN_ASPECT_RATIO_OVERRIDE);
+    }
+
+    /**
+     * Sets the top activity flag for whether the min aspect ratio of the activity has been
+     * overridden.
+     */
+    public void setHasMinAspectRatioOverride(boolean enable) {
+        setTopActivityFlag(FLAG_HAS_MIN_ASPECT_RATIO_OVERRIDE, enable);
+    }
+
     /** Clear all top activity flags and set to false. */
     public void clearTopActivityFlags() {
         mTopActivityFlags = FLAG_UNDEFINED;
@@ -392,6 +410,7 @@ public class AppCompatTaskInfo implements Parcelable {
                 + " topActivityLetterboxAppHeight=" + topActivityLetterboxAppHeight
                 + " isUserFullscreenOverrideEnabled=" + isUserFullscreenOverrideEnabled()
                 + " isSystemFullscreenOverrideEnabled=" + isSystemFullscreenOverrideEnabled()
+                + " hasMinAspectRatioOverride=" + hasMinAspectRatioOverride()
                 + " cameraCompatTaskInfo=" + cameraCompatTaskInfo.toString()
                 + "}";
     }

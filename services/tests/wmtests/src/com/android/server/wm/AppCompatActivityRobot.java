@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.BackgroundActivityStartControllerTests.setViaReflection;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -134,19 +135,9 @@ class AppCompatActivityRobot {
                 isUnresizable);
     }
 
-    void configureTopActivityIgnoreOrientationRequest(boolean ignoreOrientationRequest) {
-        mActivityStack.top().mDisplayContent
-                .setIgnoreOrientationRequest(ignoreOrientationRequest);
-    }
-
     void configureUnresizableTopActivity(@ActivityInfo.ScreenOrientation int screenOrientation) {
         configureTopActivity(/* minAspect */ -1, /* maxAspect */ -1, screenOrientation,
                 /* isUnresizable */ true);
-    }
-
-    void activateCameraInPolicy(boolean isCameraActive) {
-        doReturn(isCameraActive).when(mDisplayContent.mAppCompatCameraPolicy)
-                .isCameraActive(any(ActivityRecord.class), anyBoolean());
     }
 
     void setDisplayNaturalOrientation(@Configuration.Orientation int naturalOrientation) {
@@ -189,14 +180,23 @@ class AppCompatActivityRobot {
                 .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
-    void enableTreatmentForTopActivity(boolean enabled) {
-        doReturn(enabled).when(mDisplayContent.mAppCompatCameraPolicy)
-                .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
+    void enableFullscreenCameraCompatTreatmentForTopActivity(boolean enabled) {
+        if (mDisplayContent.mAppCompatCameraPolicy.hasDisplayRotationCompatPolicy()) {
+            doReturn(enabled).when(
+                    mDisplayContent.mAppCompatCameraPolicy.mDisplayRotationCompatPolicy)
+                        .isTreatmentEnabledForActivity(eq(mActivityStack.top()));
+        }
     }
 
-    void setTopActivityCameraActive(boolean enabled) {
+    void setIsCameraRunningAndWindowingModeEligibleFullscreen(boolean enabled) {
         doReturn(enabled).when(getTopDisplayRotationCompatPolicy())
-                .isCameraActive(eq(mActivityStack.top()), /* mustBeFullscreen= */ eq(true));
+                .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()),
+                        /* mustBeFullscreen= */ eq(true));
+    }
+
+    void setIsCameraRunningAndWindowingModeEligibleFreeform(boolean enabled) {
+        doReturn(enabled).when(getTopCameraCompatFreeformPolicy())
+                .isCameraRunningAndWindowingModeEligible(eq(mActivityStack.top()));
     }
 
     void setTopActivityEligibleForOrientationOverride(boolean enabled) {
@@ -214,7 +214,7 @@ class AppCompatActivityRobot {
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
-        doReturn(enabled).when(mActivityStack.top()).shouldCreateCompatDisplayInsets();
+        doReturn(enabled).when(mActivityStack.top()).shouldCreateAppCompatDisplayInsets();
     }
 
     void setTopActivityInSizeCompatMode(boolean inScm) {
@@ -228,7 +228,13 @@ class AppCompatActivityRobot {
 
     void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
         doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideType();
+    }
+
+    void setUserAspectRatioType(@UserMinAspectRatio int aspectRatio) {
+        final AppCompatAspectRatioOverrides aspectRatioOverrides = mActivityStack.top()
+                .mAppCompatController.getAppCompatAspectRatioOverrides();
+        setViaReflection(aspectRatioOverrides, "mUserAspectRatioType", aspectRatio);
     }
 
     void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
@@ -240,12 +246,28 @@ class AppCompatActivityRobot {
         mDisplayContent.setIgnoreOrientationRequest(enabled);
     }
 
+    void setTopActivityOrganizedTask() {
+        doReturn(mTaskStack.top()).when(mActivityStack.top()).getOrganizedTask();
+    }
+
     void setTopTaskInMultiWindowMode(boolean inMultiWindowMode) {
         doReturn(inMultiWindowMode).when(mTaskStack.top()).inMultiWindowMode();
     }
 
     void setTopActivityAsEmbedded(boolean embedded) {
         doReturn(embedded).when(mActivityStack.top()).isEmbedded();
+    }
+
+    void setTopActivityVisible(boolean isVisible) {
+        doReturn(isVisible).when(mActivityStack.top()).isVisible();
+    }
+
+    void setTopActivityVisibleRequested(boolean isVisibleRequested) {
+        doReturn(isVisibleRequested).when(mActivityStack.top()).isVisibleRequested();
+    }
+
+    void setTopActivityFillsParent(boolean fillsParent) {
+        doReturn(fillsParent).when(mActivityStack.top()).fillsParent();
     }
 
     void setTopActivityInMultiWindowMode(boolean multiWindowMode) {
@@ -492,7 +514,7 @@ class AppCompatActivityRobot {
             activity.setRequestedOrientation(screenOrientation);
         }
         // Make sure to use the provided configuration to construct the size compat fields.
-        activity.clearSizeCompatMode();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
         activity.ensureActivityConfiguration();
         // Make sure the display configuration reflects the change of activity.
         if (activity.mDisplayContent.updateOrientation()) {
@@ -501,8 +523,13 @@ class AppCompatActivityRobot {
     }
 
     private DisplayRotationCompatPolicy getTopDisplayRotationCompatPolicy() {
-        return mActivityStack.top().mDisplayContent
-                .mAppCompatCameraPolicy.mDisplayRotationCompatPolicy;
+        return mActivityStack.top().mDisplayContent.mAppCompatCameraPolicy
+                .mDisplayRotationCompatPolicy;
+    }
+
+    private CameraCompatFreeformPolicy getTopCameraCompatFreeformPolicy() {
+        return mActivityStack.top().mDisplayContent.mAppCompatCameraPolicy
+                .mCameraCompatFreeformPolicy;
     }
 
     // We add the activity to the stack and spyOn() on its properties.

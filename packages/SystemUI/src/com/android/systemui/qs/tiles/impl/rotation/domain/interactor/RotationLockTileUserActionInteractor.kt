@@ -46,6 +46,7 @@ constructor(
                         Intent(Settings.ACTION_AUTO_ROTATE_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
     }

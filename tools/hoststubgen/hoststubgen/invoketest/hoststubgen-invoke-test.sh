@@ -43,9 +43,8 @@ cleanup_temp() {
 
 cleanup_temp
 
-JAR=hoststubgen-test-tiny-framework.jar
-STUB=$TEMP/stub.jar
-IMPL=$TEMP/impl.jar
+INJAR=hoststubgen-test-tiny-framework.jar
+OUTJAR=$TEMP/host.jar
 
 ANNOTATION_FILTER=$TEMP/annotation-filter.txt
 
@@ -81,27 +80,18 @@ run_hoststubgen() {
     cat $ANNOTATION_FILTER
   fi
 
-  local stub_arg=""
-  local impl_arg=""
+  local out_arg=""
 
-  if [[ "$STUB" != "" ]] ; then
-    stub_arg="--out-stub-jar $STUB"
-  fi
-  if [[ "$IMPL" != "" ]] ; then
-    impl_arg="--out-impl-jar $IMPL"
+  if [[ "$OUTJAR" != "" ]] ; then
+    out_arg="--out-jar $OUTJAR"
   fi
 
   hoststubgen \
       --debug \
-      --in-jar $JAR \
-      $stub_arg \
-      $impl_arg \
-      --stub-annotation \
-          android.hosttest.annotation.HostSideTestStub \
+      --in-jar $INJAR \
+      $out_arg \
       --keep-annotation \
           android.hosttest.annotation.HostSideTestKeep \
-      --stub-class-annotation \
-          android.hosttest.annotation.HostSideTestWholeClassStub \
       --keep-class-annotation \
           android.hosttest.annotation.HostSideTestWholeClassKeep \
       --throw-annotation \
@@ -110,8 +100,10 @@ run_hoststubgen() {
           android.hosttest.annotation.HostSideTestRemove \
       --substitute-annotation \
           android.hosttest.annotation.HostSideTestSubstitute \
-      --native-substitute-annotation \
-          android.hosttest.annotation.HostSideTestNativeSubstitutionClass \
+      --redirect-annotation \
+          android.hosttest.annotation.HostSideTestRedirect \
+      --redirection-class-annotation \
+          android.hosttest.annotation.HostSideTestRedirectionClass \
       --class-load-hook-annotation \
           android.hosttest.annotation.HostSideTestClassLoadHook \
       --keep-static-initializer-annotation \
@@ -213,9 +205,9 @@ com.unsupported.*
 "
 
 run_hoststubgen_for_failure "One specific class disallowed" \
-    "TinyFrameworkClassAnnotations is not allowed to have Ravenwood annotations" \
+    "TinyFrameworkAnnotations is not allowed to have Ravenwood annotations" \
     "
-!com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations
+!com.android.hoststubgen.test.tinyframework.TinyFrameworkAnnotations
 * # All other classes allowed
 "
 
@@ -225,11 +217,7 @@ run_hoststubgen_for_success "One specific class disallowed, but it doesn't use a
 * # All other classes allowed
 "
 
-STUB="" run_hoststubgen_for_success "No stub generation" ""
-
-IMPL="" run_hoststubgen_for_success "No impl generation" ""
-
-STUB="" IMPL="" run_hoststubgen_for_success "No stub, no impl generation" ""
+OUTJAR="" run_hoststubgen_for_success "No output generation" ""
 
 EXTRA_ARGS="--in-jar abc" run_hoststubgen_for_failure "Duplicate arg" \
     "Duplicate or conflicting argument found: --in-jar" \

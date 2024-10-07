@@ -40,9 +40,10 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
-import com.android.wm.shell.animation.Interpolators;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.shared.animation.Interpolators;
+import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.annotation.Retention;
@@ -418,7 +419,7 @@ public class PipAnimationController {
         }
 
         SurfaceControl getContentOverlayLeash() {
-            return mContentOverlay == null ? null : mContentOverlay.mLeash;
+            return mContentOverlay == null ? null : mContentOverlay.getLeash();
         }
 
         void setColorContentOverlay(Context context) {
@@ -496,13 +497,8 @@ public class PipAnimationController {
             mCurrentValue = value;
         }
 
-        boolean shouldApplyCornerRadius() {
-            return !isOutPipDirection(mTransitionDirection);
-        }
-
         boolean shouldApplyShadowRadius() {
-            return !isOutPipDirection(mTransitionDirection)
-                    && !isRemovePipDirection(mTransitionDirection);
+            return !isRemovePipDirection(mTransitionDirection);
         }
 
         boolean inScaleTransition() {
@@ -555,7 +551,7 @@ public class PipAnimationController {
                     final float alpha = getStartValue() * (1 - fraction) + getEndValue() * fraction;
                     setCurrentValue(alpha);
                     getSurfaceTransactionHelper().alpha(tx, leash, alpha)
-                            .round(tx, leash, shouldApplyCornerRadius())
+                            .round(tx, leash, true /* applyCornerRadius */)
                             .shadow(tx, leash, shouldApplyShadowRadius());
                     if (!handlePipTransaction(leash, tx, destinationBounds, alpha)) {
                         tx.apply();
@@ -571,7 +567,7 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper()
                             .resetScale(tx, leash, getDestinationBounds())
                             .crop(tx, leash, getDestinationBounds())
-                            .round(tx, leash, shouldApplyCornerRadius())
+                            .round(tx, leash, true /* applyCornerRadius */)
                             .shadow(tx, leash, shouldApplyShadowRadius());
                     tx.show(leash);
                     tx.apply();
@@ -685,13 +681,11 @@ public class PipAnimationController {
                         getSurfaceTransactionHelper().scaleAndCrop(tx, leash,
                                 adjustedSourceRectHint, initialSourceValue, bounds, insets,
                                 isInPipDirection, fraction);
-                        if (shouldApplyCornerRadius()) {
-                            final Rect sourceBounds = new Rect(initialContainerRect);
-                            sourceBounds.inset(insets);
-                            getSurfaceTransactionHelper()
-                                    .round(tx, leash, sourceBounds, bounds)
-                                    .shadow(tx, leash, shouldApplyShadowRadius());
-                        }
+                        final Rect sourceBounds = new Rect(initialContainerRect);
+                        sourceBounds.inset(insets);
+                        getSurfaceTransactionHelper()
+                                .round(tx, leash, sourceBounds, bounds)
+                                .shadow(tx, leash, shouldApplyShadowRadius());
                     }
                     if (!handlePipTransaction(leash, tx, bounds, /* alpha= */ 1f)) {
                         tx.apply();
@@ -740,11 +734,9 @@ public class PipAnimationController {
                             .rotateAndScaleWithCrop(tx, leash, initialContainerRect, bounds,
                                     insets, degree, x, y, isOutPipDirection,
                                     rotationDelta == ROTATION_270 /* clockwise */);
-                    if (shouldApplyCornerRadius()) {
-                        getSurfaceTransactionHelper()
-                                .round(tx, leash, sourceBounds, bounds)
-                                .shadow(tx, leash, shouldApplyShadowRadius());
-                    }
+                    getSurfaceTransactionHelper()
+                            .round(tx, leash, sourceBounds, bounds)
+                            .shadow(tx, leash, shouldApplyShadowRadius());
                     if (!handlePipTransaction(leash, tx, bounds, 1f /* alpha */)) {
                         tx.apply();
                     }
@@ -760,7 +752,7 @@ public class PipAnimationController {
                 void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
                     getSurfaceTransactionHelper()
                             .alpha(tx, leash, 1f)
-                            .round(tx, leash, shouldApplyCornerRadius())
+                            .round(tx, leash, true /* applyCornerRadius */)
                             .shadow(tx, leash, shouldApplyShadowRadius());
                     tx.show(leash);
                     tx.apply();

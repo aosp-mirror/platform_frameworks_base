@@ -23,7 +23,6 @@ import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.testing.TestableLooper
 import android.view.View
-import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -46,6 +45,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.never
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -67,12 +68,9 @@ class CommunalSmartspaceControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var session: SmartspaceSession
 
-    private lateinit var controller: CommunalSmartspaceController
+    private val preconditionListenerCaptor = argumentCaptor<SmartspacePrecondition.Listener>()
 
-    // TODO(b/272811280): Remove usage of real view
-    private val fakeParent by lazy {
-        FrameLayout(context)
-    }
+    private lateinit var controller: CommunalSmartspaceController
 
     /**
      * A class which implements SmartspaceView and extends View. This is mocked to provide the right
@@ -153,6 +151,26 @@ class CommunalSmartspaceControllerTest : SysuiTestCase() {
         controller.removeListener(listener)
 
         verify(session).close()
+    }
+
+    /** Ensures smartspace session begins when precondition is met if there is any listener. */
+    @Test
+    fun testConnectOnPreconditionMet() {
+        // Precondition not met
+        `when`(precondition.conditionsMet()).thenReturn(false)
+        controller.addListener(listener)
+
+        // Verify session not created because precondition not met
+        verify(smartspaceManager, never()).createSmartspaceSession(any())
+
+        // Precondition met
+        `when`(precondition.conditionsMet()).thenReturn(true)
+        verify(precondition).addListener(preconditionListenerCaptor.capture())
+        val preconditionListener = preconditionListenerCaptor.firstValue
+        preconditionListener.onCriteriaChanged()
+
+        // Verify session created
+        verify(smartspaceManager).createSmartspaceSession(any())
     }
 
     /**

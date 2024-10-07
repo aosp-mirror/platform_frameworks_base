@@ -35,6 +35,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -381,5 +382,45 @@ class ShadeInteractorLegacyImplTest : SysuiTestCase() {
 
             // THEN user is not interacting
             assertThat(actual).isFalse()
+        }
+
+    @Test
+    fun expandNotificationsShade_unsupported() =
+        testScope.runTest {
+            assertThrows(UnsupportedOperationException::class.java) {
+                underTest.expandNotificationsShade("reason")
+            }
+        }
+
+    @Test
+    fun expandQuickSettingsShade_unsupported() =
+        testScope.runTest {
+            assertThrows(UnsupportedOperationException::class.java) {
+                underTest.expandQuickSettingsShade("reason")
+            }
+        }
+
+    @Test
+    fun collapseNotificationsShade_unsupported() =
+        testScope.runTest {
+            assertThrows(UnsupportedOperationException::class.java) {
+                underTest.collapseNotificationsShade("reason")
+            }
+        }
+
+    @Test
+    fun collapseQuickSettingsShade_unsupported() =
+        testScope.runTest {
+            assertThrows(UnsupportedOperationException::class.java) {
+                underTest.collapseQuickSettingsShade("reason")
+            }
+        }
+
+    @Test
+    fun collapseEitherShade_unsupported() =
+        testScope.runTest {
+            assertThrows(UnsupportedOperationException::class.java) {
+                underTest.collapseEitherShade("reason")
+            }
         }
 }

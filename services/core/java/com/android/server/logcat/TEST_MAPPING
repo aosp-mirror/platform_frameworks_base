@@ -1,19 +1,12 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.logcat"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
+      "name": "FrameworksServicesTests_android_server_logcat"
     }
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {"include-filter": "com.android.server.logcat"}
-      ]
+      "name": "FrameworksServicesTests_android_server_logcat"
     }
   ]
 }

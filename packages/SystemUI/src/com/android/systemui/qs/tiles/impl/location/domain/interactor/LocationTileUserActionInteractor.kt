@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.location.domain.interactor
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.content.Intent
 import android.provider.Settings
 import com.android.systemui.dagger.qualifiers.Application
@@ -52,7 +53,7 @@ constructor(
                     val wasEnabled: Boolean = input.data.isEnabled
                     if (keyguardController.isMethodSecure() && keyguardController.isShowing()) {
                         activityStarter.postQSRunnableDismissingKeyguard {
-                            CoroutineScope(applicationScope.coroutineContext).launch {
+                            CoroutineScope(applicationScope.coroutineContext + createCoroutineTracingContext("LocationTileScope")).launch {
                                 locationController.setLocationEnabled(!wasEnabled)
                             }
                         }
@@ -68,6 +69,7 @@ constructor(
                         Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     )
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

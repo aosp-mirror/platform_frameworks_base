@@ -22,8 +22,8 @@
     <string name="use_password_title" msgid="4655101984031246476">"Vil du bruke passord?"</string>
     <string name="dialog_dismiss_button" msgid="989567669882005067">"Lukk"</string>
     <string name="dialog_continue_button" msgid="8630290044077052145">"Fortsett"</string>
-    <string name="dialog_sign_in_options_button" msgid="448002958902615054">"Påloggingsalternativer"</string>
-    <string name="sign_in_options_title" msgid="6720572645638986680">"Påloggingsalternativer"</string>
+    <string name="dialog_sign_in_options_button" msgid="448002958902615054">"Påloggingvalg"</string>
+    <string name="sign_in_options_title" msgid="6720572645638986680">"Påloggingsvalg"</string>
     <string name="provider_list_title" msgid="6803918216129492212">"Administrer pålogginger"</string>
     <string name="choose_sign_in_title" msgid="3616025924746872202">"Velg en pålogging"</string>
     <string name="choose_passkey_title" msgid="8459270617632817465">"Velg passnøkkel"</string>

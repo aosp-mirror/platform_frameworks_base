@@ -37,6 +37,8 @@ class SceneDataSourceDelegatorTest : SysuiTestCase() {
     private val initialSceneKey = kosmos.initialSceneKey
     private val fakeSceneDataSource = kosmos.fakeSceneDataSource
 
+    // TODO(b/356596436): Add tests for showing, hiding, and replacing overlays after we've defined
+    //  them.
     private val underTest = kosmos.sceneDataSourceDelegator
 
     @Test

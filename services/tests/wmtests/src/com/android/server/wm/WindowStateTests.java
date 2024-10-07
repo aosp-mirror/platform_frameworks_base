@@ -80,6 +80,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -88,9 +89,12 @@ import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.os.IBinder;
 import android.os.InputConfig;
 import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.util.ArraySet;
@@ -116,6 +120,7 @@ import androidx.test.filters.SmallTest;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.SensitiveContentPackages.PackageInfo;
+import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.Test;
@@ -310,10 +315,8 @@ public class WindowStateTests extends WindowTestsBase {
         // Simulate the window is in split screen root task.
         final Task rootTask = createTask(mDisplayContent,
                 WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
-        spyOn(appWindow);
-        spyOn(rootTask);
         rootTask.setFocusable(false);
-        doReturn(rootTask).when(appWindow).getRootTask();
+        appWindow.mActivityRecord.reparent(rootTask, 0 /* position */, "test");
 
         // Make sure canBeImeTarget is false;
         assertFalse(appWindow.canBeImeTarget());
@@ -478,6 +481,32 @@ public class WindowStateTests extends WindowTestsBase {
                 .updateClientVisibility(app, null /* statsToken */);
         waitUntilHandlersIdle();
         assertFalse(statusBar.isVisible());
+    }
+
+    /**
+     * Verifies that the InsetsSourceProvider frame cannot be updated by WindowState before
+     * relayout is called.
+     */
+    @SetupWindows(addWindows = { W_STATUS_BAR })
+    @Test
+    public void testUpdateSourceFrameBeforeRelayout() {
+        final WindowState statusBar = mStatusBarWindow;
+        statusBar.mHasSurface = true;
+        assertTrue(statusBar.isVisible());
+        final int statusBarId = InsetsSource.createId(null, 0, statusBars());
+        final var statusBarProvider = mDisplayContent.getInsetsStateController()
+                .getOrCreateSourceProvider(statusBarId, statusBars());
+        statusBarProvider.setWindowContainer(statusBar, null /* frameProvider */,
+                        null /* imeFrameProvider */);
+
+        statusBar.updateSourceFrame(new Rect(0, 0, 500, 200));
+        assertTrue("InsetsSourceProvider frame should not be updated before relayout",
+                statusBarProvider.getSourceFrame().isEmpty());
+
+        makeWindowVisible(statusBar);
+        statusBar.updateSourceFrame(new Rect(0, 0, 500, 100));
+        assertEquals("InsetsSourceProvider frame should be updated after relayout",
+                new Rect(0, 0, 500, 100), statusBarProvider.getSourceFrame());
     }
 
     @Test
@@ -967,6 +996,88 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(testFlag(handle.inputConfig, InputConfig.NO_INPUT_CHANNEL));
     }
 
+    @DisableFlags(Flags.FLAG_SCROLLING_FROM_LETTERBOX)
+    @Test
+    public void testTouchRegionUsesLetterboxBoundsIfTransformedBoundsAndLetterboxScrolling() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+
+        // Transformed bounds used for size of touchable region if letterbox inner bounds are empty.
+        final Rect transformedBounds = new Rect(0, 0, 300, 500);
+        doReturn(transformedBounds).when(win.mToken).getFixedRotationTransformDisplayBounds();
+
+        // Otherwise, touchable region should match letterbox inner bounds.
+        final Rect letterboxInnerBounds = new Rect(30, 0, 270, 500);
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(letterboxInnerBounds);
+            return null;
+        }).when(win.mActivityRecord).getLetterboxInnerBounds(any());
+
+        Region outRegion = new Region();
+        win.getSurfaceTouchableRegion(outRegion, win.mAttrs);
+
+        // Because scrollingFromLetterbox flag is disabled and letterboxInnerBounds is not empty,
+        // touchable region should match letterboxInnerBounds always.
+        assertEquals(letterboxInnerBounds, outRegion.getBounds());
+    }
+
+    @DisableFlags(Flags.FLAG_SCROLLING_FROM_LETTERBOX)
+    @Test
+    public void testTouchRegionUsesLetterboxBoundsIfNullTransformedBoundsAndLetterboxScrolling() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+
+        // Fragment bounds used for size of touchable region if letterbox inner bounds are empty
+        // and Transform bounds are null.
+        doReturn(null).when(win.mToken).getFixedRotationTransformDisplayBounds();
+        final Rect fragmentBounds = new Rect(0, 0, 300, 500);
+        final TaskFragment taskFragment = win.mActivityRecord.getTaskFragment();
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(fragmentBounds);
+            return null;
+        }).when(taskFragment).getDimBounds(any());
+
+        // Otherwise, touchable region should match letterbox inner bounds.
+        final Rect letterboxInnerBounds = new Rect(30, 0, 270, 500);
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(letterboxInnerBounds);
+            return null;
+        }).when(win.mActivityRecord).getLetterboxInnerBounds(any());
+
+        Region outRegion = new Region();
+        win.getSurfaceTouchableRegion(outRegion, win.mAttrs);
+
+        // Because scrollingFromLetterbox flag is disabled and letterboxInnerBounds is not empty,
+        // touchable region should match letterboxInnerBounds always.
+        assertEquals(letterboxInnerBounds, outRegion.getBounds());
+    }
+
+    @EnableFlags(Flags.FLAG_SCROLLING_FROM_LETTERBOX)
+    @Test
+    public void testTouchRegionUsesTransformedBoundsIfLetterboxScrolling() {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, "win");
+
+        // Transformed bounds used for size of touchable region if letterbox inner bounds are empty.
+        final Rect transformedBounds = new Rect(0, 0, 300, 500);
+        doReturn(transformedBounds).when(win.mToken).getFixedRotationTransformDisplayBounds();
+
+        // Otherwise, touchable region should match letterbox inner bounds.
+        final Rect letterboxInnerBounds = new Rect(30, 0, 270, 500);
+        doAnswer(invocation -> {
+            Rect rect = invocation.getArgument(0);
+            rect.set(letterboxInnerBounds);
+            return null;
+        }).when(win.mActivityRecord).getLetterboxInnerBounds(any());
+
+        Region outRegion = new Region();
+        win.getSurfaceTouchableRegion(outRegion, win.mAttrs);
+
+        // Because scrollingFromLetterbox flag is enabled and transformedBounds are non-null,
+        // touchable region should match transformedBounds.
+        assertEquals(transformedBounds, outRegion.getBounds());
+    }
+
     @Test
     public void testHasActiveVisibleWindow() {
         final int uid = ActivityBuilder.DEFAULT_FAKE_UID;
@@ -1035,7 +1146,7 @@ public class WindowStateTests extends WindowTestsBase {
                 mDisplayContent,
                 "SystemDialog", true);
         mDisplayContent.setImeLayeringTarget(mAppWindow);
-        mAppWindow.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        mAppWindow.getTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         makeWindowVisible(mImeWindow);
         systemDialogWindow.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
         assertTrue(systemDialogWindow.needsRelativeLayeringToIme());

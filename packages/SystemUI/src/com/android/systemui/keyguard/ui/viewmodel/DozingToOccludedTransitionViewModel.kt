@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.util.MathUtils
+import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -55,8 +56,18 @@ constructor(
         var currentAlpha = 0f
         return transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
-            startTime = 100.milliseconds, // Wait for the light reveal to "hit" the LS elements.
-            onStart = { currentAlpha = viewState.alpha() },
+            startTime = if (lightRevealMigration()) {
+                100.milliseconds // Wait for the light reveal to "hit" the LS elements.
+            } else {
+                0.milliseconds
+            },
+            onStart = {
+                if (lightRevealMigration()) {
+                    currentAlpha = viewState.alpha()
+                } else {
+                    currentAlpha = 0f
+                }
+            },
             onStep = { MathUtils.lerp(currentAlpha, 0f, it) },
             onCancel = { 0f },
         )

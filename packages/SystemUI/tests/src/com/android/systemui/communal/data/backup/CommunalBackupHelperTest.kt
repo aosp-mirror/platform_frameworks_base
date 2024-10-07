@@ -123,19 +123,19 @@ class CommunalBackupHelperTest : SysuiTestCase() {
                 FakeWidgetMetadata(
                     widgetId = 11,
                     componentName = "com.android.fakePackage1/fakeWidget1",
-                    rank = 3,
+                    rank = 0,
                     userSerialNumber = 0,
                 ),
                 FakeWidgetMetadata(
                     widgetId = 12,
                     componentName = "com.android.fakePackage2/fakeWidget2",
-                    rank = 2,
+                    rank = 1,
                     userSerialNumber = 0,
                 ),
                 FakeWidgetMetadata(
                     widgetId = 13,
                     componentName = "com.android.fakePackage3/fakeWidget3",
-                    rank = 1,
+                    rank = 2,
                     userSerialNumber = 10,
                 ),
             )

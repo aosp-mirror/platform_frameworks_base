@@ -57,12 +57,17 @@ interface CommunalWidgetRepository {
     /** A flow of information about active communal widgets stored in database. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
-    /** Add a widget at the specified position in the app widget service and the database. */
+    /**
+     * Add a widget in the app widget service and the database.
+     *
+     * @param rank The rank of the widget determines its position in the grid. 0 is first place, 1
+     *   is second, etc. If rank is not specified, widget is added at the end.
+     */
     fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
-        configurator: WidgetConfigurator? = null
+        rank: Int?,
+        configurator: WidgetConfigurator? = null,
     ) {}
 
     /**
@@ -75,9 +80,9 @@ interface CommunalWidgetRepository {
     /**
      * Update the order of widgets in the database.
      *
-     * @param widgetIdToPriorityMap mapping of the widget ids to the priority of the widget.
+     * @param widgetIdToRankMap mapping of the widget ids to the rank of the widget.
      */
-    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {}
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {}
 
     /**
      * Restores the database by reading a state file from disk and updating the widget ids according
@@ -87,6 +92,14 @@ interface CommunalWidgetRepository {
 
     /** Aborts the restore process and removes files from disk if necessary. */
     fun abortRestoreWidgets()
+
+    /**
+     * Update the spanY of a widget in the database.
+     *
+     * @param widgetId id of the widget to update.
+     * @param spanY new spanY value for the widget.
+     */
+    fun updateWidgetSpanY(widgetId: Int, spanY: Int)
 }
 
 @SysUISingleton
@@ -113,19 +126,29 @@ constructor(
 
     /** Widget metadata from database + matching [AppWidgetProviderInfo] if any. */
     private val widgetEntries: Flow<List<CommunalWidgetEntry>> =
-        combine(
-            communalWidgetDao.getWidgets(),
-            communalWidgetHost.appWidgetProviders,
-        ) { entries, providers ->
+        combine(communalWidgetDao.getWidgets(), communalWidgetHost.appWidgetProviders) {
+            entries,
+            providers ->
             entries.mapNotNull { (rank, widget) ->
                 CommunalWidgetEntry(
                     appWidgetId = widget.widgetId,
                     componentName = widget.componentName,
-                    priority = rank.rank,
-                    providerInfo = providers[widget.widgetId]
+                    rank = rank.rank,
+                    providerInfo = providers[widget.widgetId],
                 )
             }
         }
+
+    override fun updateWidgetSpanY(widgetId: Int, spanY: Int) {
+        bgScope.launch {
+            communalWidgetDao.updateWidgetSpanY(widgetId, spanY)
+            logger.i({ "Updated spanY of widget $int1 to $int2." }) {
+                int1 = widgetId
+                int2 = spanY
+            }
+            backupManager.dataChanged()
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
@@ -151,8 +174,8 @@ constructor(
     override fun addWidget(
         provider: ComponentName,
         user: UserHandle,
-        priority: Int,
-        configurator: WidgetConfigurator?
+        rank: Int?,
+        configurator: WidgetConfigurator?,
     ) {
         bgScope.launch {
             val id = communalWidgetHost.allocateIdAndBindWidget(provider, user)
@@ -190,14 +213,15 @@ constructor(
                 communalWidgetDao.addWidget(
                     widgetId = id,
                     provider = provider,
-                    priority = priority,
+                    rank = rank,
                     userSerialNumber = userManager.getUserSerialNumber(user.identifier),
+                    spanY = 3,
                 )
                 backupManager.dataChanged()
             } else {
                 appWidgetHost.deleteAppWidgetId(id)
             }
-            logger.i("Added widget ${provider.flattenToString()} at position $priority.")
+            logger.i("Added widget ${provider.flattenToString()} at position $rank.")
         }
     }
 
@@ -211,11 +235,11 @@ constructor(
         }
     }
 
-    override fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
+    override fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {
         bgScope.launch {
-            communalWidgetDao.updateWidgetOrder(widgetIdToPriorityMap)
+            communalWidgetDao.updateWidgetOrder(widgetIdToRankMap)
             logger.i({ "Updated the order of widget list with ids: $str1." }) {
-                str1 = widgetIdToPriorityMap.toString()
+                str1 = widgetIdToRankMap.toString()
             }
             backupManager.dataChanged()
         }
@@ -320,6 +344,7 @@ constructor(
                         componentName = restoredWidget.componentName
                         rank = restoredWidget.rank
                         userSerialNumber = userManager.getUserSerialNumber(newUser.identifier)
+                        spanY = restoredWidget.spanY
                     }
                 }
             val newState = CommunalHubState().apply { widgets = newWidgets.toTypedArray() }
@@ -342,7 +367,7 @@ constructor(
                 addWidget(
                     provider = ComponentName.unflattenFromString(widget.componentName)!!,
                     user = newUser,
-                    priority = widget.rank,
+                    rank = widget.rank,
                 )
             }
 
@@ -377,7 +402,8 @@ constructor(
         return CommunalWidgetContentModel.Available(
             appWidgetId = entry.appWidgetId,
             providerInfo = entry.providerInfo!!,
-            priority = entry.priority,
+            rank = entry.rank,
+            spanY = entry.spanY,
         )
     }
 
@@ -394,7 +420,8 @@ constructor(
             return CommunalWidgetContentModel.Available(
                 appWidgetId = entry.appWidgetId,
                 providerInfo = entry.providerInfo!!,
-                priority = entry.priority,
+                rank = entry.rank,
+                spanY = entry.spanY,
             )
         }
 
@@ -403,10 +430,11 @@ constructor(
         return if (componentName != null && session != null) {
             CommunalWidgetContentModel.Pending(
                 appWidgetId = entry.appWidgetId,
-                priority = entry.priority,
+                rank = entry.rank,
                 componentName = componentName,
                 icon = session.icon,
                 user = session.user,
+                spanY = entry.spanY,
             )
         } else {
             null
@@ -416,7 +444,8 @@ constructor(
     private data class CommunalWidgetEntry(
         val appWidgetId: Int,
         val componentName: String,
-        val priority: Int,
+        val rank: Int,
         var providerInfo: AppWidgetProviderInfo? = null,
+        var spanY: Int = 3,
     )
 }

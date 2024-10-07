@@ -16,6 +16,7 @@
 
 package android.content.rollback;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
@@ -145,7 +146,10 @@ public final class PackageRollbackInfo implements Parcelable {
         mPendingRestores.remove(ri);
     }
 
-    /** @hide */
+    /**
+     * True if the package is an apex else false.
+     */
+    @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
     public boolean isApex() {
         return mIsApex;
     }
@@ -154,7 +158,11 @@ public final class PackageRollbackInfo implements Parcelable {
     public @PackageManager.RollbackDataPolicy int getRollbackDataPolicy() {
         return mRollbackDataPolicy;
     }
-    /** @hide */
+
+    /**
+     * True if the package is apk-in-apex else false.
+     */
+    @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
     public boolean isApkInApex() {
         return mIsApkInApex;
     }

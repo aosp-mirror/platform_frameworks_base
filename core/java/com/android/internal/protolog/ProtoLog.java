@@ -16,9 +16,14 @@
 
 package com.android.internal.protolog;
 
+import android.os.ServiceManager;
+
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * ProtoLog API - exposes static logging methods. Usage of this API is similar
@@ -48,6 +53,41 @@ public class ProtoLog {
     public static boolean REQUIRE_PROTOLOGTOOL = true;
 
     private static IProtoLog sProtoLogInstance;
+
+    private static final Object sInitLock = new Object();
+
+    /**
+     * Initialize ProtoLog in this process.
+     * <p>
+     * This method MUST be called before any protologging is performed in this process.
+     * Ensure that all groups that will be used for protologging are registered.
+     *
+     * @param groups The ProtoLog groups that will be used in the process.
+     */
+    public static void init(IProtoLogGroup... groups) {
+        // These tracing instances are only used when we cannot or do not preprocess the source
+        // files to extract out the log strings. Otherwise, the trace calls are replaced with calls
+        // directly to the generated tracing implementations.
+        if (android.tracing.Flags.perfettoProtologTracing()) {
+            synchronized (sInitLock) {
+                if (sProtoLogInstance != null) {
+                    // The ProtoLog instance has already been initialized in this process
+                    final var alreadyRegisteredGroups = sProtoLogInstance.getRegisteredGroups();
+                    final var allGroups = new HashSet<>(alreadyRegisteredGroups);
+                    allGroups.addAll(Arrays.stream(groups).toList());
+                    groups = allGroups.toArray(new IProtoLogGroup[0]);
+                }
+
+                try {
+                    sProtoLogInstance = new PerfettoProtoLogImpl(groups);
+                } catch (ServiceManager.ServiceNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } else {
+            sProtoLogInstance = new LogcatOnlyProtoLogImpl();
+        }
+    }
 
     /**
      * DEBUG level log.
@@ -150,14 +190,6 @@ public class ProtoLog {
         return sProtoLogInstance;
     }
 
-    /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
-     */
-    public static void registerGroups(IProtoLogGroup... protoLogGroups) {
-        sProtoLogInstance.registerGroups(protoLogGroups);
-    }
-
     private static void logStringMessage(LogLevel logLevel, IProtoLogGroup group,
             String stringMessage, Object... args) {
         if (sProtoLogInstance == null) {
@@ -167,16 +199,6 @@ public class ProtoLog {
 
         if (sProtoLogInstance.isEnabled(group, logLevel)) {
             sProtoLogInstance.log(logLevel, group, stringMessage, args);
-        }
-    }
-
-    static {
-        if (android.tracing.Flags.perfettoProtologTracing()) {
-            sProtoLogInstance = new PerfettoProtoLogImpl();
-        } else {
-            // The first call to ProtoLog is likely to flip REQUIRE_PROTOLOGTOOL, which is when this
-            // static block will be executed before REQUIRE_PROTOLOGTOOL is actually set.
-            sProtoLogInstance = new LogcatOnlyProtoLogImpl();
         }
     }
 }

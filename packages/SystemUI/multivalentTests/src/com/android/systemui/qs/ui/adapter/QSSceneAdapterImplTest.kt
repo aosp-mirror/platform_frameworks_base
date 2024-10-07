@@ -255,7 +255,7 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
             runCurrent()
             clearInvocations(qsImpl!!)
 
-            underTest.setState(QSSceneAdapter.State.Expanding(progress))
+            underTest.setState(QSSceneAdapter.State.Expanding { progress })
             with(qsImpl!!) {
                 verify(this).setQsVisible(true)
                 verify(this, never())

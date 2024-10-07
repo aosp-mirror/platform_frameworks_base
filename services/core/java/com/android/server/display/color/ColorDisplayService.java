@@ -70,6 +70,7 @@ import android.provider.Settings.System;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.Spline;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.accessibility.AccessibilityManager;
@@ -113,6 +114,8 @@ public final class ColorDisplayService extends SystemService {
     static {
         Matrix.setIdentityM(MATRIX_IDENTITY, 0);
     }
+
+    private static final int EVEN_DIMMER_MAX_PERCENT_ALLOWED = 100;
 
     private static final int MSG_USER_CHANGED = 0;
     private static final int MSG_SET_UP = 1;
@@ -192,6 +195,9 @@ public final class ColorDisplayService extends SystemService {
 
     private final boolean mVisibleBackgroundUsersEnabled;
     private final UserManagerService mUserManager;
+
+    private Spline mEvenDimmerSpline;
+    private boolean mEvenDimmerActivated;
 
     public ColorDisplayService(Context context) {
         super(context);
@@ -1625,6 +1631,16 @@ public final class ColorDisplayService extends SystemService {
         }
 
         /**
+         * Gets the adjusted nits, given a strength and nits.
+         * @param strength of reduce bright colors
+         * @param nits target nits
+         * @return the actual nits that would be output, given input nits and rbc strength.
+         */
+        public float getAdjustedNitsForStrength(float nits, int strength) {
+            return mReduceBrightColorsTintController.getAdjustedNitsForStrength(nits, strength);
+        }
+
+        /**
          * Sets the listener and returns whether reduce bright colors is currently enabled.
          */
         public boolean setReduceBrightColorsListener(ReduceBrightColorsListener listener) {
@@ -1641,6 +1657,14 @@ public final class ColorDisplayService extends SystemService {
 
         public int getReduceBrightColorsStrength() {
             return mReduceBrightColorsTintController.getStrength();
+        }
+
+        /**
+         *
+         * @return whether reduce bright colors is on, due to even dimmer being activated
+         */
+        public boolean getReduceBrightColorsActivatedForEvenDimmer() {
+            return mEvenDimmerActivated;
         }
 
         /**
@@ -1667,9 +1691,41 @@ public final class ColorDisplayService extends SystemService {
          * Applies tint changes for even dimmer feature.
          */
         public void applyEvenDimmerColorChanges(boolean enabled, int strength) {
+            mEvenDimmerActivated = enabled;
             mReduceBrightColorsTintController.setActivated(enabled);
             mReduceBrightColorsTintController.setMatrix(strength);
             mHandler.sendEmptyMessage(MSG_APPLY_REDUCE_BRIGHT_COLORS);
+        }
+
+        /**
+         * Get spline to map between requested nits, and required even dimmer strength.
+         * @return nits to strength spline
+         */
+        public Spline fetchEvenDimmerSpline(float nits) {
+            if (mEvenDimmerSpline == null) {
+                mEvenDimmerSpline = createNitsToStrengthSpline(nits);
+            }
+            return mEvenDimmerSpline;
+        }
+
+        /**
+         * Creates a spline mapping requested nits values, for each resulting strength value
+         * (in percent) for even dimmer.
+         * Returns null if coefficients are not initialised.
+         * @return spline from nits to strength
+         */
+        private Spline createNitsToStrengthSpline(float nits) {
+            final float[] requestedNits = new float[EVEN_DIMMER_MAX_PERCENT_ALLOWED + 1];
+            final float[] resultingStrength = new float[EVEN_DIMMER_MAX_PERCENT_ALLOWED + 1];
+            for (int i = 0; i <= EVEN_DIMMER_MAX_PERCENT_ALLOWED; i++) {
+                resultingStrength[EVEN_DIMMER_MAX_PERCENT_ALLOWED - i] = i;
+                requestedNits[EVEN_DIMMER_MAX_PERCENT_ALLOWED - i] =
+                        getAdjustedNitsForStrength(nits, i);
+                if (requestedNits[EVEN_DIMMER_MAX_PERCENT_ALLOWED - i] == 0) {
+                    return null;
+                }
+            }
+            return new Spline.LinearSpline(requestedNits, resultingStrength);
         }
     }
 

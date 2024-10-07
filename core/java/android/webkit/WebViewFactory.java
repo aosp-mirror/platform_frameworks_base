@@ -208,7 +208,7 @@ public final class WebViewFactory {
         public MissingWebViewPackageException(Exception e) { super(e); }
     }
 
-    private static boolean isWebViewSupported() {
+    static boolean isWebViewSupported() {
         // No lock; this is a benign race as Boolean's state is final and the PackageManager call
         // will always return the same value.
         if (sWebViewSupported == null) {
@@ -318,7 +318,7 @@ public final class WebViewFactory {
         String libraryFileName;
         try {
             PackageInfo packageInfo = packageManager.getPackageInfo(packageName,
-                    PackageManager.GET_META_DATA | PackageManager.MATCH_DEBUG_TRIAGED_MISSING);
+                    PackageManager.GET_META_DATA);
             libraryFileName = getWebViewLibrary(packageInfo.applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(LOGTAG, "Couldn't find package " + packageName);
@@ -479,7 +479,6 @@ public final class WebViewFactory {
                 newPackageInfo = pm.getPackageInfo(
                     response.packageInfo.packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES
-                    | PackageManager.MATCH_DEBUG_TRIAGED_MISSING
                     // Make sure that we fetch the current provider even if its not
                     // installed for the current user
                     | PackageManager.MATCH_UNINSTALLED_PACKAGES

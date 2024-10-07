@@ -17,6 +17,8 @@
 package com.android.server.accessibility.a11ychecker;
 
 
+import android.accessibility.AccessibilityCheckClass;
+import android.accessibility.AccessibilityCheckResultType;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageInfo;
@@ -25,9 +27,6 @@ import android.util.Slog;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckClass;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckResultReported;
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckResultType;
 
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityCheckResult;
 import com.google.android.apps.common.testing.accessibility.framework.AccessibilityHierarchyCheck;
@@ -92,44 +91,55 @@ public class AccessibilityCheckerUtils {
                             AccessibilityCheckClass.TRAVERSAL_ORDER_CHECK));
     // LINT.ThenChange(/services/accessibility/java/com/android/server/accessibility/a11ychecker/proto/a11ychecker.proto)
 
-    static Set<AccessibilityCheckResultReported> processResults(
+
+    /**
+     * Returns AccessibilityCheckResultReported.Builder with the common fields for all nodes
+     * belonging in the same cache pre-filled.
+     */
+    static @Nullable AndroidAccessibilityCheckerResult.Builder getCommonResultBuilder(
             AccessibilityNodeInfo nodeInfo,
-            List<AccessibilityHierarchyCheckResult> checkResults,
             @Nullable String activityClassName,
             PackageManager packageManager,
             ComponentName a11yServiceComponentName) {
-        String appPackageName = nodeInfo.getPackageName().toString();
-        String nodePath = AccessibilityNodePathBuilder.createNodePath(nodeInfo);
-        if (nodePath == null) {
-            return Set.of();
+        if (nodeInfo.getPackageName() == null) {
+            return null;
         }
-        AccessibilityCheckResultReported.Builder builder;
+        String appPackageName = nodeInfo.getPackageName().toString();
         try {
-            builder = AccessibilityCheckResultReported.newBuilder()
+            return AndroidAccessibilityCheckerResult.newBuilder()
                     .setPackageName(appPackageName)
                     .setAppVersionCode(getAppVersionCode(packageManager, appPackageName))
-                    .setUiElementPath(nodePath)
                     .setActivityName(
                             getActivityName(packageManager, appPackageName, activityClassName))
                     .setWindowTitle(getWindowTitle(nodeInfo))
-                    .setSourceComponentName(a11yServiceComponentName.flattenToString())
-                    .setSourceVersionCode(
-                            getAppVersionCode(packageManager,
-                                    a11yServiceComponentName.getPackageName()));
+                    .setSourceComponentName(a11yServiceComponentName)
+                    .setSourceVersionCode(getAppVersionCode(packageManager,
+                            a11yServiceComponentName.getPackageName()));
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(LOG_TAG, "Unknown package name", e);
+            return null;
+        }
+    }
+
+    static Set<AndroidAccessibilityCheckerResult> processResults(
+            AccessibilityNodeInfo nodeInfo,
+            List<AccessibilityHierarchyCheckResult> checkResults,
+            AndroidAccessibilityCheckerResult.Builder resultBuilder) {
+        String nodePath = AccessibilityNodePathBuilder.createNodePath(nodeInfo);
+        if (resultBuilder == null || nodePath == null) {
             return Set.of();
         }
-
         return checkResults.stream()
                 .filter(checkResult -> checkResult.getType()
                         == AccessibilityCheckResult.AccessibilityCheckResultType.ERROR
                         || checkResult.getType()
                         == AccessibilityCheckResult.AccessibilityCheckResultType.WARNING)
-                .map(checkResult -> builder.setResultCheckClass(
-                        getCheckClass(checkResult)).setResultType(
-                        getCheckResultType(checkResult)).setResultId(
-                        checkResult.getResultId()).build())
+                .map(checkResult -> new AndroidAccessibilityCheckerResult.Builder(resultBuilder)
+                        .setUiElementPath(nodePath)
+                        .setResultCheckClass(getCheckClass(checkResult))
+                        .setResultType(getCheckResultType(checkResult))
+                        .setResultId(checkResult.getResultId())
+                        .build())
                 .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -188,9 +198,9 @@ public class AccessibilityCheckerUtils {
     private static AccessibilityCheckResultType getCheckResultType(
             AccessibilityHierarchyCheckResult checkResult) {
         return switch (checkResult.getType()) {
-            case ERROR -> AccessibilityCheckResultType.ERROR;
-            case WARNING -> AccessibilityCheckResultType.WARNING;
-            default -> AccessibilityCheckResultType.UNKNOWN_RESULT_TYPE;
+            case ERROR -> AccessibilityCheckResultType.ERROR_CHECK_RESULT_TYPE;
+            case WARNING -> AccessibilityCheckResultType.WARNING_CHECK_RESULT_TYPE;
+            default -> AccessibilityCheckResultType.UNKNOWN_CHECK_RESULT_TYPE;
         };
     }
 

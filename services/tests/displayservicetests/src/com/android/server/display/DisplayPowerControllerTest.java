@@ -75,6 +75,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
@@ -158,6 +159,8 @@ public final class DisplayPowerControllerTest {
     private DisplayManagerFlags mDisplayManagerFlagsMock;
     @Mock
     private DisplayManagerInternal.DisplayOffloadSession mDisplayOffloadSession;
+    @Mock
+    private IBatteryStats mMockBatteryStats;
     @Captor
     private ArgumentCaptor<SensorEventListener> mSensorEventListenerCaptor;
 
@@ -204,7 +207,8 @@ public final class DisplayPowerControllerTest {
 
         doAnswer((Answer<Void>) invocationOnMock -> null).when(() ->
                 SystemProperties.set(anyString(), any()));
-        doAnswer((Answer<Void>) invocationOnMock -> null).when(BatteryStatsService::getService);
+        doAnswer((Answer<IBatteryStats>) invocationOnMock -> mMockBatteryStats)
+                .when(BatteryStatsService::getService);
         doAnswer((Answer<Boolean>) invocationOnMock -> false)
                 .when(ActivityManager::isLowRamDeviceStatic);
 
@@ -2123,6 +2127,48 @@ public final class DisplayPowerControllerTest {
     }
 
     @Test
+    public void testManualBrightness_stateDozePolicyOnUseNormalBrightnessForDozeTrue_brightnessDoze() {
+        when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
+        when(mDisplayManagerFlagsMock.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        mHolder.dpc.setDisplayOffloadSession(mDisplayOffloadSession);
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        float brightness = 0.277f;
+        when(mHolder.displayPowerState.getColorFadeLevel()).thenReturn(1.0f);
+        when(mHolder.brightnessSetting.getBrightness()).thenReturn(brightness);
+        when(mHolder.hbmController.getCurrentBrightnessMax())
+                .thenReturn(PowerManager.BRIGHTNESS_MAX);
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+        // Start with state=DOZE.
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_DOZE);
+        DisplayPowerRequest dprInit = new DisplayPowerRequest();
+        dprInit.policy = DisplayPowerRequest.POLICY_DOZE;
+        mHolder.dpc.requestPowerState(dprInit, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState; initialize to DOZE
+        // Go to state=ON. But state change would be blocked. so, state=DOZE.
+        when(mDisplayOffloadSession.blockScreenOn(any())).thenReturn(true);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.dozeScreenState = Display.STATE_ON;
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        dpr.useNormalBrightnessForDoze = true;
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState; process turning on.
+
+        ArgumentCaptor<BrightnessSetting.BrightnessSettingListener> listenerCaptor =
+                ArgumentCaptor.forClass(BrightnessSetting.BrightnessSettingListener.class);
+        verify(mHolder.brightnessSetting).registerListener(listenerCaptor.capture());
+        BrightnessSetting.BrightnessSettingListener listener = listenerCaptor.getValue();
+        listener.onBrightnessChanged(brightness);
+        advanceTime(1); // Send messages, run updatePowerState
+
+        // When state=DOZE, force doze brightness regardless the requested policy.
+        verify(mHolder.animator).animateTo(eq(brightness * DOZE_SCALE_FACTOR),
+                /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
+                /* ignoreAnimationLimits= */ anyBoolean());
+    }
+
+    @Test
     public void testDozeManualBrightness_AbcIsNull() {
         when(mDisplayManagerFlagsMock.isDisplayOffloadEnabled()).thenReturn(true);
         mHolder = createDisplayPowerController(DISPLAY_ID, UNIQUE_ID, /* isEnabled= */ true,
@@ -2211,6 +2257,66 @@ public final class DisplayPowerControllerTest {
         verify(mHolder.animator, never()).animateTo(eq(DEFAULT_DOZE_BRIGHTNESS),
                 /* linearSecondTarget= */ anyFloat(), /* rate= */ anyFloat(),
                 /* ignoreAnimationLimits= */ anyBoolean());
+    }
+
+    @Test
+    public void testManualBrightnessModeSavesBrightness() {
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Initialize
+
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+        advanceTime(1);
+
+        verify(mHolder.brightnessSetting).saveIfNeeded();
+    }
+
+    @Test
+    public void testBatteryStatNotes_enabledOnDefaultDisplayWhenDisabledOnOthers()
+            throws Exception {
+        when(mDisplayManagerFlagsMock.isBatteryStatsEnabledForAllDisplays()).thenReturn(false);
+
+        verifyNoteScreenState(Display.DEFAULT_DISPLAY, /* expectNote= */ true);
+    }
+
+    @Test
+    public void testBatteryStatNotes_enabledOnDefaultDisplayWhenEnabledOnOthers() throws Exception {
+        when(mDisplayManagerFlagsMock.isBatteryStatsEnabledForAllDisplays()).thenReturn(true);
+
+        verifyNoteScreenState(Display.DEFAULT_DISPLAY, /* expectNote= */ true);
+    }
+
+    @Test
+    public void testBatteryStatNotes_flagGuardedOnNonDefaultDisplays() throws Exception {
+        when(mDisplayManagerFlagsMock.isBatteryStatsEnabledForAllDisplays()).thenReturn(false);
+
+        verifyNoteScreenState(/* displayId= */ 2, /* expectNote= */ false);
+
+        when(mDisplayManagerFlagsMock.isBatteryStatsEnabledForAllDisplays()).thenReturn(true);
+
+        verifyNoteScreenState(/* displayId= */ 2, /* expectNote= */ true);
+    }
+
+    private void verifyNoteScreenState(int displayId, boolean expectNote) throws Exception {
+        mHolder = createDisplayPowerController(displayId, UNIQUE_ID);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        dpr.policy = DisplayPowerRequest.POLICY_BRIGHT;
+        when(mHolder.displayPowerState.getScreenState()).thenReturn(Display.STATE_ON);
+
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        if (expectNote) {
+            verify(mMockBatteryStats)
+                    .noteScreenState(
+                            displayId, Display.STATE_ON, Display.STATE_REASON_DEFAULT_POLICY);
+            verify(mMockBatteryStats).noteScreenBrightness(eq(displayId), anyInt());
+        } else {
+            verify(mMockBatteryStats, never()).noteScreenState(anyInt(), anyInt(), anyInt());
+            verify(mMockBatteryStats, never()).noteScreenBrightness(anyInt(), anyInt());
+        }
     }
 
     /**
@@ -2573,7 +2679,7 @@ public final class DisplayPowerControllerTest {
         BrightnessClamperController getBrightnessClamperController(Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data, Context context,
-                DisplayManagerFlags flags, SensorManager sensorManager) {
+                DisplayManagerFlags flags, SensorManager sensorManager, float currentBrightness) {
             return mClamperController;
         }
 

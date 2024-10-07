@@ -92,8 +92,11 @@
     <dimen name="docked_divider_handle_width">16dp</dimen>
     <dimen name="docked_divider_handle_height">2dp</dimen>
 
-    <dimen name="split_divider_handle_region_width">96dp</dimen>
+    <dimen name="split_divider_handle_region_width">80dp</dimen>
     <dimen name="split_divider_handle_region_height">48dp</dimen>
+    <!-- The divider touch zone height is intentionally halved in portrait to avoid colliding
+         with the app handle.-->
+    <dimen name="desktop_mode_portrait_split_divider_handle_region_height">24dp</dimen>
 
     <!-- Divider handle size for split screen -->
     <dimen name="split_divider_handle_width">40dp</dimen>
@@ -301,31 +304,31 @@
     <dimen name="letterbox_education_dialog_corner_radius">28dp</dimen>
 
     <!-- The width of the top icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_icon_width">45dp</dimen>
+    <dimen name="letterbox_education_dialog_title_icon_width">32dp</dimen>
 
     <!-- The height of the top icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_title_icon_height">44dp</dimen>
+    <dimen name="letterbox_education_dialog_title_icon_height">32dp</dimen>
 
     <!-- The width of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_width">40dp</dimen>
+    <dimen name="letterbox_education_dialog_icon_width">28dp</dimen>
 
     <!-- The height of an icon in the letterbox education dialog. -->
-    <dimen name="letterbox_education_dialog_icon_height">32dp</dimen>
+    <dimen name="letterbox_education_dialog_icon_height">22dp</dimen>
 
     <!-- The fixed width of the dialog if there is enough space in the parent. -->
-    <dimen name="letterbox_education_dialog_width">472dp</dimen>
+    <dimen name="letterbox_education_dialog_width">364dp</dimen>
 
     <!-- The margin between the dialog container and its parent. -->
-    <dimen name="letterbox_education_dialog_margin">16dp</dimen>
+    <dimen name="letterbox_education_dialog_margin">24dp</dimen>
 
     <!-- The width of each action container in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_action_width">140dp</dimen>
+    <dimen name="letterbox_education_dialog_action_width">124dp</dimen>
 
     <!-- The space between two actions in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_space_between_actions">24dp</dimen>
+    <dimen name="letterbox_education_dialog_space_between_actions">32dp</dimen>
 
     <!-- The corner radius of the buttons in the letterbox education dialog -->
-    <dimen name="letterbox_education_dialog_button_radius">12dp</dimen>
+    <dimen name="letterbox_education_dialog_button_radius">28dp</dimen>
 
     <!-- The horizontal padding for the buttons in the letterbox education dialog -->
     <dimen name="letterbox_education_dialog_horizontal_padding">16dp</dimen>
@@ -364,7 +367,7 @@
     <dimen name="letterbox_restart_dialog_button_width">82dp</dimen>
 
     <!-- The width of the buttons in the restart dialog -->
-    <dimen name="letterbox_restart_dialog_button_height">36dp</dimen>
+    <dimen name="letterbox_restart_dialog_button_height">40dp</dimen>
 
     <!-- The corner radius of the buttons in the restart dialog -->
     <dimen name="letterbox_restart_dialog_button_radius">18dp</dimen>
@@ -457,6 +460,11 @@
          start of this area. -->
     <dimen name="desktop_mode_customizable_caption_margin_end">152dp</dimen>
 
+    <!-- The width of the right-aligned region that is taken up by caption elements and extra
+         margins when the caption has the minimize button. This will be merged with the above value
+         once the minimize button becomes default. -->
+    <dimen name="desktop_mode_customizable_caption_with_minimize_button_margin_end">204dp</dimen>
+
     <!-- The default minimum allowed window width when resizing a window in desktop mode. -->
     <dimen name="desktop_mode_minimum_window_width">386dp</dimen>
 
@@ -496,9 +504,9 @@
     <!-- The width of the handle menu in desktop mode.  -->
     <dimen name="desktop_mode_handle_menu_width">216dp</dimen>
 
-    <!-- The maximum height of the handle menu in desktop mode. Four pills (52dp each) plus 2dp
-        spacing between them plus 4dp top padding. -->
-    <dimen name="desktop_mode_handle_menu_height">270dp</dimen>
+    <!-- The maximum height of the handle menu in desktop mode. Three pills at 52dp each,
+         additional actions pill 156dp, plus 2dp spacing between them plus 4dp top padding. -->
+    <dimen name="desktop_mode_handle_menu_height">322dp</dimen>
 
     <!-- The elevation set on the handle menu pills. -->
     <dimen name="desktop_mode_handle_menu_pill_elevation">1dp</dimen>
@@ -511,6 +519,9 @@
 
     <!-- The maximum height of the handle menu's "New Window" button in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_new_window_height">52dp</dimen>
+
+    <!-- The maximum height of the handle menu's "Manage Windows" button in desktop mode. -->
+    <dimen name="desktop_mode_handle_menu_manage_windows_height">52dp</dimen>
 
     <!-- The maximum height of the handle menu's "Screenshot" button in desktop mode. -->
     <dimen name="desktop_mode_handle_menu_screenshot_height">52dp</dimen>
@@ -561,7 +572,7 @@
     <!-- The thickness in dp for all desktop drag transition regions. -->
     <dimen name="desktop_mode_transition_region_thickness">44dp</dimen>
 
-    <item type="dimen" format="float" name="desktop_mode_fullscreen_region_scale">0.4</item>
+    <item type="dimen" format="float" name="desktop_mode_fullscreen_region_scale">0.2</item>
 
     <!-- The height on the screen where drag to the left or right edge will result in a
     desktop task snapping to split size. The empty space between this and the top is to allow
@@ -575,6 +586,13 @@
     <dimen name="desktop_mode_header_buttons_ripple_radius">16dp</dimen>
     <!-- The vertical inset to apply to the app chip's ripple drawable -->
     <dimen name="desktop_mode_header_app_chip_ripple_inset_vertical">4dp</dimen>
+
+    <!-- The corner radius of the minimize button's ripple drawable -->
+    <dimen name="desktop_mode_header_minimize_ripple_radius">18dp</dimen>
+    <!-- The vertical inset to apply to the minimize button's ripple drawable -->
+    <dimen name="desktop_mode_header_minimize_ripple_inset_vertical">4dp</dimen>
+    <!-- The horizontal inset to apply to the minimize button's ripple drawable -->
+    <dimen name="desktop_mode_header_minimize_ripple_inset_horizontal">6dp</dimen>
 
     <!-- The corner radius of the maximize button's ripple drawable -->
     <dimen name="desktop_mode_header_maximize_ripple_radius">18dp</dimen>
@@ -590,6 +608,9 @@
     <!-- The horizontal inset to apply to the close button's ripple drawable -->
     <dimen name="desktop_mode_header_close_ripple_inset_horizontal">6dp</dimen>
 
+    <!-- The padding added to all sides of windowing education tooltip -->
+    <dimen name="desktop_windowing_education_tooltip_padding">8dp</dimen>
+
     <!-- The acceptable area ratio of fg icon area/bg icon area, i.e. (72 x 72) / (108 x 108) -->
     <item type="dimen" format="float" name="splash_icon_enlarge_foreground_threshold">0.44</item>
     <!-- Scaling factor applied to splash icons without provided background i.e. (192 / 160) -->
@@ -603,4 +624,12 @@
     <!-- The offset from the left edge of the entering page for the cross-activity animation -->
     <dimen name="cross_activity_back_entering_start_offset">96dp</dimen>
 
+    <!-- The open by default settings dialog menu width. -->
+    <dimen name="open_by_default_settings_dialog_width">348dp</dimen>
+    <!-- The open by default settings dialog menu height. -->
+    <dimen name="open_by_default_settings_dialog_height">380dp</dimen>
+    <!-- The height of radio buttons in the open by default settings dialog. -->
+    <dimen name="open_by_default_settings_dialog_radio_button_height">64dp</dimen>
+    <!-- The width of radio buttons in the open by default settings dialog. -->
+    <dimen name="open_by_default_settings_dialog_radio_button_width">316dp</dimen>
 </resources>

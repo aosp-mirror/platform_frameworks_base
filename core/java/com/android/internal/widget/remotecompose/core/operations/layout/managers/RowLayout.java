@@ -23,7 +23,6 @@ import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
-import com.android.internal.widget.remotecompose.core.documentation.DocumentedCompanionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
 import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
@@ -48,8 +47,6 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
     public static final int SPACE_EVENLY = 7;
     public static final int SPACE_AROUND = 8;
 
-    public static final RowLayout.Companion COMPANION = new RowLayout.Companion();
-
     int mHorizontalPositioning;
     int mVerticalPositioning;
     float mSpacedBy = 0f;
@@ -68,6 +65,7 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
         this(parent, componentId, animationId, 0, 0, 0, 0,
                 horizontalPositioning, verticalPositioning, spacedBy);
     }
+
     @Override
     public String toString() {
         return "ROW [" + mComponentId + ":" + mAnimationId + "] (" + mX + ", "
@@ -217,7 +215,6 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
             }
             childMeasure.setX(tx);
             childMeasure.setY(ty);
-            childMeasure.setVisibility(child.mVisibility);
             tx += childMeasure.getW();
             if (mHorizontalPositioning == SPACE_BETWEEN
                     || mHorizontalPositioning == SPACE_AROUND
@@ -229,66 +226,66 @@ public class RowLayout extends LayoutManager implements ComponentStartOperation 
         DebugLog.e();
     }
 
-    public static class Companion implements DocumentedCompanionOperation {
-        @Override
-        public String name() {
-            return "RowLayout";
-        }
+    public static String name() {
+        return "RowLayout";
+    }
 
-        @Override
-        public int id() {
-            return Operations.LAYOUT_ROW;
-        }
+    public static int id() {
+        return Operations.LAYOUT_ROW;
+    }
 
-        public void apply(WireBuffer buffer, int componentId, int animationId,
-                          int horizontalPositioning, int verticalPositioning, float spacedBy) {
-            buffer.start(Operations.LAYOUT_ROW);
-            buffer.writeInt(componentId);
-            buffer.writeInt(animationId);
-            buffer.writeInt(horizontalPositioning);
-            buffer.writeInt(verticalPositioning);
-            buffer.writeFloat(spacedBy);
-        }
+    public static void apply(WireBuffer buffer, int componentId, int animationId,
+                             int horizontalPositioning, int verticalPositioning, float spacedBy) {
+        buffer.start(Operations.LAYOUT_ROW);
+        buffer.writeInt(componentId);
+        buffer.writeInt(animationId);
+        buffer.writeInt(horizontalPositioning);
+        buffer.writeInt(verticalPositioning);
+        buffer.writeFloat(spacedBy);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int componentId = buffer.readInt();
-            int animationId = buffer.readInt();
-            int horizontalPositioning = buffer.readInt();
-            int verticalPositioning = buffer.readInt();
-            float spacedBy = buffer.readFloat();
-            operations.add(new RowLayout(null, componentId, animationId,
-                    horizontalPositioning, verticalPositioning, spacedBy));
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int componentId = buffer.readInt();
+        int animationId = buffer.readInt();
+        int horizontalPositioning = buffer.readInt();
+        int verticalPositioning = buffer.readInt();
+        float spacedBy = buffer.readFloat();
+        operations.add(new RowLayout(null, componentId, animationId,
+                horizontalPositioning, verticalPositioning, spacedBy));
+    }
 
-        @Override
-        public void documentation(DocumentationBuilder doc) {
-            doc.operation("Layout Operations", id(), name())
-                    .description("Row layout implementation, positioning components one"
-                            + " after the other horizontally.\n\n"
-                            + "It supports weight and horizontal/vertical positioning.")
-                    .examplesDimension(400, 100)
-                    .exampleImage("Start", "layout-RowLayout-start-top.png")
-                    .exampleImage("Center", "layout-RowLayout-center-top.png")
-                    .exampleImage("End", "layout-RowLayout-end-top.png")
-                    .exampleImage("SpaceEvenly", "layout-RowLayout-space-evenly-top.png")
-                    .exampleImage("SpaceAround", "layout-RowLayout-space-around-top.png")
-                    .exampleImage("SpaceBetween", "layout-RowLayout-space-between-top.png")
-                    .field(INT, "COMPONENT_ID", "unique id for this component")
-                    .field(INT, "ANIMATION_ID", "id used to match components,"
-                          + " for animation purposes")
-                    .field(INT, "HORIZONTAL_POSITIONING", "horizontal positioning value")
-                    .possibleValues("START", RowLayout.START)
-                    .possibleValues("CENTER", RowLayout.CENTER)
-                    .possibleValues("END", RowLayout.END)
-                    .possibleValues("SPACE_BETWEEN", RowLayout.SPACE_BETWEEN)
-                    .possibleValues("SPACE_EVENLY", RowLayout.SPACE_EVENLY)
-                    .possibleValues("SPACE_AROUND", RowLayout.SPACE_AROUND)
-                    .field(INT, "VERTICAL_POSITIONING", "vertical positioning value")
-                    .possibleValues("TOP", RowLayout.TOP)
-                    .possibleValues("CENTER", RowLayout.CENTER)
-                    .possibleValues("BOTTOM", RowLayout.BOTTOM)
-                    .field(FLOAT, "SPACED_BY", "Horizontal spacing between components");
-        }
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Layout Operations", id(), name())
+                .description("Row layout implementation, positioning components one"
+                        + " after the other horizontally.\n\n"
+                        + "It supports weight and horizontal/vertical positioning.")
+                .examplesDimension(400, 100)
+                .exampleImage("Start", "layout-RowLayout-start-top.png")
+                .exampleImage("Center", "layout-RowLayout-center-top.png")
+                .exampleImage("End", "layout-RowLayout-end-top.png")
+                .exampleImage("SpaceEvenly", "layout-RowLayout-space-evenly-top.png")
+                .exampleImage("SpaceAround", "layout-RowLayout-space-around-top.png")
+                .exampleImage("SpaceBetween", "layout-RowLayout-space-between-top.png")
+                .field(INT, "COMPONENT_ID", "unique id for this component")
+                .field(INT, "ANIMATION_ID", "id used to match components,"
+                        + " for animation purposes")
+                .field(INT, "HORIZONTAL_POSITIONING", "horizontal positioning value")
+                .possibleValues("START", RowLayout.START)
+                .possibleValues("CENTER", RowLayout.CENTER)
+                .possibleValues("END", RowLayout.END)
+                .possibleValues("SPACE_BETWEEN", RowLayout.SPACE_BETWEEN)
+                .possibleValues("SPACE_EVENLY", RowLayout.SPACE_EVENLY)
+                .possibleValues("SPACE_AROUND", RowLayout.SPACE_AROUND)
+                .field(INT, "VERTICAL_POSITIONING", "vertical positioning value")
+                .possibleValues("TOP", RowLayout.TOP)
+                .possibleValues("CENTER", RowLayout.CENTER)
+                .possibleValues("BOTTOM", RowLayout.BOTTOM)
+                .field(FLOAT, "SPACED_BY", "Horizontal spacing between components");
+    }
+
+    @Override
+    public void write(WireBuffer buffer) {
+        apply(buffer, mComponentId, mAnimationId,
+                mHorizontalPositioning, mVerticalPositioning, mSpacedBy);
     }
 }

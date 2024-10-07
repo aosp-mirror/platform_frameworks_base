@@ -71,6 +71,12 @@ interface NotificationScrollView {
     /** Set a consumer for current gesture overscroll events */
     fun setCurrentGestureOverscrollConsumer(consumer: Consumer<Boolean>?)
 
+    /** Set a consumer for current gesture in guts events */
+    fun setCurrentGestureInGutsConsumer(consumer: Consumer<Boolean>?)
+
+    /** Set a consumer for current remote input notification row bottom bound events */
+    fun setRemoteInputRowBottomBoundConsumer(consumer: Consumer<Float?>?)
+
     /** Set a consumer for heads up height changed events */
     fun setHeadsUpHeightConsumer(consumer: Consumer<Float>?)
 
@@ -80,8 +86,29 @@ interface NotificationScrollView {
     /** sets the current expand fraction */
     fun setExpandFraction(expandFraction: Float)
 
+    /** sets the current QS expand fraction */
+    fun setQsExpandFraction(expandFraction: Float)
+
+    /** set whether we are idle on the lockscreen scene */
+    fun setShowingStackOnLockscreen(showingStackOnLockscreen: Boolean)
+
+    /** set the alpha from 0-1f of stack fade-in on lockscreen */
+    fun setAlphaForLockscreenFadeIn(alphaForLockscreenFadeIn: Float)
+
     /** Sets whether the view is displayed in doze mode. */
     fun setDozing(dozing: Boolean)
+
+    /** Sets whether the view is displayed in pulsing mode. */
+    fun setPulsing(pulsing: Boolean, animated: Boolean)
+
+    /** Gets the inset for HUNs when they are not visible */
+    fun getHeadsUpInset(): Int
+
+    /**
+     * Signals that any open Notification guts should be closed, as scene container is handling
+     * touch events.
+     */
+    fun closeGutsOnSceneTouch()
 
     /** Adds a listener to be notified, when the stack height might have changed. */
     fun addStackHeightChangedListener(runnable: Runnable)
@@ -97,4 +124,7 @@ interface NotificationScrollView {
 
     /** @see addHeadsUpHeightChangedListener */
     fun removeHeadsUpHeightChangedListener(runnable: Runnable)
+
+    /** Sets whether updates to the stack are are suppressed. */
+    fun suppressHeightUpdates(suppress: Boolean)
 }

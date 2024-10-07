@@ -382,6 +382,16 @@ public class LogModule {
         return factory.create("MediaLog", 20);
     }
 
+    /**
+     * Provides a buffer for media device changes
+     */
+    @Provides
+    @SysUISingleton
+    @MediaDeviceLog
+    public static LogBuffer providesMediaDeviceLogBuffer(LogBufferFactory factory) {
+        return factory.create("MediaDeviceLog", 50);
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @SysUISingleton
@@ -467,6 +477,16 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 400);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by SIM events.
+     */
+    @Provides
+    @SysUISingleton
+    @SimLog
+    public static LogBuffer provideSimLogBuffer(LogBufferFactory factory) {
+        return factory.create("SimLog", 500);
     }
 
     /**
@@ -574,7 +594,7 @@ public class LogModule {
     @SysUISingleton
     @KeyguardQuickAffordancesLog
     public static LogBuffer provideKeyguardQuickAffordancesLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardQuickAffordancesLog", 25);
+        return factory.create("KeyguardQuickAffordancesLog", 100);
     }
 
     /**
@@ -618,6 +638,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for communal touch-handling logs.
+     */
+    @Provides
+    @SysUISingleton
+    @CommunalTouchLog
+    public static LogBuffer provideCommunalTouchLogBuffer(LogBufferFactory factory) {
+        return factory.create("CommunalTouchLog", 250);
+    }
+
+    /**
      * Provides a {@link TableLogBuffer} for communal-related logs.
      */
     @Provides
@@ -633,6 +663,14 @@ public class LogModule {
     @DisplayMetricsRepoLog
     public static LogBuffer provideDisplayMetricsRepoLogBuffer(LogBufferFactory factory) {
         return factory.create("DisplayMetricsRepo", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for focus related logs. */
+    @Provides
+    @SysUISingleton
+    @FocusedDisplayRepoLog
+    public static LogBuffer provideFocusedDisplayRepoLogBuffer(LogBufferFactory factory) {
+        return factory.create("FocusedDisplayRepo", 50);
     }
 
     /** Provides a {@link LogBuffer} for the scene framework. */
@@ -658,6 +696,14 @@ public class LogModule {
     @KeyboardLog
     public static LogBuffer provideKeyboardLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyboardLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for the input devices tutorial. */
+    @Provides
+    @SysUISingleton
+    @InputDeviceTutorialLog
+    public static LogBuffer provideInputDeviceTutorialLogBuffer(LogBufferFactory factory) {
+        return factory.create("InputDeviceTutorialLog", 50);
     }
 
     /** Provides a {@link LogBuffer} for {@link PackageChangeRepository} */
@@ -698,5 +744,13 @@ public class LogModule {
     @VolumeLog
     public static LogBuffer provideVolumeLogBuffer(LogBufferFactory factory) {
         return factory.create("VolumeLog", 50);
+    }
+
+    /** Provides a {@link LogBuffer} for use by long touch event handlers. */
+    @Provides
+    @SysUISingleton
+    @LongPressTouchLog
+    public static LogBuffer providesLongPressTouchLog(LogBufferFactory factory) {
+        return factory.create("LongPressViewLog", 200);
     }
 }

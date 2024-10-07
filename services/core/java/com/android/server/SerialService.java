@@ -56,14 +56,9 @@ public class SerialService extends ISerialManager.Stub {
         }
     }
 
-    @android.ravenwood.annotation.RavenwoodReplace
     private static String[] getSerialPorts(Context context) {
         return context.getResources().getStringArray(
                 com.android.internal.R.array.config_serialPorts);
-    }
-
-    private static String[] getSerialPorts$ravenwood(Context context) {
-        return new String[0];
     }
 
     public static class Lifecycle extends SystemService {

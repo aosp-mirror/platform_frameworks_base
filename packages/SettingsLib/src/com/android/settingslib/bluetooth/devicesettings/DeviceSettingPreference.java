@@ -40,6 +40,10 @@ public abstract class DeviceSettingPreference {
                 return ActionSwitchPreference.readFromParcel(in);
             case DeviceSettingType.DEVICE_SETTING_TYPE_MULTI_TOGGLE:
                 return MultiTogglePreference.readFromParcel(in);
+            case DeviceSettingType.DEVICE_SETTING_TYPE_FOOTER:
+                return DeviceSettingFooterPreference.readFromParcel(in);
+            case DeviceSettingType.DEVICE_SETTING_TYPE_HELP:
+                return DeviceSettingHelpPreference.readFromParcel(in);
             default:
                 return UNKNOWN;
         }

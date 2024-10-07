@@ -558,7 +558,9 @@ public class BiometricServiceTest {
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_NONE),
-                eq(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE),
+                eq(Flags.mandatoryBiometrics()
+                        ? BiometricConstants.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS
+                        : BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE),
                 eq(0 /* vendorCode */));
 
         // Enrolled, not disabled in settings, user requires confirmation in settings
@@ -636,7 +638,8 @@ public class BiometricServiceTest {
                 eq(TEST_REQUEST_ID),
                 cookieCaptor.capture() /* cookie */,
                 anyBoolean() /* allowBackgroundAuthentication */,
-                anyBoolean() /* isForLegacyFingerprintManager */);
+                anyBoolean() /* isForLegacyFingerprintManager */,
+                eq(false) /* isMandatoryBiometrics */);
 
         // onReadyForAuthentication, mAuthSession state OK
         mBiometricService.mImpl.onReadyForAuthentication(TEST_REQUEST_ID, cookieCaptor.getValue());
@@ -1449,7 +1452,9 @@ public class BiometricServiceTest {
     }
 
     @Test
-    public void testCanAuthenticate_whenBiometricsNotEnabledForApps() throws Exception {
+    @RequiresFlagsDisabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenBiometricsNotEnabledForApps_returnsHardwareUnavailable()
+            throws Exception {
         setupAuthForOnly(TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         when(mBiometricService.mSettingObserver.getEnabledForApps(anyInt())).thenReturn(false);
         when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
@@ -1458,6 +1463,25 @@ public class BiometricServiceTest {
         // When only biometric is requested
         int authenticators = Authenticators.BIOMETRIC_STRONG;
         assertEquals(BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+
+        // When credential and biometric are requested
+        authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
+        assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
+                invokeCanAuthenticate(mBiometricService, authenticators));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_MANDATORY_BIOMETRICS)
+    public void testCanAuthenticate_whenBiometricsNotEnabledForApps() throws Exception {
+        setupAuthForOnly(TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        when(mBiometricService.mSettingObserver.getEnabledForApps(anyInt())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
+
+        // When only biometric is requested
+        int authenticators = Authenticators.BIOMETRIC_STRONG;
+        assertEquals(BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
 
         // When credential and biometric are requested

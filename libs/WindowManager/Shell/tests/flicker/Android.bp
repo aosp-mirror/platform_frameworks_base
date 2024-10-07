@@ -59,7 +59,7 @@ java_defaults {
         enabled: false,
     },
     test_suites: ["device-tests"],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     static_libs: [
         "wm-shell-flicker-utils",
         "androidx.test.ext.junit",
@@ -68,6 +68,7 @@ java_defaults {
         "flickerlib-helpers",
         "flickerlib-trace_processor_shell",
         "platform-test-annotations",
+        "platform-test-rules",
         "wm-flicker-common-app-helpers",
         "wm-flicker-common-assertions",
         "launcher-helper-lib",

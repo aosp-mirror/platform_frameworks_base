@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
@@ -38,6 +37,7 @@ import android.app.ApplicationErrorReport;
 import android.app.INotificationManager;
 import android.app.SystemServiceRegistry;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -103,10 +103,13 @@ import com.android.i18n.timezone.ZoneInfoDb;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.ApplicationSharedMemory;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.policy.AttributeCache;
-import com.android.internal.protolog.ProtoLogService;
+import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.ProtoLogConfigurationServiceImpl;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.util.FrameworkStatsLog;
@@ -202,6 +205,7 @@ import com.android.server.os.SchedulingPolicyService;
 import com.android.server.pdb.PersistentDataBlockService;
 import com.android.server.people.PeopleService;
 import com.android.server.permission.access.AccessCheckingService;
+import com.android.server.pinner.PinnerService;
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.ApexSystemServiceInfo;
 import com.android.server.pm.BackgroundInstallControlService;
@@ -256,6 +260,7 @@ import com.android.server.stats.bootstrap.StatsBootstrapAtomService;
 import com.android.server.stats.pull.StatsPullAtomService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
+import com.android.server.supervision.SupervisionService;
 import com.android.server.systemcaptions.SystemCaptionsManagerService;
 import com.android.server.telecom.TelecomLoaderService;
 import com.android.server.testharness.TestHarnessModeService;
@@ -432,6 +437,10 @@ public final class SystemServer implements Dumpable {
             "android.os.profiling.ProfilingService$Lifecycle";
     private static final String PROFILING_SERVICE_JAR_PATH =
             "/apex/com.android.profiling/javalib/service-profiling.jar";
+
+    private static final String RANGING_APEX_SERVICE_JAR_PATH =
+            "/apex/com.android.uwb/javalib/service-ranging.jar";
+    private static final String RANGING_SERVICE_CLASS = "com.android.server.ranging.RangingService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -933,6 +942,12 @@ public final class SystemServer implements Dumpable {
         // Setup the default WTF handler
         RuntimeInit.setDefaultApplicationWtfHandler(SystemServer::handleEarlySystemWtf);
 
+        // Initialize the application shared memory region.
+        // This needs to happen before any system services are started,
+        // as they may rely on the shared memory region having been initialized.
+        ApplicationSharedMemory instance = ApplicationSharedMemory.create();
+        ApplicationSharedMemory.setInstance(instance);
+
         // Start services.
         try {
             t.traceBegin("StartServices");
@@ -1092,10 +1107,15 @@ public final class SystemServer implements Dumpable {
 
         // Orchestrates some ProtoLogging functionality.
         if (android.tracing.Flags.clientSideProtoLogging()) {
-            t.traceBegin("StartProtoLogService");
-            ServiceManager.addService(Context.PROTOLOG_SERVICE, new ProtoLogService());
+            t.traceBegin("StartProtoLogConfigurationService");
+            ServiceManager.addService(
+                    Context.PROTOLOG_CONFIGURATION_SERVICE, new ProtoLogConfigurationServiceImpl());
             t.traceEnd();
         }
+
+        t.traceBegin("InitializeProtoLog");
+        ProtoLog.init(WmProtoLogGroups.values());
+        t.traceEnd();
 
         // Platform compat service is used by ActivityManagerService, PackageManagerService, and
         // possibly others in the future. b/135010838.
@@ -1597,6 +1617,12 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
+            if (android.app.supervision.flags.Flags.supervisionApi()) {
+                t.traceBegin("StartSupervisionService");
+                mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
+                t.traceEnd();
+            }
+
             if (!isTv) {
                 t.traceBegin("StartVibratorManagerService");
                 mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
@@ -1729,12 +1755,11 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(LogcatManagerService.class);
             t.traceEnd();
 
-            t.traceBegin("StartAppFunctionManager");
-            if (enableAppFunctionManager()) {
+            if (AppFunctionManagerConfiguration.isSupported(context)) {
+                t.traceBegin("StartAppFunctionManager");
                 mSystemServiceManager.startService(AppFunctionManagerService.class);
+                t.traceEnd();
             }
-            t.traceEnd();
-
         } catch (Throwable e) {
             Slog.e("System", "******************************************");
             Slog.e("System", "************ Failure starting core service");
@@ -2454,8 +2479,8 @@ public final class SystemServer implements Dumpable {
                 reportWtf("starting RuntimeService", e);
             }
             t.traceEnd();
-
-            if (!isWatch && !disableNetworkTime) {
+            if (!disableNetworkTime && (!isWatch || (isWatch
+                    && android.server.Flags.allowNetworkTimeUpdateService()))) {
                 t.traceBegin("StartNetworkTimeUpdateService");
                 try {
                     networkTimeUpdater = new NetworkTimeUpdateService(context);
@@ -2992,14 +3017,29 @@ public final class SystemServer implements Dumpable {
         }
         t.traceEnd();
 
-        t.traceBegin("GameManagerService");
-        mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
-        t.traceEnd();
+        if (!isWatch || !android.server.Flags.removeGameManagerServiceFromWear()) {
+            t.traceBegin("GameManagerService");
+            mSystemServiceManager.startService(GameManagerService.Lifecycle.class);
+            t.traceEnd();
+        } else {
+            Slog.d(TAG, "Not starting GameManagerService");
+        }
 
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)) {
             t.traceBegin("UwbService");
             mSystemServiceManager.startServiceFromJar(UWB_SERVICE_CLASS, UWB_APEX_SERVICE_JAR_PATH);
             t.traceEnd();
+        }
+
+        if (com.android.ranging.flags.Flags.rangingStackEnabled()) {
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_UWB)
+                    || context.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_WIFI_RTT)) {
+                t.traceBegin("RangingService");
+                mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
+                        RANGING_APEX_SERVICE_JAR_PATH);
+                t.traceEnd();
+            }
         }
 
         t.traceBegin("StartBootPhaseDeviceSpecificServicesReady");

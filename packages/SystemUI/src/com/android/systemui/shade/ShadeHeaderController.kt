@@ -194,6 +194,7 @@ constructor(
             if (qsVisible && field != value) {
                 header.alpha = ShadeInterpolation.getContentAlpha(value)
                 field = value
+                updateIgnoredSlots()
             }
         }
 
@@ -538,7 +539,7 @@ constructor(
 
     private fun updateIgnoredSlots() {
         // switching from QQS to QS state halfway through the transition
-        if (singleCarrier || qsExpandedFraction < 0.5) {
+        if (singleCarrier || (!largeScreenActive && qsExpandedFraction < 0.5)) {
             iconContainer.removeIgnoredSlots(carrierIconSlots)
         } else {
             iconContainer.addIgnoredSlots(carrierIconSlots)

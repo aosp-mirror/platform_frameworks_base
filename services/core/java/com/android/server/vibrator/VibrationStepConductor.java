@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Build;
 import android.os.CombinedVibration;
-import android.os.IBinder;
 import android.os.VibrationEffect;
 import android.os.vibrator.Flags;
 import android.os.vibrator.PrebakedSegment;
@@ -32,6 +31,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.vibrator.VibrationSession.Status;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -52,7 +52,7 @@ import java.util.concurrent.TimeoutException;
  * VibrationThread. The only thread-safe methods for calling from other threads are the "notify"
  * methods (which should never be used from the VibrationThread thread).
  */
-final class VibrationStepConductor implements IBinder.DeathRecipient {
+final class VibrationStepConductor {
     private static final boolean DEBUG = VibrationThread.DEBUG;
     private static final String TAG = VibrationThread.TAG;
 
@@ -217,7 +217,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     }
 
     /**
-     * Calculate the {@link Vibration.Status} based on the current queue state and the expected
+     * Calculate the {@link Vibration.EndInfo} based on the current queue state and the expected
      * number of {@link StartSequentialEffectStep} to be played.
      */
     @Nullable
@@ -235,10 +235,10 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         }
         // No pending steps, and something happened.
         if (mSuccessfulVibratorOnSteps > 0) {
-            return new Vibration.EndInfo(Vibration.Status.FINISHED);
+            return new Vibration.EndInfo(Status.FINISHED);
         }
         // If no step was able to turn the vibrator ON successfully.
-        return new Vibration.EndInfo(Vibration.Status.IGNORED_UNSUPPORTED);
+        return new Vibration.EndInfo(Status.IGNORED_UNSUPPORTED);
     }
 
     /**
@@ -343,20 +343,6 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
     }
 
     /**
-     * Binder death notification. VibrationThread registers this when it's running a conductor.
-     * Note that cancellation could theoretically happen immediately, before the conductor has
-     * started, but in this case it will be processed in the first signals loop.
-     */
-    @Override
-    public void binderDied() {
-        if (DEBUG) {
-            Slog.d(TAG, "Binder died, cancelling vibration...");
-        }
-        notifyCancelled(new Vibration.EndInfo(Vibration.Status.CANCELLED_BINDER_DIED),
-                /* immediate= */ false);
-    }
-
-    /**
      * Notify the execution that cancellation is requested. This will be acted upon
      * asynchronously in the VibrationThread.
      *
@@ -377,7 +363,7 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
         if ((cancelInfo == null) || !cancelInfo.status.name().startsWith("CANCEL")) {
             Slog.w(TAG, "Vibration cancel requested with bad signal=" + cancelInfo
                     + ", using CANCELLED_UNKNOWN_REASON to ensure cancellation.");
-            cancelInfo = new Vibration.EndInfo(Vibration.Status.CANCELLED_BY_UNKNOWN_REASON);
+            cancelInfo = new Vibration.EndInfo(Status.CANCELLED_BY_UNKNOWN_REASON);
         }
         synchronized (mLock) {
             if ((immediate && mSignalCancelImmediate) || (mSignalCancel != null)) {
@@ -449,6 +435,23 @@ final class VibrationStepConductor implements IBinder.DeathRecipient {
             }
             mLock.notify();
         }
+    }
+
+    /**
+     * Notify that the VibrationThread has completed the vibration effect playback.
+     *
+     * <p>This is a lightweight method intended to be called by the vibration thread directly. The
+     * VibrationThread may still be continuing with cleanup tasks, and should not be given new work
+     * until it notifies the manager that it has been released.
+     */
+    public void notifyVibrationComplete(@NonNull Vibration.EndInfo endInfo) {
+        if (Build.IS_DEBUGGABLE) {
+            expectIsVibrationThread(true);
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "Vibration " + mVibration.id + " finished with " + endInfo);
+        }
+        mVibration.end(endInfo);
     }
 
     /** Returns true if a cancellation signal was sent via {@link #notifyCancelled}. */

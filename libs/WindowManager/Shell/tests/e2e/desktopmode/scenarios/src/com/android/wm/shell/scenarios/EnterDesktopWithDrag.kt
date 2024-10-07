@@ -16,37 +16,25 @@
 
 package com.android.wm.shell.scenarios
 
-import android.platform.test.annotations.Postsubmit
-import android.app.Instrumentation
 import android.tools.NavBar
 import android.tools.Rotation
-import android.tools.traces.parsers.WindowManagerStateHelper
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
-import com.android.launcher3.tapl.LauncherInstrumentation
-import com.android.server.wm.flicker.helpers.DesktopModeAppHelper
-import com.android.server.wm.flicker.helpers.SimpleAppHelper
+import android.tools.flicker.rules.ChangeDisplayOrientationRule
 import com.android.window.flags.Flags
 import com.android.wm.shell.Utils
 import org.junit.After
 import org.junit.Assume
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.BlockJUnit4ClassRunner
 
-@RunWith(BlockJUnit4ClassRunner::class)
-@Postsubmit
-open class EnterDesktopWithDrag
-@JvmOverloads
-constructor(val rotation: Rotation = Rotation.ROTATION_0) {
-
-    private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
-    private val tapl = LauncherInstrumentation()
-    private val wmHelper = WindowManagerStateHelper(instrumentation)
-    private val device = UiDevice.getInstance(instrumentation)
-    private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
+@Ignore("Test Base Class")
+abstract class EnterDesktopWithDrag
+constructor(
+    val rotation: Rotation = Rotation.ROTATION_0,
+    isResizeable: Boolean = true,
+    isLandscapeApp: Boolean = true,
+) : DesktopScenarioCustomAppTestBase(isResizeable, isLandscapeApp) {
 
     @Rule @JvmField val testSetupRule = Utils.testSetupRule(NavBar.MODE_GESTURAL, rotation)
 
@@ -55,6 +43,8 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+        ChangeDisplayOrientationRule.setRotation(rotation)
+        tapl.enableTransientTaskbar(false)
     }
 
     @Test

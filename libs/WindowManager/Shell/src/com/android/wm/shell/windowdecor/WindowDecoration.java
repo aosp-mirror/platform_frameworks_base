@@ -144,8 +144,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     TaskDragResizer mTaskDragResizer;
     boolean mIsCaptionVisible;
 
-    private boolean mIsStatusBarVisible;
-    private boolean mIsKeyguardVisibleAndOccluded;
+    boolean mIsStatusBarVisible;
+    boolean mIsKeyguardVisibleAndOccluded;
 
     /** The most recent set of insets applied to this window decoration. */
     private WindowDecorationInsets mWindowDecorationInsets;
@@ -241,7 +241,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         }
         rootView = null; // Clear it just in case we use it accidentally
 
-        updateCaptionVisibility(outResult.mRootView);
+        updateCaptionVisibility(outResult.mRootView, params);
 
         final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
         outResult.mWidth = taskBounds.width();
@@ -346,7 +346,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     private void updateCaptionInsets(RelayoutParams params, WindowContainerTransaction wct,
             RelayoutResult<T> outResult, Rect taskBounds) {
-        if (!mIsCaptionVisible) {
+        if (!mIsCaptionVisible || !params.mIsInsetSource) {
             if (mWindowDecorationInsets != null) {
                 mWindowDecorationInsets.remove(wct);
                 mWindowDecorationInsets = null;
@@ -527,10 +527,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
     }
 
     /**
-     * Checks if task has entered/exited immersive mode and requires a change in caption visibility.
+     * Update caption visibility state and views.
      */
-    private void updateCaptionVisibility(View rootView) {
-        mIsCaptionVisible = mIsStatusBarVisible && !mIsKeyguardVisibleAndOccluded;
+    private void updateCaptionVisibility(View rootView, @NonNull RelayoutParams params) {
+        mIsCaptionVisible = params.mIsCaptionVisible;
         setCaptionVisibility(rootView, mIsCaptionVisible);
     }
 
@@ -724,12 +724,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         int mCaptionWidthId;
         final List<OccludingCaptionElement> mOccludingCaptionElements = new ArrayList<>();
         int mInputFeatures;
+        boolean mIsInsetSource = true;
         @InsetsSource.Flags int mInsetSourceFlags;
 
         int mShadowRadiusId;
         int mCornerRadius;
 
         int mCaptionTopPadding;
+        boolean mIsCaptionVisible;
 
         Configuration mWindowDecorConfig;
 
@@ -742,12 +744,14 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionWidthId = Resources.ID_NULL;
             mOccludingCaptionElements.clear();
             mInputFeatures = 0;
+            mIsInsetSource = true;
             mInsetSourceFlags = 0;
 
             mShadowRadiusId = Resources.ID_NULL;
             mCornerRadius = 0;
 
             mCaptionTopPadding = 0;
+            mIsCaptionVisible = false;
 
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;

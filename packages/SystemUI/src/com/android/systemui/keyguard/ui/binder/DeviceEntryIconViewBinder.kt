@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.util.Log
 import android.util.StateSet
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -83,6 +84,11 @@ object DeviceEntryIconViewBinder {
                     if (
                         !isA11yAction && falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
                     ) {
+                        Log.d(
+                            TAG,
+                            "Long press rejected because it is not a11yAction " +
+                                "and it is a falseLongTap"
+                        )
                         return
                     }
                     vibratorHelper.performHapticFeedback(

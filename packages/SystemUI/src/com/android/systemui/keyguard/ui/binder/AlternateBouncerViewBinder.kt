@@ -42,6 +42,7 @@ import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerUdfpsIconViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerWindowViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.LongPressHandlingViewLogger
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scrim.ScrimView
@@ -191,6 +192,7 @@ constructor(
 
         optionallyAddUdfpsViews(
             view = view,
+            logger = alternateBouncerDependencies.logger,
             udfpsIconViewModel = alternateBouncerDependencies.udfpsIconViewModel,
             udfpsA11yOverlayViewModel =
                 alternateBouncerDependencies.udfpsAccessibilityOverlayViewModel,
@@ -248,6 +250,7 @@ constructor(
 
     private fun optionallyAddUdfpsViews(
         view: ConstraintLayout,
+        logger: LongPressHandlingViewLogger,
         udfpsIconViewModel: AlternateBouncerUdfpsIconViewModel,
         udfpsA11yOverlayViewModel: Lazy<AlternateBouncerUdfpsAccessibilityOverlayViewModel>,
     ) {
@@ -276,7 +279,7 @@ constructor(
                         var udfpsView = view.getViewById(udfpsViewId)
                         if (udfpsView == null) {
                             udfpsView =
-                                DeviceEntryIconView(view.context, null).apply {
+                                DeviceEntryIconView(view.context, null, logger = logger).apply {
                                     id = udfpsViewId
                                     contentDescription =
                                         context.resources.getString(

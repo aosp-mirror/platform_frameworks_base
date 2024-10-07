@@ -15,7 +15,10 @@
  */
 package android.view;
 
+import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+
 import android.animation.LayoutTransition;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -364,6 +367,18 @@ public class ViewOverlay {
                 }
             }
             return null;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        @FlaggedApi(FLAG_VIEW_VELOCITY_API)
+        public float getFrameContentVelocity() {
+            if (mHostView != null) {
+                return mHostView.getFrameContentVelocity();
+            }
+            return super.getFrameContentVelocity();
         }
     }
 

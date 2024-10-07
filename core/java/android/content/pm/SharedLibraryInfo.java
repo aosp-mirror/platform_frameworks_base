@@ -94,7 +94,7 @@ public final class SharedLibraryInfo implements Parcelable {
     private final String mPath;
     private final String mPackageName;
     private final String mName;
-    private final List<String> mCodePaths;
+    private List<String> mCodePaths;
 
     private final long mVersion;
     private final @Type int mType;
@@ -279,6 +279,15 @@ public final class SharedLibraryInfo implements Parcelable {
             // Static or dynamic library.
             return Objects.requireNonNull(mCodePaths);
         }
+    }
+
+    /**
+     * Sets new all code paths for that library.
+     *
+     * @hide
+     */
+    public void setAllCodePaths(List<String> paths) {
+        mCodePaths = paths;
     }
 
     /**

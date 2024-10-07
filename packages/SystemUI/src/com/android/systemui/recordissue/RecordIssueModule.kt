@@ -19,6 +19,7 @@ package com.android.systemui.recordissue
 import com.android.systemui.Flags
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.RecordIssueTile
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
@@ -61,6 +62,7 @@ interface RecordIssueModule {
                         labelRes = R.string.qs_record_issue_label
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.UTILITIES,
             )
 
         /** Inject FlashlightTile into tileViewModelMap in QSModule */

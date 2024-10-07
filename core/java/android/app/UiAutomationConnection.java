@@ -16,8 +16,6 @@
 
 package android.app;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.NonNull;
@@ -228,7 +226,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public boolean takeScreenshot(Rect crop, ScreenCapture.ScreenCaptureListener listener) {
+    public boolean takeScreenshot(Rect crop, ScreenCapture.ScreenCaptureListener listener,
+            int displayId) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -240,7 +239,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
             final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
                     .setSourceCrop(crop)
                     .build();
-            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs, listener);
+            mWindowManager.captureDisplay(displayId, captureArgs, listener);
         } catch (RemoteException re) {
             re.rethrowAsRuntimeException();
         } finally {

@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.ConditionVariable;
@@ -42,6 +43,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
+import com.android.server.power.stats.format.CpuPowerStatsLayout;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,7 +55,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.function.IntSupplier;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -124,11 +125,6 @@ public class CpuPowerStatsCollectorTest {
         }
 
         @Override
-        public IntSupplier getVoltageSupplier() {
-            return () -> 3500;
-        }
-
-        @Override
         public long getPowerStatsCollectionThrottlePeriod(String powerComponentName) {
             return 0;
         }
@@ -150,7 +146,9 @@ public class CpuPowerStatsCollectorTest {
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
         when(mMockKernelCpuStatsReader.isSupportedFeature()).thenReturn(true);
-        when(mConsumedEnergyRetriever.getEnergyConsumerIds(anyInt())).thenReturn(new int[0]);
+        when(mConsumedEnergyRetriever.getEnergyConsumerIds(anyInt()))
+                .thenReturn(new int[0]);
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         mUidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID_2);
     }
 
@@ -228,9 +226,7 @@ public class CpuPowerStatsCollectorTest {
         assertThat(descriptor.name).isEqualTo("cpu");
         assertThat(descriptor.statsArrayLength).isEqualTo(13);
         assertThat(descriptor.uidStatsArrayLength).isEqualTo(5);
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
-        layout.fromExtras(descriptor.extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(descriptor);
 
         long[] deviceStats = new long[descriptor.statsArrayLength];
         layout.setTimeByScalingStep(deviceStats, 2, 42);
@@ -267,8 +263,7 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
-        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(collector.getPowerStatsDescriptor());
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
                 new SparseArray<>() {{
@@ -338,8 +333,7 @@ public class CpuPowerStatsCollectorTest {
         mockEnergyConsumers();
 
         CpuPowerStatsCollector collector = createCollector(8, 0);
-        CpuPowerStatsLayout layout = new CpuPowerStatsLayout();
-        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(collector.getPowerStatsDescriptor());
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
                 new SparseArray<>() {{
@@ -462,17 +456,24 @@ public class CpuPowerStatsCollectorTest {
 
     private void mockEnergyConsumers() {
         reset(mConsumedEnergyRetriever);
+        when(mConsumedEnergyRetriever.getVoltageMv()).thenReturn(3500);
         when(mConsumedEnergyRetriever.getEnergyConsumerIds(EnergyConsumerType.CPU_CLUSTER))
                 .thenReturn(new int[]{1, 2});
-        when(mConsumedEnergyRetriever.getConsumedEnergyUws(eq(new int[]{1, 2})))
-                .thenReturn(new long[]{1000, 2000})
-                .thenReturn(new long[]{1500, 2700});
+        when(mConsumedEnergyRetriever.getConsumedEnergy(eq(new int[]{1, 2})))
+                .thenReturn(new EnergyConsumerResult[]{
+                        mockEnergyConsumer(1000), mockEnergyConsumer(2000)})
+                .thenReturn(new EnergyConsumerResult[]{
+                        mockEnergyConsumer(1500), mockEnergyConsumer(2700)});
+    }
+
+    private EnergyConsumerResult mockEnergyConsumer(long energyUWs) {
+        EnergyConsumerResult ecr = new EnergyConsumerResult();
+        ecr.energyUWs = energyUWs;
+        return ecr;
     }
 
     private static int[] getScalingStepToPowerBracketMap(CpuPowerStatsCollector collector) {
-        CpuPowerStatsLayout layout =
-                new CpuPowerStatsLayout();
-        layout.fromExtras(collector.getPowerStatsDescriptor().extras);
+        CpuPowerStatsLayout layout = new CpuPowerStatsLayout(collector.getPowerStatsDescriptor());
         return layout.getScalingStepToPowerBracketMap();
     }
 

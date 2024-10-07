@@ -420,6 +420,7 @@ public class CarrierConfigManager {
      * <p>
      * Note: This requires the Telephony config_supports_telephony_audio_device overlay to be true
      * in order to work.
+     * @deprecated this functionality was never used and is no longer supported.
      * @hide
      */
     public static final String KEY_PLAY_CALL_RECORDING_TONE_BOOL = "play_call_recording_tone_bool";
@@ -5029,6 +5030,18 @@ public class CarrierConfigManager {
         public static final String KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY =
                 KEY_PREFIX + "es_supl_data_plane_only_roaming_plmn_string_array";
 
+        /**
+         * Determine whether to enable Net Initiated SUPL (NI SUPL) message injection.
+         * If enabled, the GnssLocationProvider will monitor for WAP PUSH or MT SMS NI SUPL intents
+         * and subsequently inject the NI SUPL packet into the GNSS HAL.
+         * {@code false} - Disable NI SUPL message injection. This is default.
+         * {@code true} - Enable NI SUPL message injection.
+         */
+        @FlaggedApi(android.location.flags.Flags
+                .FLAG_ENABLE_NI_SUPL_MESSAGE_INJECTION_BY_CARRIER_CONFIG_BUGFIX)
+        public static final String KEY_ENABLE_NI_SUPL_MESSAGE_INJECTION_BOOL =
+                KEY_PREFIX + "enable_ni_supl_message_injection_bool";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_PERSIST_LPP_MODE_BOOL, true);
@@ -5046,6 +5059,9 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_ES_SUPL_CONTROL_PLANE_SUPPORT_INT,
                     SUPL_EMERGENCY_MODE_TYPE_CP_ONLY);
             defaults.putStringArray(KEY_ES_SUPL_DATA_PLANE_ONLY_ROAMING_PLMN_STRING_ARRAY, null);
+            if (android.location.flags.Flags.enableNiSuplMessageInjectionByCarrierConfigBugfix()) {
+                defaults.putBoolean(KEY_ENABLE_NI_SUPL_MESSAGE_INJECTION_BOOL, false);
+            }
             return defaults;
         }
     }
@@ -9747,7 +9763,7 @@ public class CarrierConfigManager {
      * users to switch to using satellite emergency messaging.</li>
      * </ul>
      * <p>
-     * The default value is 300 seconds.
+     * The default value is 180 seconds.
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
     public static final String KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT =
@@ -9993,6 +10009,17 @@ public class CarrierConfigManager {
     public static final String KEY_SATELLITE_ESOS_SUPPORTED_BOOL = "satellite_esos_supported_bool";
 
     /**
+     * Indicate whether carrier roaming to satellite is using P2P SMS.
+     *
+     * This will need agreement with carriers before enabling this flag.
+     *
+     * The default value is false.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL =
+            "satellite_roaming_p2p_sms_supported_bool";
+
+    /**
      * Defines the NIDD (Non-IP Data Delivery) APN to be used for carrier roaming to satellite
      * attachment. For more on NIDD, see 3GPP TS 29.542.
      * Note this config is the only source of truth regarding the definition of the APN.
@@ -10001,6 +10028,19 @@ public class CarrierConfigManager {
      */
     public static final String KEY_SATELLITE_NIDD_APN_NAME_STRING =
             "satellite_nidd_apn_name_string";
+
+    /**
+     * Default value {@code true}, meaning when an emergency call request comes in, if the device is
+     * in emergency satellite mode but hasn't sent the first satellite datagram, then exits
+     * satellite mode to allow the emergency call to go through.
+     *
+     * If {@code false}, the emergency call is always blocked if device is in emergency satellite
+     * mode. Note if device is NOT in emergency satellite mode, emergency call is always allowed.
+     *
+     * @hide
+     */
+    public static final String KEY_SATELLITE_ROAMING_TURN_OFF_SESSION_FOR_EMERGENCY_CALL_BOOL =
+            "satellite_roaming_turn_off_session_for_emergency_call_bool";
 
     /** @hide */
     @IntDef({
@@ -10073,8 +10113,36 @@ public class CarrierConfigManager {
      * The default value is 30 seconds.
      */
     @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
-    public static final String KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
-            "satellite_screen_off_inactivity_timeout_duration_sec_int";
+    public static final String KEY_SATELLITE_ROAMING_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_roaming_screen_off_inactivity_timeout_sec_int";
+
+    /**
+     * An integer key holds the timeout duration in seconds used to determine whether to exit P2P
+     * SMS mode and start TN scanning.
+     *
+     * The timer is started when the device is not connected, user is not pointing to the
+     * satellite and no data transfer is happening.
+     * When the timer expires, the device will move to IDLE mode upon which TN scanning will start.
+     *
+     * The default value is 180 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_ROAMING_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_roaming_p2p_sms_inactivity_timeout_sec_int";
+
+    /**
+     * An integer key holds the timeout duration in seconds used to determine whether to exit ESOS
+     * mode and start TN scanning.
+     *
+     * The timer is started when the device is not connected, user is not pointing to the
+     * satellite and no data transfer is happening.
+     * When the timer expires, the device will move to IDLE mode upon which TN scanning will start.
+     *
+     * The default value is 600 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ROAMING_NB_IOT_NTN)
+    public static final String KEY_SATELLITE_ROAMING_ESOS_INACTIVITY_TIMEOUT_SEC_INT =
+            "satellite_roaming_esos_inactivity_timeout_sec_int";
 
     /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
@@ -11189,7 +11257,7 @@ public class CarrierConfigManager {
                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                 PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
-        sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 300);
+        sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 180);
         sDefaults.putIntArray(KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-140 dBm, -44 dBm]
                 new int[]{
@@ -11234,12 +11302,16 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_EMERGENCY_CALL_TO_SATELLITE_T911_HANDOVER_TIMEOUT_MILLIS_INT,
                 (int) TimeUnit.SECONDS.toMillis(30));
         sDefaults.putBoolean(KEY_SATELLITE_ESOS_SUPPORTED_BOOL, false);
+        sDefaults.putBoolean(KEY_SATELLITE_ROAMING_P2P_SMS_SUPPORTED_BOOL, false);
         sDefaults.putString(KEY_SATELLITE_NIDD_APN_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SATELLITE_ROAMING_TURN_OFF_SESSION_FOR_EMERGENCY_CALL_BOOL, true);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_CONNECT_TYPE_INT, 0);
         sDefaults.putInt(KEY_CARRIER_ROAMING_NTN_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_INT,
                 SatelliteManager.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911);
         sDefaults.putInt(KEY_CARRIER_SUPPORTED_SATELLITE_NOTIFICATION_HYSTERESIS_SEC_INT, 180);
-        sDefaults.putInt(KEY_SATELLITE_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
+        sDefaults.putInt(KEY_SATELLITE_ROAMING_SCREEN_OFF_INACTIVITY_TIMEOUT_SEC_INT, 30);
+        sDefaults.putInt(KEY_SATELLITE_ROAMING_P2P_SMS_INACTIVITY_TIMEOUT_SEC_INT, 180);
+        sDefaults.putInt(KEY_SATELLITE_ROAMING_ESOS_INACTIVITY_TIMEOUT_SEC_INT, 600);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORTS_BUSINESS_CALL_COMPOSER_BOOL, false);

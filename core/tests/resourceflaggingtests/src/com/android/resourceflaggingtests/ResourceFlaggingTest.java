@@ -19,14 +19,23 @@ package com.android.resourceflaggingtests;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.FileUtils;
 import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+
+import com.android.intenal.flaggedresources.R;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +55,14 @@ public class ResourceFlaggingTest {
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
         AssetManager assets = new AssetManager();
-        assertThat(assets.addAssetPath(extractApkAndGetPath(R.raw.resapp))).isNotEqualTo(0);
+        assets.setApkAssets(
+                new ApkAssets[]{
+                        ApkAssets.loadFromPath(
+                                extractApkAndGetPath(
+                                        com.android.resourceflaggingtests.R.raw.resapp
+                                )
+                        )
+                }, true);
 
         final DisplayMetrics dm = new DisplayMetrics();
         dm.setToDefaults();
@@ -55,54 +71,129 @@ public class ResourceFlaggingTest {
 
     @Test
     public void testFlagDisabled() {
-        assertThat(getBoolean("res1")).isTrue();
+        assertThat(mResources.getBoolean(R.bool.bool1)).isTrue();
     }
 
     @Test
     public void testFlagEnabled() {
-        assertThat(getBoolean("res2")).isTrue();
+        assertThat(mResources.getBoolean(R.bool.bool2)).isTrue();
+    }
+
+    @Test
+    public void testNegatedDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool5)).isTrue();
+    }
+
+    @Test
+    public void testNegatedEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool6)).isTrue();
     }
 
     @Test
     public void testFlagEnabledDifferentCompilationUnit() {
-        assertThat(getBoolean("res3")).isTrue();
+        assertThat(mResources.getBoolean(R.bool.bool3)).isTrue();
     }
 
     @Test
     public void testFlagDisabledStringArrayElement() {
-        assertThat(getStringArray("strarr1")).isEqualTo(new String[]{"one", "two", "three"});
+        assertThat(mResources.getStringArray(R.array.strarr1))
+                .isEqualTo(new String[]{"one", "two", "three"});
     }
 
     @Test
     public void testFlagDisabledIntArrayElement() {
-        assertThat(getIntArray("intarr1")).isEqualTo(new int[]{1, 2, 3});
+        assertThat(mResources.getIntArray(R.array.intarr1)).isEqualTo(new int[]{1, 2, 3});
     }
 
-    private boolean getBoolean(String name) {
-        int resId = mResources.getIdentifier(
-                name,
-                "bool",
-                "com.android.intenal.flaggedresources");
-        assertThat(resId).isNotEqualTo(0);
-        return mResources.getBoolean(resId);
+    @Test
+    public void testDirectoryEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool8)).isTrue();
     }
 
-    private String[] getStringArray(String name) {
-        int resId = mResources.getIdentifier(
-                name,
-                "array",
-                "com.android.intenal.flaggedresources");
-        assertThat(resId).isNotEqualTo(0);
-        return mResources.getStringArray(resId);
+    @Test
+    public void testDirectoryDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool7)).isTrue();
     }
 
-    private int[] getIntArray(String name) {
-        int resId = mResources.getIdentifier(
-                name,
-                "array",
-                "com.android.intenal.flaggedresources");
-        assertThat(resId).isNotEqualTo(0);
-        return mResources.getIntArray(resId);
+    @Test
+    public void testDirectoryNegatedEnabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool9)).isTrue();
+    }
+
+    @Test
+    public void testDirectoryNegatedDisabledFlag() {
+        assertThat(mResources.getBoolean(R.bool.bool10)).isTrue();
+    }
+
+    @Test
+    public void testLayoutWithDisabledElements() {
+        LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.layout1, null);
+        assertThat(ll).isNotNull();
+        assertThat((View) ll.findViewById(R.id.text1)).isNotNull();
+        assertThat((View) ll.findViewById(R.id.disabled_text)).isNull();
+        assertThat((View) ll.findViewById(R.id.text2)).isNotNull();
+    }
+
+    @Test
+    public void testEnabledFlagLayoutOverrides() {
+        LinearLayout ll = (LinearLayout) getLayoutInflater().inflate(R.layout.layout3, null);
+        assertThat(ll).isNotNull();
+        assertThat((View) ll.findViewById(R.id.text1)).isNotNull();
+        assertThat(((TextView) ll.findViewById(R.id.text1)).getText()).isEqualTo("foobar");
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testDisabledLayout() {
+        getLayoutInflater().inflate(R.layout.layout2, null);
+    }
+
+    @Test(expected = Resources.NotFoundException.class)
+    public void testDisabledDrawable() {
+        mResources.getDrawable(R.drawable.removedpng);
+    }
+
+    @Test
+    public void testDisabledStyleDoesntOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style1, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    @Test
+    public void testEnabledStyleDoesOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style2, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    @Test
+    public void testEnabledStyleItemDoesOverride() {
+        TypedArray ta = mResources.newTheme().obtainStyledAttributes(
+                R.style.style3, new int[] { android.R.attr.windowIsTranslucent});
+        assertThat(ta.getBoolean(0, false)).isTrue();
+    }
+
+    private LayoutInflater getLayoutInflater() {
+        ContextWrapper c = new ContextWrapper(mContext) {
+            private LayoutInflater mInflater;
+
+            @Override
+            public Resources getResources() {
+                return mResources;
+            }
+
+            @Override
+            public Object getSystemService(String name) {
+                if (LAYOUT_INFLATER_SERVICE.equals(name)) {
+                    if (mInflater == null) {
+                        mInflater = LayoutInflater.from(getBaseContext()).cloneInContext(this);
+                    }
+                    return mInflater;
+                }
+                return super.getSystemService(name);
+            }
+        };
+        return LayoutInflater.from(c);
     }
 
     private String extractApkAndGetPath(int id) throws Exception {

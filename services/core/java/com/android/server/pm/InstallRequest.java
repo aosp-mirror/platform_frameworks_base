@@ -58,6 +58,7 @@ import com.android.server.art.model.DexoptResult;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -614,6 +615,20 @@ final class InstallRequest {
         return mScanResult.mDynamicSharedLibraryInfos;
     }
 
+    public void updateAllCodePaths(List<String> paths) {
+        if (mScanResult.mSdkSharedLibraryInfo != null) {
+            mScanResult.mSdkSharedLibraryInfo.setAllCodePaths(paths);
+        }
+        if (mScanResult.mStaticSharedLibraryInfo != null) {
+            mScanResult.mStaticSharedLibraryInfo.setAllCodePaths(paths);
+        }
+        if (mScanResult.mDynamicSharedLibraryInfos != null) {
+            for (SharedLibraryInfo info : mScanResult.mDynamicSharedLibraryInfos) {
+                info.setAllCodePaths(paths);
+            }
+        }
+    }
+
     @Nullable
     public PackageSetting getScannedPackageSetting() {
         assertScanResultExists();
@@ -865,6 +880,14 @@ final class InstallRequest {
     public void setScannedPackageSettingLastUpdateTime(long lastUpdateTim) {
         assertScanResultExists();
         mScanResult.mPkgSetting.setLastUpdateTime(lastUpdateTim);
+    }
+
+    public void setScannedPackageSettingFirstInstallTime(long firstInstallTime) {
+        assertScanResultExists();
+        PackageUserStateInternal userState = mScanResult.mPkgSetting.getUserStates().get(mUserId);
+        if (userState != null && userState.getFirstInstallTimeMillis() == 0) {
+            mScanResult.mPkgSetting.setFirstInstallTime(firstInstallTime, mUserId);
+        }
     }
 
     public void setRemovedAppId(int appId) {

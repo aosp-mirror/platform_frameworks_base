@@ -16,120 +16,138 @@
 
 package com.android.systemui.gesture.domain
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.navigationbar.gestural.data.respository.GestureRepository
+import com.android.systemui.kosmos.backgroundCoroutineContext
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.navigationbar.gestural.data.gestureRepository
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
+import com.android.systemui.navigationbar.gestural.domain.TaskMatcher
+import com.android.systemui.shared.system.activityManagerWrapper
+import com.android.systemui.shared.system.taskStackChangeListeners
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class GestureInteractorTest : SysuiTestCase() {
     @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    private val kosmos = testKosmos()
 
-    val dispatcher = StandardTestDispatcher()
+    val dispatcher = kosmos.testDispatcher
+    val repository = spy(kosmos.gestureRepository)
     val testScope = TestScope(dispatcher)
 
-    @Mock private lateinit var gestureRepository: GestureRepository
+    private val underTest by lazy { createInteractor() }
 
-    private val underTest by lazy {
-        GestureInteractor(gestureRepository, testScope.backgroundScope)
+    private fun createInteractor(): GestureInteractor {
+        return GestureInteractor(
+            repository,
+            dispatcher,
+            kosmos.backgroundCoroutineContext,
+            testScope,
+            kosmos.activityManagerWrapper,
+            kosmos.taskStackChangeListeners
+        )
     }
 
-    @Before
-    fun setup() {
-        Dispatchers.setMain(dispatcher)
-        whenever(gestureRepository.gestureBlockedActivities).thenReturn(MutableStateFlow(setOf()))
-    }
+    private fun setTopActivity(componentName: ComponentName) {
+        val task = mock<ActivityManager.RunningTaskInfo>()
+        task.topActivity = componentName
+        whenever(kosmos.activityManagerWrapper.runningTask).thenReturn(task)
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
+        kosmos.taskStackChangeListeners.listenerImpl.onTaskStackChanged()
     }
 
     @Test
     fun addBlockedActivity_testCombination() =
         testScope.runTest {
             val globalComponent = mock<ComponentName>()
-            whenever(gestureRepository.gestureBlockedActivities)
-                .thenReturn(MutableStateFlow(setOf(globalComponent)))
+            repository.addGestureBlockedMatcher(TaskMatcher.TopActivityComponent(globalComponent))
+
             val localComponent = mock<ComponentName>()
-            underTest.addGestureBlockedActivity(localComponent, GestureInteractor.Scope.Local)
-            val lastSeen by collectLastValue(underTest.gestureBlockedActivities)
-            testScope.runCurrent()
-            verify(gestureRepository, never()).addGestureBlockedActivity(any())
-            assertThat(lastSeen).hasSize(2)
-            assertThat(lastSeen).containsExactly(globalComponent, localComponent)
+
+            val blocked by collectLastValue(underTest.topActivityBlocked)
+
+            underTest.addGestureBlockedMatcher(
+                TaskMatcher.TopActivityComponent(localComponent),
+                GestureInteractor.Scope.Local
+            )
+
+            assertThat(blocked).isFalse()
+
+            setTopActivity(localComponent)
+
+            assertThat(blocked).isTrue()
+        }
+
+    @Test
+    fun initialization_testEmit() =
+        testScope.runTest {
+            val globalComponent = mock<ComponentName>()
+            repository.addGestureBlockedMatcher(TaskMatcher.TopActivityComponent(globalComponent))
+            setTopActivity(globalComponent)
+
+            val interactor = createInteractor()
+
+            val blocked by collectLastValue(interactor.topActivityBlocked)
+            assertThat(blocked).isTrue()
         }
 
     @Test
     fun addBlockedActivityLocally_onlyAffectsLocalInteractor() =
         testScope.runTest {
-            val component = mock<ComponentName>()
-            underTest.addGestureBlockedActivity(component, GestureInteractor.Scope.Local)
-            val lastSeen by collectLastValue(underTest.gestureBlockedActivities)
-            testScope.runCurrent()
-            verify(gestureRepository, never()).addGestureBlockedActivity(any())
-            assertThat(lastSeen).contains(component)
+            val interactor1 = createInteractor()
+            val interactor1Blocked by collectLastValue(interactor1.topActivityBlocked)
+            val interactor2 = createInteractor()
+            val interactor2Blocked by collectLastValue(interactor2.topActivityBlocked)
+
+            val localComponent = mock<ComponentName>()
+
+            interactor1.addGestureBlockedMatcher(
+                TaskMatcher.TopActivityComponent(localComponent),
+                GestureInteractor.Scope.Local
+            )
+            setTopActivity(localComponent)
+
+            assertThat(interactor1Blocked).isTrue()
+            assertThat(interactor2Blocked).isFalse()
         }
 
     @Test
-    fun removeBlockedActivityLocally_onlyAffectsLocalInteractor() =
+    fun matchingBlockers_separatelyManaged() =
         testScope.runTest {
-            val component = mock<ComponentName>()
-            underTest.addGestureBlockedActivity(component, GestureInteractor.Scope.Local)
-            val lastSeen by collectLastValue(underTest.gestureBlockedActivities)
-            testScope.runCurrent()
-            underTest.removeGestureBlockedActivity(component, GestureInteractor.Scope.Local)
-            testScope.runCurrent()
-            verify(gestureRepository, never()).removeGestureBlockedActivity(any())
-            assertThat(lastSeen).isEmpty()
-        }
+            val interactor = createInteractor()
+            val interactorBlocked by collectLastValue(interactor.topActivityBlocked)
 
-    @Test
-    fun addBlockedActivity_invokesRepository() =
-        testScope.runTest {
-            val component = mock<ComponentName>()
-            underTest.addGestureBlockedActivity(component, GestureInteractor.Scope.Global)
-            runCurrent()
-            val captor = argumentCaptor<ComponentName>()
-            verify(gestureRepository).addGestureBlockedActivity(captor.capture())
-            assertThat(captor.firstValue).isEqualTo(component)
-        }
+            val localComponent = mock<ComponentName>()
 
-    @Test
-    fun removeBlockedActivity_invokesRepository() =
-        testScope.runTest {
-            val component = mock<ComponentName>()
-            underTest.removeGestureBlockedActivity(component, GestureInteractor.Scope.Global)
-            runCurrent()
-            val captor = argumentCaptor<ComponentName>()
-            verify(gestureRepository).removeGestureBlockedActivity(captor.capture())
-            assertThat(captor.firstValue).isEqualTo(component)
+            val matcher1 = TaskMatcher.TopActivityComponent(localComponent)
+            val matcher2 = TaskMatcher.TopActivityComponent(localComponent)
+
+            interactor.addGestureBlockedMatcher(matcher1, GestureInteractor.Scope.Local)
+            interactor.addGestureBlockedMatcher(matcher2, GestureInteractor.Scope.Local)
+            setTopActivity(localComponent)
+            assertThat(interactorBlocked).isTrue()
+
+            interactor.removeGestureBlockedMatcher(matcher1, GestureInteractor.Scope.Local)
+            assertThat(interactorBlocked).isTrue()
+
+            interactor.removeGestureBlockedMatcher(matcher2, GestureInteractor.Scope.Local)
+            assertThat(interactorBlocked).isFalse()
         }
 }

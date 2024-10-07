@@ -42,6 +42,7 @@ import com.android.wm.shell.pip2.phone.PhonePipMenuController;
 import com.android.wm.shell.pip2.phone.PipController;
 import com.android.wm.shell.pip2.phone.PipMotionHelper;
 import com.android.wm.shell.pip2.phone.PipScheduler;
+import com.android.wm.shell.pip2.phone.PipTaskListener;
 import com.android.wm.shell.pip2.phone.PipTouchHandler;
 import com.android.wm.shell.pip2.phone.PipTransition;
 import com.android.wm.shell.pip2.phone.PipTransitionState;
@@ -73,12 +74,15 @@ public abstract class Pip2Module {
             PipBoundsAlgorithm pipBoundsAlgorithm,
             Optional<PipController> pipController,
             PipTouchHandler pipTouchHandler,
+            PipTaskListener pipTaskListener,
             @NonNull PipScheduler pipScheduler,
             @NonNull PipTransitionState pipStackListenerController,
+            @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipUiStateChangeController pipUiStateChangeController) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
-                pipBoundsState, null, pipBoundsAlgorithm, pipScheduler,
-                pipStackListenerController, pipUiStateChangeController);
+                pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
+                pipScheduler, pipStackListenerController, pipDisplayLayoutState,
+                pipUiStateChangeController);
     }
 
     @WMSingleton
@@ -123,9 +127,11 @@ public abstract class Pip2Module {
     @Provides
     static PipScheduler providePipScheduler(Context context,
             PipBoundsState pipBoundsState,
+            PhonePipMenuController pipMenuController,
             @ShellMainThread ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
-        return new PipScheduler(context, pipBoundsState, mainExecutor, pipTransitionState);
+        return new PipScheduler(context, pipBoundsState, pipMenuController,
+                mainExecutor, pipTransitionState);
     }
 
     @WMSingleton
@@ -189,5 +195,18 @@ public abstract class Pip2Module {
     static PipUiStateChangeController providePipUiStateChangeController(
             PipTransitionState pipTransitionState) {
         return new PipUiStateChangeController(pipTransitionState);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipTaskListener providePipTaskListener(Context context,
+            ShellTaskOrganizer shellTaskOrganizer,
+            PipTransitionState pipTransitionState,
+            PipScheduler pipScheduler,
+            PipBoundsState pipBoundsState,
+            PipBoundsAlgorithm pipBoundsAlgorithm,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipTaskListener(context, shellTaskOrganizer, pipTransitionState,
+                pipScheduler, pipBoundsState, pipBoundsAlgorithm, mainExecutor);
     }
 }

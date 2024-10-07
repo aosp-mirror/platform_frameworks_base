@@ -52,14 +52,6 @@ flag {
 }
 
 flag {
-    name: "bugreport_mode_max_value"
-    is_exported: true
-    namespace: "telephony"
-    description: "Introduce a constant as maximum value of bugreport mode."
-    bug: "305067125"
-}
-
-flag {
     name: "adpf_prefer_power_efficiency"
     is_exported: true
     namespace: "game"
@@ -115,14 +107,6 @@ flag {
 }
 
 flag {
-    name: "adpf_fmq_eager_send"
-    namespace: "game"
-    description: "Guards the use of an eager-sending optimization in FMQ for low-latency messages"
-    is_fixed_read_only: true
-    bug: "315894228"
-}
-
-flag {
     name: "adpf_hwui_gpu"
     namespace: "game"
     description: "Guards use of the FMQ channel for ADPF"
@@ -166,6 +150,14 @@ flag {
     namespace: "backstage_power"
     description: "Guards StrictMode APIs for detecting restricted network access."
     bug: "317250784"
+}
+
+flag {
+    name: "binder_frozen_state_change_callback"
+    is_exported: true
+    namespace: "system_performance"
+    description: "Guards the frozen state change callback API."
+    bug: "361157077"
 }
 
 flag {
@@ -222,5 +214,21 @@ flag {
     namespace: "profile_experiences"
     description: "Guards a new Private Profile API in LauncherApps"
     bug: "346294653"
+    is_exported: true
+}
+
+flag {
+     name: "mainline_vcn_platform_api"
+     namespace: "vcn"
+     description: "Expose platform APIs to mainline VCN"
+     is_exported: true
+     bug: "366598445"
+}
+
+flag {
+    name: "network_time_uses_shared_memory"
+    namespace: "system_performance"
+    description: "SystemClock.currentNetworkTimeMillis() reads network time offset from shared memory"
+    bug: "361329788"
     is_exported: true
 }

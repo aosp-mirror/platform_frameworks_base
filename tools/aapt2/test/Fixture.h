@@ -73,7 +73,8 @@ class CommandTestFixture : public TestDirectoryFixture {
   // Wries the contents of the file to the specified path. The file is compiled and the flattened
   // file is written to the out directory.
   bool CompileFile(const std::string& path, const std::string& contents,
-                   android::StringPiece flat_out_dir, android::IDiagnostics* diag);
+                   android::StringPiece flat_out_dir, android::IDiagnostics* diag,
+                   const std::vector<android::StringPiece>& additional_args = {});
 
   // Executes the link command with the specified arguments.
   bool Link(const std::vector<std::string>& args, android::IDiagnostics* diag);

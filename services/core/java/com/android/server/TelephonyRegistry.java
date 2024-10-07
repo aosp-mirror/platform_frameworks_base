@@ -1732,41 +1732,47 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 // In the future, we can remove this logic for every notification here and add a
                 // callback so listeners know when their PhoneStateListener's subId becomes invalid,
                 // but for now we use the simplest fix.
-                if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
+                if (validatePhoneId(phoneId)) {
                     mServiceState[phoneId] = state;
 
-                    for (Record r : mRecords) {
-                        if (VDBG) {
-                            log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
-                                    + " phoneId=" + phoneId + " state=" + state);
-                        }
-                        if (r.matchTelephonyCallbackEvent(
-                                TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
-                                && idMatch(r, subId, phoneId)) {
+                    if (SubscriptionManager.isValidSubscriptionId(subId)) {
 
-                            try {
-                                ServiceState stateToSend;
-                                if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                    stateToSend = new ServiceState(state);
-                                } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                    stateToSend = state.createLocationInfoSanitizedCopy(false);
-                                } else {
-                                    stateToSend = state.createLocationInfoSanitizedCopy(true);
+                        for (Record r : mRecords) {
+                            if (VDBG) {
+                                log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
+                                        + " phoneId=" + phoneId + " state=" + state);
+                            }
+                            if (r.matchTelephonyCallbackEvent(
+                                    TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
+                                    && idMatch(r, subId, phoneId)) {
+
+                                try {
+                                    ServiceState stateToSend;
+                                    if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                        stateToSend = new ServiceState(state);
+                                    } else if(checkCoarseLocationAccess(
+                                            r, Build.VERSION_CODES.Q)) {
+                                        stateToSend = state.createLocationInfoSanitizedCopy(false);
+                                    } else {
+                                        stateToSend = state.createLocationInfoSanitizedCopy(true);
+                                    }
+                                    if (DBG) {
+                                        log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
+                                                + " subId=" + subId + " phoneId=" + phoneId
+                                                + " state=" + stateToSend);
+                                    }
+                                    r.callback.onServiceStateChanged(stateToSend);
+                                } catch (RemoteException ex) {
+                                    mRemoveList.add(r.binder);
                                 }
-                                if (DBG) {
-                                    log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
-                                            + " subId=" + subId + " phoneId=" + phoneId
-                                            + " state=" + stateToSend);
-                                }
-                                r.callback.onServiceStateChanged(stateToSend);
-                            } catch (RemoteException ex) {
-                                mRemoveList.add(r.binder);
                             }
                         }
                     }
+                    else {
+                        log("notifyServiceStateForSubscriber: INVALID subId=" +subId);
+                    }
                 } else {
-                    log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
-                            + " or subId=" + subId);
+                    log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId);
                 }
                 handleRemoveListLocked();
             }

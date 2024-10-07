@@ -549,7 +549,7 @@ public class OverlayPresentationTest {
         assertThat(taskContainer.getTaskFragmentContainers()).containsExactly(overlayContainer);
 
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(Configuration.EMPTY,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                DEFAULT_DISPLAY, TASK_ID, true /* visible */, false /* hasDirectActivity */,
                 null /* decorSurface */));
 
         mSplitController.updateOverlayContainer(mTransaction, overlayContainer);
@@ -618,7 +618,8 @@ public class OverlayPresentationTest {
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
-                true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
+                TASK_ID, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */);
         parentInfo.getConfiguration().windowConfiguration.getBounds().offset(10, 10);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
@@ -642,7 +643,8 @@ public class OverlayPresentationTest {
         final TaskContainer.TaskProperties taskProperties = taskContainer.getTaskProperties();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(
                 new Configuration(taskProperties.getConfiguration()), taskProperties.getDisplayId(),
-                true /* visible */, false /* hasDirectActivity */, null /* decorSurface */);
+                TASK_ID, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */);
 
         mSplitController.onTaskFragmentParentInfoChanged(mTransaction, TASK_ID, parentInfo);
 

@@ -427,7 +427,8 @@ public class DisplayWhiteBalanceController implements
      *      The writer used to dump the state.
      */
     public void dump(PrintWriter writer) {
-        writer.println("DisplayWhiteBalanceController");
+        writer.println("DisplayWhiteBalanceController:");
+        writer.println("------------------------------");
         writer.println("  mLoggingEnabled=" + mLoggingEnabled);
         writer.println("  mEnabled=" + mEnabled);
         writer.println("  mStrongModeEnabled=" + mStrongModeEnabled);

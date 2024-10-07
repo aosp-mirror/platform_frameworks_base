@@ -397,9 +397,9 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_DOZE,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
-        // 1st AUTO_BRIGHTNESS_MODE_DEFAULT
-        verify(mAutomaticBrightnessController).switchMode(
-                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
+        // 3rd AUTO_BRIGHTNESS_MODE_DOZE
+        verify(mAutomaticBrightnessController, times(3)).switchMode(
+                AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DOZE,
                 /* sendUpdate= */ false);
 
         // Validate interaction when automaticBrightnessController is in non-idle mode, display
@@ -407,8 +407,8 @@ public class AutomaticBrightnessStrategyTest {
         mAutomaticBrightnessStrategy.setAutoBrightnessState(Display.STATE_ON,
                 allowAutoBrightnessWhileDozing, brightnessReason, policy,
                 useNormalBrightnessForDoze, lastUserSetBrightness, userSetBrightnessChanged);
-        // 2nd AUTO_BRIGHTNESS_MODE_DEFAULT
-        verify(mAutomaticBrightnessController, times(2)).switchMode(
+        // AUTO_BRIGHTNESS_MODE_DEFAULT
+        verify(mAutomaticBrightnessController).switchMode(
                 AutomaticBrightnessController.AUTO_BRIGHTNESS_MODE_DEFAULT,
                 /* sendUpdate= */ false);
     }

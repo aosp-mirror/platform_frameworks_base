@@ -797,7 +797,7 @@
     <string name="permlab_accessNotifications" msgid="7130360248191984741">"သတိပေးချက်များအား အသုံးပြုခွင့်"</string>
     <string name="permdesc_accessNotifications" msgid="761730149268789668">"အပလီကေးရှင်းကို အကြောင်းကြားချက်များအား ထုတ်လုပ်ရန်၊ လေ့လာရန်၊ ဖျက်ရန် ခွင့်ပြုခြင်း။ တခြား အပလီကေးရှင်းများမှ သတိပေးချက်များလည်း ပါဝင်ပါသည်"</string>
     <string name="permlab_bindNotificationListenerService" msgid="5848096702733262458">"သတိပေးချက် နားထောင်ခြင်း ဆားဗစ် နှင့် ပူးပေါင်းခြင်း"</string>
-    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးခြင်း။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ"</string>
+    <string name="permdesc_bindNotificationListenerService" msgid="4970553694467137126">"ဖုန်းကိုင်ထားသူနှင့် အကြောင်းကြားချက် နားစွင့်သော ဆားဗစ်မှ ထိပ်ပိုင်းအင်တာဖေ့စ် ကို ပူးပေါင်းခွင့်ပေးသည်။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
     <string name="permlab_bindConditionProviderService" msgid="5245421224814878483">"အခြေအနေ စီမံပေးရေး ဝန်ဆောင်မှု တစ်ခုဆီသို့ ချိတ်တွဲခြင်း"</string>
     <string name="permdesc_bindConditionProviderService" msgid="6106018791256120258">"စွဲကိုင်ထားသူအား အခြေအနေကို စီမံပေးသူ၏ ထိပ်သီး အဆင့် အင်တာဖေ့စ်သို့ ချိတ်တွဲခွင့်ကို ပေးသည်။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်နိုင်ပါ။"</string>
     <string name="permlab_bindDreamService" msgid="4776175992848982706">"အိပ်မက် ဝန်ဆောင်မှုသို့ ပေါင်းစည်းမည်"</string>
@@ -1195,6 +1195,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"နောက်သို့"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"လက်ကွက်ပြောင်းရန်"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"လက်ကွက်ရွေးစနစ် ဖွင့်ရန်"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"ဆက်တင်များ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
@@ -1745,7 +1746,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"အက်ပ်တစ်ခုသည် ခွင့်ပြုချက်တောင်းဆိုမှုကို ပိတ်နေသဖြင့် သင့်တုံ့ပြန်မှုကို စိစစ်၍မရပါ။"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"အများသုံးနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"အသံခလုတ် ဖြတ်လမ်းလင့်ခ်ဖြင့် အသုံးပြုရန် ဝန်ဆောင်မှုများကို ရွေးပါ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"အသံထိန်းခလုတ်ဖြတ်လမ်းဖြင့် အသုံးပြုရန်အတွက် တူးလ်များကိုရွေးပါ"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ကို ပိတ်ထားသည်"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ပြီးပြီ"</string>
@@ -2009,6 +2010,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"ဖန်သားပြင်လော့ခ် သတ်မှတ်ပါ"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"ဖန်သားပြင်လော့ခ် သတ်မှတ်ရန်"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"သင့်သီးသန့်နေရာသုံးရန် ဤစက်၌ ဖန်သားပြင်လော့ခ် သတ်မှတ်ပါ"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"သီးသန့်နေရာကို ဖျက်ရန်အတွက် ဤစက်တွင် ဖန်သားပြင်လော့ခ် သတ်မှတ်ပါ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> မရနိုင်ပါ"</string>

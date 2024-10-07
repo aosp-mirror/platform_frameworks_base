@@ -48,7 +48,7 @@ constructor(
     @Application scope: CoroutineScope,
     val repository: KeyguardRepository,
     val biometricSettingsRepository: BiometricSettingsRepository,
-    transitionInteractor: KeyguardTransitionInteractor,
+    keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor,
     internalTransitionInteractor: InternalKeyguardTransitionInteractor,
 ) {
 
@@ -76,7 +76,7 @@ constructor(
             .filter { enabled -> !enabled }
             .sampleCombine(
                 internalTransitionInteractor.currentTransitionInfoInternal,
-                biometricSettingsRepository.isCurrentUserInLockdown
+                biometricSettingsRepository.isCurrentUserInLockdown,
             )
             .map { (_, transitionInfo, inLockdown) ->
                 // ...we hide the keyguard, if it's showing and we're not in lockdown. In that case,
@@ -91,10 +91,18 @@ constructor(
          */
         scope.launch {
             if (!SceneContainerFlag.isEnabled) {
-                showKeyguardWhenReenabled
-                    .filter { shouldDismiss -> shouldDismiss }
-                    .collect {
-                        transitionInteractor.startDismissKeyguardTransition("keyguard disabled")
+                repository.isKeyguardEnabled
+                    .filter { enabled -> !enabled }
+                    .sampleCombine(
+                        biometricSettingsRepository.isCurrentUserInLockdown,
+                        internalTransitionInteractor.currentTransitionInfoInternal,
+                    )
+                    .collect { (_, inLockdown, currentTransitionInfo) ->
+                        if (currentTransitionInfo.to != KeyguardState.GONE && !inLockdown) {
+                            keyguardDismissTransitionInteractor.startDismissKeyguardTransition(
+                                "keyguard disabled"
+                            )
+                        }
                     }
             }
         }

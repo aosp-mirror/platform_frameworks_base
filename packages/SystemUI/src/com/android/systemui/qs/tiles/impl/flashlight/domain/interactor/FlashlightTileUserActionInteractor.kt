@@ -42,6 +42,7 @@ constructor(
                         flashlightController.setFlashlight(!input.data.isEnabled)
                     }
                 }
+                is QSTileUserAction.ToggleClick -> {}
                 else -> {}
             }
         }

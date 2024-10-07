@@ -62,7 +62,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.pip.PhonePipKeepClearAlgorithm;
 import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
@@ -77,15 +76,18 @@ import com.android.wm.shell.compatui.CompatUIConfiguration;
 import com.android.wm.shell.compatui.CompatUIController;
 import com.android.wm.shell.compatui.CompatUIShellCommandHandler;
 import com.android.wm.shell.compatui.CompatUIStatusManager;
+import com.android.wm.shell.compatui.api.CompatUIComponentFactory;
 import com.android.wm.shell.compatui.api.CompatUIComponentIdGenerator;
 import com.android.wm.shell.compatui.api.CompatUIHandler;
 import com.android.wm.shell.compatui.api.CompatUIRepository;
 import com.android.wm.shell.compatui.api.CompatUIState;
+import com.android.wm.shell.compatui.components.RestartButtonSpecKt;
+import com.android.wm.shell.compatui.impl.DefaultCompatUIComponentFactory;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIRepository;
 import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
@@ -102,6 +104,7 @@ import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.recents.TaskStackTransitionObserver;
 import com.android.wm.shell.shared.ShellTransitions;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.shared.annotations.ShellAnimationThread;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
@@ -120,6 +123,7 @@ import com.android.wm.shell.sysui.ShellInterface;
 import com.android.wm.shell.taskview.TaskViewFactory;
 import com.android.wm.shell.taskview.TaskViewFactoryController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.MixedTransitionHandler;
 import com.android.wm.shell.transition.Transitions;
@@ -134,6 +138,7 @@ import dagger.Module;
 import dagger.Provides;
 
 import java.util.Optional;
+import java.util.function.IntPredicate;
 
 /**
  * Provides basic dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -144,7 +149,11 @@ import java.util.Optional;
  * dependencies that are device/form factor SystemUI implementation specific should go into their
  * respective modules (ie. {@link WMShellModule} for handheld, {@link TvWMShellModule} for tv, etc.)
  */
-@Module(includes = WMShellConcurrencyModule.class)
+@Module(
+        includes = {
+                WMShellConcurrencyModule.class,
+                WMShellCoroutinesModule.class
+        })
 public abstract class WMShellBaseModule {
 
     //
@@ -258,16 +267,23 @@ public abstract class WMShellBaseModule {
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
             Lazy<AccessibilityManager> accessibilityManager,
             CompatUIRepository compatUIRepository,
+            Optional<DesktopRepository> desktopRepository,
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
+            @NonNull CompatUIComponentFactory compatUIComponentFactory,
             CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
         if (Flags.appCompatUiFramework()) {
-            return Optional.of(new DefaultCompatUIHandler(compatUIRepository, compatUIState,
-                    componentIdGenerator));
+            return Optional.of(
+                    new DefaultCompatUIHandler(compatUIRepository, compatUIState,
+                            componentIdGenerator, compatUIComponentFactory, mainExecutor));
         }
+        final IntPredicate inDesktopModePredicate =
+                desktopRepository.<IntPredicate>map(modeTaskRepository -> displayId ->
+                        modeTaskRepository.getVisibleTaskCount(displayId) > 0)
+                            .orElseGet(() -> displayId -> false);
         return Optional.of(
                 new CompatUIController(
                         context,
@@ -283,7 +299,8 @@ public abstract class WMShellBaseModule {
                         compatUIConfiguration.get(),
                         compatUIShellCommandHandler.get(),
                         accessibilityManager.get(),
-                        compatUIStatusManager));
+                        compatUIStatusManager,
+                        inDesktopModePredicate));
     }
 
     @WMSingleton
@@ -308,6 +325,15 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
+    static CompatUIComponentFactory provideCompatUIComponentFactory(
+            @NonNull Context context,
+            @NonNull SyncTransactionQueue syncQueue,
+            @NonNull DisplayController displayController) {
+        return new DefaultCompatUIComponentFactory(context, syncQueue, displayController);
+    }
+
+    @WMSingleton
+    @Provides
     static CompatUIComponentIdGenerator provideCompatUIComponentIdGenerator() {
         return new DefaultComponentIdGenerator();
     }
@@ -315,7 +341,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static CompatUIRepository provideCompatUIRepository() {
-        return new DefaultCompatUIRepository();
+        // TODO(b/360288344) Integrate Dagger Multibinding
+        final CompatUIRepository repository = new DefaultCompatUIRepository();
+        repository.addSpec(RestartButtonSpecKt.getRestartButtonSpec());
+        return repository;
     }
 
     @WMSingleton
@@ -416,7 +445,9 @@ public abstract class WMShellBaseModule {
             BackAnimationBackground backAnimationBackground,
             Optional<ShellBackAnimationRegistry> shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
-            Transitions transitions) {
+            Transitions transitions,
+            @ShellMainThread Handler handler
+    ) {
         if (BackAnimationController.IS_ENABLED) {
             return shellBackAnimationRegistry.map(
                     (animations) ->
@@ -429,7 +460,8 @@ public abstract class WMShellBaseModule {
                                     backAnimationBackground,
                                     animations,
                                     shellCommandHandler,
-                                    transitions));
+                                    transitions,
+                                    handler));
         }
         return Optional.empty();
     }
@@ -675,14 +707,14 @@ public abstract class WMShellBaseModule {
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellController,
                         shellCommandHandler, taskStackListener, activityTaskManager,
-                        desktopModeTaskRepository, taskStackTransitionObserver, mainExecutor));
+                        desktopRepository, taskStackTransitionObserver, mainExecutor));
     }
 
     @BindsOptionalOf
@@ -711,14 +743,15 @@ public abstract class WMShellBaseModule {
             @ShellMainThread Handler mainHandler,
             @ShellAnimationThread ShellExecutor animExecutor,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            HomeTransitionObserver homeTransitionObserver) {
+            HomeTransitionObserver homeTransitionObserver,
+            FocusTransitionObserver focusTransitionObserver) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellCommandHandler, shellController, organizer,
                 pool, displayController, mainExecutor, mainHandler, animExecutor,
-                rootTaskDisplayAreaOrganizer, homeTransitionObserver);
+                rootTaskDisplayAreaOrganizer, homeTransitionObserver, focusTransitionObserver);
     }
 
     @WMSingleton
@@ -726,6 +759,12 @@ public abstract class WMShellBaseModule {
     static HomeTransitionObserver provideHomeTransitionObserver(Context context,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new HomeTransitionObserver(context, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static FocusTransitionObserver provideFocusTransitionObserver() {
+        return new FocusTransitionObserver();
     }
 
     @WMSingleton
@@ -964,16 +1003,16 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     @DynamicOverride
-    abstract DesktopModeTaskRepository optionalDesktopModeTaskRepository();
+    abstract DesktopRepository optionalDesktopRepository();
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeTaskRepository> provideDesktopTaskRepository(Context context,
-            @DynamicOverride Optional<Lazy<DesktopModeTaskRepository>> desktopModeTaskRepository) {
+    static Optional<DesktopRepository> provideDesktopRepository(Context context,
+            @DynamicOverride Optional<Lazy<DesktopRepository>> desktopRepository) {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        return desktopModeTaskRepository.flatMap((lazy) -> {
+        return desktopRepository.flatMap((lazy) -> {
             if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }
@@ -988,11 +1027,10 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static TaskStackTransitionObserver provideTaskStackTransitionObserver(
-            Context context,
             Lazy<Transitions> transitions,
             ShellInit shellInit
     ) {
-        return new TaskStackTransitionObserver(context, transitions, shellInit);
+        return new TaskStackTransitionObserver(transitions, shellInit);
     }
 
     //

@@ -313,12 +313,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         }
 
         /**
-         * Hint to window manager that the user has started a navigation action that should
-         * abort animations that have no timeout, in case they got stuck.
-         */
-        void triggerAnimationFailsafe();
-
-        /**
          * The keyguard showing state has changed
          */
         void onKeyguardShowingAndNotOccludedChanged();
@@ -368,6 +362,17 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Invoked when a screenshot is taken of the given display to notify registered listeners.
          */
         List<ComponentName> notifyScreenshotListeners(int displayId);
+
+        /**
+         * Returns whether the given UID is the owner of a virtual device, which the given display
+         * belongs to.
+         */
+        boolean isCallerVirtualDeviceOwner(int displayId, int callingUid);
+
+        /**
+         * Returns whether the display with the given ID is trusted.
+         */
+        boolean isDisplayTrusted(int displayId);
     }
 
     /**
@@ -427,6 +432,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param packageName package name
      * @param outAppOp First element will be filled with the app op corresponding to
      *                 this window, or OP_NONE.
+     * @param displayId The display on which this window is being added.
      *
      * @return {@link WindowManagerGlobal#ADD_OKAY} if the add can proceed;
      *      else an error code, usually
@@ -435,7 +441,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @see WindowManager.LayoutParams#PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY
      */
     int checkAddPermission(int type, boolean isRoundedCornerOverlay, String packageName,
-            int[] outAppOp);
+            int[] outAppOp, int displayId);
 
     /**
      * After the window manager has computed the current configuration based
@@ -753,11 +759,9 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param focusedToken Client window token that currently has focus. This is where the key
      *            event will normally go.
      * @param event The key event.
-     * @param policyFlags The policy flags associated with the key.
-     * @return Returns an alternate key event to redispatch as a fallback, or null to give up.
-     * The caller is responsible for recycling the key event.
+     * @return true if the unhandled key is intercepted by the policy.
      */
-    KeyEvent dispatchUnhandledKey(IBinder focusedToken, KeyEvent event, int policyFlags);
+    boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken);
 
     /**
      * Called when the top focused display is changed.

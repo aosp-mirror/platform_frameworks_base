@@ -38,6 +38,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.util.PathParser;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
@@ -46,6 +47,7 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
+import com.android.wm.shell.shared.handles.RegionSamplingHelper;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
@@ -85,6 +87,7 @@ public class BubbleViewInfoTaskLegacy extends
     private boolean mSkipInflation;
     private Callback mCallback;
     private Executor mMainExecutor;
+    private Executor mBackgroundExecutor;
 
     /**
      * Creates a task to load information for the provided {@link Bubble}. Once all info
@@ -100,7 +103,8 @@ public class BubbleViewInfoTaskLegacy extends
             BubbleIconFactory factory,
             boolean skipInflation,
             Callback c,
-            Executor mainExecutor) {
+            Executor mainExecutor,
+            Executor backgroundExecutor) {
         mBubble = b;
         mContext = new WeakReference<>(context);
         mExpandedViewManager = new WeakReference<>(expandedViewManager);
@@ -112,6 +116,7 @@ public class BubbleViewInfoTaskLegacy extends
         mSkipInflation = skipInflation;
         mCallback = c;
         mMainExecutor = mainExecutor;
+        mBackgroundExecutor = backgroundExecutor;
     }
 
     @Override
@@ -123,7 +128,7 @@ public class BubbleViewInfoTaskLegacy extends
         if (mLayerView.get() != null) {
             return BubbleViewInfo.populateForBubbleBar(mContext.get(), mExpandedViewManager.get(),
                     mTaskViewFactory.get(), mPositioner.get(), mLayerView.get(), mIconFactory,
-                    mBubble, mSkipInflation);
+                    mBubble, mSkipInflation, mMainExecutor, mBackgroundExecutor);
         } else {
             return BubbleViewInfo.populate(mContext.get(), mExpandedViewManager.get(),
                     mTaskViewFactory.get(), mPositioner.get(), mStackView.get(), mIconFactory,
@@ -188,7 +193,9 @@ public class BubbleViewInfoTaskLegacy extends
                 BubbleBarLayerView layerView,
                 BubbleIconFactory iconFactory,
                 Bubble b,
-                boolean skipInflation) {
+                boolean skipInflation,
+                Executor mainExecutor,
+                Executor backgroundExecutor) {
             BubbleViewInfo info = new BubbleViewInfo();
 
             if (!skipInflation && !b.isInflated()) {
@@ -197,7 +204,16 @@ public class BubbleViewInfoTaskLegacy extends
                 info.bubbleBarExpandedView = (BubbleBarExpandedView) inflater.inflate(
                         R.layout.bubble_bar_expanded_view, layerView, false /* attachToRoot */);
                 info.bubbleBarExpandedView.initialize(
-                        expandedViewManager, positioner, false /* isOverflow */, bubbleTaskView);
+                        expandedViewManager, positioner, false /* isOverflow */, bubbleTaskView,
+                        mainExecutor, backgroundExecutor, new RegionSamplingProvider() {
+                            @Override
+                            public RegionSamplingHelper createHelper(View sampledView,
+                                    RegionSamplingHelper.SamplingCallback callback,
+                                    Executor backgroundExecutor, Executor mainExecutor) {
+                                return RegionSamplingProvider.super.createHelper(sampledView,
+                                        callback, backgroundExecutor, mainExecutor);
+                            }
+                        });
             }
 
             if (!populateCommonInfo(info, c, b, iconFactory)) {

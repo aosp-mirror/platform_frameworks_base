@@ -21,6 +21,33 @@ flag {
 }
 
 flag {
+  name: "modes_ui_icons"
+  namespace: "systemui"
+  description: "Shows current Priority Mode icon in lockscreen, status bar, and QS; dependent on flags modes_api and modes_ui"
+  bug: "360399800"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "modes_ui_empty_shade"
+  namespace: "systemui"
+  description: "Shows mode that is currently blocking notifications in the empty shade; dependent on flags modes_api and modes_ui"
+  bug: "366003631"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "modes_ui_test"
+  namespace: "systemui"
+  description: "Guards new CTS tests for Modes; dependent on flags modes_api and modes_ui"
+  bug: "360862012"
+}
+
+flag {
   name: "api_tvextender"
   is_exported: true
   namespace: "systemui"
@@ -88,6 +115,13 @@ flag {
 }
 
 flag {
+  name: "notification_no_custom_view_conversations"
+  namespace: "systemui"
+  description: "Ensures that conversations are not allowed to use Custom Views."
+  bug: "368817201"
+}
+
+flag {
   name: "keyguard_private_notifications"
   namespace: "systemui"
   description: "Fixes the behavior of KeyguardManager#setPrivateNotificationsAllowed()"
@@ -108,6 +142,16 @@ flag {
   namespace: "systemui"
   description: "This flag enables the API to allow setting VibrationEffect for NotificationChannels"
   bug: "241732519"
+}
+
+flag {
+  name: "notif_channel_crop_vibration_effects"
+  namespace: "systemui"
+  description: "Limits the size of vibration effects that can be stored in a NotificationChannel"
+  bug: "345881518"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -208,5 +252,13 @@ flag {
   is_exported: true
   namespace: "systemui"
   description: "Guards new android.app.richongoingnotification api"
+  bug: "337261753"
+}
+
+flag {
+  name: "ui_rich_ongoing"
+  is_exported: true
+  namespace: "systemui"
+  description: "Guards new android.app.richongoingnotification promotion and new uis"
   bug: "337261753"
 }

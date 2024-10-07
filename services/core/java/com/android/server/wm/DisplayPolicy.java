@@ -71,8 +71,8 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_RIGHT;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SCREEN_ON;
 import static com.android.server.policy.PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
@@ -804,6 +804,14 @@ public class DisplayPolicy {
                     mAwake /* waiting */);
             if (!awake) {
                 onDisplaySwitchFinished();
+                // In case PhoneWindowManager's startedGoingToSleep is called after screenTurnedOff
+                // (the source caller is in order but the methods run on different threads) and
+                // updateScreenOffSleepToken was skipped by mIsGoingToSleepDefaultDisplay. Then
+                // acquire sleep token if screen is off.
+                if (!mScreenOnEarly && !mScreenOnFully && !mDisplayContent.isSleeping()) {
+                    Slog.w(TAG, "Late acquire sleep token for " + mDisplayContent);
+                    mService.mRoot.mDisplayOffTokenAcquirer.acquire(mDisplayContent.mDisplayId);
+                }
             }
         }
     }
@@ -851,6 +859,7 @@ public class DisplayPolicy {
     public void screenTurningOn(ScreenOnListener screenOnListener) {
         WindowProcessController visibleDozeUiProcess = null;
         synchronized (mLock) {
+            mService.mRoot.mDisplayOffTokenAcquirer.release(mDisplayContent.mDisplayId);
             mScreenOnEarly = true;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
@@ -875,8 +884,12 @@ public class DisplayPolicy {
         onDisplaySwitchFinished();
     }
 
-    public void screenTurnedOff() {
+    /** It is called after {@link #screenTurningOn}. This runs on PowerManager's thread. */
+    public void screenTurnedOff(boolean acquireSleepToken) {
         synchronized (mLock) {
+            if (acquireSleepToken) {
+                mService.mRoot.mDisplayOffTokenAcquirer.acquire(mDisplayContent.mDisplayId);
+            }
             mScreenOnEarly = false;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
@@ -1036,7 +1049,7 @@ public class DisplayPolicy {
     /**
      * Check if a window can be added to the system.
      *
-     * Currently enforces that two window types are singletons per display:
+     * Currently enforces that these window types are singletons per display:
      * <ul>
      * <li>{@link WindowManager.LayoutParams#TYPE_STATUS_BAR}</li>
      * <li>{@link WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}</li>
@@ -1058,41 +1071,40 @@ public class DisplayPolicy {
             ActivityTaskManagerService.enforceTaskPermission("DisplayPolicy");
         }
 
+        final String systemUiPermission =
+                mService.isCallerVirtualDeviceOwner(mDisplayContent.getDisplayId(), callingUid)
+                        && mDisplayContent.isTrusted()
+                        // Virtual device owners can add system windows on their trusted displays.
+                        ? android.Manifest.permission.CREATE_VIRTUAL_DEVICE
+                        : android.Manifest.permission.STATUS_BAR_SERVICE;
+
         switch (attrs.type) {
             case TYPE_STATUS_BAR:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
                 if (mStatusBar != null && mStatusBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NOTIFICATION_SHADE:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
-                if (mNotificationShade != null) {
-                    if (mNotificationShade.isAlive()) {
-                        return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
-                    }
+                if (mNotificationShade != null && mNotificationShade.isAlive()) {
+                    return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR:
-                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
-                        callingPid, callingUid, "DisplayPolicy");
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
+                        "DisplayPolicy");
                 if (mNavigationBar != null && mNavigationBar.isAlive()) {
                     return WindowManagerGlobal.ADD_MULTIPLE_SINGLETON;
                 }
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
-                mContext.enforcePermission(android.Manifest.permission.STATUS_BAR_SERVICE,
-                        callingPid, callingUid, "DisplayPolicy");
-                break;
             case TYPE_STATUS_BAR_ADDITIONAL:
             case TYPE_STATUS_BAR_SUB_PANEL:
             case TYPE_VOICE_INTERACTION_STARTING:
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
                 break;
             case TYPE_STATUS_BAR_PANEL:
@@ -1102,8 +1114,7 @@ public class DisplayPolicy {
         if (attrs.providedInsets != null) {
             // Recents component is allowed to add inset types.
             if (!mService.mAtmService.isCallerRecents(callingUid)) {
-                mContext.enforcePermission(
-                        android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                mContext.enforcePermission(systemUiPermission, callingPid, callingUid,
                         "DisplayPolicy");
             }
         }
@@ -2121,7 +2132,8 @@ public class DisplayPolicy {
         final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
         final InsetsState newInsetsState = newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
-        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)
+        final boolean sameConfigFrame = newInfo.mConfigFrame.equals(currentInfo.mConfigFrame);
+        if (sameConfigFrame
                 && newInfo.mOverrideConfigFrame.equals(currentInfo.mOverrideConfigFrame)) {
             // Even if the config frame is not changed in current rotation, it may change the
             // insets in other rotations if the frame of insets source is changed.
@@ -2145,7 +2157,12 @@ public class DisplayPolicy {
         }
         mDecorInsets.invalidate();
         mDecorInsets.mInfoForRotation[rotation].set(newInfo);
-        return true;
+        if (!mService.mDisplayEnabled) {
+            // There could be other pending changes during booting. It might be better to let the
+            // clients receive the new states earlier.
+            return true;
+        }
+        return !sameConfigFrame;
     }
 
     DecorInsets.Info getDecorInsetsInfo(int rotation, int w, int h) {
@@ -2507,7 +2524,7 @@ public class DisplayPolicy {
         if (getStatusBar() != null) {
             final StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
             if (statusBar != null) {
-                statusBar.setTopAppHidesStatusBar(topAppHidesStatusBar);
+                statusBar.setTopAppHidesStatusBar(getDisplayId(), topAppHidesStatusBar);
             }
         }
 
@@ -2534,9 +2551,9 @@ public class DisplayPolicy {
                         mService.mPolicy.isUserSetupComplete(),
                         isNavBarEmpty(disableFlags));
             } else {
-                // TODO (b/277290737): Move this to the client side, instead of using a proxy.
-                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(rootDisplayAreaId,
-                        isImmersiveMode));
+                // TODO(b/277290737): Move this to the client side, instead of using a proxy.
+                callStatusBarSafely(statusBar -> statusBar.immersiveModeChanged(getDisplayId(),
+                        rootDisplayAreaId, isImmersiveMode));
             }
         }
 

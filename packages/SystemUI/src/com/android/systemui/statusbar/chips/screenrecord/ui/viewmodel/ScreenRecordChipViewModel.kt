@@ -80,7 +80,7 @@ constructor(
                     is ScreenRecordChipModel.Recording -> {
                         OngoingActivityChipModel.Shown.Timer(
                             icon =
-                                OngoingActivityChipModel.ChipIcon.Basic(
+                                OngoingActivityChipModel.ChipIcon.SingleColorIcon(
                                     Icon.Resource(
                                         ICON,
                                         ContentDescription.Resource(

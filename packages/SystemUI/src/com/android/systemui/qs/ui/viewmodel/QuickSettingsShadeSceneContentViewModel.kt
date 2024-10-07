@@ -14,28 +14,22 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.qs.ui.viewmodel
 
-import com.android.systemui.lifecycle.SysUiViewModel
-import com.android.systemui.shade.ui.viewmodel.OverlayShadeViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /**
  * Models UI state used to render the content of the quick settings shade scene.
  *
- * Different from [QuickSettingsShadeSceneActionsViewModel], which only models user actions that can
+ * Different from [QuickSettingsShadeUserActionsViewModel], which only models user actions that can
  * be performed to navigate to other scenes.
  */
 class QuickSettingsShadeSceneContentViewModel
 @AssistedInject
 constructor(
-    val overlayShadeViewModelFactory: OverlayShadeViewModel.Factory,
     val quickSettingsContainerViewModel: QuickSettingsContainerViewModel,
-) : SysUiViewModel() {
+) {
 
     @AssistedFactory
     interface Factory {

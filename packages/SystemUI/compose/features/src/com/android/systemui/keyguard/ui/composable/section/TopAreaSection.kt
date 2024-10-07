@@ -93,7 +93,7 @@ constructor(
         // Update state whenever currentSceneKey has changed.
         LaunchedEffect(state, currentScene) {
             if (currentScene != state.transitionState.currentScene) {
-                state.setTargetScene(currentScene, coroutineScope = this)
+                state.setTargetScene(currentScene, animationScope = this)
             }
         }
 

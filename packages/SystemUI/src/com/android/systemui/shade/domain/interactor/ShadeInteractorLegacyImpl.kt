@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.app.tracing.FlowTracing.traceAsCounter
+import com.android.compose.animation.scene.TransitionKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -61,7 +62,7 @@ constructor(
                 keyguardRepository.statusBarState,
                 repository.legacyShadeExpansion,
                 repository.qsExpansion,
-                sharedNotificationContainerInteractor.isSplitShadeEnabled
+                sharedNotificationContainerInteractor.isSplitShadeEnabled,
             ) {
                 lockscreenShadeExpansion,
                 statusBarState,
@@ -97,19 +98,53 @@ constructor(
         repository.legacyExpandedOrAwaitingInputTransfer.stateIn(
             scope,
             SharingStarted.Eagerly,
-            false
+            false,
         )
 
     override val isUserInteractingWithShade: Flow<Boolean> =
         combine(
             userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion),
-            repository.legacyLockscreenShadeTracking
+            repository.legacyLockscreenShadeTracking,
         ) { legacyShadeTracking, legacyLockscreenShadeTracking ->
             legacyShadeTracking || legacyLockscreenShadeTracking
         }
 
     override val isUserInteractingWithQs: Flow<Boolean> =
         userInteractingFlow(repository.legacyQsTracking, repository.qsExpansion)
+
+    override fun expandNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "expandNotificationShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun expandQuickSettingsShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "expandQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseNotificationsShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "collapseNotificationShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseQuickSettingsShade(
+        loggingReason: String,
+        transitionKey: TransitionKey?,
+        bypassNotificationsShade: Boolean,
+    ) {
+        throw UnsupportedOperationException(
+            "collapseQuickSettingsShade() is not supported in legacy shade"
+        )
+    }
+
+    override fun collapseEitherShade(loggingReason: String, transitionKey: TransitionKey?) {
+        throw UnsupportedOperationException(
+            "collapseEitherShade() is not supported in legacy shade"
+        )
+    }
 
     /**
      * Return a flow for whether a user is interacting with an expandable shade component using
@@ -118,7 +153,7 @@ constructor(
      */
     private fun userInteractingFlow(
         tracking: Flow<Boolean>,
-        expansion: StateFlow<Float>
+        expansion: StateFlow<Float>,
     ): Flow<Boolean> {
         return flow {
             // initial value is false

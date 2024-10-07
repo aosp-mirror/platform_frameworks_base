@@ -47,6 +47,8 @@ import android.os.Build;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -82,6 +84,7 @@ import java.util.Locale;
  *
  * @hide
  */
+@RavenwoodKeepWholeClass
 public class ResourcesImpl {
     static final String TAG = "Resources";
 
@@ -689,6 +692,7 @@ public class ResourcesImpl {
     }
 
     @Nullable
+    @RavenwoodThrow(blockedBy = Drawable.class)
     Drawable loadDrawable(@NonNull Resources wrapper, @NonNull TypedValue value, int id,
             int density, @Nullable Resources.Theme theme)
             throws NotFoundException {
@@ -1035,6 +1039,7 @@ public class ResourcesImpl {
      * Loads a font from XML or resources stream.
      */
     @Nullable
+    @RavenwoodThrow(blockedBy = Typeface.class)
     public Typeface loadFont(Resources wrapper, TypedValue value, int id) {
         if (value.string == null) {
             throw new NotFoundException("Resource \"" + getResourceName(id) + "\" ("

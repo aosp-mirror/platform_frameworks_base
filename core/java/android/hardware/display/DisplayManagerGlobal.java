@@ -21,6 +21,7 @@ import static android.hardware.display.DisplayManager.EventsMask;
 import static android.view.Display.HdrCapabilities.HdrType;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -174,10 +175,14 @@ public final class DisplayManagerGlobal {
     /**
      * Gets an instance of the display manager global singleton.
      *
+     * This method is actually unsupported on Ravenwood, however to support
+     * {@link android.app.ResourcesManager} we make this method always return null.
+     *
      * @return The display manager instance, may be null early in system startup
      * before the display manager has been fully initialized.
      */
     @UnsupportedAppUsage
+    // @RavenwoodIgnore(value = "null")
     public static DisplayManagerGlobal getInstance() {
         synchronized (DisplayManagerGlobal.class) {
             if (sInstance == null) {
@@ -787,7 +792,6 @@ public final class DisplayManagerGlobal {
     public void setVirtualDisplaySurface(IVirtualDisplayCallback token, Surface surface) {
         try {
             mDm.setVirtualDisplaySurface(token, surface);
-            setVirtualDisplayState(token, surface != null);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -805,14 +809,6 @@ public final class DisplayManagerGlobal {
     public void releaseVirtualDisplay(IVirtualDisplayCallback token) {
         try {
             mDm.releaseVirtualDisplay(token);
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
-        }
-    }
-
-    void setVirtualDisplayState(IVirtualDisplayCallback token, boolean isOn) {
-        try {
-            mDm.setVirtualDisplayState(token, isOn);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -1228,6 +1224,20 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * @param displayId The ID of the display
+     * @return The highest HDR/SDR ratio of the ratios defined in Display Device Config. If no
+     * HDR/SDR map is defined, this always returns 1.
+     */
+    @FlaggedApi(com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio(int displayId) {
+        try {
+            return mDm.getHighestHdrSdrRatio(displayId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @see DisplayManager#getDozeBrightnessSensorValueToBrightness
      */
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS)
@@ -1426,7 +1436,7 @@ public final class DisplayManagerGlobal {
      * system's display configuration.
      */
     public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
-            "cache_key.display_info";
+            PropertyInvalidatedCache.createSystemCacheKey("display_info");
 
     /**
      * Invalidates the contents of the display info cache for all applications. Can only

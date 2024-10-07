@@ -23,5 +23,8 @@ sealed interface QSTileUserAction {
     val expandable: Expandable?
 
     class Click(override val expandable: Expandable?) : QSTileUserAction
+
+    class ToggleClick(override val expandable: Expandable?) : QSTileUserAction
+
     class LongClick(override val expandable: Expandable?) : QSTileUserAction
 }

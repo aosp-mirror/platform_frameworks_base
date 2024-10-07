@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,6 +28,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.security.legacykeystore.ILegacyKeystore;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
@@ -77,7 +80,8 @@ public class WifiMigrationTest {
     @Test
     public void testKeystoreMigrationAvoidedOnLegacyVendorPartition() {
         when(WifiBlobStore.supplicantCanAccessBlobstore()).thenReturn(false);
-        WifiMigration.migrateLegacyKeystoreToWifiBlobstore();
+        assertEquals(WifiMigration.KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED,
+                WifiMigration.migrateLegacyKeystoreToWifiBlobstore());
         verifyNoMoreInteractions(mLegacyKeystore, mWifiBlobStore);
     }
 
@@ -88,7 +92,8 @@ public class WifiMigrationTest {
     @Test
     public void testKeystoreMigrationNoLegacyAliases() throws Exception {
         when(mLegacyKeystore.list(anyString(), anyInt())).thenReturn(new String[0]);
-        WifiMigration.migrateLegacyKeystoreToWifiBlobstore();
+        assertEquals(WifiMigration.KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED,
+                WifiMigration.migrateLegacyKeystoreToWifiBlobstore());
         verify(mLegacyKeystore).list(anyString(), anyInt());
         verifyNoMoreInteractions(mLegacyKeystore, mWifiBlobStore);
     }
@@ -104,7 +109,8 @@ public class WifiMigrationTest {
         when(mLegacyKeystore.list(anyString(), anyInt())).thenReturn(legacyAliases);
         when(mWifiBlobStore.list(anyString())).thenReturn(blobstoreAliases);
 
-        WifiMigration.migrateLegacyKeystoreToWifiBlobstore();
+        assertEquals(WifiMigration.KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE,
+                WifiMigration.migrateLegacyKeystoreToWifiBlobstore());
         verify(mWifiBlobStore, times(legacyAliases.length)).put(anyString(), any(byte[].class));
     }
 
@@ -122,9 +128,35 @@ public class WifiMigrationTest {
         when(mWifiBlobStore.list(anyString())).thenReturn(blobstoreAliases);
 
         // Expect that only the unique legacy alias is migrated to the blobstore
-        WifiMigration.migrateLegacyKeystoreToWifiBlobstore();
+        assertEquals(WifiMigration.KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE,
+                WifiMigration.migrateLegacyKeystoreToWifiBlobstore());
         verify(mWifiBlobStore).list(anyString());
         verify(mWifiBlobStore).put(eq(uniqueLegacyAlias), any(byte[].class));
         verifyNoMoreInteractions(mWifiBlobStore);
+    }
+
+    /**
+     * Verify that the Keystore migration is skipped if Legacy Keystore is deprecated,
+     * since the migration is not needed.
+     */
+    @Test
+    public void testKeystoreMigrationAvoidedIfLegacyKsDeprecated() throws Exception {
+        // Legacy Keystore will throw a ServiceSpecificException with
+        // code ERROR_SYSTEM_ERROR if a method is deprecated
+        when(mLegacyKeystore.list(anyString(), anyInt())).thenThrow(
+                new ServiceSpecificException(ILegacyKeystore.ERROR_SYSTEM_ERROR));
+        assertEquals(WifiMigration.KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED,
+                WifiMigration.migrateLegacyKeystoreToWifiBlobstore());
+    }
+
+    /**
+     * Verify that the Keystore migration method returns a failure code when an
+     * unexpected exception is encountered.
+     */
+    @Test
+    public void testKeystoreMigrationFailsIfExceptionEncountered() throws Exception {
+        when(mLegacyKeystore.list(anyString(), anyInt())).thenThrow(new RemoteException());
+        assertEquals(WifiMigration.KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION,
+                WifiMigration.migrateLegacyKeystoreToWifiBlobstore());
     }
 }

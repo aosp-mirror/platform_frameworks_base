@@ -16,7 +16,9 @@
 
 package com.android.server.audio;
 
+import static com.android.media.audio.Flags.FLAG_ABS_VOLUME_INDEX_FIX;
 import static com.android.media.audio.Flags.FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME;
+import static com.android.media.audio.Flags.absVolumeIndexFix;
 
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -116,7 +118,7 @@ public class AudioDeviceVolumeManagerTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME)
+    @RequiresFlagsDisabled({FLAG_DISABLE_PRESCALE_ABSOLUTE_VOLUME, FLAG_ABS_VOLUME_INDEX_FIX})
     public void configurablePreScaleAbsoluteVolume_checkIndex() throws Exception {
         AudioManager am = mContext.getSystemService(AudioManager.class);
         final int minIndex = am.getStreamMinVolume(AudioManager.STREAM_MUSIC);
@@ -177,6 +179,7 @@ public class AudioDeviceVolumeManagerTest {
         final AudioDeviceAttributes bleDevice = new AudioDeviceAttributes(
                 /*native type*/ AudioSystem.DEVICE_OUT_BLE_HEADSET, /*address*/ "bla");
         final int maxPreScaleIndex = 3;
+        int passedIndex = maxIndex;
 
         for (int i = 0; i < maxPreScaleIndex; i++) {
             final VolumeInfo volCur = new VolumeInfo.Builder(volMedia)
@@ -185,9 +188,12 @@ public class AudioDeviceVolumeManagerTest {
             mAudioService.setDeviceVolume(volCur, bleDevice, mPackageName);
             mTestLooper.dispatchAll();
 
+            if (absVolumeIndexFix()) {
+                passedIndex = i + 1;
+            }
             // Stream volume changes
             verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                            AudioManager.STREAM_MUSIC, maxIndex,
+                            AudioManager.STREAM_MUSIC, passedIndex,
                             AudioSystem.DEVICE_OUT_BLE_HEADSET);
         }
 
@@ -197,8 +203,11 @@ public class AudioDeviceVolumeManagerTest {
         mAudioService.setDeviceVolume(volIndex4, bleDevice, mPackageName);
         mTestLooper.dispatchAll();
 
+        if (absVolumeIndexFix()) {
+            passedIndex = 4;
+        }
         verify(mSpyAudioSystem, atLeast(1)).setStreamVolumeIndexAS(
-                        AudioManager.STREAM_MUSIC, maxIndex,
+                        AudioManager.STREAM_MUSIC, passedIndex,
                         AudioSystem.DEVICE_OUT_BLE_HEADSET);
     }
 }

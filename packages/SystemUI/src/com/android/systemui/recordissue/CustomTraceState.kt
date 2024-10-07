@@ -21,6 +21,10 @@ import com.android.traceur.PresetTraceConfigs.TraceOptions
 import com.android.traceur.PresetTraceConfigs.getDefaultConfig
 import com.android.traceur.TraceConfig
 
+/**
+ * This class encapsulates the values that go into a customized record issue trace config, part of
+ * the RecordIssueTile feature. This class stores the last configuration chosen by power users.
+ */
 class CustomTraceState(private val prefs: SharedPreferences) {
 
     private var enabledTags: Set<String>?

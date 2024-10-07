@@ -42,30 +42,38 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
-import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
+import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
+import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
+import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
-import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.scene.data.repository.Idle
+import com.android.systemui.scene.data.repository.Transition
+import com.android.systemui.scene.data.repository.setTransition
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.data.repository.fakeShadeRepository
 import com.android.systemui.shade.mockLargeScreenHeaderHelper
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.any
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -145,7 +153,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun setUp() {
         shadeTestUtil.setSplitShade(false)
         movementFlow = MutableStateFlow(BurnInModel())
-        whenever(aodBurnInViewModel.movement(any())).thenReturn(movementFlow)
+        whenever(aodBurnInViewModel.movement).thenReturn(movementFlow)
         underTest = kosmos.sharedNotificationContainerViewModel
     }
 
@@ -295,34 +303,47 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             // Start transitioning to glanceable hub
             val progress = 0.6f
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                    value = 0f,
-                )
+            kosmos.setTransition(
+                sceneTransition = Transition(from = Scenes.Lockscreen, to = Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.STARTED,
+                        from = LOCKSCREEN,
+                        to = GLANCEABLE_HUB,
+                        value = 0f,
+                    ),
             )
+
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                    value = progress,
-                )
+            kosmos.setTransition(
+                sceneTransition =
+                    Transition(
+                        from = Scenes.Lockscreen,
+                        to = Scenes.Communal,
+                        progress = flowOf(progress),
+                    ),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.RUNNING,
+                        from = LOCKSCREEN,
+                        to = GLANCEABLE_HUB,
+                        value = progress,
+                    ),
             )
+
             runCurrent()
             assertThat(alpha).isIn(Range.closed(0f, 1f))
 
             // Finish transition to glanceable hub
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.FINISHED,
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                    value = 1f,
-                )
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.FINISHED,
+                        from = LOCKSCREEN,
+                        to = GLANCEABLE_HUB,
+                        value = 1f,
+                    ),
             )
             assertThat(alpha).isEqualTo(0f)
 
@@ -341,6 +362,69 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             showLockscreen()
             assertThat(alpha).isEqualTo(1f)
 
+            // Go to dozing
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = LOCKSCREEN,
+                to = DOZING,
+                testScope,
+            )
+            assertThat(alpha).isEqualTo(1f)
+
+            // Start transitioning to glanceable hub
+            val progress = 0.6f
+            kosmos.setTransition(
+                sceneTransition = Transition(from = Scenes.Lockscreen, to = Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.STARTED,
+                        from = DOZING,
+                        to = GLANCEABLE_HUB,
+                        value = 0f,
+                    ),
+            )
+            runCurrent()
+            kosmos.setTransition(
+                sceneTransition =
+                    Transition(
+                        from = Scenes.Lockscreen,
+                        to = Scenes.Communal,
+                        progress = flowOf(progress),
+                    ),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.RUNNING,
+                        from = DOZING,
+                        to = GLANCEABLE_HUB,
+                        value = progress,
+                    ),
+            )
+            runCurrent()
+            // Keep notifications hidden during the transition from dream to hub
+            assertThat(alpha).isEqualTo(0)
+
+            // Finish transition to glanceable hub
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.FINISHED,
+                        from = DOZING,
+                        to = GLANCEABLE_HUB,
+                        value = 1f,
+                    ),
+            )
+            assertThat(alpha).isEqualTo(0f)
+        }
+
+    @Test
+    fun glanceableHubAlpha_dozingToHub() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.glanceableHubAlpha)
+
+            // Start on lockscreen, notifications should be unhidden.
+            showLockscreen()
+            assertThat(alpha).isEqualTo(1f)
+
             // Transition to dream, notifications should be hidden so that transition
             // from dream->hub doesn't cause notification flicker.
             showDream()
@@ -348,35 +432,46 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             // Start transitioning to glanceable hub
             val progress = 0.6f
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                    from = KeyguardState.DREAMING,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                    value = 0f,
-                )
+            kosmos.setTransition(
+                sceneTransition = Transition(from = Scenes.Lockscreen, to = Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.STARTED,
+                        from = DREAMING,
+                        to = GLANCEABLE_HUB,
+                        value = 0f,
+                    ),
             )
             runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.RUNNING,
-                    from = KeyguardState.DREAMING,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                    value = progress,
-                )
+            kosmos.setTransition(
+                sceneTransition =
+                    Transition(
+                        from = Scenes.Lockscreen,
+                        to = Scenes.Communal,
+                        progress = flowOf(progress),
+                    ),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.RUNNING,
+                        from = DREAMING,
+                        to = GLANCEABLE_HUB,
+                        value = progress,
+                    ),
             )
             runCurrent()
             // Keep notifications hidden during the transition from dream to hub
             assertThat(alpha).isEqualTo(0)
 
             // Finish transition to glanceable hub
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.FINISHED,
-                    from = KeyguardState.DREAMING,
-                    to = KeyguardState.GLANCEABLE_HUB,
-                    value = 1f,
-                )
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition =
+                    TransitionStep(
+                        transitionState = TransitionState.FINISHED,
+                        from = DREAMING,
+                        to = GLANCEABLE_HUB,
+                        value = 1f,
+                    ),
             )
             assertThat(alpha).isEqualTo(0f)
         }
@@ -400,35 +495,39 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         testScope.runTest {
             val isOnLockscreen by collectLastValue(underTest.isOnLockscreen)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Gone),
+                stateTransition = TransitionStep(from = LOCKSCREEN, to = GONE),
             )
             assertThat(isOnLockscreen).isFalse()
 
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Lockscreen),
+                stateTransition = TransitionStep(from = GONE, to = LOCKSCREEN),
+            )
+            assertThat(isOnLockscreen).isTrue()
             // While progressing from lockscreen, should still be true
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    value = 0.8f,
-                    transitionState = TransitionState.RUNNING
-                )
+            kosmos.setTransition(
+                sceneTransition = Transition(from = Scenes.Lockscreen, to = Scenes.Gone),
+                stateTransition =
+                    TransitionStep(
+                        from = LOCKSCREEN,
+                        to = GONE,
+                        value = 0.8f,
+                        transitionState = TransitionState.RUNNING,
+                    ),
             )
             assertThat(isOnLockscreen).isTrue()
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.GONE,
-                to = KeyguardState.LOCKSCREEN,
-                testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Lockscreen),
+                stateTransition = TransitionStep(from = GONE, to = LOCKSCREEN),
             )
             assertThat(isOnLockscreen).isTrue()
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.PRIMARY_BOUNCER,
-                testScope,
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Bouncer),
+                stateTransition = TransitionStep(from = LOCKSCREEN, to = PRIMARY_BOUNCER),
             )
             assertThat(isOnLockscreen).isTrue()
         }
@@ -442,8 +541,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             shadeTestUtil.setLockscreenShadeExpansion(0f)
             shadeTestUtil.setQsExpansion(0f)
             keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.OCCLUDED,
+                from = LOCKSCREEN,
+                to = OCCLUDED,
                 testScope,
             )
             assertThat(isOnLockscreenWithoutShade).isFalse()
@@ -480,11 +579,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             assertThat(isOnGlanceableHubWithoutShade).isFalse()
 
             // Move to glanceable hub
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GLANCEABLE_HUB,
-                testScope = this
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition = TransitionStep(from = LOCKSCREEN, to = GLANCEABLE_HUB),
             )
+
             assertThat(isOnGlanceableHubWithoutShade).isTrue()
 
             // While state is GLANCEABLE_HUB, validate variations of both shade and qs expansion
@@ -502,6 +601,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             shadeTestUtil.setQsExpansion(0f)
             shadeTestUtil.setLockscreenShadeExpansion(0f)
+            kosmos.setTransition(
+                sceneTransition = Idle(Scenes.Communal),
+                stateTransition = TransitionStep(from = LOCKSCREEN, to = GLANCEABLE_HUB),
+            )
             assertThat(isOnGlanceableHubWithoutShade).isTrue()
         }
 
@@ -705,7 +808,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @DisableSceneContainer
     fun translationYUpdatesOnKeyguardForBurnIn() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+            val translationY by collectLastValue(underTest.translationY)
 
             showLockscreen()
             assertThat(translationY).isEqualTo(0)
@@ -718,11 +821,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @DisableSceneContainer
     fun translationYUpdatesOnKeyguard() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+            val translationY by collectLastValue(underTest.translationY)
 
             configurationRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
-                -100
+                -100,
             )
             configurationRepository.onAnyConfigurationChange()
 
@@ -739,11 +842,11 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     @DisableSceneContainer
     fun translationYDoesNotUpdateWhenShadeIsExpanded() =
         testScope.runTest {
-            val translationY by collectLastValue(underTest.translationY(BurnInParameters()))
+            val translationY by collectLastValue(underTest.translationY)
 
             configurationRepository.setDimensionPixelSize(
                 R.dimen.keyguard_translate_distance_on_swipe_up,
-                -100
+                -100,
             )
             configurationRepository.onAnyConfigurationChange()
 
@@ -782,7 +885,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun alphaOnFullQsExpansion() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+            val alpha by
+                collectLastValue(underTest.keyguardAlpha(viewState, testScope.backgroundScope))
 
             showLockscreenWithQSExpanded()
 
@@ -799,90 +903,51 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
     @Test
     @BrokenWithSceneContainer(330311871)
-    fun alphaDoesNotUpdateWhileGoneTransitionIsRunning() =
-        testScope.runTest {
-            val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
-
-            showLockscreen()
-            // GONE transition gets to 90% complete
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.STARTED,
-                    value = 0f,
-                )
-            )
-            runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.GONE,
-                    transitionState = TransitionState.RUNNING,
-                    value = 0.9f,
-                )
-            )
-            runCurrent()
-
-            // At this point, alpha should be zero
-            assertThat(alpha).isEqualTo(0f)
-
-            // An attempt to override by the shade should be ignored
-            shadeTestUtil.setQsExpansion(0.5f)
-            assertThat(alpha).isEqualTo(0f)
-        }
-
-    @Test
-    fun alphaDoesNotUpdateWhileOcclusionTransitionIsRunning() =
-        testScope.runTest {
-            val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
-
-            showLockscreen()
-            // OCCLUDED transition gets to 90% complete
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.OCCLUDED,
-                    transitionState = TransitionState.STARTED,
-                    value = 0f,
-                )
-            )
-            runCurrent()
-            keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    from = KeyguardState.LOCKSCREEN,
-                    to = KeyguardState.OCCLUDED,
-                    transitionState = TransitionState.RUNNING,
-                    value = 0.9f,
-                )
-            )
-            runCurrent()
-
-            // At this point, alpha should be zero
-            assertThat(alpha).isEqualTo(0f)
-
-            // An attempt to override by the shade should be ignored
-            shadeTestUtil.setQsExpansion(0.5f)
-            assertThat(alpha).isEqualTo(0f)
-        }
-
-    @Test
     fun alphaWhenGoneIsSetToOne() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+            val alpha by
+                collectLastValue(underTest.keyguardAlpha(viewState, testScope.backgroundScope))
 
             showLockscreen()
+            assertThat(alpha).isEqualTo(1f)
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.GONE,
-                testScope
+            // GONE transition gets to 90% complete
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = LOCKSCREEN,
+                    to = GONE,
+                    transitionState = TransitionState.STARTED,
+                    value = 0f,
+                )
             )
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = LOCKSCREEN,
+                    to = GONE,
+                    transitionState = TransitionState.RUNNING,
+                    value = 0.9f,
+                )
+            )
+            runCurrent()
+            // Change in state should not immediately set value to 1f. Should wait for
+            // transition to complete
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
 
+            // Transition is active, and NSSL should be nearly faded out
+            assertThat(alpha).isLessThan(0.5f)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = LOCKSCREEN,
+                    to = GONE,
+                    transitionState = TransitionState.FINISHED,
+                    value = 1f,
+                )
+            )
+            runCurrent()
+            // Should reset to 1f
             assertThat(alpha).isEqualTo(1f)
         }
 
@@ -921,11 +986,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             assertThat(fadeIn[0]).isEqualTo(false)
 
             // ... then user hits power to go to AOD
-            keyguardTransitionRepository.sendTransitionSteps(
-                from = KeyguardState.LOCKSCREEN,
-                to = KeyguardState.AOD,
-                testScope,
-            )
+            keyguardTransitionRepository.sendTransitionSteps(from = LOCKSCREEN, to = AOD, testScope)
             // ... followed by a shade collapse
             showLockscreen()
             // ... does not trigger a fade in
@@ -937,7 +998,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun alpha_isZero_fromPrimaryBouncerToGoneWhileCommunalSceneVisible() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+            val alpha by
+                collectLastValue(underTest.keyguardAlpha(viewState, testScope.backgroundScope))
 
             showPrimaryBouncer()
             showCommunalScene()
@@ -945,7 +1007,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // PRIMARY_BOUNCER->GONE transition is started
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.STARTED,
                     value = 0f,
@@ -956,7 +1018,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // PRIMARY_BOUNCER->GONE transition running
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.1f,
@@ -967,7 +1029,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.9f,
@@ -979,10 +1041,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             hideCommunalScene()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.FINISHED,
-                    value = 1f
+                    value = 1f,
                 )
             )
             runCurrent()
@@ -995,7 +1057,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun alpha_fromPrimaryBouncerToGoneWhenCommunalSceneNotVisible() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+            val alpha by
+                collectLastValue(underTest.keyguardAlpha(viewState, testScope.backgroundScope))
 
             showPrimaryBouncer()
             hideCommunalScene()
@@ -1003,7 +1066,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // PRIMARY_BOUNCER->GONE transition is started
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.STARTED,
                 )
@@ -1013,7 +1076,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // PRIMARY_BOUNCER->GONE transition running
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.1f,
@@ -1024,7 +1087,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.9f,
@@ -1035,10 +1098,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.PRIMARY_BOUNCER,
+                    from = PRIMARY_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.FINISHED,
-                    value = 1f
+                    value = 1f,
                 )
             )
             runCurrent()
@@ -1050,7 +1113,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun alpha_isZero_fromAlternateBouncerToGoneWhileCommunalSceneVisible() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+            val alpha by
+                collectLastValue(underTest.keyguardAlpha(viewState, testScope.backgroundScope))
 
             showAlternateBouncer()
             showCommunalScene()
@@ -1058,7 +1122,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // ALTERNATE_BOUNCER->GONE transition is started
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.STARTED,
                     value = 0f,
@@ -1069,7 +1133,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // ALTERNATE_BOUNCER->GONE transition running
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.1f,
@@ -1080,7 +1144,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.9f,
@@ -1092,10 +1156,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             hideCommunalScene()
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.FINISHED,
-                    value = 1f
+                    value = 1f,
                 )
             )
             runCurrent()
@@ -1108,7 +1172,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
     fun alpha_fromAlternateBouncerToGoneWhenCommunalSceneNotVisible() =
         testScope.runTest {
             val viewState = ViewStateAccessor()
-            val alpha by collectLastValue(underTest.keyguardAlpha(viewState))
+            val alpha by
+                collectLastValue(underTest.keyguardAlpha(viewState, testScope.backgroundScope))
 
             showAlternateBouncer()
             hideCommunalScene()
@@ -1116,7 +1181,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // ALTERNATE_BOUNCER->GONE transition is started
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.STARTED,
                 )
@@ -1126,7 +1191,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             // ALTERNATE_BOUNCER->GONE transition running
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.1f,
@@ -1137,7 +1202,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.RUNNING,
                     value = 0.9f,
@@ -1148,10 +1213,10 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
 
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
-                    from = KeyguardState.ALTERNATE_BOUNCER,
+                    from = ALTERNATE_BOUNCER,
                     to = GONE,
                     transitionState = TransitionState.FINISHED,
-                    value = 1f
+                    value = 1f,
                 )
             )
             runCurrent()
@@ -1164,11 +1229,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         runCurrent()
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
         runCurrent()
-        keyguardTransitionRepository.sendTransitionSteps(
-            from = KeyguardState.AOD,
-            to = KeyguardState.LOCKSCREEN,
-            testScope,
-        )
+        keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
     }
 
     private suspend fun TestScope.showDream() {
@@ -1178,8 +1239,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         keyguardRepository.setDreaming(true)
         runCurrent()
         keyguardTransitionRepository.sendTransitionSteps(
-            from = KeyguardState.LOCKSCREEN,
-            to = KeyguardState.DREAMING,
+            from = LOCKSCREEN,
+            to = DREAMING,
             testScope,
         )
     }
@@ -1190,11 +1251,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         runCurrent()
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
         runCurrent()
-        keyguardTransitionRepository.sendTransitionSteps(
-            from = KeyguardState.AOD,
-            to = KeyguardState.LOCKSCREEN,
-            testScope,
-        )
+        keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
     }
 
     private suspend fun TestScope.showLockscreenWithQSExpanded() {
@@ -1203,11 +1260,7 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         runCurrent()
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
         runCurrent()
-        keyguardTransitionRepository.sendTransitionSteps(
-            from = KeyguardState.AOD,
-            to = KeyguardState.LOCKSCREEN,
-            testScope,
-        )
+        keyguardTransitionRepository.sendTransitionSteps(from = AOD, to = LOCKSCREEN, testScope)
     }
 
     private suspend fun TestScope.showPrimaryBouncer() {
@@ -1219,8 +1272,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         kosmos.keyguardBouncerRepository.setPrimaryShow(true)
         runCurrent()
         keyguardTransitionRepository.sendTransitionSteps(
-            from = KeyguardState.GLANCEABLE_HUB,
-            to = KeyguardState.PRIMARY_BOUNCER,
+            from = GLANCEABLE_HUB,
+            to = PRIMARY_BOUNCER,
             testScope,
         )
     }
@@ -1234,8 +1287,8 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
         kosmos.keyguardBouncerRepository.setPrimaryShow(false)
         runCurrent()
         keyguardTransitionRepository.sendTransitionSteps(
-            from = KeyguardState.GLANCEABLE_HUB,
-            to = KeyguardState.ALTERNATE_BOUNCER,
+            from = GLANCEABLE_HUB,
+            to = ALTERNATE_BOUNCER,
             testScope,
         )
     }

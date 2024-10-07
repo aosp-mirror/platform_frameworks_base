@@ -62,7 +62,7 @@ interface INfcAdapter
 
     void dispatch(in Tag tag);
 
-    void setReaderMode (IBinder b, IAppCallback callback, int flags, in Bundle extras);
+    void setReaderMode (IBinder b, IAppCallback callback, int flags, in Bundle extras, String pkg);
 
     void addNfcUnlockHandler(INfcUnlockHandler unlockHandler, in int[] techList);
     void removeNfcUnlockHandler(INfcUnlockHandler unlockHandler);
@@ -73,7 +73,7 @@ interface INfcAdapter
     boolean setNfcSecure(boolean enable);
     NfcAntennaInfo getNfcAntennaInfo();
 
-    boolean setControllerAlwaysOn(boolean value);
+    void setControllerAlwaysOn(int mode);
     boolean isControllerAlwaysOn();
     boolean isControllerAlwaysOnSupported();
     void registerControllerAlwaysOnListener(in INfcControllerAlwaysOnListener listener);
@@ -100,7 +100,7 @@ interface INfcAdapter
     void unregisterWlcStateListener(in INfcWlcStateListener listener);
     WlcListenerDeviceInfo getWlcListenerDeviceInfo();
 
-    void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags);
+    void updateDiscoveryTechnology(IBinder b, int pollFlags, int listenFlags, String pkg);
 
     void notifyPollingLoop(in PollingFrame frame);
     void notifyHceDeactivated();
@@ -114,4 +114,7 @@ interface INfcAdapter
     void setScreenState();
     void checkFirmware();
     List<String> fetchActiveNfceeList();
+    void triggerInitialization();
+    boolean getSettingStatus();
+    boolean isTagPresent();
 }

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_DISALLOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_BOUND_BY_FOREGROUND;
@@ -95,7 +96,12 @@ public class BackgroundLaunchProcessControllerTests {
     int mUid = 234;
     String mPackageName = "package.name";
     int mAppSwitchState = APP_SWITCH_DISALLOW;
-    boolean mIsCheckingForFgsStart = false;
+    BackgroundLaunchProcessController.BalCheckConfiguration mBalCheckConfiguration =
+            new BackgroundLaunchProcessController.BalCheckConfiguration(
+                    /* isCheckingForFgsStarts */ false,
+                    /* checkVisibility */ true,
+                    /* checkOtherExemptions */ true,
+                    ACTIVITY_BG_START_GRACE_PERIOD_MS);
     boolean mHasActivityInVisibleTask = false;
     boolean mHasBackgroundActivityStartPrivileges = false;
     long mLastStopAppSwitchesTime = 0L;
@@ -106,7 +112,7 @@ public class BackgroundLaunchProcessControllerTests {
     public void testNothingAllows() {
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -118,7 +124,7 @@ public class BackgroundLaunchProcessControllerTests {
         mHasBackgroundActivityStartPrivileges = true;
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -136,7 +142,7 @@ public class BackgroundLaunchProcessControllerTests {
                 BackgroundStartPrivileges.ALLOW_BAL);
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -154,7 +160,7 @@ public class BackgroundLaunchProcessControllerTests {
                 BackgroundStartPrivileges.ALLOW_BAL);
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -170,7 +176,7 @@ public class BackgroundLaunchProcessControllerTests {
                 BackgroundStartPrivileges.ALLOW_BAL);
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -186,7 +192,7 @@ public class BackgroundLaunchProcessControllerTests {
                 BackgroundStartPrivileges.ALLOW_BAL);
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -201,7 +207,7 @@ public class BackgroundLaunchProcessControllerTests {
         mHasActiveVisibleWindow.add(999);
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -216,7 +222,7 @@ public class BackgroundLaunchProcessControllerTests {
         mHasActiveVisibleWindow.add(999);
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -229,7 +235,7 @@ public class BackgroundLaunchProcessControllerTests {
         mHasActivityInVisibleTask = true;
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);
@@ -245,7 +251,7 @@ public class BackgroundLaunchProcessControllerTests {
         mLastActivityFinishTime = now - 100;
         BalVerdict balVerdict = mController.areBackgroundActivityStartsAllowed(
                 mPid, mUid, mPackageName,
-                mAppSwitchState, mIsCheckingForFgsStart,
+                mAppSwitchState, mBalCheckConfiguration,
                 mHasActivityInVisibleTask, mHasBackgroundActivityStartPrivileges,
                 mLastStopAppSwitchesTime, mLastActivityLaunchTime,
                 mLastActivityFinishTime);

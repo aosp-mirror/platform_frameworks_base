@@ -38,6 +38,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATIO
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.flags.Flags.customizableWindowHeaders;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
 import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 
@@ -63,6 +65,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
@@ -111,9 +116,9 @@ import com.android.internal.view.menu.MenuHelper;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.BackgroundFallback;
 import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
-import com.android.window.flags.Flags;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /** @hide */
@@ -1140,7 +1145,8 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDrawLegacyNavigationBarBackground =
                     ((requestedVisibleTypes | mLastForceConsumingTypes)
                             & WindowInsets.Type.navigationBars()) != 0
-                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
+                    && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0
+                    && navBarSize > 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
                 mDrawLegacyNavigationBarBackgroundHandled =
                         mWindow.onDrawLegacyNavigationBarBackgroundChanged(
@@ -1212,14 +1218,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
         final boolean hideCaptionBar = fullscreen
                 || (requestedVisibleTypes & WindowInsets.Type.captionBar()) == 0;
-        final boolean consumingCaptionBar = Flags.enableCaptionCompatInsetForceConsumption()
-                && ((mLastForceConsumingTypes & WindowInsets.Type.captionBar()) != 0
+        final boolean consumingCaptionBar =
+                ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()
+                        && ((mLastForceConsumingTypes & WindowInsets.Type.captionBar()) != 0
                         && hideCaptionBar);
 
         final boolean isOpaqueCaptionBar = customizableWindowHeaders()
                 && (appearance & APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND) == 0;
         final boolean consumingOpaqueCaptionBar =
-                Flags.enableCaptionCompatInsetForceConsumptionAlways()
+                ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS.isTrue()
                         && mLastForceConsumingOpaqueCaptionBar
                         && isOpaqueCaptionBar;
 
@@ -1348,8 +1355,15 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     mCrossWindowBlurEnabled = enabled;
                     updateBackgroundBlurRadius();
                 };
+                // The executor to receive callback {@link mCrossWindowBlurEnabledListener}. It
+                // should be the executor for this {@link DecorView}'s ui thread (not necessarily
+                // the main thread).
+                final Executor executor = Looper.myLooper() == Looper.getMainLooper()
+                        ? getContext().getMainExecutor()
+                        : new HandlerExecutor(new Handler(Looper.myLooper()));
                 getContext().getSystemService(WindowManager.class)
-                        .addCrossWindowBlurEnabledListener(mCrossWindowBlurEnabledListener);
+                        .addCrossWindowBlurEnabledListener(
+                                executor, mCrossWindowBlurEnabledListener);
                 getViewTreeObserver().addOnPreDrawListener(mBackgroundBlurOnPreDrawListener);
             } else {
                 updateBackgroundBlurRadius();

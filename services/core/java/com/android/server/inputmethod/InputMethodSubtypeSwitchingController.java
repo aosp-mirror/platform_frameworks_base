@@ -686,11 +686,8 @@ final class InputMethodSubtypeSwitchingController {
      */
     @Nullable
     public ImeSubtypeListItem getNextInputMethodLocked(boolean onlyCurrentIme,
-            @Nullable InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
+            @NonNull InputMethodInfo imi, @Nullable InputMethodSubtype subtype,
             @SwitchMode int mode, boolean forward) {
-        if (imi == null) {
-            return null;
-        }
         if (Flags.imeSwitcherRevamp()) {
             return mRotationList.next(imi, subtype, onlyCurrentIme,
                     isRecency(mode, forward), forward);

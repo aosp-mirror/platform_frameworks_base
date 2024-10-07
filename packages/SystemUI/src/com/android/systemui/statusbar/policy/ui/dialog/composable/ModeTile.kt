@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog.composable
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,8 +31,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.systemui.common.ui.compose.Icon
@@ -39,43 +47,48 @@ import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModeTileViewMod
 
 @Composable
 fun ModeTile(viewModel: ModeTileViewModel) {
-    val tileColor =
-        if (viewModel.enabled) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceVariant
-    val contentColor =
-        if (viewModel.enabled) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onSurfaceVariant
+    val tileColor: Color by
+        animateColorAsState(
+            if (viewModel.enabled) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.surfaceVariant
+        )
+    val contentColor: Color by
+        animateColorAsState(
+            if (viewModel.enabled) MaterialTheme.colorScheme.onPrimary
+            else MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
     CompositionLocalProvider(LocalContentColor provides contentColor) {
-        Surface(
-            color = tileColor,
-            shape = RoundedCornerShape(16.dp),
-        ) {
+        Surface(color = tileColor, shape = RoundedCornerShape(16.dp)) {
             Row(
                 modifier =
                     Modifier.combinedClickable(
                             onClick = viewModel.onClick,
-                            onLongClick = viewModel.onLongClick
+                            onLongClick = viewModel.onLongClick,
+                            onLongClickLabel = viewModel.onLongClickLabel,
                         )
-                        .padding(20.dp),
+                        .padding(16.dp)
+                        .semantics { stateDescription = viewModel.stateDescription },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement =
-                    Arrangement.spacedBy(
-                        space = 10.dp,
-                        alignment = Alignment.Start,
-                    ),
+                    Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
             ) {
                 Icon(icon = viewModel.icon, modifier = Modifier.size(24.dp))
                 Column {
                     Text(
                         viewModel.text,
                         fontWeight = FontWeight.W500,
-                        modifier = Modifier.tileMarquee()
+                        modifier = Modifier.tileMarquee().testTag("name"),
                     )
                     Text(
                         viewModel.subtext,
                         fontWeight = FontWeight.W400,
-                        modifier = Modifier.tileMarquee()
+                        modifier =
+                            Modifier.tileMarquee()
+                                .testTag(if (viewModel.enabled) "stateOn" else "stateOff")
+                                .clearAndSetSemantics {
+                                    contentDescription = viewModel.subtextDescription
+                                },
                     )
                 }
             }
@@ -84,8 +97,5 @@ fun ModeTile(viewModel: ModeTileViewModel) {
 }
 
 private fun Modifier.tileMarquee(): Modifier {
-    return this.basicMarquee(
-        iterations = 1,
-        initialDelayMillis = 200,
-    )
+    return this.basicMarquee(iterations = 1)
 }

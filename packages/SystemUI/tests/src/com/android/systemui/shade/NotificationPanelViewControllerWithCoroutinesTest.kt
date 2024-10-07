@@ -19,7 +19,6 @@
 package com.android.systemui.shade
 
 import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -34,8 +33,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
-import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -159,6 +156,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun doubleTapRequired_onKeyguard_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
             val listener = getFalsingTapListener()
@@ -186,6 +184,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_MSDL_FEEDBACK)
     fun doubleTapRequired_shadeLocked_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
             val listener = getFalsingTapListener()
@@ -211,7 +210,7 @@ class NotificationPanelViewControllerWithCoroutinesTest :
                     KEYGUARD /*statusBarState*/,
                     false /*keyguardFadingAway*/,
                     false /*goingToFullShade*/,
-                    SHADE /*oldStatusBarState*/
+                    SHADE, /*oldStatusBarState*/
                 )
         }
         advanceUntilIdle()
@@ -242,37 +241,5 @@ class NotificationPanelViewControllerWithCoroutinesTest :
         // THEN the bottomAreaAlpha is fully opaque
         val bottomAreaAlpha by collectLastValue(mFakeKeyguardRepository.bottomAreaAlpha)
         assertThat(bottomAreaAlpha).isEqualTo(1f)
-    }
-
-    @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun shadeExpanded_whenHunIsPresent() = runTest {
-        launch(mainDispatcher) {
-            givenViewAttached()
-
-            // WHEN a pinned heads up is present
-            mFakeHeadsUpNotificationRepository.setNotifications(
-                FakeHeadsUpRowRepository("key", isPinned = true)
-            )
-        }
-        advanceUntilIdle()
-
-        // THEN the panel should be visible
-        assertThat(mNotificationPanelViewController.isExpanded).isTrue()
-    }
-
-    @Test
-    @EnableFlags(NotificationsHeadsUpRefactor.FLAG_NAME)
-    fun shadeExpanded_whenHunIsAnimatingAway() = runTest {
-        launch(mainDispatcher) {
-            givenViewAttached()
-
-            // WHEN a heads up is animating away
-            mFakeHeadsUpNotificationRepository.isHeadsUpAnimatingAway.value = true
-        }
-        advanceUntilIdle()
-
-        // THEN the panel should be visible
-        assertThat(mNotificationPanelViewController.isExpanded).isTrue()
     }
 }

@@ -1,0 +1,37 @@
+[
+  // sans-serif aliases
+  { "name": "arial", "to": "sans-serif" },
+  { "name": "helvetica", "to": "sans-serif" },
+  { "name": "tahoma", "to": "sans-serif" },
+  { "name": "verdana", "to": "sans-serif" },
+  { "name": "sans-serif-black", "to": "sans-serif", "weight": "900" },
+  { "name": "sans-serif-light", "to": "sans-serif", "weight": "300" },
+  { "name": "sans-serif-medium", "to": "sans-serif", "weight": "500" },
+  { "name": "sans-serif-thin", "to": "sans-serif", "weight": "100" },
+
+  // sans-serif-condensed aliases
+  { "name": "sans-serif-condensed-light", "to": "sans-serif-condensed", "weight": "300" },
+  { "name": "sans-serif-condensed-medium", "to": "sans-serif-condensed", "weight": "500" },
+
+  // serif aliases
+  { "name": "ITC Stone Serif", "to": "serif" },
+  { "name": "baskerville", "to": "serif" },
+  { "name": "fantasy", "to": "serif" },
+  { "name": "georgia", "to": "serif" },
+  { "name": "goudy", "to": "serif" },
+  { "name": "palatino", "to": "serif" },
+  { "name": "times new roman", "to": "serif" },
+  { "name": "times", "to": "serif" },
+  { "name": "serif-bold", "to": "serif", "weight": "700" },
+
+  // monospace aliases
+  { "name": "monaco", "to": "monospace" },
+  { "name": "sans-serif-monospace", "to": "monospace" },
+
+  // serif-monospace aliases
+  { "name": "courier new", "to": "serif-monospace" },
+  { "name": "courier", "to": "serif-monospace" },
+
+  // source-sans-pro aliases
+  { "name": "source-sans-pro-semi-bold", "to": "source-sans-pro", "weight": "600" }
+]

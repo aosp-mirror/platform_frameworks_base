@@ -16,7 +16,7 @@
 package com.android.wm.shell.bubbles
 
 import android.view.LayoutInflater
-import com.android.wm.shell.common.bubbles.BubblePopupView
+import com.android.wm.shell.shared.bubbles.BubblePopupView
 import com.android.wm.shell.testing.goldenpathmanager.WMShellGoldenPathManager
 import com.android.wm.shell.R
 import org.junit.Rule

@@ -92,6 +92,14 @@ flag {
 }
 
 flag {
+    name: "display_topology"
+    namespace: "display_manager"
+    description: "Display topology for moving cursors and windows between extended displays"
+    bug: "278199220"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_displays_refresh_rates_synchronization"
     namespace: "display_manager"
     description: "Enables synchronization of refresh rates across displays"
@@ -246,6 +254,14 @@ flag {
 }
 
 flag {
+    name: "highest_hdr_sdr_ratio_api"
+    namespace: "display_manager"
+    description: "Feature flag for an API to get the highest defined HDR/SDR ratio for a display."
+    bug: "335181559"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "doze_brightness_float"
     namespace: "display_manager"
     description: "Define doze brightness in the float scale [0, 1]."
@@ -328,5 +344,32 @@ flag {
     namespace: "display_manager"
     description: "Flag for new HDR brightness clamper."
     bug: "331275392"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "idle_screen_config_in_subscribing_light_sensor"
+    namespace: "display_manager"
+    description: "Account for Idle screen refresh rate configs while subscribing to light sensor"
+    bug: "358019330"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_battery_stats_for_all_displays"
+    namespace: "display_manager"
+    description: "Flag to enable battery stats for all displays."
+    bug: "366112793"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "block_autobrightness_changes_on_stylus_usage"
+    namespace: "display_manager"
+    description: "Block the usage of ALS to control the display brightness when stylus is being used"
+    bug: "352411468"
     is_fixed_read_only: true
 }

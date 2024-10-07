@@ -21,7 +21,9 @@ import com.android.app.tracing.coroutines.flow.collectLatest
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
+import com.android.systemui.lifecycle.ExclusiveActivatable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +40,11 @@ sealed class AuthMethodBouncerViewModel(
      * being able to attempt to unlock the device.
      */
     val isInputEnabled: StateFlow<Boolean>,
-) : SysUiViewModel() {
+
+    /** Name to use for performance tracing purposes. */
+    val traceName: String,
+    protected val bouncerHapticPlayer: BouncerHapticPlayer? = null,
+) : ExclusiveActivatable() {
 
     private val _animateFailure = MutableStateFlow(false)
     /**
@@ -60,7 +66,7 @@ sealed class AuthMethodBouncerViewModel(
 
     private val authenticationRequests = Channel<AuthenticationRequest>(Channel.BUFFERED)
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         authenticationRequests.receiveAsFlow().collectLatest { request ->
             if (!isInputEnabled.value) {
                 return@collectLatest
@@ -76,9 +82,15 @@ sealed class AuthMethodBouncerViewModel(
                 return@collectLatest
             }
 
+            performAuthenticationHapticFeedback(authenticationResult)
+
             _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
             clearInput()
+            if (authenticationResult == AuthenticationResult.SUCCEEDED) {
+                onSuccessfulAuthentication()
+            }
         }
+        awaitCancellation()
     }
 
     /**
@@ -107,20 +119,26 @@ sealed class AuthMethodBouncerViewModel(
     /** Returns the input entered so far. */
     protected abstract fun getInput(): List<Any>
 
+    /** Invoked after a successful authentication. */
+    protected open fun onSuccessfulAuthentication() = Unit
+
+    /** Perform authentication result haptics */
+    private fun performAuthenticationHapticFeedback(result: AuthenticationResult) {
+        if (result == AuthenticationResult.SKIPPED) return
+
+        bouncerHapticPlayer?.playAuthenticationFeedback(
+            authenticationSucceeded = result == AuthenticationResult.SUCCEEDED
+        )
+    }
+
     /**
      * Attempts to authenticate the user using the current input value.
      *
      * @see BouncerInteractor.authenticate
      */
-    protected fun tryAuthenticate(
-        input: List<Any> = getInput(),
-        useAutoConfirm: Boolean = false,
-    ) {
+    protected fun tryAuthenticate(input: List<Any> = getInput(), useAutoConfirm: Boolean = false) {
         authenticationRequests.trySend(AuthenticationRequest(input, useAutoConfirm))
     }
 
-    private data class AuthenticationRequest(
-        val input: List<Any>,
-        val useAutoConfirm: Boolean,
-    )
+    private data class AuthenticationRequest(val input: List<Any>, val useAutoConfirm: Boolean)
 }

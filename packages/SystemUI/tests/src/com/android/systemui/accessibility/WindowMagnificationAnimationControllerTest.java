@@ -53,6 +53,7 @@ import android.window.InputTransferToken;
 
 import androidx.test.filters.LargeTest;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
@@ -112,6 +113,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     SysUiState mSysUiState;
     @Mock
     SecureSettings mSecureSettings;
+    @Mock
+    ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private SpyWindowMagnificationController mController;
     private WindowMagnificationController mSpyController;
     private WindowMagnificationAnimationController mWindowMagnificationAnimationController;
@@ -164,7 +167,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                 mSysUiState,
                 mSecureSettings,
                 scvhSupplier,
-                mSfVsyncFrameProvider);
+                mSfVsyncFrameProvider,
+                mViewCaptureAwareWindowManager);
 
         mSpyController = mController.getSpyController();
     }
@@ -1015,7 +1019,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                 SysUiState sysUiState,
                 SecureSettings secureSettings,
                 Supplier<SurfaceControlViewHost> scvhSupplier,
-                SfVsyncFrameCallbackProvider sfVsyncFrameProvider) {
+                SfVsyncFrameCallbackProvider sfVsyncFrameProvider,
+                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager) {
             super(
                     context,
                     handler,
@@ -1027,7 +1032,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
                     secureSettings,
                     scvhSupplier,
                     sfVsyncFrameProvider,
-                    WindowManagerGlobal::getWindowSession);
+                    WindowManagerGlobal::getWindowSession,
+                    viewCaptureAwareWindowManager);
             mSpyController = Mockito.mock(WindowMagnificationController.class);
         }
 

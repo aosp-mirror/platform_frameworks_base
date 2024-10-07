@@ -24,6 +24,17 @@ flag {
 }
 
 flag {
+  name: "asm_reintroduce_grace_period"
+  namespace: "responsible_apis"
+  description: "Allow launches within the grace period for ASM apps"
+  bug: "367702727"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+
+flag {
     name: "content_uri_permission_apis"
     is_exported: true
     namespace: "responsible_apis"
@@ -51,4 +62,12 @@ flag {
     namespace: "responsible_apis"
     description: "Opt the system into enforcement of BAL"
     bug: "339403750"
+}
+
+flag {
+    name: "prevent_intent_redirect"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks"
+    bug: "361143368"
+    is_fixed_read_only: true
 }

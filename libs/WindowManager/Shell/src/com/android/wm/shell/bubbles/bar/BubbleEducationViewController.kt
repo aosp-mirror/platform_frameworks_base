@@ -34,9 +34,9 @@ import com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import com.android.wm.shell.bubbles.BubbleEducationController
 import com.android.wm.shell.bubbles.BubbleViewProvider
 import com.android.wm.shell.bubbles.setup
-import com.android.wm.shell.common.bubbles.BubblePopupDrawable
-import com.android.wm.shell.common.bubbles.BubblePopupView
 import com.android.wm.shell.shared.animation.PhysicsAnimator
+import com.android.wm.shell.shared.bubbles.BubblePopupDrawable
+import com.android.wm.shell.shared.bubbles.BubblePopupView
 import kotlin.math.roundToInt
 
 /** Manages bubble education presentation and animation */

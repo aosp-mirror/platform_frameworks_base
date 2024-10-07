@@ -40,6 +40,9 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Process;
 import android.os.Trace;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.ravenwood.annotation.RavenwoodReplace;
+import android.ravenwood.annotation.RavenwoodThrow;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -70,6 +73,7 @@ import java.util.WeakHashMap;
 import java.util.function.Function;
 
 /** @hide */
+@RavenwoodKeepWholeClass
 public class ResourcesManager {
     static final String TAG = "ResourcesManager";
     private static final boolean DEBUG = false;
@@ -149,6 +153,7 @@ public class ResourcesManager {
      * This will collect the package resources' paths from its ApplicationInfo and add them to all
      * existing and future contexts while the application is running.
      */
+    @RavenwoodThrow(reason = "FLAG_REGISTER_RESOURCE_PATHS is unsupported")
     public void registerResourcePaths(@NonNull String uniqueId, @NonNull ApplicationInfo appInfo) {
         if (!Flags.registerResourcePaths()) {
             return;
@@ -426,16 +431,19 @@ public class ResourcesManager {
     }
 
     /**
-     * Protected so that tests can override and returns something a fixed value.
+     * public so that tests can access and override
      */
     @VisibleForTesting
-    protected @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
+    public @NonNull DisplayMetrics getDisplayMetrics(int displayId, DisplayAdjustments da) {
         final DisplayManagerGlobal displayManagerGlobal = DisplayManagerGlobal.getInstance();
         final DisplayMetrics dm = new DisplayMetrics();
         final DisplayInfo displayInfo = displayManagerGlobal != null
                 ? displayManagerGlobal.getDisplayInfo(displayId) : null;
         if (displayInfo != null) {
-            displayInfo.getAppMetrics(dm, da);
+            final Configuration dajConfig = da.getConfiguration();
+            displayInfo.getAppMetrics(dm, da.getCompatibilityInfo(),
+                    (mResDisplayId == displayId && Configuration.EMPTY.equals(dajConfig))
+                            ? mResConfiguration : dajConfig);
         } else {
             dm.setToDefaults();
         }
@@ -1405,6 +1413,7 @@ public class ResourcesManager {
         return newKey;
     }
 
+    @RavenwoodThrow(reason = "AppInfo update not supported")
     public void appendPendingAppInfoUpdate(@NonNull String[] oldSourceDirs,
             @NonNull ApplicationInfo appInfo) {
         synchronized (mLock) {
@@ -1423,6 +1432,7 @@ public class ResourcesManager {
         }
     }
 
+    @RavenwoodReplace(reason = "AppInfo update not supported")
     public final void applyAllPendingAppInfoUpdates() {
         synchronized (mLock) {
             if (mPendingAppInfoUpdates != null) {
@@ -1433,6 +1443,10 @@ public class ResourcesManager {
                 mPendingAppInfoUpdates = null;
             }
         }
+    }
+
+    private void applyAllPendingAppInfoUpdates$ravenwood() {
+        /* no-op */
     }
 
     public final boolean applyConfigurationToResources(@NonNull Configuration config,
@@ -1877,6 +1891,7 @@ public class ResourcesManager {
          * instance uses.
          */
         @Override
+        @RavenwoodThrow(blockedBy = ResourcesLoader.class)
         public void onLoadersChanged(@NonNull Resources resources,
                 @NonNull List<ResourcesLoader> newLoader) {
             synchronized (mLock) {
@@ -1906,6 +1921,7 @@ public class ResourcesManager {
          * {@code loader} to apply any changes of the set of {@link ApkAssets}.
          **/
         @Override
+        @RavenwoodThrow(blockedBy = ResourcesLoader.class)
         public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
             synchronized (mLock) {
                 final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceImplKeys =
@@ -1964,6 +1980,7 @@ public class ResourcesManager {
     public void registerAllResourcesReference(@NonNull Resources resources) {
         if (android.content.res.Flags.registerResourcePaths()) {
             synchronized (mLock) {
+                cleanupReferences(mAllResourceReferences, mAllResourceReferencesQueue);
                 mAllResourceReferences.add(
                         new WeakReference<>(resources, mAllResourceReferencesQueue));
             }

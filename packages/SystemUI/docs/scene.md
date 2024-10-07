@@ -68,15 +68,13 @@ file evalutes to `true`.
 1.  Set a collection of **aconfig flags** to `true` by running the following
     commands:
     ```console
-    $ adb shell device_config override systemui com.android.systemui.scene_container true
-    $ adb shell device_config override systemui com.android.systemui.compose_lockscreen true
     $ adb shell device_config override systemui com.android.systemui.keyguard_bottom_area_refactor true
     $ adb shell device_config override systemui com.android.systemui.keyguard_wm_state_refactor true
-    $ adb shell device_config override systemui com.android.systemui.media_in_scene_container true
     $ adb shell device_config override systemui com.android.systemui.migrate_clocks_to_blueprint true
-    $ adb shell device_config override systemui com.android.systemui.notifications_heads_up_refactor true
+    $ adb shell device_config override systemui com.android.systemui.notification_avalanche_throttle_hun true
     $ adb shell device_config override systemui com.android.systemui.predictive_back_sysui true
     $ adb shell device_config override systemui com.android.systemui.device_entry_udfps_refactor true
+    $ adb shell device_config override systemui com.android.systemui.scene_container true
     ```
 2.  **Restart** System UI by issuing the following command:
     ```console
@@ -121,11 +119,11 @@ Should a variant owner or OEM want to replace or add a new scene, they could
 do so by defining their own scene. This section describes how to do that.
 
 Each scene is defined as an implementation of the
-[`ComposableScene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/ComposableScene.kt)
+[`Scene`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/compose/features/src/com/android/systemui/scene/ui/composable/Scene.kt)
 interface, which has three parts: 1. The `key` property returns the
 [`SceneKey`](https://cs.android.com/android/platform/superproject/main/+/main:frameworks/base/packages/SystemUI/src/com/android/systemui/scene/shared/model/SceneKey.kt)
-that uniquely identifies that scene 2. The `destinationScenes` `Flow` returns
-the (potentially ever-changing) set of navigation edges to other scenes, based
+that uniquely identifies that scene 2. The `userActions` `Flow` returns
+the (potentially ever-changing) set of navigation edges to other content, based
 on user-actions, which is how the navigation graph is defined (see
 [the Scene navigation](#Scene-navigation) section for more) 3. The `Content`
 function which uses
@@ -138,10 +136,10 @@ see the [Scene transition animations](#Scene-transition-animations) section
 For example:
 
 ```kotlin
-@SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : ComposableScene {
+@SysUISingleton class YourScene @Inject constructor( /* your dependencies here */ ) : Scene {
     override val key = SceneKey.YourScene
 
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> =
+    override val userActions: StateFlow<Map<UserAction, SceneModel>> =
         MutableStateFlow<Map<UserAction, SceneModel>>(
             mapOf(
                 // This is where scene navigation is defined, more on that below.

@@ -89,12 +89,11 @@ public class SatelliteImplBase extends SatelliteService {
         }
 
         @Override
-        public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
-                boolean isEmergency, IIntegerConsumer resultCallback) throws RemoteException {
+        public void requestSatelliteEnabled(SatelliteModemEnableRequestAttributes enableAttributes,
+                IIntegerConsumer resultCallback) throws RemoteException {
             executeMethodAsync(
                     () -> SatelliteImplBase.this
-                            .requestSatelliteEnabled(
-                                    enableSatellite, enableDemoMode, isEmergency, resultCallback),
+                            .requestSatelliteEnabled(enableAttributes, resultCallback),
                     "requestSatelliteEnabled");
         }
 
@@ -325,11 +324,7 @@ public class SatelliteImplBase extends SatelliteService {
      * enabled, this may also disable the cellular modem, and if the satellite modem is disabled,
      * this may also re-enable the cellular modem.
      *
-     * @param enableSatellite True to enable the satellite modem and false to disable.
-     * @param enableDemoMode True to enable demo mode and false to disable.
-     * @param isEmergency To specify the satellite is enabled for emergency session and false for
-     * non emergency session. Note: it is possible that a emergency session started get converted
-     * to a non emergency session and vice versa.
+     * @param enableAttributes The enable parameters that will be applied to the satellite session
      * @param resultCallback The callback to receive the error code result of the operation.
      *
      * Valid result codes returned:
@@ -342,8 +337,8 @@ public class SatelliteImplBase extends SatelliteService {
      *   SatelliteResult:SATELLITE_RESULT_REQUEST_NOT_SUPPORTED
      *   SatelliteResult:SATELLITE_RESULT_NO_RESOURCES
      */
-    public void requestSatelliteEnabled(boolean enableSatellite, boolean enableDemoMode,
-            boolean isEmergency, @NonNull IIntegerConsumer resultCallback) {
+    public void requestSatelliteEnabled(SatelliteModemEnableRequestAttributes enableAttributes,
+            @NonNull IIntegerConsumer resultCallback) {
         // stub implementation
     }
 

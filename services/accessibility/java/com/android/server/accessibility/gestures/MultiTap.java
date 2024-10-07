@@ -89,7 +89,7 @@ public class MultiTap extends GestureMatcher {
 
     @Override
     protected void onUp(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
-        cancelAfterDoubleTapTimeout(event, rawEvent, policyFlags);
+        cancelPendingTransitions();
         if (!isInsideSlop(rawEvent, mTouchSlop)) {
             cancelGesture(event, rawEvent, policyFlags);
         }

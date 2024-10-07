@@ -207,8 +207,8 @@ public class KeyguardIndicationController {
     protected boolean mPowerPluggedInWireless;
     protected boolean mPowerPluggedInDock;
     protected int mChargingSpeed;
+    protected boolean mPowerCharged;
 
-    private boolean mPowerCharged;
     /** Whether the battery defender is triggered. */
     private boolean mBatteryDefender;
     /** Whether the battery defender is triggered with the device plugged. */
@@ -1100,14 +1100,15 @@ public class KeyguardIndicationController {
             String percentage = NumberFormat.getPercentInstance().format(mBatteryLevel / 100f);
             return mContext.getResources().getString(
                     R.string.keyguard_plugged_in_incompatible_charger, percentage);
-        } else if (mPowerCharged) {
-            return mContext.getResources().getString(R.string.keyguard_charged);
         }
 
         return computePowerChargingStringIndication();
     }
 
     protected String computePowerChargingStringIndication() {
+        if (mPowerCharged) {
+            return mContext.getResources().getString(R.string.keyguard_charged);
+        }
         final boolean hasChargingTime = mChargingTimeRemaining > 0;
         int chargingId;
         if (mPowerPluggedInWired) {

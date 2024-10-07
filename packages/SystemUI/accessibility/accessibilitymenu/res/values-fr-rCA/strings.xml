@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Aller à l\'écran précédent"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Aller à l\'écran suivant"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Le menu Accessibilité propose un grand espace à l\'écran à l\'aide duquel vous pouvez contrôler votre appareil. Utilisez-le pour verrouiller votre appareil, régler le volume et la luminosité, prendre des captures d\'écran et plus."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Contrôle l\'appareil à l\'aide d\'un menu de grande taille"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Contrôler l\'appareil à l\'aide d\'un menu de grande taille"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Paramètres du menu Accessibilité"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Boutons de grande taille"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Augmenter la taille des boutons du menu Accessibilité"</string>

@@ -27,6 +27,7 @@ import java.lang.annotation.RetentionPolicy;
             DeviceSettingType.DEVICE_SETTING_TYPE_UNKNOWN,
             DeviceSettingType.DEVICE_SETTING_TYPE_ACTION_SWITCH,
             DeviceSettingType.DEVICE_SETTING_TYPE_MULTI_TOGGLE,
+            DeviceSettingType.DEVICE_SETTING_TYPE_FOOTER,
         },
         open = true)
 public @interface DeviceSettingType {
@@ -38,4 +39,10 @@ public @interface DeviceSettingType {
 
     /** Device setting type is multi-toggle preference. */
     int DEVICE_SETTING_TYPE_MULTI_TOGGLE = 2;
+
+    /** Device setting type is footer preference. */
+    int DEVICE_SETTING_TYPE_FOOTER = 3;
+
+    /** Device setting type is "help" preference. */
+    int DEVICE_SETTING_TYPE_HELP = 4;
 }

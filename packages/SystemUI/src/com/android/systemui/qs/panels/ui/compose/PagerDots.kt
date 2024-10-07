@@ -31,9 +31,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.semantics.pageLeft
 import androidx.compose.ui.semantics.pageRight
 import androidx.compose.ui.semantics.semantics
@@ -60,68 +62,64 @@ fun PagerDots(
     val inPageTransition by
         remember(pagerState) {
             derivedStateOf {
-                pagerState.currentPageOffsetFraction.absoluteValue > 0.01 &&
+                pagerState.currentPageOffsetFraction.absoluteValue > 0.05 &&
                     !pagerState.isOverscrolling()
             }
         }
     val coroutineScope = rememberCoroutineScope()
-    Row(
-        modifier =
-            modifier
-                .wrapContentWidth()
-                .pagerDotsSemantics(
-                    pagerState,
-                    coroutineScope,
+    val doubleDotWidth = dotSize * 2 + spaceSize
+    val activeMarkerWidth by
+        animateDpAsState(
+            targetValue = if (inPageTransition) doubleDotWidth else dotSize,
+            label = "PagerDotsTransitionAnimation",
+        )
+    val cornerRadius = dotSize / 2
+
+    fun DrawScope.drawDoubleRect(withPrevious: Boolean, width: Dp) {
+        drawRoundRect(
+            topLeft =
+                Offset(
+                    if (withPrevious) {
+                        dotSize.toPx() - width.toPx()
+                    } else {
+                        -(dotSize.toPx() + spaceSize.toPx())
+                    },
+                    0f,
                 ),
+            color = activeColor,
+            size = Size(width.toPx(), dotSize.toPx()),
+            cornerRadius = CornerRadius(cornerRadius.toPx()),
+        )
+    }
+
+    Row(
+        modifier = modifier.wrapContentWidth().pagerDotsSemantics(pagerState, coroutineScope),
         horizontalArrangement = spacedBy(spaceSize),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (!inPageTransition) {
-            repeat(pagerState.pageCount) { i ->
-                // We use canvas directly to only invalidate the draw phase when the page is
-                // changing.
-                Canvas(Modifier.size(dotSize)) {
-                    if (pagerState.currentPage == i) {
-                        drawCircle(activeColor)
-                    } else {
-                        drawCircle(nonActiveColor)
-                    }
-                }
-            }
-        } else {
-            val doubleDotWidth = dotSize * 2 + spaceSize
-            val cornerRadius = dotSize / 2
-            val width by
-                animateDpAsState(targetValue = if (inPageTransition) doubleDotWidth else dotSize)
-
-            fun DrawScope.drawDoubleRect() {
-                drawRoundRect(
-                    color = activeColor,
-                    size = Size(width.toPx(), dotSize.toPx()),
-                    cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-                )
-            }
-
-            repeat(pagerState.pageCount) { page ->
-                Canvas(Modifier.size(dotSize)) {
-                    val withPrevious = pagerState.currentPageOffsetFraction < 0
-                    val ltr = layoutDirection == LayoutDirection.Ltr
+        // This means that the active rounded rect has to be drawn between the current page
+        // and the previous one (as we are animating back), or the current one if not transitioning
+        val withPrevious = pagerState.currentPageOffsetFraction <= 0 || pagerState.isOverscrolling()
+        repeat(pagerState.pageCount) { page ->
+            Canvas(Modifier.size(dotSize)) {
+                val rtl = layoutDirection == LayoutDirection.Rtl
+                scale(if (rtl) -1f else 1f, 1f, Offset(0f, center.y)) {
+                    drawCircle(nonActiveColor)
+                    // We always want to draw the rounded rect on the rightmost dot iteration, so
+                    // the inactive dot is always drawn behind.
+                    // This means that:
+                    // * if we are scrolling back, we draw it when we are in the current page (so it
+                    //   extends between this page and the previous one).
+                    // * if we are scrolling forward, we draw it when we are in the next page (so it
+                    //   extends between the next page and the current one).
+                    // * if we are not scrolling, withPrevious is true (pageOffset 0) and we
+                    //   draw in the current page.
+                    // drawDoubleRect calculates the offset based on the above.
                     if (
-                        withPrevious && page == (pagerState.currentPage - 1) ||
-                            !withPrevious && page == pagerState.currentPage
-                    ) {
-                        if (ltr) {
-                            drawDoubleRect()
-                        }
-                    } else if (
                         withPrevious && page == pagerState.currentPage ||
-                            !withPrevious && page == (pagerState.currentPage + 1)
+                            (!withPrevious && page == pagerState.currentPage + 1)
                     ) {
-                        if (!ltr) {
-                            drawDoubleRect()
-                        }
-                    } else {
-                        drawCircle(nonActiveColor)
+                        drawDoubleRect(withPrevious, activeMarkerWidth)
                     }
                 }
             }

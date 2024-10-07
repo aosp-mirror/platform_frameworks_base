@@ -83,7 +83,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_TOKEN_TRANSFO
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.window.flags.Flags.FLAG_CAMERA_COMPAT_FOR_FREEFORM;
+import static com.android.window.flags.Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -369,8 +369,10 @@ public class DisplayContentTests extends WindowTestsBase {
                 "startingWin");
         startingWin.setHasSurface(true);
         assertTrue(startingWin.canBeImeTarget());
+        final WindowContainer imeSurfaceParentWindow = mock(WindowContainer.class);
         final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
-        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        doReturn(imeSurfaceParent).when(imeSurfaceParentWindow).getSurfaceControl();
+        doReturn(imeSurfaceParentWindow).when(mDisplayContent).computeImeParent();
         spyOn(imeContainer);
 
         mDisplayContent.setImeInputTarget(startingWin);
@@ -406,8 +408,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 "startingWin");
         startingWin.setHasSurface(true);
         assertTrue(startingWin.canBeImeTarget());
+        final WindowContainer imeSurfaceParentWindow = mock(WindowContainer.class);
         final SurfaceControl imeSurfaceParent = mock(SurfaceControl.class);
-        doReturn(imeSurfaceParent).when(mDisplayContent).computeImeParent();
+        doReturn(imeSurfaceParent).when(imeSurfaceParentWindow).getSurfaceControl();
+        doReturn(imeSurfaceParentWindow).when(mDisplayContent).computeImeParent();
+
 
         // Main precondition for this test: organize the ImeContainer.
         final IDisplayAreaOrganizer mockImeOrganizer = mock(IDisplayAreaOrganizer.class);
@@ -639,10 +644,11 @@ public class DisplayContentTests extends WindowTestsBase {
                 ws.matchesDisplayAreaBounds());
 
         assertTrue("IME shouldn't be attached to app",
-                dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
-                        .mActivityRecord.getSurfaceControl());
+                dc.computeImeParent().getSurfaceControl() != dc.getImeTarget(
+                        IME_TARGET_LAYERING).getWindow().mActivityRecord.getSurfaceControl());
         assertEquals("IME should be attached to display",
-                dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+                dc.getImeContainer().getParent().getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
@@ -1144,6 +1150,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testOrientationBehind() {
+        assertNull(mDisplayContent.getLastOrientationSource());
         final ActivityRecord prev = new ActivityBuilder(mAtm).setCreateTask(true)
                 .setScreenOrientation(getRotatedOrientation(mDisplayContent)).build();
         prev.setVisibleRequested(false);
@@ -1190,8 +1197,9 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_BASE_APPLICATION, "app"));
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
-                        .mActivityRecord.getSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeTarget(
+                        IME_TARGET_LAYERING).getWindow().mActivityRecord.getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1201,7 +1209,8 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getImeTarget(IME_TARGET_LAYERING).getWindow().setWindowingMode(
                 WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW);
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -1212,7 +1221,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(mAppWindow);
         // The surface parent of IME should be the display instead of app window.
         assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1220,7 +1229,8 @@ public class DisplayContentTests extends WindowTestsBase {
         final DisplayContent dc = createNewDisplay();
         dc.setImeLayeringTarget(createWindow(null, TYPE_STATUS_BAR, "statusBar"));
         dc.setImeInputTarget(dc.getImeTarget(IME_TARGET_LAYERING).getWindow());
-        assertEquals(dc.getImeContainer().getParentSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParentSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @SetupWindows(addWindows = W_ACTIVITY)
@@ -1231,7 +1241,8 @@ public class DisplayContentTests extends WindowTestsBase {
         doReturn(true).when(mDisplayContent).shouldImeAttachedToApp();
         mDisplayContent.setImeLayeringTarget(app1);
         mDisplayContent.setImeInputTarget(app1);
-        assertEquals(app1.mActivityRecord.getSurfaceControl(), mDisplayContent.computeImeParent());
+        assertEquals(app1.mActivityRecord.getSurfaceControl(),
+                mDisplayContent.computeImeParent().getSurfaceControl());
         mDisplayContent.setImeLayeringTarget(app2);
         // Expect null means no change IME parent when the IME layering target not yet
         // request IME to be the input target.
@@ -1249,7 +1260,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setImeInputTarget(app);
         assertFalse(mDisplayContent.shouldImeAttachedToApp());
         assertEquals(mDisplayContent.getImeContainer().getParentSurfaceControl(),
-                mDisplayContent.computeImeParent());
+                mDisplayContent.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1274,7 +1285,8 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(dc.getImeTarget(IME_TARGET_LAYERING), dc.getImeInputTarget());
 
         // The ImeParent should be the display.
-        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+        assertEquals(dc.getImeContainer().getParent().getSurfaceControl(),
+                dc.computeImeParent().getSurfaceControl());
     }
 
     @Test
@@ -1732,25 +1744,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
-    @SetupWindows(addWindows = W_ACTIVITY)
-    @Test
-    public void testRotateSeamlesslyWithFixedRotation() {
-        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-        final ActivityRecord app = mAppWindow.mActivityRecord;
-        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
-        mAppWindow.mAttrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
-
-        // Use seamless rotation if the top app is rotated.
-        assertTrue(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
-                ROTATION_90 /* newRotation */, false /* forceUpdate */));
-
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(app);
-
-        // Use normal rotation because animating recents is an intermediate state.
-        assertFalse(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
-                ROTATION_90 /* newRotation */, false /* forceUpdate */));
-    }
-
     @Test
     public void testFixedRotationWithPip() {
         final DisplayContent displayContent = mDefaultDisplay;
@@ -1826,49 +1819,6 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent).updateOrientation(eq(app), anyBoolean());
         assertFalse(app.isFixedRotationTransforming());
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
-    }
-
-    @Test
-    public void testRecentsNotRotatingWithFixedRotation() {
-        unblockDisplayRotation(mDisplayContent);
-        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-
-        final ActivityRecord activity = createActivityRecord(mDisplayContent);
-        final ActivityRecord recentsActivity = createActivityRecord(mDisplayContent);
-        recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_NOSENSOR);
-        doReturn(mock(RecentsAnimationController.class)).when(mWm).getRecentsAnimationController();
-
-        // Do not rotate if the recents animation is animating on top.
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
-        assertFalse(displayRotation.updateRotationUnchecked(false));
-
-        // Rotation can be updated if the recents animation is finished.
-        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
-        assertTrue(displayRotation.updateRotationUnchecked(false));
-
-        // Rotation can be updated if the policy is not ok to animate (e.g. going to sleep).
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
-        ((TestWindowManagerPolicy) mWm.mPolicy).mOkToAnimate = false;
-        assertTrue(displayRotation.updateRotationUnchecked(false));
-
-        // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
-        // switching activities in different orientations by quickstep gesture.
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        mDisplayContent.setFixedRotationLaunchingAppUnchecked(activity);
-        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
-        assertTrue(displayRotation.updateRotationUnchecked(false));
-
-        // The recents activity should not apply fixed rotation if the top activity is not opaque.
-        mDisplayContent.mFocusedApp = activity;
-        doReturn(false).when(mDisplayContent.mFocusedApp).occludesParent();
-        doReturn(ROTATION_90).when(mDisplayContent).rotationForActivityInDifferentOrientation(
-                eq(recentsActivity));
-        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
-        assertFalse(recentsActivity.hasFixedRotationTransform());
     }
 
     @EnableFlags(com.android.window.flags.Flags.FLAG_RESPECT_NON_TOP_VISIBLE_FIXED_ORIENTATION)
@@ -2796,15 +2746,17 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowState imeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "imeAppTarget");
         mDisplayContent.setImeLayeringTarget(imeAppTarget);
-        spyOn(imeAppTarget);
-        doReturn(true).when(imeAppTarget).isRequestedVisible(ime());
+        imeAppTarget.setRequestedVisibleTypes(ime());
         assertEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
 
         // Verify imeMenuDialog doesn't be focused window if the next IME target is closing.
         final WindowState nextImeAppTarget =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "nextImeAppTarget");
         makeWindowVisibleAndDrawn(nextImeAppTarget);
-        nextImeAppTarget.mActivityRecord.commitVisibility(false, false);
+        // Even if the app still requests IME, the ime dialog should not gain focus if the target
+        // app is invisible.
+        nextImeAppTarget.setRequestedVisibleTypes(ime());
+        nextImeAppTarget.mActivityRecord.setVisibility(false);
         mDisplayContent.setImeLayeringTarget(nextImeAppTarget);
         assertNotEquals(imeMenuDialog, mDisplayContent.findFocusedWindow());
     }
@@ -2868,7 +2820,7 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mWm.mUmInternal, never()).isUserVisible(userId2, displayId);
     }
 
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void cameraCompatFreeformFlagEnabled_cameraCompatFreeformPolicyNotNull() {
         doReturn(true).when(() ->
@@ -2877,7 +2829,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
-    @DisableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @DisableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @Test
     public void cameraCompatFreeformFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {
         doReturn(true).when(() ->
@@ -2886,7 +2838,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(createNewDisplay().mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy());
     }
 
-    @EnableFlags(FLAG_CAMERA_COMPAT_FOR_FREEFORM)
+    @EnableFlags(FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_MODE)
     @Test
     public void desktopWindowingFlagNotEnabled_cameraCompatFreeformPolicyIsNull() {

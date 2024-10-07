@@ -21,11 +21,11 @@ package com.android.systemui.statusbar.notification.domain.interactor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRepository
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpRowRepository
 import com.android.systemui.statusbar.notification.shared.HeadsUpRowKey
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,10 +39,10 @@ class HeadsUpNotificationInteractor
 @Inject
 constructor(
     private val headsUpRepository: HeadsUpRepository,
-    private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
-    private val shadeInteractor: ShadeInteractor,
+    faceAuthInteractor: DeviceEntryFaceAuthInteractor,
+    keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
+    shadeInteractor: ShadeInteractor,
 ) {
 
     /** The top-ranked heads up row, regardless of pinned state */
@@ -56,9 +56,8 @@ constructor(
             }
             .distinctUntilChanged()
 
-    /** Set of currently pinned top-level heads up rows to be displayed. */
-    val pinnedHeadsUpRows: Flow<Set<HeadsUpRowKey>> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+    private val activeHeadsUpRows: Flow<Set<Pair<HeadsUpRowKey, Boolean>>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(emptySet())
         } else {
             headsUpRepository.activeHeadsUpRows.flatMapLatest { repositories ->
@@ -67,9 +66,7 @@ constructor(
                         repositories.map { repo ->
                             repo.isPinned.map { isPinned -> repo to isPinned }
                         }
-                    combine(toCombine) { pairs ->
-                        pairs.filter { (_, isPinned) -> isPinned }.map { (repo, _) -> repo }.toSet()
-                    }
+                    combine(toCombine) { pairs -> pairs.toSet() }
                 } else {
                     // if the set is empty, there are no flows to combine
                     flowOf(emptySet())
@@ -78,9 +75,29 @@ constructor(
         }
     }
 
+    /** Set of currently active top-level heads up rows to be displayed. */
+    val activeHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            activeHeadsUpRows.map { it.map { (repo, _) -> repo }.toSet() }
+        }
+    }
+
+    /** Set of currently pinned top-level heads up rows to be displayed. */
+    val pinnedHeadsUpRowKeys: Flow<Set<HeadsUpRowKey>> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(emptySet())
+        } else {
+            activeHeadsUpRows.map {
+                it.filter { (_, isPinned) -> isPinned }.map { (repo, _) -> repo }.toSet()
+            }
+        }
+    }
+
     /** Are there any pinned heads up rows to display? */
     val hasPinnedRows: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             headsUpRepository.activeHeadsUpRows.flatMapLatest { rows ->
@@ -95,7 +112,7 @@ constructor(
     }
 
     val isHeadsUpOrAnimatingAway: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             combine(hasPinnedRows, headsUpRepository.isHeadsUpAnimatingAway) {
@@ -123,7 +140,7 @@ constructor(
         }
 
     val showHeadsUpStatusBar: Flow<Boolean> by lazy {
-        if (NotificationsHeadsUpRefactor.isUnexpectedlyInLegacyMode()) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
             flowOf(false)
         } else {
             combine(hasPinnedRows, canShowHeadsUp) { hasPinnedRows, canShowHeadsUp ->
@@ -147,6 +164,16 @@ constructor(
     /** Snooze the currently pinned HUN. */
     fun snooze() {
         headsUpRepository.snooze()
+    }
+
+    /** Unpin all currently pinned HUNs. */
+    fun unpinAll(userUnPinned: Boolean) {
+        headsUpRepository.unpinAll(userUnPinned)
+    }
+
+    /** Notifies that the current scene transition is idle. */
+    fun onTransitionIdle() {
+        headsUpRepository.releaseAfterExpansion()
     }
 }
 

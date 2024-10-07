@@ -25,7 +25,7 @@ import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
-import com.android.compose.animation.scene.content.state.ContentState
+import com.android.compose.animation.scene.content.state.TransitionState
 
 /** A transformation applied to one or more elements during a transition. */
 sealed interface Transformation {
@@ -66,7 +66,7 @@ internal sealed interface PropertyTransformation<T> : Transformation {
         content: ContentKey,
         element: Element,
         stateInContent: Element.State,
-        transition: ContentState.Transition<*>,
+        transition: TransitionState.Transition,
         value: T,
     ): T
 }
@@ -83,17 +83,13 @@ internal class RangedPropertyTransformation<T>(
     override fun reversed(): Transformation {
         return RangedPropertyTransformation(
             delegate.reversed() as PropertyTransformation<T>,
-            range.reversed()
+            range.reversed(),
         )
     }
 }
 
 /** The progress-based range of a [PropertyTransformation]. */
-data class TransformationRange(
-    val start: Float,
-    val end: Float,
-    val easing: Easing,
-) {
+data class TransformationRange(val start: Float, val end: Float, val easing: Easing) {
     constructor(
         start: Float? = null,
         end: Float? = null,

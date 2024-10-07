@@ -22,15 +22,16 @@ import android.graphics.PorterDuffColorFilter
 import androidx.annotation.RawRes
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,13 +41,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
@@ -60,6 +61,7 @@ import com.airbnb.lottie.compose.LottieDynamicProperty
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
+import com.android.compose.modifiers.background
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.IN_PROGRESS
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
@@ -67,29 +69,22 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionSta
 enum class TutorialActionState {
     NOT_STARTED,
     IN_PROGRESS,
-    FINISHED
+    FINISHED,
 }
 
 @Composable
 fun ActionTutorialContent(
     actionState: TutorialActionState,
     onDoneButtonClicked: () -> Unit,
-    config: TutorialScreenConfig
+    config: TutorialScreenConfig,
 ) {
-    val animatedColor by
-        animateColorAsState(
-            targetValue =
-                if (actionState == FINISHED) config.colors.successBackground
-                else config.colors.background,
-            animationSpec = tween(durationMillis = 150, easing = LinearEasing),
-            label = "backgroundColor"
-        )
     Column(
         verticalArrangement = Arrangement.Center,
         modifier =
             Modifier.fillMaxSize()
-                .drawBehind { drawRect(animatedColor) }
-                .padding(start = 48.dp, top = 124.dp, end = 48.dp, bottom = 48.dp)
+                .background(config.colors.background)
+                .safeDrawingPadding()
+                .padding(start = 48.dp, top = 100.dp, end = 48.dp, bottom = 8.dp),
     ) {
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
             TutorialDescription(
@@ -100,16 +95,18 @@ fun ActionTutorialContent(
                 bodyTextId =
                     if (actionState == FINISHED) config.strings.bodySuccessResId
                     else config.strings.bodyResId,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             Spacer(modifier = Modifier.width(76.dp))
             TutorialAnimation(
                 actionState,
                 config,
-                modifier = Modifier.weight(1f).padding(top = 8.dp)
+                modifier = Modifier.weight(1f).padding(top = 8.dp),
             )
         }
-        DoneButton(onDoneButtonClicked = onDoneButtonClicked)
+        AnimatedVisibility(visible = actionState == FINISHED, enter = fadeIn()) {
+            DoneButton(onDoneButtonClicked = onDoneButtonClicked)
+        }
     }
 }
 
@@ -118,19 +115,19 @@ fun TutorialDescription(
     @StringRes titleTextId: Int,
     titleColor: Color,
     @StringRes bodyTextId: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Column(verticalArrangement = Arrangement.Top, modifier = modifier) {
         Text(
             text = stringResource(id = titleTextId),
             style = MaterialTheme.typography.displayLarge,
-            color = titleColor
+            color = titleColor,
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(id = bodyTextId),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.White
+            color = Color.White,
         )
     }
 }
@@ -139,7 +136,7 @@ fun TutorialDescription(
 fun TutorialAnimation(
     actionState: TutorialActionState,
     config: TutorialScreenConfig,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         AnimatedContent(
@@ -160,18 +157,18 @@ fun TutorialAnimation(
                     // state which shares initial animation frame with both FINISHED and NOT_STARTED
                     EnterTransition.None togetherWith ExitTransition.None
                 }
-            }
+            },
         ) { state ->
             when (state) {
                 NOT_STARTED ->
                     EducationAnimation(
                         config.animations.educationResId,
-                        config.colors.animationColors
+                        config.colors.animationColors,
                     )
                 IN_PROGRESS ->
                     FrozenSuccessAnimation(
                         config.animations.successResId,
-                        config.colors.animationColors
+                        config.colors.animationColors,
                     )
                 FINISHED ->
                     SuccessAnimation(config.animations.successResId, config.colors.animationColors)
@@ -183,7 +180,7 @@ fun TutorialAnimation(
 @Composable
 private fun FrozenSuccessAnimation(
     @RawRes successAnimationId: Int,
-    animationProperties: LottieDynamicProperties
+    animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
     LottieAnimation(
@@ -196,7 +193,7 @@ private fun FrozenSuccessAnimation(
 @Composable
 private fun EducationAnimation(
     @RawRes educationAnimationId: Int,
-    animationProperties: LottieDynamicProperties
+    animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(educationAnimationId))
     val progress by
@@ -211,7 +208,7 @@ private fun EducationAnimation(
 @Composable
 private fun SuccessAnimation(
     @RawRes successAnimationId: Int,
-    animationProperties: LottieDynamicProperties
+    animationProperties: LottieDynamicProperties,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(successAnimationId))
     val progress by animateLottieCompositionAsState(composition, iterations = 1)
@@ -225,13 +222,13 @@ private fun SuccessAnimation(
 @Composable
 fun rememberColorFilterProperty(
     layerName: String,
-    color: Color
+    color: Color,
 ): LottieDynamicProperty<ColorFilter> {
     return rememberLottieDynamicProperty(
         LottieProperty.COLOR_FILTER,
         value = PorterDuffColorFilter(color.toArgb(), PorterDuff.Mode.SRC_ATOP),
         // "**" below means match zero or more layers, so ** layerName ** means find layer with that
         // name at any depth
-        keyPath = arrayOf("**", layerName, "**")
+        keyPath = arrayOf("**", layerName, "**"),
     )
 }

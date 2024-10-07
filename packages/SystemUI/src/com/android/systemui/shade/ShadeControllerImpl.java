@@ -65,6 +65,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private final StatusBarWindowController mStatusBarWindowController;
     private final DeviceProvisionedController mDeviceProvisionedController;
 
+    private final Lazy<NotificationShadeWindowViewController> mNotifShadeWindowViewController;
     private final Lazy<NotificationPanelViewController> mNpvc;
     private final Lazy<AssistManager> mAssistManagerLazy;
     private final Lazy<NotificationGutsManager> mGutsManager;
@@ -72,7 +73,6 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     private boolean mExpandedVisible;
     private boolean mLockscreenOrShadeVisible;
 
-    private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private ShadeVisibilityListener mShadeVisibilityListener;
 
     @Inject
@@ -87,6 +87,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             DeviceProvisionedController deviceProvisionedController,
             NotificationShadeWindowController notificationShadeWindowController,
             @DisplayId int displayId,
+            Lazy<NotificationShadeWindowViewController> notificationShadeWindowViewController,
             Lazy<NotificationPanelViewController> shadeViewControllerLazy,
             Lazy<AssistManager> assistManagerLazy,
             Lazy<NotificationGutsManager> gutsManager
@@ -105,6 +106,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mDeviceProvisionedController = deviceProvisionedController;
         mGutsManager = gutsManager;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mNotifShadeWindowViewController = notificationShadeWindowViewController;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mDisplayId = displayId;
         mKeyguardStateController = keyguardStateController;
@@ -139,7 +141,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 
-            mNotificationShadeWindowViewController.cancelExpandHelper();
+            mNotifShadeWindowViewController.get().cancelExpandHelper();
             getNpvc().collapse(true, delayed, speedUpFactor);
         }
     }
@@ -242,7 +244,7 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
     @Override
     public void cancelExpansionAndCollapseShade() {
         if (getNpvc().isTracking()) {
-            mNotificationShadeWindowViewController.cancelCurrentTouch();
+            mNotifShadeWindowViewController.get().cancelCurrentTouch();
         }
         if (getNpvc().isPanelExpanded()
                 && mStatusBarStateController.getState() == StatusBarState.SHADE) {
@@ -367,14 +369,8 @@ public final class ShadeControllerImpl extends BaseShadeControllerImpl {
         mShadeVisibilityListener.expandedVisibleChanged(expandedVisible);
     }
 
-    @Override
-    public void setNotificationShadeWindowViewController(
-            NotificationShadeWindowViewController controller) {
-        mNotificationShadeWindowViewController = controller;
-    }
-
     private NotificationShadeWindowView getNotificationShadeWindowView() {
-        return mNotificationShadeWindowViewController.getView();
+        return mNotifShadeWindowViewController.get().getView();
     }
 
     private NotificationPanelViewController getNpvc() {

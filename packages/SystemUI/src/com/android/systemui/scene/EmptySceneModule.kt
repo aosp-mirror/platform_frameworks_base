@@ -16,7 +16,8 @@
 
 package com.android.systemui.scene
 
-import com.android.systemui.scene.shared.model.Scene
+import com.android.systemui.scene.ui.composable.Overlay
+import com.android.systemui.scene.ui.composable.Scene
 import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ElementsIntoSet
@@ -27,6 +28,12 @@ object EmptySceneModule {
     @Provides
     @ElementsIntoSet
     fun emptySceneSet(): Set<Scene> {
+        return emptySet()
+    }
+
+    @Provides
+    @ElementsIntoSet
+    fun emptyOverlaySet(): Set<Overlay> {
         return emptySet()
     }
 }

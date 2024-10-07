@@ -373,6 +373,7 @@ public class ViewConfiguration {
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
+    private final boolean mViewTouchScreenHapticScrollFeedbackEnabled;
     @UnsupportedAppUsage
     private final boolean mFadingMarqueeEnabled;
     private final long mGlobalActionsKeyTimeout;
@@ -437,6 +438,7 @@ public class ViewConfiguration {
         mSmartSelectionInitializedTimeout = SMART_SELECTION_INITIALIZED_TIMEOUT_IN_MILLISECOND;
         mSmartSelectionInitializingTimeout = SMART_SELECTION_INITIALIZING_TIMEOUT_IN_MILLISECOND;
         mPreferKeepClearForFocusEnabled = false;
+        mViewTouchScreenHapticScrollFeedbackEnabled = false;
     }
 
     /**
@@ -588,6 +590,12 @@ public class ViewConfiguration {
         mViewBasedRotaryEncoderScrollHapticsEnabledConfig =
                 res.getBoolean(
                         com.android.internal.R.bool.config_viewBasedRotaryEncoderHapticsEnabled);
+        mViewTouchScreenHapticScrollFeedbackEnabled =
+                Flags.enableTouchScrollFeedback()
+                        ? res.getBoolean(
+                        com.android.internal.R.bool
+                                .config_viewTouchScreenHapticScrollFeedbackEnabled)
+                        : false;
     }
 
     /**
@@ -1283,6 +1291,10 @@ public class ViewConfiguration {
 
         if (source == InputDevice.SOURCE_ROTARY_ENCODER && axis == MotionEvent.AXIS_SCROLL) {
             return mRotaryEncoderHapticScrollFeedbackEnabled;
+        }
+
+        if ((source & InputDevice.SOURCE_TOUCHSCREEN) != 0) {
+            return mViewTouchScreenHapticScrollFeedbackEnabled;
         }
 
         return false;

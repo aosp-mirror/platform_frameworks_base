@@ -19,13 +19,12 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
-import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
-import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON_RETURN_HOME;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -51,7 +50,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.window.RemoteTransition;
 import android.window.WindowContainerTransaction;
 
@@ -69,13 +67,14 @@ import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
-import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
+import com.android.wm.shell.shared.TransactionPool;
 import com.android.wm.shell.splitscreen.SplitScreen.SplitScreenListener;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.DefaultMixedHandler;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.HomeTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
@@ -98,9 +97,9 @@ public class StageCoordinatorTests extends ShellTestCase {
     @Mock
     private SyncTransactionQueue mSyncQueue;
     @Mock
-    private MainStage mMainStage;
+    private StageTaskListener mMainStage;
     @Mock
-    private SideStage mSideStage;
+    private StageTaskListener mSideStage;
     @Mock
     private SplitLayout mSplitLayout;
     @Mock
@@ -120,7 +119,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
     private final Rect mRootBounds = new Rect(0, 0, 45, 60);
 
-    private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
     private SurfaceControl mDividerLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
@@ -140,7 +138,7 @@ public class StageCoordinatorTests extends ShellTestCase {
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, mMainHandler, Optional.empty(), mLaunchAdjacentController,
                 Optional.empty()));
-        mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
+        mDividerLeash = new SurfaceControl.Builder().setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
@@ -150,7 +148,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
-        mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mRootLeash = new SurfaceControl.Builder().setName("test").build();
         mStageCoordinator.onTaskAppeared(mRootTask, mRootLeash);
 
         mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().build();
@@ -432,7 +430,8 @@ public class StageCoordinatorTests extends ShellTestCase {
         ShellInit shellInit = new ShellInit(mMainExecutor);
         final Transitions t = new Transitions(mContext, shellInit, mock(ShellController.class),
                 mTaskOrganizer, mTransactionPool, mock(DisplayController.class), mMainExecutor,
-                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class));
+                mMainHandler, mAnimExecutor, mock(HomeTransitionObserver.class),
+                mock(FocusTransitionObserver.class));
         shellInit.init();
         return t;
     }

@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.view.InsetsSourceControl;
@@ -42,6 +43,7 @@ import android.view.WindowManager.LayoutParams;
  * 
  *  {@hide} 
  */
+@RavenwoodKeepWholeClass
 public class CompatibilityInfo implements Parcelable {
     /** default compatibility info object for compatible applications */
     @UnsupportedAppUsage

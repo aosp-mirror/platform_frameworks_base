@@ -52,9 +52,20 @@ constructor(
         get() = prefs.getBoolean(HAS_APPROVED_SCREEN_RECORDING, false)
         private set(value) = prefs.edit().putBoolean(HAS_APPROVED_SCREEN_RECORDING, value).apply()
 
+    // Store the index of the issue type because res ids are generated at compile time and change
+    // in value from one build to another. The index will not change between package versions.
+    private var issueTypeIndex: Int
+        get() = prefs.getInt(KEY_ISSUE_TYPE_INDEX, ISSUE_TYPE_NOT_SET)
+        set(value) = prefs.edit().putInt(KEY_ISSUE_TYPE_INDEX, value).apply()
+
     var issueTypeRes
-        get() = prefs.getInt(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
-        set(value) = prefs.edit().putInt(KEY_ISSUE_TYPE_RES, value).apply()
+        get() =
+            // If the user has never used the record issue tile, we don't show a default issue type
+            if (issueTypeIndex == ISSUE_TYPE_NOT_SET) ISSUE_TYPE_NOT_SET
+            else ALL_ISSUE_TYPES.keys.toIntArray()[issueTypeIndex]
+        set(value) {
+            issueTypeIndex = ALL_ISSUE_TYPES.keys.toIntArray().indexOf(value)
+        }
 
     val traceConfig: TraceConfig
         get() = ALL_ISSUE_TYPES[issueTypeRes] ?: customTraceState.traceConfig
@@ -89,17 +100,17 @@ constructor(
         private const val HAS_APPROVED_SCREEN_RECORDING = "HasApprovedScreenRecord"
         private const val KEY_RECORD_SCREEN = "key_recordScreen"
         private const val KEY_TAG_TITLES = "key_tagTitles"
-        const val KEY_ISSUE_TYPE_RES = "key_issueTypeRes"
+        const val KEY_ISSUE_TYPE_INDEX = "key_issueTypeIndex"
         const val ISSUE_TYPE_NOT_SET = -1
         const val TAG_TITLE_DELIMITER = ": "
 
-        val ALL_ISSUE_TYPES: Map<Int, TraceConfig?> =
-            hashMapOf(
+        val ALL_ISSUE_TYPES: LinkedHashMap<Int, TraceConfig?> =
+            linkedMapOf(
                 Pair(R.string.performance, PresetTraceConfigs.getPerformanceConfig()),
                 Pair(R.string.user_interface, PresetTraceConfigs.getUiConfig()),
                 Pair(R.string.battery, PresetTraceConfigs.getBatteryConfig()),
                 Pair(R.string.thermal, PresetTraceConfigs.getThermalConfig()),
-                Pair(R.string.custom, null),
+                Pair(R.string.custom, null), // Null means we are using a custom trace config
             )
     }
 }

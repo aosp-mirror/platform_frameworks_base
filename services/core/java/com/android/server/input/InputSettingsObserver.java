@@ -71,6 +71,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadTapToClickEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_TAP_DRAGGING),
                         (reason) -> updateTouchpadTapDraggingEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_VISUALIZER),
+                        (reason) -> updateTouchpadHardwareStateNotificationsEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
@@ -91,6 +93,8 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_TIMEOUT_MS),
                         (reason) -> updateKeyRepeatInfo()),
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
+                        (reason) -> updateKeyRepeatInfo()),
+                Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_ENABLED),
                         (reason) -> updateKeyRepeatInfo()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
                         (reason) -> updateShowRotaryInput()),
@@ -177,6 +181,10 @@ class InputSettingsObserver extends ContentObserver {
         mNative.setTouchpadTapDraggingEnabled(InputSettings.useTouchpadTapDragging(mContext));
     }
 
+    private void updateTouchpadHardwareStateNotificationsEnabled() {
+        mService.updateTouchpadVisualizerEnabled(InputSettings.useTouchpadVisualizer(mContext));
+    }
+
     private void updateTouchpadRightClickZoneEnabled() {
         mNative.setTouchpadRightClickZoneEnabled(InputSettings.useTouchpadRightClickZone(mContext));
     }
@@ -224,6 +232,11 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateKeyRepeatInfo() {
+        // Key repeat is enabled by default
+        final boolean keyRepeatEnabled = Settings.Secure.getIntForUser(
+                mContext.getContentResolver(), Settings.Secure.KEY_REPEAT_ENABLED, 1,
+                UserHandle.USER_CURRENT) != 0;
+
         // Use ViewConfiguration getters only as fallbacks because they may return stale values.
         final int timeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_TIMEOUT_MS, ViewConfiguration.getKeyRepeatTimeout(),
@@ -231,7 +244,7 @@ class InputSettingsObserver extends ContentObserver {
         final int delayMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
                 UserHandle.USER_CURRENT);
-        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
+        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs, keyRepeatEnabled);
     }
 
     private void updateMaximumObscuringOpacityForTouch() {

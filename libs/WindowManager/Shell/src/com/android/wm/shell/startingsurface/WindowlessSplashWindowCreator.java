@@ -36,7 +36,7 @@ import android.window.StartingWindowInfo;
 import android.window.StartingWindowRemovalInfo;
 
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.shared.TransactionPool;
 
 class WindowlessSplashWindowCreator extends AbsSplashWindowCreator {
 

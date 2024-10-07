@@ -222,6 +222,9 @@ public final class NotificationRecord {
     private boolean mPendingLogUpdate = false;
     private int mProposedImportance = IMPORTANCE_UNSPECIFIED;
     private boolean mSensitiveContent = false;
+    // Whether an app has attempted to cancel this notification after it has been marked as
+    // lifetime extended.
+    private boolean mCanceledAfterLifetimeExtension = false;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -327,10 +330,19 @@ public final class NotificationRecord {
         }
 
         final long[] vibrationPattern = channel.getVibrationPattern();
-        if (vibrationPattern == null) {
-            return helper.createDefaultVibration(insistent);
+        if (vibrationPattern != null) {
+            return helper.createWaveformVibration(vibrationPattern, insistent);
         }
-        return helper.createWaveformVibration(vibrationPattern, insistent);
+
+        if (com.android.server.notification.Flags.notificationVibrationInSoundUri()) {
+            final VibrationEffect vibrationEffectFromSoundUri =
+                    helper.createVibrationEffectFromSoundUri(channel.getSound());
+            if (vibrationEffectFromSoundUri != null) {
+                return vibrationEffectFromSoundUri;
+            }
+        }
+
+        return helper.createDefaultVibration(insistent);
     }
 
     private VibrationEffect calculateVibration() {
@@ -535,6 +547,7 @@ public final class NotificationRecord {
                 + NotificationListenerService.Ranking.importanceToString(mProposedImportance));
         pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mSensitiveContent=" + mSensitiveContent);
+        pw.println(prefix + "mCanceledAfterLifetimeExtension=" + mCanceledAfterLifetimeExtension);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
@@ -1480,14 +1493,23 @@ public final class NotificationRecord {
 
             final Notification notification = getNotification();
             notification.visitUris((uri) -> {
-                visitGrantableUri(uri, false, false);
+                if (com.android.server.notification.Flags.notificationVerifyChannelSoundUri()) {
+                    visitGrantableUri(uri, false, false);
+                } else {
+                    oldVisitGrantableUri(uri, false, false);
+                }
             });
 
             if (notification.getChannelId() != null) {
                 NotificationChannel channel = getChannel();
                 if (channel != null) {
-                    visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
-                            & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                    if (com.android.server.notification.Flags.notificationVerifyChannelSoundUri()) {
+                        visitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                                & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                    } else {
+                        oldVisitGrantableUri(channel.getSound(), (channel.getUserLockedFields()
+                                & NotificationChannel.USER_LOCKED_SOUND) != 0, true);
+                    }
                 }
             }
         } finally {
@@ -1503,7 +1525,7 @@ public final class NotificationRecord {
      * {@link #mGrantableUris}. Otherwise, this will either log or throw
      * {@link SecurityException} depending on target SDK of enqueuing app.
      */
-    private void visitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
+    private void oldVisitGrantableUri(Uri uri, boolean userOverriddenUri, boolean isSound) {
         if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
 
         if (mGrantableUris != null && mGrantableUris.contains(uri)) {
@@ -1539,6 +1561,45 @@ public final class NotificationRecord {
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Note the presence of a {@link Uri} that should have permission granted to
+     * whoever will be rendering it.
+     * <p>
+     * If the enqueuing app has the ability to grant access, it will be added to
+     * {@link #mGrantableUris}. Otherwise, this will either log or throw
+     * {@link SecurityException} depending on target SDK of enqueuing app.
+     */
+    private void visitGrantableUri(Uri uri, boolean userOverriddenUri,
+            boolean isSound) {
+        if (mGrantableUris != null && mGrantableUris.contains(uri)) {
+            return; // already verified this URI
+        }
+
+        final int sourceUid = getSbn().getUid();
+        try {
+            PermissionHelper.grantUriPermission(mUgmInternal, uri, sourceUid);
+
+            if (mGrantableUris == null) {
+                mGrantableUris = new ArraySet<>();
+            }
+            mGrantableUris.add(uri);
+        } catch (SecurityException e) {
+            if (!userOverriddenUri) {
+                if (isSound) {
+                    mSound = Settings.System.DEFAULT_NOTIFICATION_URI;
+                    Log.w(TAG, "Replacing " + uri + " from " + sourceUid + ": " + e.getMessage());
+                } else {
+                    if (mTargetSdkVersion >= Build.VERSION_CODES.P) {
+                        throw e;
+                    } else {
+                        Log.w(TAG,
+                                "Ignoring " + uri + " from " + sourceUid + ": " + e.getMessage());
+                    }
+                }
+            }
         }
     }
 
@@ -1618,6 +1679,14 @@ public final class NotificationRecord {
 
     public void setPkgAllowedAsConvo(boolean allowedAsConvo) {
         mPkgAllowedAsConvo = allowedAsConvo;
+    }
+
+    public boolean isCanceledAfterLifetimeExtension() {
+        return mCanceledAfterLifetimeExtension;
+    }
+
+    public void setCanceledAfterLifetimeExtension(boolean canceledAfterLifetimeExtension) {
+        mCanceledAfterLifetimeExtension = canceledAfterLifetimeExtension;
     }
 
     /**

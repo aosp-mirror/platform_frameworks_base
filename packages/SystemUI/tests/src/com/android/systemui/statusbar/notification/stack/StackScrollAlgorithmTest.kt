@@ -18,11 +18,11 @@ import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.res.R
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
-import com.android.systemui.statusbar.EmptyShadeView
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.RoundableState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView.FooterViewState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -79,7 +79,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* bypassController */ { false },
             mStatusBarKeyguardViewManager,
             largeScreenShadeInterpolator,
-            avalancheController
+            avalancheController,
         )
 
     private val testableResources = mContext.getOrCreateTestableResources()
@@ -240,7 +240,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             headsUpTop = headsUpTop,
             stackTop = stackTop,
             collapsedHeight = collapsedHeight,
-            intrinsicHeight = intrinsicHeight
+            intrinsicHeight = intrinsicHeight,
         )
 
         // When
@@ -269,7 +269,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             headsUpTop = headsUpTop,
             stackTop = stackTop,
             collapsedHeight = collapsedHeight,
-            intrinsicHeight = intrinsicHeight
+            intrinsicHeight = intrinsicHeight,
         )
 
         // When
@@ -296,6 +296,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             collapsedHeight = 100,
             intrinsicHeight = intrinsicHunHeight,
         )
+        ambientState.qsExpansionFraction = 1.0f
         whenever(notificationRow.isAboveShelf).thenReturn(true)
 
         // When
@@ -547,7 +548,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction = 0.25f,
-            expectedAlpha = 0.0f
+            expectedAlpha = 0.0f,
         )
     }
 
@@ -557,7 +558,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(true)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction = 0.85f,
-            expectedAlpha = 0.0f
+            expectedAlpha = 0.0f,
         )
     }
 
@@ -567,7 +568,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         whenever(mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit).thenReturn(false)
         resetViewStates_expansionChanging_notificationAlphaUpdated(
             expansionFraction = 0.6f,
-            expectedAlpha = getContentAlpha(0.6f)
+            expectedAlpha = getContentAlpha(0.6f),
         )
     }
 
@@ -784,7 +785,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val gap =
             stackScrollAlgorithm.getGapForLocation(
                 /* fractionToShade= */ 0f,
-                /* onKeyguard= */ true
+                /* onKeyguard= */ true,
             )
         assertThat(gap).isEqualTo(smallGap)
     }
@@ -794,7 +795,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val gap =
             stackScrollAlgorithm.getGapForLocation(
                 /* fractionToShade= */ 0.5f,
-                /* onKeyguard= */ true
+                /* onKeyguard= */ true,
             )
         assertThat(gap).isEqualTo(smallGap * 0.5f + bigGap * 0.5f)
     }
@@ -804,7 +805,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         val gap =
             stackScrollAlgorithm.getGapForLocation(
                 /* fractionToShade= */ 0f,
-                /* onKeyguard= */ false
+                /* onKeyguard= */ false,
             )
         assertThat(gap).isEqualTo(bigGap)
     }
@@ -868,7 +869,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* mustStayOnScreen= */ true,
             /* isViewEndVisible= */ true,
             /* viewEnd= */ 0f,
-            /* maxHunY= */ 10f
+            /* maxHunY= */ 10f,
         )
 
         assertTrue(expandableViewState.headsUpIsVisible)
@@ -885,7 +886,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* mustStayOnScreen= */ true,
             /* isViewEndVisible= */ true,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 0f
+            /* maxHunY= */ 0f,
         )
 
         assertFalse(expandableViewState.headsUpIsVisible)
@@ -902,7 +903,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* mustStayOnScreen= */ true,
             /* isViewEndVisible= */ true,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 1f
+            /* maxHunY= */ 1f,
         )
 
         assertTrue(expandableViewState.headsUpIsVisible)
@@ -919,7 +920,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* mustStayOnScreen= */ false,
             /* isViewEndVisible= */ true,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 1f
+            /* maxHunY= */ 1f,
         )
 
         assertTrue(expandableViewState.headsUpIsVisible)
@@ -936,7 +937,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* mustStayOnScreen= */ true,
             /* isViewEndVisible= */ false,
             /* viewEnd= */ 10f,
-            /* maxHunY= */ 1f
+            /* maxHunY= */ 1f,
         )
 
         assertTrue(expandableViewState.headsUpIsVisible)
@@ -950,7 +951,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.clampHunToTop(
             /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 1f,
-            expandableViewState
+            expandableViewState,
         )
 
         // qqs (10 + 0) < viewY (50)
@@ -965,7 +966,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.clampHunToTop(
             /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 1f,
-            expandableViewState
+            expandableViewState,
         )
 
         // qqs (10 + 0) > viewY (-10)
@@ -981,7 +982,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.clampHunToTop(
             /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 10f,
-            expandableViewState
+            expandableViewState,
         )
 
         // newTranslation = max(10, -100) = 10
@@ -999,7 +1000,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         stackScrollAlgorithm.clampHunToTop(
             /* headsUpTop= */ 10f,
             /* collapsedHeight= */ 10f,
-            expandableViewState
+            expandableViewState,
         )
 
         // newTranslation = max(10, 5) = 10
@@ -1015,7 +1016,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 110f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 0f
+                /* originalCornerRoundness= */ 0f,
             )
         assertEquals(1f, currentRoundness)
     }
@@ -1027,7 +1028,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 90f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 0f
+                /* originalCornerRoundness= */ 0f,
             )
         assertEquals(0.5f, currentRoundness)
     }
@@ -1039,7 +1040,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 0f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 0f
+                /* originalCornerRoundness= */ 0f,
             )
         assertEquals(0f, currentRoundness)
     }
@@ -1051,7 +1052,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                 /* hostViewHeight= */ 100f,
                 /* stackY= */ 0f,
                 /* viewMaxHeight= */ 20f,
-                /* originalCornerRoundness= */ 1f
+                /* originalCornerRoundness= */ 1f,
             )
         assertEquals(1f, currentRoundness)
     }
@@ -1075,7 +1076,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* childrenOnTop= */ 0.0f,
             /* StackScrollAlgorithmState= */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true
+            /* shouldElevateHun= */ true,
         )
 
         // Then: full shadow would be applied
@@ -1103,7 +1104,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* childrenOnTop= */ 0.0f,
             /* StackScrollAlgorithmState= */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true
+            /* shouldElevateHun= */ true,
         )
 
         // Then: HUN should have shadow, but not as full size
@@ -1113,6 +1114,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeOpened_hunDoesNotOverlapQQS_hunShouldHaveNoShadow() {
         // Given: shade is opened, yTranslation of HUN is equal to QQS Panel's height,
         // the height of HUN is equal to the height of QQS Panel,
@@ -1135,7 +1137,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* childrenOnTop= */ 0.0f,
             /* StackScrollAlgorithmState= */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true
+            /* shouldElevateHun= */ true,
         )
 
         // Then: HUN should not have shadow
@@ -1143,6 +1145,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun shadeClosed_hunShouldHaveFullShadow() {
         // Given: shade is closed, ambientState.stackTranslation == -ambientState.topPadding,
         // the height of HUN is equal to the height of QQS Panel,
@@ -1163,7 +1166,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* childrenOnTop= */ 0.0f,
             /* StackScrollAlgorithmState= */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true
+            /* shouldElevateHun= */ true,
         )
 
         // Then: HUN should have full shadow
@@ -1171,6 +1174,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableSceneContainer
     fun draggingHunToOpenShade_hunShouldHavePartialShadow() {
         // Given: shade is closed when HUN pops up,
         // now drags down the HUN to open shade
@@ -1192,7 +1196,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
             /* childrenOnTop= */ 0.0f,
             /* StackScrollAlgorithmState= */ algorithmState,
             /* ambientState= */ ambientState,
-            /* shouldElevateHun= */ true
+            /* shouldElevateHun= */ true,
         )
 
         // Then: HUN should have shadow, but not as full size
@@ -1270,14 +1274,14 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         setExpansionFractionWithoutShelfDuringAodToLockScreen(
             ambientState,
             algorithmState,
-            fraction = 0.5f
+            fraction = 0.5f,
         )
         stackScrollAlgorithm.resetViewStates(ambientState, 0)
 
         // Then: pulsingNotificationView should show at full height
         assertEquals(
             stackScrollAlgorithm.getMaxAllowedChildHeight(pulsingNotificationView),
-            pulsingNotificationView.viewState.height
+            pulsingNotificationView.viewState.height,
         )
 
         // After: reset dozeAmount and expansionFraction
@@ -1285,7 +1289,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         setExpansionFractionWithoutShelfDuringAodToLockScreen(
             ambientState,
             algorithmState,
-            fraction = 1f
+            fraction = 1f,
         )
     }
 
@@ -1298,7 +1302,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     /* headsUpIsVisible= */ false,
                     /* showingPulsing= */ false,
                     /* isOnKeyguard=*/ false,
-                    /*headsUpOnKeyguard=*/ false
+                    /*headsUpOnKeyguard=*/ false,
                 )
             )
             .isFalse()
@@ -1312,7 +1316,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     /* headsUpIsVisible= */ true,
                     /* showingPulsing= */ false,
                     /* isOnKeyguard=*/ false,
-                    /*headsUpOnKeyguard=*/ false
+                    /*headsUpOnKeyguard=*/ false,
                 )
             )
             .isFalse()
@@ -1326,7 +1330,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     /* headsUpIsVisible= */ false,
                     /* showingPulsing= */ true,
                     /* isOnKeyguard=*/ false,
-                    /* headsUpOnKeyguard= */ false
+                    /* headsUpOnKeyguard= */ false,
                 )
             )
             .isFalse()
@@ -1340,7 +1344,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     /* headsUpIsVisible= */ false,
                     /* showingPulsing= */ false,
                     /* isOnKeyguard=*/ true,
-                    /* headsUpOnKeyguard= */ false
+                    /* headsUpOnKeyguard= */ false,
                 )
             )
             .isFalse()
@@ -1354,7 +1358,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     /* headsUpIsVisible= */ false,
                     /* showingPulsing= */ false,
                     /* isOnKeyguard=*/ false,
-                    /* headsUpOnKeyguard= */ false
+                    /* headsUpOnKeyguard= */ false,
                 )
             )
             .isTrue()
@@ -1368,7 +1372,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
                     /* headsUpIsVisible= */ false,
                     /* showingPulsing= */ false,
                     /* isOnKeyguard=*/ true,
-                    /* headsUpOnKeyguard= */ true
+                    /* headsUpOnKeyguard= */ true,
                 )
             )
             .isTrue()
@@ -1404,7 +1408,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private fun createHunViewMock(
         isShadeOpen: Boolean,
         fullyVisible: Boolean,
-        headerVisibleAmount: Float
+        headerVisibleAmount: Float,
     ) =
         mock<ExpandableNotificationRow>().apply {
             val childViewStateMock = createHunChildViewState(isShadeOpen, fullyVisible)
@@ -1436,7 +1440,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
     private fun setExpansionFractionWithoutShelfDuringAodToLockScreen(
         ambientState: AmbientState,
         algorithmState: StackScrollAlgorithm.StackScrollAlgorithmState,
-        fraction: Float
+        fraction: Float,
     ) {
         // showingShelf: false
         algorithmState.firstViewInShelf = null
@@ -1446,7 +1450,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // set stackEndHeight and stackHeight
         // ExpansionFractionWithoutShelf == stackHeight / stackEndHeight
         ambientState.stackEndHeight = 100f
-        ambientState.stackHeight = ambientState.stackEndHeight * fraction
+        ambientState.interpolatedStackHeight = ambientState.stackEndHeight * fraction
     }
 
     private fun resetViewStates_hunYTranslationIs(expected: Float) {
@@ -1472,7 +1476,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
     private fun resetViewStates_hunsOverlapping_bottomHunClipped(
         topHun: ExpandableNotificationRow,
-        bottomHun: ExpandableNotificationRow
+        bottomHun: ExpandableNotificationRow,
     ) {
         val topHunHeight =
             mContext.resources.getDimensionPixelSize(R.dimen.notification_content_min_height)
@@ -1520,7 +1524,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         headsUpBottom: Float = headsUpTop + intrinsicHeight, // assume all the space available
         stackTop: Float,
         stackCutoff: Float = 2000f,
-        fullStackHeight: Float = 3000f
+        fullStackHeight: Float = 3000f,
     ) {
         ambientState.headsUpTop = headsUpTop
         ambientState.headsUpBottom = headsUpBottom
@@ -1530,7 +1534,7 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
         // shade is fully open
         ambientState.expansionFraction = 1.0f
         with(fullStackHeight) {
-            ambientState.stackHeight = this
+            ambientState.interpolatedStackHeight = this
             ambientState.stackEndHeight = this
         }
         stackScrollAlgorithm.setIsExpanded(true)

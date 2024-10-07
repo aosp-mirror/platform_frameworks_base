@@ -34,6 +34,7 @@ import android.content.pm.UserProperties;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IpcDataCache;
 import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -100,6 +101,9 @@ public final class UserManagerTest {
 
     @Before
     public void setUp() throws Exception {
+        // Disable binder caches in this process.
+        IpcDataCache.disableForTestMode();
+
         mOriginalCurrentUserId = ActivityManager.getCurrentUser();
         mUserManager = UserManager.get(mContext);
         mActivityManager = mContext.getSystemService(ActivityManager.class);

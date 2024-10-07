@@ -339,6 +339,13 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Flush the brightness update that has been made to the persistent data store.
+     */
+    public void saveBrightnessIfNeeded() {
+        mBrightnessSetting.saveIfNeeded();
+    }
+
+    /**
      * Sets the current screen brightness, and notifies the BrightnessSetting about the change.
      */
     public void updateScreenBrightnessSetting(float brightnessValue, float maxBrightness) {
@@ -492,6 +499,13 @@ public final class DisplayBrightnessController {
         notifyCurrentScreenBrightness();
         mUserSetScreenBrightnessUpdated = true;
         return true;
+    }
+
+    /**
+     * Notifies if the stylus is currently being used or not.
+     */
+    public void setStylusBeingUsed(boolean isEnabled) {
+        // Todo(b/369977976) - Disable the auto-brightness strategy
     }
 
     @VisibleForTesting

@@ -24,21 +24,23 @@ import android.os.UserHandle
 /** Encapsulates data for a communal widget. */
 sealed interface CommunalWidgetContentModel {
     val appWidgetId: Int
-    val priority: Int
+    val rank: Int
 
     /** Widget is ready to display */
     data class Available(
         override val appWidgetId: Int,
         val providerInfo: AppWidgetProviderInfo,
-        override val priority: Int,
+        override val rank: Int,
+        val spanY: Int = 3,
     ) : CommunalWidgetContentModel
 
     /** Widget is pending installation */
     data class Pending(
         override val appWidgetId: Int,
-        override val priority: Int,
+        override val rank: Int,
         val componentName: ComponentName,
         val icon: Bitmap?,
         val user: UserHandle,
+        val spanY: Int = 3,
     ) : CommunalWidgetContentModel
 }

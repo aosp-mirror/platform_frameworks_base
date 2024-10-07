@@ -17,15 +17,13 @@
 package com.android.systemui.shade
 
 import android.view.MotionEvent
-import androidx.compose.ui.Alignment
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.scene.shared.model.TransitionKeys.OpenBottomShade
+import com.android.systemui.scene.shared.model.TransitionKeys.Instant
 import com.android.systemui.scene.shared.model.TransitionKeys.SlightlyFasterShadeCollapse
 import com.android.systemui.shade.ShadeController.ShadeVisibilityListener
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -82,20 +80,24 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isShadeEnabled() = shadeInteractor.isShadeEnabled.value
 
+    @Deprecated("Deprecated in Java")
     override fun isShadeFullyOpen(): Boolean = shadeInteractor.isAnyFullyExpanded.value
 
+    @Deprecated("Deprecated in Java")
     override fun isExpandingOrCollapsing(): Boolean = shadeInteractor.isUserInteracting.value
 
+    @Deprecated("Deprecated in Java")
     override fun instantExpandShade() {
         // Do nothing
     }
 
     override fun instantCollapseShade() {
-        sceneInteractor.snapToScene(
-            SceneFamilies.Home,
-            "hide shade",
+        shadeInteractor.collapseNotificationsShade(
+            loggingReason = "ShadeControllerSceneImpl.instantCollapseShade",
+            transitionKey = Instant,
         )
     }
 
@@ -103,7 +105,7 @@ constructor(
         flags: Int,
         force: Boolean,
         delayed: Boolean,
-        speedUpFactor: Float
+        speedUpFactor: Float,
     ) {
         if (!force && !shadeInteractor.isAnyExpanded.value) {
             runPostCollapseActions()
@@ -127,16 +129,17 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun collapseWithDuration(animationDuration: Int) {
         // TODO(b/300258424) inline this. The only caller uses the default duration.
         animateCollapseShade()
     }
 
     private fun animateCollapseShadeInternal() {
-        sceneInteractor.changeScene(
-            SceneFamilies.Home, // TODO(b/336581871): add sceneState?
-            "ShadeController.animateCollapseShade",
-            SlightlyFasterShadeCollapse,
+        // TODO(b/336581871): add sceneState?
+        shadeInteractor.collapseEitherShade(
+            loggingReason = "ShadeController.animateCollapseShade",
+            transitionKey = SlightlyFasterShadeCollapse,
         )
     }
 
@@ -145,11 +148,12 @@ constructor(
         animateCollapseShade()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun closeShadeIfOpen(): Boolean {
         if (shadeInteractor.isAnyExpanded.value) {
             commandQueue.animateCollapsePanels(
                 CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL,
-                true /* force */
+                true, /* force */
             )
             assistManagerLazy.get().hideAssist()
         }
@@ -160,6 +164,7 @@ constructor(
         animateCollapseShadeForcedDelayed()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun collapseShade(animate: Boolean) {
         if (animate) {
             animateCollapseShade()
@@ -168,25 +173,18 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun collapseOnMainThread() {
         // TODO if this works with delegation alone, we can deprecate and delete
         collapseShade()
     }
 
     override fun expandToNotifications() {
-        sceneInteractor.changeScene(
-            SceneFamilies.NotifShade,
-            "ShadeController.animateExpandShade",
-            OpenBottomShade.takeIf { shadeInteractor.shadeAlignment == Alignment.BottomEnd }
-        )
+        shadeInteractor.expandNotificationsShade("ShadeController.animateExpandShade")
     }
 
     override fun expandToQs() {
-        sceneInteractor.changeScene(
-            SceneFamilies.QuickSettings,
-            "ShadeController.animateExpandQs",
-            OpenBottomShade.takeIf { shadeInteractor.shadeAlignment == Alignment.BottomEnd }
-        )
+        shadeInteractor.expandQuickSettingsShade("ShadeController.animateExpandQs")
     }
 
     override fun setVisibilityListener(listener: ShadeVisibilityListener) {
@@ -206,14 +204,17 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun postAnimateCollapseShade() {
         animateCollapseShade()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun postAnimateForceCollapseShade() {
         animateCollapseShadeForced()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun postAnimateExpandQs() {
         expandToQs()
     }
@@ -227,18 +228,23 @@ constructor(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun makeExpandedInvisible() {
         // Do nothing
     }
 
+    @Deprecated("Deprecated in Java")
     override fun makeExpandedVisible(force: Boolean) {
         // Do nothing
     }
 
+    @Deprecated("Deprecated in Java")
     override fun isExpandedVisible(): Boolean {
-        return sceneInteractor.currentScene.value != Scenes.Gone
+        return sceneInteractor.currentScene.value != Scenes.Gone ||
+            sceneInteractor.currentOverlays.value.isNotEmpty()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onStatusBarTouch(event: MotionEvent) {
         // The only call to this doesn't happen with MigrateClocksToBlueprint.isEnabled enabled
         throw UnsupportedOperationException()

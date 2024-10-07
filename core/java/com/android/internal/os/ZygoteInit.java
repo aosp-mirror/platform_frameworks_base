@@ -631,21 +631,20 @@ public class ZygoteInit {
      */
     private static Runnable forkSystemServer(String abiList, String socketName,
             ZygoteServer zygoteServer) {
-        long capabilities = posixCapabilitiesAsBits(
-                OsConstants.CAP_IPC_LOCK,
-                OsConstants.CAP_KILL,
-                OsConstants.CAP_NET_ADMIN,
-                OsConstants.CAP_NET_BIND_SERVICE,
-                OsConstants.CAP_NET_BROADCAST,
-                OsConstants.CAP_NET_RAW,
-                OsConstants.CAP_SYS_MODULE,
-                OsConstants.CAP_SYS_NICE,
-                OsConstants.CAP_SYS_PTRACE,
-                OsConstants.CAP_SYS_TIME,
-                OsConstants.CAP_SYS_TTY_CONFIG,
-                OsConstants.CAP_WAKE_ALARM,
-                OsConstants.CAP_BLOCK_SUSPEND
-        );
+        long capabilities =
+                (1L << OsConstants.CAP_IPC_LOCK) |
+                (1L << OsConstants.CAP_KILL) |
+                (1L << OsConstants.CAP_NET_ADMIN) |
+                (1L << OsConstants.CAP_NET_BIND_SERVICE) |
+                (1L << OsConstants.CAP_NET_BROADCAST) |
+                (1L << OsConstants.CAP_NET_RAW) |
+                (1L << OsConstants.CAP_SYS_MODULE) |
+                (1L << OsConstants.CAP_SYS_NICE) |
+                (1L << OsConstants.CAP_SYS_PTRACE) |
+                (1L << OsConstants.CAP_SYS_TIME) |
+                (1L << OsConstants.CAP_SYS_TTY_CONFIG) |
+                (1L << OsConstants.CAP_WAKE_ALARM) |
+                (1L << OsConstants.CAP_BLOCK_SUSPEND);
         /* Containers run without some capabilities, so drop any caps that are not available. */
         StructCapUserHeader header = new StructCapUserHeader(
                 OsConstants._LINUX_CAPABILITY_VERSION_3, 0);
@@ -739,20 +738,6 @@ public class ZygoteInit {
         }
 
         return null;
-    }
-
-    /**
-     * Gets the bit array representation of the provided list of POSIX capabilities.
-     */
-    private static long posixCapabilitiesAsBits(int... capabilities) {
-        long result = 0;
-        for (int capability : capabilities) {
-            if ((capability < 0) || (capability > OsConstants.CAP_LAST_CAP)) {
-                throw new IllegalArgumentException(String.valueOf(capability));
-            }
-            result |= (1L << capability);
-        }
-        return result;
     }
 
     /**

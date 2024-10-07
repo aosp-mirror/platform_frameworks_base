@@ -27,8 +27,8 @@ import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.DisplayRotationProto.FIXED_TO_USER_ROTATION_MODE;
 import static com.android.server.wm.DisplayRotationProto.FROZEN_TO_USER_ROTATION;
@@ -81,7 +81,6 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -136,7 +135,6 @@ public class DisplayRotation {
     private final RotationLockHistory mRotationLockHistory = new RotationLockHistory();
 
     private OrientationListener mOrientationListener;
-    private StatusBarManagerInternal mStatusBarManagerInternal;
     private SettingsObserver mSettingsObserver;
     @NonNull
     private final DeviceStateController mDeviceStateController;
@@ -609,16 +607,6 @@ public class DisplayRotation {
 
         if (isDefaultDisplay) {
             mDisplayRotationCoordinator.onDefaultDisplayRotationChanged(rotation);
-        }
-
-        // Preemptively cancel the running recents animation -- SysUI can't currently handle this
-        // case properly since the signals it receives all happen post-change. We do this earlier
-        // in the rotation flow, since DisplayContent.updateDisplayOverrideConfigurationLocked seems
-        // to happen too late.
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
-        if (recentsAnimationController != null) {
-            recentsAnimationController.cancelAnimationForDisplayChange();
         }
 
         ProtoLog.v(WM_DEBUG_ORIENTATION,
@@ -1569,11 +1557,9 @@ public class DisplayRotation {
 
     /** Notify the StatusBar that system rotation suggestion has changed. */
     private void sendProposedRotationChangeToStatusBarInternal(int rotation, boolean isValid) {
-        if (mStatusBarManagerInternal == null) {
-            mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
-        }
-        if (mStatusBarManagerInternal != null) {
-            mStatusBarManagerInternal.onProposedRotationChanged(rotation, isValid);
+        final StatusBarManagerInternal bar = mDisplayPolicy.getStatusBarManagerInternal();
+        if (bar != null) {
+            bar.onProposedRotationChanged(mDisplayContent.getDisplayId(), rotation, isValid);
         }
     }
 

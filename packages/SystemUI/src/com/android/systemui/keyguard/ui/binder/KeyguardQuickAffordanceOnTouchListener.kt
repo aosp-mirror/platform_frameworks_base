@@ -18,13 +18,12 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.graphics.PointF
+import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewPropertyAnimator
-import androidx.core.animation.CycleInterpolator
-import androidx.core.animation.ObjectAnimator
-import com.android.systemui.res.R
+import com.android.systemui.Flags
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.view.rawDistanceFrom
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
@@ -71,11 +70,10 @@ class KeyguardQuickAffordanceOnTouchListener(
                     // Moving too far while performing a long-press gesture cancels that
                     // gesture.
                     if (
-                        event
-                            .rawDistanceFrom(
-                                downDisplayCoords.x,
-                                downDisplayCoords.y,
-                            ) > ViewConfiguration.getTouchSlop()
+                        event.rawDistanceFrom(
+                            downDisplayCoords.x,
+                            downDisplayCoords.y,
+                        ) > ViewConfiguration.getTouchSlop()
                     ) {
                         cancel()
                     }
@@ -151,10 +149,14 @@ class KeyguardQuickAffordanceOnTouchListener(
             event: MotionEvent,
             pointerIndex: Int = 0,
         ): Boolean {
-            return when (event.getToolType(pointerIndex)) {
-                MotionEvent.TOOL_TYPE_STYLUS -> true
-                MotionEvent.TOOL_TYPE_MOUSE -> true
-                else -> false
+            return if (Flags.nonTouchscreenDevicesBypassFalsing()) {
+                event.device?.supportsSource(InputDevice.SOURCE_TOUCHSCREEN) == false
+            } else {
+                when (event.getToolType(pointerIndex)) {
+                    MotionEvent.TOOL_TYPE_STYLUS -> true
+                    MotionEvent.TOOL_TYPE_MOUSE -> true
+                    else -> false
+                }
             }
         }
     }

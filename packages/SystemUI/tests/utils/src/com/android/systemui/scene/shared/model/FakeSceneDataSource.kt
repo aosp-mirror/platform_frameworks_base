@@ -16,6 +16,7 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +30,16 @@ class FakeSceneDataSource(
     private val _currentScene = MutableStateFlow(initialSceneKey)
     override val currentScene: StateFlow<SceneKey> = _currentScene.asStateFlow()
 
+    private val _currentOverlays = MutableStateFlow<Set<OverlayKey>>(emptySet())
+    override val currentOverlays: StateFlow<Set<OverlayKey>> = _currentOverlays.asStateFlow()
+
     var isPaused = false
         private set
+
     var pendingScene: SceneKey? = null
+        private set
+
+    var pendingOverlays: Set<OverlayKey>? = null
         private set
 
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
@@ -46,10 +54,32 @@ class FakeSceneDataSource(
         changeScene(toScene)
     }
 
+    override fun showOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) {
+        if (isPaused) {
+            pendingOverlays = (pendingOverlays ?: currentOverlays.value) + overlay
+        } else {
+            _currentOverlays.value += overlay
+        }
+    }
+
+    override fun hideOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) {
+        if (isPaused) {
+            pendingOverlays = (pendingOverlays ?: currentOverlays.value) - overlay
+        } else {
+            _currentOverlays.value -= overlay
+        }
+    }
+
+    override fun replaceOverlay(from: OverlayKey, to: OverlayKey, transitionKey: TransitionKey?) {
+        hideOverlay(from, transitionKey)
+        showOverlay(to, transitionKey)
+    }
+
     /**
-     * Pauses scene changes.
+     * Pauses scene and overlay changes.
      *
-     * Any following calls to [changeScene] will be conflated and the last one will be remembered.
+     * Any following calls to [changeScene] or overlay changing functions will be conflated and the
+     * last one will be remembered.
      */
     fun pause() {
         check(!isPaused) { "Can't pause what's already paused!" }
@@ -58,10 +88,13 @@ class FakeSceneDataSource(
     }
 
     /**
-     * Unpauses scene changes.
+     * Unpauses scene and overlay changes.
      *
      * If there were any calls to [changeScene] since [pause] was called, the latest of the bunch
      * will be replayed.
+     *
+     * If there were any calls to show, hide or replace overlays since [pause] was called, they will
+     * all be applied at once.
      *
      * If [force] is `true`, there will be no check that [isPaused] is true.
      *
@@ -76,6 +109,8 @@ class FakeSceneDataSource(
         isPaused = false
         pendingScene?.let { _currentScene.value = it }
         pendingScene = null
+        pendingOverlays?.let { _currentOverlays.value = it }
+        pendingOverlays = null
 
         check(expectedScene == null || currentScene.value == expectedScene) {
             """

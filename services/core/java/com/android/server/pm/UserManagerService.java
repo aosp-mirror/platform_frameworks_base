@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.FEATURE_AUTOMOTIVE;
 import static android.content.pm.PackageManager.FEATURE_EMBEDDED;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.DEV_CREATE_OVERRIDE_PROPERTY;
 import static android.os.UserManager.DISALLOW_USER_SWITCH;
 import static android.os.UserManager.SYSTEM_USER_MODE_EMULATION_PROPERTY;
@@ -1089,6 +1090,19 @@ public class UserManagerService extends IUserManager.Stub {
         mUser0Allocations = DBG_ALLOCATION ? new AtomicInteger() : null;
         mPrivateSpaceAutoLockSettingsObserver = new SettingsObserver(mHandler);
         emulateSystemUserModeIfNeeded();
+        initPropertyInvalidatedCaches();
+    }
+
+    /**
+     * This method is used to invalidate the caches at server statup,
+     * so that caches can start working.
+     */
+    private static final void initPropertyInvalidatedCaches() {
+        if (android.multiuser.Flags.cachesNotInvalidatedAtStartReadOnly()) {
+            UserManager.invalidateIsUserUnlockedCache();
+            UserManager.invalidateQuietModeEnabledCache();
+            UserManager.invalidateUserSerialNumberCache();
+        }
     }
 
     private boolean doesDeviceHardwareSupportPrivateSpace() {
@@ -1372,6 +1386,10 @@ public class UserManagerService extends IUserManager.Stub {
         }
 
         if (isHeadlessSystemUserMode()) {
+            if (mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_bootToHeadlessSystemUser)) {
+                return UserHandle.USER_SYSTEM;
+            }
             // Return the previous foreground user, if there is one.
             final int previousUser = getPreviousFullUserToEnterForeground();
             if (previousUser != UserHandle.USER_NULL) {
@@ -2514,6 +2532,38 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
+     * This method validates whether calling user is valid in visible background users feature.
+     * Valid user is the current user or the system or in the same profile group as the current
+     * user. Visible background users are not valid calling users.
+     */
+    public static void enforceCurrentUserIfVisibleBackgroundEnabled(@UserIdInt int currentUserId) {
+        if (!UserManager.isVisibleBackgroundUsersEnabled()) {
+            return;
+        }
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (DBG) {
+            Slog.d(LOG_TAG, "enforceValidCallingUser: callingUserId=" + callingUserId
+                    + " isSystemUser=" + (callingUserId == USER_SYSTEM)
+                    + " currentUserId=" + currentUserId
+                    + " callingPid=" + Binder.getCallingPid()
+                    + " callingUid=" + Binder.getCallingUid());
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            if (callingUserId != USER_SYSTEM && callingUserId != currentUserId
+                    && !UserManagerService.getInstance()
+                    .isSameProfileGroup(callingUserId, currentUserId)) {
+                throw new SecurityException(
+                        "Invalid calling user on devices that enable visible background users. "
+                                + "callingUserId=" + callingUserId + " currentUserId="
+                                + currentUserId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
      * Gets the current and target user ids as a {@link Pair}, calling
      * {@link ActivityManagerInternal} directly (and without performing any permission check).
      *
@@ -2595,11 +2645,15 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public int getMainDisplayIdAssignedToUser() {
-        // Not checking for any permission as it returns info about calling user
-        int userId = UserHandle.getUserId(Binder.getCallingUid());
-        int displayId = mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
-        return displayId;
+    public int getMainDisplayIdAssignedToUser(int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId
+                && !hasManageUsersOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS)) {
+            throw new SecurityException("Caller from user " + callingUserId + " needs MANAGE_USERS "
+                    + "or INTERACT_ACROSS_USERS permission to get the main display for (" + userId
+                    + ")");
+        }
+        return mUserVisibilityMediator.getMainDisplayAssignedToUser(userId);
     }
 
     @Override

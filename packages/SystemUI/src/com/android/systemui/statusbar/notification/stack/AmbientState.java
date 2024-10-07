@@ -88,13 +88,14 @@ public class AmbientState implements Dumpable {
     private ExpandableView mLastVisibleBackgroundChild;
     private float mCurrentScrollVelocity;
     private int mStatusBarState;
+    private boolean mShowingStackOnLockscreen;
+    private float mLockscreenStackFadeInProgress;
     private float mExpandingVelocity;
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
     private boolean mIsSmallScreen;
     private boolean mPulsing;
     private float mHideAmount;
-    private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
 
     /**
@@ -139,6 +140,9 @@ public class AmbientState implements Dumpable {
     /** Fraction of shade expansion. */
     private float mExpansionFraction;
 
+    /** Fraction of QS expansion. 0 when in shade, 1 when in QS. */
+    private float mQsExpansionFraction;
+
     /** Height of the notifications panel when expansion completes. */
     private float mStackEndHeight;
 
@@ -171,7 +175,8 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @return Height of the notifications panel without top padding when expansion completes.
+     * @return Height of the available space for the notification content, when the shade
+     * expansion completes.
      */
     public float getStackEndHeight() {
         return mStackEndHeight;
@@ -208,9 +213,18 @@ public class AmbientState implements Dumpable {
     }
 
     /**
+     * @param expansionFraction Fraction of QS expansion.
+     */
+    public void setQsExpansionFraction(float expansionFraction) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mQsExpansionFraction = expansionFraction;
+    }
+
+    /**
      * @param isSwipingUp Whether we are swiping up.
      */
     public void setSwipingUp(boolean isSwipingUp) {
+        SceneContainerFlag.assertInLegacyMode();
         if (!isSwipingUp && mIsSwipingUp) {
             // Just stopped swiping up.
             mIsFlingRequiredAfterLockScreenSwipeUp = true;
@@ -229,6 +243,7 @@ public class AmbientState implements Dumpable {
      * @param isFlinging Whether we are flinging the shade open or closed.
      */
     public void setFlinging(boolean isFlinging) {
+        SceneContainerFlag.assertInLegacyMode();
         if (isOnKeyguard() && !isFlinging && mIsFlinging) {
             // Just stopped flinging.
             mIsFlingRequiredAfterLockScreenSwipeUp = false;
@@ -258,17 +273,26 @@ public class AmbientState implements Dumpable {
     }
 
     /**
-     * @see #getStackHeight()
+     * @return Fraction of QS expansion.
      */
-    public void setStackHeight(float stackHeight) {
-        mStackHeight = stackHeight;
+    public float getQsExpansionFraction() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mQsExpansionFraction;
     }
 
     /**
-     * @return Height of notifications panel interpolated by the expansion fraction.
+     * @return Height of the notification content returned by {@link #getStackEndHeight()}, but
+     * interpolated by the shade expansion fraction.
      */
-    public float getStackHeight() {
+    public float getInterpolatedStackHeight() {
         return mStackHeight;
+    }
+
+    /**
+     * @see #getInterpolatedStackHeight()
+     */
+    public void setInterpolatedStackHeight(float stackHeight) {
+        mStackHeight = stackHeight;
     }
 
     @Inject
@@ -492,10 +516,12 @@ public class AmbientState implements Dumpable {
     }
 
     public int getTopPadding() {
+        SceneContainerFlag.assertInLegacyMode();
         return mTopPadding;
     }
 
     public void setTopPadding(int topPadding) {
+        SceneContainerFlag.assertInLegacyMode();
         mTopPadding = topPadding;
     }
 
@@ -511,8 +537,15 @@ public class AmbientState implements Dumpable {
         if (mDozeAmount == 1.0f && !isPulseExpanding()) {
             return mShelf.getHeight();
         }
-        int height = (int) Math.max(mLayoutMinHeight,
-                Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
+        int height;
+        if (SceneContainerFlag.isEnabled()) {
+            // TODO(b/192348384): This is probably incorrect as mContentHeight is not up to date.
+            //  Consider removing usages of getInnerHeight in flexiglass if possible.
+            height = (int) Math.min(mLayoutHeight, mContentHeight) - mTopPadding;
+        } else {
+            height = (int) Math.max(mLayoutMinHeight,
+                    Math.min(mLayoutHeight, mContentHeight) - mTopPadding);
+        }
         if (ignorePulseHeight) {
             return height;
         }
@@ -549,6 +582,7 @@ public class AmbientState implements Dumpable {
     }
 
     public void setLayoutMinHeight(int layoutMinHeight) {
+        SceneContainerFlag.assertInLegacyMode();
         mLayoutMinHeight = layoutMinHeight;
     }
 
@@ -592,6 +626,26 @@ public class AmbientState implements Dumpable {
 
     public boolean isOnKeyguard() {
         return mStatusBarState == StatusBarState.KEYGUARD;
+    }
+
+    public boolean isShowingStackOnLockscreen() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return false;
+        return mShowingStackOnLockscreen;
+    }
+
+    public void setShowingStackOnLockscreen(boolean showingStackOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mShowingStackOnLockscreen = showingStackOnLockscreen;
+    }
+
+    public float getLockscreenStackFadeInProgress() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        return mLockscreenStackFadeInProgress;
+    }
+
+    public void setLockscreenStackFadeInProgress(float lockscreenStackFadeInProgress) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mLockscreenStackFadeInProgress = lockscreenStackFadeInProgress;
     }
 
     public void setStatusBarState(int statusBarState) {
@@ -665,6 +719,7 @@ public class AmbientState implements Dumpable {
      * @return Whether we need to do a fling down after swiping up on lockscreen.
      */
     public boolean isFlingingAfterSwipeUpOnLockscreen() {
+        SceneContainerFlag.assertInLegacyMode();
         return mIsFlinging && mIsFlingRequiredAfterLockScreenSwipeUp;
     }
 
@@ -695,14 +750,6 @@ public class AmbientState implements Dumpable {
 
     public boolean isHiddenAtAll() {
         return mHideAmount != 0;
-    }
-
-    public void setAppearing(boolean appearing) {
-        mAppearing = appearing;
-    }
-
-    public boolean isAppearing() {
-        return mAppearing;
     }
 
     public void setPulseHeight(float height) {
@@ -835,8 +882,8 @@ public class AmbientState implements Dumpable {
         pw.println("mFractionToShade=" + mFractionToShade);
         pw.println("mHideAmount=" + mHideAmount);
         pw.println("mAppearFraction=" + mAppearFraction);
-        pw.println("mAppearing=" + mAppearing);
         pw.println("mExpansionFraction=" + mExpansionFraction);
+        pw.println("mQsExpansionFraction=" + mQsExpansionFraction);
         pw.println("mExpandingVelocity=" + mExpandingVelocity);
         pw.println("mOverScrollTopAmount=" + mOverScrollTopAmount);
         pw.println("mOverScrollBottomAmount=" + mOverScrollBottomAmount);

@@ -83,10 +83,10 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
+import com.android.wm.shell.shared.ShellSharedConstants;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
-import com.android.wm.shell.sysui.ShellSharedConstants;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -137,6 +137,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private Transitions mTransitions;
     @Mock
     private RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
+    @Mock
+    private Handler mHandler;
 
     private BackAnimationController mController;
     private TestableContentResolver mContentResolver;
@@ -161,13 +163,14 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
         mDefaultCrossActivityBackAnimation = new DefaultCrossActivityBackAnimation(mContext,
-                mAnimationBackground, mRootTaskDisplayAreaOrganizer);
-        mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground);
+                mAnimationBackground, mRootTaskDisplayAreaOrganizer, mHandler);
+        mCrossTaskBackAnimation = new CrossTaskBackAnimation(mContext, mAnimationBackground,
+                mHandler);
         mShellBackAnimationRegistry =
                 new ShellBackAnimationRegistry(mDefaultCrossActivityBackAnimation,
                         mCrossTaskBackAnimation, /* dialogCloseAnimation= */ null,
                         new CustomCrossActivityBackAnimation(mContext, mAnimationBackground,
-                                mRootTaskDisplayAreaOrganizer),
+                                mRootTaskDisplayAreaOrganizer, mHandler),
                         /* defaultBackToHomeAnimation= */ null);
         mController =
                 new BackAnimationController(
@@ -181,7 +184,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
                         mShellCommandHandler,
-                        mTransitions);
+                        mTransitions,
+                        mHandler);
         mShellInit.init();
         mShellExecutor.flushAll();
         mTouchableRegion = new Rect(0, 0, 100, 100);
@@ -344,7 +348,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
                         mShellCommandHandler,
-                        mTransitions);
+                        mTransitions,
+                        mHandler);
         shellInit.init();
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
@@ -692,6 +697,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mBackTransitionHandler.startAnimation(mockBinder, tInfo, st, ft, callback);
         verify(mBackTransitionHandler).handlePrepareTransition(
                 eq(tInfo), eq(st), eq(ft), eq(callback));
+
+        mBackTransitionHandler.onAnimationFinished();
         final TransitionInfo.Change openToClose = createAppChange(openTaskId, TRANSIT_CLOSE,
                 FLAG_BACK_GESTURE_ANIMATED);
         tInfo2 = createTransitionInfo(TRANSIT_CLOSE_PREPARE_BACK_NAVIGATION, openToClose);
@@ -700,7 +707,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mBackTransitionHandler.mergeAnimation(mBackTransitionHandler.mClosePrepareTransition,
                 tInfo2, st, mock(IBinder.class), mergeCallback);
         assertTrue("Change should be consumed", tInfo2.getChanges().isEmpty());
-        mBackTransitionHandler.onAnimationFinished();
         verify(callback).onTransitionFinished(any());
     }
 
@@ -881,7 +887,7 @@ public class BackAnimationControllerTest extends ShellTestCase {
         RemoteAnimationTarget[] targets = new RemoteAnimationTarget[]{animationTarget};
         if (mController.mBackAnimationAdapter != null) {
             mController.mBackAnimationAdapter.getRunner().onAnimationStart(
-                    targets, null, null, mBackAnimationFinishedCallback);
+                    targets, null /* prepareOpenTransition */, mBackAnimationFinishedCallback);
             mShellExecutor.flushAll();
         }
     }
@@ -897,7 +903,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                 new BackAnimationRunner(
                         mAnimatorCallback,
                         mBackAnimationRunner,
-                        mContext));
+                        mContext,
+                        mHandler));
     }
 
     private void unregisterAnimation(int type) {

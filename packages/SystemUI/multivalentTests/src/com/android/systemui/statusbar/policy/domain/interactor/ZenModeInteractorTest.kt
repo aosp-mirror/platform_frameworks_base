@@ -16,19 +16,27 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.app.AutomaticZenRule
+import android.app.Flags
 import android.app.NotificationManager.Policy
+import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.service.notification.SystemZenRules
+import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.R
 import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shared.settings.data.repository.secureSettingsRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
+import com.android.systemui.statusbar.policy.data.repository.fakeDeviceProvisioningRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -47,8 +55,29 @@ class ZenModeInteractorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val zenModeRepository = kosmos.fakeZenModeRepository
     private val settingsRepository = kosmos.secureSettingsRepository
+    private val deviceProvisioningRepository = kosmos.fakeDeviceProvisioningRepository
 
     private val underTest = kosmos.zenModeInteractor
+
+    @Test
+    fun isZenAvailable_off() =
+        testScope.runTest {
+            val isZenAvailable by collectLastValue(underTest.isZenAvailable)
+            deviceProvisioningRepository.setDeviceProvisioned(false)
+            runCurrent()
+
+            assertThat(isZenAvailable).isFalse()
+        }
+
+    @Test
+    fun isZenAvailable_on() =
+        testScope.runTest {
+            val isZenAvailable by collectLastValue(underTest.isZenAvailable)
+            deviceProvisioningRepository.setDeviceProvisioned(true)
+            runCurrent()
+
+            assertThat(isZenAvailable).isTrue()
+        }
 
     @Test
     fun isZenModeEnabled_off() =
@@ -216,5 +245,182 @@ class ZenModeInteractorTest : SysuiTestCase() {
             underTest.activateMode(manualDnd)
             assertThat(zenModeRepository.getModeActiveDuration(manualDnd.id))
                 .isEqualTo(Duration.ofMinutes(60))
+        }
+
+    @Test
+    fun activeModes_computesMainActiveMode() =
+        testScope.runTest {
+            val activeModes by collectLastValue(underTest.activeModes)
+
+            zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
+            zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
+
+            runCurrent()
+            assertThat(activeModes?.modeNames).hasSize(0)
+            assertThat(activeModes?.mainMode).isNull()
+
+            zenModeRepository.activateMode("Other")
+            runCurrent()
+            assertThat(activeModes?.modeNames).containsExactly("Mode Other")
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Other")
+
+            zenModeRepository.activateMode("Bedtime")
+            runCurrent()
+            assertThat(activeModes?.modeNames)
+                .containsExactly("Mode Bedtime", "Mode Other")
+                .inOrder()
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Bedtime")
+
+            zenModeRepository.deactivateMode("Other")
+            runCurrent()
+            assertThat(activeModes?.modeNames).containsExactly("Mode Bedtime")
+            assertThat(activeModes?.mainMode?.name).isEqualTo("Mode Bedtime")
+
+            zenModeRepository.deactivateMode("Bedtime")
+            runCurrent()
+            assertThat(activeModes?.modeNames).hasSize(0)
+            assertThat(activeModes?.mainMode).isNull()
+        }
+
+    @Test
+    fun getActiveModes_computesMainActiveMode() = runTest {
+        zenModeRepository.addMode(id = "Bedtime", type = AutomaticZenRule.TYPE_BEDTIME)
+        zenModeRepository.addMode(id = "Other", type = AutomaticZenRule.TYPE_OTHER)
+
+        var activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).hasSize(0)
+        assertThat(activeModes.mainMode).isNull()
+
+        zenModeRepository.activateMode("Other")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Other")
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Other")
+
+        zenModeRepository.activateMode("Bedtime")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Bedtime", "Mode Other").inOrder()
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Bedtime")
+
+        zenModeRepository.deactivateMode("Other")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).containsExactly("Mode Bedtime")
+        assertThat(activeModes.mainMode?.name).isEqualTo("Mode Bedtime")
+
+        zenModeRepository.deactivateMode("Bedtime")
+        activeModes = underTest.getActiveModes()
+        assertThat(activeModes.modeNames).hasSize(0)
+        assertThat(activeModes.mainMode).isNull()
+    }
+
+    @Test
+    fun mainActiveMode_flows() =
+        testScope.runTest {
+            val mainActiveMode by collectLastValue(underTest.mainActiveMode)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setId("Bedtime")
+                        .setName("Mode Bedtime")
+                        .setType(AutomaticZenRule.TYPE_BEDTIME)
+                        .setActive(false)
+                        .setPackage(mContext.packageName)
+                        .setIconResId(R.drawable.ic_zen_mode_type_bedtime)
+                        .build(),
+                    TestModeBuilder()
+                        .setId("Other")
+                        .setName("Mode Other")
+                        .setType(AutomaticZenRule.TYPE_OTHER)
+                        .setActive(false)
+                        .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                        .setIconResId(R.drawable.ic_zen_mode_type_other)
+                        .build(),
+                )
+            )
+
+            runCurrent()
+            assertThat(mainActiveMode).isNull()
+
+            zenModeRepository.activateMode("Other")
+            runCurrent()
+            assertThat(mainActiveMode?.name).isEqualTo("Mode Other")
+            assertThat(mainActiveMode?.icon?.key?.resId)
+                .isEqualTo(R.drawable.ic_zen_mode_type_other)
+
+            zenModeRepository.activateMode("Bedtime")
+            runCurrent()
+            assertThat(mainActiveMode?.name).isEqualTo("Mode Bedtime")
+            assertThat(mainActiveMode?.icon?.key?.resId)
+                .isEqualTo(R.drawable.ic_zen_mode_type_bedtime)
+
+            zenModeRepository.deactivateMode("Other")
+            runCurrent()
+            assertThat(mainActiveMode?.name).isEqualTo("Mode Bedtime")
+            assertThat(mainActiveMode?.icon?.key?.resId)
+                .isEqualTo(R.drawable.ic_zen_mode_type_bedtime)
+
+            zenModeRepository.deactivateMode("Bedtime")
+            runCurrent()
+            assertThat(mainActiveMode).isNull()
+        }
+
+    @Test
+    @EnableFlags(Flags.FLAG_MODES_UI)
+    fun dndMode_flows() =
+        testScope.runTest {
+            val dndMode by collectLastValue(underTest.dndMode)
+
+            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
+            runCurrent()
+
+            assertThat(dndMode!!.isActive).isFalse()
+
+            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
+            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            runCurrent()
+
+            assertThat(dndMode!!.isActive).isTrue()
+        }
+
+    @Test
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME, Flags.FLAG_MODES_UI, Flags.FLAG_MODES_API)
+    fun modesHidingNotifications_onlyIncludesModesWithNotifListSuppression() =
+        testScope.runTest {
+            val modesHidingNotifications by collectLastValue(underTest.modesHidingNotifications)
+
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder()
+                        .setName("Not active, no list suppression")
+                        .setActive(false)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Not active, has list suppression")
+                        .setActive(false)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("No list suppression")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ true)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Has list suppression 1")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                    TestModeBuilder()
+                        .setName("Has list suppression 2")
+                        .setActive(true)
+                        .setVisualEffect(VISUAL_EFFECT_NOTIFICATION_LIST, /* allowed= */ false)
+                        .build(),
+                )
+            )
+            runCurrent()
+
+            assertThat(modesHidingNotifications?.map { it.name })
+                .containsExactly("Has list suppression 1", "Has list suppression 2")
+                .inOrder()
         }
 }

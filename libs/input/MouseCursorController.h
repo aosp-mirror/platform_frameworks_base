@@ -43,7 +43,6 @@ public:
     MouseCursorController(PointerControllerContext& context);
     ~MouseCursorController();
 
-    std::optional<FloatRect> getBounds() const;
     void move(float deltaX, float deltaY);
     void setPosition(float x, float y);
     FloatPoint getPosition() const;
@@ -66,6 +65,8 @@ public:
     bool doAnimations(nsecs_t timestamp);
 
     bool resourcesLoaded();
+
+    std::string dump() const;
 
 private:
     mutable std::mutex mLock;
@@ -102,7 +103,6 @@ private:
 
     } mLocked GUARDED_BY(mLock);
 
-    std::optional<FloatRect> getBoundsLocked() const;
     void setPositionLocked(float x, float y);
 
     void updatePointerLocked();

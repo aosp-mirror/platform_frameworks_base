@@ -59,6 +59,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var activeMediaDeviceItem: DeviceItem
     private lateinit var notConnectedDeviceItem: DeviceItem
+    private lateinit var connectedAudioSharingMediaDeviceItem: DeviceItem
     private lateinit var connectedMediaDeviceItem: DeviceItem
     private lateinit var connectedOtherDeviceItem: DeviceItem
     @Mock private lateinit var dialog: SystemUIDialog
@@ -94,6 +95,15 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
         connectedMediaDeviceItem =
             DeviceItem(
                 type = DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
+                cachedBluetoothDevice = cachedBluetoothDevice,
+                deviceName = DEVICE_NAME,
+                connectionSummary = DEVICE_CONNECTION_SUMMARY,
+                iconWithDescription = null,
+                background = null
+            )
+        connectedAudioSharingMediaDeviceItem =
+            DeviceItem(
+                type = DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
                 cachedBluetoothDevice = cachedBluetoothDevice,
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
@@ -180,6 +190,21 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                     .logDeviceClick(
                         cachedBluetoothDevice.address,
                         DeviceItemType.SAVED_BLUETOOTH_DEVICE
+                    )
+            }
+        }
+    }
+
+    @Test
+    fun testOnClick_connectedAudioSharingMediaDevice_logClick() {
+        with(kosmos) {
+            testScope.runTest {
+                whenever(cachedBluetoothDevice.address).thenReturn(DEVICE_ADDRESS)
+                actionInteractorImpl.onClick(connectedAudioSharingMediaDeviceItem, dialog)
+                verify(bluetoothTileDialogLogger)
+                    .logDeviceClick(
+                        cachedBluetoothDevice.address,
+                        DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE
                     )
             }
         }
@@ -415,7 +440,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnClick_hasTwoConnectedLeDevice_clickedConnectedLe_shouldLaunchSettings() {
+    fun testOnClick_hasTwoConnectedLeDevice_clickedActiveLe_shouldLaunchSettings() {
         with(kosmos) {
             testScope.runTest {
                 whenever(cachedBluetoothDevice.device).thenReturn(bluetoothDevice)
@@ -438,7 +463,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                     if (device == bluetoothDevice) GROUP_ID_1 else GROUP_ID_2
                 }
 
-                actionInteractorImpl.onClick(connectedMediaDeviceItem, dialog)
+                actionInteractorImpl.onClick(activeMediaDeviceItem, dialog)
                 verify(activityStarter)
                     .postStartActivityDismissingKeyguard(
                         ArgumentMatchers.any(),

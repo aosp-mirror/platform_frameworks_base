@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy.ui.dialog.composable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.runtime.Composable
@@ -33,17 +32,13 @@ import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.ModesDialogView
 fun ModeTileGrid(viewModel: ModesDialogViewModel) {
     val tiles by viewModel.tiles.collectAsStateWithLifecycle(initialValue = emptyList())
 
-    // TODO(b/346519570): Handle what happens when we have more than a few modes.
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = Modifier.padding(8.dp).fillMaxWidth().heightIn(max = 300.dp),
+        columns = GridCells.Fixed(1),
+        modifier = Modifier.fillMaxWidth().heightIn(max = 320.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(
-            tiles.size,
-            key = { index -> tiles[index].id },
-        ) { index ->
+        items(tiles.size, key = { index -> tiles[index].id }) { index ->
             ModeTile(viewModel = tiles[index])
         }
     }

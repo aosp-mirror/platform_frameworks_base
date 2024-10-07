@@ -26,7 +26,7 @@ import com.android.systemui.screenshot.data.repository.ProfileTypeRepository
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult
 import com.android.systemui.screenshot.policy.CapturePolicy.PolicyResult.NotMatched
 import com.android.systemui.screenshot.policy.CaptureType.IsolatedTask
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags
+import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
@@ -48,7 +48,7 @@ constructor(
             return NotMatched(policy = NAME, reason = SHADE_EXPANDED)
         }
 
-        if (DesktopModeFlags.DESKTOP_WINDOWING_MODE.isEnabled(context)) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             content.rootTasks.firstOrNull()?.also {
                 if (it.windowingMode == WINDOWING_MODE_FREEFORM) {
                     return NotMatched(policy = NAME, reason = DESKTOP_MODE_ENABLED)

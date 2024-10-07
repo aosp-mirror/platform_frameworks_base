@@ -33,7 +33,6 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
-import static android.app.AppOpsManager.OP_BLUETOOTH_CONNECT;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_CAMERA_SANDBOXED;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
@@ -73,6 +72,9 @@ import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
 
+import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION;
+import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION;
+import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_PROXY_OPERATION;
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import android.Manifest;
@@ -161,6 +163,7 @@ import com.android.internal.os.Clock;
 import com.android.internal.pm.pkg.component.ParsedAttribution;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -424,7 +427,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /** Hands the definition of foreground and uid states */
     @GuardedBy("this")
-    public AppOpsUidStateTracker getUidStateTracker() {
+    private AppOpsUidStateTracker getUidStateTracker() {
         if (mUidStateTracker == null) {
             mUidStateTracker = new AppOpsUidStateTrackerImpl(
                     LocalServices.getService(ActivityManagerInternal.class),
@@ -620,7 +623,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             this.op = op;
             this.uid = uid;
             this.uidState = uidState;
-            this.packageName = packageName;
+            this.packageName = packageName.intern();
             // We keep an invariant that the persistent device will always have an entry in
             // mDeviceAttributedOps.
             mDeviceAttributedOps.put(PERSISTENT_DEVICE_ID_DEFAULT,
@@ -1032,7 +1035,10 @@ public class AppOpsService extends IAppOpsService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            String pkgName = intent.getData().getEncodedSchemeSpecificPart();
+            if (action == null) {
+                return;
+            }
+            String pkgName = intent.getData().getEncodedSchemeSpecificPart().intern();
             int uid = intent.getIntExtra(Intent.EXTRA_UID, Process.INVALID_UID);
 
             if (action.equals(ACTION_PACKAGE_ADDED)
@@ -1236,7 +1242,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops ops = uidState.pkgOps.get(packageName);
         if (ops == null) {
             ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+            uidState.pkgOps.put(packageName.intern(), ops);
         }
 
         SparseIntArray packageModes =
@@ -2827,12 +2833,26 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkOperation(int code, int uid, String packageName) {
+        if (Flags.appopAccessTrackingLoggingEnabled()) {
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
+                    uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
+                    false);
+        }
         return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
                 Context.DEVICE_ID_DEFAULT, false /*raw*/);
     }
 
     @Override
     public int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId) {
+        if (Flags.appopAccessTrackingLoggingEnabled()) {
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
+                    uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
+                    false);
+        }
         return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
                 virtualDeviceId, false /*raw*/);
     }
@@ -2896,21 +2916,28 @@ public class AppOpsService extends IAppOpsService.Stub {
                         uidState.uid, getPersistentId(virtualDeviceId), code);
 
                 if (rawUidMode != AppOpsManager.opToDefaultMode(code)) {
-                    return raw ? rawUidMode : uidState.evalMode(code, rawUidMode);
+                    return raw ? rawUidMode :
+                        evaluateForegroundMode(/* uid= */ uid, /* op= */ code,
+                        /* rawUidMode= */ rawUidMode);
                 }
             }
 
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
             if (op == null) {
-                return AppOpsManager.opToDefaultMode(code);
+                return evaluateForegroundMode(
+                        /* uid= */ uid,
+                        /* op= */ code,
+                        /* rawUidMode= */ AppOpsManager.opToDefaultMode(code));
             }
-            return raw
-                    ? mAppOpsCheckingService.getPackageMode(
-                            op.packageName, op.op, UserHandle.getUserId(op.uid))
-                    : op.uidState.evalMode(
-                            op.op,
-                            mAppOpsCheckingService.getPackageMode(
-                                    op.packageName, op.op, UserHandle.getUserId(op.uid)));
+            var packageMode = mAppOpsCheckingService.getPackageMode(
+                    op.packageName,
+                    op.op,
+                    UserHandle.getUserId(op.uid));
+            return raw ? packageMode :
+                    evaluateForegroundMode(
+                        /* uid= */ uid,
+                        /* op= */op.op,
+                        /* rawUidMode= */ packageMode);
         }
     }
 
@@ -3006,6 +3033,14 @@ public class AppOpsService extends IAppOpsService.Stub {
     public SyncNotedAppOp noteProxyOperationWithState(int code,
             AttributionSourceState attributionSourceState, boolean shouldCollectAsyncNotedOp,
             String message, boolean shouldCollectMessage, boolean skipProxyOperation) {
+        if (Flags.appopAccessTrackingLoggingEnabled()) {
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
+                    attributionSourceState.uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_PROXY_OPERATION,
+                    attributionSourceState.attributionTag != null);
+        }
+
         AttributionSource attributionSource = new AttributionSource(attributionSourceState);
         return mCheckOpsDelegateDispatcher.noteProxyOperation(code, attributionSource,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
@@ -3087,6 +3122,14 @@ public class AppOpsService extends IAppOpsService.Stub {
     public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
             String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage) {
+        if (Flags.appopAccessTrackingLoggingEnabled()) {
+            FrameworkStatsLog.write(
+                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
+                    uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION,
+                    attributionTag != null);
+        }
+
         return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
                 attributionTag, Context.DEVICE_ID_DEFAULT, shouldCollectAsyncNotedOp, message,
                 shouldCollectMessage);
@@ -3115,11 +3158,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     packageName);
         }
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (code == OP_BLUETOOTH_CONNECT) {
-                Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as incoming "
-                        + "package: " + packageName + " and uid: " + uid + " is invalid");
-            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3149,13 +3187,6 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         } catch (SecurityException e) {
             logVerifyAndGetBypassFailure(uid, e, "noteOperation");
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (code == OP_BLUETOOTH_CONNECT) {
-                Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                        + " verifyAndGetBypass returned a SecurityException for package: "
-                        + packageName + " and uid: " + uid + " and attributionTag: "
-                        + attributionTag, e);
-            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3173,17 +3204,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName + "flags: " +
                         AppOpsManager.flagsToString(flags));
-                // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                if (code == OP_BLUETOOTH_CONNECT) {
-                    Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                            + " #getOpsLocked returned null for"
-                            + " uid: " + uid
-                            + " packageName: " + packageName
-                            + " attributionTag: " + attributionTag
-                            + " pvr.isAttributionTagValid: " + pvr.isAttributionTagValid
-                            + " pvr.bypass: " + pvr.bypass);
-                    Slog.e(TAG, "mUidStates.get(" + uid + "): " + mUidStates.get(uid));
-                }
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                         packageName);
             }
@@ -3228,11 +3248,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, uidMode);
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (code == OP_BLUETOOTH_CONNECT && uidMode == MODE_ERRORED) {
-                        Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                                + " uid mode is MODE_ERRORED");
-                    }
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
@@ -3252,11 +3267,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, mode);
-                    // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-                    if (code == OP_BLUETOOTH_CONNECT && mode == MODE_ERRORED) {
-                        Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
-                                + " package mode is MODE_ERRORED");
-                    }
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
@@ -4773,7 +4783,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return null;
             }
             ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+            uidState.pkgOps.put(packageName.intern(), ops);
         }
 
         if (edit) {
@@ -5110,7 +5120,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         Ops ops = uidState.pkgOps.get(pkgName);
         if (ops == null) {
             ops = new Ops(pkgName, uidState);
-            uidState.pkgOps.put(pkgName, ops);
+            uidState.pkgOps.put(pkgName.intern(), ops);
         }
         ops.put(op.op, op);
     }
@@ -7035,6 +7045,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         throw new IllegalStateException(
                 "Requested persistentId for invalid virtualDeviceId: " + virtualDeviceId);
+    }
+
+    @GuardedBy("this")
+    private int evaluateForegroundMode(int uid, int op, int rawUidMode) {
+        return getUidStateTracker().evalMode(uid, op, rawUidMode);
     }
 
     private final class ClientUserRestrictionState implements DeathRecipient {

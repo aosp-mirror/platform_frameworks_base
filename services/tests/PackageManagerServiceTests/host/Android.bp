@@ -88,3 +88,17 @@ genrule {
         " && $(location soong_zip) -o $(genDir)/temp.apk -L 0 -C $(genDir)/apk -D $(genDir)/apk" +
         " && $(location zipalign) -f 4 $(genDir)/temp.apk $(out)",
 }
+
+test_module_config_host {
+    name: "PackageManagerServiceHostTests_test_overlayactorvisibilitytest",
+    base: "PackageManagerServiceHostTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.pm.test.OverlayActorVisibilityTest"],
+}
+
+test_module_config_host {
+    name: "PackageManagerServiceHostTests_android_server_pm_Presubmit",
+    base: "PackageManagerServiceHostTests",
+    test_suites: ["device-tests"],
+    include_annotations: ["android.platform.test.annotations.Presubmit"],
+}

@@ -19,16 +19,6 @@ flag {
 }
 
 flag {
-    name: "do_not_skip_ime_by_target_visibility"
-    namespace: "windowing_frontend"
-    description: "Avoid window traversal missing IME"
-    bug: "339375944"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "apply_lifecycle_on_pip_change"
     namespace: "windowing_frontend"
     description: "Make pip activity lifecyle change with windowing mode"
@@ -80,6 +70,17 @@ flag {
 }
 
 flag {
+  name: "common_surface_animator"
+  namespace: "windowing_frontend"
+  description: "A reusable surface animator for default transition"
+  bug: "326331384"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "reduce_keyguard_transitions"
   namespace: "windowing_frontend"
   description: "Avoid setting keyguard transitions ready unless there are no other changes"
@@ -121,6 +122,17 @@ flag {
 }
 
 flag {
+    name: "remove_activity_starter_dream_callback"
+    namespace: "windowing_frontend"
+    description: "Avoid a race with DreamManagerService callbacks for isDreaming by checking Activity state directly"
+    bug: "366452352"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+    is_fixed_read_only: true
+}
+
+flag {
     name: "supports_multi_instance_system_ui"
     is_exported: true
     namespace: "multitasking"
@@ -154,6 +166,13 @@ flag {
 }
 
 flag {
+  name: "universal_resizable_by_default"
+  namespace: "windowing_frontend"
+  description: "The orientation, aspect ratio, resizability of activity will follow system behavior by default"
+  bug: "357141415"
+}
+
+flag {
   name: "respect_non_top_visible_fixed_orientation"
   namespace: "windowing_frontend"
   description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
@@ -184,6 +203,17 @@ flag {
   namespace: "windowing_frontend"
   description: "Only use the task's dim and reparent it to the display area when needed instead of coordinating multiple dimmers"
   bug: "352522056"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "update_dims_when_window_shown"
+  namespace: "windowing_frontend"
+  description: "Check if we need to update dim layers when a new window draws the first frame"
+  bug: "327332488"
   is_fixed_read_only: true
   metadata {
     purpose: PURPOSE_BUGFIX
@@ -228,14 +258,15 @@ flag {
 }
 
 flag {
-  name: "custom_animations_behind_translucent"
+  name: "ensure_wallpaper_in_wear_transitions"
   namespace: "windowing_frontend"
-  description: "A change can use its own layer parameters to animate behind a translucent activity"
-  bug: "327332488"
+  description: "Ensure that wallpaper window tokens are always present/available for collection in transitions on Wear"
+  bug: "355596979"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
 }
+
 flag {
   name: "migrate_predictive_back_transition"
   namespace: "windowing_frontend"
@@ -245,4 +276,42 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+  name: "always_capture_activity_snapshot"
+  namespace: "windowing_frontend"
+  description: "Always capture activity snapshot regardless predictive back status"
+  bug: "362183912"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "remove_starting_window_wait_for_multi_transitions"
+  namespace: "windowing_frontend"
+  description: "Avoid remove starting window too early when playing multiple transitions"
+  bug: "362347290"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "ensure_keyguard_does_transition_starting"
+  namespace: "windowing_frontend"
+  description: "Ensure that keyguard is the one starting transitions, instead of delegating to Core"
+  bug: "364930619"
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_priority_system_navigation_observer"
+    namespace: "systemui"
+    description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
 }

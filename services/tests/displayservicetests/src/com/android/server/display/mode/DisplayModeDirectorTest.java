@@ -1557,6 +1557,19 @@ public class DisplayModeDirectorTest {
         when(ddcMock.getIdleScreenRefreshRateTimeoutLuxThresholdPoint())
                 .thenReturn(List.of(getIdleScreenRefreshRateTimeoutLuxThresholdPoint(6, 1000),
                         getIdleScreenRefreshRateTimeoutLuxThresholdPoint(100, 800)));
+        director.defaultDisplayDeviceUpdated(ddcMock); // set the updated ddc
+
+        // idleScreenRefreshRate config is still null because the flag to enable subscription to
+        // light sensor is not enabled
+        sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 4));
+        waitForIdleSync();
+        assertNull(director.getBrightnessObserver().getIdleScreenRefreshRateConfig());
+
+        // Flag to subscribe to light sensor is enabled, and the sensor subscription is attempted
+        // again to load the idle screen refresh rate config
+        when(mDisplayManagerFlags.isIdleScreenConfigInSubscribingLightSensorEnabled())
+                .thenReturn(true);
+        director.defaultDisplayDeviceUpdated(ddcMock); // set the updated ddc
 
         // Sensor reads 5 lux
         sensorListener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 5));
@@ -1575,7 +1588,6 @@ public class DisplayModeDirectorTest {
         waitForIdleSync();
         assertEquals(new SurfaceControl.IdleScreenRefreshRateConfig(800),
                 director.getBrightnessObserver().getIdleScreenRefreshRateConfig());
-
     }
 
     @Test
@@ -3231,6 +3243,8 @@ public class DisplayModeDirectorTest {
 
     @Test
     public void testNotifyDefaultDisplayDeviceUpdated() {
+        when(mDisplayManagerFlags.isIdleScreenConfigInSubscribingLightSensorEnabled())
+                .thenReturn(true);
         when(mResources.getInteger(com.android.internal.R.integer.config_defaultPeakRefreshRate))
             .thenReturn(75);
         when(mResources.getInteger(R.integer.config_defaultRefreshRate))
@@ -3289,6 +3303,8 @@ public class DisplayModeDirectorTest {
                 new float[]{ BrightnessSynchronizer.brightnessIntToFloat(5) }, /* delta= */ 0);
         assertArrayEquals(director.getBrightnessObserver().getLowAmbientBrightnessThresholds(),
                 new float[]{10}, /* delta= */ 0);
+        assertNull(director.getBrightnessObserver()
+                .getIdleScreenRefreshRateTimeoutLuxThresholdPoints());
 
 
         // Notify that the default display is updated, such that DisplayDeviceConfig has new values
@@ -3300,6 +3316,10 @@ public class DisplayModeDirectorTest {
                 /* defaultRefreshRateInHbmSunlight= */ 75,
                 /* lowPowerSupportedModes= */ List.of(),
                 /* lowLightBlockingZoneSupportedModes= */ List.of());
+        List<IdleScreenRefreshRateTimeoutLuxThresholdPoint>
+                idleScreenRefreshRateTimeoutLuxThresholdPoints =
+                List.of(getIdleScreenRefreshRateTimeoutLuxThresholdPoint(0, 1500),
+                        getIdleScreenRefreshRateTimeoutLuxThresholdPoint(50, 1000));
         when(displayDeviceConfig.getRefreshRateData()).thenReturn(refreshRateData);
         when(displayDeviceConfig.getDefaultLowBlockingZoneRefreshRate()).thenReturn(50);
         when(displayDeviceConfig.getDefaultHighBlockingZoneRefreshRate()).thenReturn(55);
@@ -3311,6 +3331,8 @@ public class DisplayModeDirectorTest {
                 .thenReturn(new float[]{0.21f});
         when(displayDeviceConfig.getHighAmbientBrightnessThresholds())
                 .thenReturn(new float[]{2100});
+        when(displayDeviceConfig.getIdleScreenRefreshRateTimeoutLuxThresholdPoint())
+                .thenReturn(idleScreenRefreshRateTimeoutLuxThresholdPoints);
         director.defaultDisplayDeviceUpdated(displayDeviceConfig);
 
         // Verify the new values are from the freshly loaded DisplayDeviceConfig.
@@ -3329,6 +3351,9 @@ public class DisplayModeDirectorTest {
                 new float[]{30}, /* delta= */ 0);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmHdr(), 65);
         assertEquals(director.getHbmObserver().getRefreshRateInHbmSunlight(), 75);
+        assertEquals(director.getBrightnessObserver()
+                .getIdleScreenRefreshRateTimeoutLuxThresholdPoints(),
+                idleScreenRefreshRateTimeoutLuxThresholdPoints);
 
         // Notify that the default display is updated, such that DeviceConfig has new values
         FakeDeviceConfig config = mInjector.getDeviceConfig();
@@ -3531,12 +3556,16 @@ public class DisplayModeDirectorTest {
                 new RefreshRateRange(refreshRate, refreshRate);
         displayListener.onDisplayChanged(DISPLAY_ID);
 
-        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_REFRESH_RATE);
         assertVoteForPhysicalRefreshRate(vote, /* refreshRate= */ refreshRate);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, refreshRate, refreshRate);
 
         mInjector.mDisplayInfo.layoutLimitedRefreshRate = null;
         displayListener.onDisplayChanged(DISPLAY_ID);
 
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_REFRESH_RATE);
+        assertNull(vote);
         vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
         assertNull(vote);
     }
@@ -3559,6 +3588,8 @@ public class DisplayModeDirectorTest {
         displayListener.onDisplayChanged(DISPLAY_ID);
 
         Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_FRAME_RATE);
+        assertNull(vote);
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_LAYOUT_LIMITED_REFRESH_RATE);
         assertNull(vote);
     }
 

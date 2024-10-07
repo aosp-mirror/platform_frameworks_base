@@ -26,8 +26,7 @@ import com.android.systemui.flags.RefactorFlagUtils
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
-import com.android.systemui.keyguard.shared.ComposeLockscreen
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
+import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
 import com.android.systemui.statusbar.phone.PredictiveBackSysUiFlag
 
 /** Helper for reading or using the scene container flag state. */
@@ -39,11 +38,10 @@ object SceneContainerFlag {
     inline val isEnabled
         get() =
             sceneContainer() && // mainAconfigFlag
-                ComposeLockscreen.isEnabled &&
                 KeyguardBottomAreaRefactor.isEnabled &&
                 KeyguardWmStateRefactor.isEnabled &&
                 MigrateClocksToBlueprint.isEnabled &&
-                NotificationsHeadsUpRefactor.isEnabled &&
+                NotificationThrottleHun.isEnabled &&
                 PredictiveBackSysUiFlag.isEnabled &&
                 DeviceEntryUdfpsRefactor.isEnabled
 
@@ -55,11 +53,10 @@ object SceneContainerFlag {
     /** The set of secondary flags which must be enabled for scene container to work properly */
     inline fun getSecondaryFlags(): Sequence<FlagToken> =
         sequenceOf(
-            ComposeLockscreen.token,
             KeyguardBottomAreaRefactor.token,
             KeyguardWmStateRefactor.token,
             MigrateClocksToBlueprint.token,
-            NotificationsHeadsUpRefactor.token,
+            NotificationThrottleHun.token,
             PredictiveBackSysUiFlag.token,
             DeviceEntryUdfpsRefactor.token,
             // NOTE: Changes should also be made in isEnabled and @EnableSceneContainer

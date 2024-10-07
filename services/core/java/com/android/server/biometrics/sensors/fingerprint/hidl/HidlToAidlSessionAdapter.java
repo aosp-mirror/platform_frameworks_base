@@ -209,6 +209,10 @@ public class HidlToAidlSessionAdapter implements ISession {
         return null;
     }
 
+    protected IBiometricsFingerprint getIBiometricsFingerprint() {
+        return mSession.get();
+    }
+
     public long getAuthenticatorIdForUpdateClient() throws RemoteException {
         return mSession.get().getAuthenticatorId();
     }

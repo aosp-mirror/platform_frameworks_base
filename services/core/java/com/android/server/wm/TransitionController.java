@@ -53,7 +53,7 @@ import android.window.WindowContainerTransaction;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
-import com.android.internal.protolog.ProtoLogGroup;
+import com.android.internal.protolog.WmProtoLogGroups;
 import com.android.server.FgThread;
 import com.android.window.flags.Flags;
 
@@ -303,7 +303,8 @@ class TransitionController {
                     + " possible.");
         }
         Transition transit = new Transition(type, flags, this, mSyncEngine);
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s", transit);
+        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                "Creating Transition: %s", transit);
         moveToCollecting(transit);
         return transit;
     }
@@ -324,21 +325,21 @@ class TransitionController {
         final long timeoutMs =
                 transition.mType == TRANSIT_CHANGE ? CHANGE_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
         mCollectingTransition.startCollecting(timeoutMs);
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
-                mCollectingTransition);
+        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                "Start collecting in Transition: %s", mCollectingTransition);
     }
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player,
             @Nullable WindowProcessController playerProc) {
         if (!mTransitionPlayers.isEmpty()) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Registering transition "
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Registering transition "
                     + "player %s over %d other players", player.asBinder(),
                     mTransitionPlayers.size());
             // flush currently running transitions so that the new player doesn't get
             // intermediate state
             flushRunningTransitions();
         } else {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Registering transition "
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Registering transition "
                     + "player %s ", player.asBinder());
         }
         mTransitionPlayers.add(new TransitionPlayerRecord(player, playerProc));
@@ -351,18 +352,18 @@ class TransitionController {
             if (mTransitionPlayers.get(idx).mPlayer.asBinder() == player.asBinder()) break;
         }
         if (idx < 0) {
-            ProtoLog.w(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Attempt to unregister "
+            ProtoLog.w(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Attempt to unregister "
                     + "transition player %s but it isn't registered", player.asBinder());
             return;
         }
         final boolean needsFlush = idx == (mTransitionPlayers.size() - 1);
         final TransitionPlayerRecord record = mTransitionPlayers.remove(idx);
         if (needsFlush) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Unregistering active "
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Unregistering active "
                     + "transition player %s at index=%d leaving %d in stack", player.asBinder(),
                     idx, mTransitionPlayers.size());
         } else {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Unregistering transition "
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Unregistering transition "
                     + "player %s at index=%d leaving %d in stack", player.asBinder(), idx,
                     mTransitionPlayers.size());
         }
@@ -408,6 +409,10 @@ class TransitionController {
      */
     @Nullable
     Transition getCollectingTransition() {
+        if (mCollectingTransition != null && !mCollectingTransition.isCollecting()) {
+            Slog.wtfStack(TAG, "Collecting Transition (#" + mCollectingTransition.getSyncId()
+                    + ") is not collecting. state=" + mCollectingTransition.getState());
+        }
         return mCollectingTransition;
     }
 
@@ -737,8 +742,9 @@ class TransitionController {
             @Nullable RemoteTransition remoteTransition,
             @Nullable TransitionRequestInfo.DisplayChange displayChange) {
         if (mIsWaitingForDisplayEnabled) {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Disabling player for transition"
-                    + " #%d because display isn't enabled yet", transition.getSyncId());
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Disabling player for transition #%d because display isn't enabled yet",
+                    transition.getSyncId());
             transition.mIsPlayerEnabled = false;
             transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
             mAtm.mH.post(() -> mAtm.mWindowOrganizerController.startTransition(
@@ -754,7 +760,7 @@ class TransitionController {
             return transition;
         }
         try {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
             ActivityManager.RunningTaskInfo startTaskInfo = null;
             ActivityManager.RunningTaskInfo pipTaskInfo = null;
@@ -876,10 +882,10 @@ class TransitionController {
     }
 
     /** @see Transition#setOverrideAnimation */
-    void setOverrideAnimation(TransitionInfo.AnimationOptions options,
+    void setOverrideAnimation(TransitionInfo.AnimationOptions options, ActivityRecord r,
             @Nullable IRemoteCallback startCallback, @Nullable IRemoteCallback finishCallback) {
         if (mCollectingTransition == null) return;
-        mCollectingTransition.setOverrideAnimation(options, startCallback, finishCallback);
+        mCollectingTransition.setOverrideAnimation(options, r, startCallback, finishCallback);
     }
 
     void setNoAnimation(WindowContainer wc) {
@@ -917,7 +923,12 @@ class TransitionController {
     }
 
     /** @see Transition#finishTransition */
-    void finishTransition(Transition record) {
+    void finishTransition(@NonNull ActionChain chain) {
+        if (!chain.isFinishing()) {
+            throw new IllegalStateException("Can't finish on a non-finishing transition "
+                    + chain.mTransition);
+        }
+        final Transition record = chain.mTransition;
         // It is usually a no-op but make sure that the metric consumer is removed.
         mTransitionMetricsReporter.reportAnimationStart(record.getToken(), 0 /* startTime */);
         // It is a no-op if the transition did not change the display.
@@ -926,14 +937,14 @@ class TransitionController {
             Slog.e(TAG, "Trying to finish a non-playing transition " + record);
             return;
         }
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);
+        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);
         mPlayingTransitions.remove(record);
         if (!inTransition()) {
             // reset track-count now since shell-side is idle.
             mTrackCount = 0;
         }
         updateRunningRemoteAnimation(record, false /* isPlaying */);
-        record.finishTransition();
+        record.finishTransition(chain);
         for (int i = mAnimatingExitWindows.size() - 1; i >= 0; i--) {
             final WindowState w = mAnimatingExitWindows.get(i);
             if (w.mAnimatingExit && w.mHasSurface && !w.inTransition()) {
@@ -1047,8 +1058,8 @@ class TransitionController {
             // If it's a legacy sync, then it needs to wait until there is no collecting transition.
             if (queued.mTransition == null) return;
             if (!canStartCollectingNow(queued.mTransition)) return;
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from collecting"
-                    + " to waiting.", mCollectingTransition.getSyncId());
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+                    "Moving #%d from collecting to waiting.", mCollectingTransition.getSyncId());
             mWaitingTransitions.add(mCollectingTransition);
             mCollectingTransition = null;
         } else if (mSyncEngine.hasActiveSync()) {
@@ -1211,8 +1222,8 @@ class TransitionController {
             // Didn't overlap with anything, so give it its own track
             track = mTrackCount;
             if (track > 0) {
-                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Playing #%d in parallel on "
-                        + "track #%d", transition.getSyncId(), track);
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Playing #%d in parallel on track #%d", transition.getSyncId(), track);
             }
         }
         transition.mAnimationTrack = track;
@@ -1221,8 +1232,8 @@ class TransitionController {
         if (sync && mTrackCount > 1) {
             // If there are >1 tracks, mark as sync so that all tracks finish.
             info.setFlags(info.getFlags() | TransitionInfo.FLAG_SYNC);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Marking #%d animation as SYNC.",
-                    transition.getSyncId());
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Marking #%d animation as SYNC.", transition.getSyncId());
         }
     }
 
@@ -1345,12 +1356,13 @@ class TransitionController {
         }
     }
 
-    void dispatchLegacyAppTransitionStarting(TransitionInfo info, long statusBarTransitionDelay) {
+    void dispatchLegacyAppTransitionStarting(DisplayContent[] participantDisplays,
+            long statusBarTransitionDelay) {
         final long now = SystemClock.uptimeMillis();
         for (int i = 0; i < mLegacyListeners.size(); ++i) {
             final WindowManagerInternal.AppTransitionListener listener = mLegacyListeners.get(i);
-            for (int j = 0; j < info.getRootCount(); ++j) {
-                final int displayId = info.getRoot(j).getDisplayId();
+            for (int j = 0; j < participantDisplays.length; ++j) {
+                final int displayId = participantDisplays[j].mDisplayId;
                 if (shouldDispatchLegacyListener(listener, displayId)) {
                     listener.onAppTransitionStartingLocked(
                             now + statusBarTransitionDelay,
@@ -1400,7 +1412,7 @@ class TransitionController {
     /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
     private void queueTransition(Transition transit, OnStartCollect onStartCollect) {
         mQueuedTransitions.add(new QueuedTransition(transit, onStartCollect));
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+        ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
                 "Queueing transition: %s", transit);
     }
 
@@ -1416,7 +1428,7 @@ class TransitionController {
                 // Check if we can run in parallel here.
                 if (canStartCollectingNow(transit)) {
                     // start running in parallel.
-                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
                             + " collecting to waiting.", mCollectingTransition.getSyncId());
                     mWaitingTransitions.add(mCollectingTransition);
                     mCollectingTransition = null;
@@ -1455,7 +1467,7 @@ class TransitionController {
                 // Check if we can run in parallel here.
                 if (canStartCollectingNow(null /* transit */)) {
                     // create and collect in parallel.
-                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
+                    ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
                             + " collecting to waiting.", mCollectingTransition.getSyncId());
                     mWaitingTransitions.add(mCollectingTransition);
                     mCollectingTransition = null;
@@ -1479,7 +1491,7 @@ class TransitionController {
             // Just add to queue since we already have a queue.
             mQueuedTransitions.add(new QueuedTransition(syncGroup,
                     (deferred) -> applySync.accept(true /* deferred */)));
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
                     "Queueing legacy sync-set: %s", syncGroup.mSyncId);
             return;
         }
@@ -1674,9 +1686,10 @@ class TransitionController {
         }
 
         void logOnSend() {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnSendLog());
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    startWCT=%s", mStartWCT);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s",
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnSendLog());
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN,
+                    "    startWCT=%s", mStartWCT);
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "    info=%s",
                     mInfo.toString("    " /* prefix */));
         }
 
@@ -1699,7 +1712,7 @@ class TransitionController {
         }
 
         void logOnFinish() {
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnFinishLog());
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "%s", buildOnFinishLog());
         }
     }
 

@@ -19,8 +19,8 @@ package com.android.wm.shell.recents;
 import android.annotation.Nullable;
 import android.graphics.Color;
 
+import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
-import com.android.wm.shell.util.GroupedRecentTaskInfo;
 
 import java.util.List;
 import java.util.concurrent.Executor;

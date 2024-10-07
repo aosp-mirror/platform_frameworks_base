@@ -210,19 +210,30 @@ public class AndroidPaintContext extends PaintContext {
     }
 
     @Override
-    public void getTextBounds(int textId, int start, int end, boolean monospace, float[] bounds) {
+    public void getTextBounds(int textId, int start, int end, int flags, float[] bounds) {
         String str = getText(textId);
         if (end == -1) {
             end = str.length();
         }
 
+        Paint.FontMetrics metrics = mPaint.getFontMetrics();
         mPaint.getTextBounds(str, start, end, mTmpRect);
 
         bounds[0] = mTmpRect.left;
-        bounds[1] = mTmpRect.top;
-        bounds[2] = monospace ? (mPaint.measureText(str, start, end) - mTmpRect.left)
-                : mTmpRect.right;
-        bounds[3] = mTmpRect.bottom;
+
+        if ((flags & PaintContext.TEXT_MEASURE_MONOSPACE_WIDTH) != 0) {
+            bounds[2] = mPaint.measureText(str, start, end) - mTmpRect.left;
+        } else {
+            bounds[2] = mTmpRect.right;
+        }
+
+        if ((flags & PaintContext.TEXT_MEASURE_FONT_HEIGHT) != 0) {
+            bounds[1] = Math.round(metrics.ascent);
+            bounds[3] = Math.round(metrics.bottom);
+        } else {
+            bounds[1] = mTmpRect.top;
+            bounds[3] = mTmpRect.bottom;
+        }
     }
 
     @Override
@@ -236,6 +247,9 @@ public class AndroidPaintContext extends PaintContext {
                             boolean rtl) {
 
         String textToPaint = getText(textID);
+        if (textToPaint == null) {
+            return;
+        }
         if (end == -1) {
             if (start != 0) {
                 textToPaint = textToPaint.substring(start);

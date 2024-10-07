@@ -16,10 +16,13 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
+import android.app.DreamManager
 import com.android.systemui.common.usagestats.domain.UsageStatsInteractor
 import com.android.systemui.common.usagestats.shared.model.ActivityEventModel
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.log.LogBuffer
@@ -34,10 +37,12 @@ import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 
@@ -56,6 +61,8 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val taskStackChangeListeners: TaskStackChangeListeners,
     private val usageStatsInteractor: UsageStatsInteractor,
+    private val dreamManager: DreamManager,
+    @Background private val bgScope: CoroutineScope,
     @CommunalLog logBuffer: LogBuffer,
 ) {
     private companion object {
@@ -127,13 +134,21 @@ constructor(
      * Checks if an activity starts while on the glanceable hub and dismisses the keyguard if it
      * does. This can detect activities started due to broadcast trampolines from widgets.
      */
+    @SuppressLint("MissingPermission")
     suspend fun waitForActivityStartAndDismissKeyguard() {
         if (waitForActivityStartWhileOnHub()) {
             logger.d("Detected trampoline, requesting unlock")
             activityStarter.dismissKeyguardThenExecute(
-                /* action= */ { false },
+                /* action= */ {
+                    // Kill the dream when launching the trampoline activity. Right now the exit
+                    // animation stalls when tapping the battery widget, and the dream remains
+                    // visible until the transition hits some timeouts and gets cancelled.
+                    // TODO(b/362841648): remove once exit animation is fixed.
+                    bgScope.launch { dreamManager.stopDream() }
+                    false
+                },
                 /* cancel= */ null,
-                /* afterKeyguardGone= */ false
+                /* afterKeyguardGone= */ false,
             )
         }
     }

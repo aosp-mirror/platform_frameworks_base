@@ -30,9 +30,9 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
-import com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.fakeTelephonyRepository
@@ -90,11 +90,11 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             .thenReturn(needsEmergencyAffordance)
         whenever(telecomManager.isInCall).thenReturn(false)
 
-        kosmos.fakeFeatureFlagsClassic.set(REFACTOR_GETCURRENTUSER, true)
-
         kosmos.fakeTelephonyRepository.setHasTelephonyRadio(true)
 
         kosmos.telecomManager = telecomManager
+
+        kosmos.sceneInteractor.changeScene(Scenes.Bouncer, "")
     }
 
     @Test
@@ -134,6 +134,7 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             assertThat(metricsLogger.logs.element().category)
                 .isEqualTo(MetricsProto.MetricsEvent.ACTION_EMERGENCY_CALL)
             verify(activityTaskManager).stopSystemLockTaskMode()
+            assertThat(kosmos.sceneInteractor.currentScene.value).isEqualTo(Scenes.Lockscreen)
             verify(telecomManager).showInCallScreen(eq(false))
         }
 
@@ -160,6 +161,7 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
             assertThat(metricsLogger.logs.element().category)
                 .isEqualTo(MetricsProto.MetricsEvent.ACTION_EMERGENCY_CALL)
             verify(activityTaskManager).stopSystemLockTaskMode()
+            assertThat(kosmos.sceneInteractor.currentScene.value).isEqualTo(Scenes.Lockscreen)
 
             // TODO(b/25189994): Test the activity has been started once we switch to the
             //  ActivityStarter interface here.

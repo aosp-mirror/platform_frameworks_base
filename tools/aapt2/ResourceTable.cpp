@@ -50,21 +50,21 @@ bool less_than_type(const std::unique_ptr<ResourceTableType>& lhs,
 
 template <typename T>
 bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, StringPiece rhs) {
-  return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
+  return lhs->name < rhs;
 }
 
 template <typename T>
 bool greater_than_struct_with_name(StringPiece lhs, const std::unique_ptr<T>& rhs) {
-  return rhs->name.compare(0, rhs->name.size(), lhs.data(), lhs.size()) > 0;
+  return rhs->name > lhs;
 }
 
 template <typename T>
 struct NameEqualRange {
   bool operator()(const std::unique_ptr<T>& lhs, StringPiece rhs) const {
-    return less_than_struct_with_name<T>(lhs, rhs);
+    return less_than_struct_with_name(lhs, rhs);
   }
   bool operator()(StringPiece lhs, const std::unique_ptr<T>& rhs) const {
-    return greater_than_struct_with_name<T>(lhs, rhs);
+    return greater_than_struct_with_name(lhs, rhs);
   }
 };
 
@@ -74,7 +74,7 @@ bool less_than_struct_with_name_and_id(const T& lhs,
   if (lhs.id != rhs.second) {
     return lhs.id < rhs.second;
   }
-  return lhs.name.compare(0, lhs.name.size(), rhs.first.data(), rhs.first.size()) < 0;
+  return lhs.name < rhs.first;
 }
 
 template <typename T, typename Func, typename Elements>
@@ -90,14 +90,31 @@ struct ConfigKey {
   StringPiece product;
 };
 
-template <typename T>
-bool lt_config_key_ref(const T& lhs, const ConfigKey& rhs) {
-  int cmp = lhs->config.compare(*rhs.config);
-  if (cmp == 0) {
-    cmp = StringPiece(lhs->product).compare(rhs.product);
+struct lt_config_key_ref {
+  template <typename T>
+  bool operator()(const T& lhs, const ConfigKey& rhs) const noexcept {
+    int cmp = lhs->config.compare(*rhs.config);
+    if (cmp == 0) {
+      cmp = lhs->product.compare(rhs.product);
+    }
+    return cmp < 0;
   }
-  return cmp < 0;
-}
+};
+
+struct ConfigFlagKey {
+  const ConfigDescription* config;
+  StringPiece product;
+  const FeatureFlagAttribute& flag;
+};
+
+struct lt_config_flag_key_ref {
+  template <typename T>
+  bool operator()(const T& lhs, const ConfigFlagKey& rhs) const noexcept {
+    return std::tie(lhs->config, lhs->product, lhs->value->GetFlag()->name,
+                    lhs->value->GetFlag()->negated) <
+           std::tie(*rhs.config, rhs.product, rhs.flag.name, rhs.flag.negated);
+  }
+};
 
 }  // namespace
 
@@ -159,10 +176,10 @@ ResourceEntry* ResourceTableType::FindOrCreateEntry(android::StringPiece name) {
 ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
                                               android::StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -172,10 +189,10 @@ ResourceConfigValue* ResourceEntry::FindValue(const ConfigDescription& config,
 const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescription& config,
                                                     android::StringPiece product) const {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -185,10 +202,10 @@ const ResourceConfigValue* ResourceEntry::FindValue(const android::ConfigDescrip
 ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& config,
                                                       StringPiece product) {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<std::unique_ptr<ResourceConfigValue>>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
       return value;
     }
   }
@@ -199,36 +216,40 @@ ResourceConfigValue* ResourceEntry::FindOrCreateValue(const ConfigDescription& c
 
 std::vector<ResourceConfigValue*> ResourceEntry::FindAllValues(const ConfigDescription& config) {
   std::vector<ResourceConfigValue*> results;
-
-  auto iter = values.begin();
+  auto iter =
+      std::lower_bound(values.begin(), values.end(), ConfigKey{&config, ""}, lt_config_key_ref());
   for (; iter != values.end(); ++iter) {
     ResourceConfigValue* value = iter->get();
-    if (value->config == config) {
-      results.push_back(value);
-      ++iter;
+    if (value->config != config) {
       break;
     }
-  }
-
-  for (; iter != values.end(); ++iter) {
-    ResourceConfigValue* value = iter->get();
-    if (value->config == config) {
-      results.push_back(value);
-    }
+    results.push_back(value);
   }
   return results;
 }
 
-bool ResourceEntry::HasDefaultValue() const {
-  const ConfigDescription& default_config = ConfigDescription::DefaultConfig();
-
-  // The default config should be at the top of the list, since the list is sorted.
-  for (auto& config_value : values) {
-    if (config_value->config == default_config) {
-      return true;
+ResourceConfigValue* ResourceEntry::FindOrCreateFlagDisabledValue(
+    const FeatureFlagAttribute& flag, const android::ConfigDescription& config,
+    android::StringPiece product) {
+  auto iter = std::lower_bound(flag_disabled_values.begin(), flag_disabled_values.end(),
+                               ConfigFlagKey{&config, product, flag}, lt_config_flag_key_ref());
+  if (iter != flag_disabled_values.end()) {
+    ResourceConfigValue* value = iter->get();
+    const auto value_flag = value->value->GetFlag().value();
+    if (value_flag.name == flag.name && value_flag.negated == flag.negated &&
+        value->config == config && value->product == product) {
+      return value;
     }
   }
-  return false;
+  ResourceConfigValue* newValue =
+      flag_disabled_values.insert(iter, util::make_unique<ResourceConfigValue>(config, product))
+          ->get();
+  return newValue;
+}
+
+bool ResourceEntry::HasDefaultValue() const {
+  // The default config should be at the top of the list, since the list is sorted.
+  return !values.empty() && values.front()->config == ConfigDescription::DefaultConfig();
 }
 
 ResourceTable::CollisionResult ResourceTable::ResolveFlagCollision(FlagStatus existing,
@@ -364,14 +385,14 @@ struct SortedVectorInserter : public Comparer {
     if (found) {
       return &*it;
     }
-    return &*el.insert(it, std::forward<T>(value));
+    return &*el.insert(it, std::move(value));
   }
 };
 
 struct PackageViewComparer {
   bool operator()(const ResourceTablePackageView& lhs, const ResourceTablePackageView& rhs) {
     return less_than_struct_with_name_and_id<ResourceTablePackageView, uint8_t>(
-        lhs, std::make_pair(rhs.name, rhs.id));
+        lhs, std::tie(rhs.name, rhs.id));
   }
 };
 
@@ -384,17 +405,18 @@ struct TypeViewComparer {
 struct EntryViewComparer {
   bool operator()(const ResourceTableEntryView& lhs, const ResourceTableEntryView& rhs) {
     return less_than_struct_with_name_and_id<ResourceTableEntryView, uint16_t>(
-        lhs, std::make_pair(rhs.name, rhs.id));
+        lhs, std::tie(rhs.name, rhs.id));
   }
 };
 
-void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePackage* package,
-                              const ResourceTableType* type, const std::string& entry_name,
-                              const std::optional<ResourceId>& id, const Visibility& visibility,
-                              const std::optional<AllowNew>& allow_new,
-                              const std::optional<OverlayableItem>& overlayable_item,
-                              const std::optional<StagedId>& staged_id,
-                              const std::vector<std::unique_ptr<ResourceConfigValue>>& values) {
+void InsertEntryIntoTableView(
+    ResourceTableView& table, const ResourceTablePackage* package, const ResourceTableType* type,
+    const std::string& entry_name, const std::optional<ResourceId>& id,
+    const Visibility& visibility, const std::optional<AllowNew>& allow_new,
+    const std::optional<OverlayableItem>& overlayable_item,
+    const std::optional<StagedId>& staged_id,
+    const std::vector<std::unique_ptr<ResourceConfigValue>>& values,
+    const std::vector<std::unique_ptr<ResourceConfigValue>>& flag_disabled_values) {
   SortedVectorInserter<ResourceTablePackageView, PackageViewComparer> package_inserter;
   SortedVectorInserter<ResourceTableTypeView, TypeViewComparer> type_inserter;
   SortedVectorInserter<ResourceTableEntryView, EntryViewComparer> entry_inserter;
@@ -421,6 +443,9 @@ void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePacka
   for (auto& value : values) {
     new_entry.values.emplace_back(value.get());
   }
+  for (auto& value : flag_disabled_values) {
+    new_entry.flag_disabled_values.emplace_back(value.get());
+  }
 
   entry_inserter.Insert(view_type->entries, std::move(new_entry));
 }
@@ -429,10 +454,25 @@ void InsertEntryIntoTableView(ResourceTableView& table, const ResourceTablePacka
 const ResourceConfigValue* ResourceTableEntryView::FindValue(const ConfigDescription& config,
                                                              android::StringPiece product) const {
   auto iter = std::lower_bound(values.begin(), values.end(), ConfigKey{&config, product},
-                               lt_config_key_ref<const ResourceConfigValue*>);
+                               lt_config_key_ref());
   if (iter != values.end()) {
     const ResourceConfigValue* value = *iter;
-    if (value->config == config && StringPiece(value->product) == product) {
+    if (value->config == config && value->product == product) {
+      return value;
+    }
+  }
+  return nullptr;
+}
+
+const ResourceConfigValue* ResourceTableEntryView::FindFlagDisabledValue(
+    const FeatureFlagAttribute& flag, const ConfigDescription& config,
+    android::StringPiece product) const {
+  auto iter = std::lower_bound(flag_disabled_values.begin(), flag_disabled_values.end(),
+                               ConfigFlagKey{&config, product, flag}, lt_config_flag_key_ref());
+  if (iter != values.end()) {
+    const ResourceConfigValue* value = *iter;
+    if (value->value->GetFlag() == flag && value->config == config &&
+        StringPiece(value->product) == product) {
       return value;
     }
   }
@@ -446,13 +486,13 @@ ResourceTableView ResourceTable::GetPartitionedView(const ResourceTableViewOptio
       for (const auto& entry : type->entries) {
         InsertEntryIntoTableView(view, package.get(), type.get(), entry->name, entry->id,
                                  entry->visibility, entry->allow_new, entry->overlayable_item,
-                                 entry->staged_id, entry->values);
+                                 entry->staged_id, entry->values, entry->flag_disabled_values);
 
         if (options.create_alias_entries && entry->staged_id) {
           auto alias_id = entry->staged_id.value().id;
           InsertEntryIntoTableView(view, package.get(), type.get(), entry->name, alias_id,
                                    entry->visibility, entry->allow_new, entry->overlayable_item, {},
-                                   entry->values);
+                                   entry->values, entry->flag_disabled_values);
         }
       }
     }
@@ -600,6 +640,25 @@ bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) 
     entry->staged_id = res.staged_id.value();
   }
 
+  if (res.value != nullptr && res.value->GetFlagStatus() == FlagStatus::Disabled) {
+    auto disabled_config_value =
+        entry->FindOrCreateFlagDisabledValue(res.value->GetFlag().value(), res.config, res.product);
+    if (!disabled_config_value->value) {
+      // Resource does not exist, add it now.
+      // Must clone the value since it might be in the values vector as well
+      CloningValueTransformer cloner(&string_pool);
+      disabled_config_value->value = res.value->Transform(cloner);
+    } else {
+      diag->Error(android::DiagMessage(source)
+                  << "duplicate value for resource '" << res.name << "' " << "with config '"
+                  << res.config << "' and flag '"
+                  << (res.value->GetFlag().value().negated ? "!" : "")
+                  << res.value->GetFlag().value().name << "'");
+      diag->Error(android::DiagMessage(source) << "resource previously defined here");
+      return false;
+    }
+  }
+
   if (res.value != nullptr) {
     auto config_value = entry->FindOrCreateValue(res.config, res.product);
     if (!config_value->value) {
@@ -608,18 +667,22 @@ bool ResourceTable::AddResource(NewResource&& res, android::IDiagnostics* diag) 
     } else {
       // When validation is enabled, ensure that a resource cannot have multiple values defined for
       // the same configuration unless protected by flags.
-      auto result =
-          validate ? ResolveFlagCollision(config_value->value->GetFlagStatus(), res.flag_status)
-                   : CollisionResult::kKeepBoth;
+      auto result = validate ? ResolveFlagCollision(config_value->value->GetFlagStatus(),
+                                                    res.value->GetFlagStatus())
+                             : CollisionResult::kKeepBoth;
       if (result == CollisionResult::kConflict) {
         result = ResolveValueCollision(config_value->value.get(), res.value.get());
       }
       switch (result) {
-        case CollisionResult::kKeepBoth:
+        case CollisionResult::kKeepBoth: {
           // Insert the value ignoring for duplicate configurations
-          entry->values.push_back(util::make_unique<ResourceConfigValue>(res.config, res.product));
-          entry->values.back()->value = std::move(res.value);
+          auto it = entry->values.insert(
+              std::lower_bound(entry->values.begin(), entry->values.end(),
+                               ConfigKey{&res.config, res.product}, lt_config_key_ref()),
+              util::make_unique<ResourceConfigValue>(res.config, res.product));
+          (*it)->value = std::move(res.value);
           break;
+        }
 
         case CollisionResult::kTakeNew:
           // Take the incoming value.
@@ -777,11 +840,6 @@ NewResourceBuilder& NewResourceBuilder::SetStagedId(StagedId staged_alias) {
 
 NewResourceBuilder& NewResourceBuilder::SetAllowMangled(bool allow_mangled) {
   res_.allow_mangled = allow_mangled;
-  return *this;
-}
-
-NewResourceBuilder& NewResourceBuilder::SetFlagStatus(FlagStatus flag_status) {
-  res_.flag_status = flag_status;
   return *this;
 }
 

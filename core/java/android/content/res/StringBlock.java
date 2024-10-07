@@ -25,6 +25,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.text.LineBreakConfig;
+import android.ravenwood.annotation.RavenwoodClassLoadHook;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.text.Annotation;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -60,6 +62,8 @@ import java.util.Arrays;
  *
  * {@hide}
  */
+@RavenwoodKeepWholeClass
+@RavenwoodClassLoadHook(RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public final class StringBlock implements Closeable {
     private static final String TAG = "AssetManager";
     private static final boolean localLOGV = false;

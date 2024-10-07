@@ -35,7 +35,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
 import static com.android.settingslib.flags.Flags.volumeDialogAudioSharingFix;
-import static com.android.systemui.Flags.hapticVolumeSlider;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -695,18 +694,15 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             addRow(AudioManager.STREAM_MUSIC,
                     R.drawable.ic_volume_media, R.drawable.ic_volume_media_mute, true, true);
             if (!AudioSystem.isSingleVolume(mContext)) {
-
                 addRow(AudioManager.STREAM_RING, R.drawable.ic_ring_volume,
                         R.drawable.ic_ring_volume_off, true, false);
-
-
+                addRow(AudioManager.STREAM_NOTIFICATION, R.drawable.ic_volume_ringer,
+                        R.drawable.ic_volume_off, true, false);
                 addRow(STREAM_ALARM,
                         R.drawable.ic_alarm, R.drawable.ic_volume_alarm_mute, true, false);
                 addRow(AudioManager.STREAM_VOICE_CALL,
                         com.android.internal.R.drawable.ic_phone,
                         com.android.internal.R.drawable.ic_phone, false, false);
-                addRow(AudioManager.STREAM_BLUETOOTH_SCO,
-                        R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false, false);
                 addRow(AudioManager.STREAM_SYSTEM, R.drawable.ic_volume_system,
                         R.drawable.ic_volume_system_mute, false, false);
             }
@@ -931,10 +927,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     }
 
     private void addSliderHapticsToRow(VolumeRow row) {
-        if (hapticVolumeSlider()) {
-            row.createPlugin(mVibratorHelper, mSystemClock);
-            HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
-        }
+        row.createPlugin(mVibratorHelper, mSystemClock);
+        HapticSliderViewBinder.bind(row.slider, row.mHapticPlugin);
     }
 
     @VisibleForTesting void addSliderHapticsToRows() {
@@ -1994,7 +1988,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                                             : R.drawable.ic_volume_media_bt;
             }
         } else if (isStreamMuted(ss)) {
-            iconRes = ss.muted ? R.drawable.ic_volume_media_off : row.iconMuteRes;
+            iconRes = row.iconMuteRes;
         } else {
             iconRes = mShowLowMediaVolumeIcon && ss.level * 2 < (ss.levelMax + ss.levelMin)
                       ? R.drawable.ic_volume_media_low : row.iconRes;

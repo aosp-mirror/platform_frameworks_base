@@ -57,7 +57,7 @@ public abstract class VirtualInputDeviceConfig {
         mVendorId = builder.mVendorId;
         mProductId = builder.mProductId;
         mAssociatedDisplayId = builder.mAssociatedDisplayId;
-        mInputDeviceName = Objects.requireNonNull(builder.mInputDeviceName);
+        mInputDeviceName = Objects.requireNonNull(builder.mInputDeviceName, "Missing device name");
 
         if (mAssociatedDisplayId == Display.INVALID_DISPLAY) {
             throw new IllegalArgumentException(
@@ -77,7 +77,7 @@ public abstract class VirtualInputDeviceConfig {
         mVendorId = in.readInt();
         mProductId = in.readInt();
         mAssociatedDisplayId = in.readInt();
-        mInputDeviceName = Objects.requireNonNull(in.readString8());
+        mInputDeviceName = Objects.requireNonNull(in.readString8(), "Missing device name");
     }
 
     /**

@@ -264,6 +264,7 @@ Bitmap::Bitmap(void* address, size_t size, const SkImageInfo& info, size_t rowBy
         , mPixelStorageType(PixelStorageType::Heap) {
     mPixelStorage.heap.address = address;
     mPixelStorage.heap.size = size;
+    traceBitmapCreate();
 }
 
 Bitmap::Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info)
@@ -272,6 +273,7 @@ Bitmap::Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info)
         , mPixelStorageType(PixelStorageType::WrappedPixelRef) {
     pixelRef.ref();
     mPixelStorage.wrapped.pixelRef = &pixelRef;
+    traceBitmapCreate();
 }
 
 Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes)
@@ -281,6 +283,7 @@ Bitmap::Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info
     mPixelStorage.ashmem.address = address;
     mPixelStorage.ashmem.fd = fd;
     mPixelStorage.ashmem.size = mappedSize;
+    traceBitmapCreate();
 }
 
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
@@ -297,10 +300,12 @@ Bitmap::Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes
     setImmutable();  // HW bitmaps are always immutable
     mImage = SkImages::DeferredFromAHardwareBuffer(buffer, mInfo.alphaType(),
                                                    mInfo.refColorSpace());
+    traceBitmapCreate();
 }
 #endif
 
 Bitmap::~Bitmap() {
+    traceBitmapDelete();
     switch (mPixelStorageType) {
         case PixelStorageType::WrappedPixelRef:
             mPixelStorage.wrapped.pixelRef->unref();
@@ -570,6 +575,30 @@ sp<uirenderer::Gainmap> Bitmap::gainmap() const {
 
 void Bitmap::setGainmap(sp<uirenderer::Gainmap>&& gainmap) {
     mGainmap = std::move(gainmap);
+}
+
+std::mutex Bitmap::mLock{};
+size_t Bitmap::mTotalBitmapBytes = 0;
+size_t Bitmap::mTotalBitmapCount = 0;
+
+void Bitmap::traceBitmapCreate() {
+    if (ATRACE_ENABLED()) {
+        std::lock_guard lock{mLock};
+        mTotalBitmapBytes += getAllocationByteCount();
+        mTotalBitmapCount++;
+        ATRACE_INT64("Bitmap Memory", mTotalBitmapBytes);
+        ATRACE_INT64("Bitmap Count", mTotalBitmapCount);
+    }
+}
+
+void Bitmap::traceBitmapDelete() {
+    if (ATRACE_ENABLED()) {
+        std::lock_guard lock{mLock};
+        mTotalBitmapBytes -= getAllocationByteCount();
+        mTotalBitmapCount--;
+        ATRACE_INT64("Bitmap Memory", mTotalBitmapBytes);
+        ATRACE_INT64("Bitmap Count", mTotalBitmapCount);
+    }
 }
 
 }  // namespace android

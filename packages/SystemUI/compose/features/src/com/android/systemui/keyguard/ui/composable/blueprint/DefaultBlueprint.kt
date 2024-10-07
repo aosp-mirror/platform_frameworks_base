@@ -21,12 +21,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
@@ -42,6 +46,7 @@ import com.android.systemui.keyguard.ui.composable.section.SettingsMenuSection
 import com.android.systemui.keyguard.ui.composable.section.StatusBarSection
 import com.android.systemui.keyguard.ui.composable.section.TopAreaSection
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenContentViewModel
+import com.android.systemui.res.R
 import java.util.Optional
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -73,9 +78,12 @@ constructor(
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
         val areNotificationsVisible by
-            viewModel
-                .areNotificationsVisible(contentKey)
-                .collectAsStateWithLifecycle(initialValue = false)
+            viewModel.areNotificationsVisible().collectAsStateWithLifecycle(initialValue = false)
+        val isBypassEnabled by viewModel.isBypassEnabled.collectAsStateWithLifecycle()
+
+        if (isBypassEnabled) {
+            with(notificationSection) { HeadsUpNotifications() }
+        }
 
         LockscreenLongPress(
             viewModel = viewModel.touchHandling,
@@ -110,11 +118,11 @@ constructor(
                                             }
                                 )
                             }
-                            if (isShadeLayoutWide) {
+                            if (isShadeLayoutWide && !isBypassEnabled) {
                                 with(notificationSection) {
                                     Notifications(
                                         areNotificationsVisible = areNotificationsVisible,
-                                        isShadeLayoutWide = isShadeLayoutWide,
+                                        isShadeLayoutWide = true,
                                         burnInParams = null,
                                         modifier =
                                             Modifier.fillMaxWidth(0.5f)
@@ -124,13 +132,27 @@ constructor(
                                 }
                             }
                         }
-                        if (!isShadeLayoutWide) {
-                            with(notificationSection) {
-                                Notifications(
-                                    areNotificationsVisible = areNotificationsVisible,
-                                    isShadeLayoutWide = isShadeLayoutWide,
-                                    burnInParams = null,
-                                    modifier = Modifier.weight(weight = 1f)
+
+                        val aodIconPadding: Dp =
+                            dimensionResource(R.dimen.below_clock_padding_start_icons)
+
+                        with(notificationSection) {
+                            if (!isShadeLayoutWide && !isBypassEnabled) {
+                                Box(modifier = Modifier.weight(weight = 1f)) {
+                                    AodNotificationIcons(
+                                        modifier =
+                                            Modifier.align(alignment = Alignment.TopStart)
+                                                .padding(start = aodIconPadding),
+                                    )
+                                    Notifications(
+                                        areNotificationsVisible = areNotificationsVisible,
+                                        isShadeLayoutWide = false,
+                                        burnInParams = null,
+                                    )
+                                }
+                            } else {
+                                AodNotificationIcons(
+                                    modifier = Modifier.padding(start = aodIconPadding),
                                 )
                             }
                         }
@@ -175,7 +197,7 @@ constructor(
                 },
                 modifier = Modifier.fillMaxSize(),
             ) { measurables, constraints ->
-                check(measurables.size == 6)
+                check(measurables.size == 6) { "Expected 6 measurables, got: ${measurables.size}" }
                 val aboveLockIconMeasurable = measurables[0]
                 val lockIconMeasurable = measurables[1]
                 val belowLockIconMeasurable = measurables[2]

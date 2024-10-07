@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.airplane.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 
 val Kosmos.airplaneModeInteractor: AirplaneModeInteractor by
@@ -26,6 +26,6 @@ val Kosmos.airplaneModeInteractor: AirplaneModeInteractor by
         AirplaneModeInteractor(
             FakeAirplaneModeRepository(),
             FakeConnectivityRepository(),
-            FakeMobileConnectionsRepository(),
+            fakeMobileConnectionsRepository,
         )
     }

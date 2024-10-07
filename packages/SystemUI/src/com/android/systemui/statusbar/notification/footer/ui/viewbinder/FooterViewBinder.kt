@@ -19,6 +19,8 @@ package com.android.systemui.statusbar.notification.footer.ui.viewbinder
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.statusbar.notification.NotificationActivityStarter
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModel
 import com.android.systemui.util.ui.isAnimating
@@ -36,6 +38,7 @@ object FooterViewBinder {
         clearAllNotifications: View.OnClickListener,
         launchNotificationSettings: View.OnClickListener,
         launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ): DisposableHandle {
         return footer.repeatWhenAttached {
             lifecycleScope.launch {
@@ -44,7 +47,8 @@ object FooterViewBinder {
                     viewModel,
                     clearAllNotifications,
                     launchNotificationSettings,
-                    launchNotificationHistory
+                    launchNotificationHistory,
+                    notificationActivityStarter,
                 )
             }
         }
@@ -55,21 +59,17 @@ object FooterViewBinder {
         viewModel: FooterViewModel,
         clearAllNotifications: View.OnClickListener,
         launchNotificationSettings: View.OnClickListener,
-        launchNotificationHistory: View.OnClickListener
+        launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
-        launch {
-            bindClearAllButton(
-                footer,
-                viewModel,
-                clearAllNotifications,
-            )
-        }
+        launch { bindClearAllButton(footer, viewModel, clearAllNotifications) }
         launch {
             bindManageOrHistoryButton(
                 footer,
                 viewModel,
                 launchNotificationSettings,
-                launchNotificationHistory
+                launchNotificationHistory,
+                notificationActivityStarter,
             )
         }
         launch { bindMessage(footer, viewModel) }
@@ -80,8 +80,6 @@ object FooterViewBinder {
         viewModel: FooterViewModel,
         clearAllNotifications: View.OnClickListener,
     ) = coroutineScope {
-        footer.setClearAllButtonClickListener(clearAllNotifications)
-
         launch {
             viewModel.clearAllButton.labelId.collect { textId ->
                 footer.setClearAllButtonText(textId)
@@ -96,18 +94,21 @@ object FooterViewBinder {
 
         launch {
             viewModel.clearAllButton.isVisible.collect { isVisible ->
+                if (isVisible.value) {
+                    footer.setClearAllButtonClickListener(clearAllNotifications)
+                } else {
+                    // When the button isn't visible, it also shouldn't react to clicks. This is
+                    // necessary because when the clear all button is not visible, it's actually
+                    // just the alpha that becomes 0 so it can still be tapped.
+                    footer.setClearAllButtonClickListener(null)
+                }
+
                 if (isVisible.isAnimating) {
-                    footer.setClearAllButtonVisible(
-                        isVisible.value,
-                        /* animate = */ true,
-                    ) { _ ->
+                    footer.setClearAllButtonVisible(isVisible.value, /* animate= */ true) { _ ->
                         isVisible.stopAnimating()
                     }
                 } else {
-                    footer.setClearAllButtonVisible(
-                        isVisible.value,
-                        /* animate = */ false,
-                    )
+                    footer.setClearAllButtonVisible(isVisible.value, /* animate= */ false)
                 }
             }
         }
@@ -118,13 +119,23 @@ object FooterViewBinder {
         viewModel: FooterViewModel,
         launchNotificationSettings: View.OnClickListener,
         launchNotificationHistory: View.OnClickListener,
+        notificationActivityStarter: NotificationActivityStarter,
     ) = coroutineScope {
         launch {
-            viewModel.manageButtonShouldLaunchHistory.collect { shouldLaunchHistory ->
-                if (shouldLaunchHistory) {
-                    footer.setManageButtonClickListener(launchNotificationHistory)
-                } else {
-                    footer.setManageButtonClickListener(launchNotificationSettings)
+            if (ModesEmptyShadeFix.isEnabled) {
+                viewModel.manageOrHistoryButtonClick.collect { settingsIntent ->
+                    val onClickListener = { view: View ->
+                        notificationActivityStarter.startSettingsIntent(view, settingsIntent)
+                    }
+                    footer.setManageButtonClickListener(onClickListener)
+                }
+            } else {
+                viewModel.manageButtonShouldLaunchHistory.collect { shouldLaunchHistory ->
+                    if (shouldLaunchHistory) {
+                        footer.setManageButtonClickListener(launchNotificationHistory)
+                    } else {
+                        footer.setManageButtonClickListener(launchNotificationSettings)
+                    }
                 }
             }
         }
@@ -143,22 +154,24 @@ object FooterViewBinder {
 
         launch {
             viewModel.manageOrHistoryButton.isVisible.collect { isVisible ->
-                // NOTE: This visibility change is never animated.
+                // NOTE: This visibility change is never animated. We also don't need to do anything
+                // special about the onClickListener here, since we're changing the visibility to
+                // GONE so it won't be clickable anyway.
                 footer.setManageOrHistoryButtonVisible(isVisible.value)
             }
         }
     }
 
-    private suspend fun bindMessage(
-        footer: FooterView,
-        viewModel: FooterViewModel,
-    ) = coroutineScope {
-        // Bind the resource IDs
-        footer.setMessageString(viewModel.message.messageId)
-        footer.setMessageIcon(viewModel.message.iconId)
+    private suspend fun bindMessage(footer: FooterView, viewModel: FooterViewModel) =
+        coroutineScope {
+            // Bind the resource IDs
+            footer.setMessageString(viewModel.message.messageId)
+            footer.setMessageIcon(viewModel.message.iconId)
 
-        launch {
-            viewModel.message.isVisible.collect { visible -> footer.setFooterLabelVisible(visible) }
+            launch {
+                viewModel.message.isVisible.collect { visible ->
+                    footer.setFooterLabelVisible(visible)
+                }
+            }
         }
-    }
 }

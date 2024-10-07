@@ -18,10 +18,12 @@ package com.android.settingslib.bluetooth.devicesettings;
 
 import com.android.settingslib.bluetooth.devicesettings.DeviceInfo;
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingState;
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsProviderServiceStatus;
 import com.android.settingslib.bluetooth.devicesettings.IDeviceSettingsListener;
 
-oneway interface IDeviceSettingsProviderService {
-   void registerDeviceSettingsListener(in DeviceInfo device, in IDeviceSettingsListener callback);
-   void unregisterDeviceSettingsListener(in DeviceInfo device, in IDeviceSettingsListener callback);
-   void updateDeviceSettings(in DeviceInfo device, in DeviceSettingState params);
+interface IDeviceSettingsProviderService {
+   DeviceSettingsProviderServiceStatus getServiceStatus();
+   oneway void registerDeviceSettingsListener(in DeviceInfo device, in IDeviceSettingsListener callback);
+   oneway void unregisterDeviceSettingsListener(in DeviceInfo device, in IDeviceSettingsListener callback);
+   oneway void updateDeviceSettings(in DeviceInfo device, in DeviceSettingState params);
 }

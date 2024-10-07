@@ -24,11 +24,13 @@ sealed interface MediaOutputComponentModel {
 
     val device: AudioOutputDevice
     val isInAudioSharing: Boolean
+    val canOpenAudioSwitcher: Boolean
 
     /** There is an ongoing call on the device. */
     data class Calling(
         override val device: AudioOutputDevice,
         override val isInAudioSharing: Boolean,
+        override val canOpenAudioSwitcher: Boolean,
     ) : MediaOutputComponentModel
 
     /** There is media playing on the device. */
@@ -37,11 +39,13 @@ sealed interface MediaOutputComponentModel {
         val isPlaybackActive: Boolean,
         override val device: AudioOutputDevice,
         override val isInAudioSharing: Boolean,
+        override val canOpenAudioSwitcher: Boolean,
     ) : MediaOutputComponentModel
 
     /** There is nothing playing on the device. */
     data class Idle(
         override val device: AudioOutputDevice,
         override val isInAudioSharing: Boolean,
+        override val canOpenAudioSwitcher: Boolean,
     ) : MediaOutputComponentModel
 }

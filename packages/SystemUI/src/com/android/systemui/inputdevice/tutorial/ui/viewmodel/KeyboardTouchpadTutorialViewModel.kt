@@ -22,6 +22,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.domain.interactor.ConnectionState
 import com.android.systemui.inputdevice.tutorial.domain.interactor.KeyboardTouchpadConnectionInteractor
 import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity.Companion.INTENT_TUTORIAL_TYPE_KEY
@@ -47,6 +48,7 @@ class KeyboardTouchpadTutorialViewModel(
     private val gesturesInteractor: Optional<TouchpadGesturesInteractor>,
     private val keyboardTouchpadConnectionInteractor: KeyboardTouchpadConnectionInteractor,
     private val hasTouchpadTutorialScreens: Boolean,
+    private val logger: InputDeviceTutorialLogger,
     handle: SavedStateHandle
 ) : ViewModel(), DefaultLifecycleObserver {
 
@@ -68,7 +70,10 @@ class KeyboardTouchpadTutorialViewModel(
 
     init {
         viewModelScope.launch {
-            keyboardTouchpadConnectionInteractor.connectionState.collect { connectionState = it }
+            keyboardTouchpadConnectionInteractor.connectionState.collect {
+                logger.logNewConnectionState(connectionState)
+                connectionState = it
+            }
         }
 
         viewModelScope.launch {
@@ -89,7 +94,14 @@ class KeyboardTouchpadTutorialViewModel(
         viewModelScope.launch {
             // close activity if screen requires touchpad but we don't have it. This can only happen
             // when current sysui build doesn't contain touchpad module dependency
-            _screen.filterNot { it.canBeShown() }.collect { _closeActivity.value = true }
+            _screen
+                .filterNot { it.canBeShown() }
+                .collect {
+                    logger.e(
+                        "Touchpad is connected but touchpad module is missing, something went wrong"
+                    )
+                    _closeActivity.value = true
+                }
         }
     }
 
@@ -114,11 +126,14 @@ class KeyboardTouchpadTutorialViewModel(
             if (requiredHardwarePresent(nextScreen)) {
                 break
             }
+            logger.logNextScreenMissingHardware(nextScreen)
             nextScreen = nextScreen.next()
         }
         if (nextScreen == null) {
+            logger.d("Final screen reached, closing tutorial")
             _closeActivity.value = true
         } else {
+            logger.logNextScreen(nextScreen)
             _screen.value = nextScreen
             screensBackStack.add(nextScreen)
         }
@@ -127,6 +142,7 @@ class KeyboardTouchpadTutorialViewModel(
     private fun Screen.canBeShown() = requiredHardware != TOUCHPAD || hasTouchpadTutorialScreens
 
     private fun setupDeviceState(previousScreen: Screen?, currentScreen: Screen) {
+        logger.logMovingBetweenScreens(previousScreen, currentScreen)
         if (previousScreen?.requiredHardware == currentScreen.requiredHardware) return
         previousScreen?.let { clearDeviceStateForScreen(it) }
         when (currentScreen.requiredHardware) {
@@ -153,6 +169,7 @@ class KeyboardTouchpadTutorialViewModel(
             _closeActivity.value = true
         } else {
             screensBackStack.removeLast()
+            logger.logGoingBack(screensBackStack.last())
             _screen.value = screensBackStack.last()
         }
     }
@@ -162,6 +179,7 @@ class KeyboardTouchpadTutorialViewModel(
     constructor(
         private val gesturesInteractor: Optional<TouchpadGesturesInteractor>,
         private val keyboardTouchpadConnected: KeyboardTouchpadConnectionInteractor,
+        private val logger: InputDeviceTutorialLogger,
         @Assisted private val hasTouchpadTutorialScreens: Boolean,
     ) : AbstractSavedStateViewModelFactory() {
 
@@ -180,6 +198,7 @@ class KeyboardTouchpadTutorialViewModel(
                 gesturesInteractor,
                 keyboardTouchpadConnected,
                 hasTouchpadTutorialScreens,
+                logger,
                 handle
             )
                 as T

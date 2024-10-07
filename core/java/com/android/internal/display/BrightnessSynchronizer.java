@@ -134,7 +134,8 @@ public class BrightnessSynchronizer {
      * Prints data on dumpsys.
      */
     public void dump(PrintWriter pw) {
-        pw.println("BrightnessSynchronizer");
+        pw.println("BrightnessSynchronizer:");
+        pw.println("-----------------------");
         pw.println("  mLatestIntBrightness=" + mLatestIntBrightness);
         pw.println("  mLatestFloatBrightness=" + mLatestFloatBrightness);
         pw.println("  mCurrentUpdate=" + mCurrentUpdate);

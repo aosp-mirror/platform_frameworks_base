@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
@@ -26,7 +27,6 @@ import static android.view.WindowManager.TRANSIT_CHANGE;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -44,6 +44,7 @@ import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -174,8 +175,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
 
         if (decoration == null) return;
 
+        if (!shouldShowWindowDecor(taskInfo)) {
+            destroyWindowDecoration(taskInfo);
+            return;
+        }
+
         decoration.relayout(taskInfo);
-        setupCaptionColor(taskInfo, decoration);
     }
 
     @Override
@@ -237,18 +242,12 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         decoration.close();
     }
 
-    private void setupCaptionColor(RunningTaskInfo taskInfo, CaptionWindowDecoration decoration) {
-        if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
-            decoration.setCaptionColor(Color.TRANSPARENT);
-        } else {
-            final int statusBarColor = taskInfo.taskDescription.getStatusBarColor();
-            decoration.setCaptionColor(statusBarColor);
-        }
-    }
-
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             return true;
+        }
+        if (taskInfo.getWindowingMode() == WINDOWING_MODE_PINNED) {
+            return false;
         }
         if (taskInfo.getActivityType() != ACTIVITY_TYPE_STANDARD) {
             return false;
@@ -307,11 +306,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setDragPositioningCallback(taskPositioner);
-        windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.setTaskDragResizer(taskPositioner);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */, false /* setTaskCropAndPosition */);
-        setupCaptionColor(taskInfo, windowDecoration);
     }
 
     private class CaptionTouchEventListener implements
@@ -332,7 +329,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
             mTaskId = taskInfo.taskId;
             mTaskToken = taskInfo.token;
             mDragPositioningCallback = dragPositioningCallback;
-            mDragDetector = new DragDetector(this);
+            mDragDetector = new DragDetector(this, 0 /* holdToDragMinDurationMs */,
+                    ViewConfiguration.get(mContext).getScaledTouchSlop());
             mDisplayId = taskInfo.displayId;
         }
 

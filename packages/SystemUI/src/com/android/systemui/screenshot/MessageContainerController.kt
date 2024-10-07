@@ -9,7 +9,6 @@ import android.view.ViewGroup.MarginLayoutParams
 import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.constraintlayout.widget.Guideline
-import com.android.systemui.Flags.screenshotPrivateProfileBehaviorFix
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.res.R
 import com.android.systemui.screenshot.message.ProfileMessageController
@@ -49,44 +48,19 @@ constructor(
     }
 
     fun onScreenshotTaken(screenshot: ScreenshotData) {
-        if (screenshotPrivateProfileBehaviorFix()) {
-            mainScope.launch {
-                val profileData = profileMessageController.onScreenshotTaken(screenshot.userHandle)
-                var notifiedApps: List<CharSequence> =
-                    screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
-
-                // If profile first run needs to show, bias towards that, otherwise show screenshot
-                // detection notification if needed.
-                if (profileData != null) {
-                    workProfileFirstRunView.visibility = View.VISIBLE
-                    detectionNoticeView.visibility = View.GONE
-                    profileMessageController.bindView(workProfileFirstRunView, profileData) {
-                        animateOutMessageContainer()
-                    }
-                    animateInMessageContainer()
-                } else if (notifiedApps.isNotEmpty()) {
-                    detectionNoticeView.visibility = View.VISIBLE
-                    workProfileFirstRunView.visibility = View.GONE
-                    screenshotDetectionController.populateView(detectionNoticeView, notifiedApps)
-                    animateInMessageContainer()
-                }
-            }
-        } else {
-            val workProfileData =
-                workProfileMessageController.onScreenshotTaken(screenshot.userHandle)
+        mainScope.launch {
+            val profileData = profileMessageController.onScreenshotTaken(screenshot.userHandle)
             var notifiedApps: List<CharSequence> =
                 screenshotDetectionController.maybeNotifyOfScreenshot(screenshot)
 
-            // If work profile first run needs to show, bias towards that, otherwise show screenshot
+            // If profile first run needs to show, bias towards that, otherwise show screenshot
             // detection notification if needed.
-            if (workProfileData != null) {
+            if (profileData != null) {
                 workProfileFirstRunView.visibility = View.VISIBLE
                 detectionNoticeView.visibility = View.GONE
-                workProfileMessageController.populateView(
-                    workProfileFirstRunView,
-                    workProfileData,
-                    this::animateOutMessageContainer
-                )
+                profileMessageController.bindView(workProfileFirstRunView, profileData) {
+                    animateOutMessageContainer()
+                }
                 animateInMessageContainer()
             } else if (notifiedApps.isNotEmpty()) {
                 detectionNoticeView.visibility = View.VISIBLE

@@ -782,6 +782,7 @@ public class BrightnessTracker {
 
     public void dump(final PrintWriter pw) {
         pw.println("BrightnessTracker state:");
+        pw.println("------------------------");
         synchronized (mDataCollectionLock) {
             pw.println("  mStarted=" + mStarted);
             pw.println("  mLightSensor=" + mLightSensor);

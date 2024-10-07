@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -53,6 +53,7 @@ import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 /**
  * Helper class to run app animations in a remote process.
@@ -348,6 +349,10 @@ class RemoteAnimationController implements DeathRecipient {
             } finally {
                 mIsFinishing = false;
             }
+            // Reset input for all activities when the remote animation is finished.
+            final Consumer<ActivityRecord> updateActivities =
+                    activity -> activity.setDropInputForAnimation(false);
+            mDisplayContent.forAllActivities(updateActivities);
         }
         setRunningRemoteAnimation(false);
         ProtoLog.i(WM_DEBUG_REMOTE_ANIMATIONS, "Finishing remote animation");

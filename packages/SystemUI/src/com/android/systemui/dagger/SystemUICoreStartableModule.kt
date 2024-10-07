@@ -30,7 +30,7 @@ import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamStartable
 import com.android.systemui.globalactions.GlobalActionsComponent
-import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialCoreStartable
+import com.android.systemui.haptics.msdl.MSDLCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewConfigurator
@@ -323,4 +323,9 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(BatteryControllerStartable::class)
     abstract fun bindsBatteryControllerStartable(impl: BatteryControllerStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(MSDLCoreStartable::class)
+    abstract fun bindMSDLCoreStartable(impl: MSDLCoreStartable): CoreStartable
 }

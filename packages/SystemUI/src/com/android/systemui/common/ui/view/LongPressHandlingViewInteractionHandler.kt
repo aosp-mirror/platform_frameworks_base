@@ -17,7 +17,7 @@
 
 package com.android.systemui.common.ui.view
 
-import android.view.ViewConfiguration
+import com.android.systemui.log.LongPressHandlingViewLogger
 import kotlinx.coroutines.DisposableHandle
 
 /** Encapsulates logic to handle complex touch interactions with a [LongPressHandlingView]. */
@@ -35,6 +35,14 @@ class LongPressHandlingViewInteractionHandler(
     private val onSingleTapDetected: () -> Unit,
     /** Time for the touch to be considered a long-press in ms */
     var longPressDuration: () -> Long,
+    /**
+     * Default touch slop that is allowed, if the movement between [MotionEventModel.Down] and
+     * [MotionEventModel.Up] is more than [allowedTouchSlop] then the touch is not processed as
+     * single tap or a long press.
+     */
+    val allowedTouchSlop: Int,
+    /** Optional logger that can be passed in to log touch events */
+    val logger: LongPressHandlingViewLogger? = null,
 ) {
     sealed class MotionEventModel {
         object Other : MotionEventModel()
@@ -70,22 +78,26 @@ class LongPressHandlingViewInteractionHandler(
                 true
             }
             is MotionEventModel.Move -> {
-                if (event.distanceMoved > ViewConfiguration.getTouchSlop()) {
+                if (event.distanceMoved > allowedTouchSlop) {
+                    logger?.cancelingLongPressDueToTouchSlop(event.distanceMoved, allowedTouchSlop)
                     cancelScheduledLongPress()
                 }
                 false
             }
             is MotionEventModel.Up -> {
+                logger?.onUpEvent(event.distanceMoved, allowedTouchSlop, event.gestureDuration)
                 cancelScheduledLongPress()
                 if (
-                    event.distanceMoved <= ViewConfiguration.getTouchSlop() &&
+                    event.distanceMoved <= allowedTouchSlop &&
                         event.gestureDuration < longPressDuration()
                 ) {
+                    logger?.dispatchingSingleTap()
                     dispatchSingleTap()
                 }
                 false
             }
             is MotionEventModel.Cancel -> {
+                logger?.motionEventCancelled()
                 cancelScheduledLongPress()
                 false
             }
@@ -97,15 +109,18 @@ class LongPressHandlingViewInteractionHandler(
         x: Int,
         y: Int,
     ) {
+        val duration = longPressDuration()
+        logger?.schedulingLongPress(duration)
         scheduledLongPressHandle =
             postDelayed(
                 {
+                    logger?.longPressTriggered()
                     dispatchLongPress(
                         x = x,
                         y = y,
                     )
                 },
-                longPressDuration(),
+                duration,
             )
     }
 

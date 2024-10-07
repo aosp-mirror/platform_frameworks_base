@@ -60,9 +60,8 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -70,6 +69,7 @@ import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.recents.RecentTasks;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
@@ -393,7 +393,7 @@ public final class WMShell implements
 
     void initDesktopMode(DesktopMode desktopMode) {
         desktopMode.addVisibleTasksListener(
-                new DesktopModeTaskRepository.VisibleTasksListener() {
+                new DesktopRepository.VisibleTasksListener() {
                     @Override
                     public void onTasksVisibilityChanged(int displayId, int visibleTasksCount) {
                         if (displayId == Display.DEFAULT_DISPLAY) {

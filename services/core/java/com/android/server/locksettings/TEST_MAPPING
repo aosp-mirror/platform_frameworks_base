@@ -1,28 +1,12 @@
 {
     "presubmit-large": [
         {
-            "name": "CtsDevicePolicyManagerTestCases",
-            "options": [
-                {
-                    "include-annotation": "com.android.cts.devicepolicy.annotations.LockSettingsTest"
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
+            "name": "CtsDevicePolicyManagerTestCases_LockSettingsTest"
         }
     ],
     "presubmit": [
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.locksettings."
-                },
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_locksettings"
         }
     ],
     "postsubmit": [

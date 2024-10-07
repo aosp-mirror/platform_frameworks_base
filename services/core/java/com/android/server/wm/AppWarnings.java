@@ -152,10 +152,12 @@ class AppWarnings {
      * @param r activity record for which the warning may be displayed
      */
     public void showUnsupportedDisplaySizeDialogIfNeeded(ActivityRecord r) {
-        final Configuration globalConfig = mAtm.getGlobalConfiguration();
-        if (globalConfig.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
+        final DisplayContent dc = r.getDisplayContent();
+        final Configuration config = dc == null
+                ? mAtm.getGlobalConfiguration() : dc.getConfiguration();
+        if (config.densityDpi != DisplayMetrics.DENSITY_DEVICE_STABLE
                 && r.info.applicationInfo.requiresSmallestWidthDp
-                > globalConfig.smallestScreenWidthDp) {
+                > config.smallestScreenWidthDp) {
             mUiHandler.showUnsupportedDisplaySizeDialog(r);
         }
     }

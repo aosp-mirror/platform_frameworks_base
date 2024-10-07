@@ -29,6 +29,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.QSLog
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -44,12 +45,12 @@ import javax.inject.Inject
  * @property[vibratorHelper] The [VibratorHelper] to deliver haptic effects.
  * @property[effectDuration] The duration of the effect in ms.
  */
-// TODO(b/332902869): In addition from being injectable, we can consider making it a singleton
 class QSLongPressEffect
 @Inject
 constructor(
     private val vibratorHelper: VibratorHelper?,
     private val keyguardStateController: KeyguardStateController,
+    private val falsingManager: FalsingManager,
     @QSLog private val logBuffer: LogBuffer,
 ) {
 
@@ -72,7 +73,7 @@ constructor(
     private val durations =
         vibratorHelper?.getPrimitiveDurations(
             VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
-            VibrationEffect.Composition.PRIMITIVE_SPIN
+            VibrationEffect.Composition.PRIMITIVE_SPIN,
         )
 
     private var longPressHint: VibrationEffect? = null
@@ -152,15 +153,27 @@ constructor(
         logEvent(qsTile?.tileSpec, state, "animation completed")
         when (state) {
             State.RUNNING_FORWARD -> {
-                vibrate(snapEffect)
-                if (keyguardStateController.isUnlocked) {
-                    setState(State.LONG_CLICKED)
-                } else {
+                val wasFalseLongTap = falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)
+                if (wasFalseLongTap) {
                     callback?.onResetProperties()
                     setState(State.IDLE)
+                    logEvent(qsTile?.tileSpec, state, "false long click. No action triggered")
+                } else if (keyguardStateController.isUnlocked) {
+                    vibrate(snapEffect)
+                    setState(State.LONG_CLICKED)
+                    qsTile?.longClick(expandable)
+                    logEvent(qsTile?.tileSpec, state, "long click action triggered")
+                } else {
+                    vibrate(snapEffect)
+                    callback?.onResetProperties()
+                    setState(State.IDLE)
+                    qsTile?.longClick(expandable)
+                    logEvent(
+                        qsTile?.tileSpec,
+                        state,
+                        "properties reset and long click action triggered",
+                    )
                 }
-                logEvent(qsTile?.tileSpec, state, "long click action triggered")
-                qsTile?.longClick(expandable)
             }
             State.RUNNING_BACKWARDS_FROM_UP -> {
                 callback?.onEffectFinishedReversing()
@@ -236,7 +249,7 @@ constructor(
             LongPressHapticBuilder.createLongPressHint(
                 durations?.get(0) ?: LongPressHapticBuilder.INVALID_DURATION,
                 durations?.get(1) ?: LongPressHapticBuilder.INVALID_DURATION,
-                effectDuration
+                effectDuration,
             )
         setState(State.IDLE)
         return true
@@ -265,7 +278,7 @@ constructor(
                 }
 
                 override fun dialogTransitionController(
-                    cuj: DialogCuj?,
+                    cuj: DialogCuj?
                 ): DialogTransitionAnimator.Controller? =
                     DialogTransitionAnimator.Controller.fromView(view, cuj)
             }
@@ -298,7 +311,7 @@ constructor(
                 str2 = event
                 str3 = state.name
             },
-            { "[long-press effect on $str1 tile] $str2 on state: $str3" }
+            { "[long-press effect on $str1 tile] $str2 on state: $str3" },
         )
     }
 

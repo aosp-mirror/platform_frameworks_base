@@ -150,6 +150,13 @@ public class BrightnessSetting {
     }
 
     /**
+     * Flush the brightness update that has been made to the persistent data store.
+     */
+    public void saveIfNeeded() {
+        mPersistentDataStore.saveIfNeeded();
+    }
+
+    /**
      * @return The brightness for the default display in nits. Used when the underlying display
      * device has changed but we want to persist the nit value.
      */

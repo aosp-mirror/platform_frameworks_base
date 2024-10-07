@@ -244,23 +244,23 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun dualCarrier_disablesCarrierIconsInStatusIcons() {
+    fun dualCarrier_disablesCarrierIconsInStatusIcons_qs() {
         whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(false)
 
         makeShadeVisible()
         shadeHeaderController.qsExpandedFraction = 1.0f
 
-        verify(statusIcons).addIgnoredSlots(carrierIconSlots)
+        verify(statusIcons, times(2)).addIgnoredSlots(carrierIconSlots)
     }
 
     @Test
-    fun dualCarrier_enablesCarrierIconsInStatusIcons_qsExpanded() {
+    fun dualCarrier_disablesCarrierIconsInStatusIcons_qqs() {
         whenever(mShadeCarrierGroupController.isSingleCarrier).thenReturn(false)
 
         makeShadeVisible()
         shadeHeaderController.qsExpandedFraction = 0.0f
 
-        verify(statusIcons, times(2)).removeIgnoredSlots(carrierIconSlots)
+        verify(statusIcons, times(2)).addIgnoredSlots(carrierIconSlots)
     }
 
     @Test

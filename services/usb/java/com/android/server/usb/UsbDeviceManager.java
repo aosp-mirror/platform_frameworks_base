@@ -1027,27 +1027,35 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             boolean enabled = (mCurrentFunctions & UsbManager.FUNCTION_MIDI) != 0;
             if (enabled != mMidiEnabled) {
                 if (enabled) {
+                    boolean midiDeviceFound = false;
                     if (android.hardware.usb.flags.Flags.enableUsbSysfsMidiIdentification()) {
                         try {
                             getMidiCardDevice();
+                            midiDeviceFound = true;
                         } catch (FileNotFoundException e) {
-                            Slog.e(TAG, "could not identify MIDI device", e);
-                            enabled = false;
+                            Slog.w(TAG, "could not identify MIDI device", e);
                         }
-                    } else {
+                    }
+                    // For backward compatibility with older kernels without
+                    // https://lore.kernel.org/r/20240307030922.3573161-1-royluo@google.com
+                    if (!midiDeviceFound) {
                         Scanner scanner = null;
                         try {
                             scanner = new Scanner(new File(MIDI_ALSA_PATH));
                             mMidiCard = scanner.nextInt();
                             mMidiDevice = scanner.nextInt();
+                            midiDeviceFound = true;
                         } catch (FileNotFoundException e) {
                             Slog.e(TAG, "could not open MIDI file", e);
-                            enabled = false;
                         } finally {
                             if (scanner != null) {
                                 scanner.close();
                             }
                         }
+                    }
+                    if (!midiDeviceFound) {
+                        Slog.e(TAG, "Failed to enable MIDI function");
+                        enabled = false;
                     }
                 }
                 mMidiEnabled = enabled;

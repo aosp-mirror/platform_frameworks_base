@@ -25,7 +25,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.MobileConnectionsRepositoryImpl
@@ -152,16 +151,17 @@ constructor(
     override val defaultMobileIconGroup: Flow<SignalIcon.MobileIconGroup> =
         activeRepo.flatMapLatest { it.defaultMobileIconGroup }
 
-    override val deviceServiceState: StateFlow<ServiceStateModel?> =
+    override val isDeviceEmergencyCallCapable: StateFlow<Boolean> =
         activeRepo
-            .flatMapLatest { it.deviceServiceState }
+            .flatMapLatest { it.isDeviceEmergencyCallCapable }
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                realRepository.deviceServiceState.value
+                realRepository.isDeviceEmergencyCallCapable.value
             )
 
     override val isAnySimSecure: Flow<Boolean> = activeRepo.flatMapLatest { it.isAnySimSecure }
+
     override fun getIsAnySimSecure(): Boolean = activeRepo.value.getIsAnySimSecure()
 
     override val defaultDataSubId: StateFlow<Int> =

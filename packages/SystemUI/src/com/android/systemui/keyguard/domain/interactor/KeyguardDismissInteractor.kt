@@ -16,9 +16,13 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
@@ -28,23 +32,30 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Encapsulates business logic for requesting the keyguard to dismiss/finish/done. */
 @SysUISingleton
 class KeyguardDismissInteractor
 @Inject
 constructor(
-    trustRepository: TrustRepository,
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    @Application private val scope: CoroutineScope,
     private val keyguardRepository: KeyguardRepository,
-    primaryBouncerInteractor: PrimaryBouncerInteractor,
+    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    private val selectedUserInteractor: SelectedUserInteractor,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
+    trustRepository: TrustRepository,
     alternateBouncerInteractor: AlternateBouncerInteractor,
     powerInteractor: PowerInteractor,
-    private val selectedUserInteractor: SelectedUserInteractor,
 ) {
     /*
      * Updates when a biometric has authenticated the device and is requesting to dismiss
@@ -65,9 +76,9 @@ constructor(
                     primaryBouncerInteractor.isShowing,
                     alternateBouncerInteractor.isVisible,
                     powerInteractor.isInteractive,
-                    ::Triple
+                    ::Triple,
                 ),
-                ::toQuad
+                ::toQuad,
             )
             .filter { (trustModel, primaryBouncerShowing, altBouncerShowing, interactive) ->
                 val bouncerShowing = primaryBouncerShowing || altBouncerShowing
@@ -126,5 +137,28 @@ constructor(
 
     suspend fun setKeyguardDone(keyguardDoneTiming: KeyguardDone) {
         keyguardRepository.setKeyguardDone(keyguardDoneTiming)
+    }
+
+    /**
+     * Dismiss the keyguard (or show the bouncer) and invoke the provided callback once dismissed.
+     *
+     * TODO(b/358412565): Support dismiss messages.
+     */
+    fun dismissKeyguardWithCallback(callback: IKeyguardDismissCallback?) {
+        scope.launch {
+            withContext(mainDispatcher) {
+                if (callback != null) {
+                    dismissCallbackRegistry.addCallback(callback)
+                }
+
+                // This will either show the bouncer, or dismiss the keyguard if insecure.
+                // We currently need to request showing the primary bouncer in order to start a
+                // transition to PRIMARY_BOUNCER. Once we refactor that so that starting the
+                // transition is what causes the bouncer to show, we can remove this entire method,
+                // and simply ask KeyguardTransitionInteractor to transition to a bouncer state or
+                // dismiss keyguard.
+                primaryBouncerInteractor.show(true)
+            }
+        }
     }
 }

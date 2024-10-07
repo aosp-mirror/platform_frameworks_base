@@ -155,16 +155,16 @@ public class ConversionUtil {
     public static RecognitionConfig api2aidlRecognitionConfig(
             SoundTrigger.RecognitionConfig apiConfig) {
         RecognitionConfig aidlConfig = new RecognitionConfig();
-        aidlConfig.captureRequested = apiConfig.captureRequested;
-        // apiConfig.allowMultipleTriggers is ignored by the lower layers.
+        aidlConfig.captureRequested = apiConfig.isCaptureRequested();
+        // apiConfig.isAllowMultipleTriggers() is ignored by the lower layers.
         aidlConfig.phraseRecognitionExtras =
-                new PhraseRecognitionExtra[apiConfig.keyphrases.length];
-        for (int i = 0; i < apiConfig.keyphrases.length; ++i) {
+                new PhraseRecognitionExtra[apiConfig.getKeyphrases().size()];
+        for (int i = 0; i < apiConfig.getKeyphrases().size(); ++i) {
             aidlConfig.phraseRecognitionExtras[i] = api2aidlPhraseRecognitionExtra(
-                    apiConfig.keyphrases[i]);
+                    apiConfig.getKeyphrases().get(i));
         }
-        aidlConfig.data = Arrays.copyOf(apiConfig.data, apiConfig.data.length);
-        aidlConfig.audioCapabilities = api2aidlAudioCapabilities(apiConfig.audioCapabilities);
+        aidlConfig.data = Arrays.copyOf(apiConfig.getData(), apiConfig.getData().length);
+        aidlConfig.audioCapabilities = api2aidlAudioCapabilities(apiConfig.getAudioCapabilities());
         return aidlConfig;
     }
 

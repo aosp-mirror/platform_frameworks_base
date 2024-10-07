@@ -16,6 +16,7 @@
 
 package com.android.keyguard.logging
 
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordanceViewModel
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.KeyguardQuickAffordancesLog
@@ -60,6 +61,15 @@ constructor(
                 str2 = slotId
             },
             { "QuickAffordance selected with id: $str1, in slot: $str2" }
+        )
+    }
+
+    fun logUpdate(viewModel: KeyguardQuickAffordanceViewModel) {
+        buffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { str1 = viewModel.toString() },
+            { "QuickAffordance updated: $str1" }
         )
     }
 

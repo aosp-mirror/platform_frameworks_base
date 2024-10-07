@@ -171,11 +171,11 @@ public class BatteryUsageStatsPerfTest {
                 .setConsumedPower(123)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU, 10100)
-                .setConsumedPowerForCustomComponent(
+                .setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200)
                 .setUsageDurationMillis(
                         BatteryConsumer.POWER_COMPONENT_CPU, 10300)
-                .setUsageDurationForCustomComponentMillis(
+                .setUsageDurationMillis(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10400);
 
         for (int i = 0; i < 1000; i++) {
@@ -191,10 +191,9 @@ public class BatteryUsageStatsPerfTest {
                 consumerBuilder.setUsageDurationMillis(componentId, componentId * 1000);
             }
 
-            consumerBuilder.setConsumedPowerForCustomComponent(
-                    BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 1234)
-                    .setUsageDurationForCustomComponentMillis(
-                            BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 4321);
+            consumerBuilder
+                    .setConsumedPower(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 1234)
+                    .setUsageDurationMillis(BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 4321);
         }
         return builder.build();
     }

@@ -15,3 +15,11 @@ flag {
     description: "If enabled, the rotary encoder scroll haptic implementation in the View class will be used, and the HapticScrollFeedbackProvider logic for rotary encoder haptic will be muted."
     bug: "299587011"
 }
+
+flag {
+    namespace: "toolkit"
+    name: "enable_touch_scroll_feedback"
+    description: "Enables touchscreen haptic scroll feedback"
+    bug: "331830899"
+    is_fixed_read_only: true
+}

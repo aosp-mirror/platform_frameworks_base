@@ -23,6 +23,7 @@ import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.KeyGestureEvent;
 import android.os.IBinder;
+import android.util.SparseBooleanArray;
 import android.view.InputChannel;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -45,9 +46,11 @@ public abstract class InputManagerInternal {
 
     /**
      * Called by the power manager to tell the input manager whether it should start
-     * watching for wake events.
+     * watching for wake events on given displays.
+     *
+     * @param displayInteractivities Map of display ids to their current interactive state.
      */
-    public abstract void setInteractive(boolean interactive);
+    public abstract void setDisplayInteractivities(SparseBooleanArray displayInteractivities);
 
     /**
      * Toggles Caps Lock state for input device with specific id.
@@ -232,6 +235,9 @@ public abstract class InputManagerInternal {
     /**
      * Notify key gesture was completed by the user.
      *
+     * NOTE: This is a temporary API added to assist in a long-term refactor, and is not meant for
+     * general use by system services.
+     *
      * @param deviceId the device ID of the keyboard using which the event was completed
      * @param keycodes the keys pressed for the event
      * @param modifierState the modifier state
@@ -240,4 +246,20 @@ public abstract class InputManagerInternal {
      */
     public abstract void notifyKeyGestureCompleted(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int event);
+
+    /**
+     * Notify that a key gesture was detected by another system component, and it should be handled
+     * appropriately by KeyGestureController.
+     *
+     * NOTE: This is a temporary API added to assist in a long-term refactor, and is not meant for
+     * general use by system services.
+     *
+     * @param deviceId the device ID of the keyboard using which the event was completed
+     * @param keycodes the keys pressed for the event
+     * @param modifierState the modifier state
+     * @param event the gesture event that was completed
+     *
+     */
+    public abstract void handleKeyGestureInKeyGestureController(int deviceId, int[] keycodes,
+            int modifierState, @KeyGestureEvent.KeyGestureType int event);
 }

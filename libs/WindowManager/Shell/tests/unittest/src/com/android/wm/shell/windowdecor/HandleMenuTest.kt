@@ -33,6 +33,7 @@ import android.view.LayoutInflater
 import android.view.SurfaceControl
 import android.view.SurfaceControlViewHost
 import android.view.View
+import android.view.WindowManager
 import androidx.core.graphics.toPointF
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags
@@ -41,9 +42,9 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
@@ -76,6 +77,8 @@ class HandleMenuTest : ShellTestCase() {
 
     @Mock
     private lateinit var mockDesktopWindowDecoration: DesktopModeWindowDecoration
+    @Mock
+    private lateinit var mockWindowManager: WindowManager
     @Mock
     private lateinit var onClickListener: View.OnClickListener
     @Mock
@@ -131,7 +134,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testFullscreenMenuUsesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_FULLSCREEN, SPLIT_POSITION_UNDEFINED)
         val handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
@@ -143,7 +146,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testFreeformMenu_usesViewHostViewContainer() {
         createTaskInfo(WINDOWING_MODE_FREEFORM, SPLIT_POSITION_UNDEFINED)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_UNDEFINED)
@@ -154,7 +157,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testSplitLeftMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_TOP_OR_LEFT)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_TOP_OR_LEFT)
@@ -169,7 +172,7 @@ class HandleMenuTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_ADDITIONAL_WINDOWS_ABOVE_STATUS_BAR)
+    @EnableFlags(Flags.FLAG_ENABLE_HANDLE_INPUT_FIX)
     fun testSplitRightMenu_usesSystemViewContainer() {
         createTaskInfo(WINDOWING_MODE_MULTI_WINDOW, SPLIT_POSITION_BOTTOM_OR_RIGHT)
         handleMenu = createAndShowHandleMenu(SPLIT_POSITION_BOTTOM_OR_RIGHT)
@@ -230,13 +233,14 @@ class HandleMenuTest : ShellTestCase() {
             }
             else -> error("Invalid windowing mode")
         }
-        val handleMenu = HandleMenu(mockDesktopWindowDecoration, layoutId, appIcon, appName,
-            splitScreenController, shouldShowWindowingPill = true,
-            shouldShowNewWindowButton = true,
+        val handleMenu = HandleMenu(mockDesktopWindowDecoration,
+            WindowManagerWrapper(mockWindowManager),
+            layoutId, appIcon, appName, splitScreenController, shouldShowWindowingPill = true,
+            shouldShowNewWindowButton = true, shouldShowManageWindowsButton = false,
             null /* openInBrowserLink */, captionWidth = HANDLE_WIDTH, captionHeight = 50,
             captionX = captionX
         )
-        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock())
+        handleMenu.show(mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock(), mock())
         return handleMenu
     }
 

@@ -299,6 +299,14 @@ public class WallpaperManager {
             "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
 
     /**
+     * Extra passed on {@link Intent.ACTION_WALLPAPER_CHANGED} indicating if wallpaper was set from
+     * a foreground app.
+     * @hide
+     */
+    public static final String EXTRA_WHICH_WALLPAPER_CHANGED =
+            "android.service.wallpaper.extra.WHICH_WALLPAPER_CHANGED";
+
+    /**
      * The different screen orientations. {@link #getOrientation} provides their exact definition.
      * This is only used internally by the framework and the WallpaperBackupAgent.
      * @hide
@@ -1571,9 +1579,26 @@ public class WallpaperManager {
      */
     @Nullable
     public Rect peekBitmapDimensions(@SetWallpaperFlags int which, boolean returnDefault) {
+        if (multiCrop()) {
+            return peekBitmapDimensionsAsUser(which, returnDefault, mContext.getUserId());
+        }
         checkExactlyOneWallpaperFlagSet(which);
         return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which,
                 mContext.getUserId());
+    }
+
+    /**
+     * Overload of {@link #peekBitmapDimensions(int, boolean)} with a userId argument.
+     * TODO(b/360120606): remove the SuppressWarnings
+     * @hide
+     */
+    @SuppressWarnings("AndroidFrameworkContextUserId")
+    @FlaggedApi(FLAG_MULTI_CROP)
+    @Nullable
+    public Rect peekBitmapDimensionsAsUser(@SetWallpaperFlags int which, boolean returnDefault,
+            int userId) {
+        checkExactlyOneWallpaperFlagSet(which);
+        return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which, userId);
     }
 
     /**

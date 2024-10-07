@@ -95,6 +95,7 @@ class DeviceStateToLayoutMap {
 
     public void dumpLocked(IndentingPrintWriter ipw) {
         ipw.println("DeviceStateToLayoutMap:");
+        ipw.println("-----------------------");
         ipw.increaseIndent();
 
         ipw.println("mIsPortInDisplayLayoutEnabled=" + mIsPortInDisplayLayoutEnabled);

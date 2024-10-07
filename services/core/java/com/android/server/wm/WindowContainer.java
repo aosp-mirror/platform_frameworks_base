@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -31,15 +32,17 @@ import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.os.UserHandle.USER_NULL;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.WindowInsets.Type.InsetsType;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.window.TaskFragmentAnimationParams.DEFAULT_ANIMATION_BACKGROUND_COLOR;
+import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.isActivityTransitOld;
@@ -50,7 +53,6 @@ import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -100,7 +102,6 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.WindowManager;
 import android.view.WindowManager.TransitionOldType;
 import android.view.animation.Animation;
@@ -116,7 +117,6 @@ import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.AlwaysTruePredicate;
-import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -173,6 +173,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * The {@link InsetsSourceProvider}s provided by this window container.
      */
     protected SparseArray<InsetsSourceProvider> mInsetsSourceProviders = null;
+
+    /**
+     * The combined excluded insets types (combined mExcludeInsetsTypes and the
+     * mMergedExcludeInsetsTypes from its parent)
+     */
+    protected @InsetsType int mMergedExcludeInsetsTypes = 0;
+    private @InsetsType int mExcludeInsetsTypes = 0;
 
     @Nullable
     private ArrayMap<IBinder, DeathRecipient> mInsetsOwnerDeathRecipientMap;
@@ -458,7 +465,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         source.setFrame(provider.getArbitraryRectangle())
                 .updateSideHint(getBounds())
                 .setBoundingRects(provider.getBoundingRects());
-        if (Flags.enableCaptionCompatInsetForceConsumption()) {
+        if (ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION.isTrue()) {
             source.setFlags(provider.getFlags());
         }
         mLocalInsetsSources.put(id, source);
@@ -556,6 +563,49 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mControllableInsetProvider;
     }
 
+    /**
+     * Sets the excludeInsetsTypes of this window and updates the mMergedExcludeInsetsTypes of
+     * all child nodes in the hierarchy.
+     *
+     * @param excludeInsetsTypes the excluded {@link InsetsType} that should be set on this
+     *                           WindowContainer
+     */
+    void setExcludeInsetsTypes(@InsetsType int excludeInsetsTypes) {
+        if (excludeInsetsTypes == mExcludeInsetsTypes) {
+            return;
+        }
+        mExcludeInsetsTypes = excludeInsetsTypes;
+        mergeExcludeInsetsTypesAndNotifyInsetsChanged(
+                mParent != null ? mParent.mMergedExcludeInsetsTypes : 0);
+    }
+
+    private void mergeExcludeInsetsTypesAndNotifyInsetsChanged(
+            @InsetsType int excludeInsetsTypesFromParent) {
+        final ArraySet<WindowState> changedWindows = new ArraySet<>();
+        updateMergedExcludeInsetsTypes(excludeInsetsTypesFromParent, changedWindows);
+        if (getDisplayContent() != null) {
+            getDisplayContent().getInsetsStateController().notifyInsetsChanged(changedWindows);
+        }
+    }
+
+    private void updateMergedExcludeInsetsTypes(
+            @InsetsType int excludeInsetsTypesFromParent, ArraySet<WindowState> changedWindows) {
+        final int newMergedExcludeInsetsTypes = mExcludeInsetsTypes | excludeInsetsTypesFromParent;
+        if (newMergedExcludeInsetsTypes == mMergedExcludeInsetsTypes) {
+            return;
+        }
+        mMergedExcludeInsetsTypes = newMergedExcludeInsetsTypes;
+
+        final WindowState win = asWindowState();
+        if (win != null) {
+            changedWindows.add(win);
+        }
+        // Apply to all children
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowContainer<?> child = mChildren.get(i);
+            child.updateMergedExcludeInsetsTypes(mMergedExcludeInsetsTypes, changedWindows);
+        }
+    }
 
     @Override
     final protected WindowContainer getParent() {
@@ -654,6 +704,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onParentChanged(ConfigurationContainer newParent, ConfigurationContainer oldParent) {
         super.onParentChanged(newParent, oldParent);
         if (mParent == null) {
+            mergeExcludeInsetsTypesAndNotifyInsetsChanged(0);
             return;
         }
 
@@ -668,6 +719,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // new parent.
             reparentSurfaceControl(getSyncTransaction(), mParent.mSurfaceControl);
         }
+        mergeExcludeInsetsTypesAndNotifyInsetsChanged(mParent.mMergedExcludeInsetsTypes);
 
         // Either way we need to ask the parent to assign us a Z-order.
         mParent.assignChildLayers();
@@ -706,7 +758,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mLastSurfacePosition.set(0, 0);
         mLastDeltaRotation = Surface.ROTATION_0;
 
-        final Builder b = mWmService.makeSurfaceBuilder(null)
+        final Builder b = mWmService.makeSurfaceBuilder()
                 .setContainerLayer()
                 .setName(getName());
 
@@ -1241,8 +1293,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     boolean inTransitionSelfOrParent() {
         if (!mTransitionController.isShellTransitionsEnabled()) {
-            return isAnimating(PARENTS | TRANSITION,
-                    ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+            return isAnimating(PARENTS | TRANSITION, ANIMATION_TYPE_APP_TRANSITION);
         }
         return inTransition();
     }
@@ -1732,13 +1783,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *         last time {@link #getOrientation(int) was called.
      */
     @Nullable
-    WindowContainer getLastOrientationSource() {
-        final WindowContainer source = mLastOrientationSource;
-        if (source != null && source != this) {
-            final WindowContainer nextSource = source.getLastOrientationSource();
-            if (nextSource != null) {
-                return nextSource;
-            }
+    final WindowContainer<?> getLastOrientationSource() {
+        if (mLastOrientationSource == null) {
+            return null;
+        }
+        WindowContainer<?> source = this;
+        while (source != source.mLastOrientationSource && source.mLastOrientationSource != null) {
+            source = source.mLastOrientationSource;
         }
         return source;
     }
@@ -2663,13 +2714,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
-    SurfaceSession getSession() {
-        if (getParent() != null) {
-            return getParent().getSession();
-        }
-        return null;
-    }
-
     void assignLayer(Transaction t, int layer) {
         // Don't assign layers while a transition animation is playing
         // TODO(b/173528115): establish robust best-practices around z-order fighting.
@@ -2884,6 +2928,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * Go through the hierarchy to allow windows to request a dim if needed
+     */
+    void adjustDims() {
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).adjustDims();
+        }
+    }
+
+    /**
      * Trigger a call to prepareSurfaces from the animation thread, such that pending transactions
      * will be applied.
      */
@@ -2997,12 +3050,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Make sure display isn't a part of the transition already - needed for legacy transitions.
         if (mDisplayContent.inTransition()) return false;
 
-        if (!ActivityTaskManagerService.isPip2ExperimentEnabled()) {
-            // Screenshots are turned off when PiP is undergoing changes.
-            return !inPinnedWindowingMode() && getParent() != null
-                    && !getParent().inPinnedWindowingMode();
-        }
-        return true;
+        // Screenshots are turned off when PiP is undergoing changes.
+        return ActivityTaskManagerService.isPip2ExperimentEnabled() || !isPipChange();
+    }
+
+    /** Returns true if WC is pinned and undergoing changes. */
+    private boolean isPipChange() {
+        final boolean isExitingPip = this.asTaskFragment() != null
+                && mTransitionController.getWindowingModeAtStart(this) == WINDOWING_MODE_PINNED
+                && !inPinnedWindowingMode();
+
+        return isExitingPip || inPinnedWindowingMode()
+                || (getParent() != null && getParent().inPinnedWindowingMode());
     }
 
     /**
@@ -4345,4 +4404,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         t.merge(mSyncTransaction);
     }
 
+    int getSyncTransactionCommitCallbackDepth() {
+        return mSyncTransactionCommitCallbackDepth;
+    }
 }

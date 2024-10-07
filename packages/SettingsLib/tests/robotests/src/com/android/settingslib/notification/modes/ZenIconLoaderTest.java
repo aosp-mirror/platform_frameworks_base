@@ -16,17 +16,12 @@
 
 package com.android.settingslib.notification.modes;
 
-import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import android.app.AutomaticZenRule;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.service.notification.ZenPolicy;
+import android.service.notification.SystemZenRules;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import org.junit.Before;
@@ -48,44 +43,73 @@ public class ZenIconLoaderTest {
     }
 
     @Test
-    public void getIcon_systemOwnedRuleWithIcon_loads() throws Exception {
-        AutomaticZenRule systemRule = newRuleBuilder()
-                .setPackage("android")
+    public void getIcon_systemOwnedModeWithIcon_loads() throws Exception {
+        ZenMode mode = new TestModeBuilder()
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
                 .setIconResId(android.R.drawable.ic_media_play)
                 .build();
 
-        ListenableFuture<Drawable> loadFuture = mLoader.getIcon(mContext, systemRule);
-        assertThat(loadFuture.isDone()).isTrue();
-        assertThat(loadFuture.get()).isNotNull();
+        ZenIcon icon = mLoader.getIcon(mContext, mode).get();
+
+        assertThat(icon.drawable()).isNotNull();
+        assertThat(icon.key().resPackage()).isNull();
+        assertThat(icon.key().resId()).isEqualTo(android.R.drawable.ic_media_play);
     }
 
     @Test
-    public void getIcon_ruleWithoutSpecificIcon_loadsFallback() throws Exception {
-        AutomaticZenRule rule = newRuleBuilder()
+    public void getIcon_modeWithoutSpecificIcon_loadsFallback() throws Exception {
+        ZenMode mode = new TestModeBuilder()
                 .setType(AutomaticZenRule.TYPE_DRIVING)
                 .setPackage("com.blah")
                 .build();
 
-        ListenableFuture<Drawable> loadFuture = mLoader.getIcon(mContext, rule);
-        assertThat(loadFuture.isDone()).isTrue();
-        assertThat(loadFuture.get()).isNotNull();
+        ZenIcon icon = mLoader.getIcon(mContext, mode).get();
+
+        assertThat(icon.drawable()).isNotNull();
+        assertThat(icon.key().resPackage()).isNull();
+        assertThat(icon.key().resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_driving);
     }
 
     @Test
     public void getIcon_ruleWithAppIconWithLoadFailure_loadsFallback() throws Exception {
-        AutomaticZenRule rule = newRuleBuilder()
+        ZenMode mode = new TestModeBuilder()
                 .setType(AutomaticZenRule.TYPE_DRIVING)
                 .setPackage("com.blah")
                 .setIconResId(-123456)
                 .build();
 
-        ListenableFuture<Drawable> loadFuture = mLoader.getIcon(mContext, rule);
-        assertThat(loadFuture.get()).isNotNull();
+        ZenIcon icon = mLoader.getIcon(mContext, mode).get();
+
+        assertThat(icon.drawable()).isNotNull();
+        assertThat(icon.key().resPackage()).isNull();
+        assertThat(icon.key().resId()).isEqualTo(
+                com.android.internal.R.drawable.ic_zen_mode_type_driving);
     }
 
-    private static AutomaticZenRule.Builder newRuleBuilder() {
-        return new AutomaticZenRule.Builder("Driving", Uri.parse("drive"))
-                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
-                .setZenPolicy(new ZenPolicy.Builder().build());
+    @Test
+    public void getIcon_cachesCustomIcons() throws Exception {
+        ZenMode mode = new TestModeBuilder()
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setIconResId(android.R.drawable.ic_media_play)
+                .build();
+
+        ZenIcon iconOne = mLoader.getIcon(mContext, mode).get();
+        ZenIcon iconTwo = mLoader.getIcon(mContext, mode).get();
+
+        assertThat(iconOne.drawable()).isSameInstanceAs(iconTwo.drawable());
+    }
+
+    @Test
+    public void getIcon_cachesDefaultIcons() throws Exception {
+        ZenMode mode = new TestModeBuilder()
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_IMMERSIVE)
+                .build();
+
+        ZenIcon iconOne = mLoader.getIcon(mContext, mode).get();
+        ZenIcon iconTwo = mLoader.getIcon(mContext, mode).get();
+
+        assertThat(iconOne.drawable()).isSameInstanceAs(iconTwo.drawable());
     }
 }

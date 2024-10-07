@@ -18,6 +18,7 @@
 
 package com.android.systemui.scene.shared.model
 
+import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
 import kotlinx.coroutines.CoroutineScope
@@ -49,6 +50,15 @@ class SceneDataSourceDelegator(
                 initialValue = config.initialSceneKey,
             )
 
+    override val currentOverlays: StateFlow<Set<OverlayKey>> =
+        delegateMutable
+            .flatMapLatest { delegate -> delegate.currentOverlays }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = emptySet(),
+            )
+
     override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) {
         delegateMutable.value.changeScene(
             toScene = toScene,
@@ -59,6 +69,28 @@ class SceneDataSourceDelegator(
     override fun snapToScene(toScene: SceneKey) {
         delegateMutable.value.snapToScene(
             toScene = toScene,
+        )
+    }
+
+    override fun showOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) {
+        delegateMutable.value.showOverlay(
+            overlay = overlay,
+            transitionKey = transitionKey,
+        )
+    }
+
+    override fun hideOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) {
+        delegateMutable.value.hideOverlay(
+            overlay = overlay,
+            transitionKey = transitionKey,
+        )
+    }
+
+    override fun replaceOverlay(from: OverlayKey, to: OverlayKey, transitionKey: TransitionKey?) {
+        delegateMutable.value.replaceOverlay(
+            from = from,
+            to = to,
+            transitionKey = transitionKey,
         )
     }
 
@@ -82,8 +114,21 @@ class SceneDataSourceDelegator(
         override val currentScene: StateFlow<SceneKey> =
             MutableStateFlow(initialSceneKey).asStateFlow()
 
+        override val currentOverlays: StateFlow<Set<OverlayKey>> =
+            MutableStateFlow(emptySet<OverlayKey>()).asStateFlow()
+
         override fun changeScene(toScene: SceneKey, transitionKey: TransitionKey?) = Unit
 
         override fun snapToScene(toScene: SceneKey) = Unit
+
+        override fun showOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) = Unit
+
+        override fun hideOverlay(overlay: OverlayKey, transitionKey: TransitionKey?) = Unit
+
+        override fun replaceOverlay(
+            from: OverlayKey,
+            to: OverlayKey,
+            transitionKey: TransitionKey?
+        ) = Unit
     }
 }

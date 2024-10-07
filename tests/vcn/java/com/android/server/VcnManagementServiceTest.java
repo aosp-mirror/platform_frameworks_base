@@ -146,6 +146,8 @@ public class VcnManagementServiceTest {
     private static final LinkProperties TEST_LP_1 = new LinkProperties();
     private static final LinkProperties TEST_LP_2 = new LinkProperties();
 
+    private static final int ACTIVE_MODEM_COUNT = 2;
+
     static {
         TEST_LP_1.setInterfaceName(TEST_IFACE_NAME);
         TEST_LP_2.setInterfaceName(TEST_IFACE_NAME_2);
@@ -233,6 +235,7 @@ public class VcnManagementServiceTest {
         setupSystemService(mMockContext, mUserManager, Context.USER_SERVICE, UserManager.class);
 
         doReturn(TEST_USER_HANDLE).when(mUserManager).getMainUser();
+        doReturn(ACTIVE_MODEM_COUNT).when(mTelMgr).getActiveModemCount();
 
         doReturn(TEST_PACKAGE_NAME).when(mMockContext).getOpPackageName();
 

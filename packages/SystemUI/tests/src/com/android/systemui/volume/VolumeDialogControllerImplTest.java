@@ -48,9 +48,11 @@ import androidx.test.filters.SmallTest;
 
 import com.android.settingslib.flags.Flags;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.SysuiTestCaseExtKt;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.kosmos.Kosmos;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.VibratorHelper;
@@ -77,6 +79,8 @@ import java.util.concurrent.Executor;
 @SmallTest
 @TestableLooper.RunWithLooper
 public class VolumeDialogControllerImplTest extends SysuiTestCase {
+
+    private final Kosmos mKosmos = SysuiTestCaseExtKt.testKosmos(this);
 
     TestableVolumeDialogControllerImpl mVolumeController;
     VolumeDialogControllerImpl.C mCallback;
@@ -129,10 +133,6 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
         when(mRingerModeInternalLiveData.getValue()).thenReturn(-1);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
         when(mUserTracker.getUserContext()).thenReturn(mContext);
-        // Enable group volume adjustments
-        mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions,
-                true);
 
         mCallback = mock(VolumeDialogControllerImpl.C.class);
         mThreadFactory.setLooper(TestableLooper.get(this).getLooper());
@@ -146,6 +146,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                         mNotificationManager,
                         mVibrator,
                         mIAudioService,
+                        VolumeControllerAdapterKosmosKt.getVolumeControllerAdapter(mKosmos),
                         mAccessibilityManager,
                         mPackageManager,
                         mWakefullnessLifcycle,
@@ -323,6 +324,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                 NotificationManager notificationManager,
                 VibratorHelper optionalVibrator,
                 IAudioService iAudioService,
+                VolumeControllerAdapter volumeControllerAdapter,
                 AccessibilityManager accessibilityManager,
                 PackageManager packageManager,
                 WakefulnessLifecycle wakefulnessLifecycle,
@@ -342,6 +344,7 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
                     notificationManager,
                     optionalVibrator,
                     iAudioService,
+                    volumeControllerAdapter,
                     accessibilityManager,
                     packageManager,
                     wakefulnessLifecycle,

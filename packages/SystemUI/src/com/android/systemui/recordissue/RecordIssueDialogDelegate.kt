@@ -42,7 +42,6 @@ import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePoli
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate
 import com.android.systemui.recordissue.IssueRecordingState.Companion.ALL_ISSUE_TYPES
 import com.android.systemui.recordissue.IssueRecordingState.Companion.ISSUE_TYPE_NOT_SET
-import com.android.systemui.recordissue.IssueRecordingState.Companion.KEY_ISSUE_TYPE_RES
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -50,6 +49,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.Executor
+
+private const val EXTRA_ISSUE_TYPE_RES = "extra_issueTypeRes"
 
 class RecordIssueDialogDelegate
 @AssistedInject
@@ -170,7 +171,7 @@ constructor(
             PopupMenu.OnMenuItemClickListener {
                 issueTypeButton.text = it.title
                 state.issueTypeRes =
-                    it.intent?.getIntExtra(KEY_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
+                    it.intent?.getIntExtra(EXTRA_ISSUE_TYPE_RES, ISSUE_TYPE_NOT_SET)
                         ?: ISSUE_TYPE_NOT_SET
                 onIssueTypeSelected.run()
                 true
@@ -181,7 +182,7 @@ constructor(
                 if (it != state.issueTypeRes) {
                     iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
                 }
-                intent = Intent().putExtra(KEY_ISSUE_TYPE_RES, it)
+                intent = Intent().putExtra(EXTRA_ISSUE_TYPE_RES, it)
 
                 if (it == R.string.custom) {
                     setOnMenuItemClickListener {

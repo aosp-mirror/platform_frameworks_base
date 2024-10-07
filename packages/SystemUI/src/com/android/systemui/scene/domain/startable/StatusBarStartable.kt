@@ -166,7 +166,7 @@ constructor(
                     StatusBarManager.DISABLE_NONE,
                     disableToken,
                     applicationContext.packageName,
-                    selectedUserInteractor.getSelectedUserId(true),
+                    selectedUserInteractor.getSelectedUserId(),
                 )
             } catch (e: RemoteException) {
                 Log.d(TAG, "Failed to clear flags", e)

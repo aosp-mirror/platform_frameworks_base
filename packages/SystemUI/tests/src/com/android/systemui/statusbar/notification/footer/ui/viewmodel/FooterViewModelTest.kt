@@ -38,6 +38,7 @@ import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.shared.settings.data.repository.fakeSecureSettingsRepository
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.testKosmos
 import com.android.systemui.util.ui.isAnimating
@@ -252,6 +253,39 @@ class FooterViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             // THEN label is "History"
             assertThat(buttonLabel).isEqualTo(R.string.manage_notifications_history_text)
+        }
+
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @Test
+    fun manageButtonOnClick_whenHistoryDisabled() =
+        testScope.runTest {
+            val onClick by collectLastValue(underTest.manageOrHistoryButtonClick)
+            runCurrent()
+
+            // WHEN notification history is disabled
+            fakeSecureSettingsRepository.setInt(Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0)
+
+            // THEN onClick leads to settings page
+            assertThat(onClick?.targetIntent?.action)
+                .isEqualTo(Settings.ACTION_NOTIFICATION_SETTINGS)
+            assertThat(onClick?.backStack).isEmpty()
+        }
+
+    @EnableFlags(ModesEmptyShadeFix.FLAG_NAME)
+    @Test
+    fun historyButtonOnClick_whenHistoryEnabled() =
+        testScope.runTest {
+            val onClick by collectLastValue(underTest.manageOrHistoryButtonClick)
+            runCurrent()
+
+            // WHEN notification history is enabled
+            fakeSecureSettingsRepository.setInt(Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 1)
+
+            // THEN onClick leads to history page
+            assertThat(onClick?.targetIntent?.action)
+                .isEqualTo(Settings.ACTION_NOTIFICATION_HISTORY)
+            assertThat(onClick?.backStack?.map { it.action })
+                .containsExactly(Settings.ACTION_NOTIFICATION_SETTINGS)
         }
 
     @Test

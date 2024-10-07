@@ -18,7 +18,7 @@ package com.android.server;
 
 import static android.provider.DeviceConfig.Properties;
 
-import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -42,6 +42,7 @@ import android.provider.Settings;
 import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 
@@ -153,6 +154,14 @@ public class RescueParty {
 
     private static final int PERSISTENT_MASK = ApplicationInfo.FLAG_PERSISTENT
             | ApplicationInfo.FLAG_SYSTEM;
+
+    /**
+     * EventLog tags used when logging into the event log. Note the values must be sync with
+     * frameworks/base/services/core/java/com/android/server/EventLogTags.logtags to get correct
+     * name translation.
+     */
+    private static final int LOG_TAG_RESCUE_SUCCESS = 2902;
+    private static final int LOG_TAG_RESCUE_FAILURE = 2903;
 
     /** Register the Rescue Party observer as a Package Watchdog health observer */
     public static void registerHealthObserver(Context context) {
@@ -291,13 +300,13 @@ public class RescueParty {
                 Properties properties = new Properties.Builder(namespaceToReset).build();
                 try {
                     if (!DeviceConfig.setProperties(properties)) {
-                        logCriticalInfo(Log.ERROR, "Failed to clear properties under "
+                        logCrashRecoveryEvent(Log.ERROR, "Failed to clear properties under "
                             + namespaceToReset
                             + ". Running `device_config get_sync_disabled_for_tests` will confirm"
                             + " if config-bulk-update is enabled.");
                     }
                 } catch (DeviceConfig.BadConfigException exception) {
-                    logCriticalInfo(Log.WARN, "namespace " + namespaceToReset
+                    logCrashRecoveryEvent(Log.WARN, "namespace " + namespaceToReset
                             + " is already banned, skip reset.");
                 }
             }
@@ -523,12 +532,12 @@ public class RescueParty {
         Slog.w(TAG, "Attempting rescue level " + levelToString(level));
         try {
             executeRescueLevelInternal(context, level, failedPackage);
-            EventLogTags.writeRescueSuccess(level);
+            EventLog.writeEvent(LOG_TAG_RESCUE_SUCCESS, level);
             String successMsg = "Finished rescue level " + levelToString(level);
             if (!TextUtils.isEmpty(failedPackage)) {
                 successMsg += " for package " + failedPackage;
             }
-            logCriticalInfo(Log.DEBUG, successMsg);
+            logCrashRecoveryEvent(Log.DEBUG, successMsg);
         } catch (Throwable t) {
             logRescueException(level, failedPackage, t);
         }
@@ -631,7 +640,8 @@ public class RescueParty {
         // Request the reboot from a separate thread to avoid deadlock on PackageWatchdog
         // when device shutting down.
         setRebootProperty(true);
-        Runnable runnable = () -> {
+
+        if (Flags.synchronousRebootInRescueParty()) {
             try {
                 PowerManager pm = context.getSystemService(PowerManager.class);
                 if (pm != null) {
@@ -640,9 +650,20 @@ public class RescueParty {
             } catch (Throwable t) {
                 logRescueException(level, failedPackage, t);
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        } else {
+            Runnable runnable = () -> {
+                try {
+                    PowerManager pm = context.getSystemService(PowerManager.class);
+                    if (pm != null) {
+                        pm.reboot(TAG);
+                    }
+                } catch (Throwable t) {
+                    logRescueException(level, failedPackage, t);
+                }
+            };
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
     }
 
     private static void executeFactoryReset(Context context, int level,
@@ -655,18 +676,28 @@ public class RescueParty {
         setFactoryResetProperty(true);
         long now = System.currentTimeMillis();
         setLastFactoryResetTimeMs(now);
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    RecoverySystem.rebootPromptAndWipeUserData(context, TAG);
-                } catch (Throwable t) {
-                    logRescueException(level, failedPackage, t);
-                }
+
+        if (Flags.synchronousRebootInRescueParty()) {
+            try {
+                RecoverySystem.rebootPromptAndWipeUserData(context, TAG + "," + failedPackage);
+            } catch (Throwable t) {
+                logRescueException(level, failedPackage, t);
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+        } else {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        RecoverySystem.rebootPromptAndWipeUserData(context,
+                            TAG + "," + failedPackage);
+                    } catch (Throwable t) {
+                        logRescueException(level, failedPackage, t);
+                    }
+                }
+            };
+            Thread thread = new Thread(runnable);
+            thread.start();
+        }
     }
 
 
@@ -682,12 +713,12 @@ public class RescueParty {
     private static void logRescueException(int level, @Nullable String failedPackageName,
             Throwable t) {
         final String msg = getCompleteMessage(t);
-        EventLogTags.writeRescueFailure(level, msg);
+        EventLog.writeEvent(LOG_TAG_RESCUE_FAILURE, level, msg);
         String failureMsg = "Failed rescue level " + levelToString(level);
         if (!TextUtils.isEmpty(failedPackageName)) {
             failureMsg += " for package " + failedPackageName;
         }
-        logCriticalInfo(Log.ERROR, failureMsg + ": " + msg);
+        logCrashRecoveryEvent(Log.ERROR, failureMsg + ": " + msg);
     }
 
     private static int mapRescueLevelToUserImpact(int rescueLevel) {
@@ -917,7 +948,7 @@ public class RescueParty {
         }
 
         @Override
-        public String getName() {
+        public String getUniqueIdentifier() {
             return NAME;
         }
 

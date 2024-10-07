@@ -18,7 +18,6 @@ package com.android.wm.shell.recents
 
 import android.app.ActivityManager
 import android.app.WindowConfiguration
-import android.content.Context
 import android.os.IBinder
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
@@ -60,7 +59,6 @@ class TaskStackTransitionObserverTest {
 
     @JvmField @Rule val setFlagsRule = SetFlagsRule()
 
-    @Mock private lateinit var context: Context
     @Mock private lateinit var shellInit: ShellInit
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock private lateinit var transitionsLazy: Lazy<Transitions>
@@ -74,7 +72,7 @@ class TaskStackTransitionObserverTest {
         MockitoAnnotations.initMocks(this)
         shellInit = Mockito.spy(ShellInit(testExecutor))
         whenever(transitionsLazy.get()).thenReturn(transitions)
-        transitionObserver = TaskStackTransitionObserver(context, transitionsLazy, shellInit)
+        transitionObserver = TaskStackTransitionObserver(transitionsLazy, shellInit)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             val initRunnableCaptor = ArgumentCaptor.forClass(Runnable::class.java)
             verify(shellInit)

@@ -24,8 +24,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.qs.panels.data.repository.DefaultLargeTilesRepository
-import com.android.systemui.qs.panels.data.repository.defaultLargeTilesRepository
+import com.android.systemui.qs.panels.domain.interactor.qsPreferencesInteractor
 import com.android.systemui.qs.pipeline.domain.interactor.currentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.res.R
@@ -56,11 +55,9 @@ class QuickQuickSettingsViewModelTest : SysuiTestCase() {
 
     private val kosmos =
         testKosmos().apply {
-            defaultLargeTilesRepository =
-                object : DefaultLargeTilesRepository {
-                    override val defaultLargeTiles: Set<TileSpec> =
-                        tiles.filter { it.spec.startsWith(PREFIX_LARGE) }.toSet()
-                }
+            qsPreferencesInteractor.setLargeTilesSpecs(
+                tiles.filter { it.spec.startsWith(PREFIX_LARGE) }.toSet()
+            )
         }
 
     private val underTest = kosmos.quickQuickSettingsViewModel

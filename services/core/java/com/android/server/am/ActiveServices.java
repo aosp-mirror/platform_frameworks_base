@@ -1516,9 +1516,8 @@ public final class ActiveServices {
                 serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
         mAm.mBatteryStatsService.noteServiceStartRunning(uid, packageName, serviceName);
         final ProcessRecord hostApp = r.app;
-        final boolean wasStopped = hostApp == null ? wasStopped(r) : false;
-        final boolean firstLaunch =
-                hostApp == null ? !mAm.wasPackageEverLaunched(r.packageName, r.userId) : false;
+        final boolean wasStopped = hostApp == null ? r.appInfo.isStopped() : false;
+        final boolean firstLaunch = hostApp == null ? r.appInfo.isNotLaunched() : false;
 
         String error = bringUpServiceLocked(r, service.getFlags(), callerFg,
                 false /* whileRestarting */,
@@ -4308,9 +4307,8 @@ public final class ActiveServices {
                         true, UNKNOWN_ADJ);
             }
 
-            final boolean wasStopped = hostApp == null ? wasStopped(s) : false;
-            final boolean firstLaunch =
-                    hostApp == null ? !mAm.wasPackageEverLaunched(s.packageName, s.userId) : false;
+            final boolean wasStopped = hostApp == null ? s.appInfo.isStopped() : false;
+            final boolean firstLaunch = hostApp == null ? s.appInfo.isNotLaunched() : false;
 
             boolean needOomAdj = false;
             if (c.hasFlag(Context.BIND_AUTO_CREATE)) {
@@ -9349,9 +9347,5 @@ public final class ActiveServices {
         }
         return mCachedDeviceProvisioningPackage != null
                 && mCachedDeviceProvisioningPackage.equals(packageName);
-    }
-
-    private boolean wasStopped(ServiceRecord serviceRecord) {
-        return (serviceRecord.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0;
     }
 }

@@ -76,7 +76,6 @@ constructor(
     }
 
     private fun listenForOccludedToPrimaryBouncer() {
-        // TODO(b/336576536): Check if adaptation for scene framework is needed
         if (SceneContainerFlag.isEnabled) return
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
@@ -107,7 +106,7 @@ constructor(
                         startTransitionToLockscreenOrHub(
                             isIdleOnCommunal,
                             showCommunalFromOccluded,
-                            dreamFromOccluded
+                            dreamFromOccluded,
                         )
                     }
             }
@@ -128,7 +127,7 @@ constructor(
                         startTransitionToLockscreenOrHub(
                             isIdleOnCommunal,
                             showCommunalFromOccluded,
-                            dreamFromOccluded
+                            dreamFromOccluded,
                         )
                     }
             }
@@ -148,7 +147,7 @@ constructor(
                 communalSceneInteractor.changeScene(
                     newScene = CommunalScenes.Communal,
                     loggingReason = "occluded to hub",
-                    transitionKey = CommunalTransitionKeys.SimpleFade
+                    transitionKey = CommunalTransitionKeys.SimpleFade,
                 )
             } else {
                 startTransitionTo(KeyguardState.GLANCEABLE_HUB)
@@ -211,8 +210,9 @@ constructor(
 
             duration =
                 when (toState) {
-                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
+                    KeyguardState.ALTERNATE_BOUNCER -> TO_ALTERNATE_BOUNCER_DURATION
                     KeyguardState.GLANCEABLE_HUB -> TO_GLANCEABLE_HUB_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -221,9 +221,10 @@ constructor(
     companion object {
         const val TAG = "FromOccludedTransitionInteractor"
         private val DEFAULT_DURATION = 500.milliseconds
-        val TO_LOCKSCREEN_DURATION = 933.milliseconds
-        val TO_GLANCEABLE_HUB_DURATION = 250.milliseconds
+        val TO_ALTERNATE_BOUNCER_DURATION = DEFAULT_DURATION
         val TO_AOD_DURATION = DEFAULT_DURATION
         val TO_DOZING_DURATION = DEFAULT_DURATION
+        val TO_GLANCEABLE_HUB_DURATION = 250.milliseconds
+        val TO_LOCKSCREEN_DURATION = 933.milliseconds
     }
 }

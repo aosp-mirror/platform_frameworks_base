@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.saver.domain
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.content.Context
 import android.content.DialogInterface
 import android.content.SharedPreferences
@@ -44,7 +45,7 @@ class DataSaverDialogDelegate(
             setTitle(R.string.data_saver_enable_title)
             setMessage(R.string.data_saver_description)
             setPositiveButton(R.string.data_saver_enable_button) { _: DialogInterface?, _ ->
-                CoroutineScope(backgroundContext).launch {
+                CoroutineScope(backgroundContext + createCoroutineTracingContext("DataSaverDialogScope")).launch {
                     dataSaverController.setDataSaverEnabled(true)
                 }
 

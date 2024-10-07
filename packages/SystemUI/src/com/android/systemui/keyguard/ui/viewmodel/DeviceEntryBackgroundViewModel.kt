@@ -43,21 +43,22 @@ constructor(
     val deviceEntryIconViewModel: DeviceEntryIconViewModel,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     configurationInteractor: ConfigurationInteractor,
-    lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
-    aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
-    goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
-    primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
-    occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
-    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
-    dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
     alternateBouncerToAodTransitionViewModel: AlternateBouncerToAodTransitionViewModel,
-    goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
-    goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
-    primaryBouncerToDozingTransitionViewModel: PrimaryBouncerToDozingTransitionViewModel,
-    lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
-    dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     alternateBouncerToDozingTransitionViewModel: AlternateBouncerToDozingTransitionViewModel,
+    aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
     dreamingToAodTransitionViewModel: DreamingToAodTransitionViewModel,
+    dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
+    goneToDozingTransitionViewModel: GoneToDozingTransitionViewModel,
+    goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
+    lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
+    occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
+    occludedToDozingTransitionViewModel: OccludedToDozingTransitionViewModel,
+    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
+    primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
+    primaryBouncerToDozingTransitionViewModel: PrimaryBouncerToDozingTransitionViewModel,
     primaryBouncerToLockscreenTransitionViewModel: PrimaryBouncerToLockscreenTransitionViewModel,
 ) {
     val color: Flow<Int> =
@@ -67,14 +68,14 @@ constructor(
                     .map {
                         Utils.getColorAttrDefaultColor(
                             context,
-                            com.android.internal.R.attr.colorSurface
+                            com.android.internal.R.attr.colorSurface,
                         )
                     }
                     .onStart {
                         emit(
                             Utils.getColorAttrDefaultColor(
                                 context,
-                                com.android.internal.R.attr.colorSurface
+                                com.android.internal.R.attr.colorSurface,
                             )
                         )
                     }
@@ -86,23 +87,23 @@ constructor(
         deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBackground ->
             if (useBackground) {
                 setOf(
-                        lockscreenToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        aodToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        goneToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         alternateBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        goneToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        goneToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        lockscreenToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        dozingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         alternateBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        aodToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        dozingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         dreamingToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToLockscreenTransitionViewModel
-                            .deviceEntryBackgroundViewAlpha,
+                        dreamingToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        goneToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        lockscreenToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        occludedToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        offToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                     )
                     .merge()
                     .onStart {

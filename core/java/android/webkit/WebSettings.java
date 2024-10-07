@@ -497,25 +497,32 @@ public abstract class WebSettings {
     public abstract  boolean getUseWebViewBackgroundForOverscrollBackground();
 
     /**
-     * Sets whether the WebView should save form data. In Android O, the
-     * platform has implemented a fully functional Autofill feature to store
-     * form data. Therefore, the Webview form data save feature is disabled.
+     * Sets whether the WebView should save form data. In {@link android.os.Build.VERSION_CODES#O},
+     * the platform has implemented a fully functional Autofill feature to store form data.
+     * Therefore, the Webview form data save feature is disabled.
      *
-     * Note that the feature will continue to be supported on older versions of
+     * <p>Note that the feature will continue to be supported on older versions of
      * Android as before.
      *
-     * @deprecated In Android O and afterwards, this function does not have
-     * any effect, the form data will be saved to platform's autofill service
-     * if applicable.
+     * @see #getSaveFormData
+     * @deprecated In Android O and afterwards, this function does not have any effect. Form data
+     * will be saved to platform's autofill service if applicable.
      */
     @Deprecated
     public abstract  void setSaveFormData(boolean save);
 
     /**
-     * Gets whether the WebView saves form data.
+     * Gets whether the WebView saves form data. In {@link android.os.Build.VERSION_CODES#O}, the
+     * platform has implemented a fully functional Autofill feature to store form data. Therefore,
+     * the Webview form data save feature is disabled.
+     *
+     * <p>Note that the feature will continue to be supported on older versions of
+     * Android as before.
      *
      * @return whether the WebView saves form data
      * @see #setSaveFormData
+     * @deprecated In Android O and afterwards, this function does not have any effect. Form data
+     * will be filled from the platform's autofill service if applicable.
      */
     @Deprecated
     public abstract boolean getSaveFormData();

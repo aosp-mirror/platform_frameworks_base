@@ -34,9 +34,7 @@ import com.android.settingslib.Utils
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
-import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
-import com.android.systemui.biometrics.shared.model.toSensorType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.AuthRippleInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
@@ -104,7 +102,6 @@ constructor(
 
     private var udfpsController: UdfpsController? = null
     private var udfpsRadius: Float = -1f
-    private var udfpsType: FingerprintSensorType = FingerprintSensorType.UNKNOWN
 
     override fun start() {
         init()
@@ -373,11 +370,8 @@ constructor(
     private val udfpsControllerCallback =
         object : UdfpsController.Callback {
             override fun onFingerDown() {
-                // only show dwell ripple for device entry non-ultrasonic udfps
-                if (
-                    keyguardUpdateMonitor.isFingerprintDetectionRunning &&
-                        udfpsType != FingerprintSensorType.UDFPS_ULTRASONIC
-                ) {
+                // only show dwell ripple for device entry
+                if (keyguardUpdateMonitor.isFingerprintDetectionRunning) {
                     showDwellRipple()
                 }
             }
@@ -403,7 +397,6 @@ constructor(
             if (it.size > 0) {
                 udfpsController = udfpsControllerProvider.get()
                 udfpsRadius = authController.udfpsRadius
-                udfpsType = it[0].sensorType.toSensorType()
 
                 if (mView.isAttachedToWindow) {
                     udfpsController?.addCallback(udfpsControllerCallback)

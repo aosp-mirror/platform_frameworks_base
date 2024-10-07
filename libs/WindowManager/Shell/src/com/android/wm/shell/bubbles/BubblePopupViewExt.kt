@@ -17,8 +17,8 @@ package com.android.wm.shell.bubbles
 
 import android.graphics.Color
 import com.android.wm.shell.R
-import com.android.wm.shell.common.bubbles.BubblePopupDrawable
-import com.android.wm.shell.common.bubbles.BubblePopupView
+import com.android.wm.shell.shared.bubbles.BubblePopupDrawable
+import com.android.wm.shell.shared.bubbles.BubblePopupView
 
 /**
  * A convenience method to setup the [BubblePopupView] with the correct config using local resources

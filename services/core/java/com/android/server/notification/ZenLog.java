@@ -23,18 +23,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings.Global;
-import android.service.notification.Condition;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeDiff;
 import android.util.LocalLog;
-import android.util.Log;
-import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class ZenLog {
@@ -61,6 +58,8 @@ public class ZenLog {
     private static final int TYPE_RECORD_CALLER = 19;
     private static final int TYPE_CHECK_REPEAT_CALLER = 20;
     private static final int TYPE_ALERT_ON_UPDATED_INTERCEPT = 21;
+    private static final int TYPE_APPLY_DEVICE_EFFECT = 22;
+    private static final int TYPE_SCHEDULE_APPLY_DEVICE_EFFECT = 23;
 
     public static void traceIntercepted(NotificationRecord record, String reason) {
         append(TYPE_INTERCEPTED, record.getKey() + "," + reason);
@@ -173,6 +172,14 @@ public class ZenLog {
                 + ", given uri=" + hasUri);
     }
 
+    public static void traceApplyDeviceEffect(String effect, boolean newValue) {
+        append(TYPE_APPLY_DEVICE_EFFECT, effect + " -> " + newValue);
+    }
+
+    public static void traceScheduleApplyDeviceEffect(String effect, boolean scheduledValue) {
+        append(TYPE_SCHEDULE_APPLY_DEVICE_EFFECT, effect + " -> " + scheduledValue);
+    }
+
     private static String subscribeResult(IConditionProvider provider, RemoteException e) {
         return provider == null ? "no provider" : e != null ? e.getMessage() : "ok";
     }
@@ -196,6 +203,8 @@ public class ZenLog {
             case TYPE_RECORD_CALLER: return "record_caller";
             case TYPE_CHECK_REPEAT_CALLER: return "check_repeat_caller";
             case TYPE_ALERT_ON_UPDATED_INTERCEPT: return "alert_on_updated_intercept";
+            case TYPE_APPLY_DEVICE_EFFECT: return "apply_device_effect";
+            case TYPE_SCHEDULE_APPLY_DEVICE_EFFECT: return "schedule_device_effect";
             default: return "unknown";
         }
     }
@@ -271,6 +280,16 @@ public class ZenLog {
         synchronized (STATE_CHANGES) {
             pw.printf(prefix  + "State Changes:\n");
             STATE_CHANGES.dump(prefix, pw);
+        }
+    }
+
+    @VisibleForTesting(/* otherwise = VisibleForTesting.NONE */)
+    public static void clear() {
+        synchronized (INTERCEPTION_EVENTS) {
+            INTERCEPTION_EVENTS.clear();
+        }
+        synchronized (STATE_CHANGES) {
+            STATE_CHANGES.clear();
         }
     }
 }

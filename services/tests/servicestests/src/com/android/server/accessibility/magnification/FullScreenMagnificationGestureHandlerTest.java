@@ -23,6 +23,8 @@ import static android.view.MotionEvent.ACTION_POINTER_DOWN;
 import static android.view.MotionEvent.ACTION_POINTER_INDEX_SHIFT;
 import static android.view.MotionEvent.ACTION_POINTER_UP;
 import static android.view.MotionEvent.ACTION_UP;
+import static android.view.MotionEvent.CLASSIFICATION_TWO_FINGER_SWIPE;
+import static android.view.MotionEvent.TOOL_TYPE_FINGER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
@@ -30,6 +32,7 @@ import static com.android.server.testutils.TestUtils.strictMock;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -62,6 +65,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -103,6 +107,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -695,6 +700,15 @@ public class FullScreenMagnificationGestureHandlerTest {
         assertActionsInOrder(eventCaptor.mEvents, expectedActions);
 
         returnToNormalFrom(STATE_ACTIVATED);
+    }
+
+    @Test
+    public void testIntervalsOf_sendMotionEventInfo_returnMatchIntervals() {
+        FullScreenMagnificationGestureHandler.MotionEventInfo upEventQueue =
+                createEventQueue(ACTION_UP, 0, 100, 300);
+
+        List<Long> upIntervals = mMgh.mDetectingState.intervalsOf(upEventQueue, ACTION_UP);
+        assertEquals(Arrays.asList(100L, 200L), upIntervals);
     }
 
     @Test
@@ -1414,6 +1428,49 @@ public class FullScreenMagnificationGestureHandlerTest {
     }
 
     @Test
+    public void testSynthesizedGestureEventsDoNotMoveMagnifierViewport() {
+        final EventCaptor eventCaptor = new EventCaptor();
+        mMgh.setNext(eventCaptor);
+
+        float centerX =
+                (INITIAL_MAGNIFICATION_BOUNDS.left + INITIAL_MAGNIFICATION_BOUNDS.width()) / 2.0f;
+        float centerY =
+                (INITIAL_MAGNIFICATION_BOUNDS.top + INITIAL_MAGNIFICATION_BOUNDS.height()) / 2.0f;
+        float scale = 5.6f; // value is unimportant but unique among tests to increase coverage.
+        mFullScreenMagnificationController.setScaleAndCenter(
+                DISPLAY_0, centerX, centerY, scale, /* animate= */ false, 1);
+        centerX = mFullScreenMagnificationController.getCenterX(DISPLAY_0);
+        centerY = mFullScreenMagnificationController.getCenterY(DISPLAY_0);
+
+        // Second finger down on trackpad starts a synthesized two-finger swipe with source
+        // mouse.
+        MotionEvent downEvent = motionEvent(centerX, centerY, ACTION_DOWN,
+                TOOL_TYPE_FINGER, CLASSIFICATION_TWO_FINGER_SWIPE);
+        send(downEvent, InputDevice.SOURCE_MOUSE);
+        fastForward(20);
+
+        // Two-finger swipe creates a synthesized move event, and shouldn't impact magnifier
+        // viewport.
+        MotionEvent moveEvent = motionEvent(centerX - 42, centerY - 42, ACTION_MOVE,
+                TOOL_TYPE_FINGER, CLASSIFICATION_TWO_FINGER_SWIPE);
+        send(moveEvent, InputDevice.SOURCE_MOUSE);
+        fastForward(20);
+
+        assertThat(mFullScreenMagnificationController.getCenterX(DISPLAY_0)).isEqualTo(centerX);
+        assertThat(mFullScreenMagnificationController.getCenterY(DISPLAY_0)).isEqualTo(centerY);
+
+        // The events were not consumed by magnifier.
+        assertThat(eventCaptor.mEvents.size()).isEqualTo(2);
+        assertThat(eventCaptor.mEvents.get(0).getSource()).isEqualTo(InputDevice.SOURCE_MOUSE);
+        assertThat(eventCaptor.mEvents.get(1).getSource()).isEqualTo(InputDevice.SOURCE_MOUSE);
+
+        final List<Integer> expectedActions = new ArrayList();
+        expectedActions.add(Integer.valueOf(ACTION_DOWN));
+        expectedActions.add(Integer.valueOf(ACTION_MOVE));
+        assertActionsInOrder(eventCaptor.mEvents, expectedActions);
+    }
+
+    @Test
     @RequiresFlagsDisabled(Flags.FLAG_ENABLE_MAGNIFICATION_FOLLOWS_MOUSE)
     public void testMouseHoverMoveEventsDoNotMoveMagnifierViewport() {
         runHoverMoveEventsDoNotMoveMagnifierViewport(InputDevice.SOURCE_MOUSE);
@@ -2130,6 +2187,30 @@ public class FullScreenMagnificationGestureHandlerTest {
         return MotionEvent.obtain(mLastDownTime, mClock.now(), action, x, y, 0);
     }
 
+    private MotionEvent motionEvent(float x, float y, int action, int toolType,
+            int classification) {
+        // Create a generic motion event to populate the parameters.
+        MotionEvent event = motionEvent(x, y, action);
+        int pointerCount = event.getPointerCount();
+        MotionEvent.PointerCoords[] coords = new MotionEvent.PointerCoords[pointerCount];
+        MotionEvent.PointerProperties[] properties =
+                new MotionEvent.PointerProperties[pointerCount];
+        for (int i = 0; i < pointerCount; i++) {
+            properties[i] = new MotionEvent.PointerProperties();
+            event.getPointerProperties(i, properties[i]);
+            properties[i].toolType = toolType;
+            coords[i] = new MotionEvent.PointerCoords();
+            event.getPointerCoords(i, coords[i]);
+        }
+        // Apply the custom classification.
+        return MotionEvent.obtain(event.getDownTime(), event.getEventTime(), action,
+                /*pointerCount=*/1, properties, coords,
+                event.getMetaState(), event.getButtonState(),
+                event.getXPrecision(), event.getYPrecision(), event.getDeviceId(),
+                event.getEdgeFlags(), event.getSource(), event.getDisplayId(), event.getFlags(),
+                classification);
+    }
+
     private MotionEvent mouseEvent(float x, float y, int action) {
         return fromMouse(motionEvent(x, y, action));
     }
@@ -2225,6 +2306,31 @@ public class FullScreenMagnificationGestureHandlerTest {
         return event;
     }
 
+    private FullScreenMagnificationGestureHandler.MotionEventInfo createEventQueue(
+            int eventType, long... delays) {
+        FullScreenMagnificationGestureHandler.MotionEventInfo eventQueue = null;
+        long currentTime = SystemClock.uptimeMillis();
+
+        for (int i = 0; i < delays.length; i++) {
+            MotionEvent event = MotionEvent.obtain(currentTime + delays[i],
+                    currentTime + delays[i], eventType, 0, 0, 0);
+
+            FullScreenMagnificationGestureHandler.MotionEventInfo info =
+                    FullScreenMagnificationGestureHandler.MotionEventInfo
+                    .obtain(event, MotionEvent.obtain(event), 0);
+
+            if (eventQueue == null) {
+                eventQueue = info;
+            } else {
+                FullScreenMagnificationGestureHandler.MotionEventInfo tail = eventQueue;
+                while (tail.getNext() != null) {
+                    tail = tail.getNext();
+                }
+                tail.setNext(info);
+            }
+        }
+        return eventQueue;
+    }
 
     private String stateDump() {
         return "\nCurrent state dump:\n" + mMgh + "\n" + mHandler.getPendingMessages();

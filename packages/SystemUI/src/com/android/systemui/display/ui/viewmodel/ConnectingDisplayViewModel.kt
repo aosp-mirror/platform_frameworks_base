@@ -79,7 +79,7 @@ constructor(
             .combine(concurrentDisplaysInProgessFlow) { pendingDisplay, concurrentDisplaysInProgress
                 ->
                 if (pendingDisplay == null) {
-                    hideDialog()
+                    dismissDialog()
                 } else {
                     showDialog(pendingDisplay, concurrentDisplaysInProgress)
                 }
@@ -88,17 +88,17 @@ constructor(
     }
 
     private fun showDialog(pendingDisplay: PendingDisplay, concurrentDisplaysInProgess: Boolean) {
-        hideDialog()
+        dismissDialog()
         dialog =
             bottomSheetFactory
                 .createDialog(
                     onStartMirroringClickListener = {
                         scope.launch(bgDispatcher) { pendingDisplay.enable() }
-                        hideDialog()
+                        dismissDialog()
                     },
                     onCancelMirroring = {
                         scope.launch(bgDispatcher) { pendingDisplay.ignore() }
-                        hideDialog()
+                        dismissDialog()
                     },
                     navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },
                     showConcurrentDisplayInfo = concurrentDisplaysInProgess
@@ -106,8 +106,8 @@ constructor(
                 .apply { show() }
     }
 
-    private fun hideDialog() {
-        dialog?.hide()
+    private fun dismissDialog() {
+        dialog?.dismiss()
         dialog = null
     }
 

@@ -35,9 +35,12 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -90,6 +93,9 @@ public class CompatUIControllerTest extends ShellTestCase {
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private CompatUIController mController;
     private ShellInit mShellInit;
     @Mock
@@ -122,7 +128,6 @@ public class CompatUIControllerTest extends ShellTestCase {
     private CompatUIConfiguration mCompatUIConfiguration;
     @Mock
     private CompatUIShellCommandHandler mCompatUIShellCommandHandler;
-
     @Mock
     private AccessibilityManager mAccessibilityManager;
 
@@ -131,6 +136,8 @@ public class CompatUIControllerTest extends ShellTestCase {
 
     @NonNull
     private CompatUIStatusManager mCompatUIStatusManager;
+
+    private boolean mInDesktopModePredicateResult;
 
     @Before
     public void setUp() {
@@ -157,7 +164,7 @@ public class CompatUIControllerTest extends ShellTestCase {
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
                 mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
                 mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager,
-                mCompatUIStatusManager) {
+                mCompatUIStatusManager, i -> mInDesktopModePredicateResult) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -685,6 +692,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testLetterboxEduLayout_notCreatedWhenLetterboxEducationIsDisabled() {
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
         taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(false);
@@ -693,6 +701,34 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         verify(mController, never()).createLetterboxEduWindowManager(any(), eq(taskInfo),
                 eq(mMockTaskListener));
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @EnableFlags(Flags.FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE)
+    public void testUpdateActiveTaskInfo_removeAllComponentWhenInDesktopModeFlagEnabled() {
+        mInDesktopModePredicateResult = false;
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+        verify(mController, never()).removeLayouts(taskInfo.taskId);
+
+        mInDesktopModePredicateResult = true;
+        mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+        verify(mController).removeLayouts(taskInfo.taskId);
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
+    @DisableFlags(Flags.FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE)
+    public void testUpdateActiveTaskInfo_removeAllComponentWhenInDesktopModeFlagDisabled() {
+        mInDesktopModePredicateResult = false;
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+        verify(mController, never()).removeLayouts(taskInfo.taskId);
+
+        mInDesktopModePredicateResult = true;
+        mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+        verify(mController, never()).removeLayouts(taskInfo.taskId);
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat) {

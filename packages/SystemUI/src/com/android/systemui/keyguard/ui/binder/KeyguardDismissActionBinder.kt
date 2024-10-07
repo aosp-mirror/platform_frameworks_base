@@ -17,11 +17,11 @@ package com.android.systemui.keyguard.ui.binder
 
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.systemui.CoreStartable
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.util.kotlin.sample
 import dagger.Lazy
 import javax.inject.Inject
@@ -41,7 +41,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (!SceneContainerFlag.isEnabled) {
+        if (!ComposeBouncerFlags.isEnabled) {
             return
         }
 

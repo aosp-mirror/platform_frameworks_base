@@ -38,6 +38,7 @@ object TestMediaDevicesFactory {
     ): MediaDevice = mock {
         whenever(name).thenReturn(deviceName)
         whenever(icon).thenReturn(deviceIcon)
+        whenever(deviceType).thenReturn(MediaDevice.MediaDeviceType.TYPE_PHONE_DEVICE)
     }
 
     fun wiredMediaDevice(
@@ -77,6 +78,18 @@ object TestMediaDevicesFactory {
             whenever(name).thenReturn(deviceName)
             whenever(icon).thenReturn(deviceIcon)
             whenever(cachedDevice).thenReturn(cachedBluetoothDevice)
+            whenever(deviceType).thenReturn(MediaDevice.MediaDeviceType.TYPE_BLUETOOTH_DEVICE)
+        }
+    }
+
+    fun remoteMediaDevice(
+        deviceName: String = "remote_media",
+        deviceIcon: Drawable? = TestStubDrawable(),
+    ): MediaDevice {
+        return mock<MediaDevice> {
+            whenever(name).thenReturn(deviceName)
+            whenever(icon).thenReturn(deviceIcon)
+            whenever(deviceType).thenReturn(MediaDevice.MediaDeviceType.TYPE_CAST_DEVICE)
         }
     }
 }

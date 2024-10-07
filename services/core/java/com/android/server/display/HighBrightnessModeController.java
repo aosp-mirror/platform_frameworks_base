@@ -266,7 +266,7 @@ class HighBrightnessModeController {
         mSettingsObserver.stopObserving();
     }
 
-    void setHighBrightnessModeMetadata(HighBrightnessModeMetadata hbmInfo) {
+    void setHighBrightnessModeMetadata(@Nullable HighBrightnessModeMetadata hbmInfo) {
         mHighBrightnessModeMetadata = hbmInfo;
     }
 

@@ -132,10 +132,10 @@ class CallChipViewModelTest : SysuiTestCase() {
             )
 
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.Basic::class.java)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
             assertThat(icon.contentDescription).isNotNull()
@@ -170,10 +170,10 @@ class CallChipViewModelTest : SysuiTestCase() {
             )
 
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.Basic::class.java)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
             assertThat(icon.contentDescription).isNotNull()
@@ -206,10 +206,10 @@ class CallChipViewModelTest : SysuiTestCase() {
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, notificationIcon = null))
 
             assertThat((latest as OngoingActivityChipModel.Shown).icon)
-                .isInstanceOf(OngoingActivityChipModel.ChipIcon.Basic::class.java)
+                .isInstanceOf(OngoingActivityChipModel.ChipIcon.SingleColorIcon::class.java)
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
-                        as OngoingActivityChipModel.ChipIcon.Basic)
+                        as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
             assertThat(icon.contentDescription).isNotNull()

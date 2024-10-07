@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.util.Log
-import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -46,7 +45,7 @@ constructor(
     val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     val internalTransitionInteractor: InternalKeyguardTransitionInteractor,
     val repository: KeyguardTransitionRepository,
-) : CoreStartable {
+) {
 
     /**
      * Whether the lockscreen should be showing when the device starts up for the first time. If not
@@ -60,18 +59,18 @@ constructor(
         }
     }
 
-    override fun start() {
+    fun start() {
         scope.launch {
             if (internalTransitionInteractor.currentTransitionInfoInternal.value.from != OFF) {
                 Log.e(
                     "KeyguardTransitionInteractor",
                     "showLockscreenOnBoot emitted, but we've already " +
                         "transitioned to a state other than OFF. We'll respect that " +
-                        "transition, but this should not happen."
+                        "transition, but this should not happen.",
                 )
             } else {
                 if (SceneContainerFlag.isEnabled) {
-                    // TODO(b/336576536): Some part of the transition implemented for flag off is
+                    // TODO(b/360372242): Some part of the transition implemented for flag off is
                     //  missing here. There are two things achieved with this:
                     //  1. Keyguard is hidden when the setup wizard is shown. This part is already
                     //     implemented in scene container by disabling visibility instead of going

@@ -124,6 +124,16 @@ public class BinderDeathDispatcherTest {
             return this;
         }
 
+        @Override
+        public void addFrozenStateChangeCallback(FrozenStateChangeCallback callback)
+                throws RemoteException {
+        }
+
+        @Override
+        public boolean removeFrozenStateChangeCallback(FrozenStateChangeCallback callback) {
+            return false;
+        }
+
         public void die() {
             isAlive = false;
             if (mRecipient != null) {

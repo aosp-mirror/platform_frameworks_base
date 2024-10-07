@@ -567,7 +567,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #INFO_SESSION_CONFIGURATION_QUERY_VERSION
      */
     @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public List<CameraCharacteristics.Key<?>> getAvailableSessionCharacteristicsKeys() {
         if (mAvailableSessionCharacteristicsKeys != null) {
             return mAvailableSessionCharacteristicsKeys;
@@ -1485,7 +1484,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_SINGLE_STRENGTH_MAX_LEVEL =
             new Key<Integer>("android.flash.singleStrengthMaxLevel", int.class);
 
@@ -1501,7 +1499,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_SINGLE_STRENGTH_DEFAULT_LEVEL =
             new Key<Integer>("android.flash.singleStrengthDefaultLevel", int.class);
 
@@ -1525,7 +1522,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_TORCH_STRENGTH_MAX_LEVEL =
             new Key<Integer>("android.flash.torchStrengthMaxLevel", int.class);
 
@@ -1541,7 +1537,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_CAMERA_MANUAL_FLASH_STRENGTH_CONTROL)
     public static final Key<Integer> FLASH_TORCH_STRENGTH_DEFAULT_LEVEL =
             new Key<Integer>("android.flash.torchStrengthDefaultLevel", int.class);
 
@@ -5210,7 +5205,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     @PublicKey
     @NonNull
-    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
     public static final Key<Integer> INFO_SESSION_CONFIGURATION_QUERY_VERSION =
             new Key<Integer>("android.info.sessionConfigurationQueryVersion", int.class);
 
@@ -5977,28 +5971,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> JPEGR_AVAILABLE_JPEG_R_STALL_DURATIONS_MAXIMUM_RESOLUTION =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.jpegr.availableJpegRStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
-
-    /**
-     * <p>Minimum and maximum padding zoom factors supported by this camera device for
-     * android.efv.paddingZoomFactor used for the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension.</p>
-     * <p>The minimum and maximum padding zoom factors supported by the device for
-     * android.efv.paddingZoomFactor used as part of the
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
-     * extension feature. This extension specific camera characteristic can be queried using
-     * {@link android.hardware.camera2.CameraExtensionCharacteristics#get }.</p>
-     * <p><b>Units</b>: A pair of padding zoom factors in floating-points:
-     * (minPaddingZoomFactor, maxPaddingZoomFactor)</p>
-     * <p><b>Range of valid values:</b><br></p>
-     * <p>1.0 &lt; minPaddingZoomFactor &lt;= maxPaddingZoomFactor</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     * @hide
-     */
-    @ExtensionKey
-    @FlaggedApi(Flags.FLAG_CONCERT_MODE_API)
-    public static final Key<android.util.Range<Float>> EFV_PADDING_ZOOM_FACTOR_RANGE =
-            new Key<android.util.Range<Float>>("android.efv.paddingZoomFactorRange", new TypeReference<android.util.Range<Float>>() {{ }});
 
 
     /**

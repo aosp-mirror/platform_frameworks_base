@@ -1107,7 +1107,7 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Called to notify the state of operations that can be unsafe to execute has changed.
      *
-     * <p><b>Note:/b> notice that the operation safety state might change between the time this
+     * <p><b>Note:</b> notice that the operation safety state might change between the time this
      * callback is received and the operation's method on {@link DevicePolicyManager} is called, so
      * calls to the latter could still throw a {@link UnsafeStateException} even when this method
      * is called with {@code isSafe} as {@code true}

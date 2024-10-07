@@ -51,12 +51,13 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastSumBy
 import com.android.compose.ui.util.SpaceVectorConverter
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.sign
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -143,8 +144,8 @@ internal class MultiPointerDraggableNode(
     CompositionLocalConsumerModifierNode,
     ObserverModifierNode,
     SpaceVectorConverter {
-    private val pointerInputHandler: suspend PointerInputScope.() -> Unit = { pointerInput() }
-    private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
+    private val pointerTracker = delegate(SuspendingPointerInputModifierNode { pointerTracker() })
+    private val pointerInput = delegate(SuspendingPointerInputModifierNode { pointerInput() })
     private val velocityTracker = VelocityTracker()
     private var previousEnabled: Boolean = false
 
@@ -153,7 +154,7 @@ internal class MultiPointerDraggableNode(
             // Reset the pointer input whenever enabled changed.
             if (value != field) {
                 field = value
-                delegate.resetPointerInputHandler()
+                pointerInput.resetPointerInputHandler()
             }
         }
 
@@ -173,7 +174,7 @@ internal class MultiPointerDraggableNode(
             if (value != field) {
                 field = value
                 converter = SpaceVectorConverter(value)
-                delegate.resetPointerInputHandler()
+                pointerInput.resetPointerInputHandler()
             }
         }
 
@@ -186,29 +187,111 @@ internal class MultiPointerDraggableNode(
         observeReads {
             val newEnabled = enabled()
             if (newEnabled != previousEnabled) {
-                delegate.resetPointerInputHandler()
+                pointerInput.resetPointerInputHandler()
             }
             previousEnabled = newEnabled
         }
     }
 
-    override fun onCancelPointerInput() = delegate.onCancelPointerInput()
+    override fun onCancelPointerInput() {
+        pointerTracker.onCancelPointerInput()
+        pointerInput.onCancelPointerInput()
+    }
 
     override fun onPointerEvent(
         pointerEvent: PointerEvent,
         pass: PointerEventPass,
-        bounds: IntSize
-    ) = delegate.onPointerEvent(pointerEvent, pass, bounds)
+        bounds: IntSize,
+    ) {
+        // The order is important here: the tracker is always called first.
+        pointerTracker.onPointerEvent(pointerEvent, pass, bounds)
+        pointerInput.onPointerEvent(pointerEvent, pass, bounds)
+    }
 
     private var startedPosition: Offset? = null
     private var pointersDown: Int = 0
 
     internal fun pointersInfo(): PointersInfo {
         return PointersInfo(
+            // This may be null, i.e. when the user uses TalkBack
             startedPosition = startedPosition,
-            // Note: We could have 0 pointers during fling or for other reasons.
+            // We could have 0 pointers during fling or for other reasons.
             pointersDown = pointersDown.coerceAtLeast(1),
         )
+    }
+
+    private suspend fun PointerInputScope.pointerTracker() {
+        val currentContext = currentCoroutineContext()
+        awaitPointerEventScope {
+            var velocityPointerId: PointerId? = null
+            // Intercepts pointer inputs and exposes [PointersInfo], via
+            // [requireAncestorPointersInfoOwner], to our descendants.
+            while (currentContext.isActive) {
+                // During the Initial pass, we receive the event after our ancestors.
+                val changes = awaitPointerEvent(PointerEventPass.Initial).changes
+                pointersDown = changes.countDown()
+
+                when {
+                    // There are no more pointers down.
+                    pointersDown == 0 -> {
+                        startedPosition = null
+
+                        // In case of multiple events with 0 pointers down (not pressed) we may have
+                        // already removed the velocityPointer
+                        val lastPointerUp = changes.fastFilter { it.id == velocityPointerId }
+                        check(lastPointerUp.isEmpty() || lastPointerUp.size == 1) {
+                            "There are ${lastPointerUp.size} pointers up: $lastPointerUp"
+                        }
+                        if (lastPointerUp.size == 1) {
+                            velocityTracker.addPointerInputChange(lastPointerUp.first())
+                        }
+                    }
+
+                    // The first pointer down, startedPosition was not set.
+                    startedPosition == null -> {
+                        val firstPointerDown = changes.single()
+                        velocityPointerId = firstPointerDown.id
+                        velocityTracker.resetTracking()
+                        velocityTracker.addPointerInputChange(firstPointerDown)
+                        startedPosition = firstPointerDown.position
+                        if (enabled()) {
+                            onFirstPointerDown()
+                        }
+                    }
+
+                    // Changes with at least one pointer
+                    else -> {
+                        val pointerChange = changes.first()
+
+                        // Assuming that the list of changes doesn't have two changes with the same
+                        // id (PointerId), we can check:
+                        // - If the first change has `id` equals to `velocityPointerId` (this should
+                        //   always be true unless the pointer has been removed).
+                        // - If it does, we've found our change event (assuming there aren't any
+                        //   others changes with the same id in this PointerEvent - not checked).
+                        // - If it doesn't, we can check that the change with that id isn't in first
+                        //   place (which should never happen - this will crash).
+                        check(
+                            pointerChange.id == velocityPointerId ||
+                                !changes.fastAny { it.id == velocityPointerId }
+                        ) {
+                            "$velocityPointerId is present, but not the first: $changes"
+                        }
+
+                        // If the previous pointer has been removed, we use the first available
+                        // change to keep tracking the velocity.
+                        velocityPointerId =
+                            if (pointerChange.pressed) {
+                                pointerChange.id
+                            } else {
+                                changes.first { it.pressed }.id
+                            }
+
+                        velocityTracker.addPointerInputChange(pointerChange)
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun PointerInputScope.pointerInput() {
@@ -216,76 +299,52 @@ internal class MultiPointerDraggableNode(
             return
         }
 
-        coroutineScope {
-            launch {
-                // Intercepts pointer inputs and exposes [PointersInfo], via
-                // [requireAncestorPointersInfoOwner], to our descendants.
-                awaitPointerEventScope {
-                    while (isActive) {
-                        // During the Initial pass, we receive the event after our ancestors.
-                        val pointers = awaitPointerEvent(PointerEventPass.Initial).changes
-
-                        pointersDown = pointers.countDown()
-                        if (pointersDown == 0) {
-                            // There are no more pointers down
-                            startedPosition = null
-                        } else if (startedPosition == null) {
-                            startedPosition = pointers.first().position
-                            onFirstPointerDown()
-                        }
-                    }
-                }
-            }
-
-            // The order is important here: we want to make sure that the previous PointerEventScope
-            // is initialized first. This ensures that the following PointerEventScope doesn't
-            // receive more events than the first one.
-            launch {
-                awaitPointerEventScope {
-                    while (isActive) {
-                        try {
-                            detectDragGestures(
-                                orientation = orientation,
-                                startDragImmediately = startDragImmediately,
-                                onDragStart = { startedPosition, overSlop, pointersDown ->
-                                    velocityTracker.resetTracking()
-                                    onDragStarted(startedPosition, overSlop, pointersDown)
-                                },
-                                onDrag = { controller, change, amount ->
-                                    velocityTracker.addPointerInputChange(change)
-                                    dispatchScrollEvents(
-                                        availableOnPreScroll = amount,
-                                        onScroll = { controller.onDrag(it) },
-                                        source = NestedScrollSource.UserInput,
-                                    )
-                                },
-                                onDragEnd = { controller ->
-                                    startFlingGesture(
-                                        initialVelocity =
-                                            currentValueOf(LocalViewConfiguration)
-                                                .maximumFlingVelocity
-                                                .let {
-                                                    val maxVelocity = Velocity(it, it)
-                                                    velocityTracker.calculateVelocity(maxVelocity)
-                                                }
-                                                .toFloat(),
-                                        onFling = { controller.onStop(it, canChangeScene = true) }
-                                    )
-                                },
-                                onDragCancel = { controller ->
-                                    startFlingGesture(
-                                        initialVelocity = 0f,
-                                        onFling = { controller.onStop(it, canChangeScene = true) }
-                                    )
-                                },
-                                swipeDetector = swipeDetector,
+        val currentContext = currentCoroutineContext()
+        awaitPointerEventScope {
+            while (currentContext.isActive) {
+                try {
+                    detectDragGestures(
+                        orientation = orientation,
+                        startDragImmediately = startDragImmediately,
+                        onDragStart = { startedPosition, overSlop, pointersDown ->
+                            onDragStarted(startedPosition, overSlop, pointersDown)
+                        },
+                        onDrag = { controller, amount ->
+                            dispatchScrollEvents(
+                                availableOnPreScroll = amount,
+                                onScroll = { controller.onDrag(it) },
+                                source = NestedScrollSource.UserInput,
                             )
-                        } catch (exception: CancellationException) {
-                            // If the coroutine scope is active, we can just restart the drag cycle.
-                            if (!isActive) {
-                                throw exception
-                            }
-                        }
+                        },
+                        onDragEnd = { controller ->
+                            startFlingGesture(
+                                initialVelocity =
+                                    currentValueOf(LocalViewConfiguration)
+                                        .maximumFlingVelocity
+                                        .let {
+                                            val maxVelocity = Velocity(it, it)
+                                            velocityTracker.calculateVelocity(maxVelocity)
+                                        }
+                                        .toFloat(),
+                                onFling = {
+                                    controller.onStop(it, canChangeContent = true).invoke()
+                                },
+                            )
+                        },
+                        onDragCancel = { controller ->
+                            startFlingGesture(
+                                initialVelocity = 0f,
+                                onFling = {
+                                    controller.onStop(it, canChangeContent = true).invoke()
+                                },
+                            )
+                        },
+                        swipeDetector = swipeDetector,
+                    )
+                } catch (exception: CancellationException) {
+                    // If the coroutine scope is active, we can just restart the drag cycle.
+                    if (!currentContext.isActive) {
+                        throw exception
                     }
                 }
             }
@@ -299,7 +358,10 @@ internal class MultiPointerDraggableNode(
      *
      * Note: Inspired by [androidx.compose.foundation.gestures.ScrollableNode.onDragStopped]
      */
-    private fun startFlingGesture(initialVelocity: Float, onFling: (velocity: Float) -> Float) {
+    private fun startFlingGesture(
+        initialVelocity: Float,
+        onFling: suspend (velocity: Float) -> Float,
+    ) {
         // Note: [AwaitPointerEventScope] is annotated as @RestrictsSuspension, we need another
         // CoroutineScope to run the fling gestures.
         // We do not need to cancel this [Job], the source will take care of emitting an
@@ -328,10 +390,7 @@ internal class MultiPointerDraggableNode(
         // PreScroll phase
         val consumedByPreScroll =
             dispatcher
-                .dispatchPreScroll(
-                    available = availableOnPreScroll.toOffset(),
-                    source = source,
-                )
+                .dispatchPreScroll(available = availableOnPreScroll.toOffset(), source = source)
                 .toFloat()
 
         // Scroll phase
@@ -364,7 +423,7 @@ internal class MultiPointerDraggableNode(
      */
     private suspend inline fun dispatchFlingEvents(
         availableOnPreFling: Float,
-        onFling: (velocity: Float) -> Float,
+        onFling: suspend (velocity: Float) -> Float,
     ): Float {
         // PreFling phase
         val consumedByPreFling =
@@ -400,7 +459,7 @@ internal class MultiPointerDraggableNode(
         startDragImmediately: (startedPosition: Offset) -> Boolean,
         onDragStart:
             (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> DragController,
-        onDrag: (controller: DragController, change: PointerInputChange, dragAmount: Float) -> Unit,
+        onDrag: (controller: DragController, dragAmount: Float) -> Unit,
         onDragEnd: (controller: DragController) -> Unit,
         onDragCancel: (controller: DragController) -> Unit,
         swipeDetector: SwipeDetector,
@@ -443,12 +502,12 @@ internal class MultiPointerDraggableNode(
                         Orientation.Horizontal ->
                             awaitHorizontalTouchSlopOrCancellation(
                                 consumablePointer.id,
-                                onSlopReached
+                                onSlopReached,
                             )
                         Orientation.Vertical ->
                             awaitVerticalTouchSlopOrCancellation(
                                 consumablePointer.id,
-                                onSlopReached
+                                onSlopReached,
                             )
                     }
 
@@ -479,14 +538,14 @@ internal class MultiPointerDraggableNode(
 
             val successful: Boolean
             try {
-                onDrag(controller, drag, overSlop)
+                onDrag(controller, overSlop)
 
                 successful =
                     drag(
                         initialPointerId = drag.id,
                         hasDragged = { it.positionChangeIgnoreConsumed().toFloat() != 0f },
                         onDrag = {
-                            onDrag(controller, it, it.positionChange().toFloat())
+                            onDrag(controller, it.positionChange().toFloat())
                             it.consume()
                         },
                         onIgnoredEvent = {
@@ -512,7 +571,7 @@ internal class MultiPointerDraggableNode(
     }
 
     private suspend fun AwaitPointerEventScope.awaitConsumableEvent(
-        pass: () -> PointerEventPass,
+        pass: () -> PointerEventPass
     ): PointerEvent {
         fun canBeConsumed(changes: List<PointerInputChange>): Boolean {
             // At least one pointer down AND
@@ -620,7 +679,4 @@ internal fun interface PointersInfoOwner {
     fun pointersInfo(): PointersInfo
 }
 
-internal data class PointersInfo(
-    val startedPosition: Offset?,
-    val pointersDown: Int,
-)
+internal data class PointersInfo(val startedPosition: Offset?, val pointersDown: Int)

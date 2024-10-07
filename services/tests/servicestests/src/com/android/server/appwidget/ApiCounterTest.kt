@@ -25,6 +25,7 @@ class ApiCounterTest {
     private companion object {
         const val RESET_INTERVAL_MS = 10L
         const val MAX_CALLS_PER_INTERVAL = 2
+        const val MAX_PROVIDERS = 10
     }
 
     private var currentTime = 0L
@@ -34,7 +35,9 @@ class ApiCounterTest {
             /* uid= */ 123,
             ComponentName("com.android.server.appwidget", "FakeProviderClass")
         )
-    private val counter = ApiCounter(RESET_INTERVAL_MS, MAX_CALLS_PER_INTERVAL) { currentTime }
+    private val counter = ApiCounter(RESET_INTERVAL_MS, MAX_CALLS_PER_INTERVAL, MAX_PROVIDERS) {
+        currentTime
+    }
 
     @Test
     fun tryApiCall() {
@@ -58,4 +61,20 @@ class ApiCounterTest {
         counter.remove(id)
         assertThat(counter.tryApiCall(id)).isTrue()
     }
+
+    @Test
+    fun maxProviders() {
+        for (i in 0 until MAX_PROVIDERS) {
+            for (j in 0 until MAX_CALLS_PER_INTERVAL) {
+                assertThat(counter.tryApiCall(providerId(i))).isTrue()
+            }
+        }
+        assertThat(counter.tryApiCall(providerId(MAX_PROVIDERS))).isFalse()
+        // remove will allow another provider to be added
+        counter.remove(providerId(0))
+        assertThat(counter.tryApiCall(providerId(MAX_PROVIDERS))).isTrue()
+    }
+
+    private fun providerId(i: Int) =
+        AppWidgetServiceImpl.ProviderId(/* uid= */ i, id.componentName)
 }

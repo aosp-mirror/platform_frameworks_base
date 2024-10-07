@@ -206,7 +206,7 @@ public class HidlToAidlSensorAdapterTest {
                 new int[]{} /* disabledFeatures */, ENROLL_TIMEOUT_SEC, null /* previewSurface */,
                 SENSOR_ID, mLogger, mBiometricContext, 1 /* maxTemplatesPerUser */,
                 false /* debugConsent */, (new FaceEnrollOptions.Builder()).build(),
-                mAuthenticationStateListeners));
+                mAuthenticationStateListeners, mBiometricUtils));
         mLooper.dispatchAll();
 
         verify(mAidlResponseHandlerCallback).onEnrollSuccess();

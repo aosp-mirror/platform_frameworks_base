@@ -41,6 +41,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -85,25 +87,31 @@ constructor(
      */
     private val nextKeyguardStateInternal =
         combine(
-            keyguardInteractor.isAbleToDream,
-            keyguardInteractor.isKeyguardOccluded,
-            keyguardInteractor.isKeyguardGoingAway,
-        ) { dreaming, occluded, keyguardGoingAway ->
-            if (keyguardGoingAway) {
-                KeyguardState.GONE
-            } else if (occluded && !dreaming) {
-                KeyguardState.OCCLUDED
-            } else if (dreaming) {
-                KeyguardState.DREAMING
-            } else {
-                KeyguardState.LOCKSCREEN
+                // Don't use delayed dreaming signal as otherwise we might go to occluded or lock
+                // screen when closing hub if dream just started under the hub.
+                keyguardInteractor.isDreamingWithOverlay,
+                keyguardInteractor.isKeyguardOccluded,
+                keyguardInteractor.isKeyguardGoingAway,
+                keyguardInteractor.isKeyguardShowing,
+            ) { dreaming, occluded, keyguardGoingAway, keyguardShowing ->
+                if (keyguardGoingAway) {
+                    KeyguardState.GONE
+                } else if (occluded && !dreaming) {
+                    KeyguardState.OCCLUDED
+                } else if (dreaming) {
+                    KeyguardState.DREAMING
+                } else if (keyguardShowing) {
+                    KeyguardState.LOCKSCREEN
+                } else {
+                    null
+                }
             }
-        }
+            .filterNotNull()
 
     private val nextKeyguardState: StateFlow<KeyguardState> =
         combine(
                 repository.nextLockscreenTargetState,
-                nextKeyguardStateInternal,
+                nextKeyguardStateInternal.onStart { emit(KeyguardState.LOCKSCREEN) },
             ) { override, nextState ->
                 override ?: nextState
             }
@@ -150,12 +158,12 @@ constructor(
 
     private suspend fun handleIdle(
         prevTransition: ObservableTransitionState,
-        idle: ObservableTransitionState.Idle
+        idle: ObservableTransitionState.Idle,
     ) {
         if (
             prevTransition is ObservableTransitionState.Transition &&
                 currentTransitionId != null &&
-                idle.currentScene == prevTransition.toScene
+                idle.currentScene == prevTransition.toContent
         ) {
             finishCurrentTransition()
         } else {
@@ -176,10 +184,11 @@ constructor(
     }
 
     private suspend fun finishCurrentTransition() {
+        if (currentTransitionId == null) return
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,
-            TransitionState.FINISHED
+            TransitionState.FINISHED,
         )
         resetTransitionData()
     }
@@ -197,7 +206,7 @@ constructor(
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             1f,
-            TransitionState.FINISHED
+            TransitionState.FINISHED,
         )
         resetTransitionData()
     }
@@ -210,26 +219,24 @@ constructor(
 
     private suspend fun handleTransition(
         prevTransition: ObservableTransitionState,
-        transition: ObservableTransitionState.Transition
+        transition: ObservableTransitionState.Transition,
     ) {
-        if (prevTransition.isTransitioning(from = transition.fromScene, to = transition.toScene)) {
+        if (
+            prevTransition.isTransitioning(from = transition.fromContent, to = transition.toContent)
+        ) {
             // This is a new transition, but exactly the same as the previous state. Skip resetting
             // KTF for this case and just collect the new progress instead.
             collectProgress(transition)
-        } else if (transition.toScene == CommunalScenes.Communal) {
-            if (currentTransitionId != null) {
-                if (currentToState == KeyguardState.GLANCEABLE_HUB) {
-                    transitionKtfTo(transitionInteractor.getStartedFromState())
-                }
+        } else if (transition.toContent == CommunalScenes.Communal) {
+            if (currentToState == KeyguardState.GLANCEABLE_HUB) {
+                transitionKtfTo(transitionInteractor.startedKeyguardTransitionStep.value.from)
             }
             startTransitionToGlanceableHub()
             collectProgress(transition)
-        } else if (transition.toScene == CommunalScenes.Blank) {
-            if (currentTransitionId != null) {
-                // Another transition started before this one is completed. Transition to the
-                // GLANCEABLE_HUB state so that we can properly transition away from it.
-                transitionKtfTo(KeyguardState.GLANCEABLE_HUB)
-            }
+        } else if (transition.toContent == CommunalScenes.Blank) {
+            // Another transition started before this one is completed. Transition to the
+            // GLANCEABLE_HUB state so that we can properly transition away from it.
+            transitionKtfTo(KeyguardState.GLANCEABLE_HUB)
             startTransitionFromGlanceableHub()
             collectProgress(transition)
         }
@@ -290,7 +297,7 @@ constructor(
         internalTransitionInteractor.updateTransition(
             currentTransitionId!!,
             progress.coerceIn(0f, 1f),
-            TransitionState.RUNNING
+            TransitionState.RUNNING,
         )
     }
 }

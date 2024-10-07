@@ -24,7 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.notification.shared.NotificationMinimalismPrototype
+import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
 import com.android.systemui.statusbar.notification.shared.PriorityPeopleSection
 import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.Utils
@@ -42,7 +42,7 @@ import org.mockito.quality.Strictness
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 // this class has no testable logic with either of these flags enabled
-@DisableFlags(PriorityPeopleSection.FLAG_NAME, NotificationMinimalismPrototype.FLAG_NAME)
+@DisableFlags(PriorityPeopleSection.FLAG_NAME, NotificationMinimalism.FLAG_NAME)
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     lateinit var manager: NotificationSectionsFeatureManager
     private val proxyFake = DeviceConfigProxyFake()

@@ -48,6 +48,7 @@ import com.android.systemui.brightness.dagger.ScreenBrightnessModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
 import com.android.systemui.common.data.CommonDataLayerModule;
+import com.android.systemui.common.ui.ConfigurationStateModule;
 import com.android.systemui.common.usagestats.data.CommonUsageStatsDataLayerModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
@@ -66,6 +67,7 @@ import com.android.systemui.education.dagger.ContextualEducationModule;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagDependenciesModule;
 import com.android.systemui.flags.FlagsModule;
+import com.android.systemui.haptics.msdl.dagger.MSDLModule;
 import com.android.systemui.inputmethod.InputMethodModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
@@ -206,6 +208,7 @@ import javax.inject.Named;
         ClockRegistryModule.class,
         CommunalModule.class,
         CommonDataLayerModule.class,
+        ConfigurationStateModule.class,
         CommonUsageStatsDataLayerModule.class,
         ConfigurationControllerModule.class,
         ConnectivityModule.class,
@@ -231,6 +234,7 @@ import javax.inject.Named;
         MediaProjectionTaskSwitcherModule.class,
         MediaRouterModule.class,
         MotionToolModule.class,
+        MSDLModule.class,
         PeopleHubModule.class,
         PeopleModule.class,
         PluginModule.class,

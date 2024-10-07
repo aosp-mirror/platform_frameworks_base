@@ -2307,7 +2307,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 return;
             }
 
-            final int userId = mContext.getUserId();
+            final int userId = ActivityManager.getCurrentUser();
             final boolean isNotGame = Arrays.stream(packages).noneMatch(
                     p -> isPackageGame(p, userId));
             synchronized (mUidObserverLock) {

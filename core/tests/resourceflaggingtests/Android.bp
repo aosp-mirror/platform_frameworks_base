@@ -26,6 +26,7 @@ android_test {
     name: "ResourceFlaggingTests",
     srcs: [
         "src/**/*.java",
+        ":resource-flagging-test-app-r-java",
     ],
     platform_apis: true,
     certificate: "platform",

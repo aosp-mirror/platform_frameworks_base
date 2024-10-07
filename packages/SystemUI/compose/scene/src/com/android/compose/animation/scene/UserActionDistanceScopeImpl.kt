@@ -19,9 +19,8 @@ package com.android.compose.animation.scene
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 
-internal class ElementStateScopeImpl(
-    private val layoutImpl: SceneTransitionLayoutImpl,
-) : ElementStateScope {
+internal class ElementStateScopeImpl(private val layoutImpl: SceneTransitionLayoutImpl) :
+    ElementStateScope {
     override fun ElementKey.targetSize(scene: SceneKey): IntSize? {
         return layoutImpl.elements[this]?.stateByContent?.get(scene)?.targetSize.takeIf {
             it != Element.SizeUnspecified
@@ -35,13 +34,12 @@ internal class ElementStateScopeImpl(
     }
 
     override fun SceneKey.targetSize(): IntSize? {
-        return layoutImpl.scenes[this]?.targetSize.takeIf { it != IntSize.Zero }
+        return layoutImpl.sceneOrNull(this)?.targetSize.takeIf { it != IntSize.Zero }
     }
 }
 
-internal class UserActionDistanceScopeImpl(
-    private val layoutImpl: SceneTransitionLayoutImpl,
-) : UserActionDistanceScope, ElementStateScope by layoutImpl.elementStateScope {
+internal class UserActionDistanceScopeImpl(private val layoutImpl: SceneTransitionLayoutImpl) :
+    UserActionDistanceScope, ElementStateScope by layoutImpl.elementStateScope {
     override val density: Float
         get() = layoutImpl.density.density
 

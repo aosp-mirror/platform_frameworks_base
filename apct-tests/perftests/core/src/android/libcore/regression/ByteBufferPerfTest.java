@@ -565,7 +565,6 @@ public class ByteBufferPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
     public void time_new_byteArray() throws Exception {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
@@ -574,7 +573,6 @@ public class ByteBufferPerfTest {
     }
 
     @Test
-    @Parameters(method = "getData")
     public void time_ByteBuffer_allocate() throws Exception {
         BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {

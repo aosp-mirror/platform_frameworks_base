@@ -127,12 +127,12 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.util.Preconditions;
 import com.android.server.EventLogTags;
 import com.android.server.LockGuard;
-import com.android.server.RescueParty;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.display.feature.DeviceConfigParameterProvider;
 import com.android.server.lights.LightsManager;
 import com.android.server.lights.LogicalLight;
@@ -743,6 +743,7 @@ public final class PowerManagerService extends SystemService
                 int reason, int uid, int opUid, String opPackageName, String details) {
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
+            mInjector.invalidateIsInteractiveCaches();
             if (wakefulness == WAKEFULNESS_AWAKE) {
                 // Kick user activity to prevent newly awake group from timing out instantly.
                 // The dream may end without user activity if the dream app crashes / is updated,
@@ -1379,8 +1380,10 @@ public final class PowerManagerService extends SystemService
                     new DisplayGroupPowerChangeListener();
             mDisplayManagerInternal.registerDisplayGroupListener(displayGroupPowerChangeListener);
 
-            // This DreamManager method does not acquire a lock, so it should be safe to call.
-            mDreamManager.registerDreamManagerStateListener(new DreamManagerStateListener());
+            if(mDreamManager != null){
+                // This DreamManager method does not acquire a lock, so it should be safe to call.
+                mDreamManager.registerDreamManagerStateListener(new DreamManagerStateListener());
+            }
 
             mWirelessChargerDetector = mInjector.createWirelessChargerDetector(sensorManager,
                     mInjector.createSuspendBlocker(
@@ -2033,7 +2036,7 @@ public final class PowerManagerService extends SystemService
     }
 
     @SuppressWarnings("deprecation")
-    private boolean isWakeLockLevelSupportedInternal(int level) {
+    private boolean isWakeLockLevelSupportedInternal(int level, int displayId) {
         synchronized (mLock) {
             switch (level) {
                 case PowerManager.PARTIAL_WAKE_LOCK:
@@ -2045,7 +2048,8 @@ public final class PowerManagerService extends SystemService
                     return true;
 
                 case PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK:
-                    return mSystemReady && mDisplayManagerInternal.isProximitySensorAvailable();
+                    return mSystemReady
+                            && mDisplayManagerInternal.isProximitySensorAvailable(displayId);
                 case PowerManager.SCREEN_TIMEOUT_OVERRIDE_WAKE_LOCK:
                     return mSystemReady && mFeatureFlags.isEarlyScreenTimeoutDetectorEnabled()
                             && mScreenTimeoutOverridePolicy != null;
@@ -2205,7 +2209,7 @@ public final class PowerManagerService extends SystemService
                     + ", groupId=" + powerGroup.getGroupId()
                     + ", reason=" + PowerManager.wakeReasonToString(reason) + ", uid=" + uid);
         }
-        if (mForceSuspendActive || !mSystemReady) {
+        if (mForceSuspendActive || !mSystemReady || (powerGroup == null)) {
             return;
         }
         powerGroup.wakeUpLocked(eventTime, reason, details, uid, opPackageName, opUid,
@@ -2262,7 +2266,6 @@ public final class PowerManagerService extends SystemService
             int opUid, String opPackageName, String details) {
         mPowerGroups.get(groupId).setWakefulnessLocked(wakefulness, eventTime, uid, reason, opUid,
                 opPackageName, details);
-        mInjector.invalidateIsInteractiveCaches();
     }
 
     @SuppressWarnings("deprecation")
@@ -2327,8 +2330,6 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, traceMethodName);
         try {
             // Phase 2: Handle wakefulness change and bookkeeping.
-            // Under lock, invalidate before set ensures caches won't return stale values.
-            mInjector.invalidateIsInteractiveCaches();
             mWakefulnessRaw = newWakefulness;
             mWakefulnessChanging = true;
             mDirty |= DIRTY_WAKEFULNESS;
@@ -2426,6 +2427,7 @@ public final class PowerManagerService extends SystemService
     void onPowerGroupEventLocked(int event, PowerGroup powerGroup) {
         mWakefulnessChanging = true;
         mDirty |= DIRTY_WAKEFULNESS;
+        mInjector.invalidateIsInteractiveCaches();
         final int groupId = powerGroup.getGroupId();
         if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mPowerGroups.delete(groupId);
@@ -2443,6 +2445,8 @@ public final class PowerManagerService extends SystemService
                     mClock.uptimeMillis());
         } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_REMOVED) {
             mNotifier.onGroupRemoved(groupId);
+        } else if (event == DisplayGroupPowerChangeListener.DISPLAY_GROUP_CHANGED) {
+            mNotifier.onGroupChanged();
         }
 
         if (oldWakefulness != newWakefulness) {
@@ -3543,7 +3547,7 @@ public final class PowerManagerService extends SystemService
         }
 
         // Stop dream.
-        if (isDreaming) {
+        if (isDreaming && mDreamManager != null) {
             mDreamManager.stopDream(/* immediate= */ false, "power manager request" /*reason*/);
         }
     }
@@ -3666,7 +3670,7 @@ public final class PowerManagerService extends SystemService
                         mBrightWhenDozingConfig);
                 int wakefulness = powerGroup.getWakefulnessLocked();
                 if (DEBUG_SPEW) {
-                    Slog.d(TAG, "updateDisplayPowerStateLocked: displayReady=" + ready
+                    Slog.d(TAG, "updatePowerGroupsLocked: displayReady=" + ready
                             + ", groupId=" + groupId
                             + ", policy=" + policyToString(powerGroup.getPolicyLocked())
                             + ", mWakefulness="
@@ -3971,6 +3975,9 @@ public final class PowerManagerService extends SystemService
 
     private boolean isInteractiveInternal(int displayId, int uid) {
         synchronized (mLock) {
+            if (!mSystemReady) {
+                return isGloballyInteractiveInternal();
+            }
             DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
             if (displayInfo == null) {
                 Slog.w(TAG, "Did not find DisplayInfo for displayId " + displayId);
@@ -4031,7 +4038,7 @@ public final class PowerManagerService extends SystemService
             }
         }
         if (mHandler == null || !mSystemReady) {
-            if (RescueParty.isRecoveryTriggeredReboot()) {
+            if (CrashRecoveryHelper.isRecoveryTriggeredReboot()) {
                 // If we're stuck in a really low-level reboot loop, and a
                 // rescue party is trying to prompt the user for a factory data
                 // reset, we must GET TO DA CHOPPA!
@@ -5971,7 +5978,17 @@ public final class PowerManagerService extends SystemService
         public boolean isWakeLockLevelSupported(int level) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return isWakeLockLevelSupportedInternal(level);
+                return isWakeLockLevelSupportedInternal(level, Display.DEFAULT_DISPLAY);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isWakeLockLevelSupportedWithDisplayId(int level, int displayId) {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isWakeLockLevelSupportedInternal(level, displayId);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -6025,6 +6042,12 @@ public final class PowerManagerService extends SystemService
         @Override // Binder call
         public void wakeUp(long eventTime, @WakeReason int reason, String details,
                 String opPackageName) {
+            wakeUpWithDisplayId(eventTime, reason, details, opPackageName, Display.DEFAULT_DISPLAY);
+        }
+
+        @Override // Binder call
+        public void wakeUpWithDisplayId(long eventTime, @WakeReason int reason, String details,
+                String opPackageName, int displayId) {
             final long now = mClock.uptimeMillis();
             if (eventTime > now) {
                 Slog.e(TAG, "Event time " + eventTime + " cannot be newer than " + now);
@@ -6037,13 +6060,14 @@ public final class PowerManagerService extends SystemService
             final int uid = Binder.getCallingUid();
             final long ident = Binder.clearCallingIdentity();
             try {
+                int displayGroupId = getDisplayGroupId(displayId);
                 synchronized (mLock) {
                     if (!mBootCompleted && sQuiescent) {
                         mDirty |= DIRTY_QUIESCENT;
                         updatePowerStateLocked();
                         return;
                     }
-                    wakePowerGroupLocked(mPowerGroups.get(Display.DEFAULT_DISPLAY_GROUP), eventTime,
+                    wakePowerGroupLocked(mPowerGroups.get(displayGroupId), eventTime,
                             reason, details, uid, opPackageName, uid);
                 }
             } finally {
@@ -7332,5 +7356,13 @@ public final class PowerManagerService extends SystemService
                 updatePowerStateLocked();
             }
         }
+    }
+
+    private int getDisplayGroupId(int displayId) {
+        DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
+        if (displayInfo == null) {
+            return Display.INVALID_DISPLAY_GROUP;
+        }
+        return displayInfo.displayGroupId;
     }
 }

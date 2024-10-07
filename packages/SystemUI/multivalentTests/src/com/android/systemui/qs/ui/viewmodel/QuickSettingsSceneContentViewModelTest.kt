@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.LifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -33,14 +34,19 @@ import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
+import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewmodel.brightnessMirrorViewModelFactory
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.ui.viewmodel.shadeHeaderViewModelFactory
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -52,6 +58,7 @@ import org.mockito.Mockito.verify
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 @EnableSceneContainer
+@DisableFlags(com.android.systemui.Flags.FLAG_DUAL_SHADE)
 class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
@@ -65,6 +72,8 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
     private val footerActionsController = mock<FooterActionsController>()
 
     private val sceneContainerStartable = kosmos.sceneContainerStartable
+    private val sceneInteractor by lazy { kosmos.sceneInteractor }
+    private val shadeInteractor by lazy { kosmos.shadeInteractor }
 
     private lateinit var underTest: QuickSettingsSceneContentViewModel
 
@@ -81,6 +90,8 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
                 footerActionsViewModelFactory = footerActionsViewModelFactory,
                 footerActionsController = footerActionsController,
                 mediaCarouselInteractor = kosmos.mediaCarouselInteractor,
+                shadeInteractor = shadeInteractor,
+                sceneInteractor = sceneInteractor,
             )
         underTest.activateIn(testScope)
     }
@@ -123,5 +134,17 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
             kosmos.mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
 
             assertThat(isMediaVisible).isTrue()
+        }
+
+    @Test
+    fun shadeModeChange_switchToShadeScene() =
+        testScope.runTest {
+            val scene by collectLastValue(sceneInteractor.currentScene)
+
+            // switch to split shade
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            runCurrent()
+
+            assertThat(scene).isEqualTo(Scenes.Shade)
         }
 }

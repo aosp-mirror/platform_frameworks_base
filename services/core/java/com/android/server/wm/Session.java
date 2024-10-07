@@ -37,8 +37,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
-import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IME;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -72,7 +71,6 @@ import android.view.InputChannel;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.View.FocusDirection;
 import android.view.WindowInsets;
@@ -108,7 +106,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @NonNull
     final WindowProcessController mProcess;
     private final String mStringName;
-    SurfaceSession mSurfaceSession;
     private final ArrayList<WindowState> mAddedWindows = new ArrayList<>();
     /** Set of visible alert/app-overlay windows connected to this session. */
     private final ArraySet<WindowState> mAlertWindows = new ArraySet<>();
@@ -702,14 +699,33 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             final WindowState win = mService.windowForClientLocked(this, window,
                     false /* throwOnError */);
             if (win != null) {
-                ImeTracker.forLogging().onProgress(imeStatsToken,
-                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                    ImeTracker.forLogging().onProgress(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                }
                 win.setRequestedVisibleTypes(requestedVisibleTypes);
                 win.getDisplayContent().getInsetsPolicy().onRequestedVisibleTypesChanged(win,
                         imeStatsToken);
             } else {
-                ImeTracker.forLogging().onFailed(imeStatsToken,
-                        ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                EmbeddedWindowController.EmbeddedWindow embeddedWindow = null;
+                if (android.view.inputmethod.Flags.refactorInsetsController()) {
+                    embeddedWindow = mService.mEmbeddedWindowController.getByWindowToken(
+                            window.asBinder());
+                }
+                if (embeddedWindow != null) {
+                    // If there is no WindowState for the IWindow, it could be still an
+                    // EmbeddedWindow. Therefore, check the EmbeddedWindowController as well
+                    // TODO(b/329229469) Use different phase here
+                    ImeTracker.forLogging().onProgress(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                    embeddedWindow.setRequestedVisibleTypes(
+                            requestedVisibleTypes & WindowInsets.Type.ime());
+                    embeddedWindow.getDisplayContent().getInsetsPolicy()
+                            .onRequestedVisibleTypesChanged(embeddedWindow, imeStatsToken);
+                } else {
+                    ImeTracker.forLogging().onFailed(imeStatsToken,
+                            ImeTracker.PHASE_WM_UPDATE_REQUESTED_VISIBLE_TYPES);
+                }
             }
         }
     }
@@ -719,12 +735,10 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             mPackageName = mProcess.mInfo.packageName;
             mRelayoutTag = "relayoutWindow: " + mPackageName;
         }
-        if (mSurfaceSession == null) {
+        if (mProcess.mWindowSession == null) {
             if (DEBUG) {
-                Slog.v(TAG_WM, "First window added to " + this + ", creating SurfaceSession");
+                Slog.v(TAG_WM, "First window added to " + mProcess);
             }
-            mSurfaceSession = new SurfaceSession();
-            ProtoLog.i(WM_SHOW_TRANSACTIONS, "  NEW SURFACE SESSION %s", mSurfaceSession);
             mService.mSessions.add(this);
             if (mLastReportedAnimatorScale != mService.getCurrentAnimatorScale()) {
                 mService.dispatchNewAnimatorScaleLocked(this);
@@ -821,18 +835,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
 
         mService.mSessions.remove(this);
-        if (mSurfaceSession == null) {
+        if (mProcess.mWindowSession == null) {
             return;
         }
 
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "  KILL SURFACE SESSION %s", mSurfaceSession);
-        try {
-            mSurfaceSession.kill();
-        } catch (Exception e) {
-            Slog.w(TAG_WM, "Exception thrown when killing surface session " + mSurfaceSession
-                    + " in session " + this + ": " + e.toString());
-        }
-        mSurfaceSession = null;
+        mProcess.mWindowSession = null;
         mAddedWindows.clear();
         mAlertWindows.clear();
         setHasOverlayUi(false);
@@ -857,7 +864,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 pw.print(" mCanAddInternalSystemWindow="); pw.print(mCanAddInternalSystemWindow);
                 pw.print(" mAlertWindows="); pw.print(mAlertWindows);
                 pw.print(" mClientDead="); pw.print(mClientDead);
-                pw.print(" mSurfaceSession="); pw.println(mSurfaceSession);
         pw.print(prefix); pw.print("mPackageName="); pw.println(mPackageName);
         if (isSatellitePointingUiPackage()) {
             pw.print(prefix); pw.println("mIsSatellitePointingUiPackage=true");

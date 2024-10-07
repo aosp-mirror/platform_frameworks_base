@@ -87,6 +87,7 @@ combined_apis {
         "framework-permission",
         "framework-permission-s",
         "framework-profiling",
+        "framework-photopicker",
         "framework-scheduling",
         "framework-sdkextensions",
         "framework-statsd",
@@ -99,6 +100,11 @@ combined_apis {
     ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
         "true": [
             "framework-crashrecovery",
+        ],
+        default: [],
+    }) + select(release_flag("RELEASE_RANGING_STACK"), {
+        true: [
+            "framework-ranging",
         ],
         default: [],
     }),

@@ -42,6 +42,9 @@ import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LongPressHandlingViewLogger
+import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -69,6 +72,7 @@ constructor(
     private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
     private val falsingManager: Lazy<FalsingManager>,
     private val vibratorHelper: Lazy<VibratorHelper>,
+    @LongPressTouchLog private val logBuffer: LogBuffer,
 ) : KeyguardSection() {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
     private var disposableHandle: DisposableHandle? = null
@@ -88,7 +92,16 @@ constructor(
 
         val view =
             if (DeviceEntryUdfpsRefactor.isEnabled) {
-                DeviceEntryIconView(context, null).apply { id = deviceEntryIconViewId }
+                DeviceEntryIconView(
+                        context,
+                        null,
+                        logger =
+                            LongPressHandlingViewLogger(
+                                logBuffer = logBuffer,
+                                TAG
+                            )
+                    )
+                    .apply { id = deviceEntryIconViewId }
             } else {
                 // KeyguardBottomAreaRefactor.isEnabled or MigrateClocksToBlueprint.isEnabled
                 LockIconView(context, null).apply { id = R.id.lock_icon_view }
@@ -257,5 +270,9 @@ constructor(
                 }
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "DefaultDeviceEntrySection"
     }
 }

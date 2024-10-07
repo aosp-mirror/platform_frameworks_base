@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.domain.interactor.keyguardBlueprintInteract
 import com.android.systemui.keyguard.domain.interactor.keyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardSmartspaceInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
+import com.android.systemui.keyguard.ui.viewmodel.aodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
@@ -120,6 +121,7 @@ class ClockSectionTest : SysuiTestCase() {
                     keyguardSmartspaceViewModel,
                     { keyguardBlueprintInteractor },
                     keyguardRootViewModel,
+                    aodBurnInViewModel,
                 )
         }
     }
@@ -313,7 +315,7 @@ class ClockSectionTest : SysuiTestCase() {
             referencedIds.contentEquals(
                 intArrayOf(
                     com.android.systemui.shared.R.id.bc_smartspace_view,
-                    R.id.aod_notification_icon_container
+                    R.id.aod_notification_icon_container,
                 )
             )
         }

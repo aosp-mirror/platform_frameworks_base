@@ -28,6 +28,9 @@ import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.android.compose.theme.PlatformTheme
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
+import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
+import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialMetricsLogger
 import com.android.systemui.inputdevice.tutorial.TouchpadTutorialScreensProvider
 import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel
@@ -48,12 +51,18 @@ class KeyboardTouchpadTutorialActivity
 constructor(
     private val viewModelFactoryAssistedProvider: ViewModelFactoryAssistedProvider,
     private val touchpadTutorialScreensProvider: Optional<TouchpadTutorialScreensProvider>,
+    private val logger: InputDeviceTutorialLogger,
+    private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
 ) : ComponentActivity() {
 
     companion object {
         const val INTENT_TUTORIAL_TYPE_KEY = "tutorial_type"
         const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
         const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
+        const val INTENT_TUTORIAL_TYPE_BOTH = "both"
+        const val INTENT_TUTORIAL_ENTRY_POINT_KEY = "entry_point"
+        const val INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER = "scheduler"
+        const val INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU = "contextual_edu"
     }
 
     private val vm by
@@ -68,16 +77,25 @@ constructor(
         enableEdgeToEdge()
         // required to handle 3+ fingers on touchpad
         window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
         lifecycle.addObserver(vm)
         lifecycleScope.launch {
             vm.closeActivity.collect { finish ->
                 if (finish) {
+                    logger.logCloseTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
                     finish()
                 }
             }
         }
         setContent {
             PlatformTheme { KeyboardTouchpadTutorialContainer(vm, touchpadTutorialScreensProvider) }
+        }
+        if (savedInstanceState == null) {
+            metricsLogger.logPeripheralTutorialLaunched(
+                intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY),
+                intent.getStringExtra(INTENT_TUTORIAL_TYPE_KEY),
+            )
+            logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
         }
     }
 }
@@ -100,7 +118,7 @@ fun KeyboardTouchpadTutorialContainer(
         ACTION_KEY ->
             ActionKeyTutorialScreen(
                 onDoneButtonClicked = vm::onDoneButtonClicked,
-                onBack = vm::onBack
+                onBack = vm::onBack,
             )
     }
 }

@@ -26,15 +26,12 @@ import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.Trace;
 import android.util.proto.ProtoOutputStream;
-import android.view.SurfaceControl.Transaction;
 import android.view.inputmethod.Flags;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.inputmethod.ImeTracing;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
-
-import java.util.function.Supplier;
 
 /**
  * Controls the visibility and animations of IME window insets source.
@@ -54,10 +51,8 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
      */
     private boolean mIsRequestedVisibleAwaitingLeash;
 
-    public ImeInsetsSourceConsumer(
-            int id, InsetsState state, Supplier<Transaction> transactionSupplier,
-            InsetsController controller) {
-        super(id, WindowInsets.Type.ime(), state, transactionSupplier, controller);
+    public ImeInsetsSourceConsumer(int id, InsetsState state, InsetsController controller) {
+        super(id, WindowInsets.Type.ime(), state, controller);
     }
 
     @Override
@@ -70,7 +65,14 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
                         "ImeInsetsSourceConsumer#onAnimationFinished",
                         mController.getHost().getInputMethodManager(), null /* icProto */);
             }
-            boolean insetsChanged = super.onAnimationStateChanged(running);
+            boolean insetsChanged = false;
+            if (Flags.predictiveBackIme() && !running && isShowRequested()
+                    && mAnimationState == ANIMATION_STATE_HIDE) {
+                // A user controlled hide animation may have ended in the shown state (e.g.
+                // cancelled predictive back animation) -> Insets need to be reset to shown.
+                insetsChanged |= applyLocalVisibilityOverride();
+            }
+            insetsChanged |= super.onAnimationStateChanged(running);
             if (running && !isShowRequested()
                     && mController.isPredictiveBackImeHideAnimInProgress()) {
                 // IME predictive back animation switched from pre-commit to post-commit.

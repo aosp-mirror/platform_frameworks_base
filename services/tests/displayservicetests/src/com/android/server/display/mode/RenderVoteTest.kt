@@ -38,7 +38,7 @@ class RenderVoteTest {
     }
 
     @Test
-    fun `updates minRenderFrameRate if summary has less`() {
+    fun updatesMinRenderFrameRateWithBiggerValue() {
         val summary = createVotesSummary()
         summary.minRenderFrameRate = 45f
 
@@ -48,7 +48,7 @@ class RenderVoteTest {
     }
 
     @Test
-    fun `does not update minRenderFrameRate if summary has more`() {
+    fun doesNotUpdateMinRenderFrameRateWithSmallerValue() {
         val summary = createVotesSummary()
         summary.minRenderFrameRate = 75f
 
@@ -58,7 +58,7 @@ class RenderVoteTest {
     }
 
     @Test
-    fun `updates maxRenderFrameRate if summary has more`() {
+    fun updatesMaxPRenderFrameRateWithSmallerValue() {
         val summary = createVotesSummary()
         summary.maxRenderFrameRate = 120f
 
@@ -68,7 +68,7 @@ class RenderVoteTest {
     }
 
     @Test
-    fun `does not update maxRenderFrameRate if summary has less`() {
+    fun doesNotUpdateMaxPRenderFrameRateWithBiggerValue() {
         val summary = createVotesSummary()
         summary.maxRenderFrameRate = 75f
 
@@ -78,7 +78,7 @@ class RenderVoteTest {
     }
 
     @Test
-    fun `updates minPhysicalRefreshRate if summary has less`() {
+    fun updatesMinPhysicalRefreshRateWithBiggerValue() {
         val summary = createVotesSummary()
         summary.minPhysicalRefreshRate = 45f
 
@@ -88,7 +88,7 @@ class RenderVoteTest {
     }
 
     @Test
-    fun `does not update minPhysicalRefreshRate if summary has more`() {
+    fun doesNotUpdateMinPhysicalRefreshRateWithSmallerValue() {
         val summary = createVotesSummary()
         summary.minPhysicalRefreshRate = 75f
 

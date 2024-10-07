@@ -26,8 +26,8 @@ import junit.framework.Assert.assertEquals
  * Fake class for {@link CompatUILifecycle}
  */
 class FakeCompatUILifecyclePredicates(
-    private val creationReturn: Boolean,
-    private val removalReturn: Boolean,
+    private val creationReturn: Boolean = false,
+    private val removalReturn: Boolean = false,
     private val initialState: (
         CompatUIInfo,
         CompatUISharedState

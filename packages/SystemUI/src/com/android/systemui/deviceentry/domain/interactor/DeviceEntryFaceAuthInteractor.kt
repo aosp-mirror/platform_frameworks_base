@@ -60,14 +60,23 @@ interface DeviceEntryFaceAuthInteractor : CoreStartable {
     fun unregisterListener(listener: FaceAuthenticationListener)
 
     fun onUdfpsSensorTouched()
+
     fun onAssistantTriggeredOnLockScreen()
+
     fun onDeviceLifted()
-    fun onQsExpansionStared()
+
+    fun onShadeExpansionStarted()
+
     fun onNotificationPanelClicked()
+
     fun onSwipeUpOnBouncer()
+
     fun onPrimaryBouncerUserInput()
+
     fun onAccessibilityAction()
+
     fun onWalletLaunched()
+
     fun onDeviceUnfolded()
 
     /** Whether face auth is considered class 3 */

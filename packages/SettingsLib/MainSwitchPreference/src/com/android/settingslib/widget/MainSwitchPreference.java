@@ -18,6 +18,7 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -89,6 +90,10 @@ public class MainSwitchPreference extends TwoStatePreference implements OnChecke
                     androidx.preference.R.styleable.Preference_android_title);
             setTitle(title);
 
+            CharSequence summary = a.getText(
+                    androidx.preference.R.styleable.Preference_android_summary);
+            setSummary(summary);
+
             final boolean bIconSpaceReserved = a.getBoolean(
                     androidx.preference.R.styleable.Preference_android_iconSpaceReserved, true);
             setIconSpaceReserved(bIconSpaceReserved);
@@ -109,6 +114,15 @@ public class MainSwitchPreference extends TwoStatePreference implements OnChecke
         super.setTitle(title);
         if (mMainSwitchBar != null) {
             mMainSwitchBar.setTitle(title);
+        }
+    }
+
+    @Override
+    public void setSummary(CharSequence summary) {
+        super.setSummary(summary);
+        if (mMainSwitchBar != null
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            mMainSwitchBar.setSummary(summary);
         }
     }
 

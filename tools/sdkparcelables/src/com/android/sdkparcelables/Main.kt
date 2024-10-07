@@ -23,12 +23,20 @@ import java.io.IOException
 import java.util.zip.ZipFile
 
 fun main(args: Array<String>) {
-    if (args.size != 2) {
+    if (args.size < 2 || args.size > 3) {
         usage()
     }
 
     val zipFileName = args[0]
     val aidlFileName = args[1]
+
+    var stable = false
+    if (args.size == 3) {
+        if (args[2] != "--guarantee_stable") {
+            usage()
+        }
+        stable = true
+    }
 
     val zipFile: ZipFile
 
@@ -55,6 +63,9 @@ fun main(args: Array<String>) {
         val outFile = File(aidlFileName)
         val outWriter = outFile.bufferedWriter()
         for (parcelable in parcelables) {
+            if (stable) {
+                outWriter.write("@JavaOnlyStableParcelable ")
+            }
             outWriter.write("parcelable ")
             outWriter.write(parcelable.replace('/', '.').replace('$', '.'))
             outWriter.write(";\n")

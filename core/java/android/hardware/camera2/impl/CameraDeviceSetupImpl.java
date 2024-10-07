@@ -205,10 +205,6 @@ public class CameraDeviceSetupImpl extends CameraDevice.CameraDeviceSetup {
      */
     @SuppressWarnings("AndroidFrameworkCompatChange")
     public static boolean isCameraDeviceSetupSupported(CameraCharacteristics chars) {
-        if (!Flags.featureCombinationQuery()) {
-            return false;
-        }
-
         Integer queryVersion = chars.get(
                 CameraCharacteristics.INFO_SESSION_CONFIGURATION_QUERY_VERSION);
         return queryVersion != null && queryVersion > Build.VERSION_CODES.UPSIDE_DOWN_CAKE;

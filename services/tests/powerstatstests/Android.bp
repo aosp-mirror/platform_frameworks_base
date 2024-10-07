@@ -30,7 +30,7 @@ android_test {
     ],
 
     libs: [
-        "android.test.base",
+        "android.test.base.stubs.system",
     ],
 
     resource_dirs: ["res/"],
@@ -71,9 +71,31 @@ android_ravenwood_test {
     ],
     srcs: [
         "src/com/android/server/power/stats/*.java",
+        "src/com/android/server/power/stats/format/*.java",
+        "src/com/android/server/power/stats/processor/*.java",
     ],
     java_resources: [
         "res/xml/power_profile*.xml",
     ],
     auto_gen_config: true,
+}
+
+test_module_config {
+    name: "PowerStatsTests_stats_bstatscputimesvalidationtest",
+    base: "PowerStatsTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power.stats.BstatsCpuTimesValidationTest"],
+}
+
+test_module_config {
+    name: "PowerStatsTests_power_stats",
+    base: "PowerStatsTests",
+    test_suites: [
+        "automotive-tests",
+        "device-tests",
+    ],
+    include_filters: ["com.android.server.power.stats"],
 }

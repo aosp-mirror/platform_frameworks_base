@@ -28,12 +28,12 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.log.table.logcatTableLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel
@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconVie
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.QsMobileIconViewModel
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -58,13 +59,13 @@ import org.mockito.MockitoAnnotations
 @RunWithLooper(setAsMainLooper = true)
 @OptIn(ExperimentalCoroutinesApi::class)
 class ModernStatusBarMobileViewTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
     private lateinit var testableLooper: TestableLooper
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
 
-    @Mock private lateinit var tableLogBuffer: TableLogBuffer
     @Mock private lateinit var viewLogger: MobileViewLogger
     @Mock private lateinit var constants: ConnectivityConstants
     private lateinit var interactor: FakeMobileIconInteractor
@@ -88,10 +89,11 @@ class ModernStatusBarMobileViewTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 FakeConnectivityRepository(),
-                FakeMobileConnectionsRepository(),
+                kosmos.fakeMobileConnectionsRepository,
             )
 
-        interactor = FakeMobileIconInteractor(tableLogBuffer)
+        interactor =
+            FakeMobileIconInteractor(logcatTableLogBuffer(kosmos, "ModernStatusBarMobileViewTest"))
         createViewModel()
     }
 

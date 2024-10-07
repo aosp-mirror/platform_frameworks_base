@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.preview
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import android.app.WallpaperColors
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -79,6 +80,7 @@ import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessage
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
 import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry
@@ -186,8 +188,9 @@ constructor(
     private var themeStyle: Style? = null
 
     init {
-        coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
+        coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job() + createCoroutineTracingContext("KeyguardPreviewRenderer"))
         disposables += DisposableHandle { coroutineScope.cancel() }
+        clockController.setFallbackWeatherData(WeatherData.getPlaceholderWeatherData())
 
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
@@ -275,12 +278,36 @@ constructor(
         }
     }
 
+    fun onStartCustomizingQuickAffordances(
+        initiallySelectedSlotId: String?,
+    ) {
+        quickAffordancesCombinedViewModel.enablePreviewMode(
+            initiallySelectedSlotId = initiallySelectedSlotId,
+            shouldHighlightSelectedAffordance = true,
+        )
+    }
+
     fun onSlotSelected(slotId: String) {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             quickAffordancesCombinedViewModel.onPreviewSlotSelected(slotId = slotId)
         } else {
             bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
         }
+    }
+
+    fun onPreviewQuickAffordanceSelected(slotId: String, quickAffordanceId: String) {
+        quickAffordancesCombinedViewModel.onPreviewQuickAffordanceSelected(
+            slotId,
+            quickAffordanceId,
+        )
+    }
+
+    fun onDefaultPreview() {
+        quickAffordancesCombinedViewModel.onClearPreviewQuickAffordances()
+        quickAffordancesCombinedViewModel.enablePreviewMode(
+            initiallySelectedSlotId = null,
+            shouldHighlightSelectedAffordance = false,
+        )
     }
 
     fun destroy() {
@@ -391,7 +418,9 @@ constructor(
                     null, // device entry haptics not required for preview mode
                     null, // falsing manager not required for preview mode
                     null, // keyguard view mediator is not required for preview mode
+                    null, // primary bouncer interactor is not required for preview mode
                     mainDispatcher,
+                    null,
                 )
         }
         rootView.addView(

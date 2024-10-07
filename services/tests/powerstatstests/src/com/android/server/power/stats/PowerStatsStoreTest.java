@@ -59,14 +59,7 @@ public class PowerStatsStoreTest {
         clearDirectory(mStoreDirectory);
 
         mPowerStatsStore = new PowerStatsStore(mStoreDirectory,
-                MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES,
-                new TestHandler(),
-                (sectionType, parser) -> {
-                    if (sectionType.equals(TestSection.TYPE)) {
-                        return TestSection.readXml(parser);
-                    }
-                    return null;
-                });
+                MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES, new TestHandler());
     }
 
     @Test
@@ -144,7 +137,7 @@ public class PowerStatsStoreTest {
         }
 
         @Override
-        void write(TypedXmlSerializer serializer) throws IOException {
+        public void write(TypedXmlSerializer serializer) throws IOException {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < mSize; i++) {
                 sb.append("X");

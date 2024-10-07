@@ -15,12 +15,14 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
 import java.util.List;
 
@@ -28,9 +30,9 @@ import java.util.List;
  * Describe a content description for the document
  */
 public class RootContentDescription implements RemoteComposeOperation {
+    private static final int OP_CODE = Operations.ROOT_CONTENT_DESCRIPTION;
+    private static final String CLASS_NAME = "RootContentDescription";
     int mContentDescription;
-
-    public static final Companion COMPANION = new Companion();
 
     /**
      * Encodes a content description for the document
@@ -43,7 +45,7 @@ public class RootContentDescription implements RemoteComposeOperation {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mContentDescription);
+        apply(buffer, mContentDescription);
     }
 
     @Override
@@ -61,29 +63,32 @@ public class RootContentDescription implements RemoteComposeOperation {
         return toString();
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {}
+    public static String name() {
+        return CLASS_NAME;
+    }
 
-        @Override
-        public String name() {
-            return "RootContentDescription";
-        }
+    public static int id() {
+        return OP_CODE;
+    }
 
-        @Override
-        public int id() {
-            return Operations.ROOT_CONTENT_DESCRIPTION;
-        }
+    public static void apply(WireBuffer buffer, int contentDescription) {
+        buffer.start(Operations.ROOT_CONTENT_DESCRIPTION);
+        buffer.writeInt(contentDescription);
+    }
 
-        public void apply(WireBuffer buffer, int contentDescription) {
-            buffer.start(Operations.ROOT_CONTENT_DESCRIPTION);
-            buffer.writeInt(contentDescription);
-        }
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int contentDescription = buffer.readInt();
+        RootContentDescription header = new RootContentDescription(contentDescription);
+        operations.add(header);
+    }
 
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int contentDescription = buffer.readInt();
-            RootContentDescription header = new RootContentDescription(contentDescription);
-            operations.add(header);
-        }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Protocol Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Content description of root")
+                .field(INT, "id", "id of Int");
+
     }
 }

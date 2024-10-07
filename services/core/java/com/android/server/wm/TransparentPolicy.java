@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.content.res.Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
@@ -95,7 +96,7 @@ class TransparentPolicy {
         }
         final boolean wasStarted = mTransparentPolicyState.isRunning();
         mTransparentPolicyState.reset();
-        // In case mActivityRecord.hasCompatDisplayInsetsWithoutOverride() we don't apply the
+        // In case mActivityRecord.hasAppCompatDisplayInsetsWithoutOverride() we don't apply the
         // opaque activity constraints because we're expecting the activity is already letterboxed.
         final ActivityRecord firstOpaqueActivity = mActivityRecord.getTask().getActivity(
                 FIRST_OPAQUE_NOT_FINISHING_ACTIVITY_PREDICATE /* callback */,
@@ -159,12 +160,12 @@ class TransparentPolicy {
         return mTransparentPolicyState.mInheritedOrientation;
     }
 
-    ActivityRecord.CompatDisplayInsets getInheritedCompatDisplayInsets() {
-        return mTransparentPolicyState.mInheritedCompatDisplayInsets;
+    AppCompatDisplayInsets getInheritedAppCompatDisplayInsets() {
+        return mTransparentPolicyState.mInheritedAppCompatDisplayInsets;
     }
 
-    void clearInheritedCompatDisplayInsets() {
-        mTransparentPolicyState.clearInheritedCompatDisplayInsets();
+    void clearInheritedAppCompatDisplayInsets() {
+        mTransparentPolicyState.clearInheritedAppCompatDisplayInsets();
     }
 
     /**
@@ -201,8 +202,10 @@ class TransparentPolicy {
             // never has letterbox.
             return true;
         }
+        final AppCompatSizeCompatModePolicy scmPolicy = mActivityRecord.mAppCompatController
+                .getAppCompatSizeCompatModePolicy();
         if (mActivityRecord.getTask() == null || mActivityRecord.fillsParent()
-                || mActivityRecord.hasCompatDisplayInsetsWithoutInheritance()) {
+                || scmPolicy.hasAppCompatDisplayInsetsWithoutInheritance()) {
             return true;
         }
         return false;
@@ -239,9 +242,9 @@ class TransparentPolicy {
         // The app compat state for the opaque activity if any
         private int mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
 
-        // The CompatDisplayInsets of the opaque activity beneath the translucent one.
+        // The AppCompatDisplayInsets of the opaque activity beneath the translucent one.
         @Nullable
-        private ActivityRecord.CompatDisplayInsets mInheritedCompatDisplayInsets;
+        private AppCompatDisplayInsets mInheritedAppCompatDisplayInsets;
 
         @Nullable
         private ActivityRecord mFirstOpaqueActivity;
@@ -303,7 +306,7 @@ class TransparentPolicy {
             }
             mInheritedOrientation = opaqueActivity.getRequestedConfigurationOrientation();
             mInheritedAppCompatState = opaqueActivity.getAppCompatState();
-            mInheritedCompatDisplayInsets = opaqueActivity.getCompatDisplayInsets();
+            mInheritedAppCompatDisplayInsets = opaqueActivity.getAppCompatDisplayInsets();
         }
 
         private void reset() {
@@ -315,7 +318,7 @@ class TransparentPolicy {
             mInheritedMinAspectRatio = UNDEFINED_ASPECT_RATIO;
             mInheritedMaxAspectRatio = UNDEFINED_ASPECT_RATIO;
             mInheritedAppCompatState = APP_COMPAT_STATE_CHANGED__STATE__UNKNOWN;
-            mInheritedCompatDisplayInsets = null;
+            mInheritedAppCompatDisplayInsets = null;
             if (mFirstOpaqueActivity != null) {
                 mFirstOpaqueActivity.mAppCompatController.getTransparentPolicy()
                         .mDestroyListeners.remove(mActivityRecord.mAppCompatController
@@ -329,17 +332,24 @@ class TransparentPolicy {
         }
 
         private boolean isPolicyEnabled() {
+            // Disable transparent policy if task is null or in freeform.
+            final Task task = mActivityRecord.getTask();
+            if (task == null || task.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
+                return false;
+            }
             if (!mActivityRecord.mWmService.mFlags.mRespectNonTopVisibleFixedOrientation) {
                 return true;
             }
             // Do not enable the policy if the activity can affect display orientation.
             final int orientation = mActivityRecord.getOverrideOrientation();
             return orientation == SCREEN_ORIENTATION_UNSPECIFIED
+                    // This "!condition" is true if the activity is multi-window mode or the
+                    // display ignores requested orientation.
                     || !mActivityRecord.handlesOrientationChangeFromDescendant(orientation);
         }
 
-        private void clearInheritedCompatDisplayInsets() {
-            mInheritedCompatDisplayInsets = null;
+        private void clearInheritedAppCompatDisplayInsets() {
+            mInheritedAppCompatDisplayInsets = null;
         }
 
         /**

@@ -69,7 +69,7 @@ public final class DemuxResource extends TunerResourceBasic {
     public static class Builder extends TunerResourceBasic.Builder {
         private int mFilterTypes;
 
-        Builder(long handle) {
+        Builder(int handle) {
             super(handle);
         }
 

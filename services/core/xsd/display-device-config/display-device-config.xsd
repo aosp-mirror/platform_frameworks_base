@@ -42,7 +42,7 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
-                <xs:element type="thermalThrottling" name="thermalThrottling">
+                <xs:element type="thermalThrottling" name="thermalThrottling" minOccurs="0" maxOccurs="1">
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
@@ -464,7 +464,15 @@
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
-        <xs:element name="pollingWindowMillis" type="xs:nonNegativeInteger">
+        <xs:element name="customAnimationRateSec" type="nonNegativeDecimal" minOccurs="0" maxOccurs="1">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMaxMillis" type="xs:nonNegativeInteger">
+            <xs:annotation name="nonnull"/>
+            <xs:annotation name="final"/>
+        </xs:element>
+        <xs:element name="pollingWindowMinMillis" type="xs:nonNegativeInteger">
             <xs:annotation name="nonnull"/>
             <xs:annotation name="final"/>
         </xs:element>
@@ -504,8 +512,6 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
-        <!-- valid value of interpolation if specified: linear -->
-        <xs:attribute name="interpolation" type="xs:string" use="optional"/>
     </xs:complexType>
 
     <xs:complexType name="brightnessPoint">
@@ -704,6 +710,12 @@
             lux for the current display -->
             <xs:element name="luxToBrightnessMapping" type="luxToBrightnessMapping"
                         minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- The time after which the stylus is to be assumed to be not under use. This will
+             enable the logic of changing the brightness with ambient light changes -->
+            <xs:element name="idleStylusTimeoutMillis" type="xs:nonNegativeInteger"
+                minOccurs="0" maxOccurs="1">
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>

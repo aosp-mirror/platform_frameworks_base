@@ -39,7 +39,7 @@ class BaseModeRefreshRateVoteTest {
     }
 
     @Test
-    fun `updates summary with base mode refresh rate if not set`() {
+    fun updatesSummary_doesNotUpdateSummary_baseModeRefreshRateNotSet() {
         val summary = createVotesSummary()
 
         baseModeVote.updateSummary(summary)
@@ -48,7 +48,7 @@ class BaseModeRefreshRateVoteTest {
     }
 
     @Test
-    fun `keeps summary base mode refresh rate if set`() {
+    fun doesNotUpdateSummary_baseModeRefreshRateSet() {
         val summary = createVotesSummary()
         summary.appRequestBaseModeRefreshRate = OTHER_BASE_REFRESH_RATE
 
@@ -58,7 +58,7 @@ class BaseModeRefreshRateVoteTest {
     }
 
     @Test
-    fun `keeps summary with base mode refresh rate if vote refresh rate is negative`() {
+    fun doesNotUpdateSummary_baseModeRefreshRateNotSet_requestedRefreshRateInvalid() {
         val invalidBaseModeVote = BaseModeRefreshRateVote(-10f)
         val summary = createVotesSummary()
 

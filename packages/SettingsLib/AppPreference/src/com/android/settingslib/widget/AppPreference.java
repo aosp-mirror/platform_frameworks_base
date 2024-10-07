@@ -18,11 +18,8 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.View;
-import android.widget.ProgressBar;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.preference.app.R;
 
@@ -30,9 +27,6 @@ import com.android.settingslib.widget.preference.app.R;
  * The Preference for the pages need to show apps icon.
  */
 public class AppPreference extends Preference {
-
-    private int mProgress;
-    private boolean mProgressVisible;
 
     public AppPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
@@ -52,30 +46,5 @@ public class AppPreference extends Preference {
     public AppPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayoutResource(R.layout.preference_app);
-    }
-
-    /**
-     * Sets the current progress.
-     * @param amount the current progress
-     *
-     * @see ProgressBar#setProgress(int)
-     */
-    public void setProgress(int amount) {
-        mProgress = amount;
-        mProgressVisible = true;
-        notifyChanged();
-    }
-
-    @Override
-    public void onBindViewHolder(PreferenceViewHolder view) {
-        super.onBindViewHolder(view);
-
-        final ProgressBar progress = (ProgressBar) view.findViewById(android.R.id.progress);
-        if (mProgressVisible) {
-            progress.setProgress(mProgress);
-            progress.setVisibility(View.VISIBLE);
-        } else {
-            progress.setVisibility(View.GONE);
-        }
     }
 }

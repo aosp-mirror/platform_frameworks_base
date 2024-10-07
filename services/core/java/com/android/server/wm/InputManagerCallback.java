@@ -188,9 +188,8 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
      * the application did not handle.
      */
     @Override
-    public KeyEvent dispatchUnhandledKey(
-            IBinder focusedToken, KeyEvent event, int policyFlags) {
-        return mService.mPolicy.dispatchUnhandledKey(focusedToken, event, policyFlags);
+    public boolean interceptUnhandledKey(KeyEvent event, IBinder focusedToken) {
+        return mService.mPolicy.interceptUnhandledKey(event, focusedToken);
     }
 
     /** Callback to get pointer layer. */
@@ -281,7 +280,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                         + " - Input overlay layer is not initialized.");
                 return null;
             }
-            return mService.makeSurfaceBuilder(dc.getSession())
+            return mService.makeSurfaceBuilder()
                     .setContainerLayer()
                     .setName(name)
                     .setCallsite("createSurfaceForGestureMonitor")

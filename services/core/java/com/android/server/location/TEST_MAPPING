@@ -1,13 +1,7 @@
 {
   "presubmit": [
     {
-      "name": "CtsLocationFineTestCases",
-      "options": [
-          {
-             // TODO: Wait for test to deflake - b/293934372
-             "exclude-filter":"android.location.cts.fine.ScanningSettingsTest"
-          }
-      ]
+      "name": "CtsLocationFineTestCases_android_server_location"
     },
     {
       "name": "CtsLocationCoarseTestCases"
@@ -16,10 +10,7 @@
       "name": "CtsLocationNoneTestCases"
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [{
-        "include-filter": "com.android.server.location"
-      }]
+      "name": "FrameworksMockingServicesTests_location"
     }
   ]
 }

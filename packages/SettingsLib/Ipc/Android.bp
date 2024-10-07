@@ -1,0 +1,34 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "SettingsLibIpc-srcs",
+    srcs: ["src/**/*.kt"],
+}
+
+android_library {
+    name: "SettingsLibIpc",
+    defaults: [
+        "SettingsLintDefaults",
+    ],
+    srcs: [":SettingsLibIpc-srcs"],
+    static_libs: [
+        "androidx.collection_collection",
+        "guava",
+        "kotlinx-coroutines-android",
+    ],
+    kotlincflags: ["-Xjvm-default=all"],
+}
+
+android_library {
+    name: "SettingsLibIpc-testutils",
+    srcs: ["testutils/**/*.kt"],
+    static_libs: [
+        "Robolectric_all-target_upstream",
+        "SettingsLibIpc",
+        "androidx.test.core",
+        "flag-junit",
+        "kotlinx-coroutines-android",
+    ],
+}

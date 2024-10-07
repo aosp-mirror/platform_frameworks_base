@@ -25,8 +25,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.wm.shell.common.split.SplitLayout.BEHIND_APP_VEIL_LAYER;
 import static com.android.wm.shell.common.split.SplitLayout.FRONT_APP_VEIL_LAYER;
-import static com.android.wm.shell.common.split.SplitScreenConstants.FADE_DURATION;
-import static com.android.wm.shell.common.split.SplitScreenConstants.VEIL_DELAY_DURATION;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.FADE_DURATION;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.VEIL_DELAY_DURATION;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -43,7 +43,6 @@ import android.view.IWindow;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
-import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
@@ -74,7 +73,6 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private static final String GAP_BACKGROUND_SURFACE_NAME = "GapBackground";
 
     private final IconProvider mIconProvider;
-    private final SurfaceSession mSurfaceSession;
 
     private Drawable mIcon;
     private ImageView mVeilIconView;
@@ -103,17 +101,15 @@ public class SplitDecorManager extends WindowlessWindowManager {
     private int mOffsetY;
     private int mRunningAnimationCount = 0;
 
-    public SplitDecorManager(Configuration configuration, IconProvider iconProvider,
-            SurfaceSession surfaceSession) {
+    public SplitDecorManager(Configuration configuration, IconProvider iconProvider) {
         super(configuration, null /* rootSurface */, null /* hostInputToken */);
         mIconProvider = iconProvider;
-        mSurfaceSession = surfaceSession;
     }
 
     @Override
     protected SurfaceControl getParentSurface(IWindow window, WindowManager.LayoutParams attrs) {
         // Can't set position for the ViewRootImpl SC directly. Create a leash to manipulate later.
-        final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
+        final SurfaceControl.Builder builder = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName(TAG)
                 .setHidden(true)
@@ -238,7 +234,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
 
         if (mBackgroundLeash == null) {
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
-                    RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
+                    RESIZING_BACKGROUND_SURFACE_NAME);
             t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }
@@ -248,7 +244,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
             final int left = isLandscape ? mOldMainBounds.width() : 0;
             final int top = isLandscape ? 0 : mOldMainBounds.height();
             mGapBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
-                    GAP_BACKGROUND_SURFACE_NAME, mSurfaceSession);
+                    GAP_BACKGROUND_SURFACE_NAME);
             // Fill up another side bounds area.
             t.setColor(mGapBackgroundLeash, getResizingBackgroundColor(resizingTask))
                     .setLayer(mGapBackgroundLeash, Integer.MAX_VALUE - 2)
@@ -405,7 +401,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
         if (mBackgroundLeash == null) {
             // Initialize background
             mBackgroundLeash = SurfaceUtils.makeColorLayer(mHostLeash,
-                    RESIZING_BACKGROUND_SURFACE_NAME, mSurfaceSession);
+                    RESIZING_BACKGROUND_SURFACE_NAME);
             t.setColor(mBackgroundLeash, getResizingBackgroundColor(resizingTask))
                     .setLayer(mBackgroundLeash, Integer.MAX_VALUE - 1);
         }

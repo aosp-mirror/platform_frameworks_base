@@ -1,8 +1,10 @@
+# Bug component: 25698
 set noparent
 
-jsharkey@google.com
 omakoto@google.com
-dplotnikov@google.com
+topjohnwu@google.com
+hackbod@google.com  #{LAST_RESORT_SUGGESTION}
+
 
 per-file ravenwood-annotation-allowed-classes.txt = dplotnikov@google.com
 per-file texts/ravenwood-annotation-allowed-classes.txt = dplotnikov@google.com

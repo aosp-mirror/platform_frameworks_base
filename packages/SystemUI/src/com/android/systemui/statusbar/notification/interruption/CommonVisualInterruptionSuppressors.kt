@@ -45,7 +45,6 @@ import android.provider.Settings.Global.HEADS_UP_OFF
 import android.service.notification.Flags
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
-import com.android.internal.logging.UiEventLogger.UiEventEnum.RESERVE_NEW_UI_EVENT_ID
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -62,6 +61,7 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.NotificationChannels
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.settings.SystemSettings
 import com.android.systemui.util.time.SystemClock
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
@@ -279,7 +279,9 @@ class AvalancheSuppressor(
     private val packageManager: PackageManager,
     private val uiEventLogger: UiEventLogger,
     private val context: Context,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val logger: VisualInterruptionDecisionLogger,
+    private val systemSettings: SystemSettings,
 ) :
     VisualInterruptionFilter(
         types = setOf(PEEK, PULSE),
@@ -299,6 +301,11 @@ class AvalancheSuppressor(
     // to force show for debug so that phone does not get stuck sending out infinite number of
     // education HUNs.
     private var hasShownOnceForDebug = false
+
+    // Sometimes the kotlin flow value is false even when the cooldown setting is true (b/356768397)
+    // so let's directly check settings until we confirm that the flow is initialized and in sync
+    // with the real settings value.
+    private var isCooldownFlowInSync = false
 
     private fun shouldShowEdu(): Boolean {
         val forceShowOnce = SystemProperties.get(FORCE_SHOW_AVALANCHE_EDU_ONCE, "").equals("1")
@@ -354,15 +361,18 @@ class AvalancheSuppressor(
 
     override fun shouldSuppress(entry: NotificationEntry): Boolean {
         if (!isCooldownEnabled()) {
+            logger.logAvalancheAllow("cooldown OFF")
             return false
         }
         val timeSinceAvalancheMs = systemClock.currentTimeMillis() - avalancheProvider.startTime
         val timedOut = timeSinceAvalancheMs >= avalancheProvider.timeoutMs
         if (timedOut) {
+            logger.logAvalancheAllow("timedOut! timeSinceAvalancheMs=$timeSinceAvalancheMs")
             return false
         }
         val state = calculateState(entry)
         if (state != State.SUPPRESS) {
+            logger.logAvalancheAllow("state=$state")
             return false
         }
         if (shouldShowEdu()) {
@@ -476,6 +486,15 @@ class AvalancheSuppressor(
     }
 
     private fun isCooldownEnabled(): Boolean {
-        return settingsInteractor.isCooldownEnabled.value
+        val isEnabledFromFlow = settingsInteractor.isCooldownEnabled.value
+        if (isCooldownFlowInSync) {
+            return isEnabledFromFlow
+        }
+        val isEnabled =
+            systemSettings.getInt(Settings.System.NOTIFICATION_COOLDOWN_ENABLED, /* def */ 1) == 1
+        if (isEnabled == isEnabledFromFlow) {
+            isCooldownFlowInSync = true
+        }
+        return isEnabled
     }
 }

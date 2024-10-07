@@ -39,28 +39,6 @@ filegroup {
     path: "src",
 }
 
-// Sources that have no dependencies that can be used directly downstream of this library
-// TODO(b/322791067): move these sources to WindowManager-Shell-shared
-filegroup {
-    name: "wm_shell_util-sources",
-    srcs: [
-        "src/com/android/wm/shell/animation/Interpolators.java",
-        "src/com/android/wm/shell/common/bubbles/*.kt",
-        "src/com/android/wm/shell/common/bubbles/*.java",
-        "src/com/android/wm/shell/common/magnetictarget/MagnetizedObject.kt",
-        "src/com/android/wm/shell/common/split/SplitScreenConstants.java",
-        "src/com/android/wm/shell/common/TransactionPool.java",
-        "src/com/android/wm/shell/common/TriangleShape.java",
-        "src/com/android/wm/shell/common/desktopmode/*.kt",
-        "src/com/android/wm/shell/draganddrop/DragAndDropConstants.java",
-        "src/com/android/wm/shell/pip/PipContentOverlay.java",
-        "src/com/android/wm/shell/startingsurface/SplashScreenExitAnimationUtils.java",
-        "src/com/android/wm/shell/sysui/ShellSharedConstants.java",
-        "src/com/android/wm/shell/util/**/*.java",
-    ],
-    path: "src",
-}
-
 // Aidls which can be used directly downstream of this library
 filegroup {
     name: "wm_shell-aidls",
@@ -169,8 +147,10 @@ java_library {
 java_library {
     name: "WindowManager-Shell-lite-proto",
 
-    srcs: ["src/com/android/wm/shell/desktopmode/education/data/proto/**/*.proto"],
-
+    srcs: [
+        "src/com/android/wm/shell/desktopmode/education/data/proto/**/*.proto",
+        "src/com/android/wm/shell/desktopmode/persistence/*.proto",
+    ],
     proto: {
         type: "lite",
     },
@@ -195,9 +175,11 @@ java_library {
         ":wm_shell-shared-aidls",
     ],
     static_libs: [
+        "androidx.core_core-animation",
         "androidx.dynamicanimation_dynamicanimation",
         "jsr330",
     ],
+    kotlincflags: ["-Xjvm-default=all"],
 }
 
 java_library {
@@ -207,22 +189,26 @@ java_library {
         "shared/**/desktopmode/*.java",
         "shared/**/desktopmode/*.kt",
     ],
+    static_libs: [
+        "com.android.window.flags.window-aconfig-java",
+    ],
 }
 
 android_library {
     name: "WindowManager-Shell",
     srcs: [
+        "src/com/android/wm/shell/EventLogTags.logtags",
         ":wm_shell_protolog_src",
         // TODO(b/168581922) protologtool do not support kotlin(*.kt)
         ":wm_shell-sources-kt",
         ":wm_shell-aidls",
+        ":wm_shell-shared-aidls",
     ],
     resource_dirs: [
         "res",
     ],
     static_libs: [
         "androidx.appcompat_appcompat",
-        "androidx.core_core-animation",
         "androidx.core_core-ktx",
         "androidx.arch.core_core-runtime",
         "androidx.datastore_datastore",
@@ -235,6 +221,7 @@ android_library {
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "//frameworks/libs/systemui:iconloader_base",
         "com_android_wm_shell_flags_lib",
+        "PlatformAnimationLib",
         "WindowManager-Shell-proto",
         "WindowManager-Shell-lite-proto",
         "WindowManager-Shell-shared",

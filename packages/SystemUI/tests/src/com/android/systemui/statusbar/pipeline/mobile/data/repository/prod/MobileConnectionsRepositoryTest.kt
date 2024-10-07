@@ -28,7 +28,6 @@ import android.net.NetworkCapabilities.TRANSPORT_WIFI
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
-import android.os.Bundle
 import android.os.ParcelUuid
 import android.telephony.CarrierConfigManager
 import android.telephony.ServiceState
@@ -56,7 +55,6 @@ import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.connectivity.WifiPickerTrackerFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
-import com.android.systemui.statusbar.pipeline.mobile.data.model.ServiceStateModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
@@ -74,7 +72,6 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
@@ -98,6 +95,7 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -108,11 +106,7 @@ import org.mockito.MockitoAnnotations
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
     private val flags =
-        FakeFeatureFlagsClassic().also {
-            it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true)
-            it.set(Flags.INSTANT_TETHER, true)
-            it.set(Flags.WIFI_SECONDARY_NETWORKS, true)
-        }
+        FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
 
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
@@ -191,7 +185,6 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         wifiRepository =
             WifiRepositoryImpl(
-                flags,
                 testScope.backgroundScope,
                 mainExecutor,
                 testDispatcher,
@@ -602,47 +595,85 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Test
-    fun testDeviceServiceStateFromBroadcast_eagerlyWatchesBroadcast() =
+    fun testDeviceEmergencyCallState_eagerlyChecksState() =
         testScope.runTest {
-            // Value starts out empty (null)
-            assertThat(underTest.deviceServiceState.value).isNull()
+            // Value starts out false
+            assertThat(underTest.isDeviceEmergencyCallCapable.value).isFalse()
+            whenever(telephonyManager.activeModemCount).thenReturn(1)
+            whenever(telephonyManager.getServiceStateForSlot(any())).thenAnswer { _ ->
+                ServiceState().apply { isEmergencyOnly = true }
+            }
 
             // WHEN an appropriate intent gets sent out
-            val intent = serviceStateIntent(subId = -1, emergencyOnly = false)
+            val intent = serviceStateIntent(subId = -1)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
                 intent,
             )
             runCurrent()
 
-            // THEN the repo's state is updated
-            val expected = ServiceStateModel(isEmergencyOnly = false)
-            assertThat(underTest.deviceServiceState.value).isEqualTo(expected)
+            // THEN the repo's state is updated despite no listeners
+            assertThat(underTest.isDeviceEmergencyCallCapable.value).isEqualTo(true)
         }
 
     @Test
-    fun testDeviceServiceStateFromBroadcast_followsSubIdNegativeOne() =
+    fun testDeviceEmergencyCallState_aggregatesAcrossSlots_oneTrue() =
         testScope.runTest {
-            // device based state tracks -1
-            val intent = serviceStateIntent(subId = -1, emergencyOnly = false)
+            val latest by collectLastValue(underTest.isDeviceEmergencyCallCapable)
+
+            // GIVEN there are multiple slots
+            whenever(telephonyManager.activeModemCount).thenReturn(4)
+            // GIVEN only one of them reports ECM
+            whenever(telephonyManager.getServiceStateForSlot(any())).thenAnswer { invocation ->
+                when (invocation.getArgument(0) as Int) {
+                    0 -> ServiceState().apply { isEmergencyOnly = false }
+                    1 -> ServiceState().apply { isEmergencyOnly = false }
+                    2 -> ServiceState().apply { isEmergencyOnly = true }
+                    3 -> ServiceState().apply { isEmergencyOnly = false }
+                    else -> null
+                }
+            }
+
+            // GIVEN a broadcast goes out for the appropriate subID
+            val intent = serviceStateIntent(subId = -1)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
                 intent,
             )
             runCurrent()
 
-            val deviceBasedState = ServiceStateModel(isEmergencyOnly = false)
-            assertThat(underTest.deviceServiceState.value).isEqualTo(deviceBasedState)
+            // THEN the device is in ECM, because one of the service states is
+            assertThat(latest).isTrue()
+        }
 
-            // ... and ignores any other subId
-            val intent2 = serviceStateIntent(subId = 1, emergencyOnly = true)
+    @Test
+    fun testDeviceEmergencyCallState_aggregatesAcrossSlots_allFalse() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isDeviceEmergencyCallCapable)
+
+            // GIVEN there are multiple slots
+            whenever(telephonyManager.activeModemCount).thenReturn(4)
+            // GIVEN only one of them reports ECM
+            whenever(telephonyManager.getServiceStateForSlot(any())).thenAnswer { invocation ->
+                when (invocation.getArgument(0) as Int) {
+                    0 -> ServiceState().apply { isEmergencyOnly = false }
+                    1 -> ServiceState().apply { isEmergencyOnly = false }
+                    2 -> ServiceState().apply { isEmergencyOnly = false }
+                    3 -> ServiceState().apply { isEmergencyOnly = false }
+                    else -> null
+                }
+            }
+
+            // GIVEN a broadcast goes out for the appropriate subID
+            val intent = serviceStateIntent(subId = -1)
             fakeBroadcastDispatcher.sendIntentToMatchingReceiversOnly(
                 context,
-                intent2,
+                intent,
             )
             runCurrent()
 
-            assertThat(underTest.deviceServiceState.value).isEqualTo(deviceBasedState)
+            // THEN the device is in ECM, because one of the service states is
+            assertThat(latest).isFalse()
         }
 
     @Test
@@ -1549,15 +1580,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
          */
         private fun serviceStateIntent(
             subId: Int,
-            emergencyOnly: Boolean = false,
         ): Intent {
-            val serviceState = ServiceState().apply { isEmergencyOnly = emergencyOnly }
-
-            val bundle = Bundle()
-            serviceState.fillInNotifierBundle(bundle)
-
             return Intent(Intent.ACTION_SERVICE_STATE).apply {
-                putExtras(bundle)
                 putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId)
             }
         }

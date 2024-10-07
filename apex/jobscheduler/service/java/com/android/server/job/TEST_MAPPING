@@ -1,27 +1,13 @@
 {
     "presubmit": [
         {
-            "name": "CtsJobSchedulerTestCases",
-            "options": [
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-                {"exclude-annotation": "androidx.test.filters.LargeTest"}
-            ]
+            "name": "CtsJobSchedulerTestCases_com_android_server_job"
         },
         {
-            "name": "FrameworksMockingServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.job"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-                {"exclude-annotation": "androidx.test.filters.LargeTest"}
-            ]
+            "name": "FrameworksMockingServicesTests_com_android_server_job_Presubmit"
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.job"},
-                {"exclude-annotation": "androidx.test.filters.FlakyTest"},
-                {"exclude-annotation": "androidx.test.filters.LargeTest"}
-            ]
+            "name": "FrameworksServicesTests_com_android_server_job_Presubmit"
         }
     ],
     "postsubmit": [
@@ -29,29 +15,16 @@
             "name": "CtsJobSchedulerTestCases"
         },
         {
-            "name": "FrameworksMockingServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.job"}
-            ]
+            "name": "FrameworksMockingServicesTests_com_android_server_job"
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {"include-filter": "com.android.server.job"}
-            ]
+            "name": "FrameworksServicesTests_com_android_server_job"
         },
         {
-            "name": "CtsHostsideNetworkPolicyTests",
-            "options": [
-                {"include-filter": "com.android.cts.netpolicy.HostsideRestrictBackgroundNetworkTests#testMeteredNetworkAccess_expeditedJob"},
-                {"include-filter": "com.android.cts.netpolicy.HostsideRestrictBackgroundNetworkTests#testNonMeteredNetworkAccess_expeditedJob"}
-            ]
+            "name": "CtsHostsideNetworkPolicyTests_com_android_server_job"
         },
         {
-            "name": "CtsStatsdAtomHostTestCases",
-            "options": [
-                {"include-filter": "android.cts.statsdatom.jobscheduler"}
-            ]
+            "name": "CtsStatsdAtomHostTestCases_statsdatom_jobscheduler"
         }
     ]
 }

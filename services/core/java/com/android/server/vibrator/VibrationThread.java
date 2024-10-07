@@ -16,12 +16,12 @@
 
 package com.android.server.vibrator;
 
+import static android.os.Trace.TRACE_TAG_VIBRATOR;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.WorkSource;
@@ -29,8 +29,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.vibrator.VibrationSession.Status;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /** Plays a {@link HalVibration} in dedicated thread. */
@@ -69,14 +69,6 @@ final class VibrationThread extends Thread {
 
         /** Record that a vibrator was turned off, on behalf of the given uid. */
         void noteVibratorOff(int uid);
-
-        /**
-         * Tell the manager that the currently active vibration has completed its vibration, from
-         * the perspective of the Effect. However, the VibrationThread may still be continuing with
-         * cleanup tasks, and should not be given new work until {@link #onVibrationThreadReleased}
-         * is called.
-         */
-        void onVibrationCompleted(long vibrationId, @NonNull Vibration.EndInfo vibrationEndInfo);
 
         /**
          * Tells the manager that the VibrationThread is finished with the previous vibration and
@@ -127,15 +119,20 @@ final class VibrationThread extends Thread {
      *  before the release callback.
      */
     boolean runVibrationOnVibrationThread(VibrationStepConductor conductor) {
-        synchronized (mLock) {
-            if (mRequestedActiveConductor != null) {
-                Slog.wtf(TAG, "Attempt to start vibration when one already running");
-                return false;
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "runVibrationOnVibrationThread");
+        try {
+            synchronized (mLock) {
+                if (mRequestedActiveConductor != null) {
+                    Slog.wtf(TAG, "Attempt to start vibration when one already running");
+                    return false;
+                }
+                mRequestedActiveConductor = conductor;
+                mLock.notifyAll();
             }
-            mRequestedActiveConductor = conductor;
-            mLock.notifyAll();
+            return true;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
-        return true;
     }
 
     @Override
@@ -237,41 +234,14 @@ final class VibrationThread extends Thread {
         mWakeLock.acquire();
         try {
             try {
-                runCurrentVibrationWithWakeLockAndDeathLink();
+                playVibration();
             } finally {
                 clientVibrationCompleteIfNotAlready(
-                        new Vibration.EndInfo(Vibration.Status.FINISHED_UNEXPECTED));
+                        new Vibration.EndInfo(Status.FINISHED_UNEXPECTED));
             }
         } finally {
             mWakeLock.release();
             mWakeLock.setWorkSource(null);
-        }
-    }
-
-    /**
-     * Runs the VibrationThread with the binder death link, handling link/unlink failures.
-     * Called from within runWithWakeLock.
-     */
-    private void runCurrentVibrationWithWakeLockAndDeathLink() {
-        IBinder vibrationBinderToken = mExecutingConductor.getVibration().callerToken;
-        try {
-            vibrationBinderToken.linkToDeath(mExecutingConductor, 0);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Error linking vibration to token death", e);
-            clientVibrationCompleteIfNotAlready(
-                    new Vibration.EndInfo(Vibration.Status.IGNORED_ERROR_TOKEN));
-            return;
-        }
-        // Ensure that the unlink always occurs now.
-        try {
-            // This is the actual execution of the vibration.
-            playVibration();
-        } finally {
-            try {
-                vibrationBinderToken.unlinkToDeath(mExecutingConductor, 0);
-            } catch (NoSuchElementException e) {
-                Slog.wtf(TAG, "Failed to unlink token", e);
-            }
         }
     }
 
@@ -281,13 +251,17 @@ final class VibrationThread extends Thread {
     private void clientVibrationCompleteIfNotAlready(@NonNull Vibration.EndInfo vibrationEndInfo) {
         if (!mCalledVibrationCompleteCallback) {
             mCalledVibrationCompleteCallback = true;
-            mVibratorManagerHooks.onVibrationCompleted(
-                    mExecutingConductor.getVibration().id, vibrationEndInfo);
+            Trace.traceBegin(TRACE_TAG_VIBRATOR, "notifyVibrationComplete");
+            try {
+                mExecutingConductor.notifyVibrationComplete(vibrationEndInfo);
+            } finally {
+                Trace.traceEnd(TRACE_TAG_VIBRATOR);
+            }
         }
     }
 
     private void playVibration() {
-        Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "playVibration");
+        Trace.traceBegin(TRACE_TAG_VIBRATOR, "playVibration");
         try {
             mExecutingConductor.prepareToStart();
             while (!mExecutingConductor.isFinished()) {
@@ -311,7 +285,7 @@ final class VibrationThread extends Thread {
                 }
             }
         } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            Trace.traceEnd(TRACE_TAG_VIBRATOR);
         }
     }
 }

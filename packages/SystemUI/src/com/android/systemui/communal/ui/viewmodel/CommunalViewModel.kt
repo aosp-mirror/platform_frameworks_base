@@ -99,7 +99,7 @@ constructor(
 
     private val logger = Logger(logBuffer, "CommunalViewModel")
 
-    private val _isMediaHostVisible =
+    private val isMediaHostVisible =
         conflatedCallbackFlow {
                 val callback = { visible: Boolean ->
                     trySend(visible)
@@ -117,11 +117,19 @@ constructor(
                 mediaHost.updateViewVisibility()
                 emit(mediaHost.visible)
             }
+            .distinctUntilChanged()
             .onEach { logger.d({ "_isMediaHostVisible: $bool1" }) { bool1 = it } }
             .flowOn(mainDispatcher)
 
     /** Communal content saved from the previous emission when the flow is active (not "frozen"). */
     private var frozenCommunalContent: List<CommunalContentModel>? = null
+
+    private val ongoingContent =
+        isMediaHostVisible.flatMapLatest { isMediaHostVisible ->
+            communalInteractor.ongoingContent(isMediaHostVisible).onEach {
+                mediaHost.updateViewVisibility()
+            }
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val latestCommunalContent: Flow<List<CommunalContentModel>> =
@@ -130,14 +138,11 @@ constructor(
                 if (isTutorialMode) {
                     return@flatMapLatest flowOf(communalInteractor.tutorialContent)
                 }
-                val ongoingContent =
-                    _isMediaHostVisible.flatMapLatest { communalInteractor.getOngoingContent(it) }
                 combine(
                     ongoingContent,
                     communalInteractor.widgetContent,
                     communalInteractor.ctaTileContent,
-                ) { ongoing, widgets, ctaTile,
-                    ->
+                ) { ongoing, widgets, ctaTile ->
                     ongoing + widgets + ctaTile
                 }
             }
@@ -160,10 +165,10 @@ constructor(
         allOf(
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Communal,
-                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB,
                 ),
                 keyguardInteractor.isKeyguardOccluded,
-                not(keyguardInteractor.isAbleToDream)
+                not(keyguardInteractor.isAbleToDream),
             )
             .distinctUntilChanged()
             .onEach { logger.d("isCommunalContentFlowFrozen: $it") }
@@ -196,7 +201,7 @@ constructor(
         combine(
                 keyguardTransitionInteractor.isFinishedIn(
                     scene = Scenes.Communal,
-                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB
+                    stateWithoutSceneContainer = KeyguardState.GLANCEABLE_HUB,
                 ),
                 communalInteractor.isIdleOnCommunal,
                 shadeInteractor.isAnyFullyExpanded,
@@ -209,7 +214,7 @@ constructor(
         object : View.AccessibilityDelegate() {
             override fun onInitializeAccessibilityNodeInfo(
                 host: View,
-                info: AccessibilityNodeInfo
+                info: AccessibilityNodeInfo,
             ) {
                 super.onInitializeAccessibilityNodeInfo(host, info)
                 // Hint user to long press in order to enter edit mode
@@ -218,7 +223,7 @@ constructor(
                         AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
                         resources
                             .getString(R.string.accessibility_action_label_edit_widgets)
-                            .lowercase()
+                            .lowercase(),
                     )
                 )
             }
@@ -226,7 +231,7 @@ constructor(
             override fun performAccessibilityAction(
                 host: View,
                 action: Int,
-                args: Bundle?
+                args: Bundle?,
             ): Boolean {
                 when (action) {
                     AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id -> {
@@ -254,15 +259,14 @@ constructor(
             expandedMatchesParentHeight = true
             showsOnlyActiveMedia = false
             falsingProtectionNeeded = false
+            disablePagination = true
             init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
         }
     }
 
-    override fun onOpenWidgetEditor(
-        shouldOpenWidgetPickerOnStart: Boolean,
-    ) {
+    override fun onOpenWidgetEditor(shouldOpenWidgetPickerOnStart: Boolean) {
         persistScrollPosition()
-        communalInteractor.showWidgetEditor(selectedKey.value, shouldOpenWidgetPickerOnStart)
+        communalInteractor.showWidgetEditor(shouldOpenWidgetPickerOnStart)
     }
 
     override fun onDismissCtaTile() {
@@ -272,8 +276,8 @@ constructor(
         }
     }
 
-    override fun onTapWidget(componentName: ComponentName, priority: Int) {
-        metricsLogger.logTapWidget(componentName.flattenToString(), priority)
+    override fun onTapWidget(componentName: ComponentName, rank: Int) {
+        metricsLogger.logTapWidget(componentName.flattenToString(), rank)
     }
 
     fun onClick() {

@@ -104,7 +104,7 @@ public class DesktopAppCompatAspectRatioPolicy {
      * resizability.
      */
     private float getFixedOrientationLetterboxAspectRatio(@NonNull Task task) {
-        return mActivityRecord.shouldCreateCompatDisplayInsets()
+        return mActivityRecord.shouldCreateAppCompatDisplayInsets()
                 ? getDefaultMinAspectRatioForUnresizableApps(task)
                 : getDefaultMinAspectRatio(task);
     }
@@ -188,10 +188,6 @@ public class DesktopAppCompatAspectRatioPolicy {
         }
 
         final ActivityInfo info = mActivityRecord.info;
-        if (info.applicationInfo == null) {
-            return info.getMinAspectRatio();
-        }
-
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides();
         if (shouldApplyUserMinAspectRatioOverride(task)) {
@@ -199,8 +195,10 @@ public class DesktopAppCompatAspectRatioPolicy {
         }
 
         if (!aspectRatioOverrides.shouldOverrideMinAspectRatio()
-                && !mAppCompatOverrides.getAppCompatCameraOverrides()
-                .shouldOverrideMinAspectRatioForCamera()) {
+                && !AppCompatCameraPolicy.shouldOverrideMinAspectRatioForCamera(mActivityRecord)) {
+            if (mActivityRecord.isUniversalResizeable()) {
+                return 0;
+            }
             return info.getMinAspectRatio();
         }
 
@@ -244,6 +242,9 @@ public class DesktopAppCompatAspectRatioPolicy {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMaxAspectRatio();
         }
+        if (mActivityRecord.isUniversalResizeable()) {
+            return 0;
+        }
         return mActivityRecord.info.getMaxAspectRatio();
     }
 
@@ -258,13 +259,13 @@ public class DesktopAppCompatAspectRatioPolicy {
      * Whether we should apply the user aspect ratio override to the min aspect ratio for the
      * current app.
      */
-    private boolean shouldApplyUserMinAspectRatioOverride(@NonNull Task task) {
+    boolean shouldApplyUserMinAspectRatioOverride(@NonNull Task task) {
         if (!shouldEnableUserAspectRatioSettings(task)) {
             return false;
         }
 
         final int userAspectRatioCode = mAppCompatOverrides.getAppCompatAspectRatioOverrides()
-                .getUserMinAspectRatioOverrideCode();
+                .getUserMinAspectRatioOverrideType();
 
         return userAspectRatioCode != USER_MIN_ASPECT_RATIO_UNSET
                 && userAspectRatioCode != USER_MIN_ASPECT_RATIO_APP_DEFAULT

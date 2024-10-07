@@ -181,7 +181,7 @@ public class CreateUserDialogController {
      * admin status.
      */
     public Dialog createDialog(Activity activity,
-            ActivityStarter activityStarter, boolean canCreateAdminUser,
+            @NonNull ActivityStarter activityStarter, boolean canCreateAdminUser,
             NewUserData successCallback, Runnable cancelCallback) {
         mActivity = activity;
         mCustomDialogHelper = new CustomDialogHelper(activity);

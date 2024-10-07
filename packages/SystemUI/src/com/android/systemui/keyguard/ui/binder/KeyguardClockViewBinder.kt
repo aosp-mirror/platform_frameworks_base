@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSize
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
+import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -58,6 +59,7 @@ object KeyguardClockViewBinder {
         keyguardClockInteractor: KeyguardClockInteractor,
         blueprintInteractor: KeyguardBlueprintInteractor,
         rootViewModel: KeyguardRootViewModel,
+        aodBurnInViewModel: AodBurnInViewModel,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         disposables +=
@@ -78,7 +80,7 @@ object KeyguardClockViewBinder {
                             updateBurnInLayer(
                                 keyguardRootView,
                                 viewModel,
-                                viewModel.clockSize.value
+                                viewModel.clockSize.value,
                             )
                             applyConstraints(clockSection, keyguardRootView, true)
                         }
@@ -114,7 +116,7 @@ object KeyguardClockViewBinder {
                         if (!MigrateClocksToBlueprint.isEnabled) return@launch
                         combine(
                                 viewModel.hasAodIcons,
-                                rootViewModel.isNotifIconContainerVisible.map { it.value }
+                                rootViewModel.isNotifIconContainerVisible.map { it.value },
                             ) { hasIcon, isVisible ->
                                 hasIcon && isVisible
                             }
@@ -130,13 +132,13 @@ object KeyguardClockViewBinder {
 
                     launch {
                         if (!MigrateClocksToBlueprint.isEnabled) return@launch
-                        rootViewModel.burnInModel.collect { burnInModel ->
+                        aodBurnInViewModel.movement.collect { burnInModel ->
                             viewModel.currentClock.value?.let {
                                 it.largeClock.layout.applyAodBurnIn(
                                     AodClockBurnInModel(
                                         translationX = burnInModel.translationX.toFloat(),
                                         translationY = burnInModel.translationY.toFloat(),
-                                        scale = burnInModel.scale
+                                        scale = burnInModel.scale,
                                     )
                                 )
                             }
@@ -175,7 +177,7 @@ object KeyguardClockViewBinder {
     private fun cleanupClockViews(
         currentClock: ClockController?,
         rootView: ConstraintLayout,
-        burnInLayer: Layer?
+        burnInLayer: Layer?,
     ) {
         if (lastClock == currentClock) {
             return
@@ -192,10 +194,7 @@ object KeyguardClockViewBinder {
     }
 
     @VisibleForTesting
-    fun addClockViews(
-        clockController: ClockController?,
-        rootView: ConstraintLayout,
-    ) {
+    fun addClockViews(clockController: ClockController?, rootView: ConstraintLayout) {
         // We'll collect the same clock when exiting wallpaper picker without changing clock
         // so we need to remove clock views from parent before addView again
         clockController?.let { clock ->

@@ -236,6 +236,13 @@ public class BiometricLoggerTest {
     }
 
     @Test
+    public void testFingerprintsLoe() {
+        mLogger = createLogger();
+        mLogger.logFingerprintsLoe();
+        verify(mSink).reportFingerprintsLoe(eq(DEFAULT_MODALITY));
+    }
+
+    @Test
     public void testALSCallback() {
         mLogger = createLogger();
         final CallbackWithProbe<Probe> callback =

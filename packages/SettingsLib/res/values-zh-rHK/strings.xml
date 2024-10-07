@@ -100,7 +100,7 @@
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"使用中。右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"左：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>，右：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"左耳機：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -495,7 +495,7 @@
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"剩餘電量時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"剩餘電量時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後充滿電"</string>
+    <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g>後完成充電"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充滿電"</string>
     <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> - 為保護電池，目前暫停充電"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> ‑ 充電中"</string>
@@ -564,6 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"鬧鐘和提醒"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"允許此應用程式設定鬧鐘及安排具時效性的操作。這讓應用程式在背景中執行，因此可能會較耗電。\n\n如果關閉此權限，此應用程式將不會在預定時間響起已設定的鬧鐘，亦不會就特定時間的活動傳送通知。"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"日程表, 鬧鐘, 提醒, 時鐘"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"請勿騷擾"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"請勿騷擾"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"開啟「請勿騷擾」模式"</string>
@@ -581,8 +582,10 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"剛剛"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"此手機"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"此平板電腦"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此電腦 (內置)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"麥克風 (內置)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"插座喇叭"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部裝置"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"已連接的裝置"</string>
@@ -683,7 +686,11 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已啟用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"你的裝置必須重新開機，才能套用此變更。請立即重新開機或取消。"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"有線耳機"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有線耳機"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"耳機"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB 喇叭"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"麥克風插孔"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB 麥克風"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"開啟"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"關閉"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"流動網絡供應商網絡正在變更"</string>

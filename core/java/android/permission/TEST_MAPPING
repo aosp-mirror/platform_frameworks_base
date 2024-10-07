@@ -1,39 +1,15 @@
 {
     "presubmit": [
         {
-            "name": "CtsPermissionTestCases",
-            "options": [
-                {
-                    "include-filter": "android.permission.cts.PermissionControllerTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.RuntimePermissionPresentationInfoTest"
-                }
-            ]
+            "name": "CtsPermissionTestCases_Platform"
         }
     ],
     "postsubmit": [
         {
-            "name": "CtsVirtualDevicesAudioTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "include-filter": "android.virtualdevice.cts.audio.VirtualAudioPermissionTest"
-                }
-            ]
+            "name": "CtsVirtualDevicesAudioTestCases_audio_virtualaudiopermissiontest"
         },
         {
-            "name": "CtsVirtualDevicesAppLaunchTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "include-filter": "android.virtualdevice.cts.applaunch.VirtualDevicePermissionTest"
-                }
-            ]
+            "name": "CtsVirtualDevicesAppLaunchTestCases_applaunch_virtualdevicepermissiontest"
         }
     ]
 }

@@ -139,7 +139,7 @@ interface IUserManager {
     boolean isUserForeground(int userId);
     boolean isUserVisible(int userId);
     int[] getVisibleUsers();
-    int getMainDisplayIdAssignedToUser();
+    int getMainDisplayIdAssignedToUser(int userId);
     boolean isForegroundUserAdmin();
     boolean isUserNameSet(int userId);
     boolean hasRestrictedProfiles(int userId);

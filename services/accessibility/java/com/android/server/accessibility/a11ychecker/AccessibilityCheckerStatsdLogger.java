@@ -16,9 +16,8 @@
 
 package com.android.server.accessibility.a11ychecker;
 
+import android.text.TextUtils;
 import android.util.Slog;
-
-import com.android.server.accessibility.a11ychecker.A11yCheckerProto.AccessibilityCheckResultReported;
 
 import java.util.Set;
 
@@ -35,11 +34,11 @@ public class AccessibilityCheckerStatsdLogger {
     /**
      * Writes results to statsd.
      */
-    public static void logResults(Set<AccessibilityCheckResultReported> results) {
-        Slog.i(LOG_TAG, String.format("Writing %d AccessibilityCheckResultReported events",
+    public static void logResults(Set<AndroidAccessibilityCheckerResult> results) {
+        Slog.i(LOG_TAG, TextUtils.formatSimple("Writing %d AccessibilityCheckResultReported events",
                 results.size()));
 
-        for (AccessibilityCheckResultReported result : results) {
+        for (AndroidAccessibilityCheckerResult result : results) {
             AccessibilityCheckerStatsLog.write(ATOM_ID,
                     result.getPackageName(),
                     result.getAppVersionCode(),

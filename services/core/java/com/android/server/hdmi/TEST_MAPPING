@@ -1,51 +1,18 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.hdmi"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_hdmi_Presubmit"
     }
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.hdmi"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_hdmi"
     }
   ],
   // Postsubmit tests for TV devices
   "tv-postsubmit": [
     {
-      "name": "HdmiCecTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "include-filter": "android.hardware.hdmi"
-        }
-      ],
+      "name": "HdmiCecTests_hardware_hdmi",
       "file_patterns": [
         "(/|^)DeviceFeature[^/]*", "(/|^)Hdmi[^/]*"
       ]

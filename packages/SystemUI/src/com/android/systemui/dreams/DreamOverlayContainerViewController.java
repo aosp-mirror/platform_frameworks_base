@@ -381,16 +381,17 @@ public class DreamOverlayContainerViewController extends
     }
 
     /**
-     * Handle the dream waking up and run any necessary animations.
+     * Handle the dream waking up.
      */
-    public void wakeUp() {
+    public void onWakeUp() {
+        // TODO(b/361872929): clean up this bool as it doesn't do anything anymore
         // When swiping causes wakeup, do not run any animations as the dream should exit as soon
         // as possible.
         if (mWakingUpFromSwipe) {
             return;
         }
 
-        mDreamOverlayAnimationsController.wakeUp();
+        mDreamOverlayAnimationsController.onWakeUp();
     }
 
     @Override

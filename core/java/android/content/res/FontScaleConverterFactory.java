@@ -19,6 +19,7 @@ package android.content.res;
 import android.annotation.AnyThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.util.MathUtils;
 import android.util.SparseArray;
 
@@ -34,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
  *
  * @hide
  */
+@RavenwoodKeepWholeClass
 public class FontScaleConverterFactory {
     private static final float SCALE_KEY_MULTIPLIER = 100f;
 

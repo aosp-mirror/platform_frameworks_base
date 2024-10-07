@@ -62,7 +62,7 @@ public class CustomEnergyConsumerPowerCalculator extends PowerCalculator {
                     builder.getAggregateBatteryConsumerBuilder(
                             BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
             for (int i = 0; i < customEnergyConsumerPowerMah.length; i++) {
-                deviceBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
+                deviceBatteryConsumerBuilder.setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
                         customEnergyConsumerPowerMah[i]);
             }
@@ -72,7 +72,7 @@ public class CustomEnergyConsumerPowerCalculator extends PowerCalculator {
                     builder.getAggregateBatteryConsumerBuilder(
                             BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS);
             for (int i = 0; i < totalAppPowerMah.length; i++) {
-                appsBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
+                appsBatteryConsumerBuilder.setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
                         totalAppPowerMah[i]);
             }
@@ -96,7 +96,7 @@ public class CustomEnergyConsumerPowerCalculator extends PowerCalculator {
                 newTotalPowerMah = totalPowerMah;
             }
             for (int i = 0; i < customEnergyConsumerPowerMah.length; i++) {
-                app.setConsumedPowerForCustomComponent(
+                app.setConsumedPower(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID + i,
                         customEnergyConsumerPowerMah[i]);
                 if (!app.isVirtualUid()) {

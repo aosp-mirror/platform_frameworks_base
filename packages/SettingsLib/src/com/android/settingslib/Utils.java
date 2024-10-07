@@ -30,9 +30,10 @@ import android.hardware.usb.flags.Flags;
 import android.icu.text.NumberFormat;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TetheringManager;
-import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.VcnUtils;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -495,7 +496,7 @@ public class Utils {
                 || packageName.equals(sServicesSystemSharedLibPackageName)
                 || packageName.equals(sSharedSystemSharedLibPackageName)
                 || packageName.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
-                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName()))
+                || (updateServiceV2() && packageName.equals(getDefaultWebViewPackageName(pm)))
                 || isDeviceProvisioningPackage(resources, packageName);
     }
 
@@ -511,7 +512,7 @@ public class Utils {
 
     /** Fetch the package name of the default WebView provider. */
     @Nullable
-    private static String getDefaultWebViewPackageName() {
+    private static String getDefaultWebViewPackageName(PackageManager pm) {
         if (sDefaultWebViewPackageName != null) {
             return sDefaultWebViewPackageName;
         }
@@ -519,9 +520,8 @@ public class Utils {
         WebViewProviderInfo provider = null;
 
         if (android.webkit.Flags.updateServiceIpcWrapper()) {
-            WebViewUpdateManager manager = WebViewUpdateManager.getInstance();
-            if (manager != null) {
-                provider = manager.getDefaultWebViewPackage();
+            if (pm.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)) {
+                provider = WebViewUpdateManager.getInstance().getDefaultWebViewPackage();
             }
         } else {
             try {
@@ -738,14 +738,9 @@ public class Utils {
      * @param networkCapabilities NetworkCapabilities of the network.
      */
     @Nullable
-    public static WifiInfo tryGetWifiInfoForVcn(NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.getTransportInfo() == null
-                || !(networkCapabilities.getTransportInfo() instanceof VcnTransportInfo)) {
-            return null;
-        }
-        VcnTransportInfo vcnTransportInfo =
-                (VcnTransportInfo) networkCapabilities.getTransportInfo();
-        return vcnTransportInfo.getWifiInfo();
+    public static WifiInfo tryGetWifiInfoForVcn(
+            ConnectivityManager connectivityMgr, NetworkCapabilities networkCapabilities) {
+        return VcnUtils.getWifiInfoFromVcnCaps(connectivityMgr, networkCapabilities);
     }
 
     /** Whether there is any incompatible chargers in the current UsbPort? */

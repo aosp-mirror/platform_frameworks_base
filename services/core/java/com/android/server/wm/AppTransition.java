@@ -88,9 +88,9 @@ import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpe
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperIntraOpenExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_wallpaperOpenExitAnimation;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_APP_TRANSITIONS_ANIM;
 import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
 import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -134,8 +134,8 @@ import android.view.animation.TranslateAnimation;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
-import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.protolog.ProtoLog;
+import com.android.internal.protolog.common.LogLevel;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
@@ -402,8 +402,7 @@ public class AppTransition implements Dump {
             mRemoteAnimationController.goodToGo(transit);
         } else if ((isTaskOpenTransitOld(transit) || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
                 && topOpeningAnim != null) {
-            if (mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
-                    && mService.getRecentsAnimationController() == null) {
+            if (mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()) {
                 final NavBarFadeAnimationController controller =
                         new NavBarFadeAnimationController(mDisplayContent);
                 // For remote animation case, the nav bar fades out and in is controlled by the
@@ -471,11 +470,9 @@ public class AppTransition implements Dump {
     }
 
     private boolean needsBoosting() {
-        final boolean recentsAnimRunning = mService.getRecentsAnimationController() != null;
         return !mNextAppTransitionRequests.isEmpty()
                 || mAppTransitionState == APP_STATE_READY
-                || mAppTransitionState == APP_STATE_RUNNING
-                || recentsAnimRunning;
+                || mAppTransitionState == APP_STATE_RUNNING;
     }
 
     void registerListenerLocked(AppTransitionListener listener) {

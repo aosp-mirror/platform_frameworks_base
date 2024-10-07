@@ -190,6 +190,9 @@ public class StatusBarShellCommand extends ShellCommand {
                 case "notification-icons":
                     info.setNotificationIconsDisabled(true);
                     break;
+                case "quick-settings":
+                    info.setQuickSettingsDisabled(true);
+                    break;
                 default:
                     break;
             }
@@ -277,6 +280,7 @@ public class StatusBarShellCommand extends ShellCommand {
         pw.println("        system-icons        - disable system icons appearing in status bar");
         pw.println("        clock               - disable clock appearing in status bar");
         pw.println("        notification-icons  - disable notification icons from status bar");
+        pw.println("        quick-settings      - disable Quick Settings");
         pw.println("");
         pw.println("  tracing (start | stop)");
         pw.println("    Start or stop SystemUI tracing");

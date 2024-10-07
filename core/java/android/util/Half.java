@@ -19,6 +19,7 @@ package android.util;
 import android.annotation.HalfFloat;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import libcore.util.FP16;
 
@@ -92,6 +93,7 @@ import libcore.util.FP16;
  * <p>This table shows that numbers higher than 1024 lose all fractional precision.</p>
  */
 @SuppressWarnings("SimplifiableIfStatement")
+@RavenwoodKeepWholeClass
 public final class Half extends Number implements Comparable<Half> {
     /**
      * The number of bits used to represent a half-precision float value.

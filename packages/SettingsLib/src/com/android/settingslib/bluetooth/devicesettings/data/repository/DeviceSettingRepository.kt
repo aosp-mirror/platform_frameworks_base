@@ -22,12 +22,18 @@ import android.text.TextUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.devicesettings.ActionSwitchPreference
 import com.android.settingslib.bluetooth.devicesettings.DeviceSetting
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingContract
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingId
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingItem
 import com.android.settingslib.bluetooth.devicesettings.DeviceSettingsConfig
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingFooterPreference
+import com.android.settingslib.bluetooth.devicesettings.DeviceSettingHelpPreference
 import com.android.settingslib.bluetooth.devicesettings.MultiTogglePreference
 import com.android.settingslib.bluetooth.devicesettings.ToggleInfo
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.AppProvidedItem
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.BuiltinItem.BluetoothProfilesItem
+import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigItemModel.BuiltinItem.CommonBuiltinItem
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingConfigModel
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingIcon
 import com.android.settingslib.bluetooth.devicesettings.shared.model.DeviceSettingModel
@@ -97,13 +103,23 @@ class DeviceSettingRepositoryImpl(
         DeviceSettingConfigModel(
             mainItems = mainContentItems.map { it.toModel() },
             moreSettingsItems = moreSettingsItems.map { it.toModel() },
-            moreSettingsPageFooter = moreSettingsFooter)
+            moreSettingsHelpItem = moreSettingsHelpItem?.toModel(), )
 
     private fun DeviceSettingItem.toModel(): DeviceSettingConfigItemModel {
         return if (!TextUtils.isEmpty(preferenceKey)) {
-            DeviceSettingConfigItemModel.BuiltinItem(settingId, preferenceKey!!)
+            if (settingId == DeviceSettingId.DEVICE_SETTING_ID_BLUETOOTH_PROFILES) {
+                BluetoothProfilesItem(
+                    settingId,
+                    highlighted,
+                    preferenceKey!!,
+                    extras.getStringArrayList(DeviceSettingContract.INVISIBLE_PROFILES)
+                        ?: emptyList()
+                )
+            } else {
+                CommonBuiltinItem(settingId, highlighted, preferenceKey!!)
+            }
         } else {
-            DeviceSettingConfigItemModel.AppProvidedItem(settingId)
+            AppProvidedItem(settingId, highlighted)
         }
     }
 
@@ -143,7 +159,7 @@ class DeviceSettingRepositoryImpl(
                     title = pref.title,
                     toggles = pref.toggleInfos.map { it.toModel() },
                     isAllowedChangingState = pref.isAllowedChangingState,
-                    isActive = true,
+                    isActive = pref.isActive,
                     state = DeviceSettingStateModel.MultiTogglePreferenceState(pref.state),
                     updateState = { newState ->
                         coroutineScope.launch(backgroundCoroutineContext) {
@@ -151,6 +167,12 @@ class DeviceSettingRepositoryImpl(
                         }
                     },
                 )
+            is DeviceSettingFooterPreference -> DeviceSettingModel.FooterPreference(
+                cachedDevice = cachedDevice,
+                id = settingId, footerText = pref.footerText)
+            is DeviceSettingHelpPreference -> DeviceSettingModel.HelpPreference(
+                cachedDevice = cachedDevice,
+                id = settingId, intent = pref.intent)
             else -> DeviceSettingModel.Unknown(cachedDevice, settingId)
         }
 

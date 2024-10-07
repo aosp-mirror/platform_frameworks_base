@@ -16,7 +16,6 @@
 
 package com.android.credentialmanager.common.ui.components
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
@@ -93,15 +92,16 @@ fun WearButtonText(
 fun WearSecondaryLabel(
     text: String,
     color: Color = WearMaterialTheme.colors.onSurface,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    maxLines: Int = 1,
 ) {
     Text(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.wrapContentSize(),
         text = text,
         color = color,
         style = WearMaterialTheme.typography.caption1,
         overflow = TextOverflow.Ellipsis,
         textAlign = TextAlign.Start,
-        maxLines = 1,
+        maxLines = maxLines,
     )
 }

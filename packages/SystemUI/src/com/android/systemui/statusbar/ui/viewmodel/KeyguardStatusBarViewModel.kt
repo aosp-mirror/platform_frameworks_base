@@ -21,10 +21,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import javax.inject.Inject
@@ -58,7 +58,7 @@ constructor(
 ) {
 
     private val showingHeadsUpStatusBar: Flow<Boolean> =
-        if (NotificationsHeadsUpRefactor.isEnabled) {
+        if (SceneContainerFlag.isEnabled) {
             headsUpNotificationInteractor.showHeadsUpStatusBar
         } else {
             flowOf(false)

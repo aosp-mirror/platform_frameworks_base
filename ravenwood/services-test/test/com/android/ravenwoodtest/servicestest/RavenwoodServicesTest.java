@@ -16,6 +16,7 @@
 
 package com.android.ravenwoodtest.servicestest;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -62,7 +63,9 @@ public class RavenwoodServicesTest {
         final SerialManager service = (SerialManager)
                 mRavenwood.getContext().getSystemService(Context.SERIAL_SERVICE);
         final String[] ports = service.getSerialPorts();
-        assertEquals(0, ports.length);
+        final String[] refPorts = mRavenwood.getContext().getResources().getStringArray(
+                com.android.internal.R.array.config_serialPorts);
+        assertArrayEquals(refPorts, ports);
     }
 
     @Test

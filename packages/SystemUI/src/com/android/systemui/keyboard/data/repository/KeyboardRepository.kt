@@ -25,7 +25,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.inputdevice.data.repository.InputDeviceRepository
 import com.android.systemui.inputdevice.data.repository.InputDeviceRepository.DeviceAdded
-import com.android.systemui.inputdevice.data.repository.InputDeviceRepository.DeviceChange
 import com.android.systemui.inputdevice.data.repository.InputDeviceRepository.DeviceRemoved
 import com.android.systemui.inputdevice.data.repository.InputDeviceRepository.FreshStart
 import com.android.systemui.keyboard.data.model.Keyboard
@@ -62,6 +61,9 @@ interface KeyboardRepository {
      */
     val newlyConnectedKeyboard: Flow<Keyboard>
 
+    /** Emits set of currently connected keyboards */
+    val connectedKeyboards: Flow<Set<Keyboard>>
+
     /**
      * Emits [BacklightModel] whenever user changes backlight level from keyboard press. Can only
      * happen when physical keyboard is connected
@@ -75,36 +77,35 @@ class KeyboardRepositoryImpl
 constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val inputManager: InputManager,
-    inputDeviceRepository: InputDeviceRepository
+    inputDeviceRepository: InputDeviceRepository,
 ) : KeyboardRepository {
-
-    private val keyboardsChange: Flow<Pair<Collection<Int>, DeviceChange>> =
-        inputDeviceRepository.deviceChange
-            .map { (ids, change) -> ids.filter { id -> isPhysicalFullKeyboard(id) } to change }
-            .filter { (_, change) ->
-                when (change) {
-                    FreshStart -> true
-                    is DeviceAdded -> isPhysicalFullKeyboard(change.deviceId)
-                    is DeviceRemoved -> isPhysicalFullKeyboard(change.deviceId)
-                }
-            }
 
     @FlowPreview
     override val newlyConnectedKeyboard: Flow<Keyboard> =
-        keyboardsChange
+        inputDeviceRepository.deviceChange
             .flatMapConcat { (devices, operation) ->
                 when (operation) {
-                    FreshStart -> devices.asFlow()
-                    is DeviceAdded -> flowOf(operation.deviceId)
+                    FreshStart -> devices.filter { id -> isPhysicalFullKeyboard(id) }.asFlow()
+                    is DeviceAdded -> {
+                        if (isPhysicalFullKeyboard(operation.deviceId)) flowOf(operation.deviceId)
+                        else emptyFlow()
+                    }
                     is DeviceRemoved -> emptyFlow()
                 }
             }
             .mapNotNull { deviceIdToKeyboard(it) }
             .flowOn(backgroundDispatcher)
 
+    override val connectedKeyboards: Flow<Set<Keyboard>> =
+        inputDeviceRepository.deviceChange
+            .map { (deviceIds, _) -> deviceIds }
+            .map { deviceIds -> deviceIds.filter { isPhysicalFullKeyboard(it) } }
+            .distinctUntilChanged()
+            .map { deviceIds -> deviceIds.mapNotNull { deviceIdToKeyboard(it) }.toSet() }
+
     override val isAnyKeyboardConnected: Flow<Boolean> =
-        keyboardsChange
-            .map { (devices, _) -> devices.isNotEmpty() }
+        inputDeviceRepository.deviceChange
+            .map { (ids, _) -> ids.any { id -> isPhysicalFullKeyboard(id) } }
             .distinctUntilChanged()
             .flowOn(backgroundDispatcher)
 

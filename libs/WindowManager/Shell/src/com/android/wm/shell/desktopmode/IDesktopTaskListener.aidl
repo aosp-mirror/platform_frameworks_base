@@ -27,4 +27,10 @@ interface IDesktopTaskListener {
 
     /** @deprecated this is no longer supported. */
     oneway void onStashedChanged(int displayId, boolean stashed);
+
+    /**
+     * Shows taskbar corner radius when running desktop tasks are updated if
+     * [hasTasksRequiringTaskbarRounding] is true.
+     */
+    oneway void onTaskbarCornerRoundingUpdate(boolean hasTasksRequiringTaskbarRounding);
 }

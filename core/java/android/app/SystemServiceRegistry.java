@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.appfunctions.flags.Flags.enableAppFunctionManager;
+import static android.server.Flags.removeGameManagerServiceFromWear;
 
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
@@ -31,6 +32,7 @@ import android.app.admin.IDevicePolicyManager;
 import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appfunctions.AppFunctionManager;
+import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.app.appfunctions.IAppFunctionManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
@@ -48,6 +50,8 @@ import android.app.sdksandbox.SdkSandboxManagerFrameworkInitializer;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
 import android.app.smartspace.SmartspaceManager;
+import android.app.supervision.ISupervisionManager;
+import android.app.supervision.SupervisionManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timedetector.TimeDetectorImpl;
@@ -71,6 +75,7 @@ import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.EnabledSince;
 import android.content.ClipboardManager;
 import android.content.ContentCaptureOptions;
@@ -101,6 +106,7 @@ import android.debug.IAdbManager;
 import android.devicelock.DeviceLockFrameworkInitializer;
 import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
+import android.hardware.ISensorPrivacyManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
 import android.hardware.SensorPrivacyManager;
@@ -224,6 +230,7 @@ import android.print.IPrintManager;
 import android.print.PrintManager;
 import android.provider.E2eeContactKeysManager;
 import android.provider.ProviderFrameworkInitializer;
+import android.ranging.RangingFrameworkInitializer;
 import android.safetycenter.SafetyCenterFrameworkInitializer;
 import android.scheduling.SchedulingFrameworkInitializer;
 import android.security.FileIntegrityManager;
@@ -303,6 +310,16 @@ public final class SystemServiceRegistry {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long ENABLE_CHECKING_TELEPHONY_FEATURES_FOR_VCN = 330902016;
+
+    /**
+     * After {@link Build.VERSION_CODES.VANILLA_ICE_CREAM}, Wear devices will be allowed to publish
+     * no {@link GameManager} instance. This is because the respective system service is no longer
+     * started for Wear devices given that the applications of the service do not currently apply to
+     * Wear.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long NULL_GAME_MANAGER_IN_WEAR = 340929737;
 
     /**
      * The corresponding vendor API for Android V
@@ -475,7 +492,7 @@ public final class SystemServiceRegistry {
                 if (service == null
                         && ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
                         && android.server.Flags.allowRemovingVpnService()) {
-                    throw new ServiceNotFoundException(Context.VPN_MANAGEMENT_SERVICE);
+                    return null;
                 }
                 return new VpnManager(ctx, service);
             }});
@@ -589,6 +606,11 @@ public final class SystemServiceRegistry {
             @Override
             public TextServicesManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
+                 if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                        && ServiceManager.getService(Context.TEXT_SERVICES_MANAGER_SERVICE) == null
+                        && android.server.Flags.removeTextService()) {
+                    return null;
+                }
                 return TextServicesManager.createInstance(ctx);
             }});
 
@@ -704,8 +726,12 @@ public final class SystemServiceRegistry {
         registerService(Context.SENSOR_PRIVACY_SERVICE, SensorPrivacyManager.class,
                 new CachedServiceFetcher<SensorPrivacyManager>() {
                     @Override
-                    public SensorPrivacyManager createService(ContextImpl ctx) {
-                        return SensorPrivacyManager.getInstance(ctx);
+                    public SensorPrivacyManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(
+                                Context.SENSOR_PRIVACY_SERVICE);
+                        return SensorPrivacyManager.getInstance(
+                                ctx, ISensorPrivacyManager.Stub.asInterface(b));
                     }});
 
         registerService(Context.STATUS_BAR_SERVICE, StatusBarManager.class,
@@ -935,8 +961,10 @@ public final class SystemServiceRegistry {
                         @Override
                         public AppFunctionManager createService(ContextImpl ctx)
                                 throws ServiceNotFoundException {
+                            if (!AppFunctionManagerConfiguration.isSupported(ctx)) {
+                                return null;
+                            }
                             IAppFunctionManager service;
-                            //TODO(b/357551503): If the feature not present avoid look up every time
                             service = IAppFunctionManager.Stub.asInterface(
                                     ServiceManager.getServiceOrThrow(Context.APP_FUNCTION_SERVICE));
                             return new AppFunctionManager(service, ctx.getOuterContext());
@@ -1609,8 +1637,24 @@ public final class SystemServiceRegistry {
                     @Override
                     public GameManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new GameManager(ctx.getOuterContext(),
-                                ctx.mMainThread.getHandler());
+                        final PackageManager pm = ctx.getPackageManager();
+                        final boolean isWatch = pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
+                        final IBinder binder =
+                                // Allow a potentially absent GameManagerService only for
+                                // Wear devices. For non-Wear devices, throw a
+                                // ServiceNotFoundException when the service is missing.
+                                (removeGameManagerServiceFromWear() && isWatch)
+                                        ? ServiceManager.getService(Context.GAME_SERVICE)
+                                        : ServiceManager.getServiceOrThrow(Context.GAME_SERVICE);
+
+                        if (binder == null
+                                && Compatibility.isChangeEnabled(NULL_GAME_MANAGER_IN_WEAR)) {
+                            return null;
+                        }
+
+                        return new GameManager(
+                                ctx.getOuterContext(),
+                                IGameManagerService.Stub.asInterface(binder));
                     }
                 });
 
@@ -1652,11 +1696,20 @@ public final class SystemServiceRegistry {
                     @Override
                     public WearableSensingManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                        IBinder iBinder = ServiceManager.getService(
                                 Context.WEARABLE_SENSING_SERVICE);
-                        IWearableSensingManager manager =
-                                IWearableSensingManager.Stub.asInterface(iBinder);
-                        return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        if (iBinder != null) {
+                            IWearableSensingManager manager =
+                                    IWearableSensingManager.Stub.asInterface(iBinder);
+                            return new WearableSensingManager(ctx.getOuterContext(), manager);
+                        }
+                        // Wear intentionally removes the service, so do not throw a
+                        // ServiceNotFoundException when the service is not absent.
+                        if (ctx.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH)
+                                && android.server.Flags.removeWearableSensingServiceFromWear()) {
+                            return null;
+                        }
+                        throw new ServiceNotFoundException(Context.WEARABLE_SENSING_SERVICE);
                     }});
 
         registerService(Context.ON_DEVICE_INTELLIGENCE_SERVICE, OnDeviceIntelligenceManager.class,
@@ -1703,6 +1756,21 @@ public final class SystemServiceRegistry {
                         return new E2eeContactKeysManager(ctx);
                     }});
 
+        registerService(Context.SUPERVISION_SERVICE, SupervisionManager.class,
+                new CachedServiceFetcher<>() {
+                    @Override
+                    public SupervisionManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        if (!android.app.supervision.flags.Flags.supervisionApi()) {
+                            throw new ServiceNotFoundException(
+                                    "SupervisionManager is not supported");
+                        }
+                        IBinder iBinder = ServiceManager.getServiceOrThrow(
+                                Context.SUPERVISION_SERVICE);
+                        ISupervisionManager service = ISupervisionManager.Stub.asInterface(iBinder);
+                        return new SupervisionManager(ctx, service);
+                    }
+                });
         // DO NOT do a flag check like this unless the flag is read-only.
         // (because this code is executed during preload in zygote.)
         // If the flag is mutable, the check should be inside CachedServiceFetcher.
@@ -1758,6 +1826,12 @@ public final class SystemServiceRegistry {
             if (android.webkit.Flags.updateServiceIpcWrapper()) {
                 WebViewBootstrapFrameworkInitializer.registerServiceWrappers();
             }
+            // This is guarded by aconfig flag "com.android.ranging.flags.ranging_stack_enabled"
+            // when the build flag RELEASE_RANGING_STACK is enabled. When disabled, this calls the
+            // mock RangingFrameworkInitializer#registerServiceWrappers which is no-op. As the
+            // aconfig lib for ranging module is built only if  RELEASE_RANGING_STACK is enabled,
+            // flagcannot be added here.
+            RangingFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
@@ -1859,6 +1933,12 @@ public final class SystemServiceRegistry {
                     break;
                 case Context.APPWIDGET_SERVICE:
                     if (!hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_APP_WIDGETS)) {
+                        return null;
+                    }
+                    break;
+                case Context.TEXT_SERVICES_MANAGER_SERVICE:
+                    if (android.server.Flags.removeTextService()
+                            && hasSystemFeatureOpportunistic(ctx, PackageManager.FEATURE_WATCH)) {
                         return null;
                     }
                     break;

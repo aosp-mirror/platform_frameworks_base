@@ -121,7 +121,7 @@ fun ContentScope.animateContentFloatAsState(
 
 @Deprecated(
     "Use animateContentFloatAsState() instead",
-    replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)")
+    replaceWith = ReplaceWith("animateContentFloatAsState(value, key, canOverflow)"),
 )
 @Composable
 fun ContentScope.animateSceneFloatAsState(
@@ -172,14 +172,11 @@ fun ContentScope.animateContentDpAsState(
 
 @Deprecated(
     "Use animateContentDpAsState() instead",
-    replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)")
+    replaceWith = ReplaceWith("animateContentDpAsState(value, key, canOverflow)"),
 )
 @Composable
-fun ContentScope.animateSceneDpAsState(
-    value: Dp,
-    key: ValueKey,
-    canOverflow: Boolean = true,
-) = animateContentDpAsState(value, key, canOverflow)
+fun ContentScope.animateSceneDpAsState(value: Dp, key: ValueKey, canOverflow: Boolean = true) =
+    animateContentDpAsState(value, key, canOverflow)
 
 /**
  * Animate a shared element Dp value.
@@ -214,10 +211,7 @@ private object SharedDpType : SharedValueType<Dp, Dp> {
  * @see ContentScope.animateContentValueAsState
  */
 @Composable
-fun ContentScope.animateContentColorAsState(
-    value: Color,
-    key: ValueKey,
-): AnimatedState<Color> {
+fun ContentScope.animateContentColorAsState(value: Color, key: ValueKey): AnimatedState<Color> {
     return animateContentValueAsState(value, key, SharedColorType, canOverflow = false)
 }
 
@@ -227,10 +221,7 @@ fun ContentScope.animateContentColorAsState(
  * @see ElementScope.animateElementValueAsState
  */
 @Composable
-fun ElementScope<*>.animateElementColorAsState(
-    value: Color,
-    key: ValueKey,
-): AnimatedState<Color> {
+fun ElementScope<*>.animateElementColorAsState(value: Color, key: ValueKey): AnimatedState<Color> {
     return animateElementValueAsState(value, key, SharedColorType, canOverflow = false)
 }
 
@@ -274,12 +265,7 @@ private object SharedColorType : SharedValueType<Color, ColorDelta> {
  * Note: This class is necessary because Color() checks the bounds of its values and UncheckedColor
  * is internal.
  */
-private class ColorDelta(
-    val red: Float,
-    val green: Float,
-    val blue: Float,
-    val alpha: Float,
-)
+private class ColorDelta(val red: Float, val green: Float, val blue: Float, val alpha: Float)
 
 @Composable
 internal fun <T> animateSharedValueAsState(
@@ -331,7 +317,7 @@ internal fun <T> animateSharedValueAsState(
 private fun <T, Delta> sharedValue(
     layoutImpl: SceneTransitionLayoutImpl,
     key: ValueKey,
-    element: ElementKey?
+    element: ElementKey?,
 ): SharedValue<T, Delta> {
     return layoutImpl.sharedValues[key]?.get(element)?.let { it as SharedValue<T, Delta> }
         ?: error(valueReadTooEarlyMessage(key))
@@ -342,9 +328,7 @@ private fun valueReadTooEarlyMessage(key: ValueKey) =
         "means that you are reading it during composition, which you should not do. See the " +
         "documentation of AnimatedState for more information."
 
-internal class SharedValue<T, Delta>(
-    val type: SharedValueType<T, Delta>,
-) {
+internal class SharedValue<T, Delta>(val type: SharedValueType<T, Delta>) {
     /** The target value of this shared value for each content. */
     val targetValues = SnapshotStateMap<ContentKey, T>()
 
@@ -393,45 +377,75 @@ private class AnimatedStateImpl<T, Delta>(
         transition: TransitionState.Transition?,
     ): T? {
         if (transition == null) {
-            return sharedValue[layoutImpl.state.transitionState.currentScene]
+            return sharedValue[content]
+                ?: sharedValue[layoutImpl.state.transitionState.currentScene]
         }
 
-        val fromValue = sharedValue[transition.fromScene]
-        val toValue = sharedValue[transition.toScene]
-        return if (fromValue != null && toValue != null) {
-            if (fromValue == toValue) {
-                // Optimization: avoid reading progress if the values are the same, so we don't
-                // relayout/redraw for nothing.
-                fromValue
-            } else {
-                val overscrollSpec = transition.currentOverscrollSpec
-                val progress =
-                    when {
-                        overscrollSpec == null -> {
-                            if (canOverflow) transition.progress
-                            else transition.progress.fastCoerceIn(0f, 1f)
-                        }
-                        overscrollSpec.scene == transition.toScene -> 1f
-                        else -> 0f
-                    }
+        val fromValue = sharedValue[transition.fromContent]
+        val toValue = sharedValue[transition.toContent]
+        if (fromValue == null && toValue == null) {
+            return null
+        }
 
-                sharedValue.type.lerp(fromValue, toValue, progress)
+        if (fromValue != null && toValue != null) {
+            return interpolateSharedValue(fromValue, toValue, transition, sharedValue)
+        }
+
+        if (transition is TransitionState.Transition.ReplaceOverlay) {
+            val currentSceneValue = sharedValue[transition.currentScene]
+            if (currentSceneValue != null) {
+                return interpolateSharedValue(
+                    fromValue = fromValue ?: currentSceneValue,
+                    toValue = toValue ?: currentSceneValue,
+                    transition,
+                    sharedValue,
+                )
             }
-        } else fromValue ?: toValue
+        }
+
+        return fromValue ?: toValue
+    }
+
+    private fun interpolateSharedValue(
+        fromValue: T,
+        toValue: T,
+        transition: TransitionState.Transition,
+        sharedValue: SharedValue<T, *>,
+    ): T? {
+        if (fromValue == toValue) {
+            // Optimization: avoid reading progress if the values are the same, so we don't
+            // relayout/redraw for nothing.
+            return fromValue
+        }
+
+        val overscrollSpec = transition.currentOverscrollSpec
+        val progress =
+            when {
+                overscrollSpec == null -> {
+                    if (canOverflow) transition.progress
+                    else transition.progress.fastCoerceIn(0f, 1f)
+                }
+                overscrollSpec.content == transition.toContent -> 1f
+                else -> 0f
+            }
+
+        return sharedValue.type.lerp(fromValue, toValue, progress)
     }
 
     private fun transition(sharedValue: SharedValue<T, Delta>): TransitionState.Transition? {
         val targetValues = sharedValue.targetValues
         val transition =
             if (element != null) {
-                layoutImpl.elements[element]?.stateByContent?.let { sceneStates ->
-                    layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                        transition.fromScene in sceneStates || transition.toScene in sceneStates
-                    }
+                layoutImpl.elements[element]?.let { element ->
+                    elementState(
+                        layoutImpl.state.transitionStates,
+                        isInContent = { it in element.stateByContent },
+                    )
+                        as? TransitionState.Transition
                 }
             } else {
                 layoutImpl.state.currentTransitions.fastLastOrNull { transition ->
-                    transition.fromScene in targetValues || transition.toScene in targetValues
+                    transition.fromContent in targetValues || transition.toContent in targetValues
                 }
             }
 

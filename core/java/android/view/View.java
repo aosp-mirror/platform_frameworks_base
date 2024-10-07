@@ -42,6 +42,7 @@ import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
 import static android.view.flags.Flags.enableUseMeasureCacheDuringForceLayout;
 import static android.view.flags.Flags.sensitiveContentAppProtection;
+import static android.view.flags.Flags.toolkitFrameRateAnimationBugfix25q1;
 import static android.view.flags.Flags.toolkitFrameRateBySizeReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateDefaultNormalReadOnly;
 import static android.view.flags.Flags.toolkitFrameRateSmallUsesPercentReadOnly;
@@ -141,7 +142,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.Vibrator;
 import android.service.credentials.CredentialProviderService;
 import android.sysprop.DisplayProperties;
 import android.text.InputType;
@@ -372,7 +372,7 @@ import java.util.function.Predicate;
  *     </tr>
  *     <tr>
  *         <td><code>{@link #onTouchEvent(MotionEvent)}</code></td>
- *         <td>Called when a touch screen motion event occurs.
+ *         <td>Called when a motion event occurs with pointers down on the view.
  *         </td>
  *     </tr>
  *     <tr>
@@ -2459,13 +2459,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             toolkitFrameRateDefaultNormalReadOnly();
     private static final boolean sToolkitFrameRateBySizeReadOnlyFlagValue =
             toolkitFrameRateBySizeReadOnly();
-
     private static final boolean sToolkitFrameRateSmallUsesPercentReadOnlyFlagValue =
             toolkitFrameRateSmallUsesPercentReadOnly();
     private static final boolean sToolkitFrameRateViewEnablingReadOnlyFlagValue =
             toolkitFrameRateViewEnablingReadOnly();
     private static boolean sToolkitFrameRateVelocityMappingReadOnlyFlagValue =
             toolkitFrameRateVelocityMappingReadOnly();
+    private static boolean sToolkitFrameRateAnimationBugfix25q1FlagValue =
+            toolkitFrameRateAnimationBugfix25q1();
 
     // Used to set frame rate compatibility.
     @Surface.FrameRateCompatibility int mFrameRateCompatibility =
@@ -17874,7 +17875,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Implement this method to handle touch screen motion events.
+     * Implement this method to handle pointer events.
+     * <p>
+     * This method is called to handle motion events where pointers are down on
+     * the view. For example, this could include touchscreen touches, stylus
+     * touches, or click-and-drag events from a mouse. However, it is not called
+     * for motion events that do not involve pointers being down, such as hover
+     * events or mouse scroll wheel movements.
      * <p>
      * If this method is used to detect click actions, it is recommended that
      * the actions be performed by implementing and calling
@@ -24424,6 +24431,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidationTransform = t;
         }
 
+        // Increase the frame rate if there is a transformation that applies a matrix.
+        if (sToolkitFrameRateAnimationBugfix25q1FlagValue
+                && ((t.getTransformationType() & Transformation.TYPE_MATRIX) != 0)) {
+            mPrivateFlags4 |= PFLAG4_HAS_VIEW_PROPERTY_INVALIDATION;
+            mPrivateFlags4 |= PFLAG4_HAS_MOVED;
+        }
+
         if (more) {
             if (!a.willChangeBounds()) {
                 if ((flags & (ViewGroup.FLAG_OPTIMIZE_INVALIDATE | ViewGroup.FLAG_ANIMATION_DONE)) ==
@@ -27369,6 +27383,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             vr.transformMatrixToLocal(matrix);
             matrix.postTranslate(0, vr.mCurScrollY);
         }
+
+        matrix.postTranslate(-mLeft, -mTop);
+
+        if (!hasIdentityMatrix()) {
+            matrix.postConcat(getInverseMatrix());
+        }
+    }
+
+    /**
+     * Modifiers the input matrix such that it maps root view's coordinates to view-local
+     * coordinates.
+     *
+     * @param matrix input matrix to modify
+     * @hide
+     */
+    public void transformMatrixRootToLocal(@NonNull Matrix matrix) {
+        final ViewParent parent = mParent;
+        if (parent instanceof final View vp) {
+            vp.transformMatrixRootToLocal(matrix);
+            matrix.postTranslate(vp.mScrollX, vp.mScrollY);
+        }
+        // This method is different from transformMatrixToLocal that it doesn't perform any
+        // transformation for ViewRootImpl
 
         matrix.postTranslate(-mLeft, -mTop);
 
@@ -33989,7 +34026,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 || mLastFrameTop != mTop)
                 && viewRootImpl.shouldCheckFrameRateCategory()
                 && parent instanceof View
-                && ((View) parent).mFrameContentVelocity <= 0
+                && ((View) parent).getFrameContentVelocity() <= 0
                 && !isInputMethodWindowType) {
 
             return FRAME_RATE_CATEGORY_HIGH_HINT | FRAME_RATE_CATEGORY_REASON_BOOST;
@@ -34156,7 +34193,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Keep in mind that the preferred frame rate affects the frame rate for the next frame,
      * so use this method carefully. It's important to note that the preference is valid as
-     * long as the View is invalidated.
+     * long as the View is invalidated. Please also be aware that the requested frame rate
+     * will not propagate to child views when this API is used on a ViewGroup.
      *
      * @param frameRate the preferred frame rate of the view.
      */
@@ -34175,6 +34213,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * REQUESTED_FRAME_RATE_CATEGORY_NO_PREFERENCE, REQUESTED_FRAME_RATE_CATEGORY_LOW,
      * REQUESTED_FRAME_RATE_CATEGORY_NORMAL, and REQUESTED_FRAME_RATE_CATEGORY_HIGH.
      * Note that the frame rate value is valid as long as the View is invalidated.
+     * Please also be aware that the requested frame rate will not propagate to
+     * child views when this API is used on a ViewGroup.
      *
      * @return REQUESTED_FRAME_RATE_CATEGORY_DEFAULT by default,
      * or value passed to {@link #setRequestedFrameRate(float)}.

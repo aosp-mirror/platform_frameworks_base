@@ -29,18 +29,20 @@ import java.util.Set;
 
 public class ProtoLogCommandHandler extends ShellCommand {
     @NonNull
-    private final ProtoLogService mProtoLogService;
+    private final ProtoLogConfigurationService mProtoLogConfigurationService;
     @Nullable
     private final PrintWriter mPrintWriter;
 
-    public ProtoLogCommandHandler(@NonNull ProtoLogService protoLogService) {
-        this(protoLogService, null);
+    public ProtoLogCommandHandler(
+            @NonNull ProtoLogConfigurationService protoLogConfigurationService) {
+        this(protoLogConfigurationService, null);
     }
 
     @VisibleForTesting
     public ProtoLogCommandHandler(
-            @NonNull ProtoLogService protoLogService, @Nullable PrintWriter printWriter) {
-        this.mProtoLogService = protoLogService;
+            @NonNull ProtoLogConfigurationService protoLogConfigurationService,
+            @Nullable PrintWriter printWriter) {
+        this.mProtoLogConfigurationService = protoLogConfigurationService;
         this.mPrintWriter = printWriter;
     }
 
@@ -94,7 +96,7 @@ public class ProtoLogCommandHandler extends ShellCommand {
 
         switch (cmd) {
             case "list": {
-                final String[] availableGroups = mProtoLogService.getGroups();
+                final String[] availableGroups = mProtoLogConfigurationService.getGroups();
                 if (availableGroups.length == 0) {
                     pw.println("No ProtoLog groups registered with ProtoLog service.");
                     return 0;
@@ -117,12 +119,13 @@ public class ProtoLogCommandHandler extends ShellCommand {
 
                 pw.println("ProtoLog group " + group + "'s status:");
 
-                if (!Set.of(mProtoLogService.getGroups()).contains(group)) {
+                if (!Set.of(mProtoLogConfigurationService.getGroups()).contains(group)) {
                     pw.println("UNREGISTERED");
                     return 0;
                 }
 
-                pw.println("LOG_TO_LOGCAT = " + mProtoLogService.isLoggingToLogcat(group));
+                pw.println("LOG_TO_LOGCAT = "
+                        + mProtoLogConfigurationService.isLoggingToLogcat(group));
                 return 0;
             }
             default: {
@@ -142,11 +145,11 @@ public class ProtoLogCommandHandler extends ShellCommand {
 
         switch (cmd) {
             case "enable" -> {
-                mProtoLogService.enableProtoLogToLogcat(processGroups());
+                mProtoLogConfigurationService.enableProtoLogToLogcat(processGroups());
                 return 0;
             }
             case "disable" -> {
-                mProtoLogService.disableProtoLogToLogcat(processGroups());
+                mProtoLogConfigurationService.disableProtoLogToLogcat(processGroups());
                 return 0;
             }
             default -> {
@@ -159,7 +162,7 @@ public class ProtoLogCommandHandler extends ShellCommand {
     @NonNull
     private String[] processGroups() {
         if (getRemainingArgsCount() == 0) {
-            return mProtoLogService.getGroups();
+            return mProtoLogConfigurationService.getGroups();
         }
 
         final List<String> groups = new ArrayList<>();

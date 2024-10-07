@@ -54,6 +54,9 @@ static struct {
     jmethodID setCompositionSizeMax;
     jmethodID setQFactor;
     jmethodID setFrequencyProfile;
+    jmethodID setMaxEnvelopeEffectSize;
+    jmethodID setMinEnvelopeEffectControlPointDurationMillis;
+    jmethodID setMaxEnvelopeEffectControlPointDurationMillis;
 } sVibratorInfoBuilderClassInfo;
 static struct {
     jfieldID id;
@@ -484,6 +487,25 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setQFactor,
                               static_cast<jfloat>(info.qFactor.value()));
     }
+    if (info.maxEnvelopeEffectSize.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectSize,
+                              static_cast<jint>(info.maxEnvelopeEffectSize.value()));
+    }
+    if (info.minEnvelopeEffectControlPointDuration.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo
+                                      .setMinEnvelopeEffectControlPointDurationMillis,
+                              static_cast<jint>(
+                                      info.minEnvelopeEffectControlPointDuration.value().count()));
+    }
+    if (info.maxEnvelopeEffectControlPointDuration.isOk()) {
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo
+                                      .setMaxEnvelopeEffectControlPointDurationMillis,
+                              static_cast<jint>(
+                                      info.maxEnvelopeEffectControlPointDuration.value().count()));
+    }
 
     jfloat minFrequency = static_cast<jfloat>(info.minFrequency.valueOr(NAN));
     jfloat resonantFrequency = static_cast<jfloat>(info.resonantFrequency.valueOr(NAN));
@@ -580,6 +602,17 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfile",
                              "(Landroid/os/VibratorInfo$FrequencyProfile;)"
                              "Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectSize =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setMaxEnvelopeEffectSize",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setMinEnvelopeEffectControlPointDurationMillis =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass,
+                             "setMinEnvelopeEffectControlPointDurationMillis",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectControlPointDurationMillis =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass,
+                             "setMaxEnvelopeEffectControlPointDurationMillis",
+                             "(I)Landroid/os/VibratorInfo$Builder;");
 
     return jniRegisterNativeMethods(env,
                                     "com/android/server/vibrator/VibratorController$NativeWrapper",

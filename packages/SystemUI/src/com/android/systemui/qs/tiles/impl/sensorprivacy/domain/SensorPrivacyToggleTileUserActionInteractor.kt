@@ -82,6 +82,7 @@ constructor(
                     }
                     qsTileIntentUserActionHandler.handle(action.expandable, longClickIntent)
                 }
+                is QSTileUserAction.ToggleClick -> {}
             }
         }
 }

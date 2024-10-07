@@ -25,6 +25,7 @@ import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.systemui.communal.nano.CommunalHubState
+import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.widgets.CommunalWidgetHost
 import com.android.systemui.communal.widgets.CommunalWidgetModule.Companion.DEFAULT_WIDGETS
 import com.android.systemui.dagger.SysUISingleton
@@ -97,7 +98,7 @@ constructor(
                             .addWidget(
                                 widgetId = id,
                                 componentName = name,
-                                priority = defaultWidgets.size - index,
+                                rank = index,
                                 userSerialNumber = userSerialNumber,
                             )
                     }
@@ -132,9 +133,16 @@ interface CommunalWidgetDao {
     @Query(
         "SELECT * FROM communal_widget_table JOIN communal_item_rank_table " +
             "ON communal_item_rank_table.uid = communal_widget_table.item_id " +
-            "ORDER BY communal_item_rank_table.rank DESC"
+            "ORDER BY communal_item_rank_table.rank ASC"
     )
     fun getWidgets(): Flow<Map<CommunalItemRank, CommunalWidgetItem>>
+
+    @Query(
+        "SELECT * FROM communal_widget_table JOIN communal_item_rank_table " +
+            "ON communal_item_rank_table.uid = communal_widget_table.item_id " +
+            "ORDER BY communal_item_rank_table.rank ASC"
+    )
+    fun getWidgetsNow(): Map<CommunalItemRank, CommunalWidgetItem>
 
     @Query("SELECT * FROM communal_widget_table WHERE widget_id = :id")
     fun getWidgetByIdNow(id: Int): CommunalWidgetItem?
@@ -146,14 +154,15 @@ interface CommunalWidgetDao {
 
     @Query(
         "INSERT INTO communal_widget_table" +
-            "(widget_id, component_name, item_id, user_serial_number) " +
-            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber)"
+            "(widget_id, component_name, item_id, user_serial_number, span_y) " +
+            "VALUES(:widgetId, :componentName, :itemId, :userSerialNumber, :spanY)"
     )
     fun insertWidget(
         widgetId: Int,
         componentName: String,
         itemId: Long,
         userSerialNumber: Int,
+        spanY: Int = 3,
     ): Long
 
     @Query("INSERT INTO communal_item_rank_table(rank) VALUES(:rank)")
@@ -162,16 +171,19 @@ interface CommunalWidgetDao {
     @Query("UPDATE communal_item_rank_table SET rank = :order WHERE uid = :itemUid")
     fun updateItemRank(itemUid: Long, order: Int)
 
+    @Query("UPDATE communal_widget_table SET span_y = :spanY WHERE widget_id = :widgetId")
+    fun updateWidgetSpanY(widgetId: Int, spanY: Int)
+
     @Query("DELETE FROM communal_widget_table") fun clearCommunalWidgetsTable()
 
     @Query("DELETE FROM communal_item_rank_table") fun clearCommunalItemRankTable()
 
     @Transaction
-    fun updateWidgetOrder(widgetIdToPriorityMap: Map<Int, Int>) {
-        widgetIdToPriorityMap.forEach { (id, priority) ->
+    fun updateWidgetOrder(widgetIdToRankMap: Map<Int, Int>) {
+        widgetIdToRankMap.forEach { (id, rank) ->
             val widget = getWidgetByIdNow(id)
             if (widget != null) {
-                updateItemRank(widget.itemId, priority)
+                updateItemRank(widget.itemId, rank)
             }
         }
     }
@@ -180,14 +192,16 @@ interface CommunalWidgetDao {
     fun addWidget(
         widgetId: Int,
         provider: ComponentName,
-        priority: Int,
+        rank: Int? = null,
         userSerialNumber: Int,
+        spanY: Int = CommunalContentSize.HALF.span,
     ): Long {
         return addWidget(
             widgetId = widgetId,
             componentName = provider.flattenToString(),
-            priority = priority,
+            rank = rank,
             userSerialNumber = userSerialNumber,
+            spanY = spanY,
         )
     }
 
@@ -195,14 +209,30 @@ interface CommunalWidgetDao {
     fun addWidget(
         widgetId: Int,
         componentName: String,
-        priority: Int,
+        rank: Int? = null,
         userSerialNumber: Int,
+        spanY: Int = 3,
     ): Long {
+        val widgets = getWidgetsNow()
+
+        // If rank is not specified, rank it last by finding the current maximum rank and increment
+        // by 1. If the new widget is the first widget, set the rank to 0.
+        val newRank = rank ?: widgets.keys.maxOfOrNull { it.rank + 1 } ?: 0
+
+        // Shift widgets after [rank], unless widget is added at the end.
+        if (rank != null) {
+            widgets.forEach { (rankEntry, widgetEntry) ->
+                if (rankEntry.rank < newRank) return@forEach
+                updateItemRank(widgetEntry.itemId, rankEntry.rank + 1)
+            }
+        }
+
         return insertWidget(
             widgetId = widgetId,
             componentName = componentName,
-            itemId = insertItemRank(priority),
+            itemId = insertItemRank(newRank),
             userSerialNumber = userSerialNumber,
+            spanY = spanY,
         )
     }
 
@@ -225,7 +255,8 @@ interface CommunalWidgetDao {
         clearCommunalItemRankTable()
 
         state.widgets.forEach {
-            addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber)
+            val spanY = if (it.spanY != 0) it.spanY else CommunalContentSize.HALF.span
+            addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber, spanY)
         }
     }
 }

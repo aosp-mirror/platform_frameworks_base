@@ -158,6 +158,8 @@ public final class BrightnessInfo implements Parcelable {
                 return "thermal";
             case BRIGHTNESS_MAX_REASON_POWER_IC:
                 return "power IC";
+            case BRIGHTNESS_MAX_REASON_WEAR_BEDTIME_MODE:
+                return "wear bedtime";
         }
         return "invalid";
     }

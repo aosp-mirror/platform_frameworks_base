@@ -16,6 +16,8 @@
 
 package com.android.internal.protolog.common;
 
+import java.util.List;
+
 /**
  * Interface for ProtoLog implementations.
  */
@@ -70,8 +72,7 @@ public interface IProtoLog {
     boolean isEnabled(IProtoLogGroup group, LogLevel level);
 
     /**
-     * Registers available protolog groups. A group must be registered before it can be used.
-     * @param protoLogGroups The groups to register for use in protolog.
+     * @return an immutable list of the registered ProtoLog groups in this ProtoLog instance.
      */
-    void registerGroups(IProtoLogGroup... protoLogGroups);
+    List<IProtoLogGroup> getRegisteredGroups();
 }

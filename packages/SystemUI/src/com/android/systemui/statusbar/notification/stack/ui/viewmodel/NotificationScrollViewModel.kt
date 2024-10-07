@@ -17,17 +17,22 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.ObservableTransitionState.Idle
+import com.android.compose.animation.scene.ObservableTransitionState.Transition
+import com.android.compose.animation.scene.ObservableTransitionState.Transition.ChangeScene
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.scene.shared.model.SceneFamilies
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimClipping
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
@@ -39,10 +44,13 @@ import dagger.Lazy
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 class NotificationScrollViewModel
@@ -51,17 +59,85 @@ constructor(
     dumpManager: DumpManager,
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
+    private val remoteInputInteractor: RemoteInputInteractor,
     private val sceneInteractor: SceneInteractor,
     // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
     // while the flag is off, creating this object too early results in a crash
     keyguardInteractor: Lazy<KeyguardInteractor>,
 ) :
     ActivatableFlowDumper by ActivatableFlowDumperImpl(dumpManager, "NotificationScrollViewModel"),
-    SysUiViewModel() {
+    ExclusiveActivatable() {
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         activateFlowDumper()
     }
+
+    private fun expandedInScene(scene: SceneKey): Boolean {
+        return when (scene) {
+            Scenes.Lockscreen,
+            Scenes.Shade,
+            Scenes.QuickSettings -> true
+            else -> false
+        }
+    }
+
+    private fun fullyExpandedDuringSceneChange(change: ChangeScene): Boolean {
+        // The lockscreen stack is visible during all transitions away from the lockscreen, so keep
+        // the stack expanded until those transitions finish.
+        return if (change.isTransitioning(from = Scenes.Lockscreen)) {
+            true
+        } else if (change.isTransitioning(from = Scenes.Shade, to = Scenes.Lockscreen)) {
+            false
+        } else {
+            (expandedInScene(change.fromScene) && expandedInScene(change.toScene))
+        }
+    }
+
+    private fun expandFractionDuringSceneChange(
+        change: ChangeScene,
+        shadeExpansion: Float,
+        qsExpansion: Float,
+    ): Float {
+        return if (fullyExpandedDuringSceneChange(change)) {
+            1f
+        } else if (
+            change.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
+                change.isTransitioning(from = Scenes.Gone, to = Scenes.Lockscreen)
+        ) {
+            shadeExpansion
+        } else if (change.isTransitioningBetween(Scenes.Gone, Scenes.QuickSettings)) {
+            // during QS expansion, increase fraction at same rate as scrim alpha,
+            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
+            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA - EXPANSION_FOR_DELAYED_STACK_FADE_IN)
+                .coerceIn(0f, 1f)
+        } else {
+            // TODO(b/356596436): If notification shade overlay is open, we'll reach this point and
+            //  the expansion fraction in that case should be `shadeExpansion`.
+            0f
+        }
+    }
+
+    private fun expandFractionDuringOverlayTransition(
+        transition: Transition,
+        currentScene: SceneKey,
+        shadeExpansion: Float,
+    ): Float {
+        return if (currentScene == Scenes.Lockscreen) {
+            1f
+        } else if (transition.isTransitioningFromOrTo(Overlays.NotificationsShade)) {
+            shadeExpansion
+        } else {
+            0f
+        }
+    }
+
+    /** Are notification stack height updates suppressed? */
+    val suppressHeightUpdates: Flow<Boolean> =
+        sceneInteractor.transitionState.map { transition: ObservableTransitionState ->
+            transition is Transition &&
+                transition.fromContent == Scenes.Lockscreen &&
+                (transition.toContent == Scenes.Bouncer || transition.toContent == Scenes.Gone)
+        }
 
     /**
      * The expansion fraction of the notification stack. It should go from 0 to 1 when transitioning
@@ -74,55 +150,74 @@ constructor(
                 shadeInteractor.shadeMode,
                 shadeInteractor.qsExpansion,
                 sceneInteractor.transitionState,
-                sceneInteractor.resolveSceneFamily(SceneFamilies.QuickSettings),
-            ) { shadeExpansion, shadeMode, qsExpansion, transitionState, quickSettingsScene ->
+            ) { shadeExpansion, _, qsExpansion, transitionState ->
                 when (transitionState) {
-                    is ObservableTransitionState.Idle -> {
-                        when (transitionState.currentScene) {
-                            Scenes.Lockscreen,
-                            Scenes.QuickSettings -> 1f
-                            else -> shadeExpansion
-                        }
-                    }
-                    is ObservableTransitionState.Transition -> {
+                    is Idle ->
                         if (
-                            (transitionState.fromScene in SceneFamilies.NotifShade &&
-                                transitionState.toScene == quickSettingsScene) ||
-                                (transitionState.fromScene in quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.NotifShade) ||
-                                (transitionState.fromScene == Scenes.Lockscreen &&
-                                    transitionState.toScene in SceneFamilies.NotifShade) ||
-                                (transitionState.fromScene in SceneFamilies.NotifShade &&
-                                    transitionState.toScene == Scenes.Lockscreen)
+                            expandedInScene(transitionState.currentScene) ||
+                                Overlays.NotificationsShade in transitionState.currentOverlays
                         ) {
                             1f
-                        } else if (
-                            shadeMode != ShadeMode.Split &&
-                                (transitionState.fromScene in SceneFamilies.Home &&
-                                    transitionState.toScene == quickSettingsScene) ||
-                                (transitionState.fromScene == quickSettingsScene &&
-                                    transitionState.toScene in SceneFamilies.Home)
-                        ) {
-                            // during QS expansion, increase fraction at same rate as scrim alpha,
-                            // but start when scrim alpha is at EXPANSION_FOR_DELAYED_STACK_FADE_IN.
-                            (qsExpansion / EXPANSION_FOR_MAX_SCRIM_ALPHA -
-                                    EXPANSION_FOR_DELAYED_STACK_FADE_IN)
-                                .coerceIn(0f, 1f)
                         } else {
-                            shadeExpansion
+                            0f
                         }
-                    }
+                    is ChangeScene ->
+                        expandFractionDuringSceneChange(
+                            change = transitionState,
+                            shadeExpansion = shadeExpansion,
+                            qsExpansion = qsExpansion,
+                        )
+                    is Transition.ShowOrHideOverlay ->
+                        expandFractionDuringOverlayTransition(
+                            transition = transitionState,
+                            currentScene = transitionState.currentScene,
+                            shadeExpansion = shadeExpansion,
+                        )
+                    is Transition.ReplaceOverlay ->
+                        expandFractionDuringOverlayTransition(
+                            transition = transitionState,
+                            currentScene = transitionState.currentScene,
+                            shadeExpansion = shadeExpansion,
+                        )
                 }
             }
             .distinctUntilChanged()
             .dumpWhileCollecting("expandFraction")
+
+    val qsExpandFraction: Flow<Float> =
+        shadeInteractor.qsExpansion.dumpWhileCollecting("qsExpandFraction")
+
+    /** Whether we should close any open notification guts. */
+    val shouldCloseGuts: Flow<Boolean> = stackAppearanceInteractor.shouldCloseGuts
+
+    val shouldResetStackTop: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .mapNotNull { state -> state is Idle && state.currentScene == Scenes.Gone }
+            .distinctUntilChanged()
+            .dumpWhileCollecting("shouldResetStackTop")
+
+    /** Whether the Notification Stack is visibly on the lockscreen scene. */
+    val isShowingStackOnLockscreen: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .mapNotNull { state ->
+                state.isIdle(Scenes.Lockscreen) ||
+                    state.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Shade)
+            }
+            .distinctUntilChanged()
+
+    /** The alpha of the Notification Stack for lockscreen fade-in */
+    val alphaForLockscreenFadeIn = stackAppearanceInteractor.alphaForLockscreenFadeIn
 
     private operator fun SceneKey.contains(scene: SceneKey) =
         sceneInteractor.isSceneInFamily(scene, this)
 
     private val qsAllowsClipping: Flow<Boolean> =
         combine(shadeInteractor.shadeMode, shadeInteractor.qsExpansion) { shadeMode, qsExpansion ->
-                qsExpansion < 0.5f || shadeMode != ShadeMode.Single
+                when (shadeMode) {
+                    is ShadeMode.Dual -> false
+                    is ShadeMode.Split -> true
+                    is ShadeMode.Single -> qsExpansion < 0.5f
+                }
             }
             .distinctUntilChanged()
 
@@ -140,14 +235,14 @@ constructor(
 
     fun shadeScrimShape(
         cornerRadius: Flow<Int>,
-        viewLeftOffset: Flow<Int>
+        viewLeftOffset: Flow<Int>,
     ): Flow<ShadeScrimShape?> =
         combine(shadeScrimClipping, cornerRadius, viewLeftOffset) { clipping, radius, leftOffset ->
                 if (clipping == null) return@combine null
                 ShadeScrimShape(
                     bounds = clipping.bounds.minus(leftOffset = leftOffset),
                     topRadius = radius.takeIf { clipping.rounding.isTopRounded } ?: 0,
-                    bottomRadius = radius.takeIf { clipping.rounding.isBottomRounded } ?: 0
+                    bottomRadius = radius.takeIf { clipping.rounding.isBottomRounded } ?: 0,
                 )
             }
             .dumpWhileCollecting("shadeScrimShape")
@@ -177,12 +272,20 @@ constructor(
     val currentGestureOverscrollConsumer: (Boolean) -> Unit =
         stackAppearanceInteractor::setCurrentGestureOverscroll
 
+    /** Receives whether the current touch gesture is inside any open guts. */
+    val currentGestureInGutsConsumer: (Boolean) -> Unit =
+        stackAppearanceInteractor::setCurrentGestureInGuts
+
+    /** Receives the bottom bound of the currently focused remote input notification row. */
+    val remoteInputRowBottomBoundConsumer: (Float?) -> Unit =
+        remoteInputInteractor::setRemoteInputRowBottomBound
+
     /** Whether the notification stack is scrollable or not. */
     val isScrollable: Flow<Boolean> =
-        sceneInteractor.currentScene
-            .map {
-                sceneInteractor.isSceneInFamily(it, SceneFamilies.NotifShade) ||
-                    it == Scenes.Lockscreen
+        combine(sceneInteractor.currentScene, sceneInteractor.currentOverlays) {
+                currentScene,
+                currentOverlays ->
+                currentScene.showsNotifications() || currentOverlays.any { it.showsNotifications() }
             }
             .dumpWhileCollecting("isScrollable")
 
@@ -192,6 +295,32 @@ constructor(
             flowOf(false)
         } else {
             keyguardInteractor.get().isDozing.dumpWhileCollecting("isDozing")
+        }
+    }
+
+    /** Whether the notification stack is displayed in pulsing mode. */
+    val isPulsing: Flow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            flowOf(false)
+        } else {
+            keyguardInteractor.get().isPulsing.dumpWhileCollecting("isPulsing")
+        }
+    }
+
+    val shouldAnimatePulse: StateFlow<Boolean> by lazy {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) {
+            MutableStateFlow(false)
+        } else {
+            keyguardInteractor.get().isAodAvailable
+        }
+    }
+
+    private fun ContentKey.showsNotifications(): Boolean {
+        return when (this) {
+            Overlays.NotificationsShade,
+            Scenes.Lockscreen,
+            Scenes.Shade -> true
+            else -> false
         }
     }
 

@@ -169,6 +169,7 @@ public interface QSTile {
         public boolean isTransient = false;
         public String expandedAccessibilityClassName;
         public boolean handlesLongClick = true;
+        public boolean handlesSecondaryClick = false;
         @Nullable
         public Drawable sideViewCustomDrawable;
         public String spec;
@@ -183,7 +184,10 @@ public interface QSTile {
             }
         }
 
-        /** Get the text for secondaryLabel. */
+        /**
+         *  If the current secondaryLabel value is not empty, ignore the given input and return
+         *  the current value. Otherwise return current value.
+         */
         public CharSequence getSecondaryLabel(CharSequence stateText) {
             // Use a local reference as the value might change from other threads
             CharSequence localSecondaryLabel = secondaryLabel;
@@ -212,6 +216,7 @@ public interface QSTile {
                     || !Objects.equals(other.isTransient, isTransient)
                     || !Objects.equals(other.dualTarget, dualTarget)
                     || !Objects.equals(other.handlesLongClick, handlesLongClick)
+                    || !Objects.equals(other.handlesSecondaryClick, handlesSecondaryClick)
                     || !Objects.equals(other.sideViewCustomDrawable, sideViewCustomDrawable);
             other.spec = spec;
             other.icon = icon;
@@ -227,6 +232,7 @@ public interface QSTile {
             other.dualTarget = dualTarget;
             other.isTransient = isTransient;
             other.handlesLongClick = handlesLongClick;
+            other.handlesSecondaryClick = handlesSecondaryClick;
             other.sideViewCustomDrawable = sideViewCustomDrawable;
             return changed;
         }
@@ -252,6 +258,7 @@ public interface QSTile {
             sb.append(",disabledByPolicy=").append(disabledByPolicy);
             sb.append(",dualTarget=").append(dualTarget);
             sb.append(",isTransient=").append(isTransient);
+            sb.append(",handlesSecondaryClick=").append(handlesSecondaryClick);
             sb.append(",state=").append(state);
             sb.append(",sideViewCustomDrawable=").append(sideViewCustomDrawable);
             return sb.append(']');

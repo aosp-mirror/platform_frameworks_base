@@ -95,12 +95,12 @@
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"เชื่อมต่อแล้ว (ไม่รวมสื่อ) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"เชื่อมต่อแล้ว (ไม่รวมโทรศัพท์หรือสื่อ) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level" msgid="2685517576209066008">"ใช้งานอยู่ แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"ใช้งานอยู่ L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level_untethered" msgid="4961338936672922617">"ใช้งานอยู่ แบตเตอรี่ข้างซ้าย: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ข้างขวา: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered_left" msgid="2895644748625343977">"ใช้งานอยู่ L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered_right" msgid="7407517998880370179">"ใช้งานอยู่ R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered" msgid="1616774716076301755">"แบตเตอรี่ข้างซ้าย: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ข้างขวา: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_left" msgid="5725764679536058365">"ซ้าย: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right" msgid="8377995536997790142">"ขวา: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="tv_bluetooth_battery_level_untethered_left" msgid="337629670583744410">"ฝั่งซ้าย <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -111,9 +111,9 @@
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ใช้งานอยู่ (เฉพาะข้างขวา)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ใช้งานอยู่ (ข้างซ้ายและขวา)"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ใช้งานอยู่ (สื่อเท่านั้น) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ใช้งานอยู่ (สื่อเท่านั้น) L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ใช้งานอยู่ (สื่อเท่านั้น) แบตเตอรี่ข้างซ้าย: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ข้างขวา: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) L: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_lea_support" msgid="803110681688633362">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) แบตเตอรี่ข้างซ้าย: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ข้างขวา: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_left_lea_support" msgid="7707464334346454950">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) ซ้าย: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered_right_lea_support" msgid="8941549024377771038">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) ขวา: แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_no_battery_level_lea_support" msgid="5721725041048434075">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง)"</string>
@@ -564,6 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"การปลุกและการช่วยเตือน"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"อนุญาตให้แอปนี้ตั้งปลุกและกำหนดเวลาการดำเนินการที่ต้องคำนึงถึงเวลาเป็นสำคัญ สิทธิ์นี้ช่วยให้แอปทำงานในเบื้องหลังได้ จึงอาจทำให้ใช้แบตเตอรี่มากขึ้น\n\nหากปิดใช้สิทธิ์นี้ การปลุกที่มีอยู่และกิจกรรมที่ต้องคำนึงถึงเวลาเป็นสำคัญซึ่งแอปนี้กำหนดเวลาไว้จะไม่ทำงาน"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"กำหนดเวลา การปลุก การช่วยเตือน นาฬิกา"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"ห้ามรบกวน"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"ห้ามรบกวน"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"เปิด"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"เปิด \"ห้ามรบกวน\""</string>
@@ -581,8 +582,10 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"เมื่อสักครู่"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"โทรศัพท์เครื่องนี้"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"แท็บเล็ตเครื่องนี้"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"คอมพิวเตอร์เครื่องนี้ (ภายใน)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"ไมโครโฟน (ภายใน)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นชาร์จที่มีลำโพง"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"อุปกรณ์ภายนอก"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"อุปกรณ์ที่เชื่อมต่อ"</string>
@@ -683,7 +686,11 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ปิดใช้"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"เปิดใช้"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"คุณต้องรีบูตอุปกรณ์เพื่อให้การเปลี่ยนแปลงนี้มีผล รีบูตเลยหรือยกเลิก"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"หูฟังแบบมีสาย"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"หูฟังแบบใช้สาย"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"หูฟัง"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"ลำโพง USB"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"ช่องเสียบไมค์"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"ไมค์ USB"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"เปิด"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ปิด"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"การเปลี่ยนเครือข่ายผู้ให้บริการ"</string>

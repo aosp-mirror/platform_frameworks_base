@@ -155,7 +155,7 @@ class SwipeToSceneTest {
 
         // We should be at a progress = 55dp / LayoutWidth given that we use the layout size in
         // the gesture axis as swipe distance.
-        var transition = assertThat(layoutState.transitionState).isTransition()
+        var transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasCurrentScene(SceneA)
@@ -165,7 +165,7 @@ class SwipeToSceneTest {
         // Release the finger. We should now be animating back to A (currentScene = SceneA) given
         // that 55dp < positional threshold.
         rule.onRoot().performTouchInput { up() }
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasCurrentScene(SceneA)
@@ -185,7 +185,7 @@ class SwipeToSceneTest {
         }
 
         // Drag is in progress, so currentScene = SceneA and progress = 56dp / LayoutHeight
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(TestScenes.SceneC)
         assertThat(transition).hasCurrentScene(SceneA)
@@ -195,7 +195,7 @@ class SwipeToSceneTest {
         // Release the finger. We should now be animating to C (currentScene = SceneC) given
         // that 56dp >= positional threshold.
         rule.onRoot().performTouchInput { up() }
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(TestScenes.SceneC)
         assertThat(transition).hasCurrentScene(TestScenes.SceneC)
@@ -236,7 +236,7 @@ class SwipeToSceneTest {
 
         // We should be animating back to A (currentScene = SceneA) given that 124 dp/s < velocity
         // threshold.
-        var transition = assertThat(layoutState.transitionState).isTransition()
+        var transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasCurrentScene(SceneA)
@@ -260,7 +260,7 @@ class SwipeToSceneTest {
         }
 
         // We should be animating to C (currentScene = SceneC).
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(TestScenes.SceneC)
         assertThat(transition).hasCurrentScene(TestScenes.SceneC)
@@ -297,7 +297,7 @@ class SwipeToSceneTest {
         }
 
         // We are transitioning to B because we used 2 fingers.
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(TestScenes.SceneC)
         assertThat(transition).hasToScene(SceneB)
 
@@ -332,7 +332,7 @@ class SwipeToSceneTest {
         }
 
         // We are transitioning to B (and not A) because we started from the top edge.
-        var transition = assertThat(layoutState.transitionState).isTransition()
+        var transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(TestScenes.SceneC)
         assertThat(transition).hasToScene(SceneB)
 
@@ -350,7 +350,7 @@ class SwipeToSceneTest {
         }
 
         // We are transitioning to B (and not A) because we started from the left edge.
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(TestScenes.SceneC)
         assertThat(transition).hasToScene(SceneB)
 
@@ -385,12 +385,9 @@ class SwipeToSceneTest {
 
             SceneTransitionLayout(
                 state = layoutState,
-                modifier = Modifier.size(LayoutWidth, LayoutHeight)
+                modifier = Modifier.size(LayoutWidth, LayoutHeight),
             ) {
-                scene(
-                    SceneA,
-                    userActions = mapOf(Swipe.Down to SceneB),
-                ) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
                     Spacer(Modifier.fillMaxSize())
                 }
                 scene(SceneB) { Spacer(Modifier.fillMaxSize()) }
@@ -406,7 +403,7 @@ class SwipeToSceneTest {
         }
 
         // We should be at 50%
-        val transition = assertThat(layoutState.transitionState).isTransition()
+        val transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).isNotNull()
         assertThat(transition).hasProgress(0.5f)
     }
@@ -427,7 +424,7 @@ class SwipeToSceneTest {
         }
 
         // We should still correctly compute that we are swiping down to scene C.
-        var transition = assertThat(layoutState.transitionState).isTransition()
+        var transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasToScene(TestScenes.SceneC)
 
         // Release the finger, animating back to scene A.
@@ -443,7 +440,7 @@ class SwipeToSceneTest {
         }
 
         // We should still correctly compute that we are swiping up to scene B.
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasToScene(SceneB)
 
         // Release the finger, animating back to scene A.
@@ -459,7 +456,7 @@ class SwipeToSceneTest {
         }
 
         // We should still correctly compute that we are swiping down to scene B.
-        transition = assertThat(layoutState.transitionState).isTransition()
+        transition = assertThat(layoutState.transitionState).isSceneTransition()
         assertThat(transition).hasToScene(SceneB)
     }
 
@@ -507,7 +504,7 @@ class SwipeToSceneTest {
                         fade(TestElements.Foo)
                         fade(TestElements.Bar)
                     }
-                }
+                },
             )
 
         var touchSlop = 0f
@@ -519,8 +516,8 @@ class SwipeToSceneTest {
                     userActions =
                         mapOf(
                             Swipe.Down to SceneB,
-                            Swipe.Up to UserActionResult(SceneB, transitionKey = transitionkey)
-                        )
+                            Swipe.Up to UserActionResult(SceneB, transitionKey = transitionkey),
+                        ),
                 ) {
                     Box(Modifier.fillMaxSize())
                 }
@@ -565,7 +562,7 @@ class SwipeToSceneTest {
         val state =
             layoutState(
                 SceneA,
-                transitions { from(SceneA, to = SceneB) { distance = swipeDistance } }
+                transitions { from(SceneA, to = SceneB) { distance = swipeDistance } },
             )
 
         val layoutSize = 200.dp
@@ -597,7 +594,7 @@ class SwipeToSceneTest {
         }
 
         rule.waitForIdle()
-        val transition = assertThat(state.transitionState).isTransition()
+        val transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         assertThat(transition).hasProgress(0.5f, tolerance = 0.01f)
@@ -614,9 +611,10 @@ class SwipeToSceneTest {
                         from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
 
                         overscroll(SceneB, Orientation.Vertical) {
+                            progressConverter = ProgressConverter.linear()
                             translate(TestElements.Foo, x = { 20.dp.toPx() }, y = { 30.dp.toPx() })
                         }
-                    }
+                    },
                 )
             }
         val layoutSize = 200.dp
@@ -686,7 +684,7 @@ class SwipeToSceneTest {
         }
 
         // Scene B should come from the right (end) edge.
-        var transition = assertThat(state.transitionState).isTransition()
+        var transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         rule
@@ -707,7 +705,7 @@ class SwipeToSceneTest {
         }
 
         // Scene C should come from the left (start) edge.
-        transition = assertThat(state.transitionState).isTransition()
+        transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
         rule
@@ -761,7 +759,7 @@ class SwipeToSceneTest {
         }
 
         // Scene C should come from the right (start) edge.
-        var transition = assertThat(state.transitionState).isTransition()
+        var transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
         rule
@@ -782,7 +780,7 @@ class SwipeToSceneTest {
         }
 
         // Scene C should come from the left (end) edge.
-        transition = assertThat(state.transitionState).isTransition()
+        transition = assertThat(state.transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
         rule
@@ -800,7 +798,7 @@ class SwipeToSceneTest {
                 override fun onPostScroll(
                     consumed: Offset,
                     available: Offset,
-                    source: NestedScrollSource
+                    source: NestedScrollSource,
                 ): Offset {
                     availableOnPostScroll = available.y
                     return super.onPostScroll(consumed, available, source)
@@ -813,7 +811,7 @@ class SwipeToSceneTest {
                     transitions {
                         from(SceneA, to = SceneB) { distance = FixedDistance(swipeDistance) }
                         overscrollDisabled(SceneB, Orientation.Vertical)
-                    }
+                    },
                 )
             }
         val layoutSize = 200.dp

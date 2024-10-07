@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.metrics.LogMaker;
@@ -103,7 +103,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.NotificationSwipeHelper.NotificationCallback;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -937,7 +937,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
     @DisableFlags(FLAG_SCREENSHARE_NOTIFICATION_HIDING)
     public void sensitiveNotificationProtectionControllerListenerNotRegistered() {
         initController(/* viewIsAttached= */ true);
-        verifyZeroInteractions(mSensitiveNotificationProtectionController);
+        verifyNoMoreInteractions(mSensitiveNotificationProtectionController);
     }
 
     @Test

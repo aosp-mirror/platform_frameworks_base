@@ -82,7 +82,7 @@
         <item name="android:textColor">@color/tv_pip_edu_text</item>
     </style>
 
-    <style name="LetterboxDialog" parent="@android:style/Theme.Holo">
+    <style name="LetterboxDialog" parent="@android:style/Theme.DeviceDefault.Dialog.Alert">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@color/letterbox_dialog_background</item>
@@ -90,7 +90,7 @@
 
     <style name="RestartDialogTitleText">
         <item name="android:textSize">24sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:lineSpacingExtra">8sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
     </style>
@@ -102,23 +102,23 @@
 
     <style name="RestartDialogBodyText" parent="RestartDialogBodyStyle">
         <item name="android:letterSpacing">0.02</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:lineSpacingExtra">6sp</item>
     </style>
 
     <style name="RestartDialogCheckboxText" parent="RestartDialogBodyStyle">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:lineSpacingExtra">6sp</item>
     </style>
 
     <style name="RestartDialogDismissButton" parent="RestartDialogBodyStyle">
         <item name="android:lineSpacingExtra">2sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorPrimary</item>
     </style>
 
     <style name="RestartDialogConfirmButton" parent="RestartDialogBodyStyle">
         <item name="android:lineSpacingExtra">2sp</item>
-        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimary</item>
     </style>
 
     <style name="ReachabilityEduHandLayout" parent="Theme.AppCompat.Light">

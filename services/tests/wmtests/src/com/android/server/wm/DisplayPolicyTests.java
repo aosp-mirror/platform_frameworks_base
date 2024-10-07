@@ -284,11 +284,11 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy policy = mDisplayContent.getDisplayPolicy();
         policy.addWindowLw(mNotificationShadeWindow, mNotificationShadeWindow.mAttrs);
 
-        policy.screenTurnedOff();
+        policy.screenTurnedOff(false /* acquireSleepToken */);
         policy.setAwake(false);
         policy.screenTurningOn(null /* screenOnListener */);
         assertTrue(wpc.isShowingUiWhileDozing());
-        policy.screenTurnedOff();
+        policy.screenTurnedOff(false /* acquireSleepToken */);
         assertFalse(wpc.isShowingUiWhileDozing());
 
         policy.screenTurningOn(null /* screenOnListener */);
@@ -393,7 +393,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
                 info.logicalWidth, info.logicalHeight).mConfigFrame);
 
         // If screen is not fully turned on, then the cache should be preserved.
-        displayPolicy.screenTurnedOff();
+        displayPolicy.screenTurnedOff(false /* acquireSleepToken */);
         final TransitionController transitionController = mDisplayContent.mTransitionController;
         spyOn(transitionController);
         doReturn(true).when(transitionController).isCollecting();
@@ -413,15 +413,25 @@ public class DisplayPolicyTests extends WindowTestsBase {
 
     @Test
     public void testUpdateDisplayConfigurationByDecor() {
-        if (Flags.insetsDecoupledConfiguration()) {
-            // No configuration update when flag enables.
-            return;
-        }
         doReturn(NO_CUTOUT).when(mDisplayContent).calculateDisplayCutoutForRotation(anyInt());
         final WindowState navbar = createNavBarWithProvidedInsets(mDisplayContent);
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         final DisplayInfo di = mDisplayContent.getDisplayInfo();
         final int prevScreenHeightDp = mDisplayContent.getConfiguration().screenHeightDp;
+        if (Flags.insetsDecoupledConfiguration()) {
+            // No configuration update when flag enables.
+            assertFalse(displayPolicy.updateDecorInsetsInfo());
+            assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalHeight, di.logicalWidth).mOverrideConfigInsets.bottom);
+
+            final int barHeight = 2 * NAV_BAR_HEIGHT;
+            navbar.mAttrs.providedInsets[0].setInsetsSize(Insets.of(0, 0, 0, barHeight));
+            assertFalse(displayPolicy.updateDecorInsetsInfo());
+            assertEquals(barHeight, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalHeight, di.logicalWidth).mOverrideConfigInsets.bottom);
+            return;
+        }
+
         assertTrue(navbar.providesDisplayDecorInsets() && displayPolicy.updateDecorInsetsInfo());
         assertEquals(NAV_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
                 di.logicalWidth, di.logicalHeight).mConfigInsets.bottom);
@@ -530,6 +540,7 @@ public class DisplayPolicyTests extends WindowTestsBase {
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+        makeWindowVisible(mImeWindow);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
         mImeWindow.mGivenContentInsets.set(0, 10, 0, 0);

@@ -49,10 +49,10 @@ constructor(
                     is ObservableTransitionState.Idle -> flowOf(false)
                     is ObservableTransitionState.Transition ->
                         if (
-                            (state.fromScene == Scenes.Shade &&
-                                state.toScene != Scenes.QuickSettings) ||
-                                (state.fromScene == Scenes.QuickSettings &&
-                                    state.toScene != Scenes.Shade)
+                            (state.fromContent == Scenes.Shade &&
+                                state.toContent != Scenes.QuickSettings) ||
+                                (state.fromContent == Scenes.QuickSettings &&
+                                    state.toContent != Scenes.Shade)
                         ) {
                             state.isUserInputOngoing.map { !it }
                         } else {
@@ -71,10 +71,10 @@ constructor(
                     is ObservableTransitionState.Transition ->
                         if (
                             state.isInitiatedByUserInput &&
-                                (state.fromScene == Scenes.Shade ||
-                                    state.toScene == Scenes.Shade ||
-                                    state.fromScene == Scenes.QuickSettings ||
-                                    state.toScene == Scenes.QuickSettings)
+                                (state.fromContent == Scenes.Shade ||
+                                    state.toContent == Scenes.Shade ||
+                                    state.fromContent == Scenes.QuickSettings ||
+                                    state.toContent == Scenes.QuickSettings)
                         ) {
                             state.isUserInputOngoing.map { !it }
                         } else {

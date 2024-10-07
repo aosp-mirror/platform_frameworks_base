@@ -32,7 +32,7 @@ android_test {
         "platform-test-annotations",
         "testng",
     ],
-    libs: ["android.test.runner"],
+    libs: ["android.test.runner.stubs.system"],
     platform_apis: true,
     certificate: "platform",
 }

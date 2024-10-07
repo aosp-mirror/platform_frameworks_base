@@ -21,6 +21,7 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.policy.RemoteInputView.FOCUS_ANIMATION_MIN_SCALE;
 import static com.android.systemui.util.ColorUtilKt.hexColorString;
 
 import android.animation.Animator;
@@ -83,6 +84,7 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -118,6 +120,7 @@ import com.android.systemui.statusbar.phone.ExpandHeadsUpOnInlineReply;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState;
+import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent;
 import com.android.systemui.util.Compile;
@@ -828,6 +831,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setRemoteInputController(RemoteInputController r) {
         mPrivateLayout.setRemoteInputController(r);
+    }
+
+    /**
+     * Return the cumulative y-value that the actions container expands via its scale animator when
+     * remote input is activated.
+     */
+    public float getRemoteInputActionsContainerExpandedOffset() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0f;
+        RemoteInputView expandedRemoteInput = mPrivateLayout.getExpandedRemoteInput();
+        if (expandedRemoteInput == null) return 0f;
+        View actionsContainerLayout = expandedRemoteInput.getActionsContainerLayout();
+        if (actionsContainerLayout == null) return 0f;
+
+        return actionsContainerLayout.getHeight() * (1 - FOCUS_ANIMATION_MIN_SCALE) * 0.5f;
     }
 
     public void addChildNotification(ExpandableNotificationRow row) {

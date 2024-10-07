@@ -19,11 +19,15 @@ import android.app.role.OnRoleHoldersChangedListener
 import android.app.role.RoleManager
 import android.content.Context
 import android.content.pm.UserInfo
+import android.hardware.input.InputManager
+import android.hardware.input.KeyGestureEvent
+import android.os.IBinder
 import android.os.UserHandle
 import android.view.KeyEvent
 import android.view.KeyEvent.KEYCODE_N
 import android.view.KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL
 import android.view.ViewConfiguration
+import com.android.hardware.input.Flags.useKeyGestureEventHandler
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.dagger.qualifiers.Background
@@ -47,6 +51,7 @@ constructor(
     private val optionalBubbles: Optional<Bubbles>,
     private val userTracker: UserTracker,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val inputManager: InputManager,
     @Background private val backgroundExecutor: Executor,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
 ) {
@@ -59,6 +64,7 @@ constructor(
         if (!isEnabled || optionalBubbles.isEmpty) return
 
         initializeHandleSystemKey()
+        initializeKeyGestureEventHandler()
         initializeOnRoleHoldersChanged()
         initializeOnUserUnlocked()
         initializeUserTracker()
@@ -69,7 +75,19 @@ constructor(
      * [NoteTaskController], ensure custom actions can be triggered (i.e., keyboard shortcut).
      */
     private fun initializeHandleSystemKey() {
-        commandQueue.addCallback(callbacks)
+        if (!useKeyGestureEventHandler()) {
+            commandQueue.addCallback(callbacks)
+        }
+    }
+
+    /**
+     * Initializes a [InputManager.KeyGestureEventHandler] which will handle shortcuts for opening
+     * the notes role via [NoteTaskController].
+     */
+    private fun initializeKeyGestureEventHandler() {
+        if (useKeyGestureEventHandler()) {
+            inputManager.registerKeyGestureEventHandler(callbacks)
+        }
     }
 
     /**
@@ -110,9 +128,15 @@ constructor(
             KeyguardUpdateMonitorCallback(),
             CommandQueue.Callbacks,
             UserTracker.Callback,
-            OnRoleHoldersChangedListener {
+            OnRoleHoldersChangedListener,
+            InputManager.KeyGestureEventHandler {
 
             override fun handleSystemKey(key: KeyEvent) {
+                if (useKeyGestureEventHandler()) {
+                    throw IllegalStateException(
+                        "handleSystemKey must not be used when KeyGestureEventHandler is used"
+                    )
+                }
                 key.toNoteTaskEntryPointOrNull()?.let(controller::showNoteTask)
             }
 
@@ -130,6 +154,17 @@ constructor(
 
             override fun onProfilesChanged(profiles: List<UserInfo>) {
                 controller.updateNoteTaskForCurrentUserAndManagedProfiles()
+            }
+
+            override fun handleKeyGestureEvent(
+                event: KeyGestureEvent,
+                focusedToken: IBinder?,
+            ): Boolean {
+                return this@NoteTaskInitializer.handleKeyGestureEvent(event)
+            }
+
+            override fun isKeyGestureSupported(gestureType: Int): Boolean {
+                return this@NoteTaskInitializer.isKeyGestureSupported(gestureType)
             }
         }
 
@@ -169,6 +204,36 @@ constructor(
             "isTailButtonNotesGesture: isMultiPress=$isMultiPress, isLongPress=$isLongPress"
         }
         return !isMultiPress && !isLongPress
+    }
+
+    private fun handleKeyGestureEvent(event: KeyGestureEvent): Boolean {
+        // This method is on input hot path and should be kept lightweight. Shift all complex
+        // processing onto background executor wherever possible.
+        if (event.keyGestureType != KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES) {
+            return false
+        }
+        debugLog {
+            "handleKeyGestureEvent: Received OPEN_NOTES gesture event from keycodes: " +
+                event.keycodes.contentToString()
+        }
+        if (
+            event.keycodes.contains(KEYCODE_N) &&
+                event.hasModifiers(KeyEvent.META_CTRL_ON or KeyEvent.META_META_ON)
+        ) {
+            debugLog { "Note task triggered by keyboard shortcut" }
+            backgroundExecutor.execute { controller.showNoteTask(KEYBOARD_SHORTCUT) }
+            return true
+        }
+        if (event.keycodes.size == 1 && event.keycodes[0] == KEYCODE_STYLUS_BUTTON_TAIL) {
+            debugLog { "Note task triggered by stylus tail button" }
+            backgroundExecutor.execute { controller.showNoteTask(TAIL_BUTTON) }
+            return true
+        }
+        return false
+    }
+
+    private fun isKeyGestureSupported(gestureType: Int): Boolean {
+        return gestureType == KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES
     }
 
     companion object {

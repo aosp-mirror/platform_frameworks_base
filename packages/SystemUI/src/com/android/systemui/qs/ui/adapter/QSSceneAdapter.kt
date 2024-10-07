@@ -147,17 +147,17 @@ interface QSSceneAdapter {
     sealed interface State {
 
         val isVisible: Boolean
-        val expansion: Float
+        val expansion: () -> Float
         val squishiness: () -> Float
 
         data object CLOSED : State {
             override val isVisible = false
-            override val expansion = 0f
+            override val expansion = { 0f }
             override val squishiness = { 1f }
         }
 
         /** State for expanding between QQS and QS */
-        data class Expanding(override val expansion: Float) : State {
+        class Expanding(override val expansion: () -> Float) : State {
             override val isVisible = true
             override val squishiness = { 1f }
         }
@@ -170,7 +170,7 @@ interface QSSceneAdapter {
          */
         class UnsquishingQQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
-            override val expansion = 0f
+            override val expansion = { 0f }
         }
 
         /**
@@ -181,16 +181,16 @@ interface QSSceneAdapter {
          */
         class UnsquishingQS(override val squishiness: () -> Float) : State {
             override val isVisible = true
-            override val expansion = 1f
+            override val expansion = { 1f }
         }
 
         companion object {
             // These are special cases of the expansion.
-            val QQS = Expanding(0f)
-            val QS = Expanding(1f)
+            val QQS = Expanding { 0f }
+            val QS = Expanding { 1f }
 
             /** Collapsing from QS to QQS. [progress] is 0f in QS and 1f in QQS. */
-            fun Collapsing(progress: Float) = Expanding(1f - progress)
+            fun Collapsing(progress: () -> Float) = Expanding { 1f - progress() }
         }
     }
 }
@@ -418,14 +418,14 @@ constructor(
 
     private fun QSImpl.applyState(state: QSSceneAdapter.State) {
         setQsVisible(state.isVisible)
-        setExpanded(state.isVisible && state.expansion > 0f)
+        setExpanded(state.isVisible && state.expansion() > 0f)
         setListening(state.isVisible)
     }
 
     override fun applyLatestExpansionAndSquishiness() {
         val qsImpl = _qsImpl.value
         val state = state.value
-        qsImpl?.setQsExpansion(state.expansion, 1f, 0f, state.squishiness())
+        qsImpl?.setQsExpansion(state.expansion(), 1f, 0f, state.squishiness())
     }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {

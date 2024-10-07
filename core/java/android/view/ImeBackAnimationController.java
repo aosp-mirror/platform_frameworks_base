@@ -149,15 +149,17 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private void setPreCommitProgress(float progress) {
         if (isHideAnimationInProgress()) return;
+        setInterpolatedProgress(BACK_GESTURE.getInterpolation(progress) * PEEK_FRACTION);
+    }
+
+    private void setInterpolatedProgress(float progress) {
         if (mWindowInsetsAnimationController != null) {
             float hiddenY = mWindowInsetsAnimationController.getHiddenStateInsets().bottom;
             float shownY = mWindowInsetsAnimationController.getShownStateInsets().bottom;
             float imeHeight = shownY - hiddenY;
-            float interpolatedProgress = BACK_GESTURE.getInterpolation(progress);
-            int newY = (int) (imeHeight - interpolatedProgress * (imeHeight * PEEK_FRACTION));
+            int newY = (int) (imeHeight - progress * imeHeight);
             if (mStartRootScrollY != 0) {
-                mViewRoot.setScrollY(
-                        (int) (mStartRootScrollY * (1 - interpolatedProgress * PEEK_FRACTION)));
+                mViewRoot.setScrollY((int) (mStartRootScrollY * (1 - progress)));
             }
             mWindowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, newY), 1f,
                     progress);
@@ -171,21 +173,14 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             return;
         }
         mTriggerBack = triggerBack;
-        int currentBottomInset = mWindowInsetsAnimationController.getCurrentInsets().bottom;
-        int targetBottomInset;
-        if (triggerBack) {
-            targetBottomInset = mWindowInsetsAnimationController.getHiddenStateInsets().bottom;
-        } else {
-            targetBottomInset = mWindowInsetsAnimationController.getShownStateInsets().bottom;
-        }
-        mPostCommitAnimator = ValueAnimator.ofFloat(currentBottomInset, targetBottomInset);
+        float targetProgress = triggerBack ? 1f : 0f;
+        mPostCommitAnimator = ValueAnimator.ofFloat(
+                BACK_GESTURE.getInterpolation(mLastProgress) * PEEK_FRACTION, targetProgress);
         mPostCommitAnimator.setInterpolator(
                 triggerBack ? STANDARD_ACCELERATE : EMPHASIZED_DECELERATE);
         mPostCommitAnimator.addUpdateListener(animation -> {
-            int bottomInset = (int) ((float) animation.getAnimatedValue());
             if (mWindowInsetsAnimationController != null) {
-                mWindowInsetsAnimationController.setInsetsAndAlpha(Insets.of(0, 0, 0, bottomInset),
-                        1f, animation.getAnimatedFraction());
+                setInterpolatedProgress((float) animation.getAnimatedValue());
             } else {
                 reset();
             }
@@ -213,13 +208,7 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
             notifyHideIme();
             // requesting IME as invisible during post-commit
             mInsetsController.setRequestedVisibleTypes(0, ime());
-            // Changes the animation state. This also notifies RootView of changed insets, which
-            // causes it to reset its scrollY to 0f (animated) if it was panned
             mInsetsController.onAnimationStateChanged(ime(), /*running*/ true);
-        }
-        if (mStartRootScrollY != 0 && !triggerBack) {
-            // This causes RootView to update its scroll back to the panned position
-            mInsetsController.getHost().notifyInsetsChanged();
         }
     }
 
@@ -280,6 +269,10 @@ public class ImeBackAnimationController implements OnBackAnimationCallback {
 
     private boolean isHideAnimationInProgress() {
         return mPostCommitAnimator != null && mTriggerBack;
+    }
+
+    boolean isAnimationInProgress() {
+        return mIsPreCommitAnimationInProgress || mWindowInsetsAnimationController != null;
     }
 
     /**

@@ -27,9 +27,11 @@ java_library {
     name: "mediatestutils",
     srcs: [
         "java/com/android/media/mediatestutils/TestUtils.java",
+        "java/com/android/media/mediatestutils/PermissionUpdateBarrierRule.java",
     ],
     static_libs: [
         "androidx.concurrent_concurrent-futures",
+        "androidx.test.runner",
         "guava",
         "mediatestutils_host",
     ],

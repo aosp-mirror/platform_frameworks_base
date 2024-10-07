@@ -21,7 +21,6 @@ import android.os.UserHandle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
 
 @SysUISingleton
@@ -30,9 +29,8 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClass
      * Check whether media control actions should be based on PlaybackState instead of notification
      */
     fun areMediaSessionActionsEnabled(packageName: String, user: UserHandle): Boolean {
-        val enabled = StatusBarManager.useMediaSessionActionsForApp(packageName, user)
         // Allow global override with flag
-        return enabled || featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS)
+        return StatusBarManager.useMediaSessionActionsForApp(packageName, user)
     }
 
     /**
@@ -49,7 +47,4 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlagsClass
 
     /** Check whether we allow remote media to generate resume controls */
     fun isRemoteResumeAllowed() = featureFlags.isEnabled(Flags.MEDIA_REMOTE_RESUME)
-
-    /** Check whether to use scene framework */
-    fun isSceneContainerEnabled() = SceneContainerFlag.isEnabled
 }

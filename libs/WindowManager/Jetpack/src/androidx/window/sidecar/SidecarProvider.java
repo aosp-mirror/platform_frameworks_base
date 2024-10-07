@@ -36,7 +36,7 @@ public class SidecarProvider {
     @Nullable
     public static SidecarInterface getSidecarImpl(Context context) {
         return isWindowExtensionsEnabled()
-                ? new SampleSidecarImpl(context.getApplicationContext())
+                ? new SidecarImpl(context.getApplicationContext())
                 : null;
     }
 

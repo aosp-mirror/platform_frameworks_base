@@ -17,6 +17,7 @@
 package com.android.wm.shell
 
 import android.app.Instrumentation
+import android.platform.test.rule.EnsureDeviceSettingsRule
 import android.platform.test.rule.NavigationModeRule
 import android.platform.test.rule.PressHomeRule
 import android.platform.test.rule.UnlockScreenRule
@@ -49,5 +50,6 @@ object Utils {
                 )
             )
             .around(PressHomeRule())
+            .around(EnsureDeviceSettingsRule())
     }
 }

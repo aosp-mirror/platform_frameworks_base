@@ -16,13 +16,16 @@
 
 package com.android.systemui.education.domain.ui.view
 
+import android.app.Dialog
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.applicationContext
-import android.widget.Toast
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.contextualeducation.GestureType
 import com.android.systemui.contextualeducation.GestureType.BACK
+import com.android.systemui.education.data.repository.fakeEduClock
 import com.android.systemui.education.domain.interactor.KeyboardTouchpadEduInteractor
 import com.android.systemui.education.domain.interactor.contextualEducationInteractor
 import com.android.systemui.education.domain.interactor.keyboardTouchpadEduInteractor
@@ -30,53 +33,146 @@ import com.android.systemui.education.ui.view.ContextualEduUiCoordinator
 import com.android.systemui.education.ui.viewmodel.ContextualEduViewModel
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.testKosmos
+import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ContextualEduUiCoordinatorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val interactor = kosmos.contextualEducationInteractor
+    private val eduClock = kosmos.fakeEduClock
+    private val minDurationForNextEdu =
+        KeyboardTouchpadEduInteractor.minIntervalBetweenEdu + 1.seconds
     private lateinit var underTest: ContextualEduUiCoordinator
-    @Mock private lateinit var toast: Toast
-
+    @Mock private lateinit var dialog: Dialog
+    @Mock private lateinit var notificationManager: NotificationManager
+    @Mock private lateinit var accessibilityManagerWrapper: AccessibilityManagerWrapper
     @get:Rule val mockitoRule = MockitoJUnit.rule()
+    private var toastContent = ""
+    private val timeoutMillis = 5000L
 
     @Before
     fun setUp() {
+        testScope.launch {
+            interactor.updateKeyboardFirstConnectionTime()
+            interactor.updateTouchpadFirstConnectionTime()
+        }
+
+        whenever(accessibilityManagerWrapper.getRecommendedTimeoutMillis(any(), any()))
+            .thenReturn(timeoutMillis.toInt())
+
         val viewModel =
             ContextualEduViewModel(
                 kosmos.applicationContext.resources,
-                kosmos.keyboardTouchpadEduInteractor
+                kosmos.keyboardTouchpadEduInteractor,
+                accessibilityManagerWrapper,
             )
+
         underTest =
-            ContextualEduUiCoordinator(kosmos.applicationCoroutineScope, viewModel) { _ -> toast }
+            ContextualEduUiCoordinator(
+                kosmos.applicationCoroutineScope,
+                viewModel,
+                kosmos.applicationContext,
+                notificationManager
+            ) { model ->
+                toastContent = model.message
+                dialog
+            }
         underTest.start()
         kosmos.keyboardTouchpadEduInteractor.start()
     }
 
     @Test
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    fun showToastOnNewEdu() =
+    fun showDialogOnNewEdu() =
         testScope.runTest {
             triggerEducation(BACK)
-            runCurrent()
-            verify(toast).show()
+            verify(dialog).show()
         }
 
-    private suspend fun triggerEducation(gestureType: GestureType) {
+    @Test
+    fun showNotificationOn2ndEdu() =
+        testScope.runTest {
+            triggerEducation(BACK)
+            eduClock.offset(minDurationForNextEdu)
+            triggerEducation(BACK)
+            verify(notificationManager).notifyAsUser(any(), anyInt(), any(), any())
+        }
+
+    @Test
+    fun dismissDialogAfterTimeout() =
+        testScope.runTest {
+            triggerEducation(BACK)
+            advanceTimeBy(timeoutMillis + 1)
+            verify(dialog).dismiss()
+        }
+
+    @Test
+    fun verifyBackEduToastContent() =
+        testScope.runTest {
+            triggerEducation(BACK)
+            assertThat(toastContent).isEqualTo(context.getString(R.string.back_edu_toast_content))
+        }
+
+    @Test
+    fun verifyBackEduNotificationContent() =
+        testScope.runTest {
+            val notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
+            triggerEducation(BACK)
+
+            eduClock.offset(minDurationForNextEdu)
+            triggerEducation(BACK)
+
+            verify(notificationManager)
+                .notifyAsUser(any(), anyInt(), notificationCaptor.capture(), any())
+            verifyNotificationContent(
+                R.string.back_edu_notification_title,
+                R.string.back_edu_notification_content,
+                notificationCaptor.value
+            )
+        }
+
+    private fun verifyNotificationContent(
+        titleResId: Int,
+        contentResId: Int,
+        notification: Notification
+    ) {
+        val expectedContent = context.getString(contentResId)
+        val expectedTitle = context.getString(titleResId)
+        val actualContent = notification.getString(Notification.EXTRA_TEXT)
+        val actualTitle = notification.getString(Notification.EXTRA_TITLE)
+        assertThat(actualContent).isEqualTo(expectedContent)
+        assertThat(actualTitle).isEqualTo(expectedTitle)
+    }
+
+    private fun Notification.getString(key: String): String =
+        this.extras?.getCharSequence(key).toString()
+
+    private suspend fun TestScope.triggerEducation(gestureType: GestureType) {
         for (i in 1..KeyboardTouchpadEduInteractor.MAX_SIGNAL_COUNT) {
             interactor.incrementSignalCount(gestureType)
         }
+        runCurrent()
     }
 }

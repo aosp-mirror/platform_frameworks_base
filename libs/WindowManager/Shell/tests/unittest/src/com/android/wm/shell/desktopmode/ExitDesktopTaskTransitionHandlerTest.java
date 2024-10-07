@@ -34,6 +34,7 @@ import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
@@ -48,7 +49,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -81,6 +82,8 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     Transitions.TransitionFinishCallback mTransitionFinishCallback;
     @Mock
     ShellExecutor mExecutor;
+    @Mock
+    Handler mHandler;
 
     private Point mPoint;
     private ExitDesktopTaskTransitionHandler mExitDesktopTaskTransitionHandler;
@@ -97,7 +100,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
                 .thenReturn(getContext().getResources().getDisplayMetrics());
 
         mExitDesktopTaskTransitionHandler = new ExitDesktopTaskTransitionHandler(mTransitions,
-                mContext, mInteractionJankMonitor);
+                mContext, mInteractionJankMonitor, mHandler);
         mPoint = new Point(0, 0);
     }
 

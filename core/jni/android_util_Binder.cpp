@@ -56,11 +56,11 @@
 //#undef ALOGV
 //#define ALOGV(...) fprintf(stderr, __VA_ARGS__)
 
-#define DEBUG_DEATH 0
-#if DEBUG_DEATH
-#define LOGDEATH ALOGD
+#define DEBUG_DEATH_FREEZE 0
+#if DEBUG_DEATH_FREEZE
+#define LOG_DEATH_FREEZE ALOGD
 #else
-#define LOGDEATH ALOGV
+#define LOG_DEATH_FREEZE ALOGV
 #endif
 
 using namespace android;
@@ -116,6 +116,7 @@ static struct binderproxy_offsets_t
     jclass mClass;
     jmethodID mGetInstance;
     jmethodID mSendDeathNotice;
+    jmethodID mInvokeFrozenStateChangeCallback;
 
     // Object state.
     jfieldID mNativeData;  // Field holds native pointer to BinderProxyNativeData.
@@ -466,10 +467,25 @@ class JavaBBinderHolder
 public:
     sp<JavaBBinder> get(JNIEnv* env, jobject obj)
     {
-        AutoMutex _l(mLock);
-        sp<JavaBBinder> b = mBinder.promote();
-        if (b == NULL) {
-            b = new JavaBBinder(env, obj);
+        sp<JavaBBinder> b;
+        {
+            AutoMutex _l(mLock);
+            // must take lock to promote because we set the same wp<>
+            // on another thread.
+            b = mBinder.promote();
+        }
+
+        if (b) return b;
+
+        // b/360067751: constructor may trigger GC, so call outside lock
+        b = new JavaBBinder(env, obj);
+
+        {
+            AutoMutex _l(mLock);
+            // if it was constructed on another thread in the meantime,
+            // return that. 'b' will just get destructed.
+            if (sp<JavaBBinder> b2 = mBinder.promote(); b2) return b2;
+
             if (mVintf) {
                 ::android::internal::Stability::markVintf(b.get());
             }
@@ -532,23 +548,59 @@ private:
 
 // ----------------------------------------------------------------------------
 
-// Per-IBinder death recipient bookkeeping.  This is how we reconcile local jobject
-// death recipient references passed in through JNI with the permanent corresponding
-// JavaDeathRecipient objects.
+// A JavaRecipient receives either death notifications or frozen state change
+// callbacks from natve code (IBinder) and dispatch the notifications to its
+// corresponding Java listener object.
+//
+// A RecipientList keeps tracks of all JavaRecipients for an IBinder. This way
+// we can find a JavaRecipient given a Java listener object.
+//
+// The implementation is shared between death recipients and frozen state change
+// callbacks via template. For death recipients the template is instantiated as
+// follows:
+//
+//                   IBinder::DeathRecipient
+//                            ^
+//                            |
+//                        (inherits)
+//                            |
+//            JavaRecipient<IBinder::DeathRecipient> <----> RecipientList<IBinder::DeathRecipient>
+//                            ^
+//                            |
+//                        (inherits)
+//                            |
+//                    JavaDeathRecipient
+//
+//
+// The instantiation for frozen state change callbacks are:
+//
+//             IBinder::FrozenStateChangeCallback
+//                           ^
+//                           |
+//                       (inherits)
+//                           |
+//     JavaRecipient<IBinder::FrozenStateChangeCallback>
+//                           ^                ^
+//                           |                |
+//                       (inherits)           +--> RecipientList<IBinder::FrozenStateChangeCallback>
+//                           |
+//              JavaFrozenStateChangeCallback
 
-class JavaDeathRecipient;
+template <typename T>
+class JavaRecipient;
 
-class DeathRecipientList : public RefBase {
-    List< sp<JavaDeathRecipient> > mList;
+template <typename T>
+class RecipientList : public RefBase {
+    List<sp<JavaRecipient<T> > > mList;
     Mutex mLock;
 
 public:
-    DeathRecipientList();
-    ~DeathRecipientList();
+    RecipientList();
+    ~RecipientList();
 
-    void add(const sp<JavaDeathRecipient>& recipient);
-    void remove(const sp<JavaDeathRecipient>& recipient);
-    sp<JavaDeathRecipient> find(jobject recipient);
+    void add(const sp<JavaRecipient<T> >& recipient);
+    void remove(const sp<JavaRecipient<T> >& recipient);
+    sp<JavaRecipient<T> > find(jobject recipient);
 
     Mutex& lock();  // Use with care; specifically for mutual exclusion during binder death
 };
@@ -569,11 +621,113 @@ static constexpr bool target_sdk_is_at_least_vic() {
 #endif // __BIONIC__
 #endif // BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
 
-class JavaDeathRecipient : public IBinder::DeathRecipient
-{
+template <typename T>
+constexpr const char* logPrefix();
+
+template <>
+constexpr const char* logPrefix<IBinder::DeathRecipient>() {
+    return "[DEATH]";
+}
+
+template <>
+constexpr const char* logPrefix<IBinder::FrozenStateChangeCallback>() {
+    return "[FREEZE]";
+}
+
+template <typename T>
+class JavaRecipient : public T {
 public:
-    JavaDeathRecipient(JNIEnv* env, jobject object, const sp<DeathRecipientList>& list)
+    JavaRecipient(JNIEnv* env, jobject object, const sp<RecipientList<T> >& list,
+                  bool useWeakReference)
           : mVM(jnienv_to_javavm(env)), mObject(NULL), mObjectWeak(NULL), mList(list) {
+        if (useWeakReference) {
+            mObjectWeak = env->NewWeakGlobalRef(object);
+        } else {
+            mObject = env->NewGlobalRef(object);
+        }
+        // These objects manage their own lifetimes so are responsible for final bookkeeping.
+        // The list holds a strong reference to this object.
+        LOG_DEATH_FREEZE("%s Adding JavaRecipient %p to RecipientList %p", logPrefix<T>(), this,
+                         list.get());
+        list->add(this);
+    }
+
+    void clearReference() {
+        sp<RecipientList<T> > list = mList.promote();
+        if (list != NULL) {
+            LOG_DEATH_FREEZE("%s Removing JavaRecipient %p from RecipientList %p", logPrefix<T>(),
+                             this, list.get());
+            list->remove(this);
+        } else {
+            LOG_DEATH_FREEZE("%s clearReference() on JavaRecipient %p but RecipientList wp purged",
+                             logPrefix<T>(), this);
+        }
+    }
+
+    bool matches(jobject obj) {
+        bool result;
+        JNIEnv* env = javavm_to_jnienv(mVM);
+
+        if (mObject != NULL) {
+            result = env->IsSameObject(obj, mObject);
+        } else {
+            ScopedLocalRef<jobject> me(env, env->NewLocalRef(mObjectWeak));
+            result = env->IsSameObject(obj, me.get());
+        }
+        return result;
+    }
+
+    void warnIfStillLive() {
+        if (mObject != NULL) {
+            // Okay, something is wrong -- we have a hard reference to a live death
+            // recipient on the VM side, but the list is being torn down.
+            JNIEnv* env = javavm_to_jnienv(mVM);
+            ScopedLocalRef<jclass> objClassRef(env, env->GetObjectClass(mObject));
+            ScopedLocalRef<jstring> nameRef(env,
+                                            (jstring)env->CallObjectMethod(objClassRef.get(),
+                                                                           gClassOffsets.mGetName));
+            ScopedUtfChars nameUtf(env, nameRef.get());
+            if (nameUtf.c_str() != NULL) {
+                ALOGW("BinderProxy is being destroyed but the application did not call "
+                      "unlinkToDeath to unlink all of its death recipients beforehand.  "
+                      "Releasing leaked death recipient: %s",
+                      nameUtf.c_str());
+            } else {
+                ALOGW("BinderProxy being destroyed; unable to get DR object name");
+                env->ExceptionClear();
+            }
+        }
+    }
+
+protected:
+    virtual ~JavaRecipient() {
+        // ALOGI("Removing death ref: recipient=%p\n", mObject);
+        JNIEnv* env = javavm_to_jnienv(mVM);
+        if (mObject != NULL) {
+            env->DeleteGlobalRef(mObject);
+        } else {
+            env->DeleteWeakGlobalRef(mObjectWeak);
+        }
+    }
+
+    JavaVM* const mVM;
+
+    // If useWeakReference is false (e.g. JavaDeathRecipient when target sdk version < 35), the
+    // Java-side Recipient is strongly referenced from mObject initially, and may later be demoted
+    // to a weak reference (mObjectWeak), e.g. upon linkToDeath() and then after binderDied() is
+    // called.
+    // If useWeakReference is true, the strong reference is never made here (i.e. mObject == NULL
+    // always). Instead, the strong reference to the Java-side Recipient is made in
+    // BinderProxy.{mDeathRecipients,mFrozenStateChangeCallbacks}. In the native world, only the
+    // weak reference is kept.
+    jobject mObject;
+    jweak mObjectWeak;
+    wp<RecipientList<T> > mList;
+};
+
+class JavaDeathRecipient : public JavaRecipient<IBinder::DeathRecipient> {
+public:
+    static bool useWeakReference() {
         // b/298374304: For apps targeting Android V or beyond, we no longer hold the global JNI ref
         // to the death recipient objects. This is to prevent the memory leak which can happen when
         // the death recipient object internally has a strong reference to the proxy object. Under
@@ -589,25 +743,26 @@ public:
         // reference to. If however you want to get binderDied() regardless of the proxy object's
         // lifecycle, keep a strong reference to the death recipient object by yourself.
 #ifdef BINDER_DEATH_RECIPIENT_WEAK_FROM_JNI
-        if (target_sdk_is_at_least_vic()) {
-            mObjectWeak = env->NewWeakGlobalRef(object);
-        } else
+        return target_sdk_is_at_least_vic();
+#else
+        return false;
 #endif
-        {
-            mObject = env->NewGlobalRef(object);
-        }
-        // These objects manage their own lifetimes so are responsible for final bookkeeping.
-        // The list holds a strong reference to this object.
-        LOGDEATH("Adding JDR %p to DRL %p", this, list.get());
-        list->add(this);
+    }
 
+    JavaDeathRecipient(JNIEnv* env, jobject object,
+                       const sp<RecipientList<IBinder::DeathRecipient> >& list)
+          : JavaRecipient(env, object, list, useWeakReference()) {
         gNumDeathRefsCreated.fetch_add(1, std::memory_order_relaxed);
         gcIfManyNewRefs(env);
     }
 
+    ~JavaDeathRecipient() {
+        gNumDeathRefsDeleted.fetch_add(1, std::memory_order_relaxed);
+    }
+
     void binderDied(const wp<IBinder>& who)
     {
-        LOGDEATH("Receiving binderDied() on JavaDeathRecipient %p\n", this);
+        LOG_DEATH_FREEZE("Receiving binderDied() on JavaDeathRecipient %p\n", this);
         if (mObject == NULL && mObjectWeak == NULL) {
             return;
         }
@@ -647,7 +802,7 @@ public:
         // with our containing DeathRecipientList so that we can't delete the global ref on mObject
         // while the list is being iterated.
         if (mObject != NULL) {
-            sp<DeathRecipientList> list = mList.promote();
+            auto list = mList.promote();
             if (list != NULL) {
                 AutoMutex _l(list->lock());
 
@@ -658,126 +813,96 @@ public:
         }
     }
 
-    void clearReference()
-    {
-        sp<DeathRecipientList> list = mList.promote();
-        if (list != NULL) {
-            LOGDEATH("Removing JDR %p from DRL %p", this, list.get());
-            list->remove(this);
-        } else {
-            LOGDEATH("clearReference() on JDR %p but DRL wp purged", this);
-        }
-    }
-
-    bool matches(jobject obj) {
-        bool result;
-        JNIEnv* env = javavm_to_jnienv(mVM);
-
-        if (mObject != NULL) {
-            result = env->IsSameObject(obj, mObject);
-        } else {
-            ScopedLocalRef<jobject> me(env, env->NewLocalRef(mObjectWeak));
-            result = env->IsSameObject(obj, me.get());
-        }
-        return result;
-    }
-
-    void warnIfStillLive() {
-        if (mObject != NULL) {
-            // Okay, something is wrong -- we have a hard reference to a live death
-            // recipient on the VM side, but the list is being torn down.
-            JNIEnv* env = javavm_to_jnienv(mVM);
-            ScopedLocalRef<jclass> objClassRef(env, env->GetObjectClass(mObject));
-            ScopedLocalRef<jstring> nameRef(env,
-                    (jstring) env->CallObjectMethod(objClassRef.get(), gClassOffsets.mGetName));
-            ScopedUtfChars nameUtf(env, nameRef.get());
-            if (nameUtf.c_str() != NULL) {
-                ALOGW("BinderProxy is being destroyed but the application did not call "
-                        "unlinkToDeath to unlink all of its death recipients beforehand.  "
-                        "Releasing leaked death recipient: %s", nameUtf.c_str());
-            } else {
-                ALOGW("BinderProxy being destroyed; unable to get DR object name");
-                env->ExceptionClear();
-            }
-        }
-    }
-
-protected:
-    virtual ~JavaDeathRecipient()
-    {
-        //ALOGI("Removing death ref: recipient=%p\n", mObject);
-        gNumDeathRefsDeleted.fetch_add(1, std::memory_order_relaxed);
-        JNIEnv* env = javavm_to_jnienv(mVM);
-        if (mObject != NULL) {
-            env->DeleteGlobalRef(mObject);
-        } else {
-            env->DeleteWeakGlobalRef(mObjectWeak);
-        }
-    }
-
 private:
-    JavaVM* const mVM;
-
-    // If target sdk version < 35, the Java-side DeathRecipient is strongly referenced from mObject
-    // upon linkToDeath() and then after binderDied() is called, the strong reference is demoted to
-    // a weak reference (mObjectWeak).
-    // If target sdk version >= 35, the strong reference is never made here (i.e. mObject == NULL
-    // always). Instead, the strong reference to the Java-side DeathRecipient is made in
-    // BinderProxy.mDeathRecipients. In the native world, only the weak reference is kept.
-    jobject mObject;
-    jweak mObjectWeak;
-    wp<DeathRecipientList> mList;
-
     // Whether binderDied was called or not.
     bool mFired = false;
 };
 
+class JavaFrozenStateChangeCallback : public JavaRecipient<IBinder::FrozenStateChangeCallback> {
+public:
+    JavaFrozenStateChangeCallback(
+            JNIEnv* env, jobject object,
+            const sp<RecipientList<IBinder::FrozenStateChangeCallback> >& list)
+          : JavaRecipient(env, object, list, /*useWeakReference=*/true) {}
+
+    void onStateChanged(const wp<IBinder>& who, State state) {
+        LOG_DEATH_FREEZE("Receiving onStateChanged() on JavaFrozenStateChangeCallback %p. state: "
+                         "%s\n",
+                         this, state == State::FROZEN ? "FROZEN" : "UNFROZEN");
+        if (mObjectWeak == NULL) {
+            return;
+        }
+        JNIEnv* env = javavm_to_jnienv(mVM);
+        ScopedLocalRef<jobject> jBinderProxy(env, javaObjectForIBinder(env, who.promote()));
+
+        // Hold a local reference to the recipient. This may fail if the recipient is weakly
+        // referenced, in which case we can't deliver the notification.
+        ScopedLocalRef<jobject> jCallback(env, env->NewLocalRef(mObjectWeak));
+        if (jCallback.get() == NULL) {
+            return;
+        }
+        env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
+                                  gBinderProxyOffsets.mInvokeFrozenStateChangeCallback,
+                                  jCallback.get(), jBinderProxy.get(), state);
+        if (env->ExceptionCheck()) {
+            jthrowable excep = env->ExceptionOccurred();
+            binder_report_exception(env, excep,
+                                    "*** Uncaught exception returned from frozen state change "
+                                    "notification!");
+        }
+    }
+};
+
 // ----------------------------------------------------------------------------
 
-DeathRecipientList::DeathRecipientList() {
-    LOGDEATH("New DRL @ %p", this);
+template <typename T>
+RecipientList<T>::RecipientList() {
+    LOG_DEATH_FREEZE("%s New RecipientList @ %p", logPrefix<T>(), this);
 }
 
-DeathRecipientList::~DeathRecipientList() {
-    LOGDEATH("Destroy DRL @ %p", this);
+template <typename T>
+RecipientList<T>::~RecipientList() {
+    LOG_DEATH_FREEZE("%s Destroy RecipientList @ %p", logPrefix<T>(), this);
     AutoMutex _l(mLock);
 
-    // Should never happen -- the JavaDeathRecipient objects that have added themselves
+    // Should never happen -- the JavaRecipientList objects that have added themselves
     // to the list are holding references on the list object.  Only when they are torn
     // down can the list header be destroyed.
     if (mList.size() > 0) {
-        List< sp<JavaDeathRecipient> >::iterator iter;
-        for (iter = mList.begin(); iter != mList.end(); iter++) {
+        for (auto iter = mList.begin(); iter != mList.end(); iter++) {
             (*iter)->warnIfStillLive();
         }
     }
 }
 
-void DeathRecipientList::add(const sp<JavaDeathRecipient>& recipient) {
+template <typename T>
+void RecipientList<T>::add(const sp<JavaRecipient<T> >& recipient) {
     AutoMutex _l(mLock);
 
-    LOGDEATH("DRL @ %p : add JDR %p", this, recipient.get());
+    LOG_DEATH_FREEZE("%s RecipientList @ %p : add JavaRecipient %p", logPrefix<T>(), this,
+                     recipient.get());
     mList.push_back(recipient);
 }
 
-void DeathRecipientList::remove(const sp<JavaDeathRecipient>& recipient) {
+template <typename T>
+void RecipientList<T>::remove(const sp<JavaRecipient<T> >& recipient) {
     AutoMutex _l(mLock);
 
-    List< sp<JavaDeathRecipient> >::iterator iter;
-    for (iter = mList.begin(); iter != mList.end(); iter++) {
+    for (auto iter = mList.begin(); iter != mList.end(); iter++) {
         if (*iter == recipient) {
-            LOGDEATH("DRL @ %p : remove JDR %p", this, recipient.get());
+            LOG_DEATH_FREEZE("%s RecipientList @ %p : remove JavaRecipient %p", logPrefix<T>(),
+                             this, recipient.get());
             mList.erase(iter);
             return;
         }
     }
 }
 
-sp<JavaDeathRecipient> DeathRecipientList::find(jobject recipient) {
+template <typename T>
+sp<JavaRecipient<T> > RecipientList<T>::find(jobject recipient) {
     AutoMutex _l(mLock);
 
-    List< sp<JavaDeathRecipient> >::iterator iter;
-    for (iter = mList.begin(); iter != mList.end(); iter++) {
+    for (auto iter = mList.begin(); iter != mList.end(); iter++) {
         if ((*iter)->matches(recipient)) {
             return *iter;
         }
@@ -785,9 +910,13 @@ sp<JavaDeathRecipient> DeathRecipientList::find(jobject recipient) {
     return NULL;
 }
 
-Mutex& DeathRecipientList::lock() {
+template <typename T>
+Mutex& RecipientList<T>::lock() {
     return mLock;
 }
+
+using DeathRecipientList = RecipientList<IBinder::DeathRecipient>;
+using FrozenStateChangeCallbackList = RecipientList<IBinder::FrozenStateChangeCallback>;
 
 // ----------------------------------------------------------------------------
 
@@ -806,6 +935,11 @@ struct BinderProxyNativeData {
     // Death recipients for mObject. Reference counted only because DeathRecipients
     // hold a weak reference that can be temporarily promoted.
     sp<DeathRecipientList> mOrgue;  // Death recipients for mObject.
+
+    // Frozen state change callbacks for mObject. Reference counted only because
+    // JavaFrozenStateChangeCallback hold a weak reference that can be
+    // temporarily promoted.
+    sp<FrozenStateChangeCallbackList> mFrozenStateChangCallbackList;
 };
 
 BinderProxyNativeData* getBPNativeData(JNIEnv* env, jobject obj) {
@@ -825,12 +959,13 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     if (val->checkSubclass(&gBinderOffsets)) {
         // It's a JavaBBinder created by ibinderForJavaObject. Already has Java object.
         jobject object = static_cast<JavaBBinder*>(val.get())->object();
-        LOGDEATH("objectForBinder %p: it's our own %p!\n", val.get(), object);
+        LOG_DEATH_FREEZE("objectForBinder %p: it's our own %p!\n", val.get(), object);
         return object;
     }
 
     BinderProxyNativeData* nativeData = new BinderProxyNativeData();
     nativeData->mOrgue = new DeathRecipientList;
+    nativeData->mFrozenStateChangCallbackList = new FrozenStateChangeCallbackList;
     nativeData->mObject = val;
 
     jobject object = env->CallStaticObjectMethod(gBinderProxyOffsets.mClass,
@@ -1017,60 +1152,60 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
 
 // ----------------------------------------------------------------------------
 
-static jint android_os_Binder_getCallingPid()
+static jint android_os_Binder_getCallingPid(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getCallingPid();
 }
 
-static jint android_os_Binder_getCallingUid()
+static jint android_os_Binder_getCallingUid(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jboolean android_os_Binder_isDirectlyHandlingTransactionNative() {
+static jboolean android_os_Binder_isDirectlyHandlingTransactionNative(CRITICAL_JNI_PARAMS) {
     return getCurrentServingCall() == BinderCallType::BINDER;
 }
 
-static jlong android_os_Binder_clearCallingIdentity()
+static jlong android_os_Binder_clearCallingIdentity(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->clearCallingIdentity();
 }
 
-static void android_os_Binder_restoreCallingIdentity(jlong token)
+static void android_os_Binder_restoreCallingIdentity(CRITICAL_JNI_PARAMS_COMMA jlong token)
 {
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
-static jboolean android_os_Binder_hasExplicitIdentity() {
+static jboolean android_os_Binder_hasExplicitIdentity(CRITICAL_JNI_PARAMS) {
     return IPCThreadState::self()->hasExplicitIdentity();
 }
 
-static void android_os_Binder_setThreadStrictModePolicy(jint policyMask)
+static void android_os_Binder_setThreadStrictModePolicy(CRITICAL_JNI_PARAMS_COMMA jint policyMask)
 {
     IPCThreadState::self()->setStrictModePolicy(policyMask);
 }
 
-static jint android_os_Binder_getThreadStrictModePolicy()
+static jint android_os_Binder_getThreadStrictModePolicy(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getStrictModePolicy();
 }
 
-static jlong android_os_Binder_setCallingWorkSourceUid(jint workSource)
+static jlong android_os_Binder_setCallingWorkSourceUid(CRITICAL_JNI_PARAMS_COMMA jint workSource)
 {
     return IPCThreadState::self()->setCallingWorkSourceUid(workSource);
 }
 
-static jlong android_os_Binder_getCallingWorkSourceUid()
+static jlong android_os_Binder_getCallingWorkSourceUid(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->getCallingWorkSourceUid();
 }
 
-static jlong android_os_Binder_clearCallingWorkSource()
+static jlong android_os_Binder_clearCallingWorkSource(CRITICAL_JNI_PARAMS)
 {
     return IPCThreadState::self()->clearCallingWorkSource();
 }
 
-static void android_os_Binder_restoreCallingWorkSource(jlong token)
+static void android_os_Binder_restoreCallingWorkSource(CRITICAL_JNI_PARAMS_COMMA jlong token)
 {
     IPCThreadState::self()->restoreCallingWorkSource(token);
 }
@@ -1433,7 +1568,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
     BinderProxyNativeData *nd = getBPNativeData(env, obj);
     IBinder* target = nd->mObject.get();
 
-    LOGDEATH("linkToDeath: binder=%p recipient=%p\n", target, recipient);
+    LOG_DEATH_FREEZE("linkToDeath: binder=%p recipient=%p\n", target, recipient);
 
     if (!target->localBinder()) {
         DeathRecipientList* list = nd->mOrgue.get();
@@ -1464,15 +1599,15 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     }
 
-    LOGDEATH("unlinkToDeath: binder=%p recipient=%p\n", target, recipient);
+    LOG_DEATH_FREEZE("unlinkToDeath: binder=%p recipient=%p\n", target, recipient);
 
     if (!target->localBinder()) {
         status_t err = NAME_NOT_FOUND;
 
         // If we find the matching recipient, proceed to unlink using that
         DeathRecipientList* list = nd->mOrgue.get();
-        sp<JavaDeathRecipient> origJDR = list->find(recipient);
-        LOGDEATH("   unlink found list %p and JDR %p", list, origJDR.get());
+        sp<JavaRecipient<IBinder::DeathRecipient> > origJDR = list->find(recipient);
+        LOG_DEATH_FREEZE("   unlink found list %p and JDR %p", list, origJDR.get());
         if (origJDR != NULL) {
             wp<IBinder::DeathRecipient> dr;
             err = target->unlinkToDeath(origJDR, NULL, flags, &dr);
@@ -1498,11 +1633,85 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
     return res;
 }
 
+static void android_os_BinderProxy_addFrozenStateChangeCallback(
+        JNIEnv* env, jobject obj,
+        jobject callback) // throws RemoteException
+{
+    if (callback == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return;
+    }
+
+    BinderProxyNativeData* nd = getBPNativeData(env, obj);
+    IBinder* target = nd->mObject.get();
+
+    LOG_DEATH_FREEZE("addFrozenStateChangeCallback: binder=%p callback=%p\n", target, callback);
+
+    if (!target->localBinder()) {
+        FrozenStateChangeCallbackList* list = nd->mFrozenStateChangCallbackList.get();
+        auto jfscc = sp<JavaFrozenStateChangeCallback>::make(env, callback, list);
+        status_t err = target->addFrozenStateChangeCallback(jfscc);
+        if (err != NO_ERROR) {
+            // Failure adding the callback, so clear its reference now.
+            jfscc->clearReference();
+            signalExceptionForError(env, obj, err, true /*canThrowRemoteException*/);
+        }
+    }
+}
+
+static jboolean android_os_BinderProxy_removeFrozenStateChangeCallback(JNIEnv* env, jobject obj,
+                                                                       jobject callback) {
+    jboolean res = JNI_FALSE;
+    if (callback == NULL) {
+        jniThrowNullPointerException(env, NULL);
+        return res;
+    }
+
+    BinderProxyNativeData* nd = getBPNativeData(env, obj);
+    IBinder* target = nd->mObject.get();
+    if (target == NULL) {
+        ALOGW("Binder has been finalized when calling removeFrozenStateChangeCallback() with "
+              "callback=%p)\n",
+              callback);
+        return JNI_FALSE;
+    }
+
+    LOG_DEATH_FREEZE("removeFrozenStateChangeCallback: binder=%p callback=%p\n", target, callback);
+
+    if (!target->localBinder()) {
+        status_t err = NAME_NOT_FOUND;
+
+        // If we find the matching callback, proceed to unlink using that
+        FrozenStateChangeCallbackList* list = nd->mFrozenStateChangCallbackList.get();
+        sp<JavaRecipient<IBinder::FrozenStateChangeCallback> > origJFSCC = list->find(callback);
+        LOG_DEATH_FREEZE("   removeFrozenStateChangeCallback found list %p and JFSCC %p", list,
+                         origJFSCC.get());
+        if (origJFSCC != NULL) {
+            err = target->removeFrozenStateChangeCallback(origJFSCC);
+            if (err == NO_ERROR) {
+                origJFSCC->clearReference();
+            }
+        }
+
+        if (err == NO_ERROR || err == DEAD_OBJECT) {
+            res = JNI_TRUE;
+        } else {
+            jniThrowException(env, "java/util/NoSuchElementException",
+                              base::StringPrintf("Frozen state change callback does not exist (%s)",
+                                                 statusToString(err).c_str())
+                                      .c_str());
+        }
+    }
+
+    return res;
+}
+
 static void BinderProxy_destroy(void* rawNativeData)
 {
     BinderProxyNativeData * nativeData = (BinderProxyNativeData *) rawNativeData;
-    LOGDEATH("Destroying BinderProxy: binder=%p drl=%p\n",
-            nativeData->mObject.get(), nativeData->mOrgue.get());
+    LOG_DEATH_FREEZE("Destroying BinderProxy: binder=%p drl=%p fsccl=%p\n",
+                     nativeData->mObject.get(), nativeData->mOrgue.get(),
+                     nativeData->mFrozenStateChangCallbackList.get());
     delete nativeData;
     IPCThreadState::self()->flushCommands();
 }
@@ -1537,6 +1746,10 @@ static const JNINativeMethod gBinderProxyMethods[] = {
     {"transactNative",      "(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z", (void*)android_os_BinderProxy_transact},
     {"linkToDeathNative",   "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
     {"unlinkToDeathNative", "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
+    {"addFrozenStateChangeCallbackNative",
+        "(Landroid/os/IBinder$FrozenStateChangeCallback;)V", (void*)android_os_BinderProxy_addFrozenStateChangeCallback},
+    {"removeFrozenStateChangeCallbackNative",
+        "(Landroid/os/IBinder$FrozenStateChangeCallback;)Z", (void*)android_os_BinderProxy_removeFrozenStateChangeCallback},
     {"getNativeFinalizer",  "()J", (void*)android_os_BinderProxy_getNativeFinalizer},
     {"getExtension",        "()Landroid/os/IBinder;", (void*)android_os_BinderProxy_getExtension},
 };
@@ -1559,6 +1772,10 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     gBinderProxyOffsets.mSendDeathNotice =
             GetStaticMethodIDOrDie(env, clazz, "sendDeathNotice",
                                    "(Landroid/os/IBinder$DeathRecipient;Landroid/os/IBinder;)V");
+    gBinderProxyOffsets.mInvokeFrozenStateChangeCallback =
+            GetStaticMethodIDOrDie(env, clazz, "invokeFrozenStateChangeCallback",
+                                   "(Landroid/os/IBinder$FrozenStateChangeCallback;Landroid/os/"
+                                   "IBinder;I)V");
     gBinderProxyOffsets.mNativeData = GetFieldIDOrDie(env, clazz, "mNativeData", "J");
 
     clazz = FindClassOrDie(env, "java/lang/Class");

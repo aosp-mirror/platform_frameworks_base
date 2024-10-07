@@ -1197,6 +1197,7 @@
     <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Пераключэнне рэжыму ўводу"</string>
     <string name="input_method_ime_switch_long_click_action_desc" msgid="3161942124116646998">"Выбраць спосаб уводу"</string>
+    <string name="input_method_switcher_settings_button" msgid="5609835654697108485">"Налады"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Месца для захавання на зыходзе"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Некаторыя сістэмныя функцыі могуць не працаваць"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Не хапае сховішча для сістэмы. Пераканайцеся, што ў вас ёсць 250 МБ свабоднага месца, і перазапусціце."</string>
@@ -1747,7 +1748,7 @@
     <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"Праграма хавае запыт дазволу, таму ваш адказ немагчыма спраўдзіць."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Каб пачаць выкарыстоўваць функцыю, націсніце на яе:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберыце функцыі, якія будзеце выкарыстоўваць з кнопкай спецыяльных магчымасцей"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберыце функцыі для выкарыстання з клавішай гучнасці"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2245540598834891500">"Выберыце функцыі для выкарыстання з клавішамі гучнасці"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сэрвіс \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" выключаны"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Змяніць ярлыкі"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
@@ -2011,6 +2012,7 @@
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Наладзьце блакіроўку экрана"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Наладзіць блакіроўку экрана"</string>
     <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Каб выкарыстоўваць прыватную прастору, на прыладзе неабходна наладзіць блакіроўку экрана"</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Каб выдаліць прыватную прастору, на прыладзе неабходна наладзіць блакіроўку экрана"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Праграма недаступная"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" цяпер недаступная."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недаступна: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>

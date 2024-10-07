@@ -16,7 +16,8 @@
 
 package com.android.wm.shell.compatui.impl
 
-import com.android.wm.shell.compatui.api.CompatUIComponent
+import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.compatui.api.CompatUIComponentFactory
 import com.android.wm.shell.compatui.api.CompatUIComponentIdGenerator
 import com.android.wm.shell.compatui.api.CompatUIEvent
 import com.android.wm.shell.compatui.api.CompatUIHandler
@@ -24,7 +25,6 @@ import com.android.wm.shell.compatui.api.CompatUIInfo
 import com.android.wm.shell.compatui.api.CompatUIRepository
 import com.android.wm.shell.compatui.api.CompatUIState
 import java.util.function.Consumer
-import java.util.function.IntSupplier
 
 /**
  * Default implementation of {@link CompatUIHandler} to handle CompatUI components
@@ -32,7 +32,9 @@ import java.util.function.IntSupplier
 class DefaultCompatUIHandler(
     private val compatUIRepository: CompatUIRepository,
     private val compatUIState: CompatUIState,
-    private val componentIdGenerator: CompatUIComponentIdGenerator
+    private val componentIdGenerator: CompatUIComponentIdGenerator,
+    private val componentFactory: CompatUIComponentFactory,
+    private val executor: ShellExecutor
 ) : CompatUIHandler {
 
     private var compatUIEventSender: Consumer<CompatUIEvent>? = null
@@ -41,23 +43,36 @@ class DefaultCompatUIHandler(
         compatUIRepository.iterateOn { spec ->
             // We get the identifier for the component depending on the task and spec
             val componentId = componentIdGenerator.generateId(compatUIInfo, spec)
-            // We check in the state if the component already exists
-            var comp = compatUIState.getUIComponent(componentId)
-            if (comp == null) {
+            spec.log("Evaluating component $componentId")
+            // We check in the state if the component does not yet exist
+            var component = compatUIState.getUIComponent(componentId)
+            if (component == null) {
+                spec.log("Component $componentId not present")
                 // We evaluate the predicate
                 if (spec.lifecycle.creationPredicate(compatUIInfo, compatUIState.sharedState)) {
+                    spec.log("Component $componentId should be created")
                     // We create the component and store in the
                     // global state
-                    comp = CompatUIComponent(spec, componentId)
+                    component =
+                        componentFactory.create(spec, componentId, compatUIState, compatUIInfo)
+                    spec.log("Component $componentId created $component")
                     // We initialize the state for the component
                     val compState = spec.lifecycle.stateBuilder(
                         compatUIInfo,
                         compatUIState.sharedState
                     )
-                    compatUIState.registerUIComponent(componentId, comp, compState)
+                    spec.log("Component $componentId initial state $compState")
+                    compatUIState.registerUIComponent(componentId, component, compState)
+                    spec.log("Component $componentId registered")
+                    // We initialize the layout for the component
+                    component.initLayout(compatUIInfo)
+                    spec.log("Component $componentId layout created")
                     // Now we can invoke the update passing the shared state and
                     // the state specific to the component
-                    comp.update(compatUIInfo, compatUIState)
+                    executor.execute {
+                        component.update(compatUIInfo)
+                        spec.log("Component $componentId updated with $compatUIInfo")
+                    }
                 }
             } else {
                 // The component is present. We check if we need to remove it
@@ -66,13 +81,18 @@ class DefaultCompatUIHandler(
                         compatUIState.sharedState,
                         compatUIState.stateForComponent(componentId)
                     )) {
+                    spec.log("Component $componentId should be removed")
                     // We clean the component
-                    comp.release()
-                    // We remove the component
+                    component.release()
+                    spec.log("Component $componentId released")
                     compatUIState.unregisterUIComponent(componentId)
+                    spec.log("Component $componentId removed from registry")
                 } else {
-                    // The component exists so we need to invoke the update methods
-                    comp.update(compatUIInfo, compatUIState)
+                    executor.execute {
+                        // The component exists so we need to invoke the update methods
+                        component.update(compatUIInfo)
+                        spec.log("Component $componentId updated with $compatUIInfo")
+                    }
                 }
             }
         }

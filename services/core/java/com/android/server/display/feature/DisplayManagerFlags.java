@@ -69,6 +69,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_MODE_LIMIT_FOR_EXTERNAL_DISPLAY,
             Flags::enableModeLimitForExternalDisplay);
 
+    private final FlagState mDisplayTopology = new FlagState(
+            Flags.FLAG_DISPLAY_TOPOLOGY,
+            Flags::displayTopology);
+
     private final FlagState mConnectedDisplayErrorHandlingFlagState = new FlagState(
             Flags.FLAG_ENABLE_CONNECTED_DISPLAY_ERROR_HANDLING,
             Flags::enableConnectedDisplayErrorHandling);
@@ -183,19 +187,30 @@ public class DisplayManagerFlags {
             Flags::offloadDozeOverrideHoldsWakelock
     );
 
-    private final FlagState mOffloadSessionCancelBlockScreenOn =
-            new FlagState(
-                    Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
-                    Flags::offloadSessionCancelBlockScreenOn);
+    private final FlagState mOffloadSessionCancelBlockScreenOn = new FlagState(
+            Flags.FLAG_OFFLOAD_SESSION_CANCEL_BLOCK_SCREEN_ON,
+            Flags::offloadSessionCancelBlockScreenOn);
 
-    private final FlagState mNewHdrBrightnessModifier =
-            new FlagState(
-                    Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
-                    Flags::newHdrBrightnessModifier);
+    private final FlagState mNewHdrBrightnessModifier = new FlagState(
+            Flags.FLAG_NEW_HDR_BRIGHTNESS_MODIFIER,
+            Flags::newHdrBrightnessModifier);
+
+    private final FlagState mIdleScreenConfigInSubscribingLightSensor = new FlagState(
+            Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
+            Flags::idleScreenConfigInSubscribingLightSensor);
 
     private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
             Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
             Flags::normalBrightnessForDozeParameter
+    );
+    private final FlagState mBlockAutobrightnessChangesOnStylusUsage = new FlagState(
+            Flags.FLAG_BLOCK_AUTOBRIGHTNESS_CHANGES_ON_STYLUS_USAGE,
+            Flags::blockAutobrightnessChangesOnStylusUsage
+    );
+
+    private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
+            Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
+            Flags::enableBatteryStatsForAllDisplays
     );
 
     /**
@@ -257,6 +272,10 @@ public class DisplayManagerFlags {
      */
     public boolean isExternalDisplayLimitModeEnabled() {
         return mExternalDisplayLimitModeState.isEnabled();
+    }
+
+    public boolean isDisplayTopologyEnabled() {
+        return mDisplayTopology.isEnabled();
     }
 
     /**
@@ -404,12 +423,36 @@ public class DisplayManagerFlags {
         return mNormalBrightnessForDozeParameter.isEnabled();
     }
 
+     /**
+      * @return {@code true} if idle timer refresh rate config is accounted for while subscribing to
+      * the light sensor
+      */
+    public boolean isIdleScreenConfigInSubscribingLightSensorEnabled() {
+        return mIdleScreenConfigInSubscribingLightSensor.isEnabled();
+    }
+
+    /**
+      * @return {@code true} if battery stats is enabled for all displays, not just the primary
+      * display.
+      */
+    public boolean isBatteryStatsEnabledForAllDisplays() {
+        return mEnableBatteryStatsForAllDisplays.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if autobrightness is to be blocked when stylus is being used
+     */
+    public boolean isBlockAutobrightnessChangesOnStylusUsage() {
+        return mBlockAutobrightnessChangesOnStylusUsage.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
      */
     public void dump(PrintWriter pw) {
         pw.println("DisplayManagerFlags:");
+        pw.println("--------------------");
         pw.println(" " + mAdaptiveToneImprovements1);
         pw.println(" " + mAdaptiveToneImprovements2);
         pw.println(" " + mBackUpSmoothDisplayAndForcePeakRefreshRateFlagState);
@@ -417,6 +460,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mConnectedDisplayManagementFlagState);
         pw.println(" " + mDisplayOffloadFlagState);
         pw.println(" " + mExternalDisplayLimitModeState);
+        pw.println(" " + mDisplayTopology);
         pw.println(" " + mHdrClamperFlagState);
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
@@ -444,6 +488,9 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
         pw.println(" " + mNormalBrightnessForDozeParameter);
+        pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
+        pw.println(" " + mEnableBatteryStatsForAllDisplays);
+        pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
     }
 
     private static class FlagState {

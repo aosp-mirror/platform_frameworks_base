@@ -259,6 +259,22 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     }
 
     @Test
+    fun onAttachedToWindow_thenGetsInsetsFetcher_insetsUpdated() {
+        view.onAttachedToWindow()
+
+        // WHEN the insets fetcher is set after the view is attached
+        val insets = Insets.of(/* left= */ 10, /* top= */ 20, /* right= */ 30, /* bottom= */ 40)
+        view.setInsetsFetcher { insets }
+
+        // THEN the insets are updated
+        assertThat(view.paddingLeft).isEqualTo(insets.left)
+        assertThat(view.paddingTop).isEqualTo(insets.top)
+        assertThat(view.paddingRight).isEqualTo(insets.right)
+        assertThat(view.paddingBottom).isEqualTo(0)
+    }
+
+
+    @Test
     fun onConfigurationChanged_updatesLeftTopRightPaddingsBasedOnInsets() {
         val insets = Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
         view.setInsetsFetcher { insets }
@@ -289,14 +305,22 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     fun onConfigurationChanged_noRelevantChange_doesNotUpdateInsets() {
         val previousInsets =
             Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
-        view.setInsetsFetcher { previousInsets }
+        val newInsets = Insets.NONE
+
+        var useNewInsets = false
+        val insetsFetcher = PhoneStatusBarView.InsetsFetcher {
+            if (useNewInsets) {
+                newInsets
+            } else {
+                previousInsets
+            }
+        }
+        view.setInsetsFetcher(insetsFetcher)
 
         context.orCreateTestableResources.overrideConfiguration(Configuration())
         view.onAttachedToWindow()
 
-        val newInsets = Insets.NONE
-        view.setInsetsFetcher { newInsets }
-
+        useNewInsets = true
         view.onConfigurationChanged(Configuration())
 
         assertThat(view.paddingLeft).isEqualTo(previousInsets.left)
@@ -309,14 +333,24 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     fun onConfigurationChanged_densityChanged_updatesInsets() {
         val previousInsets =
             Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
-        view.setInsetsFetcher { previousInsets }
+        val newInsets = Insets.NONE
+
+        var useNewInsets = false
+        val insetsFetcher = PhoneStatusBarView.InsetsFetcher {
+            if (useNewInsets) {
+                newInsets
+            } else {
+                previousInsets
+            }
+        }
+        view.setInsetsFetcher(insetsFetcher)
+
         val configuration = Configuration()
         configuration.densityDpi = 123
         context.orCreateTestableResources.overrideConfiguration(configuration)
         view.onAttachedToWindow()
 
-        val newInsets = Insets.NONE
-        view.setInsetsFetcher { newInsets }
+        useNewInsets = true
         configuration.densityDpi = 456
         view.onConfigurationChanged(configuration)
 
@@ -330,14 +364,24 @@ class PhoneStatusBarViewTest : SysuiTestCase() {
     fun onConfigurationChanged_fontScaleChanged_updatesInsets() {
         val previousInsets =
             Insets.of(/* left= */ 40, /* top= */ 30, /* right= */ 20, /* bottom= */ 10)
-        view.setInsetsFetcher { previousInsets }
+        val newInsets = Insets.NONE
+
+        var useNewInsets = false
+        val insetsFetcher = PhoneStatusBarView.InsetsFetcher {
+            if (useNewInsets) {
+                newInsets
+            } else {
+                previousInsets
+            }
+        }
+        view.setInsetsFetcher(insetsFetcher)
+
         val configuration = Configuration()
         configuration.fontScale = 1f
         context.orCreateTestableResources.overrideConfiguration(configuration)
         view.onAttachedToWindow()
 
-        val newInsets = Insets.NONE
-        view.setInsetsFetcher { newInsets }
+        useNewInsets = true
         configuration.fontScale = 2f
         view.onConfigurationChanged(configuration)
 

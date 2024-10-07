@@ -544,39 +544,35 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackInvokedNoMultiWindow_returnTrue() {
+    public void testShouldCameraCompatControlOrientationWhenInvokedNoMultiWindow_returnTrue() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertTrue(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertTrue(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackNotInvokedNoMultiWindow_returnFalse() {
+    public void testShouldCameraCompatControlOrientationWhenNotInvokedNoMultiWindow_returnFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertFalse(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackNotInvokedMultiWindow_returnFalse() {
+    public void testShouldCameraCompatControlOrientationWhenNotInvokedMultiWindow_returnFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         when(mActivity.inMultiWindowMode()).thenReturn(true);
 
-        assertFalse(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertFalse(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     @Test
-    public void testIsCameraActiveWhenCallbackInvokedMultiWindow_returnFalse() {
+    public void testShouldCameraCompatControlOrientationWhenInvokedMultiWindow_returnFalse() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         when(mActivity.inMultiWindowMode()).thenReturn(true);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
-        assertFalse(
-                mDisplayRotationCompatPolicy.isCameraActive(mActivity, /* mustBeFullscreen*/ true));
+        assertFalse(mDisplayRotationCompatPolicy.shouldCameraCompatControlOrientation(mActivity));
     }
 
     private void configureActivity(@ScreenOrientation int activityOrientation) {

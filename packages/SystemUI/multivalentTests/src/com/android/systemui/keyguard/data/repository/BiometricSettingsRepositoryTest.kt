@@ -46,11 +46,10 @@ import com.android.systemui.keyguard.data.repository.BiometricType.REAR_FINGERPR
 import com.android.systemui.keyguard.data.repository.BiometricType.SIDE_FINGERPRINT
 import com.android.systemui.keyguard.data.repository.BiometricType.UNDER_DISPLAY_FINGERPRINT
 import com.android.systemui.keyguard.shared.model.DevicePosture
-import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.res.R
-import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
-import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.fakeMobileConnectionsRepository
 import com.android.systemui.statusbar.policy.DevicePostureController
+import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
@@ -81,6 +80,8 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidJUnit4::class)
 class BiometricSettingsRepositoryTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
+
     private lateinit var underTest: BiometricSettingsRepository
 
     @Mock private lateinit var authController: AuthController
@@ -88,7 +89,6 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var biometricManager: BiometricManager
-    @Mock private lateinit var tableLogger: TableLogBuffer
     @Captor
     private lateinit var strongAuthTracker: ArgumentCaptor<LockPatternUtils.StrongAuthTracker>
     @Captor private lateinit var authControllerCallback: ArgumentCaptor<AuthController.Callback>
@@ -99,7 +99,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
     private lateinit var devicePostureRepository: FakeDevicePostureRepository
     private lateinit var facePropertyRepository: FakeFacePropertyRepository
     private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
-    private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
+    private val mobileConnectionsRepository = kosmos.fakeMobileConnectionsRepository
 
     private lateinit var testDispatcher: TestDispatcher
     private lateinit var testScope: TestScope
@@ -115,8 +115,6 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
         devicePostureRepository = FakeDevicePostureRepository()
         facePropertyRepository = FakeFacePropertyRepository()
         fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
-        mobileConnectionsRepository =
-            FakeMobileConnectionsRepository(FakeMobileMappingsProxy(), tableLogger)
     }
 
     private suspend fun createBiometricSettingsRepository() {

@@ -38,7 +38,7 @@ import com.android.systemui.deviceentry.shared.model.FaceLockoutMessage
 import com.android.systemui.deviceentry.shared.model.FaceTimeoutMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintFailureMessage
 import com.android.systemui.deviceentry.shared.model.FingerprintLockoutMessage
-import com.android.systemui.lifecycle.SysUiViewModel
+import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.res.R.string.kg_too_many_failed_attempts_countdown
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.util.kotlin.Utils.Companion.sample
@@ -50,6 +50,7 @@ import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -77,8 +78,7 @@ constructor(
     private val faceAuthInteractor: DeviceEntryFaceAuthInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val deviceEntryBiometricsAllowedInteractor: DeviceEntryBiometricsAllowedInteractor,
-    private val flags: ComposeBouncerFlags,
-) : SysUiViewModel() {
+) : ExclusiveActivatable() {
     /**
      * A message shown when the user has attempted the wrong credential too many times and now must
      * wait a while before attempting to authenticate again.
@@ -94,9 +94,9 @@ constructor(
     /** The user-facing message to show in the bouncer. */
     val message: MutableStateFlow<MessageViewModel?> = MutableStateFlow(null)
 
-    override suspend fun onActivated() {
-        if (!flags.isComposeBouncerOrSceneContainerEnabled()) {
-            return
+    override suspend fun onActivated(): Nothing {
+        if (!ComposeBouncerFlags.isComposeBouncerOrSceneContainerEnabled()) {
+            return awaitCancellation()
         }
 
         coroutineScope {
@@ -110,6 +110,7 @@ constructor(
             launch { listenForBouncerEvents() }
             launch { listenForFaceMessages() }
             launch { listenForFingerprintMessages() }
+            awaitCancellation()
         }
     }
 
@@ -153,7 +154,7 @@ constructor(
                     emptyFlow()
                 }
             }
-            .collectLatest { messageViewModel -> message.value = messageViewModel }
+            .collect { messageViewModel -> message.value = messageViewModel }
     }
 
     private suspend fun listenForSimBouncerEvents() {
@@ -168,7 +169,7 @@ constructor(
                     emptyFlow()
                 }
             }
-            .collectLatest {
+            .collect {
                 if (it != null) {
                     message.value = it
                 } else {
@@ -261,6 +262,9 @@ constructor(
         coroutineScope {
             // Keeps the lockout message up-to-date.
             launch { bouncerInteractor.onLockoutStarted.collect { startLockoutCountdown() } }
+
+            // Start already active lockdown if it exists
+            launch { startLockoutCountdown() }
 
             // Listens to relevant bouncer events
             launch {

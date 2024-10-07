@@ -37,7 +37,7 @@ interface InterruptionHandler {
      * @see InterruptionResult
      */
     fun onInterruption(
-        interrupted: TransitionState.Transition,
+        interrupted: TransitionState.Transition.ChangeScene,
         newTargetScene: SceneKey,
     ): InterruptionResult?
 }
@@ -76,12 +76,9 @@ class InterruptionResult(
  */
 object DefaultInterruptionHandler : InterruptionHandler {
     override fun onInterruption(
-        interrupted: TransitionState.Transition,
+        interrupted: TransitionState.Transition.ChangeScene,
         newTargetScene: SceneKey,
     ): InterruptionResult {
-        return InterruptionResult(
-            animateFrom = interrupted.currentScene,
-            chain = true,
-        )
+        return InterruptionResult(animateFrom = interrupted.currentScene, chain = true)
     }
 }

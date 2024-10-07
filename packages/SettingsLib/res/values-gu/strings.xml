@@ -130,7 +130,7 @@
     <string name="bluetooth_profile_pbap" msgid="2103406516858653017">"સંપર્કો અને કૉલ ઇતિહાસ ઍક્સેસ કરવા દો"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="402819589201138227">"માહિતીનો ઉપયોગ કૉલની ઘોષણાઓ અને વધુ બાબતો માટે કરવામાં આવશે"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"ઇન્ટરનેટ કનેક્શન શેરિંગ"</string>
-    <string name="bluetooth_profile_map" msgid="8907204701162107271">"ટેક્સ્ટ સંદેશા"</string>
+    <string name="bluetooth_profile_map" msgid="8907204701162107271">"ટેક્સ્ટ મેસેજ"</string>
     <string name="bluetooth_profile_sap" msgid="8304170950447934386">"સિમ ઍક્સેસ"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ઑડિયો: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ઑડિયો"</string>
@@ -564,6 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"અલાર્મ અને રિમાઇન્ડર"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"આ ઍપને અલાર્મ સેટ કરવા અને સમય પ્રતિ સંવેદનશીલ ક્રિયાઓ શેડ્યૂલ કરવા માટે મંજૂરી આપો. આ ઍપને બૅકગ્રાઉન્ડમાં ચાલવા દે છે, જેને કારણે બૅટરીનો વધુ વપરાશ થઈ શકે છે.\n\nજો આ પરવાનગી બંધ હોય, તો આ ઍપ દ્વારા શેડ્યૂલ કરવામાં આવેલા વર્તમાન અલાર્મ અને સમય આધારિત ઇવેન્ટ કામ કરશે નહીં."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"શેડ્યૂલ, અલાર્મ, રિમાઇન્ડર, ઘડિયાળ"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"ખલેલ પાડશો નહીં"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ચાલુ કરો"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"ખલેલ પાડશો નહીં ચાલુ કરો"</string>
@@ -581,8 +582,10 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"આ ટૅબ્લેટ"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"આ કમ્પ્યૂટર (આંતરિક)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"માઇક્રોફોન (આંતરિક)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ડૉક સ્પીકર"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"બહારનું ડિવાઇસ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"કનેક્ટ કરેલું ડિવાઇસ"</string>
@@ -683,7 +686,11 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"બંધ છે"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ચાલુ છે"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"આ ફેરફારને લાગુ કરવા માટે તમારા ડિવાઇસને રીબૂટ કરવાની જરૂર છે. હમણાં જ રીબૂટ કરો કે રદ કરો."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"વાયરવાળો હૅડફોન"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"વાયરવાળો હૅડફોન"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"હૅડફોન"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB સ્પીકર"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"માઇક જૅક"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB માઇક"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ચાલુ"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"બંધ"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"કૅરીઅર નેટવર્કમાં ફેરફાર થઈ રહ્યો છે"</string>

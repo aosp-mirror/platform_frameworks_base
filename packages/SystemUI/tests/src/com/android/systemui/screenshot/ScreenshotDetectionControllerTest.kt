@@ -61,8 +61,8 @@ class ScreenshotDetectionControllerTest {
 
     @Test
     fun testMaybeNotifyOfScreenshot_ignoresOverview() {
-        val data = ScreenshotData.forTesting()
-        data.source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW
+        val data =
+            ScreenshotData.forTesting(source = WindowManager.ScreenshotSource.SCREENSHOT_OVERVIEW)
 
         val list = controller.maybeNotifyOfScreenshot(data)
 
@@ -72,8 +72,8 @@ class ScreenshotDetectionControllerTest {
 
     @Test
     fun testMaybeNotifyOfScreenshot_emptySet() {
-        val data = ScreenshotData.forTesting()
-        data.source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+        val data =
+            ScreenshotData.forTesting(source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD)
 
         whenever(windowManager.notifyScreenshotListeners(eq(Display.DEFAULT_DISPLAY)))
             .thenReturn(listOf())
@@ -85,8 +85,8 @@ class ScreenshotDetectionControllerTest {
 
     @Test
     fun testMaybeNotifyOfScreenshot_oneApp() {
-        val data = ScreenshotData.forTesting()
-        data.source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+        val data =
+            ScreenshotData.forTesting(source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD)
 
         val component = ComponentName("package1", "class1")
         val appName = "app name"
@@ -95,7 +95,7 @@ class ScreenshotDetectionControllerTest {
         whenever(
                 packageManager.getActivityInfo(
                     eq(component),
-                    any(PackageManager.ComponentInfoFlags::class.java)
+                    any(PackageManager.ComponentInfoFlags::class.java),
                 )
             )
             .thenReturn(activityInfo)
@@ -112,8 +112,8 @@ class ScreenshotDetectionControllerTest {
 
     @Test
     fun testMaybeNotifyOfScreenshot_multipleApps() {
-        val data = ScreenshotData.forTesting()
-        data.source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+        val data =
+            ScreenshotData.forTesting(source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD)
 
         val component1 = ComponentName("package1", "class1")
         val component2 = ComponentName("package2", "class2")
@@ -129,21 +129,21 @@ class ScreenshotDetectionControllerTest {
         whenever(
                 packageManager.getActivityInfo(
                     eq(component1),
-                    any(PackageManager.ComponentInfoFlags::class.java)
+                    any(PackageManager.ComponentInfoFlags::class.java),
                 )
             )
             .thenReturn(activityInfo1)
         whenever(
                 packageManager.getActivityInfo(
                     eq(component2),
-                    any(PackageManager.ComponentInfoFlags::class.java)
+                    any(PackageManager.ComponentInfoFlags::class.java),
                 )
             )
             .thenReturn(activityInfo2)
         whenever(
                 packageManager.getActivityInfo(
                     eq(component3),
-                    any(PackageManager.ComponentInfoFlags::class.java)
+                    any(PackageManager.ComponentInfoFlags::class.java),
                 )
             )
             .thenReturn(activityInfo3)
@@ -165,11 +165,13 @@ class ScreenshotDetectionControllerTest {
 
     private fun includesFlagBits(@PackageManager.ComponentInfoFlagsBits mask: Int) =
         ComponentInfoFlagMatcher(mask, mask)
+
     private fun excludesFlagBits(@PackageManager.ComponentInfoFlagsBits mask: Int) =
         ComponentInfoFlagMatcher(mask, 0)
 
     private class ComponentInfoFlagMatcher(
-        @PackageManager.ComponentInfoFlagsBits val mask: Int, val value: Int
+        @PackageManager.ComponentInfoFlagsBits val mask: Int,
+        val value: Int,
     ) : ArgumentMatcher<PackageManager.ComponentInfoFlags> {
         override fun matches(flags: PackageManager.ComponentInfoFlags?): Boolean {
             return flags != null && (mask.toLong() and flags.value) == value.toLong()
@@ -182,26 +184,28 @@ class ScreenshotDetectionControllerTest {
 
     @Test
     fun testMaybeNotifyOfScreenshot_disabledApp() {
-        val data = ScreenshotData.forTesting()
-        data.source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+        val data =
+            ScreenshotData.forTesting(source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD)
 
         val component = ComponentName("package1", "class1")
         val appName = "app name"
         val activityInfo = mock(ActivityInfo::class.java)
 
         whenever(
-            packageManager.getActivityInfo(
-                eq(component),
-                argThat(includesFlagBits(MATCH_DISABLED_COMPONENTS or MATCH_ANY_USER))
+                packageManager.getActivityInfo(
+                    eq(component),
+                    argThat(includesFlagBits(MATCH_DISABLED_COMPONENTS or MATCH_ANY_USER)),
+                )
             )
-        ).thenReturn(activityInfo)
+            .thenReturn(activityInfo)
 
         whenever(
-            packageManager.getActivityInfo(
-                eq(component),
-                argThat(excludesFlagBits(MATCH_DISABLED_COMPONENTS))
+                packageManager.getActivityInfo(
+                    eq(component),
+                    argThat(excludesFlagBits(MATCH_DISABLED_COMPONENTS)),
+                )
             )
-        ).thenThrow(PackageManager.NameNotFoundException::class.java)
+            .thenThrow(PackageManager.NameNotFoundException::class.java)
 
         whenever(windowManager.notifyScreenshotListeners(eq(Display.DEFAULT_DISPLAY)))
             .thenReturn(listOf(component))

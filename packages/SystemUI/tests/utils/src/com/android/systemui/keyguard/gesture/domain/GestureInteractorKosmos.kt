@@ -16,12 +16,23 @@
 
 package com.android.systemui.keyguard.gesture.domain
 
-import com.android.systemui.keyguard.gesture.data.gestureRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.backgroundCoroutineContext
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.navigationbar.gestural.data.gestureRepository
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor
+import com.android.systemui.shared.system.activityManagerWrapper
+import com.android.systemui.shared.system.taskStackChangeListeners
 
 val Kosmos.gestureInteractor: GestureInteractor by
     Kosmos.Fixture {
-        GestureInteractor(gestureRepository = gestureRepository, scope = applicationCoroutineScope)
+        GestureInteractor(
+            gestureRepository = gestureRepository,
+            mainDispatcher = testDispatcher,
+            backgroundCoroutineContext = backgroundCoroutineContext,
+            scope = applicationCoroutineScope,
+            activityManagerWrapper = activityManagerWrapper,
+            taskStackChangeListeners = taskStackChangeListeners
+        )
     }

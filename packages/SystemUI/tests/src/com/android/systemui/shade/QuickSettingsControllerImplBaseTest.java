@@ -197,6 +197,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 () -> sceneInteractor,
                 () -> mKosmos.getFromGoneTransitionInteractor(),
                 () -> mKosmos.getFromLockscreenTransitionInteractor(),
+                () -> mKosmos.getFromOccludedTransitionInteractor(),
                 () -> mKosmos.getSharedNotificationContainerInteractor(),
                 mTestScope);
 
@@ -216,7 +217,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mKeyguardRepository,
                 keyguardTransitionInteractor,
                 powerInteractor,
-                mShadeRepository,
                 new FakeUserSetupRepository(),
                 mUserSwitcherInteractor,
                 new ShadeInteractorLegacyImpl(
@@ -231,8 +231,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                                 deviceEntryUdfpsInteractor,
                                 () -> mLargeScreenHeaderHelper),
                         mShadeRepository
-                )
-        );
+                ),
+                mKosmos.getShadeModeInteractor());
 
         mActiveNotificationsInteractor = new ActiveNotificationsInteractor(
                         new ActiveNotificationListRepository(),

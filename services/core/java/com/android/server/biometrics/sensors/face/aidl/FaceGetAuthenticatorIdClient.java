@@ -42,7 +42,8 @@ class FaceGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
             @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, opPackageName,
-                0 /* cookie */, sensorId, logger, biometricContext);
+                0 /* cookie */, sensorId, logger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mAuthenticatorIds = authenticatorIds;
     }
 

@@ -17,10 +17,12 @@
 package android.os;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
@@ -28,6 +30,7 @@ import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
+import android.sdk.Flags;
 import android.sysprop.DeviceProperties;
 import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
@@ -399,10 +402,42 @@ public class Build {
          * device. This value never changes while a device is booted, but it may
          * increase when the hardware manufacturer provides an OTA update.
          * <p>
+         * This constant records the major version of Android. Use {@link
+         * SDK_INT_FULL} if you need to consider the minor version of Android
+         * as well.
+         * <p>
          * Possible values are defined in {@link Build.VERSION_CODES}.
+         * @see #SDK_INT_FULL
          */
         public static final int SDK_INT = SystemProperties.getInt(
                 "ro.build.version.sdk", 0);
+
+        /**
+         * The major and minor SDK version of the software currently running on
+         * this hardware device. This value never changes while a device is
+         * booted, but it may increase when the hardware manufacturer provides
+         * an OTA update.
+         * <p>
+         * <code>SDK_INT</code> is increased on new Android dessert releases,
+         * also called major releases. Between these, Android may also release
+         * minor releases where <code>SDK_INT</code> remains unchanged. Minor
+         * releases can add new APIs, and have stricter guarantees around
+         * backwards compatibility (e.g. no changes gated by
+         * <code>targetSdkVersion</code>) compared to major releases.
+         * <p>
+         * <code>SDK_INT_FULL</code> is increased on every release.
+         * <p>
+         * Possible values are defined in {@link
+         * android.os.Build.VERSION_CODES_FULL}.
+         */
+        @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+        public static final int SDK_INT_FULL;
+
+        static {
+            SDK_INT_FULL = VERSION_CODES_FULL.SDK_INT_MULTIPLIER
+                * SystemProperties.getInt("ro.build.version.sdk", 0)
+                + SystemProperties.getInt("ro.build.version.sdk_minor", 0);
+        }
 
         /**
          * The SDK version of the software that <em>initially</em> shipped on
@@ -1236,6 +1271,25 @@ public class Build {
          * Vanilla Ice Cream.
          */
         public static final int VANILLA_ICE_CREAM = 35;
+    }
+
+    /**
+     * Enumeration of the currently known SDK major and minor version codes.
+     * The numbers increase for every release, and are guaranteed to be ordered
+     * by the release date of each release. The actual values should be
+     * considered an implementation detail, and the current encoding scheme may
+     * change in the future.
+     *
+     * @see android.os.Build.VERSION#SDK_INT_FULL
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    @SuppressLint("AcronymName")
+    public static class VERSION_CODES_FULL {
+        private VERSION_CODES_FULL() {}
+
+        // Use the last 5 digits for the minor version. This allows the
+        // minor version to be set to CUR_DEVELOPMENT.
+        private static final int SDK_INT_MULTIPLIER = 100000;
     }
 
     /**

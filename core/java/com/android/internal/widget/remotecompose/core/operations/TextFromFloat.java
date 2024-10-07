@@ -15,12 +15,15 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.INT;
+import static com.android.internal.widget.remotecompose.core.documentation.Operation.SHORT;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
+import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringUtils;
 
 import java.util.List;
@@ -31,13 +34,14 @@ import java.util.List;
  * before and after define number of digits before and after the decimal point
  */
 public class TextFromFloat implements Operation, VariableSupport {
+    private static final int OP_CODE = Operations.TEXT_FROM_FLOAT;
+    private static final String CLASS_NAME = "TextFromFloat";
     public int mTextId;
     public float mValue;
     public float mOutValue;
     public short mDigitsBefore;
     public short mDigitsAfter;
     public int mFlags;
-    public static final Companion COMPANION = new Companion();
     public static final int MAX_STRING_SIZE = 4000;
     char mPre = ' ';
     char mAfter = ' ';
@@ -83,7 +87,7 @@ public class TextFromFloat implements Operation, VariableSupport {
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mTextId, mValue, mDigitsAfter, mDigitsBefore, mFlags);
+        apply(buffer, mTextId, mValue, mDigitsAfter, mDigitsBefore, mFlags);
     }
 
     @Override
@@ -99,9 +103,7 @@ public class TextFromFloat implements Operation, VariableSupport {
         if (Float.isNaN(mValue)) {
             mOutValue = context.getFloat(Utils.idFromNan(mValue));
         }
-
     }
-
 
     @Override
     public void registerListening(RemoteContext context) {
@@ -110,52 +112,62 @@ public class TextFromFloat implements Operation, VariableSupport {
         }
     }
 
-    public static class Companion implements CompanionOperation {
-        private Companion() {
-        }
-
-        @Override
-        public String name() {
-            return "TextData";
-        }
-
-        @Override
-        public int id() {
-            return Operations.TEXT_FROM_FLOAT;
-        }
-
-        /**
-         * Writes out the operation to the buffer
-         * @param buffer
-         * @param textId
-         * @param value
-         * @param digitsBefore
-         * @param digitsAfter
-         * @param flags
-         */
-        public void apply(WireBuffer buffer, int textId,
-                          float value, short digitsBefore,
-                          short digitsAfter, int flags) {
-            buffer.start(Operations.TEXT_FROM_FLOAT);
-            buffer.writeInt(textId);
-            buffer.writeFloat(value);
-            buffer.writeInt((digitsBefore << 16) | digitsAfter);
-            buffer.writeInt(flags);
-
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            int textId = buffer.readInt();
-            float value = buffer.readFloat();
-            int tmp = buffer.readInt();
-            short post = (short) (tmp & 0xFFFF);
-            short pre = (short) ((tmp >> 16) & 0xFFFF);
-
-            int flags = buffer.readInt();
-            operations.add(new TextFromFloat(textId, value, pre, post, flags));
-        }
+    public static String name() {
+        return CLASS_NAME;
     }
+
+    public static int id() {
+        return OP_CODE;
+    }
+
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer       buffer to write to
+     * @param textId       the id of the output text
+     * @param value        the float value to be turned into strings
+     * @param digitsBefore the digits before the decimal point
+     * @param digitsAfter  the digits after the decimal point
+     * @param flags        flags that control if and how to fill the empty spots
+     */
+    public static void apply(WireBuffer buffer, int textId,
+                             float value, short digitsBefore,
+                             short digitsAfter, int flags) {
+        buffer.start(OP_CODE);
+        buffer.writeInt(textId);
+        buffer.writeFloat(value);
+        buffer.writeInt((digitsBefore << 16) | digitsAfter);
+        buffer.writeInt(flags);
+
+    }
+
+    public static void read(WireBuffer buffer, List<Operation> operations) {
+        int textId = buffer.readInt();
+        float value = buffer.readFloat();
+        int tmp = buffer.readInt();
+        short post = (short) (tmp & 0xFFFF);
+        short pre = (short) ((tmp >> 16) & 0xFFFF);
+
+        int flags = buffer.readInt();
+        operations.add(new TextFromFloat(textId, value, pre, post, flags));
+    }
+
+    public static void documentation(DocumentationBuilder doc) {
+        doc.operation("Expressions Operations",
+                        OP_CODE,
+                        CLASS_NAME)
+                .description("Draw text along path object")
+                .field(INT, "textId",
+                        "id of the text generated")
+                .field(INT, "value",
+                        "Value to add")
+                .field(SHORT, "prePoint",
+                        "digits before the decimal point")
+                .field(SHORT, "pstPoint",
+                        "digit after the decimal point")
+                .field(INT, "flags", "options on padding");
+    }
+
 
     @Override
     public void apply(RemoteContext context) {

@@ -19,29 +19,33 @@
 package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
+import android.view.HapticFeedbackConstants
 import android.view.KeyEvent.KEYCODE_0
 import android.view.KeyEvent.KEYCODE_9
 import android.view.KeyEvent.KEYCODE_DEL
 import android.view.KeyEvent.KEYCODE_NUMPAD_0
 import android.view.KeyEvent.KEYCODE_NUMPAD_9
 import android.view.KeyEvent.isConfirmKey
+import android.view.View
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import com.android.keyguard.PinShapeAdapter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer
 import com.android.systemui.res.R
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -55,6 +59,7 @@ constructor(
     applicationContext: Context,
     interactor: BouncerInteractor,
     private val simBouncerInteractor: SimBouncerInteractor,
+    @Assisted bouncerHapticPlayer: BouncerHapticPlayer,
     @Assisted isInputEnabled: StateFlow<Boolean>,
     @Assisted private val onIntentionalUserInput: () -> Unit,
     @Assisted override val authenticationMethod: AuthenticationMethodModel,
@@ -62,6 +67,8 @@ constructor(
     AuthMethodBouncerViewModel(
         interactor = interactor,
         isInputEnabled = isInputEnabled,
+        traceName = "PinBouncerViewModel",
+        bouncerHapticPlayer = bouncerHapticPlayer,
     ) {
     /**
      * Whether the sim-related UI in the pin view is showing.
@@ -96,7 +103,7 @@ constructor(
 
     private val requests = Channel<Request>(Channel.BUFFERED)
 
-    override suspend fun onActivated() {
+    override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { super.onActivated() }
             launch {
@@ -121,30 +128,30 @@ constructor(
                     } else {
                         interactor.hintedPinLength
                     }
-                    .collectLatest { _hintedPinLength.value = it }
+                    .collect { _hintedPinLength.value = it }
             }
             launch {
-                combine(
-                        mutablePinInput,
-                        interactor.isAutoConfirmEnabled,
-                    ) { mutablePinEntries, isAutoConfirmEnabled ->
+                combine(mutablePinInput, interactor.isAutoConfirmEnabled) {
+                        mutablePinEntries,
+                        isAutoConfirmEnabled ->
                         computeBackspaceButtonAppearance(
                             pinInput = mutablePinEntries,
                             isAutoConfirmEnabled = isAutoConfirmEnabled,
                         )
                     }
-                    .collectLatest { _backspaceButtonAppearance.value = it }
+                    .collect { _backspaceButtonAppearance.value = it }
             }
             launch {
                 interactor.isAutoConfirmEnabled
                     .map { if (it) ActionButtonAppearance.Hidden else ActionButtonAppearance.Shown }
-                    .collectLatest { _confirmButtonAppearance.value = it }
+                    .collect { _confirmButtonAppearance.value = it }
             }
             launch {
                 interactor.isPinEnhancedPrivacyEnabled
                     .map { !it }
-                    .collectLatest { _isDigitButtonAnimationEnabled.value = it }
+                    .collect { _isDigitButtonAnimationEnabled.value = it }
             }
+            awaitCancellation()
         }
     }
 
@@ -180,8 +187,22 @@ constructor(
         mutablePinInput.value = mutablePinInput.value.deleteLast()
     }
 
+    fun onBackspaceButtonPressed(view: View?) {
+        if (bouncerHapticPlayer?.isEnabled == true) {
+            bouncerHapticPlayer.playDeleteKeyPressFeedback()
+        } else {
+            view?.performHapticFeedback(
+                HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+            )
+        }
+    }
+
     /** Notifies that the user long-pressed the backspace button. */
     fun onBackspaceButtonLongPressed() {
+        if (bouncerHapticPlayer?.isEnabled == true) {
+            bouncerHapticPlayer.playDeleteKeyLongPressedFeedback()
+        }
         clearInput()
     }
 
@@ -263,12 +284,33 @@ constructor(
         }
     }
 
+    /**
+     * Notifies that the user has pressed down on a digit button. This function also performs haptic
+     * feedback on the view.
+     */
+    fun onDigitButtonDown(view: View?) {
+        if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
+            // Current PIN bouncer informs FalsingInteractor#avoidGesture() upon every Pin button
+            // touch.
+            super.onDown()
+        }
+        if (bouncerHapticPlayer?.isEnabled == true) {
+            bouncerHapticPlayer.playNumpadKeyFeedback()
+        } else {
+            view?.performHapticFeedback(
+                HapticFeedbackConstants.VIRTUAL_KEY,
+                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+            )
+        }
+    }
+
     @AssistedFactory
     interface Factory {
         fun create(
             isInputEnabled: StateFlow<Boolean>,
             onIntentionalUserInput: () -> Unit,
             authenticationMethod: AuthenticationMethodModel,
+            bouncerHapticPlayer: BouncerHapticPlayer,
         ): PinBouncerViewModel
     }
 

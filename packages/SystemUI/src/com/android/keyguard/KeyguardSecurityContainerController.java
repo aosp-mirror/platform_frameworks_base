@@ -35,7 +35,6 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
-import android.app.admin.flags.Flags;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -77,11 +76,12 @@ import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardWmStateRefactor;
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransitionInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -103,6 +103,7 @@ import kotlinx.coroutines.Job;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -134,7 +135,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
-    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    private final KeyguardDismissTransitionInteractor mKeyguardDismissTransitionInteractor;
     private final DevicePolicyManager mDevicePolicyManager;
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
@@ -321,7 +322,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
 
             if (KeyguardWmStateRefactor.isEnabled()) {
-                mKeyguardTransitionInteractor.startDismissKeyguardTransition(
+                mKeyguardDismissTransitionInteractor.startDismissKeyguardTransition(
                         "KeyguardSecurityContainerController#finish");
             }
         }
@@ -427,6 +428,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final Provider<JavaAdapter> mJavaAdapter;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final Lazy<PrimaryBouncerInteractor> mPrimaryBouncerInteractor;
+    private final Executor mBgExecutor;
     @Nullable
     private Job mSceneTransitionCollectionJob;
 
@@ -458,8 +460,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             DeviceProvisionedController deviceProvisionedController,
             FaceAuthAccessibilityDelegate faceAuthAccessibilityDelegate,
             DevicePolicyManager devicePolicyManager,
-            KeyguardTransitionInteractor keyguardTransitionInteractor,
+            KeyguardDismissTransitionInteractor keyguardDismissTransitionInteractor,
             Lazy<PrimaryBouncerInteractor> primaryBouncerInteractor,
+            @Background Executor bgExecutor,
             Provider<DeviceEntryInteractor> deviceEntryInteractor
     ) {
         super(view);
@@ -490,15 +493,17 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mSelectedUserInteractor = selectedUserInteractor;
         mDeviceEntryInteractor = deviceEntryInteractor;
         mJavaAdapter = javaAdapter;
-        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
+        mKeyguardDismissTransitionInteractor = keyguardDismissTransitionInteractor;
         mDeviceProvisionedController = deviceProvisionedController;
         mPrimaryBouncerInteractor = primaryBouncerInteractor;
         mDevicePolicyManager = devicePolicyManager;
+        mBgExecutor = bgExecutor;
     }
 
     @Override
     public void onInit() {
         mSecurityViewFlipperController.init();
+        mView.setBackgroundExecutor(mBgExecutor);
         updateResources();
         configureMode();
     }
@@ -1140,12 +1145,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             int remainingBeforeWipe, int failedAttempts) {
         int userType = USER_TYPE_PRIMARY;
         if (expiringUserId == userId) {
-            int primaryUser = UserHandle.USER_SYSTEM;
-            if (Flags.headlessSingleUserFixes()) {
-                if (mainUserId != null) {
-                    primaryUser = mainUserId;
-                }
-            }
+            int primaryUser = mainUserId != null ? mainUserId : UserHandle.USER_SYSTEM;
             // TODO: http://b/23522538
             if (expiringUserId != primaryUser) {
                 userType = USER_TYPE_SECONDARY_USER;

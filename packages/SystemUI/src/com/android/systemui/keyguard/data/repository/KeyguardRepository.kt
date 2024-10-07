@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
@@ -486,19 +487,34 @@ constructor(
 
     override val isDreaming: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
-    override val linearDozeAmount: Flow<Float> = conflatedCallbackFlow {
-        val callback =
-            object : StatusBarStateController.StateListener {
-                override fun onDozeAmountChanged(linear: Float, eased: Float) {
-                    trySendWithFailureLogging(linear, TAG, "updated dozeAmount")
-                }
+    private val _preSceneLinearDozeAmount: Flow<Float> =
+        if (SceneContainerFlag.isEnabled) {
+            emptyFlow()
+        } else {
+            conflatedCallbackFlow {
+                val callback =
+                    object : StatusBarStateController.StateListener {
+                        override fun onDozeAmountChanged(linear: Float, eased: Float) {
+                            trySendWithFailureLogging(linear, TAG, "updated dozeAmount")
+                        }
+                    }
+
+                statusBarStateController.addCallback(callback)
+                trySendWithFailureLogging(
+                    statusBarStateController.dozeAmount,
+                    TAG,
+                    "initial dozeAmount"
+                )
+
+                awaitClose { statusBarStateController.removeCallback(callback) }
             }
+        }
 
-        statusBarStateController.addCallback(callback)
-        trySendWithFailureLogging(statusBarStateController.dozeAmount, TAG, "initial dozeAmount")
-
-        awaitClose { statusBarStateController.removeCallback(callback) }
-    }
+    override val linearDozeAmount: Flow<Float>
+        get() {
+            SceneContainerFlag.assertInLegacyMode()
+            return _preSceneLinearDozeAmount
+        }
 
     override val dozeTransitionModel: Flow<DozeTransitionModel> = conflatedCallbackFlow {
         val callback =

@@ -1,31 +1,17 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksMockingServicesTests",
-      "file_patterns": [
-        "DeviceIdleController\\.java"
-      ],
-      "options": [
-        {"include-filter": "com.android.server.DeviceIdleControllerTest"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
+      "name": "FrameworksMockingServicesTests_IdleController",
+      "file_patterns": ["DeviceIdleController\\.java"]
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "file_patterns": ["AppStateTrackerImpl\\.java"],
-      "options": [
-        {"include-filter": "com.android.server.AppStateTrackerTest"},
-        {"include-annotation": "android.platform.test.annotations.Presubmit"},
-        {"exclude-annotation": "androidx.test.filters.FlakyTest"}
-      ]
+      "name": "FrameworksMockingServicesTests_AppStateTracker",
+      "file_patterns": ["AppStateTrackerImpl\\.java"]
     }
   ],
   "postsubmit": [
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {"include-filter": "com.android.server"}
-      ]
+      "name": "FrameworksMockingServicesTests_android_server"
     }
   ]
 }

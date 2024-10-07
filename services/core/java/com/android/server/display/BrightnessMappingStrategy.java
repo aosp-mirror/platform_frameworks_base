@@ -1073,7 +1073,9 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
             pw.println("  shortTermModelTimeout=" + getShortTermModelTimeout());
 
-            pw.println("  Previous short-term models (oldest to newest): ");
+            if (!mPreviousBrightnessSplines.isEmpty()) {
+                pw.println("  Previous short-term models (oldest to newest): ");
+            }
             for (int i = 0; i < mPreviousBrightnessSplines.size(); i++) {
                 pw.println("  Computed at "
                         + FORMAT.format(new Date(mBrightnessSplineChangeTimes.get(i))) + ": ");

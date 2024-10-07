@@ -29,6 +29,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import java.io.ByteArrayOutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -207,8 +209,10 @@ public final class ZenPolicy implements Parcelable {
 
     /**
      * Total number of priority categories. Keep updated with any updates to PriorityCategory enum.
+     * If this changes, you must update {@link ZenModeDiff.PolicyDiff} to include new categories.
      * @hide
      */
+    @VisibleForTesting
     public static final int NUM_PRIORITY_CATEGORIES = 9;
 
     /** @hide */
@@ -241,8 +245,10 @@ public final class ZenPolicy implements Parcelable {
 
     /**
      * Total number of visual effects. Keep updated with any updates to VisualEffect enum.
+     * If this changes, you must update {@link ZenModeDiff.PolicyDiff} to include new categories.
      * @hide
      */
+    @VisibleForTesting
     public static final int NUM_VISUAL_EFFECTS = 7;
 
     /** @hide */
@@ -390,6 +396,46 @@ public final class ZenPolicy implements Parcelable {
         mPriorityCalls = priorityCalls;
         mConversationSenders = conversationSenders;
         mAllowChannels = allowChannels;
+    }
+
+    /**
+     * Base Zen Policy used when {@link android.app.NotificationManager#setInterruptionFilter} is
+     * called with {@link android.app.NotificationManager#INTERRUPTION_FILTER_ALARMS} or an
+     * {@link android.app.AutomaticZenRule} specifies said filter.
+     *
+     * <p>Note that <em>visual effects</em> for filtered notifications are unset in this base
+     * policy, so should be merged on top of the default policy's visual effects (see
+     * {@link #overwrittenWith(ZenPolicy)}).
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static ZenPolicy getBasePolicyInterruptionFilterAlarms() {
+        return new ZenPolicy.Builder()
+                .disallowAllSounds()
+                .allowAlarms(true)
+                .allowMedia(true)
+                .allowPriorityChannels(false)
+                .build();
+    }
+
+    /**
+     * Base Zen Policy used when {@link android.app.NotificationManager#setInterruptionFilter} is
+     * called with {@link android.app.NotificationManager#INTERRUPTION_FILTER_NONE} or an
+     * {@link android.app.AutomaticZenRule} specifies said filter.
+     *
+     * <p>Note that <em>visual effects</em> for filtered notifications are unset in this base
+     * policy, so it should be merged on top of the device default policy's visual effects (see
+     * {@link #overwrittenWith(ZenPolicy)}).
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static ZenPolicy getBasePolicyInterruptionFilterNone() {
+        return new ZenPolicy.Builder()
+                .disallowAllSounds()
+                .allowPriorityChannels(false)
+                .build();
     }
 
     /**

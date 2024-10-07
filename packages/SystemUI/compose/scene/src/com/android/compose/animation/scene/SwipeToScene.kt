@@ -31,7 +31,7 @@ import androidx.compose.ui.node.PointerInputModifierNode
 import androidx.compose.ui.node.TraversableNode
 import androidx.compose.ui.node.findNearestAncestor
 import androidx.compose.ui.unit.IntSize
-import com.android.compose.animation.scene.content.Scene
+import com.android.compose.animation.scene.content.Content
 
 /**
  * Configures the swipeable behavior of a [SceneTransitionLayout] depending on the current state.
@@ -39,14 +39,14 @@ import com.android.compose.animation.scene.content.Scene
 @Stable
 internal fun Modifier.swipeToScene(
     draggableHandler: DraggableHandlerImpl,
-    swipeDetector: SwipeDetector
+    swipeDetector: SwipeDetector,
 ): Modifier {
     return this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
 }
 
 private data class SwipeToSceneElement(
     val draggableHandler: DraggableHandlerImpl,
-    val swipeDetector: SwipeDetector
+    val swipeDetector: SwipeDetector,
 ) : ModifierNodeElement<SwipeToSceneNode>() {
     override fun create(): SwipeToSceneNode = SwipeToSceneNode(draggableHandler, swipeDetector)
 
@@ -126,16 +126,15 @@ private class SwipeToSceneNode(
 
     private fun enabled(): Boolean {
         return draggableHandler.isDrivingTransition ||
-            currentScene().shouldEnableSwipes(multiPointerDraggableNode.orientation)
+            contentForSwipes().shouldEnableSwipes(multiPointerDraggableNode.orientation)
     }
 
-    private fun currentScene(): Scene {
-        val layoutImpl = draggableHandler.layoutImpl
-        return layoutImpl.scene(layoutImpl.state.transitionState.currentScene)
+    private fun contentForSwipes(): Content {
+        return draggableHandler.layoutImpl.contentForUserActions()
     }
 
     /** Whether swipe should be enabled in the given [orientation]. */
-    private fun Scene.shouldEnableSwipes(orientation: Orientation): Boolean {
+    private fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
         return userActions.keys.any {
             it is Swipe.Resolved && it.direction.orientation == orientation
         }
@@ -153,7 +152,7 @@ private class SwipeToSceneNode(
                 Orientation.Vertical -> Orientation.Horizontal
                 Orientation.Horizontal -> Orientation.Vertical
             }
-        return currentScene().shouldEnableSwipes(oppositeOrientation)
+        return contentForSwipes().shouldEnableSwipes(oppositeOrientation)
     }
 }
 
@@ -184,12 +183,12 @@ internal fun interface ScrollBehaviorOwner {
  */
 private class ScrollBehaviorOwnerNode(
     override val traverseKey: Any,
-    val nestedScrollHandlerImpl: NestedScrollHandlerImpl
+    val nestedScrollHandlerImpl: NestedScrollHandlerImpl,
 ) : Modifier.Node(), TraversableNode, ScrollBehaviorOwner {
     override fun updateScrollBehaviors(
         topOrLeftBehavior: NestedScrollBehavior,
         bottomOrRightBehavior: NestedScrollBehavior,
-        isExternalOverscrollGesture: () -> Boolean
+        isExternalOverscrollGesture: () -> Boolean,
     ) {
         nestedScrollHandlerImpl.topOrLeftBehavior = topOrLeftBehavior
         nestedScrollHandlerImpl.bottomOrRightBehavior = bottomOrRightBehavior

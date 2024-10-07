@@ -43,18 +43,23 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.recordissue.IssueRecordingService
+import com.android.systemui.recordissue.IssueRecordingService.Companion.getStartIntent
+import com.android.systemui.recordissue.IssueRecordingService.Companion.getStopIntent
 import com.android.systemui.recordissue.IssueRecordingState
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.recordissue.RecordIssueModule.Companion.TILE_SPEC
 import com.android.systemui.recordissue.TraceurMessageSender
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.screenrecord.RecordingService
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
+
+const val DELAY_MS: Long = 0
+const val INTERVAL_MS: Long = 1000
 
 class RecordIssueTile
 @Inject
@@ -77,6 +82,7 @@ constructor(
     @Background private val bgExecutor: Executor,
     private val issueRecordingState: IssueRecordingState,
     private val delegateFactory: RecordIssueDialogDelegate.Factory,
+    private val recordingController: RecordingController,
 ) :
     QSTileImpl<QSTile.BooleanState>(
         host,
@@ -132,22 +138,24 @@ constructor(
     }
 
     private fun startIssueRecordingService() =
-        PendingIntent.getForegroundService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStartIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+        recordingController.startCountdown(
+            DELAY_MS,
+            INTERVAL_MS,
+            pendingServiceIntent(getStartIntent(userContextProvider.userContext)),
+            pendingServiceIntent(getStopIntent(userContextProvider.userContext))
+        )
 
     private fun stopIssueRecordingService() =
-        PendingIntent.getService(
-                userContextProvider.userContext,
-                RecordingService.REQUEST_CODE,
-                IssueRecordingService.getStopIntent(userContextProvider.userContext),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+        pendingServiceIntent(getStopIntent(userContextProvider.userContext))
             .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
+
+    private fun pendingServiceIntent(action: Intent) =
+        PendingIntent.getService(
+            userContextProvider.userContext,
+            RecordingService.REQUEST_CODE,
+            action,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
     private fun showPrompt(expandable: Expandable?) {
         val dialog: AlertDialog =

@@ -33,6 +33,7 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -190,6 +191,7 @@ public class AudioServerPermissionProvider {
                 mIsUpdateDeferred = true;
                 return;
             }
+            Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "audioserver_permission_update");
             try {
                 for (byte i = 0; i < PermissionEnum.ENUM_SIZE; i++) {
                     var newPerms = getUidsHoldingPerm(i);
@@ -203,6 +205,8 @@ public class AudioServerPermissionProvider {
                 mDest = null;
                 // We didn't necessarily finish
                 mIsUpdateDeferred = true;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
             }
         }
     }

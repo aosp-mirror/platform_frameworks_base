@@ -48,7 +48,9 @@ import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.common.fmq.MQDescriptor;
 import android.hardware.power.ChannelConfig;
+import android.hardware.power.ChannelMessage;
 import android.hardware.power.IPower;
 import android.hardware.power.SessionConfig;
 import android.hardware.power.SessionTag;
@@ -167,6 +169,8 @@ public class HintManagerServiceTest {
         mConfig = new ChannelConfig();
         mConfig.readFlagBitmask = 1;
         mConfig.writeFlagBitmask = 2;
+        mConfig.channelDescriptor = new MQDescriptor<ChannelMessage, Byte>();
+        mConfig.eventFlagDescriptor = new MQDescriptor<Byte, Byte>();
         ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.category = ApplicationInfo.CATEGORY_GAME;
         when(mContext.getPackageManager()).thenReturn(mMockPackageManager);
@@ -631,7 +635,7 @@ public class HintManagerServiceTest {
         CountDownLatch stopLatch2 = new CountDownLatch(1);
         // negative value used for test only to avoid conflicting with any real thread that exists
         int isoProc1 = -100;
-        int isoProc2 = 9999;
+        int isoProc2 = 99999999;
         when(mAmInternalMock.getIsolatedProcesses(eq(UID))).thenReturn(List.of(0));
         int[] tids2 = createThreads(threadCount, stopLatch2);
         int[] tids2WithIsolated = Arrays.copyOf(tids2, tids2.length + 2);
@@ -658,7 +662,7 @@ public class HintManagerServiceTest {
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr1), any());
         verify(mNativeWrapperMock, never()).halSetThreads(eq(sessionPtr2), any());
         // the new TIDs pending list should be updated
-        assertArrayEquals(session2.getTidsInternal(), expectedTids2);
+        assertArrayEquals(expectedTids2, session2.getTidsInternal());
         reset(mNativeWrapperMock);
 
         // this should resume and update the threads so those never-existed invalid isolated
@@ -713,8 +717,8 @@ public class HintManagerServiceTest {
         // in background, set threads for session 1 then it should not be force paused next time
         session1.setThreads(SESSION_TIDS_A);
         // the new TIDs pending list should be updated
-        assertArrayEquals(session1.getTidsInternal(), SESSION_TIDS_A);
-        assertArrayEquals(session2.getTidsInternal(), expectedTids2);
+        assertArrayEquals(SESSION_TIDS_A, session1.getTidsInternal());
+        assertArrayEquals(expectedTids2, session2.getTidsInternal());
         verifyAllHintsEnabled(session1, false);
         verifyAllHintsEnabled(session2, false);
         reset(mNativeWrapperMock);

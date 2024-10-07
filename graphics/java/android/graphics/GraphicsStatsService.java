@@ -311,7 +311,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
                 Log.w(TAG, "Unable to create path: '" + parent.getAbsolutePath() + "'");
                 return;
             }
-            nSaveBuffer(path.getAbsolutePath(), buffer.mInfo.mPackageName,
+            nSaveBuffer(path.getAbsolutePath(), buffer.mInfo.mUid, buffer.mInfo.mPackageName,
                     buffer.mInfo.mVersionCode, buffer.mInfo.mStartTime, buffer.mInfo.mEndTime,
                     buffer.mData);
         }
@@ -405,7 +405,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
             HistoricalBuffer buffer = buffers.get(i);
             File path = pathForApp(buffer.mInfo);
             skipFiles.add(path);
-            nAddToDump(dump, path.getAbsolutePath(), buffer.mInfo.mPackageName,
+            nAddToDump(dump, path.getAbsolutePath(), buffer.mInfo.mUid, buffer.mInfo.mPackageName,
                     buffer.mInfo.mVersionCode,  buffer.mInfo.mStartTime, buffer.mInfo.mEndTime,
                     buffer.mData);
         }
@@ -469,21 +469,23 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
 
     private static native int nGetAshmemSize();
     private static native long nCreateDump(int outFd, boolean isProto);
-    private static native void nAddToDump(long dump, String path, String packageName,
+    private static native void nAddToDump(long dump, String path, int uid, String packageName,
             long versionCode, long startTime, long endTime, byte[] data);
     private static native void nAddToDump(long dump, String path);
     private static native void nFinishDump(long dump);
     private static native void nFinishDumpInMemory(long dump, long pulledData, boolean lastFullDay);
-    private static native void nSaveBuffer(String path, String packageName, long versionCode,
-            long startTime, long endTime, byte[] data);
+    private static native void nSaveBuffer(String path, int uid, String packageName,
+            long versionCode, long startTime, long endTime, byte[] data);
 
     private final class BufferInfo {
+        final int mUid;
         final String mPackageName;
         final long mVersionCode;
         long mStartTime;
         long mEndTime;
 
-        BufferInfo(String packageName, long versionCode, long startTime) {
+        BufferInfo(int uid, String packageName, long versionCode, long startTime) {
+            this.mUid = uid;
             this.mPackageName = packageName;
             this.mVersionCode = versionCode;
             this.mStartTime = startTime;
@@ -502,7 +504,7 @@ public class GraphicsStatsService extends IGraphicsStats.Stub {
         ActiveBuffer(IGraphicsStatsCallback token, int uid, int pid, String packageName,
                 long versionCode)
                 throws RemoteException, IOException {
-            mInfo = new BufferInfo(packageName, versionCode, System.currentTimeMillis());
+            mInfo = new BufferInfo(uid, packageName, versionCode, System.currentTimeMillis());
             mUid = uid;
             mPid = pid;
             mCallback = token;

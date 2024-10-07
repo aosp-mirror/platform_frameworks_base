@@ -39,8 +39,14 @@ public final class MouseEventHandler {
      * @param displayId The display that is being magnified
      */
     public void onEvent(MotionEvent event, int displayId) {
-        if (event.getAction() == ACTION_HOVER_MOVE
-                || (event.getAction() == ACTION_MOVE && event.getSource() == SOURCE_MOUSE)) {
+        // Ignore gesture events synthesized from the touchpad.
+        // TODO(b/354696546): Use synthesized pinch gestures to control scale.
+        boolean isSynthesizedFromTouchpad =
+                event.getClassification() != MotionEvent.CLASSIFICATION_NONE;
+
+        // Consume only move events from the mouse or hovers from any tool.
+        if (!isSynthesizedFromTouchpad && (event.getAction() == ACTION_HOVER_MOVE
+                || (event.getAction() == ACTION_MOVE && event.getSource() == SOURCE_MOUSE))) {
             final float eventX = event.getX();
             final float eventY = event.getY();
 

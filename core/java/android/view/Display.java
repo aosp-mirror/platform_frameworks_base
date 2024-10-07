@@ -20,6 +20,8 @@ import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
+
 import android.Manifest;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -314,6 +316,8 @@ public final class Display {
      * @hide
      * @see #getFlags()
      */
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int FLAG_ALWAYS_UNLOCKED = 1 << 9;
 
     /**
@@ -323,6 +327,8 @@ public final class Display {
      * @hide
      * @see #getFlags()
      */
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int FLAG_TOUCH_FEEDBACK_DISABLED = 1 << 10;
 
     /**
@@ -336,6 +342,8 @@ public final class Display {
      * @see #FLAG_TRUSTED
      * @hide
      */
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int FLAG_OWN_FOCUS = 1 << 11;
 
     /**
@@ -642,6 +650,8 @@ public final class Display {
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
+    @SuppressLint("UnflaggedApi") // Promotion to TestApi
+    @TestApi
     public static final int REMOVE_MODE_DESTROY_CONTENT = 1;
 
     /** @hide */
@@ -1331,7 +1341,7 @@ public final class Display {
     public HdrCapabilities getHdrCapabilities() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            if (mDisplayInfo.hdrCapabilities == null) {
+            if (mDisplayInfo.hdrCapabilities == null || mDisplayInfo.isForceSdr) {
                 return null;
             }
             int[] supportedHdrTypes;
@@ -1353,6 +1363,7 @@ public final class Display {
                     supportedHdrTypes[index++] = enabledType;
                 }
             }
+
             return new HdrCapabilities(supportedHdrTypes,
                     mDisplayInfo.hdrCapabilities.mMaxLuminance,
                     mDisplayInfo.hdrCapabilities.mMaxAverageLuminance,
@@ -1488,6 +1499,15 @@ public final class Display {
         if (toRemove != null) {
             mGlobal.unregisterDisplayListener(toRemove);
         }
+    }
+
+    /**
+     * @return The highest possible HDR/SDR ratio. If {@link #isHdrSdrRatioAvailable()} returns
+     * false, this method returns 1.
+     */
+    @FlaggedApi(FLAG_HIGHEST_HDR_SDR_RATIO_API)
+    public float getHighestHdrSdrRatio() {
+        return mGlobal.getHighestHdrSdrRatio(mDisplayId);
     }
 
     /**
@@ -2068,6 +2088,7 @@ public final class Display {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateToString(int state) {
         switch (state) {
             case STATE_UNKNOWN:
@@ -2090,6 +2111,7 @@ public final class Display {
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String stateReasonToString(@StateReason int reason) {
         switch (reason) {
             case STATE_REASON_UNKNOWN:
@@ -2344,6 +2366,8 @@ public final class Display {
          * SurfaceControl.DisplayMode
          * @hide
          */
+        @SuppressWarnings("UnflaggedApi") // For testing only
+        @TestApi
         public boolean isSynthetic() {
             return mIsSynthetic;
         }

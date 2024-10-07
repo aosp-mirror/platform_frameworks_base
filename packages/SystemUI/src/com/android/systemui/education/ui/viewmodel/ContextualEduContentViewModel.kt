@@ -16,6 +16,13 @@
 
 package com.android.systemui.education.ui.viewmodel
 
-import com.android.systemui.education.shared.model.EducationUiType
+sealed class ContextualEduContentViewModel(open val userId: Int)
 
-data class ContextualEduContentViewModel(val message: String, val type: EducationUiType)
+data class ContextualEduNotificationViewModel(
+    val title: String,
+    val message: String,
+    override val userId: Int
+) : ContextualEduContentViewModel(userId)
+
+data class ContextualEduToastViewModel(val message: String, override val userId: Int) :
+    ContextualEduContentViewModel(userId)

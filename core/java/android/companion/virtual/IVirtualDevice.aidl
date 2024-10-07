@@ -17,6 +17,7 @@
 package android.companion.virtual;
 
 import android.app.PendingIntent;
+import android.companion.virtual.ActivityPolicyExemption;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceIntentInterceptor;
 import android.companion.virtual.IVirtualDeviceSoundEffectListener;
@@ -83,9 +84,26 @@ interface IVirtualDevice {
     int getDevicePolicy(int policyType);
 
     /**
-    * Returns whether the device has a valid microphone.
-    */
+     * Returns whether the device has a valid microphone.
+     */
     boolean hasCustomAudioInputSupport();
+
+    /**
+     * Returns whether this device is allowed to create mirror displays.
+     */
+    boolean canCreateMirrorDisplays();
+
+    /*
+     * Turns off all trusted non-mirror displays of the virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void goToSleep();
+
+    /**
+     * Turns on all trusted non-mirror displays of the virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void wakeUp();
 
     /**
      * Closes the virtual device and frees all associated resources.
@@ -103,31 +121,19 @@ interface IVirtualDevice {
      * Adds an exemption to the default activity launch policy.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyExemption(in ComponentName exemption);
+    void addActivityPolicyExemption(in ActivityPolicyExemption exemption);
 
     /**
      * Removes an exemption to the default activity launch policy.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyExemption(in ComponentName exemption);
+    void removeActivityPolicyExemption(in ActivityPolicyExemption exemption);
 
     /**
      * Specifies a policy for this virtual device on the given display.
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void setDevicePolicyForDisplay(int displayId, int policyType, int devicePolicy);
-
-    /**
-     * Adds an exemption to the default activity launch policy on the given display.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void addActivityPolicyExemptionForDisplay(int displayId, in ComponentName exemption);
-
-    /**
-     * Removes an exemption to the default activity launch policy on the given display.
-     */
-    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
-    void removeActivityPolicyExemptionForDisplay(int displayId, in ComponentName exemption);
 
     /**
      * Notifies that an audio session being started.

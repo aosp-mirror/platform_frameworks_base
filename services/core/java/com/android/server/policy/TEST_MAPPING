@@ -1,32 +1,10 @@
 {
   "presubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.policy."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_policy_Presubmit"
     },
     {
-      "name": "WmTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.policy."
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "WmTests_server_policy_Presubmit"
     },
     {
       "name": "CtsPermissionPolicyTestCases",
@@ -46,44 +24,18 @@
       ]
     },
     {
-      "name": "CtsPermissionTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-filter": "android.permission.cts.SplitPermissionTest"
-        },
-        {
-          "include-filter": "android.permission.cts.BackgroundPermissionsTest"
-        }
-      ]
+      "name": "CtsPermissionTestCases_Platform"
     },
     {
-      "name": "CtsBackupTestCases",
-      "options": [
-        {
-          "include-filter": "android.backup.cts.PermissionTest"
-        }
-      ]
+      "name": "CtsBackupTestCases_cts_permissiontest"
     }
   ],
   "postsubmit": [
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.policy."
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_policy"
     },
     {
-      "name": "WmTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.policy."
-        }
-      ]
+      "name": "WmTests_server_policy"
     },
     {
       "name": "CtsPermissionPolicyTestCases",

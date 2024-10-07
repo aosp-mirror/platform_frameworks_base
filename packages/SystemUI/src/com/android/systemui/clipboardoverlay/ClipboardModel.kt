@@ -24,6 +24,7 @@ import android.text.TextUtils
 import android.util.Log
 import android.util.Size
 import android.view.textclassifier.TextLinks
+import com.android.systemui.Flags.clipboardUseDescriptionMimetype
 import com.android.systemui.res.R
 import java.io.IOException
 
@@ -70,11 +71,11 @@ data class ClipboardModel(
             context: Context,
             utils: ClipboardOverlayUtils,
             clipData: ClipData,
-            source: String
+            source: String,
         ): ClipboardModel {
             val sensitive = clipData.description?.extras?.getBoolean(EXTRA_IS_SENSITIVE) ?: false
             val item = clipData.getItemAt(0)!!
-            val type = getType(context, item)
+            val type = getType(context, item, clipData.description.getMimeType(0))
             val remote = utils.isRemoteCopy(context, clipData, source)
             return ClipboardModel(
                 clipData,
@@ -84,18 +85,26 @@ data class ClipboardModel(
                 item.textLinks,
                 item.uri,
                 sensitive,
-                remote
+                remote,
             )
         }
 
-        private fun getType(context: Context, item: ClipData.Item): Type {
+        private fun getType(context: Context, item: ClipData.Item, mimeType: String): Type {
             return if (!TextUtils.isEmpty(item.text)) {
                 Type.TEXT
             } else if (item.uri != null) {
-                if (context.contentResolver.getType(item.uri)?.startsWith("image") == true) {
-                    Type.IMAGE
+                if (clipboardUseDescriptionMimetype()) {
+                    if (mimeType.startsWith("image")) {
+                        Type.IMAGE
+                    } else {
+                        Type.URI
+                    }
                 } else {
-                    Type.URI
+                    if (context.contentResolver.getType(item.uri)?.startsWith("image") == true) {
+                        Type.IMAGE
+                    } else {
+                        Type.URI
+                    }
                 }
             } else {
                 Type.OTHER
@@ -107,6 +116,6 @@ data class ClipboardModel(
         TEXT,
         IMAGE,
         URI,
-        OTHER
+        OTHER,
     }
 }

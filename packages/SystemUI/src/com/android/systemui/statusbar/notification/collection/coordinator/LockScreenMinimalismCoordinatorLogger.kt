@@ -34,7 +34,10 @@ constructor(
             TAG,
             LogLevel.DEBUG,
             messageInitializer = { bool1 = trackingUnseen },
-            messagePrinter = { "${if (bool1) "Start" else "Stop"} tracking unseen notifications." },
+            messagePrinter = {
+                "${if (bool1) "Start" else "Stop"} " +
+                    "tracking unseen notifications because of settings change."
+            },
         )
 
     fun logShadeVisible(numUnseen: Int) {

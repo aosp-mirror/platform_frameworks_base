@@ -52,10 +52,13 @@ public class PipScheduler {
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
+    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
+
+    @Nullable private Runnable mUpdateMovementBoundsRunnable;
 
     /**
      * Temporary PiP CUJ codes to schedule PiP related transitions directly from Shell.
@@ -94,10 +97,12 @@ public class PipScheduler {
 
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
+            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
+        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
 
@@ -189,9 +194,13 @@ public class PipScheduler {
      * Signals to Core to finish the PiP resize transition.
      * Note that we do not allow any actual WM Core changes at this point.
      *
+     * @param toBounds destination bounds used only for internal state updates - not sent to Core.
      * @param configAtEnd true if we are waiting for config updates at the end of the transition.
      */
-    public void scheduleFinishResizePip(boolean configAtEnd) {
+    public void scheduleFinishResizePip(Rect toBounds, boolean configAtEnd) {
+        // Make updates to the internal state to reflect new bounds
+        onFinishingPipResize(toBounds);
+
         SurfaceControl.Transaction tx = null;
         if (configAtEnd) {
             tx = new SurfaceControl.Transaction();
@@ -237,5 +246,24 @@ public class PipScheduler {
 
         tx.setMatrix(leash, transformTensor, mMatrixTmp);
         tx.apply();
+    }
+
+    void setUpdateMovementBoundsRunnable(Runnable updateMovementBoundsRunnable) {
+        mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
+    }
+
+    private void maybeUpdateMovementBounds() {
+        if (mUpdateMovementBoundsRunnable != null)  {
+            mUpdateMovementBoundsRunnable.run();
+        }
+    }
+
+    private void onFinishingPipResize(Rect newBounds) {
+        if (mPipBoundsState.getBounds().equals(newBounds)) {
+            return;
+        }
+        mPipBoundsState.setBounds(newBounds);
+        mPipMenuController.updateMenuLayout(newBounds);
+        maybeUpdateMovementBounds();
     }
 }

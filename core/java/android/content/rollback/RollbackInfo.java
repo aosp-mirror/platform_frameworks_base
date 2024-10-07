@@ -19,8 +19,6 @@ package android.content.rollback;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
-import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.os.Parcel;
@@ -136,11 +134,8 @@ public final class RollbackInfo implements Parcelable {
      * Get rollback impact level. Refer {@link
      * android.content.pm.PackageInstaller.SessionParams#setRollbackImpactLevel(int)} for more info
      * on impact level.
-     *
-     * @hide
      */
-    @TestApi
-    @FlaggedApi(Flags.FLAG_RECOVERABILITY_DETECTION)
+    @FlaggedApi(android.crashrecovery.flags.Flags.FLAG_ENABLE_CRASHRECOVERY)
     public @PackageManager.RollbackImpactLevel int getRollbackImpactLevel() {
         return mRollbackImpactLevel;
     }

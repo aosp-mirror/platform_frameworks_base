@@ -34,12 +34,18 @@ sealed interface CommunalContentModel {
     /** Size to be rendered in the grid. */
     val size: CommunalContentSize
 
+    /** The minimum size content can be resized to. */
+    val minSize: CommunalContentSize
+        get() = CommunalContentSize.HALF
+
     /**
      * A type of communal content is ongoing / live / ephemeral, and can be sized and ordered
      * dynamically.
      */
     sealed interface Ongoing : CommunalContentModel {
         override var size: CommunalContentSize
+        override val minSize
+            get() = CommunalContentSize.THIRD
 
         /** Timestamp in milliseconds of when the content was created. */
         val createdTimestampMillis: Long
@@ -47,12 +53,12 @@ sealed interface CommunalContentModel {
 
     sealed interface WidgetContent : CommunalContentModel {
         val appWidgetId: Int
-        val priority: Int
+        val rank: Int
         val componentName: ComponentName
 
         data class Widget(
             override val appWidgetId: Int,
-            override val priority: Int,
+            override val rank: Int,
             val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
             val inQuietMode: Boolean,
@@ -71,8 +77,8 @@ sealed interface CommunalContentModel {
 
         data class DisabledWidget(
             override val appWidgetId: Int,
-            override val priority: Int,
-            val providerInfo: AppWidgetProviderInfo
+            override val rank: Int,
+            val providerInfo: AppWidgetProviderInfo,
         ) : WidgetContent {
             override val key = KEY.disabledWidget(appWidgetId)
             override val componentName: ComponentName = providerInfo.provider
@@ -85,7 +91,7 @@ sealed interface CommunalContentModel {
 
         data class PendingWidget(
             override val appWidgetId: Int,
-            override val priority: Int,
+            override val rank: Int,
             override val componentName: ComponentName,
             val icon: Bitmap? = null,
         ) : WidgetContent {
@@ -109,10 +115,7 @@ sealed interface CommunalContentModel {
         override val size = CommunalContentSize.HALF
     }
 
-    class Tutorial(
-        id: Int,
-        override var size: CommunalContentSize,
-    ) : CommunalContentModel {
+    class Tutorial(id: Int, override var size: CommunalContentSize) : CommunalContentModel {
         override val key = KEY.tutorial(id)
     }
 
@@ -128,6 +131,7 @@ sealed interface CommunalContentModel {
     class Umo(
         override val createdTimestampMillis: Long,
         override var size: CommunalContentSize = CommunalContentSize.HALF,
+        override var minSize: CommunalContentSize = CommunalContentSize.HALF,
     ) : Ongoing {
         override val key = KEY.umo()
     }

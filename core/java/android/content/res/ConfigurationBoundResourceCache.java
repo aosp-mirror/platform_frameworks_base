@@ -18,6 +18,7 @@ package android.content.res;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo.Config;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 /**
  * A Cache class which can be used to cache resource objects that are easy to clone but more
@@ -25,6 +26,7 @@ import android.content.pm.ActivityInfo.Config;
  *
  * @hide For internal use only.
  */
+@RavenwoodKeepWholeClass
 public class ConfigurationBoundResourceCache<T> extends ThemedResourceCache<ConstantState<T>> {
 
     @UnsupportedAppUsage

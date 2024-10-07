@@ -23,7 +23,7 @@ class BackGestureMonitor(
     override val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit
 ) :
-    TouchpadGestureMonitor by ThreeFingerGestureMonitor(
+    TouchpadGestureMonitor by ThreeFingerDistanceBasedGestureMonitor(
         gestureDistanceThresholdPx = gestureDistanceThresholdPx,
         gestureStateChangedCallback = gestureStateChangedCallback,
         donePredicate =

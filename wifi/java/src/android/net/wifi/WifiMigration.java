@@ -100,6 +100,39 @@ public final class WifiMigration {
     public @interface UserStoreFileId { }
 
     /**
+     * Keystore migration was completed successfully.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE = 0;
+
+    /**
+     * Keystore migration was not needed.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED = 1;
+
+    /**
+     * Keystore migration failed because an exception was encountered.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static final int KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "KEYSTORE_MIGRATION_" }, value = {
+            KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE,
+            KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED,
+            KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface KeystoreMigrationStatus { }
+
+    /**
      * Mapping of Store file Id to Store file names.
      *
      * NOTE: This is the default path for the files on AOSP devices. If the OEM has modified
@@ -572,14 +605,17 @@ public final class WifiMigration {
     /**
      * Migrate any certificates in Legacy Keystore to the newer WifiBlobstore database.
      *
+     * If there are no certificates to migrate, this method will return immediately.
+     *
      * @hide
      */
     @FlaggedApi(Flags.FLAG_LEGACY_KEYSTORE_TO_WIFI_BLOBSTORE_MIGRATION_READ_ONLY)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public static void migrateLegacyKeystoreToWifiBlobstore() {
+    public static @KeystoreMigrationStatus int migrateLegacyKeystoreToWifiBlobstore() {
         if (!WifiBlobStore.supplicantCanAccessBlobstore()) {
+            // Supplicant cannot access WifiBlobstore, so keep the certs in Legacy Keystore
             Log.i(TAG, "Avoiding migration since supplicant cannot access WifiBlobstore");
-            return;
+            return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED;
         }
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -587,7 +623,7 @@ public final class WifiMigration {
             String[] legacyAliases = legacyKeystore.list("", Process.WIFI_UID);
             if (legacyAliases == null || legacyAliases.length == 0) {
                 Log.i(TAG, "No aliases need to be migrated");
-                return;
+                return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED;
             }
 
             WifiBlobStore wifiBlobStore = WifiBlobStore.getInstance();
@@ -605,14 +641,17 @@ public final class WifiMigration {
                 legacyKeystore.remove(legacyAlias, Process.WIFI_UID);
             }
             Log.i(TAG, "Successfully migrated aliases from Legacy Keystore");
+            return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_COMPLETE;
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ILegacyKeystore.ERROR_SYSTEM_ERROR) {
                 Log.i(TAG, "Legacy Keystore service has been deprecated");
-            } else {
-                Log.e(TAG, "Encountered an exception while migrating aliases. " + e);
+                return KEYSTORE_MIGRATION_SUCCESS_MIGRATION_NOT_NEEDED;
             }
+            Log.e(TAG, "Encountered a ServiceSpecificException while migrating aliases. " + e);
+            return KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION;
         } catch (Exception e) {
             Log.e(TAG, "Encountered an exception while migrating aliases. " + e);
+            return KEYSTORE_MIGRATION_FAILURE_ENCOUNTERED_EXCEPTION;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -24,21 +24,42 @@ data class DeviceSettingConfigModel(
     val mainItems: List<DeviceSettingConfigItemModel>,
     /** Items need to be shown in device details more settings page. */
     val moreSettingsItems: List<DeviceSettingConfigItemModel>,
-    /** Footer text in more settings page. */
-    val moreSettingsPageFooter: String
+    /**
+     * Help button which need to be shown on the top right corner of device details more settings
+     * page.
+     */
+    val moreSettingsHelpItem: DeviceSettingConfigItemModel?,
 )
 
 /** Models a device setting item in config. */
 sealed interface DeviceSettingConfigItemModel {
     @DeviceSettingId val settingId: Int
+    val highlighted: Boolean
 
     /** A built-in item in Settings. */
-    data class BuiltinItem(
-        @DeviceSettingId override val settingId: Int,
-        val preferenceKey: String?
-    ) : DeviceSettingConfigItemModel
+    sealed interface BuiltinItem : DeviceSettingConfigItemModel {
+        @DeviceSettingId override val settingId: Int
+        val preferenceKey: String
+
+        /** A general built-in item in Settings. */
+        data class CommonBuiltinItem(
+            @DeviceSettingId override val settingId: Int,
+            override val highlighted: Boolean,
+            override val preferenceKey: String,
+        ) : BuiltinItem
+
+        /** A bluetooth profiles in Settings. */
+        data class BluetoothProfilesItem(
+            @DeviceSettingId override val settingId: Int,
+            override val highlighted: Boolean,
+            override val preferenceKey: String,
+            val invisibleProfiles: List<String>,
+        ) : BuiltinItem
+    }
 
     /** A remote item provided by other apps. */
-    data class AppProvidedItem(@DeviceSettingId override val settingId: Int) :
-        DeviceSettingConfigItemModel
+    data class AppProvidedItem(
+        @DeviceSettingId override val settingId: Int,
+        override val highlighted: Boolean,
+    ) : DeviceSettingConfigItemModel
 }

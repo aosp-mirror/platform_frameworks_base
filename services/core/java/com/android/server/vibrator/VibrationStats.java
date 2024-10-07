@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.CombinedVibration;
 import android.os.SystemClock;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
@@ -37,11 +38,11 @@ final class VibrationStats {
     //           vibrate request.
     // - Start: time a vibration started to play, which is closer to the time that the
     //          VibrationEffect started playing the very first segment.
-    // - End: time a vibration ended, even if it never started to play. This can be as soon as the
-    //        vibrator HAL reports it has finished the last command, or before it has even started
-    //        when the vibration is ignored or cancelled.
-    // Create and end times set by VibratorManagerService only, guarded by its lock.
-    // Start times set by VibrationThread only (single-threaded).
+    // - End: time a vibration ended with a status, even if it never started to play. This can be as
+    //        soon as the vibrator HAL reports it has finished the last command, or before it has
+    //        even started when the vibration is ignored or cancelled.
+    // Created and ended times set by VibratorManagerService only, guarded by its lock.
+    // Start time set by VibrationThread only (single-threaded).
     private long mCreateUptimeMillis;
     private long mStartUptimeMillis;
     private long mEndUptimeMillis;
@@ -95,6 +96,10 @@ final class VibrationStats {
         mEndedByUid = -1;
         mEndedByUsage = -1;
         mInterruptedUsage = -1;
+    }
+
+    StatsInfo toStatsInfo(int uid, int vibrationType, int usage, VibrationSession.Status status) {
+        return new VibrationStats.StatsInfo(uid, vibrationType, usage, status, this);
     }
 
     long getCreateUptimeMillis() {
@@ -166,7 +171,7 @@ final class VibrationStats {
      * @return true if the status was accepted. This method will only accept given values if
      * the end timestamp was never set.
      */
-    boolean reportEnded(@Nullable Vibration.CallerInfo endedBy) {
+    boolean reportEnded(@Nullable VibrationSession.CallerInfo endedBy) {
         if (hasEnded()) {
             // Vibration already ended, keep first ending stats set and ignore this one.
             return false;
@@ -187,7 +192,7 @@ final class VibrationStats {
      * <p>This method will only accept the first value as the one that was interrupted by this
      * vibration, and will ignore all successive calls.
      */
-    void reportInterruptedAnotherVibration(@NonNull Vibration.CallerInfo callerInfo) {
+    void reportInterruptedAnotherVibration(@NonNull VibrationSession.CallerInfo callerInfo) {
         if (mInterruptedUsage < 0) {
             mInterruptedUsage = callerInfo.attrs.getUsage();
         }
@@ -300,7 +305,7 @@ final class VibrationStats {
      * {@link com.android.internal.util.FrameworkStatsLog} as a
      * {@link com.android.internal.util.FrameworkStatsLog#VIBRATION_REPORTED}.
      */
-    static final class StatsInfo {
+    public static final class StatsInfo {
         public final int uid;
         public final int vibrationType;
         public final int usage;
@@ -330,8 +335,8 @@ final class VibrationStats {
         public final int[] halUnsupportedEffectsUsed;
         private boolean mIsWritten;
 
-        StatsInfo(int uid, int vibrationType, int usage, Vibration.Status status,
-                VibrationStats stats, long completionUptimeMillis) {
+        StatsInfo(int uid, int vibrationType, int usage, VibrationSession.Status status,
+                VibrationStats stats) {
             this.uid = uid;
             this.vibrationType = vibrationType;
             this.usage = usage;
@@ -341,6 +346,9 @@ final class VibrationStats {
             endedByUsage = stats.mEndedByUsage;
             interruptedUsage = stats.mInterruptedUsage;
             repeatCount = stats.mRepeatCount;
+
+            // Consider this vibration is being completed now.
+            long completionUptimeMillis = SystemClock.uptimeMillis();
 
             // This duration goes from the time this object was created until the time it was
             // completed. We can use latencies to detect the times between first and last
@@ -418,6 +426,26 @@ final class VibrationStats {
                 }
             }
             return res;
+        }
+
+        /**
+         * Returns the vibration type value from {@code ReportedVibration} that best represents this
+         * {@link CombinedVibration}.
+         *
+         * <p>This does not include external vibrations, as those are not represented by a single
+         * vibration effect.
+         */
+        public static int findVibrationType(@Nullable CombinedVibration effect) {
+            if (effect == null) {
+                return FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
+            }
+            if (effect.hasVendorEffects()) {
+                return FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__VENDOR;
+            }
+            if (effect.getDuration() == Long.MAX_VALUE) {
+                return FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__REPEATED;
+            }
+            return FrameworkStatsLog.VIBRATION_REPORTED__VIBRATION_TYPE__SINGLE;
         }
     }
 }

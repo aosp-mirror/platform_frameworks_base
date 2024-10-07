@@ -49,7 +49,7 @@ constructor(
     override fun handleScreenshot(
         screenshot: ScreenshotData,
         finisher: Consumer<Uri?>,
-        requestCallback: TakeScreenshotService.RequestCallback
+        requestCallback: TakeScreenshotService.RequestCallback,
     ) {
         if (screenshot.type == WindowManager.TAKE_SCREENSHOT_FULLSCREEN) {
             screenshot.bitmap = imageCapture.captureDisplay(screenshot.displayId, crop = null)
@@ -69,8 +69,8 @@ constructor(
                 Executors.newSingleThreadExecutor(),
                 UUID.randomUUID(),
                 screenshot.bitmap,
-                screenshot.getUserOrDefault(),
-                screenshot.displayId
+                screenshot.userHandle,
+                screenshot.displayId,
             )
         future.addListener(
             {
@@ -86,7 +86,7 @@ constructor(
                     requestCallback.reportError()
                 }
             },
-            mainExecutor
+            mainExecutor,
         )
     }
 
@@ -98,11 +98,11 @@ constructor(
                 .notifyScreenshotError(R.string.screenshot_failed_to_save_text)
         } else {
             uiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED, 0, screenshot.packageNameString)
-            if (userManager.isManagedProfile(screenshot.getUserOrDefault().identifier)) {
+            if (userManager.isManagedProfile(screenshot.userHandle.identifier)) {
                 uiEventLogger.log(
                     ScreenshotEvent.SCREENSHOT_SAVED_TO_WORK_PROFILE,
                     0,
-                    screenshot.packageNameString
+                    screenshot.packageNameString,
                 )
             }
         }

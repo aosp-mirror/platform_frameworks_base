@@ -16,18 +16,28 @@
 
 package com.android.systemui.navigationbar.gestural.domain
 
-import android.content.ComponentName
+import com.android.app.tracing.coroutines.flow.flowOn
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.navigationbar.gestural.data.respository.GestureRepository
+import com.android.systemui.shared.system.ActivityManagerWrapper
+import com.android.systemui.shared.system.TaskStackChangeListener
+import com.android.systemui.shared.system.TaskStackChangeListeners
+import com.android.systemui.util.kotlin.emitOnStart
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * {@link GestureInteractor} helps interact with gesture-related logic, including accessing the
@@ -37,67 +47,79 @@ class GestureInteractor
 @Inject
 constructor(
     private val gestureRepository: GestureRepository,
-    @Application private val scope: CoroutineScope
+    @Main private val mainDispatcher: CoroutineDispatcher,
+    @Background private val backgroundCoroutineContext: CoroutineContext,
+    @Application private val scope: CoroutineScope,
+    private val activityManagerWrapper: ActivityManagerWrapper,
+    private val taskStackChangeListeners: TaskStackChangeListeners,
 ) {
     enum class Scope {
         Local,
         Global
     }
 
-    private val _localGestureBlockedActivities = MutableStateFlow<Set<ComponentName>>(setOf())
-    /** A {@link StateFlow} for listening to changes in Activities where gestures are blocked */
-    val gestureBlockedActivities: StateFlow<Set<ComponentName>>
-        get() =
-            combine(
-                    gestureRepository.gestureBlockedActivities,
-                    _localGestureBlockedActivities.asStateFlow()
-                ) { global, local ->
-                    global + local
-                }
-                .stateIn(scope, SharingStarted.WhileSubscribed(), setOf())
+    private val _localGestureBlockedMatchers = MutableStateFlow<Set<TaskMatcher>>(setOf())
 
-    /**
-     * Adds an {@link Activity} to be blocked based on component when the topmost, focused {@link
-     * Activity}.
-     */
-    fun addGestureBlockedActivity(activity: ComponentName, gestureScope: Scope) {
-        scope.launch {
-            when (gestureScope) {
-                Scope.Local -> {
-                    _localGestureBlockedActivities.emit(
-                        _localGestureBlockedActivities.value.toMutableSet().apply { add(activity) }
-                    )
-                }
-                Scope.Global -> {
-                    gestureRepository.addGestureBlockedActivity(activity)
-                }
-            }
-        }
-    }
-
-    /** Removes an {@link Activity} from being blocked from gestures. */
-    fun removeGestureBlockedActivity(activity: ComponentName, gestureScope: Scope) {
-        scope.launch {
-            when (gestureScope) {
-                Scope.Local -> {
-                    _localGestureBlockedActivities.emit(
-                        _localGestureBlockedActivities.value.toMutableSet().apply {
-                            remove(activity)
+    private val _topActivity =
+        conflatedCallbackFlow {
+                val taskListener =
+                    object : TaskStackChangeListener {
+                        override fun onTaskStackChanged() {
+                            trySend(Unit)
                         }
+                    }
+
+                taskStackChangeListeners.registerTaskStackListener(taskListener)
+                awaitClose { taskStackChangeListeners.unregisterTaskStackListener(taskListener) }
+            }
+            .flowOn(mainDispatcher)
+            .emitOnStart()
+            .mapLatest { getTopActivity() }
+            .distinctUntilChanged()
+
+    private suspend fun getTopActivity(): TaskInfo? =
+        withContext(backgroundCoroutineContext) {
+            activityManagerWrapper.runningTask?.let { TaskInfo(it.topActivity, it.activityType) }
+        }
+
+    val topActivityBlocked =
+        combine(
+            _topActivity,
+            gestureRepository.gestureBlockedMatchers,
+            _localGestureBlockedMatchers.asStateFlow()
+        ) { runningTask, global, local ->
+            runningTask != null && (global + local).any { it.matches(runningTask) }
+        }
+
+    /** Adds an [TaskMatcher] to decide whether gestures should be blocked. */
+    fun addGestureBlockedMatcher(matcher: TaskMatcher, gestureScope: Scope) {
+        scope.launch {
+            when (gestureScope) {
+                Scope.Local -> {
+                    _localGestureBlockedMatchers.emit(
+                        _localGestureBlockedMatchers.value.toMutableSet().apply { add(matcher) }
                     )
                 }
                 Scope.Global -> {
-                    gestureRepository.removeGestureBlockedActivity(activity)
+                    gestureRepository.addGestureBlockedMatcher(matcher)
                 }
             }
         }
     }
 
-    /**
-     * Checks whether the specified {@link Activity} {@link ComponentName} is being blocked from
-     * gestures.
-     */
-    fun areGesturesBlocked(activity: ComponentName): Boolean {
-        return gestureBlockedActivities.value.contains(activity)
+    /** Removes a gesture from deciding whether gestures should be blocked */
+    fun removeGestureBlockedMatcher(matcher: TaskMatcher, gestureScope: Scope) {
+        scope.launch {
+            when (gestureScope) {
+                Scope.Local -> {
+                    _localGestureBlockedMatchers.emit(
+                        _localGestureBlockedMatchers.value.toMutableSet().apply { remove(matcher) }
+                    )
+                }
+                Scope.Global -> {
+                    gestureRepository.removeGestureBlockedMatcher(matcher)
+                }
+            }
+        }
     }
 }

@@ -260,7 +260,7 @@ TEST_F(ThemeTest, ThemeRebase) {
   ResTable_config night{};
   night.uiMode = ResTable_config::UI_MODE_NIGHT_YES;
   night.version = 8u;
-  am_night.SetConfigurations({night});
+  am_night.SetConfigurations({{night}});
 
   auto theme = am.NewTheme();
   {

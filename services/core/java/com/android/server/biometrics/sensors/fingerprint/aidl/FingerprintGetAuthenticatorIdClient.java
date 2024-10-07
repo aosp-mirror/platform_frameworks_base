@@ -42,7 +42,8 @@ public class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<AidlSe
             @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, biometricLogger, biometricContext);
+                0 /* cookie */, sensorId, biometricLogger, biometricContext,
+                false /* isMandatoryBiometrics */);
         mAuthenticatorIds = authenticatorIds;
     }
 

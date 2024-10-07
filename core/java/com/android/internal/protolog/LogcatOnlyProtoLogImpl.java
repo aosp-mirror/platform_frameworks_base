@@ -18,6 +18,7 @@ package com.android.internal.protolog;
 
 import static com.android.internal.protolog.ProtoLog.REQUIRE_PROTOLOGTOOL;
 
+import android.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -25,6 +26,9 @@ import com.android.internal.protolog.common.ILogger;
 import com.android.internal.protolog.common.IProtoLog;
 import com.android.internal.protolog.common.IProtoLogGroup;
 import com.android.internal.protolog.common.LogLevel;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Class only create and used to server temporarily for when there is source code pre-processing by
@@ -36,6 +40,8 @@ import com.android.internal.protolog.common.LogLevel;
  */
 @Deprecated
 public class LogcatOnlyProtoLogImpl implements IProtoLog {
+    private static final String LOG_TAG = LogcatOnlyProtoLogImpl.class.getName();
+
     @Override
     public void log(LogLevel logLevel, IProtoLogGroup group, long messageHash, int paramsMask,
             Object[] args) {
@@ -44,19 +50,21 @@ public class LogcatOnlyProtoLogImpl implements IProtoLog {
 
     @Override
     public void log(LogLevel logLevel, IProtoLogGroup group, String messageString, Object[] args) {
-        if (REQUIRE_PROTOLOGTOOL) {
-            throw new RuntimeException(
-                    "REQUIRE_PROTOLOGTOOL not set to false before the first log call.");
+        if (REQUIRE_PROTOLOGTOOL && group.isLogToProto()) {
+            Log.w(LOG_TAG, "ProtoLog message not processed. Failed to log it to proto. "
+                    + "Logging it below to logcat instead.");
         }
 
-        String formattedString = TextUtils.formatSimple(messageString, args);
-        switch (logLevel) {
-            case VERBOSE -> Log.v(group.getTag(), formattedString);
-            case INFO -> Log.i(group.getTag(), formattedString);
-            case DEBUG -> Log.d(group.getTag(), formattedString);
-            case WARN -> Log.w(group.getTag(), formattedString);
-            case ERROR -> Log.e(group.getTag(), formattedString);
-            case WTF -> Log.wtf(group.getTag(), formattedString);
+        if (group.isLogToLogcat() || group.isLogToProto()) {
+            String formattedString = TextUtils.formatSimple(messageString, args);
+            switch (logLevel) {
+                case VERBOSE -> Log.v(group.getTag(), formattedString);
+                case INFO -> Log.i(group.getTag(), formattedString);
+                case DEBUG -> Log.d(group.getTag(), formattedString);
+                case WARN -> Log.w(group.getTag(), formattedString);
+                case ERROR -> Log.e(group.getTag(), formattedString);
+                case WTF -> Log.wtf(group.getTag(), formattedString);
+            }
         }
     }
 
@@ -81,7 +89,8 @@ public class LogcatOnlyProtoLogImpl implements IProtoLog {
     }
 
     @Override
-    public void registerGroups(IProtoLogGroup... protoLogGroups) {
-        // Does nothing
+    @NonNull
+    public List<IProtoLogGroup> getRegisteredGroups() {
+        return Collections.emptyList();
     }
 }

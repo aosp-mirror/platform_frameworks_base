@@ -519,7 +519,7 @@ public class TvInteractiveAppManagerService extends SystemService {
     }
 
     private void registerBroadcastReceivers() {
-        PackageMonitor monitor = new PackageMonitor() {
+        PackageMonitor monitor = new PackageMonitor(/* supportsPackageRestartQuery */ true) {
             private void buildTvInteractiveAppServiceList(String[] packages) {
                 int userId = getChangingUserId();
                 synchronized (mLock) {

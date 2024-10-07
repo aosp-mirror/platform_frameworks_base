@@ -4,10 +4,10 @@ import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
-import android.net.Uri
 import android.os.Process
 import android.os.UserHandle
 import android.view.Display
+import android.view.WindowManager
 import android.view.WindowManager.ScreenshotSource
 import android.view.WindowManager.ScreenshotType
 import androidx.annotation.VisibleForTesting
@@ -15,22 +15,20 @@ import com.android.internal.util.ScreenshotRequest
 
 /** [ScreenshotData] represents the current state of a single screenshot being acquired. */
 data class ScreenshotData(
-    @ScreenshotType var type: Int,
-    @ScreenshotSource var source: Int,
+    @ScreenshotType val type: Int,
+    @ScreenshotSource val source: Int,
     /** UserHandle for the owner of the app being screenshotted, if known. */
-    var userHandle: UserHandle?,
+    val userHandle: UserHandle,
     /** ComponentName of the top-most app in the screenshot. */
-    var topComponent: ComponentName?,
+    val topComponent: ComponentName?,
     var screenBounds: Rect?,
-    var taskId: Int,
+    val taskId: Int,
     var insets: Insets,
     var bitmap: Bitmap?,
-    var displayId: Int,
-    /** App-provided URL representing the content the user was looking at in the screenshot. */
-    var contextUrl: Uri? = null,
+    val displayId: Int,
 ) {
-    val packageNameString: String
-        get() = if (topComponent == null) "" else topComponent!!.packageName
+    val packageNameString
+        get() = topComponent?.packageName ?: ""
 
     fun getUserOrDefault(): UserHandle {
         return userHandle ?: Process.myUserHandle()
@@ -42,7 +40,7 @@ data class ScreenshotData(
             ScreenshotData(
                 type = request.type,
                 source = request.source,
-                userHandle = if (request.userId >= 0) UserHandle.of(request.userId) else null,
+                userHandle = UserHandle.of(request.userId),
                 topComponent = request.topComponent,
                 screenBounds = request.boundsInScreen,
                 taskId = request.taskId,
@@ -52,16 +50,21 @@ data class ScreenshotData(
             )
 
         @VisibleForTesting
-        fun forTesting() =
+        fun forTesting(
+            userHandle: UserHandle = UserHandle.CURRENT,
+            source: Int = ScreenshotSource.SCREENSHOT_KEY_CHORD,
+            topComponent: ComponentName? = null,
+            bitmap: Bitmap? = null,
+        ) =
             ScreenshotData(
-                type = 0,
-                source = 0,
-                userHandle = null,
-                topComponent = null,
+                type = WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+                source = source,
+                userHandle = userHandle,
+                topComponent = topComponent,
                 screenBounds = null,
                 taskId = 0,
                 insets = Insets.NONE,
-                bitmap = null,
+                bitmap = bitmap,
                 displayId = Display.DEFAULT_DISPLAY,
             )
     }

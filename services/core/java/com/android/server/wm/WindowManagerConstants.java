@@ -34,6 +34,10 @@ import java.util.concurrent.Executor;
  */
 final class WindowManagerConstants {
 
+    /** The orientation of activity will be always "unspecified" except for game apps. */
+    private static final String KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST =
+            "ignore_activity_orientation_request";
+
     /**
      * The minimum duration between gesture exclusion logging for a given window in
      * milliseconds.
@@ -57,6 +61,9 @@ final class WindowManagerConstants {
     int mSystemGestureExclusionLimitDp;
     /** @see AndroidDeviceConfig#KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE */
     boolean mSystemGestureExcludedByPreQStickyImmersive;
+
+    /** @see #KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST */
+    boolean mIgnoreActivityOrientationRequest;
 
     private final WindowManagerGlobalLock mGlobalLock;
     private final Runnable mUpdateSystemGestureExclusionCallback;
@@ -89,6 +96,7 @@ final class WindowManagerConstants {
         updateSystemGestureExclusionLogDebounceMillis();
         updateSystemGestureExclusionLimitDp();
         updateSystemGestureExcludedByPreQStickyImmersive();
+        updateIgnoreActivityOrientationRequest();
     }
 
     private void onAndroidPropertiesChanged(DeviceConfig.Properties properties) {
@@ -127,6 +135,9 @@ final class WindowManagerConstants {
                     case KEY_SYSTEM_GESTURE_EXCLUSION_LOG_DEBOUNCE_MILLIS:
                         updateSystemGestureExclusionLogDebounceMillis();
                         break;
+                    case KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST:
+                        updateIgnoreActivityOrientationRequest();
+                        break;
                     default:
                         break;
                 }
@@ -152,6 +163,12 @@ final class WindowManagerConstants {
                 KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE, false);
     }
 
+    private void updateIgnoreActivityOrientationRequest() {
+        mIgnoreActivityOrientationRequest = mDeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST, false);
+    }
+
     void dump(PrintWriter pw) {
         pw.println("WINDOW MANAGER CONSTANTS (dumpsys window constants):");
 
@@ -161,6 +178,8 @@ final class WindowManagerConstants {
         pw.print("="); pw.println(mSystemGestureExclusionLimitDp);
         pw.print("  "); pw.print(KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE);
         pw.print("="); pw.println(mSystemGestureExcludedByPreQStickyImmersive);
+        pw.print("  "); pw.print(KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST);
+        pw.print("="); pw.println(mIgnoreActivityOrientationRequest);
         pw.println();
     }
 }

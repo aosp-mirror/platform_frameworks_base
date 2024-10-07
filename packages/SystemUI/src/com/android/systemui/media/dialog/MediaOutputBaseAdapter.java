@@ -63,7 +63,7 @@ public abstract class MediaOutputBaseAdapter extends
     static final int CUSTOMIZED_ITEM_GROUP = 2;
     static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
-    protected final MediaOutputController mController;
+    protected final MediaSwitchingController mController;
 
     private static final int UNMUTE_DEFAULT_VOLUME = 2;
 
@@ -73,7 +73,7 @@ public abstract class MediaOutputBaseAdapter extends
     int mCurrentActivePosition;
     private boolean mIsInitVolumeFirstTime;
 
-    public MediaOutputBaseAdapter(MediaOutputController controller) {
+    public MediaOutputBaseAdapter(MediaSwitchingController controller) {
         mController = controller;
         mIsDragging = false;
         mCurrentActivePosition = -1;
@@ -127,7 +127,7 @@ public abstract class MediaOutputBaseAdapter extends
         return mCurrentActivePosition;
     }
 
-    public MediaOutputController getController() {
+    public MediaSwitchingController getController() {
         return mController;
     }
 

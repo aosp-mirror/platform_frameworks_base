@@ -24,6 +24,8 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.Log
 import android.view.HapticFeedbackConstants
+import android.view.InputDevice
+import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnLayoutChangeListener
 import android.view.View.VISIBLE
@@ -40,7 +42,9 @@ import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
-import com.android.systemui.Flags.newAodTransition
+import com.android.keyguard.AuthInteractionProperties
+import com.android.systemui.Flags
+import com.android.systemui.Flags.msdlFeedback
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
@@ -54,7 +58,6 @@ import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.shared.ComposeLockscreen
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.BurnInParameters
@@ -67,10 +70,12 @@ import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.temporarydisplay.ViewPriority
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo
@@ -79,6 +84,8 @@ import com.android.systemui.util.ui.AnimatedValue
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
+import com.google.android.msdl.data.model.MSDLToken
+import com.google.android.msdl.domain.MSDLPlayer
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
@@ -111,7 +118,9 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
         falsingManager: FalsingManager?,
         keyguardViewMediator: KeyguardViewMediator?,
+        statusBarKeyguardViewManager: StatusBarKeyguardViewManager?,
         mainImmediateDispatcher: CoroutineDispatcher,
+        msdlPlayer: MSDLPlayer?,
     ): DisposableHandle {
         val disposables = DisposableHandles()
         val childViews = mutableMapOf<Int, View>()
@@ -119,12 +128,30 @@ object KeyguardRootViewBinder {
         if (KeyguardBottomAreaRefactor.isEnabled) {
             disposables +=
                 view.onTouchListener { _, event ->
+                    var consumed = false
                     if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                        // signifies a primary button click down has reached keyguardrootview
+                        // we need to return true here otherwise an ACTION_UP will never arrive
+                        if (Flags.nonTouchscreenDevicesBypassFalsing()) {
+                            if (
+                                event.action == MotionEvent.ACTION_DOWN &&
+                                    event.buttonState == MotionEvent.BUTTON_PRIMARY &&
+                                    !event.isTouchscreenSource()
+                            ) {
+                                consumed = true
+                            } else if (
+                                event.action == MotionEvent.ACTION_UP &&
+                                    !event.isTouchscreenSource()
+                            ) {
+                                statusBarKeyguardViewManager?.showBouncer(true)
+                                consumed = true
+                            }
+                        }
                         viewModel.setRootViewLastTapPosition(
                             Point(event.x.toInt(), event.y.toInt())
                         )
                     }
-                    false
+                    consumed
                 }
         }
 
@@ -213,7 +240,7 @@ object KeyguardRootViewBinder {
         disposables +=
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
-                    if (ComposeLockscreen.isEnabled) {
+                    if (SceneContainerFlag.isEnabled) {
                         view.setViewTreeOnBackPressedDispatcherOwner(
                             object : OnBackPressedDispatcherOwner {
                                 override val onBackPressedDispatcher =
@@ -233,10 +260,7 @@ object KeyguardRootViewBinder {
                             ->
                             if (biometricMessage?.message != null) {
                                 chipbarCoordinator!!.displayView(
-                                    createChipbarInfo(
-                                        biometricMessage.message,
-                                        R.drawable.ic_lock,
-                                    )
+                                    createChipbarInfo(biometricMessage.message, R.drawable.ic_lock)
                                 )
                             } else {
                                 chipbarCoordinator!!.removeView(ID, "occludingAppMsgNull")
@@ -299,6 +323,9 @@ object KeyguardRootViewBinder {
                                     .getDimensionPixelSize(R.dimen.shelf_appear_translation)
                                     .stateIn(this)
                             viewModel.isNotifIconContainerVisible.collect { isVisible ->
+                                if (isVisible.value) {
+                                    blueprintViewModel.refreshBlueprint()
+                                }
                                 childViews[aodNotificationIconContainerId]
                                     ?.setAodNotifIconContainerIsVisible(
                                         isVisible,
@@ -351,21 +378,33 @@ object KeyguardRootViewBinder {
                     if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
                         launch {
                             deviceEntryHapticsInteractor.playSuccessHaptic.collect {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.CONFIRM,
-                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                )
+                                if (msdlFeedback()) {
+                                    msdlPlayer?.playToken(
+                                        MSDLToken.UNLOCK,
+                                        authInteractionProperties,
+                                    )
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.BIOMETRIC_CONFIRM,
+                                    )
+                                }
                             }
                         }
 
                         launch {
                             deviceEntryHapticsInteractor.playErrorHaptic.collect {
-                                vibratorHelper.performHapticFeedback(
-                                    view,
-                                    HapticFeedbackConstants.REJECT,
-                                    HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING,
-                                )
+                                if (msdlFeedback()) {
+                                    msdlPlayer?.playToken(
+                                        MSDLToken.FAILURE,
+                                        authInteractionProperties,
+                                    )
+                                } else {
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.BIOMETRIC_REJECT,
+                                    )
+                                }
                             }
                         }
                     }
@@ -374,7 +413,10 @@ object KeyguardRootViewBinder {
 
         if (MigrateClocksToBlueprint.isEnabled) {
             burnInParams.update { current ->
-                current.copy(translationY = { childViews[burnInLayerId]?.translationY })
+                current.copy(
+                    translationX = { childViews[burnInLayerId]?.translationX },
+                    translationY = { childViews[burnInLayerId]?.translationY },
+                )
             }
         }
 
@@ -385,7 +427,7 @@ object KeyguardRootViewBinder {
                     blueprintViewModel,
                     clockViewModel,
                     childViews,
-                    burnInParams
+                    burnInParams,
                 )
             )
 
@@ -424,11 +466,7 @@ object KeyguardRootViewBinder {
      */
     private fun createChipbarInfo(message: String, @DrawableRes icon: Int): ChipbarInfo {
         return ChipbarInfo(
-            startIcon =
-                TintedIcon(
-                    Icon.Resource(icon, null),
-                    ChipbarInfo.DEFAULT_ICON_TINT,
-                ),
+            startIcon = TintedIcon(Icon.Resource(icon, null), ChipbarInfo.DEFAULT_ICON_TINT),
             text = Text.Loaded(message),
             endItem = null,
             vibrationEffect = null,
@@ -459,7 +497,7 @@ object KeyguardRootViewBinder {
             oldLeft: Int,
             oldTop: Int,
             oldRight: Int,
-            oldBottom: Int
+            oldBottom: Int,
         ) {
             // After layout, ensure the notifications are positioned correctly
             childViews[nsslPlaceholderId]?.let { notificationListPlaceholder ->
@@ -475,7 +513,7 @@ object KeyguardRootViewBinder {
                 viewModel.onNotificationContainerBoundsChanged(
                     notificationListPlaceholder.top.toFloat(),
                     notificationListPlaceholder.bottom.toFloat(),
-                    animate = shouldAnimate
+                    animate = shouldAnimate,
                 )
             }
 
@@ -491,7 +529,7 @@ object KeyguardRootViewBinder {
                                         Int.MAX_VALUE
                                     } else {
                                         view.getTop()
-                                    }
+                                    },
                                 )
                             }
                         } else {
@@ -557,59 +595,13 @@ object KeyguardRootViewBinder {
                         View.INVISIBLE
                     }
             }
-            newAodTransition() -> {
+            else -> {
                 animateInIconTranslation()
                 if (isVisible.value) {
                     CrossFadeHelper.fadeIn(this, animatorListener)
                 } else {
                     CrossFadeHelper.fadeOut(this, animatorListener)
                 }
-            }
-            !isVisible.value -> {
-                // Let's make sure the icon are translated to 0, since we cancelled it above
-                animateInIconTranslation()
-                CrossFadeHelper.fadeOut(this, animatorListener)
-            }
-            visibility != View.VISIBLE -> {
-                // No fading here, let's just appear the icons instead!
-                visibility = View.VISIBLE
-                alpha = 1f
-                appearIcons(
-                    animate = screenOffAnimationController.shouldAnimateAodIcons(),
-                    iconsAppearTranslationPx,
-                    animatorListener,
-                )
-            }
-            else -> {
-                // Let's make sure the icons are translated to 0, since we cancelled it above
-                animateInIconTranslation()
-                // We were fading out, let's fade in instead
-                CrossFadeHelper.fadeIn(this, animatorListener)
-            }
-        }
-    }
-
-    private fun View.appearIcons(
-        animate: Boolean,
-        iconAppearTranslation: Int,
-        animatorListener: Animator.AnimatorListener,
-    ) {
-        if (animate) {
-            if (!MigrateClocksToBlueprint.isEnabled) {
-                translationY = -iconAppearTranslation.toFloat()
-            }
-            alpha = 0f
-            animate()
-                .alpha(1f)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(AOD_ICONS_APPEAR_DURATION)
-                .apply { if (MigrateClocksToBlueprint.isEnabled) animateInIconTranslation() }
-                .setListener(animatorListener)
-                .start()
-        } else {
-            alpha = 1.0f
-            if (!MigrateClocksToBlueprint.isEnabled) {
-                translationY = 0f
             }
         }
     }
@@ -618,6 +610,10 @@ object KeyguardRootViewBinder {
         if (!MigrateClocksToBlueprint.isEnabled) {
             animate().animateInIconTranslation().setDuration(AOD_ICONS_APPEAR_DURATION).start()
         }
+    }
+
+    private fun MotionEvent.isTouchscreenSource(): Boolean {
+        return device?.supportsSource(InputDevice.SOURCE_TOUCHSCREEN) == true
     }
 
     private fun ViewPropertyAnimator.animateInIconTranslation(): ViewPropertyAnimator =
@@ -634,6 +630,7 @@ object KeyguardRootViewBinder {
     private val lockIcon = R.id.lock_icon_view
     private val deviceEntryIcon = R.id.device_entry_icon_view
     private val nsslPlaceholderId = R.id.nssl_placeholder
+    private val authInteractionProperties = AuthInteractionProperties()
 
     private const val ID = "occluding_app_device_entry_unlock_msg"
     private const val AOD_ICONS_APPEAR_DURATION: Long = 200

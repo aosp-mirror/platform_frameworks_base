@@ -27,7 +27,7 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ProcessList.INVALID_ADJ;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
@@ -89,6 +89,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.grammaticalinflection.GrammaticalInflectionManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService.HotPath;
+import com.android.server.wm.BackgroundLaunchProcessController.BalCheckConfiguration;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -203,6 +204,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
 
+    /** Whether this process has ever completed ActivityThread#handleBindApplication. */
+    boolean mHasEverAttached;
+
     /** Non-null if this process may have a window. */
     @Nullable
     Session mWindowSession;
@@ -284,14 +288,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     static final int ANIMATING_REASON_REMOTE_ANIMATION = 1;
     /** It is set for wakefulness transition. */
     static final int ANIMATING_REASON_WAKEFULNESS_CHANGE = 1 << 1;
-    /** Whether the legacy {@link RecentsAnimation} is running. */
-    static final int ANIMATING_REASON_LEGACY_RECENT_ANIMATION = 1 << 2;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             ANIMATING_REASON_REMOTE_ANIMATION,
             ANIMATING_REASON_WAKEFULNESS_CHANGE,
-            ANIMATING_REASON_LEGACY_RECENT_ANIMATION,
     })
     @interface AnimatingReason {}
 
@@ -328,6 +329,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public static final int ACTIVITY_STATE_FLAG_HAS_ACTIVITY_IN_VISIBLE_TASK = 1 << 22;
     public static final int ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN = 1 << 23;
     public static final int ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM = 1 << 24;
+    public static final int ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE = 1 << 25;
     public static final int ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER = 0x0000ffff;
 
     /**
@@ -359,9 +361,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         mUseFifoUiScheduling = com.android.window.flags.Flags.fifoPriorityForMajorUiProcesses()
                 && (isSysUiPackage || mAtm.isCallerRecents(uid));
-
-        onConfigurationChanged(atm.getGlobalConfiguration());
-        mAtm.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, mInfo.packageName);
     }
 
     public void setPid(int pid) {
@@ -698,20 +697,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     public boolean areBackgroundFgsStartsAllowed() {
         return areBackgroundActivityStartsAllowed(
                 mAtm.getBalAppSwitchesState(),
-                true /* isCheckingForFgsStart */).allows();
+                BackgroundLaunchProcessController.CHECK_FOR_FGS_START).allows();
     }
 
     BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState) {
-        return areBackgroundActivityStartsAllowed(
-                appSwitchState,
-                false /* isCheckingForFgsStart */);
-    }
-
-    private BackgroundActivityStartController.BalVerdict areBackgroundActivityStartsAllowed(
-            int appSwitchState, boolean isCheckingForFgsStart) {
+            int appSwitchState, BalCheckConfiguration checkConfiguration) {
         return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid,
-                mInfo.packageName, appSwitchState, isCheckingForFgsStart,
+                mInfo.packageName, appSwitchState, checkConfiguration,
                 hasActivityInVisibleTask(), mInstrumentingWithBackgroundActivityStartPrivileges,
                 mAtm.getLastStopAppSwitchesTime(),
                 mLastActivityLaunchTime, mLastActivityFinishTime);
@@ -1305,8 +1297,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         if (hasResumedFreeform
                 && com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()
                 // Exclude task layer 1 because it is already the top most.
-                && minTaskLayer > 1 && minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
-            stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+                && minTaskLayer > 1) {
+            if (minTaskLayer <= 1 + MAX_NUM_PERCEPTIBLE_FREEFORM) {
+                stateFlags |= ACTIVITY_STATE_FLAG_PERCEPTIBLE_FREEFORM;
+            } else {
+                stateFlags |= ACTIVITY_STATE_FLAG_VISIBLE_MULTI_WINDOW_MODE;
+            }
         }
         stateFlags |= minTaskLayer & ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
         if (visible) {
@@ -1547,6 +1543,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         unregisterConfigurationListeners();
         mConfigActivityRecord = activityRecord;
         activityRecord.registerConfigurationChangeListener(this);
+        // If the process hasn't attached, make sure that prepareConfigurationForLaunchingActivity
+        // will use the newer configuration sequence.
+        if (mThread == null) {
+            mHasPendingConfigurationChange = true;
+        }
     }
 
     private void unregisterActivityConfigurationListener() {
@@ -1689,7 +1690,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 resolvedConfig,
                 false /* optsOutEdgeToEdge */,
                 false /* hasFixedRotationTransform */,
-                false /* hasCompatDisplayInsets */);
+                false /* hasCompatDisplayInsets */,
+                null /* task */);
     }
 
     void dispatchConfiguration(@NonNull Configuration config) {
@@ -1934,7 +1936,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 // showing.
                 // If the configuration has been overridden by previous activity, empty it.
                 mIsActivityConfigOverrideAllowed = false;
-                unregisterActivityConfigurationListener();
+                // The call to `onServiceStarted` is not guarded with WM lock.
+                mAtm.mH.post(() -> {
+                    synchronized (mAtm.mGlobalLock) {
+                        unregisterActivityConfigurationListener();
+                    }
+                });
                 break;
             default:
                 break;
@@ -2014,14 +2021,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Returns whether this app is being launched for the first time since install */
     boolean wasFirstLaunch() {
         return mStoppedState == STOPPED_STATE_FIRST_LAUNCH;
-    }
-
-    void setRunningRecentsAnimation(boolean running) {
-        if (running) {
-            addAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        } else {
-            removeAnimatingReason(ANIMATING_REASON_LEGACY_RECENT_ANIMATION);
-        }
     }
 
     void setRunningRemoteAnimation(boolean running) {
@@ -2117,9 +2116,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             if ((animatingReasons & ANIMATING_REASON_WAKEFULNESS_CHANGE) != 0) {
                 pw.print("wakefulness|");
-            }
-            if ((animatingReasons & ANIMATING_REASON_LEGACY_RECENT_ANIMATION) != 0) {
-                pw.print("legacy-recents");
             }
             pw.println();
         }

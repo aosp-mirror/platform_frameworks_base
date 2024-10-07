@@ -17,8 +17,6 @@
 package com.android.systemui.authentication.domain.interactor
 
 import android.app.admin.DevicePolicyManager
-import android.app.admin.flags.Flags as DevicePolicyFlags
-import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
@@ -414,7 +412,6 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    @EnableFlags(DevicePolicyFlags.FLAG_HEADLESS_SINGLE_USER_FIXES)
     fun upcomingWipe() =
         testScope.runTest {
             val upcomingWipe by collectLastValue(underTest.upcomingWipe)

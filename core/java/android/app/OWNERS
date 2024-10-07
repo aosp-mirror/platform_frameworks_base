@@ -38,6 +38,7 @@ per-file GameState* = file:/GAME_MANAGER_OWNERS
 per-file IGameManager* = file:/GAME_MANAGER_OWNERS
 per-file IGameMode* = file:/GAME_MANAGER_OWNERS
 per-file BackgroundStartPrivileges.java = file:/BAL_OWNERS
+per-file activity_manager.aconfig = file:/ACTIVITY_MANAGER_OWNERS
 
 # ActivityThread
 per-file ActivityThread.java = file:/services/core/java/com/android/server/am/OWNERS
@@ -112,6 +113,7 @@ per-file *VoiceInteract* = file:/core/java/android/service/voice/OWNERS
 
 # Wallpaper
 per-file *Wallpaper* = file:/core/java/android/service/wallpaper/OWNERS
+per-file wallpaper.aconfig = file:/core/java/android/service/wallpaper/OWNERS
 
 # WindowManager
 per-file *Activity* = file:/services/core/java/com/android/server/wm/OWNERS

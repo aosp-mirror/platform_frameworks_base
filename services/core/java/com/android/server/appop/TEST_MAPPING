@@ -1,59 +1,22 @@
 {
     "presubmit": [
         {
-            "name": "CtsAppOpsTestCases",
-            "options": [
-                {
-                  "exclude-annotation": "androidx.test.filters.FlakyTest"
-                }
-            ]
+            "name": "CtsAppOpsTestCases"
         },
         {
             "name": "CtsAppOps2TestCases"
         },
         {
-            "name": "FrameworksServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.appop"
-                }
-            ]
+            "name": "FrameworksServicesTests_android_server_appop"
         },
         {
-            "name": "FrameworksMockingServicesTests",
-            "options": [
-                {
-                    "include-filter": "com.android.server.appop"
-                }
-            ]
+            "name": "FrameworksMockingServicesTests_android_server_appop"
         },
         {
-            "name": "CtsPermissionTestCases",
-            "options": [
-                {
-                    "exclude-annotation": "androidx.test.filters.FlakyTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.BackgroundPermissionsTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.SplitPermissionTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.PermissionFlagsTest"
-                },
-                {
-                    "include-filter": "android.permission.cts.SharedUidPermissionsTest"
-                }
-            ]
+            "name": "CtsPermissionTestCases_Platform"
         },
         {
-            "name": "CtsAppTestCases",
-            "options": [
-                {
-                    "include-filter": "android.app.cts.ActivityManagerApi29Test"
-                }
-            ]
+            "name": "CtsAppTestCases_cts_activitymanagerapi29test"
         },
         {
             "name": "CtsStatsdAtomHostTestCases",

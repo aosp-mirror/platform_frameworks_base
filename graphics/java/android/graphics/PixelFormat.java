@@ -17,10 +17,12 @@
 package android.graphics;
 
 import android.annotation.IntDef;
+import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+@RavenwoodKeepWholeClass
 public class PixelFormat {
     /** @hide */
     @IntDef({UNKNOWN, TRANSLUCENT, TRANSPARENT, OPAQUE})

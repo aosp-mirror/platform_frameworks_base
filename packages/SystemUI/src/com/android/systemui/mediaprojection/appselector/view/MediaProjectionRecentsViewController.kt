@@ -36,10 +36,10 @@ import com.android.systemui.mediaprojection.appselector.view.RecentTasksAdapter.
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
 import com.android.systemui.res.R
 import com.android.systemui.util.recycler.HorizontalSpacerItemDecoration
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
-import com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
+import com.android.wm.shell.shared.split.SplitBounds
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT
+import com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT
 import com.android.wm.shell.splitscreen.SplitScreen
-import com.android.wm.shell.util.SplitBounds
 import java.util.Optional
 import javax.inject.Inject
 

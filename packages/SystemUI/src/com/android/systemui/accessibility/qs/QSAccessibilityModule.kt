@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.qs
 import com.android.systemui.Flags
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.qs.shared.model.TileCategory
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.ColorCorrectionTile
 import com.android.systemui.qs.tiles.ColorInversionTile
@@ -120,42 +121,42 @@ interface QSAccessibilityModule {
     @IntoMap
     @StringKey(COLOR_CORRECTION_TILE_SPEC)
     fun provideColorCorrectionAvailabilityInteractor(
-            impl: ColorCorrectionTileDataInteractor
+        impl: ColorCorrectionTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(COLOR_INVERSION_TILE_SPEC)
     fun provideColorInversionAvailabilityInteractor(
-            impl: ColorCorrectionTileDataInteractor
+        impl: ColorCorrectionTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(FONT_SCALING_TILE_SPEC)
     fun provideFontScalingAvailabilityInteractor(
-            impl: FontScalingTileDataInteractor
+        impl: FontScalingTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(REDUCE_BRIGHTNESS_TILE_SPEC)
     fun provideReduceBrightnessAvailabilityInteractor(
-            impl: ReduceBrightColorsTileDataInteractor
+        impl: ReduceBrightColorsTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(ONE_HANDED_TILE_SPEC)
     fun provideOneHandedAvailabilityInteractor(
-            impl: OneHandedModeTileDataInteractor
+        impl: OneHandedModeTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     @Binds
     @IntoMap
     @StringKey(NIGHT_DISPLAY_TILE_SPEC)
     fun provideNightDisplayAvailabilityInteractor(
-            impl: NightDisplayTileDataInteractor
+        impl: NightDisplayTileDataInteractor
     ): QSTileAvailabilityInteractor
 
     companion object {
@@ -165,6 +166,7 @@ interface QSAccessibilityModule {
         const val REDUCE_BRIGHTNESS_TILE_SPEC = "reduce_brightness"
         const val ONE_HANDED_TILE_SPEC = "onehanded"
         const val NIGHT_DISPLAY_TILE_SPEC = "night"
+        const val HEARING_DEVICES_TILE_SPEC = "hearing_devices"
 
         @Provides
         @IntoMap
@@ -178,6 +180,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_color_correction_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /** Inject ColorCorrectionTile into tileViewModelMap in QSModule */
@@ -209,6 +212,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_inversion_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /** Inject ColorInversionTile into tileViewModelMap in QSModule */
@@ -240,6 +244,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_font_scaling_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /** Inject FontScaling Tile into tileViewModelMap in QSModule */
@@ -271,6 +276,22 @@ interface QSAccessibilityModule {
                         labelRes = com.android.internal.R.string.reduce_bright_colors_feature_name,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(HEARING_DEVICES_TILE_SPEC)
+        fun provideHearingDevicesTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(HEARING_DEVICES_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_hearing_devices_icon,
+                        labelRes = R.string.quick_settings_hearing_devices_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /**
@@ -307,6 +328,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_onehanded_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.ACCESSIBILITY,
             )
 
         /** Inject One Handed Mode Tile into tileViewModelMap in QSModule. */
@@ -340,6 +362,7 @@ interface QSAccessibilityModule {
                         labelRes = R.string.quick_settings_night_display_label,
                     ),
                 instanceId = uiEventLogger.getNewInstanceId(),
+                category = TileCategory.DISPLAY,
             )
 
         /**

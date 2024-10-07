@@ -17,7 +17,7 @@
 package com.android.wm.shell.bubbles;
 
 import android.os.Bundle;
-import com.android.wm.shell.common.bubbles.BubbleBarLocation;
+import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 /**
  * Listener interface that Launcher attaches to SystemUI to get bubbles callbacks.
  */

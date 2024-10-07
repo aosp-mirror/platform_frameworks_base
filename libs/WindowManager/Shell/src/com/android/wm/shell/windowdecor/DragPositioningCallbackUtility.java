@@ -27,12 +27,12 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
+import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.NonNull;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
-import com.android.wm.shell.shared.desktopmode.DesktopModeFlags;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 
 /**
@@ -82,52 +82,82 @@ public class DragPositioningCallbackUtility {
         final int oldRight = repositionTaskBounds.right;
         final int oldBottom = repositionTaskBounds.bottom;
 
-
         repositionTaskBounds.set(taskBoundsAtDragStart);
 
+        boolean isAspectRatioMaintained = true;
         // Make sure the new resizing destination in any direction falls within the stable bounds.
-        // If not, set the bounds back to the old location that was valid to avoid conflicts with
-        // some regions such as the gesture area.
         if ((ctrlType & CTRL_TYPE_LEFT) != 0) {
-            final int candidateLeft = repositionTaskBounds.left + (int) delta.x;
-            repositionTaskBounds.left = (candidateLeft > stableBounds.left)
-                    ? candidateLeft : oldLeft;
+            repositionTaskBounds.left = Math.max(repositionTaskBounds.left + (int) delta.x,
+                    stableBounds.left);
+            if (repositionTaskBounds.left == stableBounds.left
+                    && repositionTaskBounds.left + (int) delta.x != stableBounds.left) {
+                // If the task edge have been set to the stable bounds and not due to the users
+                // drag, the aspect ratio of the task will not be maintained.
+                isAspectRatioMaintained = false;
+            }
         }
         if ((ctrlType & CTRL_TYPE_RIGHT) != 0) {
-            final int candidateRight = repositionTaskBounds.right + (int) delta.x;
-            repositionTaskBounds.right = (candidateRight < stableBounds.right)
-                    ? candidateRight : oldRight;
+            repositionTaskBounds.right = Math.min(repositionTaskBounds.right + (int) delta.x,
+                    stableBounds.right);
+            if (repositionTaskBounds.right == stableBounds.right
+                    && repositionTaskBounds.right + (int) delta.x != stableBounds.right) {
+                // If the task edge have been set to the stable bounds and not due to the users
+                // drag, the aspect ratio of the task will not be maintained.
+                isAspectRatioMaintained = false;
+            }
         }
         if ((ctrlType & CTRL_TYPE_TOP) != 0) {
-            final int candidateTop = repositionTaskBounds.top + (int) delta.y;
-            repositionTaskBounds.top = (candidateTop > stableBounds.top)
-                    ? candidateTop : oldTop;
+            repositionTaskBounds.top = Math.max(repositionTaskBounds.top + (int) delta.y,
+                    stableBounds.top);
+            if (repositionTaskBounds.top == stableBounds.top
+                    && repositionTaskBounds.top + (int) delta.y != stableBounds.top) {
+                // If the task edge have been set to the stable bounds and not due to the users
+                // drag, the aspect ratio of the task will not be maintained.
+                isAspectRatioMaintained = false;
+            }
         }
         if ((ctrlType & CTRL_TYPE_BOTTOM) != 0) {
-            final int candidateBottom = repositionTaskBounds.bottom + (int) delta.y;
-            repositionTaskBounds.bottom = (candidateBottom < stableBounds.bottom)
-                    ? candidateBottom : oldBottom;
+            repositionTaskBounds.bottom = Math.min(repositionTaskBounds.bottom + (int) delta.y,
+                    stableBounds.bottom);
+            if (repositionTaskBounds.bottom == stableBounds.bottom
+                    && repositionTaskBounds.bottom + (int) delta.y != stableBounds.bottom) {
+                // If the task edge have been set to the stable bounds and not due to the users
+                // drag, the aspect ratio of the task will not be maintained.
+                isAspectRatioMaintained = false;
+            }
         }
+
         // If width or height are negative or exceeding the width or height constraints, revert the
         // respective bounds to use previous bound dimensions.
         if (isExceedingWidthConstraint(repositionTaskBounds, stableBounds, displayController,
                 windowDecoration)) {
             repositionTaskBounds.right = oldRight;
             repositionTaskBounds.left = oldLeft;
+            isAspectRatioMaintained = false;
         }
         if (isExceedingHeightConstraint(repositionTaskBounds, stableBounds, displayController,
                 windowDecoration)) {
             repositionTaskBounds.top = oldTop;
             repositionTaskBounds.bottom = oldBottom;
+            isAspectRatioMaintained = false;
         }
-        // If there are no changes to the bounds after checking new bounds against minimum width
-        // and height, do not set bounds and return false
-        if (oldLeft == repositionTaskBounds.left && oldTop == repositionTaskBounds.top
-                && oldRight == repositionTaskBounds.right
-                && oldBottom == repositionTaskBounds.bottom) {
-            return false;
+
+        // If the application is unresizeable and any bounds have been set back to their old
+        // location or to a stable bound edge, reset all the bounds to maintain the applications
+        // aspect ratio.
+        if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
+                && !isAspectRatioMaintained && !windowDecoration.mTaskInfo.isResizeable) {
+            repositionTaskBounds.top = oldTop;
+            repositionTaskBounds.bottom = oldBottom;
+            repositionTaskBounds.right = oldRight;
+            repositionTaskBounds.left = oldLeft;
         }
-        return true;
+
+        // If there are no changes to the bounds after checking new bounds against minimum and
+        // maximum width and height, do not set bounds and return false
+        return oldLeft != repositionTaskBounds.left || oldTop != repositionTaskBounds.top
+                || oldRight != repositionTaskBounds.right
+                || oldBottom != repositionTaskBounds.bottom;
     }
 
     /**
@@ -245,7 +275,7 @@ public class DragPositioningCallbackUtility {
 
     private static boolean isSizeConstraintForDesktopModeEnabled(Context context) {
         return DesktopModeStatus.canEnterDesktopMode(context)
-                && DesktopModeFlags.SIZE_CONSTRAINTS.isEnabled(context);
+                && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_SIZE_CONSTRAINTS.isTrue();
     }
 
     interface DragStartListener {

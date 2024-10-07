@@ -77,6 +77,8 @@ public final class BatteryUsageStatsQuery implements Parcelable {
 
     public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE = 0x0040;
 
+    public static final int FLAG_BATTERY_USAGE_STATS_ACCUMULATED = 0x0080;
+
     private static final long DEFAULT_MAX_STATS_AGE_MS = 5 * 60 * 1000;
 
     private final int mFlags;
@@ -86,7 +88,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
     private final long mFromTimestamp;
     private final long mToTimestamp;
     private final double mMinConsumedPowerThreshold;
-    private final @BatteryConsumer.PowerComponent int[] mPowerComponents;
+    private final @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
     private BatteryUsageStatsQuery(@NonNull Builder builder) {
         mFlags = builder.mFlags;
@@ -139,6 +141,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      * Returns the power components that should be estimated or null if all power components
      * are being requested.
      */
+    @BatteryConsumer.PowerComponentId
     public int[] getPowerComponents() {
         return mPowerComponents;
     }
@@ -228,7 +231,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         private long mFromTimestamp;
         private long mToTimestamp;
         private double mMinConsumedPowerThreshold = 0;
-        private @BatteryConsumer.PowerComponent int[] mPowerComponents;
+        private @BatteryConsumer.PowerComponentId int[] mPowerComponents;
 
         /**
          * Builds a read-only BatteryUsageStatsQuery object.
@@ -294,7 +297,7 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          * is all power components.
          */
         public Builder includePowerComponents(
-                @BatteryConsumer.PowerComponent int[] powerComponents) {
+                @BatteryConsumer.PowerComponentId int[] powerComponents) {
             mPowerComponents = powerComponents;
             return this;
         }
@@ -323,6 +326,15 @@ public final class BatteryUsageStatsQuery implements Parcelable {
          */
         public Builder includePowerStateData() {
             mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_POWER_STATE;
+            return this;
+        }
+
+        /**
+         * Requests the full continuously accumulated battery usage stats: across reboots
+         * and most battery stats resets.
+         */
+        public Builder accumulated() {
+            mFlags |= FLAG_BATTERY_USAGE_STATS_ACCUMULATED;
             return this;
         }
 

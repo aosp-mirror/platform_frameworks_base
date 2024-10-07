@@ -564,6 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"الارمز اور یاد دہانیاں"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"اس ایپ کو الارمز سیٹ کرنے اور وقت کے لحاظ سے حساس کارروائیوں کو شیڈول کرنے کی اجازت دیں۔ اس سے ایپ کو پس منظر میں چلنے کی اجازت ملتی ہے، جس میں زیادہ بیٹری استعمال ہو سکتی ہے۔\n\n اگر یہ اجازت آف ہے تو موجودہ الارمز اور اس ایپ کے ذریعے شیڈول کردہ وقت پر مبنی ایونٹس کام نہیں کریں گے۔"</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"شیڈول، الارم، یاد دہانی، گھڑی"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"ڈسٹرب نہ کریں"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"ڈسٹرب نہ کریں"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"آن کریں"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\'ڈسٹرب نہ کریں\' کو آن کریں"</string>
@@ -581,8 +582,10 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"یہ ٹیبلیٹ"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"یہ کمپیوٹر (داخلی)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"مائیکروفون (داخلی)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ڈاک اسپیکر"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"بیرونی آلہ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"منسلک آلہ"</string>
@@ -683,7 +686,11 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیر فعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"وائرڈ ہیڈ فون"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"تار والا ہیڈ فون"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"ہیڈ فون"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"‏‫USB اسپیکر"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"مائیک جیک"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"‏‫USB مائیک"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"آن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"آف"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"کیریئر نیٹ ورک کی تبدیلی"</string>

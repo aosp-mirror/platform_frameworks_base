@@ -26,6 +26,8 @@ import static org.mockito.Mockito.when;
 
 import androidx.annotation.NonNull;
 
+import com.android.server.wm.AppCompatConfiguration.LetterboxBackgroundType;
+
 /**
  * Robot implementation for {@link AppCompatConfiguration}.
  */
@@ -97,6 +99,32 @@ class AppCompatConfigurationRobot {
     void setThinLetterboxHeightPx(int thinHeightPx) {
         doReturn(thinHeightPx).when(mAppCompatConfiguration)
                 .getThinLetterboxHeightPx();
+    }
+
+    void setLetterboxActivityCornersRounded(boolean rounded) {
+        doReturn(rounded).when(mAppCompatConfiguration).isLetterboxActivityCornersRounded();
+    }
+
+    void setLetterboxEducationEnabled(boolean enabled) {
+        doReturn(enabled).when(mAppCompatConfiguration).getIsEducationEnabled();
+    }
+
+    void setLetterboxActivityCornersRadius(int cornerRadius) {
+        doReturn(cornerRadius).when(mAppCompatConfiguration).getLetterboxActivityCornersRadius();
+    }
+
+    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
+        doReturn(backgroundType).when(mAppCompatConfiguration).getLetterboxBackgroundType();
+    }
+
+    void setLetterboxBackgroundWallpaperBlurRadiusPx(int blurRadiusPx) {
+        doReturn(blurRadiusPx).when(mAppCompatConfiguration)
+                .getLetterboxBackgroundWallpaperBlurRadiusPx();
+    }
+
+    void setLetterboxBackgroundWallpaperDarkScrimAlpha(float darkScrimAlpha) {
+        doReturn(darkScrimAlpha).when(mAppCompatConfiguration)
+                .getLetterboxBackgroundWallpaperDarkScrimAlpha();
     }
 
     void checkToNextLeftStop(boolean invoked) {

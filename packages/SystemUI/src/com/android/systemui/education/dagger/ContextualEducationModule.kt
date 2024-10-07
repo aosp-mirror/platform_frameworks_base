@@ -16,6 +16,7 @@
 
 package com.android.systemui.education.dagger
 
+import com.android.app.tracing.coroutines.createCoroutineTracingContext
 import com.android.systemui.CoreStartable
 import com.android.systemui.Flags
 import com.android.systemui.contextualeducation.GestureType
@@ -56,7 +57,7 @@ interface ContextualEducationModule {
         fun provideEduDataStoreScope(
             @Background bgDispatcher: CoroutineDispatcher
         ): CoroutineScope {
-            return CoroutineScope(bgDispatcher + SupervisorJob())
+            return CoroutineScope(bgDispatcher + SupervisorJob() + createCoroutineTracingContext("EduDataStoreScope"))
         }
 
         @EduClock

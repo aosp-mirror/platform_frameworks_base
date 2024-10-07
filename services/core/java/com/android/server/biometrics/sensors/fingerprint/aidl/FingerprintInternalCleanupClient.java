@@ -81,7 +81,7 @@ public class FingerprintInternalCleanupClient
     @Override
     protected void onAddUnknownTemplate(int userId,
             @NonNull BiometricAuthenticator.Identifier identifier) {
-        FingerprintUtils.getInstance(getSensorId()).addBiometricForUser(
+        mBiometricUtils.addBiometricForUser(
                 getContext(), getTargetUserId(), (Fingerprint) identifier);
     }
 

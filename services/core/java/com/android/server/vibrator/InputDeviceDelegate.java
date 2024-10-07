@@ -26,6 +26,7 @@ import android.util.SparseArray;
 import android.view.InputDevice;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.vibrator.VibrationSession.CallerInfo;
 
 /** Delegates vibrations to all connected {@link InputDevice} with one or more vibrators. */
 final class InputDeviceDelegate implements InputManager.InputDeviceListener {
@@ -93,7 +94,7 @@ final class InputDeviceDelegate implements InputManager.InputDeviceListener {
      *
      * @return {@link #isAvailable()}
      */
-    public boolean vibrateIfAvailable(Vibration.CallerInfo callerInfo, CombinedVibration effect) {
+    public boolean vibrateIfAvailable(CallerInfo callerInfo, CombinedVibration effect) {
         synchronized (mLock) {
             for (int i = 0; i < mInputDeviceVibrators.size(); i++) {
                 mInputDeviceVibrators.valueAt(i).vibrate(callerInfo.uid, callerInfo.opPkg, effect,

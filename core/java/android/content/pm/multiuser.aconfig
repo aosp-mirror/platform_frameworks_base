@@ -68,6 +68,13 @@ flag {
 }
 
 flag {
+    name: "multiuser_widget"
+    namespace: "multiuser"
+    description: "Implement the Multiuser Widget"
+    bug: "365748524"
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     is_exported: true
     namespace: "profile_experiences"
@@ -161,6 +168,16 @@ flag {
 }
 
 flag {
+    name: "fix_avatar_content_provider_null_authority"
+    namespace: "multiuser"
+    description: "Fix crash when content provider authority is null."
+    bug: "362880068"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fix_avatar_picker_not_responding_for_new_user"
     namespace: "multiuser"
     description: "Avatar picker is not responding after selecting photo for new user."
@@ -211,6 +228,17 @@ flag {
 }
 
 flag {
+    name: "cache_user_properties_correctly_read_only"
+    namespace: "multiuser"
+    description: "UserProperties cache needs to take into account who the callingUid is."
+    bug: "369198539"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
     name: "cache_user_serial_number"
     namespace: "multiuser"
     description: "Optimise user serial number retrieval"
@@ -231,6 +259,16 @@ flag {
   is_fixed_read_only: true
 }
 
+flag {
+    name: "caches_not_invalidated_at_start_read_only"
+    namespace: "multiuser"
+    description: "PIC need to be invalidated at start in order to work properly."
+    bug: "356167673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
 
 # This flag guards the private space feature and all its implementations excluding the APIs. APIs are guarded by android.os.Flags.allow_private_profile.
 flag {
@@ -413,6 +451,24 @@ flag {
   description: "Refactorings related to unicorn mode to work on HSUM mode (Read only flag)"
   bug: "339201286"
   is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "caching_development_improvements"
+    namespace: "multiuser"
+    description: "System API to simplify caching implamentations"
+    bug: "364947162"
+    is_fixed_read_only: true
+}
+
+flag {
+  name: "show_custom_unlock_title_inside_private_profile"
+  namespace: "profile_experiences"
+  description: "When private space is unlocked show dynamic title in unlock factor screens based on lock factor set for the profile"
+  bug: "323835257"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

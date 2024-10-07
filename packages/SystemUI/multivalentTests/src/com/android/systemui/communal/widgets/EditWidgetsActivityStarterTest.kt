@@ -21,7 +21,6 @@ import android.content.Intent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.communal.widgets.EditWidgetsActivity.Companion.EXTRA_PRESELECTED_KEY
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.testKosmos
@@ -62,7 +61,7 @@ class EditWidgetsActivityStarterTest : SysuiTestCase() {
     fun activityLaunch_intentIsWellFormed() {
         with(kosmos) {
             testScope.runTest {
-                underTest.startActivity(TEST_PRESELECTED_KEY, shouldOpenWidgetPickerOnStart = true)
+                underTest.startActivity(shouldOpenWidgetPickerOnStart = true)
 
                 val captor = argumentCaptor<Intent>()
                 verify(activityStarter)
@@ -71,8 +70,6 @@ class EditWidgetsActivityStarterTest : SysuiTestCase() {
                 assertThat(captor.lastValue.flags and Intent.FLAG_ACTIVITY_NEW_TASK).isNotEqualTo(0)
                 assertThat(captor.lastValue.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .isNotEqualTo(0)
-                assertThat(captor.lastValue.extras?.getString(EXTRA_PRESELECTED_KEY))
-                    .isEqualTo(TEST_PRESELECTED_KEY)
                 assertThat(
                         captor.lastValue.extras?.getBoolean(
                             EditWidgetsActivity.EXTRA_OPEN_WIDGET_PICKER_ON_START
@@ -80,7 +77,7 @@ class EditWidgetsActivityStarterTest : SysuiTestCase() {
                     )
                     .isEqualTo(true)
 
-                underTest.startActivity(TEST_PRESELECTED_KEY, shouldOpenWidgetPickerOnStart = false)
+                underTest.startActivity(shouldOpenWidgetPickerOnStart = false)
 
                 verify(activityStarter, times(2))
                     .startActivityDismissingKeyguard(captor.capture(), eq(true), eq(true), any())
@@ -88,8 +85,6 @@ class EditWidgetsActivityStarterTest : SysuiTestCase() {
                 assertThat(captor.lastValue.flags and Intent.FLAG_ACTIVITY_NEW_TASK).isNotEqualTo(0)
                 assertThat(captor.lastValue.flags and Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     .isNotEqualTo(0)
-                assertThat(captor.lastValue.extras?.getString(EXTRA_PRESELECTED_KEY))
-                    .isEqualTo(TEST_PRESELECTED_KEY)
                 assertThat(
                         captor.lastValue.extras?.getBoolean(
                             EditWidgetsActivity.EXTRA_OPEN_WIDGET_PICKER_ON_START
@@ -98,9 +93,5 @@ class EditWidgetsActivityStarterTest : SysuiTestCase() {
                     .isEqualTo(false)
             }
         }
-    }
-
-    companion object {
-        const val TEST_PRESELECTED_KEY = "test-key"
     }
 }

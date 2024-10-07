@@ -1250,6 +1250,7 @@
          a watch, setting this config is no-op.
             0 - Nothing
             1 - Switch to the recent app
+            2 - Launch the default fitness app
     -->
     <integer name="config_doublePressOnStemPrimaryBehavior">0</integer>
 
@@ -1527,6 +1528,11 @@
         flow. This should be true if gatekeeper / weaver credentials can still be checked after a
         factory reset. -->
     <bool name="config_enableCredentialFactoryResetProtection">true</bool>
+
+    <!-- If true, then work around broken Weaver HALs that don't work reliably before the device has
+         fully booted. Setting this to true weakens a security feature; it should be done only when
+         necessary, though it is still better than not using Weaver at all. -->
+    <bool name="config_disableWeaverOnUnsecuredUsers">false</bool>
 
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
@@ -2309,10 +2315,6 @@
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
 
-    <!-- Flag indicating whether platform level volume adjustments are enabled for remote sessions
-         on grouped devices. -->
-    <bool name="config_volumeAdjustmentForRemoteGroupSessions">true</bool>
-
     <!-- Flag indicating current media Output Switcher version. -->
     <integer name="config_mediaOutputSwitchDialogVersion">1</integer>
 
@@ -3031,9 +3033,8 @@
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
     <!-- Whether the device allows full users to start in background visible on displays.
-         Note: this flag does NOT control the Communal Profile, which is not a full user.
-         Should be false for all devices in production. Can be enabled only for development use
-         in automotive vehicles with passenger displays. -->
+         Should be false for most devices, except automotive vehicle with passenger displays.
+         Note: this flag does NOT control the Communal Profile, which is not a full user. -->
     <bool name="config_multiuserVisibleBackgroundUsers">false</bool>
 
     <!-- Whether the device allows full users to start in background visible on the default display.
@@ -3080,6 +3081,11 @@
 
     <!-- Whether UI for multi user should be shown -->
     <bool name="config_enableMultiUserUI">false</bool>
+
+    <!-- Whether to boot system with the headless system user, i.e. user 0. If set to true,
+         system will be booted with the headless system user, or user 0. It has no effect if device
+         is not in Headless System User Mode (HSUM). -->
+    <bool name="config_bootToHeadlessSystemUser">false</bool>
 
     <!-- Whether multiple admins are allowed on the device. If set to true, new users can be created
          with admin privileges and admin privileges can be granted/revoked from existing users. -->
@@ -4149,6 +4155,9 @@
     <!-- Indicating if keyboard vibration settings supported or not. -->
     <bool name="config_keyboardVibrationSettingsSupported">false</bool>
 
+    <!-- Indicating if ringtone vibration settings supported or not. -->
+    <bool name="config_ringtoneVibrationSettingsSupported">false</bool>
+
     <!-- If the device should still vibrate even in low power mode, for certain priority vibrations
      (e.g. accessibility, alarms). This is mainly for Wear devices that don't have speakers. -->
     <bool name="config_allowPriorityVibrationsInLowPowerMode">false</bool>
@@ -4373,7 +4382,7 @@
              modes dimensions {@link config_minPercentageMultiWindowSupportWidth} the device
              supports to determine if the activity can be shown in multi windowing modes.
     -->
-    <integer name="config_respectsActivityMinWidthHeightMultiWindow">0</integer>
+    <integer name="config_respectsActivityMinWidthHeightMultiWindow">-1</integer>
 
     <!-- This value is only used when the device checks activity min height to determine if it
          can be shown in multi windowing modes.
@@ -4449,6 +4458,11 @@
 
     <!-- Bytes that the PinnerService will pin for WebView -->
     <integer name="config_pinnerWebviewPinBytes">0</integer>
+
+    <!-- Maximum memory that PinnerService will pin for apps expressed
+         as a percentage of total device memory [0,100].
+         Example: 10, means 10% of total memory will be the maximum pinned memory -->
+    <integer name="config_pinnerMaxPinnedMemoryPercentage">10</integer>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
@@ -5827,6 +5841,13 @@
          should also be non-empty.-->
     <string name="config_rawContactsLocalAccountType" translatable="false"></string>
 
+    <!-- The array of account types that accounts in any of these can be set as the default account
+         for new raw contacts. -->
+    <string-array name="config_rawContactsEligibleDefaultAccountTypes" translatable="false">
+        <!-- Add account types here, example: -->
+        <!-- <item>com.google</item> -->
+    </string-array>
+
     <!-- Whether or not to use assistant stream volume separately from music volume -->
     <bool name="config_useAssistantVolume">false</bool>
 
@@ -6163,6 +6184,10 @@
     <!-- Whether should use split screen aspect ratio for the activity when camera compat treatment
         is enabled and activity is connected to the camera in fullscreen. -->
     <bool name="config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled">false</bool>
+
+    <!-- Which aspect ratio to use when camera compat treatment is enabled and an activity eligible
+        for treatment is connected to the camera. -->
+    <item name="config_windowManagerCameraCompatAspectRatio" format="float" type="dimen">1.0</item>
 
     <!-- Docking is a uiMode configuration change and will cause activities to relaunch if it's not
          handled. If true, the configuration change will be sent but activities will not be
@@ -7026,6 +7051,10 @@
          {@link InputDevice#SOURCE_ROTARY_ENCODER}s. -->
     <bool name="config_viewBasedRotaryEncoderHapticsEnabled">false</bool>
 
+    <!-- Whether the scroll haptic feedback implementation is enabled for
+    {@link InputDevice#SOURCE_TOUCHSCREEN}s. -->
+    <bool name="config_viewTouchScreenHapticScrollFeedbackEnabled">false</bool>
+
     <!-- Whether the media player is shown on the quick settings -->
     <bool name="config_quickSettingsShowMediaPlayer">true</bool>
 
@@ -7078,6 +7107,10 @@
     <!-- Maximum number of active tasks on a given Desktop Windowing session. Set to 0 for unlimited. -->
     <integer name="config_maxDesktopWindowingActiveTasks">0</integer>
 
+    <!-- Whether a display enters desktop mode by default when the windowing mode of the display's
+         root TaskDisplayArea is set to WINDOWING_MODE_FREEFORM. -->
+    <bool name="config_enterDesktopByDefaultOnFreeformDisplay">false</bool>
+
     <!-- Frame rate compatibility value for Wallpaper
          FRAME_RATE_COMPATIBILITY_MIN (102) is used by default for lower power consumption -->
     <integer name="config_wallpaperFrameRateCompatibility">102</integer>
@@ -7110,4 +7143,12 @@
     <!-- The maximum number of call log entries for each sim card that can be stored in the call log
          provider on the device. -->
     <integer name="config_maximumCallLogEntriesPerSim">500</integer>
+
+    <!-- Whether to enable scaling and fading animation to scrollviews while scrolling.
+         P.S this is a change only intended for wear devices. -->
+    <bool name="config_enableViewGroupScalingFading">false</bool>
+    <!-- Action for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
+    <string name="identity_check_settings_action"></string>
+    <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
+    <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 </resources>

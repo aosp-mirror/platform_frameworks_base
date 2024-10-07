@@ -53,6 +53,7 @@ object ShadelessSceneContainerFrameworkModule {
                     Scenes.Bouncer,
                 ),
             initialSceneKey = Scenes.Lockscreen,
+            overlayKeys = emptyList(),
             navigationDistances =
                 mapOf(
                     Scenes.Gone to 0,

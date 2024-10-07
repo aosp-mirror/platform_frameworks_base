@@ -72,10 +72,6 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor.isUserInteractingWithShade instead")
     override val legacyLockscreenShadeTracking = MutableStateFlow(false)
 
-    private var _isDualShadeAlignedToBottom = false
-    override val isDualShadeAlignedToBottom
-        get() = _isDualShadeAlignedToBottom
-
     private var _isShadeLayoutWide = MutableStateFlow(false)
     override val isShadeLayoutWide: StateFlow<Boolean> = _isShadeLayoutWide.asStateFlow()
 
@@ -153,10 +149,6 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyShadeExpansion(expandedFraction: Float) {
         _legacyShadeExpansion.value = expandedFraction
-    }
-
-    fun setDualShadeAlignedToBottom(isAlignedToBottom: Boolean) {
-        _isDualShadeAlignedToBottom = isAlignedToBottom
     }
 
     override fun setShadeLayoutWide(isShadeLayoutWide: Boolean) {

@@ -29,12 +29,6 @@ public interface ReduceBrightColorsController extends
     /** Sets the activation state of Reduce Bright Colors */
     void setReduceBrightColorsActivated(boolean activated);
 
-    /** Sets whether Reduce Bright Colors is enabled */
-    void setReduceBrightColorsFeatureAvailable(boolean enabled);
-
-    /** Gets whether Reduce Bright Colors is enabled */
-    boolean isReduceBrightColorsFeatureAvailable();
-
     /** Gets whether Reduce Bright Colors is being transitioned to Even Dimmer */
     boolean isInUpgradeMode(Resources resources);
     /**
@@ -47,13 +41,6 @@ public interface ReduceBrightColorsController extends
          * @param activated {@code true} if Reduce Bright Colors is activated.
          */
         default void onActivated(boolean activated) {
-        }
-        /**
-         * Listener invoked when the feature enabled state changes.
-         *
-         * @param enabled {@code true} if Reduce Bright Colors feature is enabled.
-         */
-        default void onFeatureEnabledChanged(boolean enabled) {
         }
     }
 }

@@ -19,6 +19,8 @@
 #include <sys/timerfd.h>
 #include <inttypes.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <regex.h>
 
 #include <algorithm>
 #include <list>
@@ -26,6 +28,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <map>
 
 #define LOG_TAG "AnrTimerService"
 #define ATRACE_TAG ATRACE_TAG_ACTIVITY_MANAGER
@@ -33,8 +36,8 @@
 
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
-#include "android_runtime/AndroidRuntime.h"
-#include "core_jni_helpers.h"
+#include <android_runtime/AndroidRuntime.h>
+#include <core_jni_helpers.h>
 
 #include <processgroup/processgroup.h>
 #include <utils/Log.h>
@@ -109,30 +112,334 @@ bool processExists(pid_t pid) {
 // Return the name of the process whose pid is the input.  If the process does not exist, the
 // name will "notfound".
 std::string getProcessName(pid_t pid) {
-    char buffer[PATH_MAX];
-    snprintf(buffer, sizeof(buffer), "/proc/%d/cmdline", pid);
-    int fd = ::open(buffer, O_RDONLY);
-    if (fd >= 0) {
-        size_t pos = 0;
-        ssize_t result;
-        while (pos < sizeof(buffer)-1) {
-            result = ::read(fd, buffer + pos, (sizeof(buffer) - pos) - 1);
-            if (result <= 0) {
-                break;
-            }
-        }
-        ::close(fd);
-
-        if (result >= 0) {
-            buffer[pos] = 0;
+    char path[PATH_MAX];
+    snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
+    FILE* cmdline = fopen(path, "r");
+    if (cmdline != nullptr) {
+        char name[PATH_MAX];
+        char const *retval = fgets(name, sizeof(name), cmdline);
+        fclose(cmdline);
+        if (retval == nullptr) {
+            return std::string("unknown");
         } else {
-            snprintf(buffer, sizeof(buffer), "err: %s", strerror(errno));
+            return std::string(name);
         }
     } else {
-        snprintf(buffer, sizeof(buffer), "notfound");
+        return std::string("notfound");
     }
-    return std::string(buffer);
 }
+
+/**
+ * Three wrappers of the trace utilities, which hard-code the timer track.
+ */
+void traceBegin(const char* msg, int cookie) {
+    ATRACE_ASYNC_FOR_TRACK_BEGIN(ANR_TIMER_TRACK, msg, cookie);
+}
+
+void traceEnd(int cookie) {
+    ATRACE_ASYNC_FOR_TRACK_END(ANR_TIMER_TRACK, cookie);
+}
+
+void traceEvent(const char* msg) {
+    ATRACE_INSTANT_FOR_TRACK(ANR_TIMER_TRACK, msg);
+}
+
+/**
+ * This class captures tracing information for processes tracked by an AnrTimer.  A user can
+ * configure tracing to have the AnrTimerService emit extra information for watched processes.
+ * singleton.
+ *
+ * The tracing configuration has two components: process selection and an optional early action.
+ *
+ *   Processes are selected in one of three ways:
+ *    1. A list of numeric linux process IDs.
+ *    2. A regular expression, matched against process names.
+ *    3. The keyword "all", to trace every process that uses an AnrTimer.
+ *   Perfetto trace events are always emitted for every operation on a traced process.
+ *
+ *   An early action occurs before the scheduled timeout.  The early timeout is specified as a
+ *   percentage (integer value in the range 0:100) of the programmed timeout.  The AnrTimer will
+ *   execute the early action at the early timeout.  The early action may terminate the timer.
+ *
+ *   There is one early action:
+ *    1. Expire - consider the AnrTimer expired and report it to the upper layers.
+ */
+class AnrTimerTracer {
+  public:
+    // Actions that can be taken when an early  timer expires.
+    enum EarlyAction {
+        // Take no action.  This is the value used when tracing is disabled.
+        None,
+        // Trace the timer but take no other action.
+        Trace,
+        // Report timer expiration to the upper layers.  This is terminal, in that
+        Expire,
+    };
+
+    // The trace information for a single timer.
+    struct TraceConfig {
+        bool enabled = false;
+        EarlyAction action = None;
+        int earlyTimeout = 0;
+    };
+
+    AnrTimerTracer() {
+        AutoMutex _l(lock_);
+        resetLocked();
+    }
+
+    // Return the TraceConfig for a process.
+    TraceConfig getConfig(int pid) {
+        AutoMutex _l(lock_);
+        // The most likely situation: no tracing is configured.
+        if (!config_.enabled) return {};
+        if (matchAllPids_) return config_;
+        if (watched_.contains(pid)) return config_;
+        if (!matchNames_) return {};
+        if (matchedPids_.contains(pid)) return config_;
+        if (unmatchedPids_.contains(pid)) return {};
+        std::string proc_name = getProcessName(pid);
+        bool matched = regexec(&regex_, proc_name.c_str(), 0, 0, 0) == 0;
+        if (matched) {
+            matchedPids_.insert(pid);
+            return config_;
+        } else {
+            unmatchedPids_.insert(pid);
+            return {};
+        }
+    }
+
+    // Set the trace configuration.  The input is a string that contains key/value pairs of the
+    // form "key=value".  Pairs are separated by spaces.  The function returns a string status.
+    // On success, the normalized config is returned.  On failure, the configuration reset the
+    // result contains an error message.  As a special case, an empty set of configs, or a
+    // config that contains only the keyword "show", will do nothing except return the current
+    // configuration.  On any error, all tracing is disabled.
+    std::pair<bool, std::string> setConfig(const std::vector<std::string>& config) {
+        AutoMutex _l(lock_);
+        if (config.size() == 0) {
+            // Implicit "show"
+            return { true, currentConfigLocked() };
+        } else if (config.size() == 1) {
+            // Process the one-word commands
+            const char* s = config[0].c_str();
+            if (strcmp(s, "show") == 0) {
+                return { true, currentConfigLocked() };
+            } else if (strcmp(s, "off") == 0) {
+                resetLocked();
+                return { true, currentConfigLocked() };
+            } else if (strcmp(s, "help") == 0) {
+                return { true, help() };
+            }
+        } else if (config.size() > 2) {
+            return { false, "unexpected values in config" };
+        }
+
+        // Barring an error in the remaining specification list, tracing will be enabled.
+        resetLocked();
+        // Fetch the process specification.  This must be the first configuration entry.
+        {
+            auto result = setTracedProcess(config[0]);
+            if (!result.first) return result;
+        }
+
+        // Process optional actions.
+        if (config.size() > 1) {
+            auto result = setTracedAction(config[1]);
+            if (!result.first) return result;
+        }
+
+        // Accept the result.
+        config_.enabled = true;
+        return { true, currentConfigLocked() };
+    }
+
+  private:
+    // Identify the processes to be traced.
+    std::pair<bool, std::string> setTracedProcess(std::string config) {
+        const char* s = config.c_str();
+        const char* word = nullptr;
+
+        if (strcmp(s, "pid=all") == 0) {
+            matchAllPids_ = true;
+        } else if ((word = startsWith(s, "pid=")) != nullptr) {
+            int p;
+            int n;
+            while (sscanf(word, "%d%n", &p, &n) == 1) {
+                watched_.insert(p);
+                word += n;
+                if (*word == ',') word++;
+            }
+            if (*word != 0) {
+                return { false, "invalid pid list" };
+            }
+            config_.action = Trace;
+        } else if ((word = startsWith(s, "name=")) != nullptr) {
+            if (matchNames_) {
+                regfree(&regex_);
+                matchNames_ = false;
+            }
+            if (regcomp(&regex_, word, REG_EXTENDED) != 0) {
+                return { false, "invalid regex" };
+            }
+            matchNames_ = true;
+            namePattern_ = word;
+            config_.action = Trace;
+        } else {
+            return { false, "no process specified" };
+        }
+        return { true, "" };
+    }
+
+    // Set the action to be taken on a traced process.  The incoming default action is Trace;
+    // this method may overwrite that action.
+    std::pair<bool, std::string> setTracedAction(std::string config) {
+        const char* s = config.c_str();
+        const char* word = nullptr;
+        if (sscanf(s, "expire=%d", &config_.earlyTimeout) == 1) {
+            if (config_.earlyTimeout < 0) {
+                return { false, "invalid expire timeout" };
+            }
+            config_.action = Expire;
+        } else {
+            return { false, std::string("cannot parse action ") + s };
+        }
+        return { true, "" };
+    }
+
+    // Return the string value of an action.
+    static const char* toString(EarlyAction action) {
+        switch (action) {
+            case None: return "none";
+            case Trace: return "trace";
+            case Expire: return "expire";
+        }
+        return "unknown";
+    }
+
+    // Return the action represented by the string.
+    static EarlyAction fromString(const char* action) {
+        if (strcmp(action, "expire") == 0) return Expire;
+        return None;
+    }
+
+    // Return the help message.  This has everything except the invocation command.
+    static std::string help() {
+        static const char* msg =
+                "help     show this message\n"
+                "show     report the current configuration\n"
+                "off      clear the current configuration, turning off all tracing\n"
+                "spec...  configure tracing according to the specification list\n"
+                "  action=<action>     what to do when a split timer expires\n"
+                "    expire            expire the timer to the upper levels\n"
+                "    event             generate extra trace events\n"
+                "  pid=<pid>[,<pid>]   watch the processes in the pid list\n"
+                "  pid=all             watch every process in the system\n"
+                "  name=<regex>        watch the processes whose name matches the regex\n";
+        return msg;
+    }
+
+    // A small convenience function for parsing.  If the haystack starts with the needle and the
+    // haystack has at least one more character following, return a pointer to the following
+    // character.  Otherwise return null.
+    static const char* startsWith(const char* haystack, const char* needle) {
+        if (strncmp(haystack, needle, strlen(needle)) == 0 && strlen(haystack) + strlen(needle)) {
+            return haystack + strlen(needle);
+        }
+        return nullptr;
+    }
+
+    // Return the currently watched pids.  The lock must be held.
+    std::string watchedPidsLocked() const {
+        if (watched_.size() == 0) return "none";
+        bool first = true;
+        std::string result = "";
+        for (auto i = watched_.cbegin(); i != watched_.cend(); i++) {
+            if (first) {
+                result += StringPrintf("%d", *i);
+            } else {
+                result += StringPrintf(",%d", *i);
+            }
+        }
+        return result;
+    }
+
+    // Return the current configuration, in a form that can be consumed by setConfig().
+    std::string currentConfigLocked() const {
+        if (!config_.enabled) return "off";
+        std::string result;
+        if (matchAllPids_) {
+            result = "pid=all";
+        } else if (matchNames_) {
+            result = StringPrintf("name=\"%s\"", namePattern_.c_str());
+        } else {
+            result = std::string("pid=") + watchedPidsLocked();
+        }
+        switch (config_.action) {
+            case None:
+                break;
+            case Trace:
+                // The default action is Trace
+                break;
+            case Expire:
+                result += StringPrintf(" %s=%d", toString(config_.action), config_.earlyTimeout);
+                break;
+        }
+        return result;
+    }
+
+    // Reset the current configuration.
+    void resetLocked() {
+        if (!config_.enabled) return;
+
+        config_.enabled = false;
+        config_.earlyTimeout = 0;
+        config_.action = {};
+        matchAllPids_ = false;
+        watched_.clear();
+        if (matchNames_) regfree(&regex_);
+        matchNames_ = false;
+        namePattern_ = "";
+        matchedPids_.clear();
+        unmatchedPids_.clear();
+    }
+
+    // The lock for all operations
+    mutable Mutex lock_;
+
+    // The current tracing information, when a process matches.
+    TraceConfig config_;
+
+    // A short-hand flag that causes all processes to be tracing without the overhead of
+    // searching any of the maps.
+    bool matchAllPids_;
+
+    // A set of process IDs that should be traced.  This is updated directly in setConfig()
+    // and only includes pids that were explicitly called out in the configuration.
+    std::set<pid_t> watched_;
+
+    // Name mapping is a relatively expensive operation, since the process name must be fetched
+    // from the /proc file system and then a regex must be evaluated.  However, name mapping is
+    // useful to ensure processes are traced at the moment they start.  To make this faster, a
+    // process's name is matched only once, and the result is stored in the matchedPids_ or
+    // unmatchedPids_ set, as appropriate.  This can lead to confusion if a process changes its
+    // name after it starts.
+
+    // The global flag that enables name matching.  If this is disabled then all name matching
+    // is disabled.
+    bool matchNames_;
+
+    // The regular expression that matches processes to be traced.  This is saved for logging.
+    std::string namePattern_;
+
+    // The compiled regular expression.
+    regex_t regex_;
+
+    // The set of all pids that whose process names match (or do not match) the name regex.
+    // There is one set for pids that match and one set for pids that do not match.
+    std::set<pid_t> matchedPids_;
+    std::set<pid_t> unmatchedPids_;
+};
 
 /**
  * This class encapsulates the anr timer service.  The service manages a list of individual
@@ -177,7 +484,7 @@ class AnrTimerService {
      * traditional void* and Java object pointer.  The remaining parameters are
      * configuration options.
      */
-    AnrTimerService(char const* label, notifier_t notifier, void* cookie, jweak jtimer, Ticker*,
+    AnrTimerService(const char* label, notifier_t notifier, void* cookie, jweak jtimer, Ticker*,
                     bool extend, bool freeze);
 
     // Delete the service and clean up memory.
@@ -211,6 +518,11 @@ class AnrTimerService {
     // Release a timer.  The timer must be in the expired list.
     bool release(timer_id_t);
 
+    // Configure a trace specification to trace selected timers.  See AnrTimerTracer for details.
+    static std::pair<bool, std::string> trace(const std::vector<std::string>& spec) {
+        return tracer_.setConfig(spec);
+    }
+
     // Return the Java object associated with this instance.
     jweak jtimer() const {
         return notifierObject_;
@@ -221,7 +533,7 @@ class AnrTimerService {
 
   private:
     // The service cannot be copied.
-    AnrTimerService(AnrTimerService const&) = delete;
+    AnrTimerService(const AnrTimerService&) = delete;
 
     // Insert a timer into the running list.  The lock must be held by the caller.
     void insertLocked(const Timer&);
@@ -230,7 +542,7 @@ class AnrTimerService {
     Timer removeLocked(timer_id_t timerId);
 
     // Add a timer to the expired list.
-    void addExpiredLocked(Timer const&);
+    void addExpiredLocked(const Timer&);
 
     // Scrub the expired list by removing all entries for non-existent processes.  The expired
     // lock must be held by the caller.
@@ -240,10 +552,10 @@ class AnrTimerService {
     static const char* statusString(Status);
 
     // The name of this service, for logging.
-    std::string const label_;
+    const std::string label_;
 
     // The callback that is invoked when a timer expires.
-    notifier_t const notifier_;
+    const notifier_t notifier_;
 
     // The two cookies passed to the notifier.
     void* notifierCookie_;
@@ -289,7 +601,12 @@ class AnrTimerService {
 
     // The clock used by this AnrTimerService.
     Ticker *ticker_;
+
+    // The global tracing specification.
+    static AnrTimerTracer tracer_;
 };
+
+AnrTimerTracer AnrTimerService::tracer_;
 
 class AnrTimerService::ProcessStats {
   public:
@@ -337,14 +654,23 @@ class AnrTimerService::ProcessStats {
 class AnrTimerService::Timer {
   public:
     // A unique ID assigned when the Timer is created.
-    timer_id_t const id;
+    const timer_id_t id;
 
     // The creation parameters.  The timeout is the original, relative timeout.
-    int const pid;
-    int const uid;
-    nsecs_t const timeout;
-    bool const extend;
-    bool const freeze;
+    const int pid;
+    const int uid;
+    const nsecs_t timeout;
+    // True if the timer may be extended.
+    const bool extend;
+    // True if process should be frozen when its timer expires.
+    const bool freeze;
+    // This is a percentage between 0 and 100.  If it is non-zero then timer will fire at
+    // timeout*split/100, and the EarlyAction will be invoked.  The timer may continue running
+    // or may expire, depending on the action.  Thus, this value "splits" the timeout into two
+    // pieces.
+    const int split;
+    // The action to take if split (above) is non-zero, when the timer reaches the split point.
+    const AnrTimerTracer::EarlyAction action;
 
     // The state of this timer.
     Status status;
@@ -354,6 +680,9 @@ class AnrTimerService::Timer {
 
     // The scheduled timeout.  This is an absolute time.  It may be extended.
     nsecs_t scheduled;
+
+    // True if this timer is split and in its second half
+    bool splitting;
 
     // True if this timer has been extended.
     bool extended;
@@ -367,22 +696,10 @@ class AnrTimerService::Timer {
 
     // The default constructor is used to create timers that are Invalid, representing the "not
     // found" condition when a collection is searched.
-    Timer() :
-            id(NOTIMER),
-            pid(0),
-            uid(0),
-            timeout(0),
-            extend(false),
-            freeze(false),
-            status(Invalid),
-            started(0),
-            scheduled(0),
-            extended(false),
-            frozen(false) {
-    }
+    Timer() : Timer(NOTIMER) { }
 
-    // This constructor creates a timer with the specified id.  This can be used as the argument
-    // to find().
+    // This constructor creates a timer with the specified id and everything else set to
+    // "empty".  This can be used as the argument to find().
     Timer(timer_id_t id) :
             id(id),
             pid(0),
@@ -390,29 +707,37 @@ class AnrTimerService::Timer {
             timeout(0),
             extend(false),
             freeze(false),
+            split(0),
+            action(AnrTimerTracer::None),
             status(Invalid),
             started(0),
             scheduled(0),
+            splitting(false),
             extended(false),
             frozen(false) {
     }
 
     // Create a new timer.  This starts the timer.
-    Timer(int pid, int uid, nsecs_t timeout, bool extend, bool freeze) :
+    Timer(int pid, int uid, nsecs_t timeout, bool extend, bool freeze,
+          AnrTimerTracer::TraceConfig trace) :
             id(nextId()),
             pid(pid),
             uid(uid),
             timeout(timeout),
             extend(extend),
             freeze(pid != 0 && freeze),
+            split(trace.earlyTimeout),
+            action(trace.action),
             status(Running),
             started(now()),
-            scheduled(started + timeout),
+            scheduled(started + (split > 0 ? (timeout*split)/100 : timeout)),
+            splitting(false),
             extended(false),
             frozen(false) {
         if (extend && pid != 0) {
             initial.fill(pid);
         }
+
         // A zero-pid is odd but it means the upper layers will never ANR the process.  Freezing
         // is always disabled.  (It won't work anyway, but disabling it avoids error messages.)
         ALOGI_IF(DEBUG_ERROR && pid == 0, "error: zero-pid %s", toString().c_str());
@@ -434,6 +759,23 @@ class AnrTimerService::Timer {
     // returns false if the timer is eligible for extension.  If the function returns false, the
     // scheduled time is updated.
     bool expire() {
+        if (split > 0 && !splitting) {
+            scheduled = started + timeout;
+            splitting = true;
+            event("split");
+            switch (action) {
+                case AnrTimerTracer::None:
+                case AnrTimerTracer::Trace:
+                    break;
+                case AnrTimerTracer::Expire:
+                    status = Expired;
+                    maybeFreezeProcess();
+                    event("expire");
+                    break;
+            }
+            return status == Expired;
+        }
+
         nsecs_t extension = 0;
         if (extend && !extended) {
             // Only one extension is permitted.
@@ -525,15 +867,15 @@ class AnrTimerService::Timer {
 
         char tag[PATH_MAX];
         snprintf(tag, sizeof(tag), "freeze(pid=%d,uid=%d)", pid, uid);
-        ATRACE_ASYNC_FOR_TRACK_BEGIN(ANR_TIMER_TRACK, tag, cookie);
+        traceBegin(tag, cookie);
         if (SetProcessProfiles(uid, pid, {"Frozen"})) {
             ALOGI("freeze %s name=%s", toString().c_str(), getName().c_str());
             frozen = true;
-            ATRACE_ASYNC_FOR_TRACK_BEGIN(ANR_TIMER_TRACK, "frozen", cookie+1);
+            traceBegin("frozen", cookie+1);
         } else {
             ALOGE("error: freezing %s name=%s error=%s",
                   toString().c_str(), getName().c_str(), strerror(errno));
-            ATRACE_ASYNC_FOR_TRACK_END(ANR_TIMER_TRACK, cookie);
+            traceEnd(cookie);
         }
     }
 
@@ -543,7 +885,7 @@ class AnrTimerService::Timer {
         // See maybeFreezeProcess for an explanation of the cookie.
         const uint32_t cookie = id << 1;
 
-        ATRACE_ASYNC_FOR_TRACK_END(ANR_TIMER_TRACK, cookie+1);
+        traceEnd(cookie+1);
         if (SetProcessProfiles(uid, pid, {"Unfrozen"})) {
             ALOGI("unfreeze %s name=%s", toString().c_str(), getName().c_str());
             frozen = false;
@@ -551,7 +893,7 @@ class AnrTimerService::Timer {
             ALOGE("error: unfreezing %s name=%s error=%s",
                   toString().c_str(), getName().c_str(), strerror(errno));
         }
-        ATRACE_ASYNC_FOR_TRACK_END(ANR_TIMER_TRACK, cookie);
+        traceEnd(cookie);
     }
 
     // Get the next free ID.  NOTIMER is never returned.
@@ -564,12 +906,17 @@ class AnrTimerService::Timer {
     }
 
     // Log an event, non-verbose.
-    void event(char const* tag) {
+    void event(const char* tag) {
         event(tag, false);
     }
 
     // Log an event, guarded by the debug flag.
-    void event(char const* tag, bool verbose) {
+    void event(const char* tag, bool verbose) {
+        if (action != AnrTimerTracer::None) {
+            char msg[PATH_MAX];
+            snprintf(msg, sizeof(msg), "%s(pid=%d)", tag, pid);
+            traceEvent(msg);
+        }
         if (verbose) {
             char name[PATH_MAX];
             ALOGI_IF(DEBUG_TIMER, "event %s %s name=%s",
@@ -594,12 +941,12 @@ class AnrTimerService::Ticker {
     struct Entry {
         const nsecs_t scheduled;
         const timer_id_t id;
-        AnrTimerService* const service;
+        AnrTimerService* service;
 
         Entry(nsecs_t scheduled, timer_id_t id, AnrTimerService* service) :
                 scheduled(scheduled), id(id), service(service) {};
 
-        bool operator<(const Entry &r) const {
+        bool operator<(const Entry& r) const {
             return scheduled == r.scheduled ? id < r.id : scheduled < r.scheduled;
         }
     };
@@ -664,7 +1011,7 @@ class AnrTimerService::Ticker {
     }
 
     // Remove every timer associated with the service.
-    void remove(AnrTimerService const* service) {
+    void remove(const AnrTimerService* service) {
         AutoMutex _l(lock_);
         timer_id_t front = headTimerId();
         for (auto i = running_.begin(); i != running_.end(); ) {
@@ -746,7 +1093,7 @@ class AnrTimerService::Ticker {
     // scheduled expiration time of the first entry.
     void restartLocked() {
         if (!running_.empty()) {
-            Entry const x = *(running_.cbegin());
+            const Entry x = *(running_.cbegin());
             nsecs_t delay = x.scheduled - now();
             // Force a minimum timeout of 10ns.
             if (delay < 10) delay = 10;
@@ -807,7 +1154,7 @@ class AnrTimerService::Ticker {
 std::atomic<size_t> AnrTimerService::Ticker::idGen_;
 
 
-AnrTimerService::AnrTimerService(char const* label, notifier_t notifier, void* cookie,
+AnrTimerService::AnrTimerService(const char* label, notifier_t notifier, void* cookie,
             jweak jtimer, Ticker* ticker, bool extend, bool freeze) :
         label_(label),
         notifier_(notifier),
@@ -841,7 +1188,7 @@ const char* AnrTimerService::statusString(Status s) {
 
 AnrTimerService::timer_id_t AnrTimerService::start(int pid, int uid, nsecs_t timeout) {
     AutoMutex _l(lock_);
-    Timer t(pid, uid, timeout, extend_, freeze_);
+    Timer t(pid, uid, timeout, extend_, freeze_, tracer_.getConfig(pid));
     insertLocked(t);
     t.start();
     counters_.started++;
@@ -918,7 +1265,7 @@ bool AnrTimerService::release(timer_id_t id) {
     return okay;
 }
 
-void AnrTimerService::addExpiredLocked(Timer const& timer) {
+void AnrTimerService::addExpiredLocked(const Timer& timer) {
     scrubExpiredLocked();
     expired_.insert(timer);
 }
@@ -1077,7 +1424,7 @@ jlong anrTimerCreate(JNIEnv* env, jobject jtimer, jstring jname,
     ScopedUtfChars name(env, jname);
     jobject timer = env->NewWeakGlobalRef(jtimer);
     AnrTimerService* service = new AnrTimerService(name.c_str(),
-            anrNotify, &gAnrArgs, timer, gAnrArgs.ticker, extend, freeze);
+        anrNotify, &gAnrArgs, timer, gAnrArgs.ticker, extend, freeze);
     return reinterpret_cast<jlong>(service);
 }
 
@@ -1122,6 +1469,19 @@ jboolean anrTimerRelease(JNIEnv* env, jclass, jlong ptr, jint timerId) {
     return toService(ptr)->release(timerId);
 }
 
+jstring anrTimerTrace(JNIEnv* env, jclass, jobjectArray jconfig) {
+    if (!nativeSupportEnabled) return nullptr;
+    std::vector<std::string> config;
+    const jsize jlen = jconfig == nullptr ? 0 : env->GetArrayLength(jconfig);
+    for (size_t i = 0; i < jlen; i++) {
+        jstring je = static_cast<jstring>(env->GetObjectArrayElement(jconfig, i));
+        ScopedUtfChars e(env, je);
+        config.push_back(e.c_str());
+    }
+    auto r = AnrTimerService::trace(config);
+    return env->NewStringUTF(r.second.c_str());
+}
+
 jobjectArray anrTimerDump(JNIEnv *env, jclass, jlong ptr) {
     if (!nativeSupportEnabled) return nullptr;
     std::vector<std::string> stats = toService(ptr)->getDump();
@@ -1134,22 +1494,23 @@ jobjectArray anrTimerDump(JNIEnv *env, jclass, jlong ptr) {
 }
 
 static const JNINativeMethod methods[] = {
-    {"nativeAnrTimerSupported", "()Z",  (void*) anrTimerSupported},
-    {"nativeAnrTimerCreate",   "(Ljava/lang/String;ZZ)J", (void*) anrTimerCreate},
-    {"nativeAnrTimerClose",    "(J)I",     (void*) anrTimerClose},
-    {"nativeAnrTimerStart",    "(JIIJ)I",  (void*) anrTimerStart},
-    {"nativeAnrTimerCancel",   "(JI)Z",    (void*) anrTimerCancel},
-    {"nativeAnrTimerAccept",   "(JI)Z",    (void*) anrTimerAccept},
-    {"nativeAnrTimerDiscard",  "(JI)Z",    (void*) anrTimerDiscard},
-    {"nativeAnrTimerRelease",  "(JI)Z",    (void*) anrTimerRelease},
-    {"nativeAnrTimerDump",     "(J)[Ljava/lang/String;", (void*) anrTimerDump},
+    {"nativeAnrTimerSupported",   "()Z",        (void*) anrTimerSupported},
+    {"nativeAnrTimerCreate",      "(Ljava/lang/String;ZZ)J", (void*) anrTimerCreate},
+    {"nativeAnrTimerClose",       "(J)I",       (void*) anrTimerClose},
+    {"nativeAnrTimerStart",       "(JIIJ)I",    (void*) anrTimerStart},
+    {"nativeAnrTimerCancel",      "(JI)Z",      (void*) anrTimerCancel},
+    {"nativeAnrTimerAccept",      "(JI)Z",      (void*) anrTimerAccept},
+    {"nativeAnrTimerDiscard",     "(JI)Z",      (void*) anrTimerDiscard},
+    {"nativeAnrTimerRelease",     "(JI)Z",      (void*) anrTimerRelease},
+    {"nativeAnrTimerTrace",       "([Ljava/lang/String;)Ljava/lang/String;", (void*) anrTimerTrace},
+    {"nativeAnrTimerDump",        "(J)[Ljava/lang/String;", (void*) anrTimerDump},
 };
 
 } // anonymous namespace
 
 int register_android_server_utils_AnrTimer(JNIEnv* env)
 {
-    static const char *className = "com/android/server/utils/AnrTimer";
+    static const char* className = "com/android/server/utils/AnrTimer";
     jniRegisterNativeMethods(env, className, methods, NELEM(methods));
 
     nativeSupportEnabled = NATIVE_SUPPORT;

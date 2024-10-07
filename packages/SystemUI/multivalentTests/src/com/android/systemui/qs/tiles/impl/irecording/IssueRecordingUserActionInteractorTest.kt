@@ -31,6 +31,7 @@ import com.android.systemui.qs.pipeline.domain.interactor.panelInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.recordissue.RecordIssueDialogDelegate
+import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
@@ -40,11 +41,15 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class IssueRecordingUserActionInteractorTest : SysuiTestCase() {
+
+    @Mock private lateinit var recordingController: RecordingController
 
     val user = UserHandle(1)
     val kosmos = Kosmos().also { it.testCase = this }
@@ -56,6 +61,7 @@ class IssueRecordingUserActionInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
+        MockitoAnnotations.initMocks(this)
         hasCreatedDialogDelegate = false
         with(kosmos) {
             val factory =
@@ -84,7 +90,8 @@ class IssueRecordingUserActionInteractorTest : SysuiTestCase() {
                     dialogTransitionAnimator,
                     panelInteractor,
                     userTracker,
-                    factory
+                    factory,
+                    recordingController,
                 )
         }
     }

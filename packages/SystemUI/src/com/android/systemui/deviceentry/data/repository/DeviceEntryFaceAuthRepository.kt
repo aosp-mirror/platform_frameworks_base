@@ -57,7 +57,10 @@ import com.android.systemui.log.FaceAuthenticationLogger
 import com.android.systemui.log.SessionTracker
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.scene.shared.model.Scenes.Bouncer
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
@@ -159,6 +162,7 @@ constructor(
     private val powerInteractor: PowerInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val sceneInteractor: dagger.Lazy<SceneInteractor>,
     @FaceDetectTableLog private val faceDetectLog: TableLogBuffer,
     @FaceAuthTableLog private val faceAuthLog: TableLogBuffer,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -385,7 +389,18 @@ constructor(
                 biometricSettingsRepository.isFaceAuthEnrolledAndEnabled,
                 "isFaceAuthEnrolledAndEnabled"
             ),
-            Pair(keyguardRepository.isKeyguardGoingAway.isFalse(), "keyguardNotGoingAway"),
+            Pair(
+                if (SceneContainerFlag.isEnabled) {
+                    sceneInteractor
+                        .get()
+                        .transitionState
+                        .map { it.isTransitioning(to = Scenes.Gone) || it.isIdle(Scenes.Gone) }
+                        .isFalse()
+                } else {
+                    keyguardRepository.isKeyguardGoingAway.isFalse()
+                },
+                "keyguardNotGoingAway"
+            ),
             Pair(
                 keyguardTransitionInteractor
                     .isInTransitionWhere(toStatePredicate = KeyguardState::deviceIsAsleepInState)
@@ -397,7 +412,11 @@ constructor(
                     .isFalse()
                     .or(
                         alternateBouncerInteractor.isVisible.or(
-                            keyguardInteractor.primaryBouncerShowing
+                            if (SceneContainerFlag.isEnabled) {
+                                sceneInteractor.get().transitionState.map { it.isIdle(Bouncer) }
+                            } else {
+                                keyguardInteractor.primaryBouncerShowing
+                            }
                         )
                     ),
                 "secureCameraNotActiveOrAnyBouncerIsShowing"

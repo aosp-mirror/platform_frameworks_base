@@ -56,20 +56,25 @@ import static androidx.window.extensions.embedding.TaskFragmentContainer.Overlay
 import android.annotation.CallbackExecutor;
 import android.app.Activity;
 import android.app.ActivityClient;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
+import android.app.AppGlobals;
 import android.app.Application;
 import android.app.Instrumentation;
 import android.app.servertransaction.ClientTransactionListenerController;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -116,6 +121,7 @@ import java.util.function.BiConsumer;
 public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmentCallback,
         ActivityEmbeddingComponent, DividerPresenter.DragEventCallback {
     static final String TAG = "SplitController";
+    static final boolean ENABLE_SHELL_TRANSITIONS = getShellTransitEnabled();
 
     // TODO(b/243518738): Move to WM Extensions if we have requirement of overlay without
     //  association. It's not set in WM Extensions nor Wm Jetpack library currently.
@@ -274,6 +280,26 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             Log.i(TAG, "Setting embedding rules. Size: " + rules.size());
             mSplitRules.clear();
             mSplitRules.addAll(rules);
+
+            if (!Flags.aeBackStackRestore() || !mPresenter.isWaitingToRebuildTaskContainers()) {
+                return;
+            }
+
+            try {
+                final TransactionRecord transactionRecord =
+                        mTransactionManager.startNewTransaction();
+                final WindowContainerTransaction wct = transactionRecord.getTransaction();
+                if (mPresenter.rebuildTaskContainers(wct, rules)) {
+                    transactionRecord.apply(false /* shouldApplyIndependently */);
+                    updateCallbackIfNecessary();
+                } else {
+                    transactionRecord.abort();
+                }
+            } catch (IllegalStateException ex) {
+                Log.e(TAG, "Having an existing transaction while running restoration with"
+                        + "new rules!! It is likely too late to perform the restoration "
+                        + "already!?", ex);
+            }
         }
     }
 
@@ -898,6 +924,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     }
 
     @GuardedBy("mLock")
+    void onTaskFragmentParentRestored(@NonNull WindowContainerTransaction wct, int taskId,
+            @NonNull TaskFragmentParentInfo parentInfo) {
+        onTaskFragmentParentInfoChanged(wct, taskId, parentInfo);
+    }
+
+    @GuardedBy("mLock")
     void updateContainersInTaskIfVisible(@NonNull WindowContainerTransaction wct, int taskId) {
         final TaskContainer taskContainer = getTaskContainer(taskId);
         if (taskContainer == null) {
@@ -906,7 +938,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         if (taskContainer.isVisible()) {
             updateContainersInTask(wct, taskContainer);
-        } else if (Flags.fixNoContainerUpdateWithoutResize()) {
+        } else {
             // the TaskFragmentContainers need to be updated when the task becomes visible
             taskContainer.mTaskFragmentContainersNeedsUpdate = true;
         }
@@ -919,7 +951,8 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
 
         // Update all TaskFragments in the Task. Make a copy of the list since some may be
         // removed on updating.
-        final List<TaskFragmentContainer> containers = taskContainer.getTaskFragmentContainers();
+        final List<TaskFragmentContainer> containers
+                = new ArrayList<>(taskContainer.getTaskFragmentContainers());
         for (int i = containers.size() - 1; i >= 0; i--) {
             final TaskFragmentContainer container = containers.get(i);
             // Wait until onTaskFragmentAppeared to update new container.
@@ -2536,6 +2569,21 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return mTaskContainers.get(taskId);
     }
 
+    @NonNull
+    @GuardedBy("mLock")
+    List<TaskContainer> getTaskContainers() {
+        final ArrayList<TaskContainer> taskContainers = new ArrayList<>();
+        for (int i = mTaskContainers.size() - 1; i >= 0; i--) {
+            taskContainers.add(mTaskContainers.valueAt(i));
+        }
+        return taskContainers;
+    }
+
+    @GuardedBy("mLock")
+    void setSavedState(@NonNull Bundle savedState) {
+        mPresenter.setSavedState(savedState);
+    }
+
     @GuardedBy("mLock")
     void addTaskContainer(int taskId, TaskContainer taskContainer) {
         mTaskContainers.put(taskId, taskContainer);
@@ -2829,6 +2877,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         return getActiveSplitForContainer(container) != null;
     }
 
+    void scheduleBackup() {
+        synchronized (mLock) {
+            mPresenter.scheduleBackup();
+        }
+    }
+
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
 
         @Override
@@ -2840,6 +2894,36 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return;
             }
             synchronized (mLock) {
+                if (mPresenter.isWaitingToRebuildTaskContainers()) {
+                    Log.w(TAG, "Rebuilding aborted, clean up and restart");
+
+                    // Retrieve the Task intent.
+                    final int taskId = getTaskId(activity);
+                    Intent taskIntent = null;
+                    final ActivityManager am = activity.getSystemService(ActivityManager.class);
+                    final List<ActivityManager.AppTask> appTasks = am.getAppTasks();
+                    for (ActivityManager.AppTask appTask : appTasks) {
+                        if (appTask.getTaskInfo().taskId == taskId) {
+                            taskIntent = appTask.getTaskInfo().baseIntent.cloneFilter();
+                            break;
+                        }
+                    }
+
+                    // Clean up and abort the restoration
+                    // TODO(b/369488857): also to remove the non-organized activities in the Task?
+                    final TransactionRecord transactionRecord =
+                            mTransactionManager.startNewTransaction();
+                    final WindowContainerTransaction wct = transactionRecord.getTransaction();
+                    mPresenter.abortTaskContainerRebuilding(wct);
+                    transactionRecord.apply(false /* shouldApplyIndependently */);
+
+                    // Start the Task root activity.
+                    if (taskIntent != null) {
+                        activity.startActivity(taskIntent);
+                    }
+                    return;
+                }
+
                 final IBinder activityToken = activity.getActivityToken();
                 final IBinder initialTaskFragmentToken =
                         getTaskFragmentTokenFromActivityClientRecord(activity);
@@ -3285,5 +3369,18 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             action.accept(wct);
             transactionRecord.apply(false /* shouldApplyIndependently */);
         }
+    }
+
+    // TODO(b/207070762): cleanup with legacy app transition
+    private static boolean getShellTransitEnabled() {
+        try {
+            if (AppGlobals.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_AUTOMOTIVE, 0)) {
+                return SystemProperties.getBoolean("persist.wm.debug.shell_transit", true);
+            }
+        } catch (RemoteException re) {
+            Log.w(TAG, "Error getting system features");
+        }
+        return true;
     }
 }

@@ -104,23 +104,18 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g>-მა და სხვა გახსნილმა აპებმა აღმოაჩინეს ეკრანის ეს ანაბეჭდი."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"დაამატეთ შენიშვნა"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"ბმულის დართვა"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"სხვა პროფილებიდან ბმულების დამატება შეუძლებელია"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"ეკრანის ჩამწერი"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ეკრანის ჩანაწერი მუშავდება"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"უწყვეტი შეტყობინება ეკრანის ჩაწერის სესიისთვის"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"გსურთ თქვენი ეკრანის ჩაწერა?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ერთი აპის ჩაწერა"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"მთლიანი ეკრანის ჩაწერა"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"მთლიანი ეკრანის ჩაწერისას ჩაიწერება ყველაფერი, რაც თქვენს ეკრანზე გამოჩნდება. ამიტომ სიფრთხილე გამოიჩინეთ ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"აპის ჩაწერისას ჩაიწერება ყველაფერი, რაც ამ აპში გამოჩნდება ან დაიკვრება. ამიტომ სიფრთხილე გამოიჩინეთ ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ეკრანის ჩაწერა"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"ჩაწერისთვის აპის არჩევა"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"აუდიოს ჩაწერა"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"მოწყობილობის აუდიო"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ხმა თქვენი მოწყობილობიდან, როგორიც არის მუსიკა, საუბარი და ზარები"</string>
@@ -298,7 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"ეკრანმზოგი"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ეთერნეტი"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"არ შემაწუხოთ"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"პრიორიტეტული რეჟიმები"</string>
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"რეჟიმები"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"დაწყვილებული მოწყობილობები მიუწვდომელია"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"შეეხეთ მოწყობილობის დასაკავშირებლად ან გასათიშად"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth-ის გამოყენება"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"დაკავშირებული"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"აუდიოს გაზიარება"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"შეეხეთ აუდიოს გადასართავად ან გასაზიარებლად"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"შენახული"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"კავშირის გაწყვეტა"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"გააქტიურება"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Bluetooth ჩაირთვება ხვალ დილით"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"აუდიოს გაზიარება"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"მიმდინარებოს აუდიოს გაზიარება"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"აუდიო გაზიარების პარამეტრების შეყვანა"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ბატარეა"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"აუდიო"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ყურსაცვამი"</string>
@@ -437,10 +434,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"პარამეტრების გახსნა"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"სხვა მოწყობილობა"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"მიმოხილვის გადართვა"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"პრიორიტეტული რეჟიმები"</string>
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"რეჟიმები"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"მზადაა"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"პარამეტრები"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"ჩართული"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ჩართულია • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"გამორთული"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"დაყენება"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"პარამეტრებში მართვა"</string>
@@ -535,25 +533,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ს ექნება წვდომა ყველა ინფორმაციაზე, რომელიც თქვენს ეკრანზე გამოჩნდება ან თქვენს მოწყობილობაზე დაიკვრება ჩაწერის ან ტრანსლირების განმავლობაში. აღნიშნული მოიცავს ისეთ ინფორმაციას, როგორიც არის პაროლები, გადახდის დეტალები, ფოტოები, შეტყობინებები და თქვენ მიერ დაკრული აუდიო."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"დაიწყოს ჩაწერა ან ტრანსლირება?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ამ ფუნქციის მომწოდებელ სერვისს ექნება წვდომა ყველა ინფორმაციაზე, რომელიც თქვენს ეკრანზე გამოჩნდება ან თქვენს მოწყობილობაზე დაიკვრება ჩაწერის ან ტრანსლირების განმავლობაში. აღნიშნული მოიცავს ისეთ ინფორმაციას, როგორიც არის პაროლები, გადახდის დეტალები, ფოტოები, შეტყობინებები და თქვენ მიერ დაკრული აუდიო."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"აპის გაზიარება ან ჩაწერა"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"გსურთ თქვენი ეკრანის <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-თან გაზიარება?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"ერთი აპის გაზიარება"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"მთლიანი ეკრანის გაზიარება"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"ერთი აპის გაზიარება"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"მთლიანი ეკრანის გაზიარება"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"მთლიანი ეკრანის გაზიარებისას <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ხედავს ყველაფერს, რაც თქვენს ეკრანზეა. ამიტომ სიფრთხილე გამოიჩინეთ ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"აპის გაზიარებისას <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ხედავს ყველაფერს, რაც ჩანს ან უკრავს ამ აპში. ამიტომ სიფრთხილე გამოიჩინეთ ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"ეკრანის გაზიარება"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"<xliff:g id="APP_NAME">%1$s</xliff:g>-მა გათიშა ეს ვარიანტი"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"გაზიარებისთვის აპის არჩევა"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"გსურთ თქვენი ეკრანის ტრანსლირება?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"ერთი აპის ტრანსლირება"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"მთლიანი ეკრანის ტრანსლირება"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"თქვენი მთლიანი ეკრანის ტრანსლირების დროს, რაც თქვენს ეკრანზეა ყველაფერი ჩანს. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"აპის ტრანსლირების დროს ყველაფერი ჩანს, რაც იკვრება ან გამოსახულია აპში. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"ეკრანის ტრანსლირება"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"ტრანსლირებისთვის აპის არჩევა"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"გსურთ გაზიარების დაწყება?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"გაზიარებისას, ჩაწერისას ან ტრანსლირებისას, Android-ს წვდომა აქვს ყველაფერზე, რაც ჩანს თქვენს ეკრანზე ან უკრავს თქვენს მოწყობილობაზე. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"აპის გაზიარებისას, ჩაწერისას ან ტრანსლირებისას, Android-ს წვდომა აქვს ყველაფერზე, რაც ჩანს ან იკვრება აპში. ამიტომ იყავით ფრთხილად ისეთ ინფორმაციასთან, როგორიცაა პაროლები, გადახდის დეტალები, შეტყობინებები, ფოტოები, აუდიო და ვიდეო."</string>
@@ -574,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"საუბრები"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ყველა ჩუმი შეტყობინების გასუფთავება"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"შეტყობინებები დაპაუზდა „არ შემაწუხოთ“ რეჟიმის მეშვეობით"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"დაწყება ახლავე"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"შეტყობინებები არ არის."</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ახალი შეტყობინებები არ არის"</string>
@@ -726,6 +727,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"კარგი სატელიტური კავშირი"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ხელმისაწვდომია სატელიტური კავშირი"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"სატელიტური SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"გადაუდებელი ზარი ან SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"სამსახურის პროფილი"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ზოგისთვის გასართობია, მაგრამ არა ყველასთვის"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"სისტემის UI ტუნერი გაძლევთ დამატებით გზებს Android-ის სამომხმარებლო ინტერფეისის პარამეტრების დაყენებისთვის. ეს ექსპერიმენტული მახასიათებლები შეიძლება შეიცვალოს, შეწყდეს ან გაქრეს მომავალ ვერსიებში. სიფრთხილით გააგრძელეთ."</string>
@@ -1179,6 +1181,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"დინამიკები და დისპლეები"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"შემოთავაზებული მოწყობილობები"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"შემავალი"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"გამომავალი"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"შეწყვიტეთ გაზიარებული სესია, რათა მულტიმედია სხვა მოწყობილობაზე გადაიტანოთ"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"შეწყვეტა"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ტრანსლირების მუშაობის პრინციპი"</string>
@@ -1289,6 +1293,7 @@
     <string name="add" msgid="81036585205287996">"დამატება"</string>
     <string name="manage_users" msgid="1823875311934643849">"მართვა"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"ამ შეტყობინების გადათრევა გაყოფილ ეკრანებს შორის არ არის მხარდაჭერილი."</string>
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"მდებარეობა აქტიურია"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi მიუწვდომელია"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"პრიორიტეტული რეჟიმი"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"მაღვიძარა დაყენებულია"</string>
@@ -1345,6 +1350,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"ჩაკეთილი ეკრანის მორგება"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ჩაკეტილი ეკრანის მოსარგებად გაბლოკეთ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi მიუწვდომელია"</string>
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"მდებარეობა აქტიურია"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"კამერა დაბლოკილია"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"კამერა და მიკროფონი დაბლოკილია"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"მიკროფონი დაბლოკილია"</string>
@@ -1392,9 +1398,16 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"ხატულის ჩაკეცვა"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"ხატულის გაფართოება"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ან"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"სახელური ჩავლებისთვის"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"ნავიგაცია კლავიატურის გამოყენებით"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"კლავიატურის მალსახმობების სწავლა"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"ნავიგაცია სენსორული პანელის გამოყენებით"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"სენსორული პანელის ჟესტების სწავლა"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ნავიგაცია კლავიატურის და სენსორული პანელის გამოყენებით"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"სენსორული პანელის ჟესტების, კლავიატურის მალსახმობების და სხვა ფუნქციების სწავლა"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"უკან დაბრუნების ჟესტი"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"მთავარ ეკრანზე გადასვლის ჟესტი"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"მოქმედების კლავიში"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ბოლო აპების ნახვა"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"მზადაა"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"უკან დაბრუნება"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"უკან დასაბრუნებლად სენსორულ პანელზე გადაფურცლეთ მარცხნივ ან მარჯვნივ სამი თითის გამოყენებით ნებისმიერ ადგილას.\n\nამისთვის თქვენ ასევე შეგიძლიათ გამოიყენოთ კლავიატურის მალსახმობის მოქმედება + ESC."</string>
@@ -1404,6 +1417,10 @@
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"თქვენს მთავარ ეკრანზე ნებისმიერ დროს გადასასვლელად გადაფურცლეთ ეკრანის ქვემოდან ზემოთ სამი თითით."</string>
     <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"მშვენიერია!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"თქვენ შეასრულეთ მთავარ ეკრანზე დაბრუნების ჟესტი."</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ბოლო აპების ნახვა"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"თქვენს სენსორულ პანელზე სამი თითით გადაფურცლეთ ზემოთ და მოიცადეთ."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"შესანიშნავია!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"თქვენ დაასრულეთ ბოლო აპების ხედის ჟესტი."</string>
     <string name="tutorial_action_key_title" msgid="2659466586996495447">"მოქმედების კლავიში"</string>
     <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"აპებზე წვდომისთვის დააჭირეთ მოქმედების კლავიშს თქვენს კლავიატურაზე."</string>
     <string name="tutorial_action_key_success_title" msgid="466467860120112933">"გილოცავთ!"</string>
@@ -1427,8 +1444,15 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"სამი თითით გადაფურცლეთ ზემოთ და მოიცადეთ. შეეხეთ მეტი ჟესტის შესასწავლად."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"ყველა აპის სანახავად გამოიყენეთ თქვენი კლავიატურა"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"ნებისმიერ დროს დააჭირეთ მოქმედების კლავიშს. შეეხეთ მეტი ჟესტის შესასწავლად."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"დამატებითი დაბინდვის ფუქნცია ახლა განთავსებულია სიკაშკაშის პანელზე"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"ახლა თქვენ შეგიძლიათ დამატებით დაბინდოთ ეკრანი მის ზედა ნაწილში სიკაშკაშის დონის კიდევ უფრო შემცირების გზით.\n\nეს ყველაზე უკეთ ბნელ გარემოში ყოფნისას მუშაობს."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"დამატებითი დაბინდვის მალსახმობის ამოშლა"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"დამატებითი დაბინდვის მალსახმობი ამოშლილია. სიკაშკაშის შესამცირებლად გამოიყენეთ სიკაშკაშის ჩვეულებრივი პანელი."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"დამატებითი დაბინდვის ფუნქცია ახლა სიკაშკაშის სლაიდერზეა განთავსებული"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"ეკრანის დამატებითი დაბინდვა უკვე სიკაშკაშის დონის კიდევ უფრო შემცირების გზით შეგიძლიათ.\n\nვინაიდან ეს ფუნქცია უკვე სიკაშკაშის სლაიდერის ნაწილია, ამოშლილია დამატებითი დაბინდვის მალსახმობები."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"დამატებითი დაბინდვის მალსახმობების ამოშლა"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"დამატებითი დაბინდვის მალსახმობები ამოშლილია"</string>
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"კავშირი"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"მარტივი წვდომა"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"ხელსაწყოები"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"კონფიდენციალურობა"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"მოწოდებულია აპების მიერ"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ეკრანი"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"უცნობი"</string>
 </resources>

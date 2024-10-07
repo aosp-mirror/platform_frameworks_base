@@ -884,10 +884,13 @@ final class DefaultPermissionGrantPolicy {
             }
 
             // Allow voice search on wear
-            grantPermissionsToSystemPackage(pm,
-                    getDefaultSystemHandlerActivityPackage(pm,
-                            SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId),
-                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS);
+            String voiceSearchPackage = getDefaultSystemHandlerActivityPackage(pm,
+                    SearchManager.INTENT_ACTION_GLOBAL_SEARCH, userId);
+            grantPermissionsToSystemPackage(pm, voiceSearchPackage,
+                    userId, PHONE_PERMISSIONS, CALENDAR_PERMISSIONS, NEARBY_DEVICES_PERMISSIONS,
+                    COARSE_BACKGROUND_LOCATION_PERMISSIONS);
+            revokeRuntimePermissions(pm, voiceSearchPackage,
+                FINE_LOCATION_PERMISSIONS, false, userId);
         }
 
         // Print Spooler
@@ -1366,7 +1369,7 @@ final class DefaultPermissionGrantPolicy {
 
         for (int requestedPermissionNum = 0; requestedPermissionNum < numRequestedPermissions;
                 requestedPermissionNum++) {
-            String permission = requestedPermissions[requestedPermissionNum];
+            String permission = sortedRequestedPermissions[requestedPermissionNum];
 
             // If there is a disabled system app it may request a permission the updated
             // version ot the data partition doesn't, In this case skip the permission.

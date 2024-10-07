@@ -71,9 +71,10 @@
             android:layout_height="wrap_content"
             android:background="@drawable/input_method_switch_button"
             android:layout_gravity="end"
-            android:text="@string/input_method_language_settings"
+            android:text="@string/input_method_switcher_settings_button"
             android:fontFamily="google-sans-text"
             android:textAppearance="?attr/textAppearance"
+            android:contentDescription="@string/input_method_language_settings"
             android:visibility="gone"/>
 
     </LinearLayout>

@@ -1325,31 +1325,6 @@ class ActiveAdmin {
         pw.print("encryptionRequested=");
         pw.println(encryptionRequested);
 
-        if (!Flags.dumpsysPolicyEngineMigrationEnabled()) {
-            pw.print("disableCamera=");
-            pw.println(disableCamera);
-
-            pw.print("disableScreenCapture=");
-            pw.println(disableScreenCapture);
-
-            pw.print("requireAutoTime=");
-            pw.println(requireAutoTime);
-
-            if (permittedInputMethods != null) {
-                pw.print("permittedInputMethods=");
-                pw.println(permittedInputMethods);
-            }
-
-            pw.println("userRestrictions:");
-            UserRestrictionsUtils.dumpRestrictions(pw, "  ", userRestrictions);
-        }
-
-        if (!Flags.policyEngineMigrationV2Enabled()
-                || !Flags.dumpsysPolicyEngineMigrationEnabled()) {
-            pw.print("mUsbDataSignaling=");
-            pw.println(mUsbDataSignalingEnabled);
-        }
-
         pw.print("disableCallerId=");
         pw.println(disableCallerId);
 

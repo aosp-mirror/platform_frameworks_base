@@ -18,7 +18,6 @@ package com.android.systemui.shade.data.repository
 import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -102,9 +101,6 @@ interface ShadeRepository {
      */
     @Deprecated("Use ShadeInteractor.isQsBypassingShade instead")
     val legacyExpandImmediate: StateFlow<Boolean>
-
-    /** Whether dual shade should be aligned to the bottom (true) or to the top (false). */
-    val isDualShadeAlignedToBottom: Boolean
 
     /**
      * Whether the shade layout should be wide (true) or narrow (false).
@@ -237,9 +233,6 @@ class ShadeRepositoryImpl @Inject constructor(@Application applicationContext: C
 
     private val _isShadeLayoutWide = MutableStateFlow(false)
     override val isShadeLayoutWide: StateFlow<Boolean> = _isShadeLayoutWide.asStateFlow()
-
-    override val isDualShadeAlignedToBottom =
-        applicationContext.resources.getBoolean(R.bool.config_dualShadeAlignedToBottom)
 
     override fun setShadeLayoutWide(isShadeLayoutWide: Boolean) {
         _isShadeLayoutWide.value = isShadeLayoutWide

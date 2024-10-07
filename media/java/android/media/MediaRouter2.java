@@ -288,8 +288,7 @@ public final class MediaRouter2 {
 
     /**
      * Returns a proxy MediaRouter2 instance that allows you to control the routing of an app
-     * specified by {@code clientPackageName}. Returns {@code null} if the specified package name
-     * does not exist.
+     * specified by {@code clientPackageName}.
      *
      * <p>Proxy MediaRouter2 instances operate differently than regular MediaRouter2 instances:
      *

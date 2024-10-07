@@ -34,8 +34,7 @@ import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.realKeyguardTransitionRepository
-import com.android.systemui.keyguard.shared.model.DozeStateModel
-import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -49,10 +48,9 @@ import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,6 +76,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
 
     private val underTest by lazy { kosmos.communalSceneTransitionInteractor }
     private val keyguardTransitionRepository by lazy { kosmos.realKeyguardTransitionRepository }
+    private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
 
     private val ownerName = CommunalSceneTransitionInteractor::class.java.simpleName
     private val progress = MutableSharedFlow<Float>()
@@ -110,7 +109,9 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
         kosmos.fakeFeatureFlagsClassic.set(Flags.COMMUNAL_SERVICE_ENABLED, true)
         underTest.start()
         kosmos.communalSceneRepository.setTransitionState(sceneTransitions)
-        testScope.launch { keyguardTransitionRepository.emitInitialStepsFromOff(LOCKSCREEN) }
+        testScope.launch {
+            keyguardTransitionRepository.emitInitialStepsFromOff(LOCKSCREEN, testSetup = true)
+        }
     }
 
     /** Transition from blank to glanceable hub. This is the default case. */
@@ -217,15 +218,11 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
     @Test
     fun transition_from_hub_end_in_dream() =
         testScope.runTest {
-            // Device is dreaming and not dozing.
-            kosmos.powerInteractor.setAwakeForTest()
-            kosmos.fakeKeyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(from = DozeStateModel.DOZE, to = DozeStateModel.FINISH)
-            )
+            // Device is dreaming and occluded.
             kosmos.fakeKeyguardRepository.setKeyguardOccluded(true)
             kosmos.fakeKeyguardRepository.setDreaming(true)
             kosmos.fakeKeyguardRepository.setDreamingWithOverlay(true)
-            advanceTimeBy(600L)
+            runCurrent()
 
             sceneTransitions.value = hubToBlank
 
@@ -660,7 +657,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     from = LOCKSCREEN,
                     to = OCCLUDED,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET
+                    modeOnCanceled = TransitionModeOnCanceled.RESET,
                 )
             )
 
@@ -747,7 +744,7 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                     from = LOCKSCREEN,
                     to = OCCLUDED,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET
+                    modeOnCanceled = TransitionModeOnCanceled.RESET,
                 )
             )
 
@@ -788,5 +785,130 @@ class CommunalSceneTransitionInteractorTest : SysuiTestCase() {
                         ownerName = ownerName,
                     )
                 )
+        }
+
+    /** Verifies that we correctly transition to GONE after keyguard goes away */
+    @Test
+    fun transition_to_blank_after_unlock_should_go_to_gone() =
+        testScope.runTest {
+            keyguardRepository.setKeyguardShowing(true)
+            sceneTransitions.value = Idle(CommunalScenes.Communal)
+
+            val currentStep by collectLastValue(keyguardTransitionRepository.transitions)
+
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = LOCKSCREEN,
+                        to = GLANCEABLE_HUB,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    )
+                )
+
+            // Keyguard starts exiting after a while, then fully exits after some time.
+            advanceTimeBy(1.seconds)
+            keyguardRepository.setKeyguardGoingAway(true)
+            advanceTimeBy(2.seconds)
+            keyguardRepository.setKeyguardGoingAway(false)
+            keyguardRepository.setKeyguardShowing(false)
+            runCurrent()
+
+            // We snap to the blank scene as a result of keyguard going away.
+            sceneTransitions.value = Idle(CommunalScenes.Blank)
+
+            assertThat(currentStep)
+                .isEqualTo(
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = GONE,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    )
+                )
+        }
+
+    /**
+     * KTF: LOCKSCREEN -> ALTERNATE_BOUNCER starts but then STL: GLANCEABLE_HUB -> BLANK interrupts.
+     *
+     * Verifies that we correctly cancel the previous KTF state before starting the glanceable hub
+     * transition.
+     */
+    @Test
+    fun transition_to_blank_after_ktf_started_another_transition() =
+        testScope.runTest {
+            // Another transition has already started to the alternate bouncer.
+            keyguardTransitionRepository.startTransition(
+                TransitionInfo(
+                    from = LOCKSCREEN,
+                    to = ALTERNATE_BOUNCER,
+                    animator = null,
+                    ownerName = "external",
+                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                )
+            )
+
+            val allSteps by collectValues(keyguardTransitionRepository.transitions)
+            // Keep track of existing size to drop any pre-existing steps that we don't
+            // care about.
+            val numToDrop = allSteps.size
+
+            sceneTransitions.value = hubToBlank
+            runCurrent()
+            progress.emit(0.4f)
+            runCurrent()
+            // We land on blank.
+            sceneTransitions.value = Idle(CommunalScenes.Blank)
+
+            // We should cancel the previous ALTERNATE_BOUNCER transition and transition back
+            // to the GLANCEABLE_HUB before we can transition away from it.
+            assertThat(allSteps.drop(numToDrop))
+                .containsExactly(
+                    TransitionStep(
+                        from = LOCKSCREEN,
+                        to = ALTERNATE_BOUNCER,
+                        transitionState = CANCELED,
+                        value = 0f,
+                        ownerName = "external",
+                    ),
+                    TransitionStep(
+                        from = ALTERNATE_BOUNCER,
+                        to = GLANCEABLE_HUB,
+                        transitionState = STARTED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = ALTERNATE_BOUNCER,
+                        to = GLANCEABLE_HUB,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = LOCKSCREEN,
+                        transitionState = STARTED,
+                        value = 0f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = LOCKSCREEN,
+                        transitionState = RUNNING,
+                        value = 0.4f,
+                        ownerName = ownerName,
+                    ),
+                    TransitionStep(
+                        from = GLANCEABLE_HUB,
+                        to = LOCKSCREEN,
+                        transitionState = FINISHED,
+                        value = 1f,
+                        ownerName = ownerName,
+                    ),
+                )
+                .inOrder()
         }
 }

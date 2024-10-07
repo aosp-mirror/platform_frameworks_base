@@ -18,7 +18,7 @@ package com.android.systemui.volume.panel.component.captioning.ui.viewmodel
 
 import android.content.Context
 import com.android.internal.logging.UiEventLogger
-import com.android.settingslib.view.accessibility.domain.interactor.CaptioningInteractor
+import com.android.systemui.accessibility.domain.interactor.CaptioningInteractor
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel

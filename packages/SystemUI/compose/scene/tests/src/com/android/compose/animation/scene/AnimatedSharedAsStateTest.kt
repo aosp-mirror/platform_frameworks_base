@@ -39,7 +39,10 @@ import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.TestScenes.SceneD
+import com.android.compose.test.setContentAndCreateMainScope
+import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -50,12 +53,7 @@ import org.junit.runner.RunWith
 class AnimatedSharedAsStateTest {
     @get:Rule val rule = createComposeRule()
 
-    private data class Values(
-        val int: Int,
-        val float: Float,
-        val dp: Dp,
-        val color: Color,
-    )
+    private data class Values(val int: Int, val float: Float, val dp: Dp, val color: Color)
 
     private fun lerp(start: Values, stop: Values, fraction: Float): Values {
         return Values(
@@ -67,10 +65,7 @@ class AnimatedSharedAsStateTest {
     }
 
     @Composable
-    private fun ContentScope.Foo(
-        targetValues: Values,
-        onCurrentValueChanged: (Values) -> Unit,
-    ) {
+    private fun ContentScope.Foo(targetValues: Values, onCurrentValueChanged: (Values) -> Unit) {
         val key = TestElements.Foo
         Element(key, Modifier) {
             val int by animateElementIntAsState(targetValues.int, key = TestValues.Value1)
@@ -168,10 +163,7 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(expectedValues)
             }
 
-            after {
-                assertThat(lastValueInFrom).isEqualTo(toValues)
-                assertThat(lastValueInTo).isEqualTo(toValues)
-            }
+            after { assertThat(lastValueInTo).isEqualTo(toValues) }
         }
     }
 
@@ -229,10 +221,7 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(lerp(fromValues, toValues, fraction = 0.75f))
             }
 
-            after {
-                assertThat(lastValueInFrom).isEqualTo(toValues)
-                assertThat(lastValueInTo).isEqualTo(toValues)
-            }
+            after { assertThat(lastValueInTo).isEqualTo(toValues) }
         }
     }
 
@@ -248,7 +237,7 @@ class AnimatedSharedAsStateTest {
             fromSceneContent = {
                 SceneValues(
                     targetValues = fromValues,
-                    onCurrentValueChanged = { lastValueInFrom = it }
+                    onCurrentValueChanged = { lastValueInFrom = it },
                 )
             },
             toSceneContent = {
@@ -288,10 +277,7 @@ class AnimatedSharedAsStateTest {
                 assertThat(lastValueInTo).isEqualTo(expectedValues)
             }
 
-            after {
-                assertThat(lastValueInFrom).isEqualTo(toValues)
-                assertThat(lastValueInTo).isEqualTo(toValues)
-            }
+            after { assertThat(lastValueInTo).isEqualTo(toValues) }
         }
     }
 
@@ -415,30 +401,33 @@ class AnimatedSharedAsStateTest {
             }
         }
 
-        rule.setContent {
-            SceneTransitionLayout(state) {
-                // foo goes from 0f to 100f in A => B.
-                scene(SceneA) { animateFloat(0f, foo) }
-                scene(SceneB) { animateFloat(100f, foo) }
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    // foo goes from 0f to 100f in A => B.
+                    scene(SceneA) { animateFloat(0f, foo) }
+                    scene(SceneB) { animateFloat(100f, foo) }
 
-                // bar goes from 0f to 10f in C => D.
-                scene(SceneC) { animateFloat(0f, bar) }
-                scene(SceneD) { animateFloat(10f, bar) }
+                    // bar goes from 0f to 10f in C => D.
+                    scene(SceneC) { animateFloat(0f, bar) }
+                    scene(SceneD) { animateFloat(10f, bar) }
+                }
             }
-        }
 
-        rule.runOnUiThread {
-            // A => B is at 30%.
+        // A => B is at 30%.
+        scope.launch {
             state.startTransition(
                 transition(
                     from = SceneA,
                     to = SceneB,
                     progress = { 0.3f },
-                    onFinish = neverFinish(),
+                    onFreezeAndAnimate = { /* never finish */ },
                 )
             )
+        }
 
-            // C => D is at 70%.
+        // C => D is at 70%.
+        scope.launch {
             state.startTransition(transition(from = SceneC, to = SceneD, progress = { 0.7f }))
         }
         rule.waitForIdle()
@@ -460,7 +449,7 @@ class AnimatedSharedAsStateTest {
             rule.runOnUiThread {
                 MutableSceneTransitionLayoutStateImpl(
                     SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) }
+                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
                 )
             }
 
@@ -475,17 +464,18 @@ class AnimatedSharedAsStateTest {
             }
         }
 
-        rule.setContent {
-            SceneTransitionLayout(state) {
-                scene(SceneA) { animateFloat(0f, key) }
-                scene(SceneB) { animateFloat(100f, key) }
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    scene(SceneA) { animateFloat(0f, key) }
+                    scene(SceneB) { animateFloat(100f, key) }
+                }
             }
-        }
 
         // Overscroll on A at -100%: value should be interpolated given that there is no overscroll
         // defined for scene A.
         var progress by mutableStateOf(-1f)
-        rule.runOnIdle {
+        scope.launch {
             state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
         }
         rule.waitForIdle()

@@ -16,6 +16,11 @@
 
 package com.android.wm.shell.compatui.api
 
+import android.content.Context
+import android.graphics.Point
+import android.view.View
+import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.protolog.ShellProtoLogGroup
 
@@ -39,6 +44,28 @@ class CompatUILifecyclePredicates(
 )
 
 /**
+ * Layout configuration
+ */
+data class CompatUILayout(
+    val zOrder: Int = 0,
+    val layoutParamFlags: Int = FLAG_NOT_FOCUSABLE or FLAG_NOT_TOUCH_MODAL,
+    val viewBuilder: (Context, CompatUIInfo, CompatUIComponentState?) -> View,
+    val viewBinder: (
+        View,
+        CompatUIInfo,
+        CompatUISharedState,
+        CompatUIComponentState?
+    ) -> Unit = { _, _, _, _ -> },
+    val positionFactory: (
+        View,
+        CompatUIInfo,
+        CompatUISharedState,
+        CompatUIComponentState?
+    ) -> Point,
+    val viewReleaser: () -> Unit = {}
+)
+
+/**
  * Describes each compat ui component to the framework.
  */
 class CompatUISpec(
@@ -47,5 +74,7 @@ class CompatUISpec(
     // unique component identifier in the system.
     val name: String,
     // The lifecycle definition
-    val lifecycle: CompatUILifecyclePredicates
+    val lifecycle: CompatUILifecyclePredicates,
+    // The layout definition
+    val layout: CompatUILayout
 )

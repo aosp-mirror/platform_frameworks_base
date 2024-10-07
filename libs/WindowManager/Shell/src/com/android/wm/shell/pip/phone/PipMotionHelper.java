@@ -39,7 +39,6 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipPerfHintController;
@@ -49,6 +48,7 @@ import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
@@ -204,8 +204,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     @NonNull
     @Override
     public Rect getFloatingBoundsOnScreen() {
-        return !mPipBoundsState.getMotionBoundsState().getAnimatingToBounds().isEmpty()
-                ? mPipBoundsState.getMotionBoundsState().getAnimatingToBounds() : getBounds();
+        return getBounds();
     }
 
     @NonNull
@@ -616,7 +615,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             cancelPhysicsAnimation();
         }
 
-        setAnimatingToBounds(new Rect(
+        mPipBoundsState.getMotionBoundsState().setAnimatingToBounds(new Rect(
                 (int) toX,
                 (int) toY,
                 (int) toX + getBounds().width(),
@@ -660,6 +659,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             // All motion operations have actually finished.
             mPipBoundsState.setBounds(
                     mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
+            // Notifies the floating coordinator that we moved, so we return these bounds from
+            // {@link FloatingContentCoordinator.FloatingContent#getFloatingBoundsOnScreen()}.
+            mFloatingContentCoordinator.onContentMoved(this);
             mPipBoundsState.getMotionBoundsState().onAllAnimationsEnded();
             if (!mDismissalPending) {
                 // do not schedule resize if PiP is dismissing, which may cause app re-open to
@@ -671,16 +673,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mSpringingToTouch = false;
         mDismissalPending = false;
         cleanUpHighPerfSessionMaybe();
-    }
-
-    /**
-     * Notifies the floating coordinator that we're moving, and sets the animating to bounds so
-     * we return these bounds from
-     * {@link FloatingContentCoordinator.FloatingContent#getFloatingBoundsOnScreen()}.
-     */
-    private void setAnimatingToBounds(Rect bounds) {
-        mPipBoundsState.getMotionBoundsState().setAnimatingToBounds(bounds);
-        mFloatingContentCoordinator.onContentMoved(this);
     }
 
     /**
@@ -712,7 +704,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         // This is so all the proper callbacks are performed.
         mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration,
                 TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND, null /* updateBoundsCallback */);
-        setAnimatingToBounds(toBounds);
+        mPipBoundsState.getMotionBoundsState().setAnimatingToBounds(toBounds);
     }
 
     /**

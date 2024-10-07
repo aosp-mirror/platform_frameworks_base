@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.shade.ui.viewmodel.overlayShadeViewModelFactory
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.quickSettingsShadeSceneContentViewModel: QuickSettingsShadeSceneContentViewModel by
     Kosmos.Fixture {
         QuickSettingsShadeSceneContentViewModel(
-            overlayShadeViewModelFactory = overlayShadeViewModelFactory,
             quickSettingsContainerViewModel = quickSettingsContainerViewModel,
         )
     }

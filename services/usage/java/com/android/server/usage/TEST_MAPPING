@@ -4,44 +4,18 @@
       "name": "FrameworksCoreTests_usage"
     },
     {
-      "name": "FrameworksServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.usage"
-        },
-        {
-          "exclude-filter": "com.android.server.usage.StorageStatsServiceTest"
-        }
-      ]
+      "name": "FrameworksServicesTests_android_server_usage"
     },
     {
-      "name": "CtsBRSTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        }
-      ]
+      "name": "CtsBRSTestCases"
     }
   ],
   "postsubmit": [
     {
-      "name": "CtsUsageStatsTestCases",
-      "options": [
-        {
-          "include-filter": "android.app.usage.cts.UsageStatsTest"
-        }
-      ]
+      "name": "CtsUsageStatsTestCases_cts_usagestatstest_ExcludeMediumAndLarge"
     },
     {
-      "name": "CtsShortcutManagerTestCases",
-      "options": [
-        {
-          "include-filter": "android.content.pm.cts.shortcutmanager.ShortcutManagerUsageTest"
-        }
-      ]
+      "name": "CtsShortcutManagerTestCases_shortcutmanager_shortcutmanagerusagetest"
     }
   ]
 }

@@ -564,6 +564,7 @@
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Signāli un atgādinājumi"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Atļaujiet šai lietotnei iestatīt signālus un ieplānot darbības, kas jāveic konkrētā laikā. Tādējādi lietotne darbosies fonā un, iespējams, patērēs vairāk akumulatora enerģijas.\n\nJa šī atļauja nav piešķirta, esošie signāli un šīs lietotnes ieplānotie notikumi, kas jāizpilda konkrētā laikā, nedarbosies."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"ieplānot, signāls, atgādinājums, pulkstenis"</string>
+    <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Netraucēt"</string>
     <string name="zen_mode_settings_title" msgid="7374070457626419755">"Netraucēt"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Ieslēgt"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Režīma “Netraucēt” ieslēgšana"</string>
@@ -581,8 +582,10 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Tikko"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Šis tālrunis"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Šis planšetdators"</string>
+    <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Šī datora iekšējais skaļrunis"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
+    <string name="media_transfer_internal_mic" msgid="797333824290228595">"Mikrofons (iebūvētais)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doka skaļrunis"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ārēja ierīce"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pievienotā ierīce"</string>
@@ -683,7 +686,11 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Atspējots"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Iespējots"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Lai šīs izmaiņas tiktu piemērotas, nepieciešama ierīces atkārtota palaišana. Atkārtoti palaidiet to tūlīt vai atceliet izmaiņas."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Vadu austiņas"</string>
+    <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"Vadu austiņas"</string>
+    <string name="media_transfer_headphone_name" msgid="1131962659136578852">"Austiņas"</string>
+    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB skaļrunis"</string>
+    <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"Mikrofona ligzda"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB mikrofons"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"Ieslēgts"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"Izslēgts"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"Mobilo sakaru operatora tīkla mainīšana"</string>

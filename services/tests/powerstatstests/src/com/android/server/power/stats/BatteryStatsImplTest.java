@@ -117,7 +117,7 @@ public class BatteryStatsImplTest {
     private PowerStatsStore mPowerStatsStore;
     private BatteryUsageStatsProvider mBatteryUsageStatsProvider;
     @Mock
-    private PowerStatsExporter mPowerStatsExporter;
+    private PowerAttributor mPowerAttributor;
 
     @Before
     public void setUp() throws IOException {
@@ -149,9 +149,8 @@ public class BatteryStatsImplTest {
         } else {
             context = InstrumentationRegistry.getContext();
         }
-        mPowerStatsStore = new PowerStatsStore(systemDir, mHandler,
-                new AggregatedPowerStatsConfig());
-        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerStatsExporter,
+        mPowerStatsStore = new PowerStatsStore(systemDir, mHandler);
+        mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mPowerAttributor,
                 mPowerProfile, mBatteryStatsImpl.getCpuScalingPolicies(), mPowerStatsStore,
                 mMockClock);
     }
@@ -928,7 +927,7 @@ public class BatteryStatsImplTest {
         assertThat(mPowerStatsStore.getTableOfContents()).isEmpty();
 
         mBatteryStatsImpl.saveBatteryUsageStatsOnReset(mBatteryUsageStatsProvider,
-                mPowerStatsStore);
+                mPowerStatsStore, /* accumulateBatteryUsageStats */ false);
 
         synchronized (mBatteryStatsImpl) {
             mBatteryStatsImpl.noteFlashlightOnLocked(42, mMockClock.realtime, mMockClock.uptime);

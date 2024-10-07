@@ -112,6 +112,11 @@ public final class LocalLog {
         }
     }
 
+    // @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public synchronized void clear() {
+        mLog.clear();
+    }
+
     public static class ReadOnlyLocalLog {
         private final LocalLog mLog;
         ReadOnlyLocalLog(LocalLog log) {

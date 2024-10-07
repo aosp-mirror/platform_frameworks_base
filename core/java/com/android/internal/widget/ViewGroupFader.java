@@ -16,12 +16,14 @@
 
 package com.android.internal.widget;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.animation.BaseInterpolator;
 import android.view.animation.PathInterpolator;
+import android.widget.flags.Flags;
 
 /**
  * This class is ported from
@@ -36,7 +38,7 @@ import android.view.animation.PathInterpolator;
  * height of the child. When not in the top or bottom regions, children have their default alpha and
  * scale.
  */
-class ViewGroupFader {
+public class ViewGroupFader {
 
     private static final float SCALE_LOWER_BOUND = 0.7f;
     private float mScaleLowerBound = SCALE_LOWER_BOUND;
@@ -68,7 +70,7 @@ class ViewGroupFader {
     private BaseInterpolator mBottomInterpolator = new PathInterpolator(0.3f, 0f, 0.7f, 1f);
 
     /** Callback which is called when attempting to fade a view. */
-    interface AnimationCallback {
+    public interface AnimationCallback {
         boolean shouldFadeFromTop(View view);
 
         boolean shouldFadeFromBottom(View view);
@@ -82,7 +84,7 @@ class ViewGroupFader {
      * of the current position.
      */
     // TODO(b/182846214): Clean up the interface design to avoid exposing too much details to users.
-    interface ChildViewBoundsProvider {
+    public interface ChildViewBoundsProvider {
         /**
          * Provide the bounds of the child view.
          *
@@ -168,7 +170,7 @@ class ViewGroupFader {
         }
     }
 
-    ViewGroupFader(
+    public ViewGroupFader(
             ViewGroup parent,
             AnimationCallback callback,
             ChildViewBoundsProvider childViewBoundsProvider) {
@@ -212,7 +214,7 @@ class ViewGroupFader {
         this.mContainerBoundsProvider = boundsProvider;
     }
 
-    void updateFade() {
+    public void updateFade() {
         mContainerBoundsProvider.provideBounds(mParent, mContainerBounds);
         mTopBoundPixels = mContainerBounds.height() * mChainedBoundsTop;
         mBottomBoundPixels = mContainerBounds.height() * mChainedBoundsBottom;
@@ -221,11 +223,18 @@ class ViewGroupFader {
     }
 
     /** For each list element, calculate and adjust the scale and alpha based on its position */
-    private void updateListElementFades(ViewGroup parent, boolean shouldFade) {
+    public void updateListElementFades(ViewGroup parent, boolean shouldFade) {
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
             if (child.getVisibility() != View.VISIBLE) {
                 continue;
+            }
+
+            if (Flags.enableFadingViewGroup() && Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_enableViewGroupScalingFading)) {
+                if (child instanceof ViewGroup) {
+                    updateListElementFades((ViewGroup) child, true);
+                }
             }
 
             if (shouldFade) {

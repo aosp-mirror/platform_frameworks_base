@@ -113,6 +113,7 @@ import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassificationManager;
 
+import androidx.annotation.NonNull;
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -200,6 +201,13 @@ public class FrameworkServicesModule {
     @Singleton
     static CaptioningManager provideCaptioningManager(Context context) {
         return context.getSystemService(CaptioningManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static UserScopedService<CaptioningManager> provideUserScopedCaptioningManager(
+            Context context) {
+        return new UserScopedServiceImpl<>(context, CaptioningManager.class);
     }
 
     /** */
@@ -711,6 +719,19 @@ public class FrameworkServicesModule {
 
     @Provides
     @Singleton
+    static ViewCaptureAwareWindowManager.Factory viewCaptureAwareWindowManagerFactory(
+            Lazy<ViewCapture> daggerLazyViewCapture) {
+        return new ViewCaptureAwareWindowManager.Factory() {
+            @NonNull
+            @Override
+            public ViewCaptureAwareWindowManager create(@NonNull WindowManager windowManager) {
+                return provideViewCaptureAwareWindowManager(windowManager, daggerLazyViewCapture);
+            }
+        };
+    }
+
+    @Provides
+    @Singleton
     static PermissionManager providePermissionManager(Context context) {
         PermissionManager pm = context.getSystemService(PermissionManager.class);
         if (pm != null) {
@@ -726,9 +747,8 @@ public class FrameworkServicesModule {
     }
 
     @Provides
-    @Singleton
-    static ClipboardManager provideClipboardManager(Context context) {
-        return context.getSystemService(ClipboardManager.class);
+    static UserScopedService<ClipboardManager> provideClipboardManager(Context context) {
+        return new UserScopedServiceImpl<>(context, ClipboardManager.class);
     }
 
     @Provides

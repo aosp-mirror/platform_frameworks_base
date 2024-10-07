@@ -70,6 +70,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                 wifiInteractor,
                 testScope.backgroundScope,
                 FakeLogBuffer.Factory.create(),
+                mock(),
             )
     }
 
@@ -113,6 +114,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.isSatelliteAllowed)
@@ -161,6 +163,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.connectionState)
@@ -217,6 +220,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.signalStrength)
@@ -535,6 +539,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
                     wifiInteractor,
                     testScope.backgroundScope,
                     FakeLogBuffer.Factory.create(),
+                    mock(),
                 )
 
             val latest by collectLastValue(underTest.areAllConnectionsOutOfService)
@@ -569,7 +574,7 @@ class DeviceBasedSatelliteInteractorTest : SysuiTestCase() {
             val latest by collectLastValue(underTest.isWifiActive)
 
             // WHEN wifi is active
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 0, level = 1))
+            wifiRepository.setWifiNetwork(WifiNetworkModel.Active.of(level = 1))
 
             // THEN the interactor returns true due to the wifi network being active
             assertThat(latest).isTrue()

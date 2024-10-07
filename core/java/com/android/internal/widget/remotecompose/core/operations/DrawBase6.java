@@ -17,9 +17,7 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.operations.Utils.floatToString;
 
-import com.android.internal.widget.remotecompose.core.CompanionOperation;
 import com.android.internal.widget.remotecompose.core.Operation;
-import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.VariableSupport;
@@ -32,13 +30,6 @@ import java.util.List;
  */
 public abstract class DrawBase6 extends PaintOperation
         implements VariableSupport {
-    public static final Companion COMPANION =
-            new Companion(Operations.DRAW_RECT) {
-                public Operation construct(float x1, float y1, float x2, float y2) {
-                    //   return new DrawRectBase(x1, y1, x2, y2);
-                    return null;
-                }
-            };
     protected String mName = "DrawRectBase";
     float mV1;
     float mV2;
@@ -115,8 +106,16 @@ public abstract class DrawBase6 extends PaintOperation
 
     @Override
     public void write(WireBuffer buffer) {
-        COMPANION.apply(buffer, mV1, mV2, mV3, mV4, mV5, mV6);
+        write(buffer, mV1, mV2, mV3, mV4, mV5, mV6);
     }
+
+    protected abstract void write(WireBuffer buffer,
+                                  float v1,
+                                  float v2,
+                                  float v3,
+                                  float v4,
+                                  float v5,
+                                  float v6);
 
     @Override
     public String toString() {
@@ -124,79 +123,50 @@ public abstract class DrawBase6 extends PaintOperation
                 + " " + floatToString(mV3) + " " + floatToString(mV4);
     }
 
-    public static class Companion implements CompanionOperation {
-        public final int OP_CODE;
-
-        protected Companion(int code) {
-            OP_CODE = code;
-        }
-
-        @Override
-        public void read(WireBuffer buffer, List<Operation> operations) {
-            float sv1 = buffer.readFloat();
-            float sv2 = buffer.readFloat();
-            float sv3 = buffer.readFloat();
-            float sv4 = buffer.readFloat();
-            float sv5 = buffer.readFloat();
-            float sv6 = buffer.readFloat();
-
-            Operation op = construct(sv1, sv2, sv3, sv4, sv5, sv6);
-            operations.add(op);
-        }
-
-        /**
-         * writes out a the operation to the buffer.
-         * @param v1
-         * @param v2
-         * @param v3
-         * @param v4
-         * @param v5
-         * @param v6
-         * @return
-         */
-        public Operation construct(float v1,
-                                   float v2,
-                                   float v3,
-                                   float v4,
-                                   float v5,
-                                   float v6) {
-            return null;
-        }
-
-        @Override
-        public String name() {
-            return "DrawRect";
-        }
-
-        @Override
-        public int id() {
-            return OP_CODE;
-        }
-
-        /**
-         * Writes out the operation to the buffer
-         * @param buffer
-         * @param v1
-         * @param v2
-         * @param v3
-         * @param v4
-         * @param v5
-         * @param v6
-         */
-        public void apply(WireBuffer buffer,
-                          float v1,
-                          float v2,
-                          float v3,
-                          float v4,
-                          float v5,
-                          float v6) {
-            buffer.start(OP_CODE);
-            buffer.writeFloat(v1);
-            buffer.writeFloat(v2);
-            buffer.writeFloat(v3);
-            buffer.writeFloat(v4);
-            buffer.writeFloat(v5);
-            buffer.writeFloat(v6);
-        }
+    interface Maker {
+        DrawBase6 create(float v1,
+                         float v2,
+                         float v3,
+                         float v4,
+                         float v5,
+                         float v6);
     }
+
+    public static void read(Maker build, WireBuffer buffer, List<Operation> operations) {
+        float sv1 = buffer.readFloat();
+        float sv2 = buffer.readFloat();
+        float sv3 = buffer.readFloat();
+        float sv4 = buffer.readFloat();
+        float sv5 = buffer.readFloat();
+        float sv6 = buffer.readFloat();
+
+        Operation op = build.create(sv1, sv2, sv3, sv4, sv5, sv6);
+        operations.add(op);
+    }
+
+    /**
+     * writes out a the operation to the buffer.
+     *
+     * @param v1
+     * @param v2
+     * @param v3
+     * @param v4
+     * @param v5
+     * @param v6
+     * @return
+     */
+    public Operation construct(float v1,
+                               float v2,
+                               float v3,
+                               float v4,
+                               float v5,
+                               float v6) {
+        return null;
+    }
+
+
+    public static String name() {
+        return "DrawBase6";
+    }
+
 }

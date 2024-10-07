@@ -79,7 +79,6 @@ import android.permission.flags.Flags;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pools;
@@ -3155,12 +3154,6 @@ public class AppOpsManager {
 
     /** @hide */
     public static final String KEY_HISTORICAL_OPS = "historical_ops";
-
-    /** System properties for debug logging of noteOp call sites */
-    private static final String DEBUG_LOGGING_ENABLE_PROP = "appops.logging_enabled";
-    private static final String DEBUG_LOGGING_PACKAGES_PROP = "appops.logging_packages";
-    private static final String DEBUG_LOGGING_OPS_PROP = "appops.logging_ops";
-    private static final String DEBUG_LOGGING_TAG = "AppOpsManager";
 
     /**
      * Retrieve the op switch that controls the given operation.
@@ -7459,15 +7452,15 @@ public class AppOpsManager {
         }
 
         /**
-         * Similar to {@link #onOpChanged(String, String, int)} but includes the device for which
-         * the op mode has changed.
+         * Similar to {@link #onOpChanged(String, String)} but includes user and the device for
+         * which the op mode has changed.
          *
          * <p> Implement this method if callbacks are required on all devices.
          * If not implemented explicitly, the default implementation will notify for op changes
-         * on the default device {@link VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT} only.
+         * on the default device only.
          *
-         * <p> If implemented, {@link #onOpChanged(String, String, int)}
-         * will not be called automatically.
+         * <p> If implemented, {@link #onOpChanged(String, String)} will not be called
+         * automatically.
          *
          * @param op The Op that changed.
          * @param packageName Package of the app whose Op changed.
@@ -8066,14 +8059,6 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(int code, int uid, @Mode int mode) {
         try {
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (code == OP_BLUETOOTH_CONNECT) {
-                Log.i(DEBUG_LOGGING_TAG,
-                        "setUidMode called for OP_BLUETOOTH_CONNECT with mode: " + mode
-                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
-                                + " trace: "
-                                + Arrays.toString(Thread.currentThread().getStackTrace()));
-            }
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -8094,15 +8079,6 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
         try {
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (appOp.equals(OPSTR_BLUETOOTH_CONNECT)) {
-                Log.i(DEBUG_LOGGING_TAG,
-                        "setUidMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
-                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
-                                + " trace: "
-                                + Arrays.toString(Thread.currentThread().getStackTrace()));
-            }
-
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -8143,14 +8119,6 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
         try {
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (code == OP_BLUETOOTH_CONNECT) {
-                Log.i(DEBUG_LOGGING_TAG,
-                        "setMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
-                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
-                                + " trace: "
-                                + Arrays.toString(Thread.currentThread().getStackTrace()));
-            }
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -8173,14 +8141,6 @@ public class AppOpsManager {
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
             @Mode int mode) {
         try {
-            // TODO(b/302609140): Remove extra logging after this issue is diagnosed.
-            if (op.equals(OPSTR_BLUETOOTH_CONNECT)) {
-                Log.i(DEBUG_LOGGING_TAG,
-                        "setMode called for OPSTR_BLUETOOTH_CONNECT with mode: " + mode
-                                + " for uid: " + uid + " calling uid: " + Binder.getCallingUid()
-                                + " trace: "
-                                + Arrays.toString(Thread.currentThread().getStackTrace()));
-            }
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -10193,6 +10153,9 @@ public class AppOpsManager {
         }
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
+        final int sizePosition = p.dataPosition();
+        // Write size placeholder. With this size we can easily skip it in native.
+        p.writeInt(0);
 
         int numAttributionWithNotesAppOps = notedAppOps.size();
         p.writeInt(numAttributionWithNotesAppOps);
@@ -10209,6 +10172,12 @@ public class AppOpsManager {
                 }
             }
         }
+
+        final int payloadPosition = p.dataPosition();
+        p.setDataPosition(sizePosition);
+        // Total header size including 4 bytes size itself.
+        p.writeInt(payloadPosition - sizePosition);
+        p.setDataPosition(payloadPosition);
     }
 
     /**
@@ -10222,6 +10191,8 @@ public class AppOpsManager {
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
+        // Skip size.
+        p.readInt();
         int numAttributionsWithNotedAppOps = p.readInt();
 
         for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {

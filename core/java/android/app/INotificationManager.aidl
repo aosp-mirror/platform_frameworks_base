@@ -160,8 +160,8 @@ interface INotificationManager
     void requestBindProvider(in ComponentName component);
     void requestUnbindProvider(in IConditionProvider token);
 
-    void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
 
+    void setNotificationsShownFromListener(in INotificationListener token, in String[] keys);
     ParceledListSlice getActiveNotificationsFromListener(in INotificationListener token, in String[] keys, int trim);
     ParceledListSlice getSnoozedNotificationsFromListener(in INotificationListener token, int trim);
     void clearRequestedListenerHints(in INotificationListener token);
@@ -258,4 +258,10 @@ interface INotificationManager
     @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
     void unregisterCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
 
+    void setCanBePromoted(String pkg, int uid, boolean promote, boolean fromUser);
+    boolean appCanBePromoted(String pkg, int uid);
+    boolean canBePromoted(String pkg);
+
+    void setAdjustmentTypeSupportedState(in INotificationListener token, String key, boolean supported);
+    List<String> getUnsupportedAdjustmentTypes();
 }

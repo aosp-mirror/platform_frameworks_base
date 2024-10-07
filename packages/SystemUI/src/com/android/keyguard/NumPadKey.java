@@ -36,6 +36,7 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.Utils;
+import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.res.R;
 
 /**
@@ -57,6 +58,8 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
     @Nullable
     private NumPadAnimator mAnimator;
     private int mOrientation;
+    @Nullable
+    private BouncerHapticPlayer mBouncerHapticPlayer;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -221,8 +224,12 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
 
     // Cause a VIRTUAL_KEY vibration
     public void doHapticKeyClick() {
-        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
-                HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        if (mBouncerHapticPlayer != null && mBouncerHapticPlayer.isEnabled()) {
+            mBouncerHapticPlayer.playNumpadKeyFeedback();
+        } else {
+            performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING);
+        }
     }
 
     @Override
@@ -243,5 +250,9 @@ public class NumPadKey extends ViewGroup implements NumPadAnimationListener {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setTextEntryKey(true);
+    }
+
+    public void setBouncerHapticHelper(@Nullable BouncerHapticPlayer bouncerHapticPlayer) {
+        mBouncerHapticPlayer = bouncerHapticPlayer;
     }
 }

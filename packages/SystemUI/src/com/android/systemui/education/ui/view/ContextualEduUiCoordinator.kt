@@ -16,14 +16,24 @@
 
 package com.android.systemui.education.ui.view
 
+import android.app.Dialog
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
-import android.widget.Toast
+import android.content.Intent
+import android.os.Bundle
+import android.os.UserHandle
+import androidx.core.app.NotificationCompat
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.education.shared.model.EducationUiType
-import com.android.systemui.education.ui.viewmodel.ContextualEduContentViewModel
+import com.android.systemui.education.ui.viewmodel.ContextualEduNotificationViewModel
+import com.android.systemui.education.ui.viewmodel.ContextualEduToastViewModel
 import com.android.systemui.education.ui.viewmodel.ContextualEduViewModel
+import com.android.systemui.inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -37,32 +47,103 @@ class ContextualEduUiCoordinator
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val viewModel: ContextualEduViewModel,
-    private val createToast: (String) -> Toast
+    private val context: Context,
+    private val notificationManager: NotificationManager,
+    private val createDialog: (ContextualEduToastViewModel) -> Dialog,
 ) : CoreStartable {
+
+    companion object {
+        private const val CHANNEL_ID = "ContextualEduNotificationChannel"
+        private const val TAG = "ContextualEduUiCoordinator"
+        private const val NOTIFICATION_ID = 1000
+    }
 
     @Inject
     constructor(
         @Application applicationScope: CoroutineScope,
         context: Context,
         viewModel: ContextualEduViewModel,
+        notificationManager: NotificationManager,
     ) : this(
         applicationScope,
         viewModel,
-        createToast = { message -> Toast.makeText(context, message, Toast.LENGTH_LONG) }
+        context,
+        notificationManager,
+        createDialog = { model -> ContextualEduDialog(context, model) },
     )
 
+    var dialog: Dialog? = null
+
     override fun start() {
+        createEduNotificationChannel()
         applicationScope.launch {
             viewModel.eduContent.collect { contentModel ->
-                if (contentModel.type == EducationUiType.Toast) {
-                    showToast(contentModel)
+                if (contentModel != null) {
+                    when (contentModel) {
+                        is ContextualEduToastViewModel -> showDialog(contentModel)
+                        is ContextualEduNotificationViewModel -> showNotification(contentModel)
+                    }
+                } else {
+                    dialog?.dismiss()
+                    dialog = null
                 }
             }
         }
     }
 
-    private fun showToast(model: ContextualEduContentViewModel) {
-        val toast = createToast(model.message)
-        toast.show()
+    private fun createEduNotificationChannel() {
+        val channel =
+            NotificationChannel(
+                CHANNEL_ID,
+                context.getString(com.android.internal.R.string.android_system_label),
+                // Make it as silent notification
+                NotificationManager.IMPORTANCE_LOW
+            )
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun showDialog(model: ContextualEduToastViewModel) {
+        dialog = createDialog(model)
+        dialog?.show()
+    }
+
+    private fun showNotification(model: ContextualEduNotificationViewModel) {
+        // Replace "System UI" app name with "Android System"
+        val extras = Bundle()
+        extras.putString(
+            Notification.EXTRA_SUBSTITUTE_APP_NAME,
+            context.getString(com.android.internal.R.string.android_system_label)
+        )
+
+        val notification =
+            NotificationCompat.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_settings)
+                .setContentTitle(model.title)
+                .setContentText(model.message)
+                .setContentIntent(createPendingIntent())
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .addExtras(extras)
+                .build()
+        notificationManager.notifyAsUser(
+            TAG,
+            NOTIFICATION_ID,
+            notification,
+            UserHandle.of(model.userId)
+        )
+    }
+
+    private fun createPendingIntent(): PendingIntent {
+        val intent =
+            Intent(context, KeyboardTouchpadTutorialActivity::class.java).apply {
+                addCategory(Intent.CATEGORY_DEFAULT)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        return PendingIntent.getActivity(
+            context,
+            /* requestCode= */ 0,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
     }
 }

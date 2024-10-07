@@ -16,14 +16,19 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
+import com.android.systemui.keyguard.DismissCallbackRegistry
+import com.android.systemui.scene.data.model.asIterable
+import com.android.systemui.scene.domain.interactor.SceneBackInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.utils.coroutines.flow.mapLatestConflated
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -32,6 +37,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -56,6 +62,8 @@ constructor(
     private val sceneInteractor: SceneInteractor,
     private val deviceUnlockedInteractor: DeviceUnlockedInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
+    sceneBackInteractor: SceneBackInteractor,
 ) {
     /**
      * Whether the device is unlocked.
@@ -83,19 +91,40 @@ constructor(
      * Note: This does not imply that the lockscreen is visible or not.
      */
     val isDeviceEntered: StateFlow<Boolean> =
-        sceneInteractor.currentScene
-            .filter { currentScene ->
-                currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
-            }
-            .mapLatestConflated { scene ->
-                if (scene == Scenes.Gone) {
-                    // Make sure device unlock status is definitely unlocked before we consider the
-                    // device "entered".
-                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
-                    true
-                } else {
-                    false
-                }
+        combine(
+                // This flow emits true when the currentScene switches to Gone for the first time
+                // after having been on Lockscreen.
+                sceneInteractor.currentScene
+                    .filter { currentScene ->
+                        currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
+                    }
+                    .mapLatestConflated { scene ->
+                        if (scene == Scenes.Gone) {
+                            // Make sure device unlock status is definitely unlocked before we
+                            // consider the device "entered".
+                            deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
+                            true
+                        } else {
+                            false
+                        }
+                    },
+                // This flow emits true only if the bottom of the navigation back stack has been
+                // switched from Lockscreen to Gone. In other words, only if the device was unlocked
+                // while visiting at least one scene "above" the Lockscreen scene.
+                sceneBackInteractor.backStack
+                    // The bottom of the back stack, which is Lockscreen, Gone, or null if empty.
+                    .map { it.asIterable().lastOrNull() }
+                    // Filter out cases where the stack changes but the bottom remains unchanged.
+                    .distinctUntilChanged()
+                    // Detect changes of the bottom of the stack, start with null, so the first
+                    // update emits a value and the logic doesn't need to wait for a second value
+                    // before emitting something.
+                    .pairwise(initialValue = null)
+                    // Replacing a bottom of the stack that was Lockscreen with Gone constitutes a
+                    // "device entered" event.
+                    .map { (from, to) -> from == Scenes.Lockscreen && to == Scenes.Gone },
+            ) { enteredDirectly, enteredOnBackStack ->
+                enteredOnBackStack || enteredDirectly
             }
             .stateIn(
                 scope = applicationScope,
@@ -126,17 +155,14 @@ constructor(
                 },
                 isLockscreenEnabled,
                 deviceUnlockedInteractor.deviceUnlockStatus,
-                isDeviceEntered) {
-                    isNoneAuthMethod,
-                    isLockscreenEnabled,
-                    deviceUnlockStatus,
-                    isDeviceEntered ->
-                    val isSwipeAuthMethod = isNoneAuthMethod && isLockscreenEnabled
-                    (isSwipeAuthMethod ||
-                        (deviceUnlockStatus.isUnlocked &&
-                            deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
-                        !isDeviceEntered
-                }
+                isDeviceEntered,
+            ) { isNoneAuthMethod, isLockscreenEnabled, deviceUnlockStatus, isDeviceEntered ->
+                val isSwipeAuthMethod = isNoneAuthMethod && isLockscreenEnabled
+                (isSwipeAuthMethod ||
+                    (deviceUnlockStatus.isUnlocked &&
+                        deviceUnlockStatus.deviceUnlockSource?.dismissesLockscreen == false)) &&
+                    !isDeviceEntered
+            }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
@@ -150,8 +176,14 @@ constructor(
     /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
      * unlock the device it will transition to bouncer.
+     *
+     * @param callback An optional callback to invoke when the attempt succeeds, fails, or is
+     *   canceled
      */
-    fun attemptDeviceEntry() {
+    @JvmOverloads
+    fun attemptDeviceEntry(callback: IKeyguardDismissCallback? = null) {
+        callback?.let { dismissCallbackRegistry.addCallback(it) }
+
         // TODO (b/307768356),
         //       1. Check if the device is already authenticated by trust agent/passive biometrics
         //       2. Show SPFS/UDFPS bouncer if it is available AlternateBouncerInteractor.show

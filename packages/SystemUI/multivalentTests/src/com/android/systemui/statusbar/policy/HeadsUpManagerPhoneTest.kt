@@ -23,6 +23,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -36,9 +37,8 @@ import com.android.systemui.statusbar.notification.collection.provider.VisualSta
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
-import com.android.systemui.statusbar.notification.shared.NotificationsHeadsUpRefactor
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
+import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -47,6 +47,7 @@ import com.android.systemui.util.kotlin.JavaAdapter
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
+import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -244,35 +245,37 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         mSystemClock.advanceTime((TEST_AUTO_DISMISS_TIME + hmp.mExtensionTime / 2).toLong())
         Assert.assertTrue(hmp.isHeadsUpEntry(entry.key))
     }
-
     @Test
     @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testShowNotification_reorderNotAllowed_notPulsing_seenInShadeTrue() {
-        whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
-        val hmp = createHeadsUpManagerPhone()
-
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val row = mock<ExpandableNotificationRow>()
-        whenever(row.showingPulsing()).thenReturn(false)
-        notifEntry.row = row
-
-        hmp.showNotification(notifEntry)
-        Assert.assertTrue(notifEntry.isSeenInShade)
-    }
-
-    @Test
-    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
-    fun testShowNotification_reorderAllowed_notPulsing_seenInShadeFalse() {
+    fun testShowNotification_removeWhenReorderingAllowedTrue() {
         whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
         val hmp = createHeadsUpManagerPhone()
 
         val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val row = mock<ExpandableNotificationRow>()
-        whenever(row.showingPulsing()).thenReturn(false)
-        notifEntry.row = row
-
         hmp.showNotification(notifEntry)
-        Assert.assertFalse(notifEntry.isSeenInShade)
+        assertThat(hmp.mEntriesToRemoveWhenReorderingAllowed.contains(notifEntry)).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testShowNotification_reorderNotAllowed_seenInShadeTrue() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(false)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        hmp.showNotification(notifEntry)
+        assertThat(notifEntry.isSeenInShade).isTrue();
+    }
+
+    @Test
+    @EnableFlags(NotificationThrottleHun.FLAG_NAME)
+    fun testShowNotification_reorderAllowed_seenInShadeFalse() {
+        whenever(mVSProvider.isReorderingAllowed).thenReturn(true)
+        val hmp = createHeadsUpManagerPhone()
+
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
+        hmp.showNotification(notifEntry)
+        assertThat(notifEntry.isSeenInShade).isFalse();
     }
 
     @Test
@@ -469,9 +472,9 @@ class HeadsUpManagerPhoneTest(flags: FlagsParameterization) : BaseHeadsUpManager
         @get:Parameters(name = "{0}")
         val flags: List<FlagsParameterization>
             get() = buildList {
-                addAll(FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME))
                 addAll(
-                    FlagsParameterization.allCombinationsOf(NotificationsHeadsUpRefactor.FLAG_NAME)
+                    FlagsParameterization.allCombinationsOf(NotificationThrottleHun.FLAG_NAME)
+                        .andSceneContainer()
                 )
             }
     }

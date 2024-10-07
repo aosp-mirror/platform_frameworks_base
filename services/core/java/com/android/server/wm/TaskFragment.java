@@ -49,7 +49,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
-import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
+import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
@@ -2145,8 +2145,22 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     }
 
     boolean shouldSleepActivities() {
-        final Task task = getRootTask();
-        return task != null && task.shouldSleepActivities();
+        final DisplayContent dc = mDisplayContent;
+        if (dc == null) {
+            return mAtmService.isSleepingLocked();
+        }
+        if (!dc.isSleeping()) {
+            return false;
+        }
+        // In case the unlocking order is keyguard-going-away -> screen-turning-on (display is
+        // sleeping by screen-off-token which may be notified to release from power manager's
+        // thread), keep the activities resume-able to avoid extra activity lifecycle when
+        // performing keyguard-going-away. This only applies to default display because currently
+        // the per-display keyguard-going-away state is assigned from a global signal.
+        if (!dc.isDefaultDisplay || !dc.isKeyguardGoingAway()) {
+            return true;
+        }
+        return !shouldBeVisible(null /* starting */);
     }
 
     @Override
@@ -2224,7 +2238,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     static class ConfigOverrideHint {
         @Nullable DisplayInfo mTmpOverrideDisplayInfo;
-        @Nullable ActivityRecord.CompatDisplayInsets mTmpCompatInsets;
+        @Nullable AppCompatDisplayInsets mTmpCompatInsets;
         @Nullable Rect mParentAppBoundsOverride;
         int mTmpOverrideConfigOrientation;
         boolean mUseOverrideInsetsForConfig;
@@ -2294,7 +2308,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig, @Nullable ConfigOverrideHint overrideHint) {
         DisplayInfo overrideDisplayInfo = null;
-        ActivityRecord.CompatDisplayInsets compatInsets = null;
+        AppCompatDisplayInsets compatInsets = null;
         boolean useOverrideInsetsForConfig = false;
         if (overrideHint != null) {
             overrideDisplayInfo = overrideHint.mTmpOverrideDisplayInfo;

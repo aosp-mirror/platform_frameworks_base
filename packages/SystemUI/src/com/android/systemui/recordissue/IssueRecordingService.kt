@@ -23,7 +23,6 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
-import android.os.UserHandle
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -49,11 +48,11 @@ constructor(
     notificationManager: NotificationManager,
     userContextProvider: UserContextProvider,
     keyguardDismissUtil: KeyguardDismissUtil,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val panelInteractor: PanelInteractor,
-    private val traceurMessageSender: TraceurMessageSender,
+    dialogTransitionAnimator: DialogTransitionAnimator,
+    panelInteractor: PanelInteractor,
+    traceurMessageSender: TraceurMessageSender,
     private val issueRecordingState: IssueRecordingState,
-    private val iActivityManager: IActivityManager,
+    iActivityManager: IActivityManager,
 ) :
     RecordingService(
         controller,
@@ -62,8 +61,20 @@ constructor(
         uiEventLogger,
         notificationManager,
         userContextProvider,
-        keyguardDismissUtil
+        keyguardDismissUtil,
     ) {
+
+    private val session =
+        IssueRecordingServiceSession(
+            bgExecutor,
+            dialogTransitionAnimator,
+            panelInteractor,
+            traceurMessageSender,
+            issueRecordingState,
+            iActivityManager,
+            notificationManager,
+            userContextProvider,
+        )
 
     override fun getTag(): String = TAG
 
@@ -75,10 +86,7 @@ constructor(
         Log.d(getTag(), "handling action: ${intent?.action}")
         when (intent?.action) {
             ACTION_START -> {
-                bgExecutor.execute {
-                    traceurMessageSender.startTracing(issueRecordingState.traceConfig)
-                }
-                issueRecordingState.isRecording = true
+                session.start()
                 if (!issueRecordingState.recordScreen) {
                     // If we don't want to record the screen, the ACTION_SHOW_START_NOTIF action
                     // will circumvent the RecordingService's screen recording start code.
@@ -86,32 +94,13 @@ constructor(
                 }
             }
             ACTION_STOP,
-            ACTION_STOP_NOTIF -> {
-                // ViewCapture needs to save it's data before it is disabled, or else the data will
-                // be lost. This is expected to change in the near future, and when that happens
-                // this line should be removed.
-                bgExecutor.execute { traceurMessageSender.stopTracing() }
-                issueRecordingState.isRecording = false
-            }
+            ACTION_STOP_NOTIF -> session.stop(contentResolver)
             ACTION_SHARE -> {
-                bgExecutor.execute {
-                    mNotificationManager.cancelAsUser(
-                        null,
-                        intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
-                        UserHandle(mUserContextTracker.userContext.userId)
-                    )
-
-                    val screenRecording = intent.getParcelableExtra(EXTRA_PATH, Uri::class.java)
-                    if (issueRecordingState.takeBugreport) {
-                        iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
-                    } else {
-                        traceurMessageSender.shareTraces(applicationContext, screenRecording)
-                    }
-                }
-
-                dialogTransitionAnimator.disableAllCurrentDialogsExitAnimations()
-                panelInteractor.collapsePanels()
-
+                session.share(
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
+                    intent.getParcelableExtra(EXTRA_PATH, Uri::class.java),
+                    this,
+                )
                 // Unlike all other actions, action_share has different behavior for the screen
                 // recording qs tile than it does for the record issue qs tile. Return sticky to
                 // avoid running any of the base class' code for this action.

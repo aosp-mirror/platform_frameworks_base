@@ -46,7 +46,7 @@ public class AccessibilityNodeInfoTest {
     // The number of fields tested in the corresponding CTS AccessibilityNodeInfoTest:
     // See fullyPopulateAccessibilityNodeInfo, assertEqualsAccessibilityNodeInfo,
     // and assertAccessibilityNodeInfoCleared in that class.
-    private static final int NUM_MARSHALLED_PROPERTIES = 43;
+    private static final int NUM_MARSHALLED_PROPERTIES = 44;
 
     /**
      * The number of properties that are purposely not marshalled

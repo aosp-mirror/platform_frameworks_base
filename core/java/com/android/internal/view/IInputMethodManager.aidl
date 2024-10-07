@@ -76,10 +76,10 @@ interface IInputMethodManager {
 
     boolean showSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
             in ImeTracker.Token statsToken, int flags, int lastClickToolType,
-            in @nullable ResultReceiver resultReceiver, int reason);
+            in @nullable ResultReceiver resultReceiver, int reason, boolean async);
     boolean hideSoftInput(in IInputMethodClient client, @nullable IBinder windowToken,
             in ImeTracker.Token statsToken, int flags,
-            in @nullable ResultReceiver resultReceiver, int reason);
+            in @nullable ResultReceiver resultReceiver, int reason, boolean async);
 
     /**
      * A test API for CTS to request hiding the current soft input window, with the request origin
@@ -120,7 +120,8 @@ interface IInputMethodManager {
             in @nullable EditorInfo editorInfo, in @nullable IRemoteInputConnection inputConnection,
             in @nullable IRemoteAccessibilityInputConnection remoteAccessibilityInputConnection,
             int unverifiedTargetSdkVersion, int userId,
-            in ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq);
+            in ImeOnBackInvokedDispatcher imeDispatcher, int startInputSeq,
+            boolean useAsyncShowHideMethod);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);

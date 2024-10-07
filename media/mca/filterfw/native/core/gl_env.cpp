@@ -15,21 +15,23 @@
  */
 // #define LOG_NDEBUG 0
 
-#include "base/logging.h"
-#include "base/utilities.h"
 #include "core/gl_env.h"
-#include "core/shader_program.h"
-#include "core/vertex_frame.h"
-#include "system/window.h"
+
+#include <EGL/eglext.h>
+#include <com_android_graphics_libgui_flags.h>
+#include <gui/BufferQueue.h>
+#include <gui/GLConsumer.h>
+#include <gui/IGraphicBufferProducer.h>
+#include <gui/Surface.h>
 
 #include <map>
 #include <string>
-#include <EGL/eglext.h>
 
-#include <gui/BufferQueue.h>
-#include <gui/Surface.h>
-#include <gui/GLConsumer.h>
-#include <gui/IGraphicBufferProducer.h>
+#include "base/logging.h"
+#include "base/utilities.h"
+#include "core/shader_program.h"
+#include "core/vertex_frame.h"
+#include "system/window.h"
 
 namespace android {
 namespace filterfw {
@@ -165,12 +167,18 @@ bool GLEnv::InitWithNewContext() {
   }
 
   // Create dummy surface using a GLConsumer
+#if COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
+  surfaceTexture_ = new GLConsumer(0, GLConsumer::TEXTURE_EXTERNAL, /*useFenceSync=*/true,
+                                   /*isControlledByApp=*/false);
+  window_ = surfaceTexture_->getSurface();
+#else
   sp<IGraphicBufferProducer> producer;
   sp<IGraphicBufferConsumer> consumer;
   BufferQueue::createBufferQueue(&producer, &consumer);
   surfaceTexture_ = new GLConsumer(consumer, 0, GLConsumer::TEXTURE_EXTERNAL,
           true, false);
   window_ = new Surface(producer);
+#endif // COM_ANDROID_GRAPHICS_LIBGUI_FLAGS(WB_CONSUMER_BASE_OWNS_BQ)
 
   surfaces_[0] = SurfaceWindowPair(eglCreateWindowSurface(display(), config, window_.get(), NULL), NULL);
   if (CheckEGLError("eglCreateWindowSurface")) return false;

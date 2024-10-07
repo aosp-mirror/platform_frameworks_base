@@ -941,6 +941,16 @@
     <!-- Permission required for CTS test - FileIntegrityManagerTest -->
     <uses-permission android:name="android.permission.SETUP_FSVERITY" />
 
+    <!-- Permissions required for CTS test - AppFunctionManagerTest -->
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED" />
+    <uses-permission android:name="android.permission.EXECUTE_APP_FUNCTIONS" />
+
+    <!-- Permission required for CTS test - CtsNfcTestCases -->
+    <uses-permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
+
+    <!-- Permission required for CTS test - CtsAppTestCases -->
+    <uses-permission android:name="android.permission.KILL_UID" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

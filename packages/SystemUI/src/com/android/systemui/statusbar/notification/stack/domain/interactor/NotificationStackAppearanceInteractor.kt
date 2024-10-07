@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationPlaceholderRepository
@@ -39,6 +40,7 @@ class NotificationStackAppearanceInteractor
 constructor(
     private val viewHeightRepository: NotificationViewHeightRepository,
     private val placeholderRepository: NotificationPlaceholderRepository,
+    sceneInteractor: SceneInteractor,
     shadeInteractor: ShadeInteractor,
 ) {
     /** The bounds of the notification stack in the current scene. */
@@ -54,10 +56,9 @@ constructor(
 
     /** The rounding of the notification stack. */
     val shadeScrimRounding: Flow<ShadeScrimRounding> =
-        combine(
-                shadeInteractor.shadeMode,
-                isExpandingFromHeadsUp,
-            ) { shadeMode, isExpandingFromHeadsUp ->
+        combine(shadeInteractor.shadeMode, isExpandingFromHeadsUp) {
+                shadeMode,
+                isExpandingFromHeadsUp ->
                 ShadeScrimRounding(
                     isTopRounded = !(shadeMode == ShadeMode.Split && isExpandingFromHeadsUp),
                     isBottomRounded = shadeMode != ShadeMode.Single,
@@ -68,6 +69,10 @@ constructor(
     /** The alpha of the Notification Stack for the brightness mirror */
     val alphaForBrightnessMirror: StateFlow<Float> =
         placeholderRepository.alphaForBrightnessMirror.asStateFlow()
+
+    /** The alpha of the Notification Stack for lockscreen fade-in */
+    val alphaForLockscreenFadeIn: StateFlow<Float> =
+        placeholderRepository.alphaForLockscreenFadeIn.asStateFlow()
 
     /** The height of the keyguard's available space bounds */
     val constrainedAvailableSpace: StateFlow<Int> =
@@ -93,9 +98,23 @@ constructor(
     val isCurrentGestureOverscroll: Flow<Boolean> =
         viewHeightRepository.isCurrentGestureOverscroll.asStateFlow()
 
+    /** Whether we should close any notification guts that are currently open. */
+    val shouldCloseGuts: Flow<Boolean> =
+        combine(
+            sceneInteractor.isSceneContainerUserInputOngoing,
+            viewHeightRepository.isCurrentGestureInGuts,
+        ) { isUserInputOngoing, isCurrentGestureInGuts ->
+            isUserInputOngoing && !isCurrentGestureInGuts
+        }
+
     /** Sets the alpha to apply to the NSSL for the brightness mirror */
     fun setAlphaForBrightnessMirror(alpha: Float) {
         placeholderRepository.alphaForBrightnessMirror.value = alpha
+    }
+
+    /** Sets the alpha to apply to the NSSL for fade-in on lockscreen */
+    fun setAlphaForLockscreenFadeIn(alpha: Float) {
+        placeholderRepository.alphaForLockscreenFadeIn.value = alpha
     }
 
     /** Sets the position of the notification stack in the current scene. */
@@ -117,6 +136,10 @@ constructor(
     /** Sets whether the current touch gesture is overscroll. */
     fun setCurrentGestureOverscroll(isOverscroll: Boolean) {
         viewHeightRepository.isCurrentGestureOverscroll.value = isOverscroll
+    }
+
+    fun setCurrentGestureInGuts(isInGuts: Boolean) {
+        viewHeightRepository.isCurrentGestureInGuts.value = isInGuts
     }
 
     fun setConstrainedAvailableSpace(height: Int) {

@@ -589,6 +589,12 @@ public class Process {
      **/
     public static final int THREAD_GROUP_RESTRICTED = 7;
 
+    /**
+     * Thread group for foreground apps in multi-window mode
+     * @hide
+     **/
+    public static final int THREAD_GROUP_FOREGROUND_WINDOW = 8;
+
     /** @hide */
     public static final int SIGNAL_DEFAULT = 0;
     public static final int SIGNAL_QUIT = 3;
@@ -838,14 +844,9 @@ public class Process {
     /**
      * Returns true if the current process is a 64-bit runtime.
      */
-    @android.ravenwood.annotation.RavenwoodReplace
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean is64Bit() {
         return VMRuntime.getRuntime().is64Bit();
-    }
-
-    /** @hide */
-    public static final boolean is64Bit$ravenwood() {
-        return "amd64".equals(System.getProperty("os.arch"));
     }
 
     private static volatile ThreadLocal<SomeArgs> sIdentity$ravenwood;

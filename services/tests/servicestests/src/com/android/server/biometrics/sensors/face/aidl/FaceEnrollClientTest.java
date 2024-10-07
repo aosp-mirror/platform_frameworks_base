@@ -109,6 +109,8 @@ public class FaceEnrollClientTest {
     private AidlResponseHandler mAidlResponseHandler;
     @Mock
     private AuthenticationStateListeners mAuthenticationStateListeners;
+    @Mock
+    private BiometricUtils<Face> mBiometricUtils;
     @Captor
     private ArgumentCaptor<OperationContextExt> mOperationContextCaptor;
     @Captor
@@ -213,7 +215,7 @@ public class FaceEnrollClientTest {
                 mBiometricLogger, mBiometricContext, 5 /* maxTemplatesPerUser */,
                 true /* debugConsent */,
                 (new FaceEnrollOptions.Builder()).setEnrollReason(ENROLL_SOURCE).build(),
-                mAuthenticationStateListeners);
+                mAuthenticationStateListeners, mBiometricUtils);
     }
 
     @Test

@@ -254,11 +254,8 @@ public class ImeBackAnimationControllerTest {
         float progress = 0.5f;
         mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, progress, EDGE_LEFT));
         // verify correct ime insets manipulation
-        float interpolatedProgress = BACK_GESTURE.getInterpolation(progress);
-        int expectedInset =
-                (int) (IME_HEIGHT - interpolatedProgress * PEEK_FRACTION * IME_HEIGHT);
         verify(mWindowInsetsAnimationController, times(1)).setInsetsAndAlpha(
-                eq(Insets.of(0, 0, 0, expectedInset)), eq(1f), anyFloat());
+                eq(Insets.of(0, 0, 0, getImeHeight(progress))), eq(1f), anyFloat());
     }
 
     @Test
@@ -268,12 +265,13 @@ public class ImeBackAnimationControllerTest {
             WindowInsetsAnimationControlListener animationControlListener = startBackGesture();
 
             // progress back gesture
-            mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, 0.5f, EDGE_LEFT));
+            float progress = 0.5f;
+            mBackAnimationController.onBackProgressed(new BackEvent(100f, 0f, progress, EDGE_LEFT));
 
             // commit back gesture
             mBackAnimationController.onBackInvoked();
 
-            // verify setInsetsAndAlpha never called due onReady delayed
+            // verify setInsetsAndAlpha never called due to onReady delayed
             verify(mWindowInsetsAnimationController, never()).setInsetsAndAlpha(any(), anyInt(),
                     anyFloat());
             verify(mInsetsController, never()).setPredictiveBackImeHideAnimInProgress(eq(true));
@@ -283,7 +281,7 @@ public class ImeBackAnimationControllerTest {
 
             // verify setInsetsAndAlpha immediately called
             verify(mWindowInsetsAnimationController, times(1)).setInsetsAndAlpha(
-                    eq(Insets.of(0, 0, 0, IME_HEIGHT)), eq(1f), anyFloat());
+                    eq(Insets.of(0, 0, 0, getImeHeight(progress))), eq(1f), anyFloat());
             // verify post-commit hide anim has started
             verify(mInsetsController, times(1)).setPredictiveBackImeHideAnimInProgress(eq(true));
         });
@@ -318,5 +316,10 @@ public class ImeBackAnimationControllerTest {
                 anyBoolean());
 
         return animationControlListener.getValue();
+    }
+
+    private int getImeHeight(float gestureProgress) {
+        float interpolatedProgress = BACK_GESTURE.getInterpolation(gestureProgress);
+        return (int) (IME_HEIGHT - interpolatedProgress * PEEK_FRACTION * IME_HEIGHT);
     }
 }

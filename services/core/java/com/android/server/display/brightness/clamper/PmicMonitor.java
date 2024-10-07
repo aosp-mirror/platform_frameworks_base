@@ -18,15 +18,12 @@ package com.android.server.display.brightness.clamper;
 
 import static com.android.server.display.brightness.clamper.BrightnessPowerClamper.PowerChangeListener;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
 import android.os.IThermalService;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.Temperature;
 import android.power.PowerStatsInternal;
 import android.util.IntArray;
@@ -51,25 +48,30 @@ public class PmicMonitor {
 
     // The executor to periodically monitor the display power.
     private final ScheduledExecutorService mExecutor;
-    @NonNull
-    private final PowerChangeListener mPowerChangeListener;
-    private final long mPowerMonitorPeriodConfigSecs;
+    private final long mPowerMonitorPeriodConfigMillis;
     private final PowerStatsInternal mPowerStatsInternal;
     @VisibleForTesting final IThermalService mThermalService;
+    @VisibleForTesting PowerChangeListener mPowerChangeListener;
     private ScheduledFuture<?> mPmicMonitorFuture;
     private float mLastEnergyConsumed = 0;
-    private float mCurrentAvgPower = 0;
+    private float mCurrentTotalAvgPower = 0;
     private Temperature mCurrentTemperature;
     private long mCurrentTimestampMillis = 0;
+    private float[] mAvgPowerCircularList;
+    private int mPowerListStart = 0;
+    private int mPowerListEnd = 0;
 
-    PmicMonitor(PowerChangeListener listener, int powerMonitorPeriodConfigSecs) {
+    PmicMonitor(PowerChangeListener listener,
+                IThermalService thermalService,
+                int pollingMaxTimeMillis,
+                int pollingMinTimeMillis) {
         mPowerChangeListener = listener;
+        mThermalService = thermalService;
         mPowerStatsInternal = LocalServices.getService(PowerStatsInternal.class);
-        mThermalService = IThermalService.Stub.asInterface(
-                ServiceManager.getService(Context.THERMAL_SERVICE));
+        mAvgPowerCircularList = new float[pollingMaxTimeMillis / pollingMinTimeMillis];
         // start a periodic worker thread.
         mExecutor = Executors.newSingleThreadScheduledExecutor();
-        mPowerMonitorPeriodConfigSecs = (long) powerMonitorPeriodConfigSecs;
+        mPowerMonitorPeriodConfigMillis = pollingMinTimeMillis;
     }
 
     @Nullable
@@ -141,12 +143,28 @@ public class PmicMonitor {
 
         // capture thermal state.
         Temperature displayTemperature = getDisplayTemperature();
-        mCurrentAvgPower = currentPower;
+        boolean isBufferFull = false;
+        mAvgPowerCircularList[mPowerListEnd] = currentPower;
+        mCurrentTotalAvgPower += currentPower;
+        mPowerListEnd =
+            (mPowerListEnd + 1) % mAvgPowerCircularList.length;
+        if (mPowerListStart == mPowerListEnd) {
+            isBufferFull = true;
+        }
+
         mCurrentTemperature = displayTemperature;
         mLastEnergyConsumed = displayResults[0].energyUWs;
         mCurrentTimestampMillis = displayResults[0].timestampMs;
-        if (mCurrentTemperature != null) {
-            mPowerChangeListener.onChanged(mCurrentAvgPower, mCurrentTemperature.getStatus());
+
+        if (mCurrentTemperature != null && isBufferFull) {
+            mPowerChangeListener.onChanged(mCurrentTotalAvgPower / mAvgPowerCircularList.length,
+                                            mCurrentTemperature.getStatus());
+        }
+
+        // average power long-term list is full, reset values for next cycle.
+        if (isBufferFull) {
+            mCurrentTotalAvgPower = mCurrentTotalAvgPower - mAvgPowerCircularList[mPowerListStart];
+            mPowerListStart = (mPowerListStart + 1) % mAvgPowerCircularList.length;
         }
     }
 
@@ -165,11 +183,11 @@ public class PmicMonitor {
         if (mPmicMonitorFuture == null) {
             mPmicMonitorFuture = mExecutor.scheduleAtFixedRate(
                                     this::capturePeriodicDisplayPower,
-                                    mPowerMonitorPeriodConfigSecs,
-                                    mPowerMonitorPeriodConfigSecs,
-                                    TimeUnit.SECONDS);
+                                    mPowerMonitorPeriodConfigMillis,
+                                    mPowerMonitorPeriodConfigMillis,
+                                    TimeUnit.MILLISECONDS);
         } else {
-            Slog.e(TAG, "already scheduled, stop() called before start.");
+            Slog.e(TAG, "PMIC already scheduled, stop() called before start.");
         }
     }
 
@@ -181,6 +199,23 @@ public class PmicMonitor {
             mPmicMonitorFuture.cancel(true);
             mPmicMonitorFuture = null;
         }
+    }
+
+    /**
+     * Updates PMIC configuration.
+     */
+    public void updateConfiguration() {
+        if (mPmicMonitorFuture != null) {
+            mPmicMonitorFuture.cancel(true);
+            mPmicMonitorFuture = null;
+        }
+    }
+
+    /**
+     * Returns if PMIC monitor is stopped.
+     */
+    public boolean isStopped() {
+        return mPmicMonitorFuture == null;
     }
 
     /**

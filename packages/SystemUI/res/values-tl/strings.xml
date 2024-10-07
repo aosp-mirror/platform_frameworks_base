@@ -104,23 +104,18 @@
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Na-detect ng <xliff:g id="APPNAME">%1$s</xliff:g> at ng iba pang bukas na app ang screenshot na ito."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Idagdag sa tala"</string>
     <string name="backlinks_include_link" msgid="4562093591148248158">"Isama ang link"</string>
+    <string name="backlinks_duplicate_label_format" msgid="558445128952827926">"<xliff:g id="APPNAME">%1$s</xliff:g> <xliff:g id="FREQUENCYCOUNT">(%2$d)</xliff:g>⁠"</string>
+    <string name="backlinks_cross_profile_error" msgid="1355798585727802282">"Hindi maidaragdag ang mga link mula sa ibang profile"</string>
     <string name="screenrecord_title" msgid="4257171601439507792">"Recorder ng Screen"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Pinoproseso screen recording"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Kasalukuyang notification para sa session ng pag-record ng screen"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (7415261783188749730) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_single_app (1996450687814647583) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen (2794896384693120020) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (1321758636709366068) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (3738199712880063924) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue_entire_screen (5557974446773486600) -->
-    <skip />
-    <!-- no translation found for screenrecord_app_selector_title (3854492366333954736) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"I-record ang iyong screen?"</string>
+    <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Mag-record ng isang app"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"I-record ang buong screen"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kapag nire-record mo ang iyong buong screen, nire-record ang anumang ipinapakita sa screen mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kapag nagre-record ka ng app, nire-record ang anumang ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"I-record ang screen"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Pumili ng app na ire-record"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Mag-record ng audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio ng device"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Tunog mula sa iyong device, gaya ng musika, mga tawag, at ringtone"</string>
@@ -298,7 +293,7 @@
     <string name="start_dreams" msgid="9131802557946276718">"Screen saver"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Huwag Istorbohin"</string>
-    <string name="quick_settings_modes_label" msgid="5407025818652750501">"Mga mode ng priyoridad"</string>
+    <string name="quick_settings_modes_label" msgid="879156359479504244">"Mga Mode"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Walang available na mga magkapares na device"</string>
     <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Mag-tap para magkonekta o magdiskonekta ng device"</string>
@@ -307,6 +302,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gumamit ng Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Nakakonekta"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Pag-share ng Audio"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"I-tap para lumipat o magbahagi ng audio"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Na-save"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"idiskonekta"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"i-activate"</string>
@@ -315,6 +311,7 @@
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"Mag-o-on ang Bluetooth bukas ng umaga"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"Ibahagi ang audio"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button_sharing" msgid="3069309588231072128">"Ibinabahagi ang audio"</string>
+    <string name="quick_settings_bluetooth_audio_sharing_button_accessibility" msgid="7604615019302091708">"pumasok sa mga setting sa pag-share ng audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> na baterya"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
@@ -437,10 +434,11 @@
     <string name="sensor_privacy_dialog_open_settings" msgid="5635865896053011859">"Buksan ang Mga Setting"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Iba pang device"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"I-toggle ang Overview"</string>
-    <string name="zen_modes_dialog_title" msgid="4159138230418567383">"Mga priyoridad na mode"</string>
+    <string name="zen_modes_dialog_title" msgid="8854640808100096934">"Mga Mode"</string>
     <string name="zen_modes_dialog_done" msgid="6654130880256438950">"Tapos na"</string>
     <string name="zen_modes_dialog_settings" msgid="2310248023728936697">"Mga Setting"</string>
     <string name="zen_mode_on" msgid="9085304934016242591">"Naka-on"</string>
+    <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Naka-on • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Naka-off"</string>
     <string name="zen_mode_set_up" msgid="7457957033034460064">"I-set up"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Pamahalaan sa mga setting"</string>
@@ -535,25 +533,26 @@
     <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Magkakaroon ng access ang <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
     <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Magsimulang mag-record o mag-cast?"</string>
     <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Ang serbisyong nagbibigay ng function na ito ay magkakaroon ng access sa lahat ng impormasyong nakikita sa iyong screen o pine-play mula sa device mo habang nagre-record o nagka-cast. Kasama rito ang impormasyong tulad ng mga password, detalye ng pagbabayad, larawan, mensahe, at audio na pine-play mo."</string>
-    <!-- no translation found for screen_share_generic_app_selector_title (8331515850599218288) -->
-    <skip />
+    <string name="screen_share_generic_app_selector_title" msgid="8331515850599218288">"Magbahagi o mag-record ng app"</string>
     <string name="media_projection_entry_app_permission_dialog_title" msgid="4613857256721708062">"Ibahagi ang iyong screen sa <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_single_app" msgid="6314402084788062644">"Magbahagi ng isang app"</string>
-    <string name="media_projection_entry_app_permission_dialog_option_text_entire_screen" msgid="7381488112332599632">"Ibahagi ang buong screen"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="2974054871681567314">"Mag-share ng isang app"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_single_app (2308901434964846084) -->
+    <skip />
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="4493174362775038997">"I-share ang buong screen"</string>
+    <!-- no translation found for media_projection_entry_app_permission_dialog_option_text_entire_screen (5100078808078139706) -->
+    <skip />
     <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="5504288438067851086">"Kapag ibinahagi mo ang iyong buong screen, makikita ng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ang kahit anong nasa screen mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="7094417930857938876">"Kapag nagbabahagi ka ng app, makikita ng <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ang kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_app_permission_dialog_continue_entire_screen" msgid="1850848182344377579">"Ibahagi ang screen"</string>
     <string name="media_projection_entry_app_permission_dialog_single_app_disabled" msgid="8999903044874669995">"Na-disable ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang opsyong ito"</string>
-    <!-- no translation found for media_projection_entry_share_app_selector_title (1419515119767501822) -->
-    <skip />
+    <string name="media_projection_entry_share_app_selector_title" msgid="1419515119767501822">"Pumili ng app na ibabahagi"</string>
     <string name="media_projection_entry_cast_permission_dialog_title" msgid="752756942658159416">"I-cast ang iyong screen?"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_single_app" msgid="6073353940838561981">"Mag-cast ng isang app"</string>
     <string name="media_projection_entry_cast_permission_dialog_option_text_entire_screen" msgid="8389508187954155307">"I-cast ang buong screen"</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="4040447861037324017">"Kapag na-cast mo ang iyong buong screen, makikita ang anumang nasa screen mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="7487834861348460736">"Kapag nagka-cast ka ng app, makikita ang anumang ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_cast_permission_dialog_continue_entire_screen" msgid="3261124185304676483">"I-cast ang screen"</string>
-    <!-- no translation found for media_projection_entry_cast_app_selector_title (6323062146661922387) -->
-    <skip />
+    <string name="media_projection_entry_cast_app_selector_title" msgid="6323062146661922387">"Pumili ng app na ika-cast"</string>
     <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Simulan ang pagbabahagi?"</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kapag nagbabahagi, nagre-record, o nagka-cast ka, may access ang Android sa kahit anong nakikita sa iyong screen o pine-play sa device mo. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
     <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kapag nagbabahagi, nagre-record, o nagka-cast ka ng app, may access ang Android sa kahit anong ipinapakita o pine-play sa app na iyon. Kaya mag-ingat sa mga bagay-bagay tulad ng mga password, detalye ng pagbabayad, mensahe, larawan, at audio at video."</string>
@@ -574,6 +573,8 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Mga Pag-uusap"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"I-clear ang lahat ng silent na notification"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Mga notification na na-pause ng Huwag Istorbohin"</string>
+    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
+    <skip />
     <string name="media_projection_action_text" msgid="3634906766918186440">"Magsimula ngayon"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Walang mga notification"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Walang bagong notification"</string>
@@ -637,7 +638,7 @@
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Mga Setting"</string>
     <string name="volume_panel_captioning_title" msgid="5984936949147684357">"Instant Caption"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Ibinaba sa mas ligtas na level ang volume"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Naging malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Malakas ang volume ng headphones nang mas matagal sa inirerekomenda"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Lampas na sa ligtas na limitasyon para sa linggong ito ang volume ng headphone"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Magpatuloy sa pakikinig"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Hinaan"</string>
@@ -726,6 +727,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellite, malakas ang koneksyon"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellite, may koneksyon"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
+    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Mga emergency na tawag o SOS"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profile sa trabaho"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Masaya para sa ilan ngunit hindi para sa lahat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Nagbibigay sa iyo ang Tuner ng System UI ng mga karagdagang paraan upang baguhin at i-customize ang user interface ng Android. Ang mga pang-eksperimentong feature na ito ay maaaring magbago, masira o mawala sa mga pagpapalabas sa hinaharap. Magpatuloy nang may pag-iingat."</string>
@@ -1179,6 +1181,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Mga Speaker at Display"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Mga Iminumungkahing Device"</string>
+    <string name="media_input_group_title" msgid="2057057473860783021">"Input"</string>
+    <string name="media_output_group_title" msgid="6789001895863332576">"Output"</string>
     <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Ihinto ang iyong nakabahaging session para maglipat ng media sa ibang device"</string>
     <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Ihinto"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Paano gumagana ang pag-broadcast"</string>
@@ -1289,6 +1293,7 @@
     <string name="add" msgid="81036585205287996">"Magdagdag"</string>
     <string name="manage_users" msgid="1823875311934643849">"Pamahalaan ang mga user"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Hindi sinusuportahan ng notification na ito ang pag-drag sa split screen"</string>
+    <string name="dream_overlay_location_active" msgid="6484763493158166618">"Aktibo ang lokasyon"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Hindi available ang Wi‑Fi"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Priority mode"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Nakatakda ang alarm"</string>
@@ -1345,6 +1350,7 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"I-customize ang lock screen"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"I-unlock para i-customize ang lock screen"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Hindi available ang Wi-Fi"</string>
+    <string name="location_active_dream_overlay_content_description" msgid="6208885541020673916">"Aktibo ang lokasyon"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Naka-block ang camera"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Naka-block ang camera at mikropono"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Naka-block ang mikropono"</string>
@@ -1392,30 +1398,33 @@
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"I-collapse ang icon"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"I-expand ang icon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"o"</string>
+    <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Handle sa pag-drag"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Mag-navigate gamit ang iyong keyboard"</string>
+    <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Matuto ng mga keyboard shortcut"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Mag-navigate gamit ang iyong touchpad"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Matuto ng mga galaw sa touchpad"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Mag-navigate gamit ang iyong keyboard at touchpad"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Matuto ng mga galaw sa touchpad, keyboard shortcut, at higit pa"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Galaw para bumalik"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Galaw para sa Home"</string>
-    <string name="touchpad_tutorial_action_key_button" msgid="3220074511852927267">"Action key"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Tingnan ang mga kamakailang app"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Tapos na"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Bumalik"</string>
     <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Para bumalik, mag-swipe pakaliwa o pakanan gamit ang tatlong daliri saanman sa touchpad.\n\nPuwede mo ring gamitin ang keyboard shortcut na Action + ESC para dito."</string>
-    <!-- no translation found for touchpad_back_gesture_success_title (7240576648330612171) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_body (2324724953720741719) -->
-    <skip />
+    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Magaling!"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Nakumpleto mo na ang galaw para bumalik."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Pumunta sa home"</string>
     <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Para pumunta sa iyong home screen anumang oras, mag-swipe pataas gamit ang tatlong daliri mula sa ibaba ng screen. mo."</string>
-    <!-- no translation found for touchpad_home_gesture_success_title (3778407003948209795) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2404031094918807067) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_title (2659466586996495447) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5718948664616999196) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (466467860120112933) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (7201991081652850430) -->
-    <skip />
+    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Magaling!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Nakumpleto mo na ang galaw para pumunta sa home."</string>
+    <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Tingnan ang mga kamakailang app"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Mag-swipe pataas at i-hold gamit ang tatlong daliri sa iyong touchpad."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Magaling!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Nakumpleto mo ang galaw sa pag-view ng mga kamakailang app."</string>
+    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Action key"</string>
+    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Para ma-access ang iyong mga app, pindutin ang action key sa keyboard mo."</string>
+    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Binabati kita!"</string>
+    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Nakumpleto mo na ang galaw ng action key.\n\nIpinapakita ng Action + / ang lahat ng shortcut na available sa iyo."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Backlight ng keyboard"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Level %1$d sa %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Mga Home Control"</string>
@@ -1435,8 +1444,15 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"Mag-swipe pataas at i-hold gamit ang tatlong daliri. I-tap para matuto pa tungkol sa mga galaw."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Gamitin ang iyong keyboard para tingnan ang lahat ng app"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Pindutin ang action key kahit kailan. I-tap para matuto pa tungkol sa mga galaw."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="4369307638184799742">"Bahagi na ng brightness bar ang extra dim"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="7513137763024327538">"Puwede mo nang gawing extra dim ang screen sa pamamagitan ng pagpapababa ng level ng liwanag nang higit pa mula sa itaas ng iyong screen.\n\nPinakamahusay itong gumagana kapag nasa madilim na kapaligiran ka."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="1782147201534669800">"Alisin ang shortcut ng extra dim"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="4070696910424515757">"Inalis ang shortcut ng extra dim. Para bawasan ang liwanag, gamitin ang karaniwang bar ng liwanag."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"Bahagi na ng slider ng liwanag ang extra dim"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Puwede mo nang gawing extra dim ang screen sa pamamagitan ng pagbababa pa sa antas ng liwanag .\n\nDahil bahagi na ang feature na ito ng slider ng liwanag, aalisin na ang mga shortcut sa extra dim."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Alisin ang mga shortcut sa extra dim"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Inalis ang mga shortcut sa extra dim"</string>
+    <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Pagkakonekta"</string>
+    <string name="qs_edit_mode_category_accessibility" msgid="7969091385071475922">"Accessibility"</string>
+    <string name="qs_edit_mode_category_utilities" msgid="8123080090108420095">"Mga Utility"</string>
+    <string name="qs_edit_mode_category_privacy" msgid="6577774443194551775">"Privacy"</string>
+    <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Ibinibigay ng mga app"</string>
+    <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Display"</string>
+    <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Hindi Alam"</string>
 </resources>

@@ -1,54 +1,19 @@
 {
   "presubmit": [
     {
-      "name": "CtsGameManagerTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "CtsGameManagerTestCases"
     },
     {
-      "name": "CtsStatsdAtomHostTestCases",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "include-filter": "android.cts.statsdatom.gamemanager"
-        }
-      ],
+      "name": "CtsStatsdAtomHostTestCases_statsdatom_gamemanager",
       "file_patterns": [
         "(/|^)GameManagerService.java"
       ]
     },
     {
-      "name": "FrameworksMockingServicesTests",
-      "options": [
-        {
-          "include-filter": "com.android.server.app"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ]
+      "name": "FrameworksMockingServicesTests_android_server_app"
     },
     {
-      "name": "FrameworksCoreGameManagerTests",
-      "options": [
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "include-filter": "android.app"
-        }
-      ],
+      "name": "FrameworksCoreGameManagerTests_android_app",
       "file_patterns": [
         "(/|^)GameManagerService.java", "(/|^)GameManagerSettings.java"
       ]

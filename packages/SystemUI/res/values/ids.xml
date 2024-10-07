@@ -281,4 +281,9 @@
 
     <!-- Ids for communal hub widgets -->
     <item type="id" name="communal_widget_disposable_tag"/>
+
+    <!-- snapshot view-binding IDs -->
+    <item type="id" name="snapshot_view_binding" />
+    <item type="id" name="snapshot_view_binding_root" />
+
 </resources>

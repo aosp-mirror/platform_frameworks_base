@@ -27,9 +27,5 @@ public interface CompanionOperation {
      * @param operations command is to be added
      */
     void read(WireBuffer buffer, List<Operation> operations);
-
-    // Debugging / Documentation utility functions
-    String name();
-    int id();
 }
 

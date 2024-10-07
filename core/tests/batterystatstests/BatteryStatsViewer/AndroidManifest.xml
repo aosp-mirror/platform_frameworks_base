@@ -20,6 +20,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.BATTERY_STATS"/>
+    <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"/>
 
@@ -31,7 +32,8 @@
         <activity android:name=".BatteryConsumerPickerActivity"
                   android:label="Battery Stats"
                   android:launchMode="singleTop"
-                  android:exported="true">
+                  android:exported="true"
+                  android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -41,5 +43,25 @@
         <activity android:name=".BatteryStatsViewerActivity"
                   android:label="Battery Stats"
                   android:parentActivityName=".BatteryConsumerPickerActivity"/>
+
+        <activity android:name=".TrampolineActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="com.android.settings.action.IA_SETTINGS"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.development" />
+            <meta-data android:name="com.android.settings.title"
+                android:resource="@string/settings_title" />
+            <meta-data android:name="com.android.settings.summary"
+                android:resource="@string/settings_summary" />
+            <meta-data android:name="com.android.settings.group_key"
+                android:value="debug_debugging_category" />
+            <meta-data android:name="com.android.settings.order"
+                android:value="2" />
+        </activity>
     </application>
 </manifest>

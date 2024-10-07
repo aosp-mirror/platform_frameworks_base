@@ -47,6 +47,7 @@ class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceA
     override fun isFaceAuthEnabledAndEnrolled(): Boolean = false
 
     override fun isFaceAuthStrong(): Boolean = false
+
     override fun start() = Unit
 
     override fun registerListener(listener: FaceAuthenticationListener) {}
@@ -59,13 +60,17 @@ class NoopDeviceEntryFaceAuthInteractor @Inject constructor() : DeviceEntryFaceA
 
     override fun onDeviceLifted() {}
 
-    override fun onQsExpansionStared() {}
+    override fun onShadeExpansionStarted() {}
 
     override fun onNotificationPanelClicked() {}
 
     override fun onSwipeUpOnBouncer() {}
+
     override fun onPrimaryBouncerUserInput() {}
+
     override fun onAccessibilityAction() {}
+
     override fun onWalletLaunched() = Unit
+
     override fun onDeviceUnfolded() {}
 }

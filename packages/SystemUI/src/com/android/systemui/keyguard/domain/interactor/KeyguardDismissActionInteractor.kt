@@ -17,22 +17,24 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
-import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.domain.resolver.NotifShadeSceneFamilyResolver
-import com.android.systemui.scene.domain.resolver.QuickSettingsSceneFamilyResolver
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,6 +45,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
@@ -57,10 +60,12 @@ constructor(
     transitionInteractor: KeyguardTransitionInteractor,
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
-    sceneInteractor: SceneInteractor,
-    deviceEntryInteractor: DeviceEntryInteractor,
-    quickSettingsSceneFamilyResolver: QuickSettingsSceneFamilyResolver,
-    notifShadeSceneFamilyResolver: NotifShadeSceneFamilyResolver,
+    deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
+    powerInteractor: PowerInteractor,
+    alternateBouncerInteractor: AlternateBouncerInteractor,
+    shadeInteractor: Lazy<ShadeInteractor>,
+    keyguardInteractor: Lazy<KeyguardInteractor>,
+    sceneInteractor: Lazy<SceneInteractor>,
 ) {
     val dismissAction: Flow<DismissAction> = repository.dismissAction
 
@@ -95,20 +100,49 @@ constructor(
      * device is unlocked. Else, false.
      */
     private val isOnShadeWhileUnlocked: Flow<Boolean> =
-        combine(
-                sceneInteractor.currentScene,
-                deviceEntryInteractor.isUnlocked,
-            ) { scene, isUnlocked ->
-                isUnlocked &&
-                    (quickSettingsSceneFamilyResolver.includesScene(scene) ||
-                        notifShadeSceneFamilyResolver.includesScene(scene))
+        if (SceneContainerFlag.isEnabled) {
+            combine(
+                    shadeInteractor.get().isAnyExpanded,
+                    deviceUnlockedInteractor.get().deviceUnlockStatus,
+                ) { isAnyExpanded, unlockStatus ->
+                    isAnyExpanded && unlockStatus.isUnlocked
+                }
+                .distinctUntilChanged()
+        } else if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
+            combine(
+                    shadeInteractor.get().isAnyExpanded,
+                    keyguardInteractor.get().isKeyguardDismissible,
+                ) { isAnyExpanded, keyguardDismissible ->
+                    isAnyExpanded && keyguardDismissible
+                }
+                .distinctUntilChanged()
+        } else {
+            flow {
+                error(
+                    "This should not be used when both SceneContainerFlag " +
+                        "and ComposeBouncerFlag are disabled"
+                )
             }
-            .distinctUntilChanged()
+        }
+
     val executeDismissAction: Flow<() -> KeyguardDone> =
         merge(
-                finishedTransitionToGone,
+                if (SceneContainerFlag.isEnabled) {
+                    // Using currentScene instead of finishedTransitionToGone because of a race
+                    // condition that forms between finishedTransitionToGone and
+                    // isOnShadeWhileUnlocked where the latter emits false before the former emits
+                    // true, causing the merge to not emit until it's too late.
+                    sceneInteractor
+                        .get()
+                        .currentScene
+                        .map { it == Scenes.Gone }
+                        .distinctUntilChanged()
+                        .filter { it }
+                } else {
+                    finishedTransitionToGone
+                },
                 isOnShadeWhileUnlocked.filter { it }.map {},
-                dismissInteractor.dismissKeyguardRequestWithImmediateDismissAction
+                dismissInteractor.dismissKeyguardRequestWithImmediateDismissAction,
             )
             .sample(dismissAction)
             .filterNot { it is DismissAction.None }
@@ -116,18 +150,34 @@ constructor(
 
     val resetDismissAction: Flow<Unit> =
         combine(
-                transitionInteractor.isFinishedIn(
-                    scene = Scenes.Gone,
-                    stateWithoutSceneContainer = GONE
-                ),
+                if (SceneContainerFlag.isEnabled) {
+                    // Using currentScene instead of isFinishedIn because of a race condition that
+                    // forms between isFinishedIn(Gone) and isOnShadeWhileUnlocked where the latter
+                    // emits false before the former emits true, causing the evaluation of the
+                    // combine to come up with true, temporarily, before settling on false, which is
+                    // a valid final state. That causes an incorrect reset of the dismiss action to
+                    // occur before it gets executed.
+                    sceneInteractor
+                        .get()
+                        .currentScene
+                        .map { it == Scenes.Gone }
+                        .distinctUntilChanged()
+                } else {
+                    transitionInteractor.isFinishedIn(
+                        scene = Scenes.Gone,
+                        stateWithoutSceneContainer = GONE,
+                    )
+                },
                 transitionInteractor.isFinishedIn(
                     scene = Scenes.Bouncer,
-                    stateWithoutSceneContainer = PRIMARY_BOUNCER
+                    stateWithoutSceneContainer = PRIMARY_BOUNCER,
                 ),
-                transitionInteractor.isFinishedIn(state = ALTERNATE_BOUNCER),
+                alternateBouncerInteractor.isVisible,
                 isOnShadeWhileUnlocked,
-            ) { isOnGone, isOnBouncer, isOnAltBouncer, isOnShadeWhileUnlocked ->
-                !isOnGone && !isOnBouncer && !isOnAltBouncer && !isOnShadeWhileUnlocked
+                powerInteractor.isAsleep,
+            ) { isOnGone, isOnBouncer, isOnAltBouncer, isOnShadeWhileUnlocked, isAsleep ->
+                (!isOnGone && !isOnBouncer && !isOnAltBouncer && !isOnShadeWhileUnlocked) ||
+                    isAsleep
             }
             .filter { it }
             .sampleFilter(dismissAction) { it !is DismissAction.None }
@@ -138,7 +188,7 @@ constructor(
     }
 
     fun runAfterKeyguardGone(runnable: Runnable) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         setDismissAction(
             DismissAction.RunAfterKeyguardGone(
                 dismissAction = { runnable.run() },
@@ -150,18 +200,18 @@ constructor(
     }
 
     fun setDismissAction(dismissAction: DismissAction) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         repository.dismissAction.value.onCancelAction.run()
         repository.setDismissAction(dismissAction)
     }
 
     fun handleDismissAction() {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         repository.setDismissAction(DismissAction.None)
     }
 
     suspend fun setKeyguardDone(keyguardDoneTiming: KeyguardDone) {
-        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
+        if (ComposeBouncerFlags.isUnexpectedlyInLegacyMode()) return
         dismissInteractor.setKeyguardDone(keyguardDoneTiming)
     }
 }

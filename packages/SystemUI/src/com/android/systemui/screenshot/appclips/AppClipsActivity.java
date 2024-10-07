@@ -68,10 +68,14 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Flags;
 import com.android.systemui.log.DebugLogger;
 import com.android.systemui.res.R;
+import com.android.systemui.screenshot.appclips.InternalBacklinksData.BacklinksData;
+import com.android.systemui.screenshot.appclips.InternalBacklinksData.CrossProfileError;
 import com.android.systemui.screenshot.scroll.CropView;
 import com.android.systemui.settings.UserTracker;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -98,6 +102,7 @@ public class AppClipsActivity extends ComponentActivity {
     private static final String TAG = AppClipsActivity.class.getSimpleName();
     private static final ApplicationInfoFlags APPLICATION_INFO_FLAGS = ApplicationInfoFlags.of(0);
     private static final int DRAWABLE_END = 2;
+    private static final float DISABLE_ALPHA = 0.5f;
 
     private final AppClipsViewModel.Factory mViewModelFactory;
     private final PackageManager mPackageManager;
@@ -114,6 +119,7 @@ public class AppClipsActivity extends ComponentActivity {
     private Button mCancel;
     private CheckBox mBacklinksIncludeDataCheckBox;
     private TextView mBacklinksDataTextView;
+    private TextView mBacklinksCrossProfileError;
     private AppClipsViewModel mViewModel;
 
     private ResultReceiver mResultReceiver;
@@ -190,8 +196,8 @@ public class AppClipsActivity extends ComponentActivity {
         mBacklinksDataTextView = mLayout.findViewById(R.id.backlinks_data);
         mBacklinksIncludeDataCheckBox = mLayout.findViewById(R.id.backlinks_include_data);
         mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
-                (buttonView, isChecked) ->
-                        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE));
+                this::backlinksIncludeDataCheckBoxCheckedChangeListener);
+        mBacklinksCrossProfileError = mLayout.findViewById(R.id.backlinks_cross_profile_error);
 
         mViewModel = new ViewModelProvider(this, mViewModelFactory).get(AppClipsViewModel.class);
         mViewModel.getScreenshot().observe(this, this::setScreenshot);
@@ -310,10 +316,11 @@ public class AppClipsActivity extends ComponentActivity {
                 Intent.CAPTURE_CONTENT_FOR_NOTE_SUCCESS);
         data.putParcelable(EXTRA_SCREENSHOT_URI, uri);
 
+        InternalBacklinksData selectedBacklink = mViewModel.mSelectedBacklinksLiveData.getValue();
         if (mBacklinksIncludeDataCheckBox.getVisibility() == View.VISIBLE
                 && mBacklinksIncludeDataCheckBox.isChecked()
-                && mViewModel.mSelectedBacklinksLiveData.getValue() != null) {
-            ClipData backlinksData = mViewModel.mSelectedBacklinksLiveData.getValue().getClipData();
+                && selectedBacklink instanceof BacklinksData) {
+            ClipData backlinksData = ((BacklinksData) selectedBacklink).getClipData();
             data.putParcelable(EXTRA_CLIP_DATA, backlinksData);
 
             DebugLogger.INSTANCE.logcatMessage(this,
@@ -344,8 +351,61 @@ public class AppClipsActivity extends ComponentActivity {
 
         // Set up the dropdown when multiple backlinks are available.
         if (backlinksData.size() > 1) {
-            setUpListPopupWindow(backlinksData, mBacklinksDataTextView);
+            setUpListPopupWindow(updateBacklinkLabelsWithDuplicateNames(backlinksData),
+                    mBacklinksDataTextView);
         }
+    }
+
+    /**
+     * If there are more than 1 backlinks that have the same app name, then this method appends
+     * a numerical suffix to such backlinks to help users distinguish.
+     */
+    private List<InternalBacklinksData> updateBacklinkLabelsWithDuplicateNames(
+            List<InternalBacklinksData> backlinksData) {
+        // Check if there are multiple backlinks with same name.
+        Map<String, Integer> duplicateNamedBacklinksCountMap = new HashMap<>();
+        for (InternalBacklinksData data : backlinksData) {
+            if (duplicateNamedBacklinksCountMap.containsKey(data.getDisplayLabel())) {
+                int duplicateCount = duplicateNamedBacklinksCountMap.get(data.getDisplayLabel());
+                if (duplicateCount == 0) {
+                    // If this is the first time the loop is coming across a duplicate name, set the
+                    // count to 2. This way the count starts from 1 for all duplicate named
+                    // backlinks.
+                    duplicateNamedBacklinksCountMap.put(data.getDisplayLabel(), 2);
+                } else {
+                    // For all duplicate named backlinks, increase the duplicate count by 1.
+                    duplicateNamedBacklinksCountMap.put(data.getDisplayLabel(), duplicateCount + 1);
+                }
+            } else {
+                // This is the first time the loop is coming across a backlink with this name. Set
+                // its count to 0. The loop will increase its count by 1 when a duplicate is found.
+                duplicateNamedBacklinksCountMap.put(data.getDisplayLabel(), 0);
+            }
+        }
+
+        // Go through the backlinks in reverse order as it is easier to assign the numerical suffix
+        // in descending order of frequency using the duplicate map that was built earlier. For
+        // example, if "App A" is present 3 times, then we assign display label "App A (3)" first
+        // and then "App A (2)", lastly "App A (1)".
+        for (InternalBacklinksData data : backlinksData.reversed()) {
+            String originalBacklinkLabel = data.getDisplayLabel();
+            int duplicateCount = duplicateNamedBacklinksCountMap.get(originalBacklinkLabel);
+
+            // The display label should only be updated if there are multiple backlinks with the
+            // same name.
+            if (duplicateCount > 0) {
+                // Update the display label to: "App name (count)"
+                data.setDisplayLabel(
+                        getString(R.string.backlinks_duplicate_label_format, originalBacklinkLabel,
+                                duplicateCount));
+
+                // Decrease the duplicate count and update the map.
+                duplicateCount--;
+                duplicateNamedBacklinksCountMap.put(originalBacklinkLabel, duplicateCount);
+            }
+        }
+
+        return backlinksData;
     }
 
     private void setUpListPopupWindow(List<InternalBacklinksData> backlinksData, View anchor) {
@@ -365,7 +425,7 @@ public class AppClipsActivity extends ComponentActivity {
             public View getView(int position, @Nullable View convertView, ViewGroup parent) {
                 TextView itemView = (TextView) super.getView(position, convertView, parent);
                 InternalBacklinksData data = backlinksData.get(position);
-                itemView.setText(data.getClipData().getDescription().getLabel());
+                itemView.setText(data.getDisplayLabel());
 
                 Drawable icon = data.getAppIcon();
                 icon.setBounds(createBacklinksTextViewDrawableBounds());
@@ -387,7 +447,7 @@ public class AppClipsActivity extends ComponentActivity {
      * expected to be already set when this method is called.
      */
     private void updateBacklinksTextView(InternalBacklinksData backlinksData) {
-        mBacklinksDataTextView.setText(backlinksData.getClipData().getDescription().getLabel());
+        mBacklinksDataTextView.setText(backlinksData.getDisplayLabel());
         Drawable appIcon = backlinksData.getAppIcon();
         Rect compoundDrawableBounds = createBacklinksTextViewDrawableBounds();
         appIcon.setBounds(compoundDrawableBounds);
@@ -404,6 +464,38 @@ public class AppClipsActivity extends ComponentActivity {
 
         mBacklinksDataTextView.setCompoundDrawablesRelative(/* start= */ appIcon, /* top= */
                 null, /* end= */ dropDownIcon, /* bottom= */ null);
+
+        updateViewsToShowOrHideBacklinkError(backlinksData);
+    }
+
+    /** Updates views to show or hide error with backlink.  */
+    private void updateViewsToShowOrHideBacklinkError(InternalBacklinksData backlinksData) {
+        // Remove the check box change listener before updating it to avoid updating backlink text
+        // view visibility.
+        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(null);
+        if (backlinksData instanceof CrossProfileError) {
+            // There's error with the backlink, unselect the checkbox and disable it.
+            mBacklinksIncludeDataCheckBox.setEnabled(false);
+            mBacklinksIncludeDataCheckBox.setChecked(false);
+            mBacklinksIncludeDataCheckBox.setAlpha(DISABLE_ALPHA);
+
+            mBacklinksCrossProfileError.setVisibility(View.VISIBLE);
+        } else {
+            // When there is no error, ensure the check box is enabled and checked.
+            mBacklinksIncludeDataCheckBox.setEnabled(true);
+            mBacklinksIncludeDataCheckBox.setChecked(true);
+            mBacklinksIncludeDataCheckBox.setAlpha(1.0f);
+
+            mBacklinksCrossProfileError.setVisibility(View.GONE);
+        }
+
+        // (Re)Set the check box change listener as we're done making changes to the check box.
+        mBacklinksIncludeDataCheckBox.setOnCheckedChangeListener(
+                this::backlinksIncludeDataCheckBoxCheckedChangeListener);
+    }
+
+    private void backlinksIncludeDataCheckBoxCheckedChangeListener(View unused, boolean isChecked) {
+        mBacklinksDataTextView.setVisibility(isChecked ? View.VISIBLE : View.GONE);
     }
 
     private Rect createBacklinksTextViewDrawableBounds() {

@@ -24,19 +24,25 @@ import java.io.File
 /**
  * General purpose filter for class names.
  */
-class ClassFilter private constructor (
-        val defaultResult: Boolean,
+class ClassFilter private constructor(
+    private val defaultResult: Boolean,
 ) {
-    private data class FilterElement(
-            val allowed: Boolean,
-            val internalName: String,
-            val isPrefix: Boolean,
+    private enum class MatchType {
+        Full,
+        Prefix,
+        Suffix,
+    }
+
+    private class FilterElement(
+        val allowed: Boolean,
+        val internalName: String,
+        val matchType: MatchType,
     ) {
         fun matches(classInternalName: String): Boolean {
-            if (isPrefix) {
-                return classInternalName.startsWith(internalName)
-            } else {
-                return classInternalName == internalName
+            return when (matchType) {
+                MatchType.Full -> classInternalName == internalName
+                MatchType.Prefix -> classInternalName.startsWith(internalName)
+                MatchType.Suffix -> classInternalName.endsWith(internalName)
             }
         }
     }
@@ -54,15 +60,16 @@ class ClassFilter private constructor (
             return it
         }
 
-        var result = defaultResult
-        run outer@{
-            elements.forEach { e ->
-                if (e.matches(classInternalName)) {
-                    result = e.allowed
-                    return@outer // break equivalent.
-                }
+        val testClasses = sequence {
+            // Yield itself and its outer class(es) one by one
+            var idx = classInternalName.length
+            while (idx > 0) {
+                yield(classInternalName.substring(0, idx))
+                idx = classInternalName.lastIndexOf('$', idx - 1)
             }
         }
+
+        val result = elements.find { testClasses.any(it::matches) }?.allowed ?: defaultResult
         cache[classInternalName] = result
 
         return result
@@ -87,9 +94,9 @@ class ClassFilter private constructor (
 
         /** Build a filter from a string (for unit tests). */
         fun buildFromString(
-                filterString: String,
-                defaultResult: Boolean,
-                filenameForErrorMessage: String
+            filterString: String,
+            defaultResult: Boolean,
+            filenameForErrorMessage: String
         ): ClassFilter {
             val ret = ClassFilter(defaultResult)
 
@@ -113,26 +120,43 @@ class ClassFilter private constructor (
 
                 // Special case -- matches any class names.
                 if (line == "*") {
-                    ret.elements.add(FilterElement(allow, "", true))
+                    ret.elements.add(FilterElement(allow, "", MatchType.Prefix))
                     return@forEach
                 }
 
-                // Handle wildcard -- e.g. "package.name.*"
+                // Handle prefix match -- e.g. "package.name.*"
                 if (line.endsWith(".*")) {
-                    ret.elements.add(FilterElement(
-                            allow, line.substring(0, line.length - 2).toJvmClassName(), true))
+                    ret.elements.add(
+                        FilterElement(
+                            allow,
+                            line.substring(0, line.length - 2).toJvmClassName() + "/",
+                            MatchType.Prefix
+                        )
+                    )
+                    return@forEach
+                }
+
+                // Handle suffix match -- e.g. "*.Flags"
+                if (line.startsWith("*.")) {
+                    ret.elements.add(
+                        FilterElement(
+                            allow,
+                            "/" + line.substring(2, line.length).toJvmClassName(),
+                            MatchType.Suffix
+                        )
+                    )
                     return@forEach
                 }
 
                 // Any other uses of "*" would be an error.
                 if (line.contains('*')) {
                     throw ParseException(
-                            "Wildcard (*) can only show up as the last element",
-                            filenameForErrorMessage,
-                            lineNo
+                        "Wildcard (*) can only show up as the last element",
+                        filenameForErrorMessage,
+                        lineNo
                     )
                 }
-                ret.elements.add(FilterElement(allow, line.toJvmClassName(), false))
+                ret.elements.add(FilterElement(allow, line.toJvmClassName(), MatchType.Suffix))
             }
 
             return ret

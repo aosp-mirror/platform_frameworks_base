@@ -103,7 +103,7 @@ class SettingsObserverTest {
     }
 
     @Test
-    fun `test low power mode`(@TestParameter testCase: LowPowerTestCase) {
+    fun testLowPowerMode(@TestParameter testCase: LowPowerTestCase) {
         whenever(mockFlags.isVsyncLowPowerVoteEnabled).thenReturn(testCase.vsyncLowPowerVoteEnabled)
         whenever(spyContext.contentResolver)
                 .thenReturn(settingsProviderRule.mockContentResolver(null))
@@ -151,7 +151,7 @@ class SettingsObserverTest {
     }
 
     @Test
-    fun `test settings refresh rates`(@TestParameter testCase: SettingsRefreshRateTestCase) {
+    fun testSettingsRefreshRates(@TestParameter testCase: SettingsRefreshRateTestCase) {
         whenever(mockFlags.isPeakRefreshRatePhysicalLimitEnabled)
                 .thenReturn(testCase.peakRefreshRatePhysicalLimitEnabled)
 

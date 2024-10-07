@@ -17,15 +17,11 @@
 package com.android.systemui.log.table
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferHelper.Companion.adjustMaxSize
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 
 @SysUISingleton
 class TableLogBufferFactory
@@ -34,8 +30,6 @@ constructor(
     private val dumpManager: DumpManager,
     private val systemClock: SystemClock,
     private val logcatEchoTracker: LogcatEchoTracker,
-    @Background private val bgDispatcher: CoroutineDispatcher,
-    @Application private val coroutineScope: CoroutineScope,
 ) {
     private val existingBuffers = mutableMapOf<String, TableLogBuffer>()
 
@@ -58,8 +52,6 @@ constructor(
                 name,
                 systemClock,
                 logcatEchoTracker,
-                bgDispatcher,
-                coroutineScope,
             )
         dumpManager.registerTableLogBuffer(name, tableBuffer)
         return tableBuffer

@@ -22,10 +22,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.PersistableBundle
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.util.mockito.whenever
 import java.io.IOException
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -37,6 +39,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -88,7 +91,8 @@ class ClipboardModelTest : SysuiTestCase() {
 
     @Test
     @Throws(IOException::class)
-    fun test_imageClipData() {
+    @DisableFlags(FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE)
+    fun test_imageClipData_legacy() {
         val testBitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
         whenever(mMockContext.contentResolver).thenReturn(mMockContentResolver)
         whenever(mMockContext.resources).thenReturn(mContext.resources)
@@ -96,6 +100,21 @@ class ClipboardModelTest : SysuiTestCase() {
         whenever(mMockContentResolver.getType(any())).thenReturn("image")
         val imageClipData =
             ClipData("Test", arrayOf("text/plain"), ClipData.Item(Uri.parse("test")))
+        val model = ClipboardModel.fromClipData(mMockContext, mClipboardUtils, imageClipData, "")
+        assertEquals(ClipboardModel.Type.IMAGE, model.type)
+        assertEquals(testBitmap, model.loadThumbnail(mMockContext))
+    }
+
+    @Test
+    @Throws(IOException::class)
+    @EnableFlags(FLAG_CLIPBOARD_USE_DESCRIPTION_MIMETYPE)
+    fun test_imageClipData() {
+        val testBitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
+        whenever(mMockContext.contentResolver).thenReturn(mMockContentResolver)
+        whenever(mMockContext.resources).thenReturn(mContext.resources)
+        whenever(mMockContentResolver.loadThumbnail(any(), any(), any())).thenReturn(testBitmap)
+        whenever(mMockContentResolver.getType(any())).thenReturn("text")
+        val imageClipData = ClipData("Test", arrayOf("image/png"), ClipData.Item(Uri.parse("test")))
         val model = ClipboardModel.fromClipData(mMockContext, mClipboardUtils, imageClipData, "")
         assertEquals(ClipboardModel.Type.IMAGE, model.type)
         assertEquals(testBitmap, model.loadThumbnail(mMockContext))

@@ -2298,9 +2298,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     }
 
                     @Override
-                    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+                    public boolean onScroll(@Nullable MotionEvent e1, MotionEvent e2,
+                            float distanceX,
                             float distanceY) {
                         if (distanceY < 0 && distanceY > distanceX
+                                && e1 != null
                                 && e1.getY() <= mStatusBarWindowController.getStatusBarHeight()) {
                             // Downwards scroll from top
                             openShadeAndDismiss();
@@ -2310,9 +2312,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                     }
 
                     @Override
-                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+                    public boolean onFling(@Nullable MotionEvent e1, MotionEvent e2,
+                            float velocityX,
                             float velocityY) {
                         if (velocityY > 0 && Math.abs(velocityY) > Math.abs(velocityX)
+                                && e1 != null
                                 && e1.getY() <= mStatusBarWindowController.getStatusBarHeight()) {
                             // Downwards fling from top
                             openShadeAndDismiss();

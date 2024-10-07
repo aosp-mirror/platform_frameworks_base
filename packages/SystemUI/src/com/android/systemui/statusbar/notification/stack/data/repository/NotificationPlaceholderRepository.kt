@@ -31,6 +31,9 @@ class NotificationPlaceholderRepository @Inject constructor() {
     /** The alpha of the shade in order to show brightness. */
     val alphaForBrightnessMirror = MutableStateFlow(1f)
 
+    /** The alpha of the Notification Stack for lockscreen fade-in */
+    val alphaForLockscreenFadeIn = MutableStateFlow(0f)
+
     /**
      * The bounds of the notification shade scrim / container in the current scene.
      *

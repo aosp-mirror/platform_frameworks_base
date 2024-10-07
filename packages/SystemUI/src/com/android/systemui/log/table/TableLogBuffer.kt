@@ -16,19 +16,17 @@
 
 package com.android.systemui.log.table
 
+import android.annotation.SuppressLint
 import android.icu.text.SimpleDateFormat
 import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.common.buffer.RingBuffer
-import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.log.TableLogBufferBase
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.Locale
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 
 /**
  * A logger that logs changes in table format.
@@ -75,13 +73,12 @@ import kotlinx.coroutines.CoroutineScope
  *
  * @param maxSize the maximum size of the buffer. Must be > 0.
  */
+@SuppressLint("DumpableNotRegistered") // Registered as dumpable in [TableLogBufferFactory]
 class TableLogBuffer(
     maxSize: Int,
     private val name: String,
     private val systemClock: SystemClock,
     private val logcatEchoTracker: LogcatEchoTracker,
-    @Background private val bgDispatcher: CoroutineDispatcher,
-    private val coroutineScope: CoroutineScope,
     private val localLogcat: LogProxy = LogProxyDefault(),
 ) : Dumpable, TableLogBufferBase {
     init {

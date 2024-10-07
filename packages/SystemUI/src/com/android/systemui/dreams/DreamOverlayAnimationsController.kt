@@ -255,10 +255,8 @@ constructor(
         return mAnimator as AnimatorSet
     }
 
-    /** Starts the dream content and dream overlay exit animations. */
-    fun wakeUp() {
+    fun onWakeUp() {
         cancelAnimations()
-        mOverlayStateController.setExitAnimationsRunning(true)
     }
 
     /** Cancels the dream content and dream overlay animations, if they're currently running. */

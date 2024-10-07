@@ -1,0 +1,37 @@
+package {
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "SettingsLibPreference-srcs",
+    srcs: ["src/**/*.kt"],
+}
+
+android_library {
+    name: "SettingsLibPreference",
+    defaults: [
+        "SettingsLintDefaults",
+    ],
+    srcs: [":SettingsLibPreference-srcs"],
+    static_libs: [
+        "SettingsLibDataStore",
+        "SettingsLibMetadata",
+        "androidx.annotation_annotation",
+        "androidx.preference_preference",
+        "guava",
+    ],
+    kotlincflags: ["-Xjvm-default=all"],
+}
+
+android_library {
+    name: "SettingsLibPreference-testutils",
+    srcs: ["testutils/**/*.kt"],
+    static_libs: [
+        "SettingsLibPreference",
+        "androidx.fragment_fragment-testing",
+        "androidx.test.core",
+        "androidx.test.ext.junit",
+        "flag-junit",
+        "truth",
+    ],
+}

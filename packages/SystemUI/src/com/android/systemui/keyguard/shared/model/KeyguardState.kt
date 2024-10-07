@@ -156,12 +156,6 @@ enum class KeyguardState {
 
     companion object {
 
-        /** Whether the lockscreen is visible when we're FINISHED in the given state. */
-        fun lockscreenVisibleInState(state: KeyguardState): Boolean {
-            // TODO(b/349784682): Transform deprecated states for Flexiglass
-            return state != GONE
-        }
-
         /**
          * Whether the device is awake ([PowerInteractor.isAwake]) when we're FINISHED in the given
          * keyguard state.

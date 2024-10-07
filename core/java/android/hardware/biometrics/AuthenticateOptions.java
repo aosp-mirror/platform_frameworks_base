@@ -74,4 +74,7 @@ public interface AuthenticateOptions  {
 
     /** The attribution tag, if any. */
     @Nullable String getAttributionTag();
+
+    /** If the authentication is requested due to mandatory biometrics being active. */
+    boolean isMandatoryBiometrics();
 }

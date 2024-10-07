@@ -136,3 +136,14 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "compatchange_for_zerojankproxy"
+  namespace: "input_method"
+  description: "Version-gate the sync/async nature of IMM#show/hideSoftInput() when using zeroJankProxy."
+  bug: "352594277"
+  is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
