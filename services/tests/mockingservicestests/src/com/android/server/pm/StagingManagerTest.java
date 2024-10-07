@@ -756,7 +756,8 @@ public class StagingManagerTest {
                 /* isApplied */false,
                 /* stagedSessionErrorCode */ PackageManager.INSTALL_UNKNOWN,
                 /* stagedSessionErrorMessage */ "no error",
-                /* preVerifiedDomains */ null);
+                /* preVerifiedDomains */ null,
+                /* verifierController */ null);
 
         StagingManager.StagedSession stagedSession = spy(session.mStagedSession);
         doReturn(packageName).when(stagedSession).getPackageName();
