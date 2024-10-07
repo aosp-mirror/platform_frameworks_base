@@ -261,17 +261,12 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         bringDesktopAppsToFront(displayId, wct)
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            val transitionType = transitionType(remoteTransition)
-            val handler =
-                remoteTransition?.let {
-                    OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
-                }
-            transitions.startTransition(transitionType, wct, handler).also { t ->
-                handler?.setTransition(t)
-            }
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
+        val transitionType = transitionType(remoteTransition)
+        val handler = remoteTransition?.let {
+            OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
+        }
+        transitions.startTransition(transitionType, wct, handler).also { t ->
+            handler?.setTransition(t)
         }
     }
 
@@ -388,12 +383,8 @@ class DesktopTasksController(
             bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
         addMoveToDesktopChanges(wct, task)
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
-            addPendingMinimizeTransition(transition, taskToMinimize)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+        val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        addPendingMinimizeTransition(transition, taskToMinimize)
     }
 
     /**
@@ -499,11 +490,9 @@ class DesktopTasksController(
         // Rather than set windowing mode to multi-window at task level, set it to
         // undefined and inherit from split stage.
         wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+
     }
 
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
@@ -537,17 +526,12 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task)
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            exitDesktopTaskTransitionHandler.startTransition(
+        exitDesktopTaskTransitionHandler.startTransition(
                 transitionSource,
                 wct,
                 position,
                 mOnAnimationFinishedCallback
             )
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-            releaseVisualIndicator()
-        }
     }
 
     /** Move a task to the front */
@@ -584,12 +568,9 @@ class DesktopTasksController(
         wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
         val taskToMinimize =
             addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo.taskId)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            val transition = transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
-            addPendingMinimizeTransition(transition, taskToMinimize)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        val transition = transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
+        addPendingMinimizeTransition(transition, taskToMinimize)
     }
 
     /**
@@ -645,11 +626,9 @@ class DesktopTasksController(
 
         val wct = WindowContainerTransaction()
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+
     }
 
     /** Moves a task in/out of full immersive state within the desktop. */
@@ -733,11 +712,9 @@ class DesktopTasksController(
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
+
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -847,11 +824,9 @@ class DesktopTasksController(
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(true)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
+
     }
 
     @VisibleForTesting

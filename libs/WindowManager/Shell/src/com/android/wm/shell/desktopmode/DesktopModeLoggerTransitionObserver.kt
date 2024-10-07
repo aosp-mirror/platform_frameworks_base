@@ -68,9 +68,7 @@ class DesktopModeLoggerTransitionObserver(
     private val idSequence: InstanceIdSequence by lazy { InstanceIdSequence(Int.MAX_VALUE) }
 
     init {
-        if (
-            Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.canEnterDesktopMode(context)
-        ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(this::onInit, this)
         }
     }

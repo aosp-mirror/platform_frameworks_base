@@ -110,16 +110,11 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     shellInit = spy(ShellInit(testExecutor))
     desktopModeEventLogger = mock<DesktopModeEventLogger>()
 
-    transitionObserver =
-        DesktopModeLoggerTransitionObserver(
-            context, mockShellInit, transitions, desktopModeEventLogger)
-    if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-      val initRunnableCaptor = ArgumentCaptor.forClass(Runnable::class.java)
-      verify(mockShellInit).addInitCallback(initRunnableCaptor.capture(), same(transitionObserver))
-      initRunnableCaptor.value.run()
-    } else {
-      transitionObserver.onInit()
-    }
+    transitionObserver = DesktopModeLoggerTransitionObserver(
+        context, mockShellInit, transitions, desktopModeEventLogger)
+    val initRunnableCaptor = ArgumentCaptor.forClass(Runnable::class.java)
+    verify(mockShellInit).addInitCallback(initRunnableCaptor.capture(), same(transitionObserver))
+    initRunnableCaptor.value.run()
   }
 
   @Test
