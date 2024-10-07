@@ -43,6 +43,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +72,11 @@ import java.util.function.Supplier;
 public final class NfcOemExtension {
     private static final String TAG = "NfcOemExtension";
     private static final int OEM_EXTENSION_RESPONSE_THRESHOLD_MS = 2000;
+    private static final int TYPE_TECHNOLOGY = 0;
+    private static final int TYPE_PROTOCOL = 1;
+    private static final int TYPE_AID = 2;
+    private static final int TYPE_SYSTEMCODE = 3;
+
     private final NfcAdapter mAdapter;
     private final NfcOemExtensionCallback mOemNfcExtensionCallback;
     private boolean mIsRegistered = false;
@@ -678,6 +684,39 @@ public final class NfcOemExtension {
                         technologyRoute,
                         systemCodeRoute
                 ));
+    }
+
+    /**
+     * Gets current routing table entries.
+     * @return List of {@link NfcRoutingTableEntry} representing current routing table
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
+    public List<NfcRoutingTableEntry> getRoutingTable() {
+        List<Entry> entryList = NfcAdapter.callServiceReturn(() ->
+                NfcAdapter.sService.getRoutingTableEntryList(), null);
+        List<NfcRoutingTableEntry> result = new ArrayList<>();
+        for (Entry entry : entryList) {
+            switch (entry.getType()) {
+                case TYPE_TECHNOLOGY -> result.add(
+                        new RoutingTableTechnologyEntry(entry.getNfceeId(),
+                                RoutingTableTechnologyEntry.techStringToInt(entry.getEntry()))
+                );
+                case TYPE_PROTOCOL -> result.add(
+                        new RoutingTableProtocolEntry(entry.getNfceeId(),
+                                RoutingTableProtocolEntry.protocolStringToInt(entry.getEntry()))
+                );
+                case TYPE_AID -> result.add(
+                        new RoutingTableAidEntry(entry.getNfceeId(), entry.getEntry())
+                );
+                case TYPE_SYSTEMCODE -> result.add(
+                        new RoutingTableSystemCodeEntry(entry.getNfceeId(),
+                                entry.getEntry().getBytes(StandardCharsets.UTF_8))
+                );
+            }
+        }
+        return result;
     }
 
     private final class NfcOemExtensionCallback extends INfcOemExtensionCallback.Stub {
