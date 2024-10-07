@@ -654,7 +654,8 @@ public abstract class WMShellModule {
     @WMSingleton
     @Provides
     static Optional<TaskChangeListener> provideDesktopTaskChangeListener(Context context) {
-        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+        if (Flags.enableWindowingTransitionHandlersObservers() &&
+                DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.of(new DesktopTaskChangeListener());
         }
         return Optional.empty();
