@@ -16,18 +16,18 @@
 
 package com.android.systemui.volume.dialog.domain.model
 
-import android.annotation.IntegerRes
+import androidx.annotation.StringRes
 import com.android.systemui.plugins.VolumeDialogController
 
 /** Models a state of an audio stream of the Volume Dialog. */
-data class VolumeDialogStreamStateModel(
+data class VolumeDialogStreamModel(
     val isDynamic: Boolean = false,
     val level: Int = 0,
     val levelMin: Int = 0,
     val levelMax: Int = 0,
     val muted: Boolean = false,
     val muteSupported: Boolean = false,
-    @IntegerRes val name: Int = 0,
+    @StringRes val name: Int = 0,
     val remoteLabel: String? = null,
     val routedToBluetooth: Boolean = false,
 ) {
