@@ -79,6 +79,7 @@ import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.L
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.window.flags.Flags.enableFullyImmersiveInDesktop;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2515,10 +2516,16 @@ public class DisplayPolicy {
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
                         && task.getTopLeafTask().getAdjacentTask() != null)
                         != null;
-        final boolean freeformRootTaskVisible =
-                defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
+        final Task topFreeformTask = defaultTaskDisplayArea
+                .getTopRootTaskInWindowingMode(WINDOWING_MODE_FREEFORM);
+        final boolean freeformRootTaskVisible = topFreeformTask != null
+                && topFreeformTask.isVisible();
+        final boolean inNonFullscreenFreeformMode = freeformRootTaskVisible
+                && !topFreeformTask.getBounds().equals(mDisplayContent.getBounds());
 
-        getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible, freeformRootTaskVisible);
+        getInsetsPolicy().updateSystemBars(win, adjacentTasksVisible,
+                enableFullyImmersiveInDesktop()
+                        ? inNonFullscreenFreeformMode : freeformRootTaskVisible);
 
         final boolean topAppHidesStatusBar = topAppHidesSystemBar(Type.statusBars());
         if (getStatusBar() != null) {
