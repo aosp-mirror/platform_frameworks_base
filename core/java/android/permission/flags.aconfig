@@ -232,6 +232,13 @@ flag {
 }
 
 flag {
+  name: "sync_on_op_noted_api"
+  namespace: "permissions"
+  description: "New setOnOpNotedCallback API to allow subscribing to only sync ops."
+  bug: "372910217"
+}
+
+flag {
     name: "wallet_role_icon_property_enabled"
     is_exported: true
     namespace: "wallet_integration"
