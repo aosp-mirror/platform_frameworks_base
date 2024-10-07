@@ -29,6 +29,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import dagger.Module;
 import dagger.Provides;
@@ -125,9 +126,9 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     static PhoneStatusBarTransitions providePhoneStatusBarTransitions(
             @RootView PhoneStatusBarView view,
-            StatusBarWindowController statusBarWindowController
-    ) {
-        return new PhoneStatusBarTransitions(view, statusBarWindowController.getBackgroundView());
+            StatusBarWindowControllerStore statusBarWindowControllerStore) {
+        return new PhoneStatusBarTransitions(
+                view, statusBarWindowControllerStore.getDefaultDisplay().getBackgroundView());
     }
 
     /** */

@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -74,6 +75,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock private lateinit var statusBarWindowController: StatusBarWindowController
+    @Mock private lateinit var statusBarWindowControllerStore: StatusBarWindowControllerStore
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var windowManager: WindowManager
@@ -105,6 +107,8 @@ class ShadeControllerImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         whenever(windowManager.defaultDisplay).thenReturn(display)
         whenever(deviceProvisionedController.isCurrentUserSetup).thenReturn(true)
+        whenever(statusBarWindowControllerStore.defaultDisplay)
+            .thenReturn(statusBarWindowController)
         shadeController =
             ShadeControllerImpl(
                 commandQueue,
@@ -113,7 +117,7 @@ class ShadeControllerImplTest : SysuiTestCase() {
                 keyguardStateController,
                 statusBarStateController,
                 statusBarKeyguardViewManager,
-                statusBarWindowController,
+                statusBarWindowControllerStore,
                 deviceProvisionedController,
                 notificationShadeWindowController,
                 0,

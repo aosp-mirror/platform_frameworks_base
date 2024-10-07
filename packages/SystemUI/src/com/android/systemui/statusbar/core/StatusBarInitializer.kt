@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
-import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
@@ -71,7 +71,7 @@ interface StatusBarInitializer {
 class StatusBarInitializerImpl
 @Inject
 constructor(
-    private val windowController: StatusBarWindowController,
+    private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
     private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
 ) : CoreStartable, StatusBarInitializer {
@@ -106,7 +106,7 @@ constructor(
 
     private fun doStart() {
         initialized = true
-        windowController.fragmentHostManager
+        statusBarWindowControllerStore.defaultDisplay.fragmentHostManager
             .addTagListener(
                 CollapsedStatusBarFragment.TAG,
                 object : FragmentHostManager.FragmentListener {
