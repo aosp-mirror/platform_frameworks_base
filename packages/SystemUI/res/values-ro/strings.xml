@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Activat"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activat • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Dezactivat"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurează"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestionează în setări"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Niciun mod activ}=1{{mode} este activ}few{# moduri sunt active}other{# de moduri sunt active}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Se vor anunța prin sunete și vibrații numai alarmele, mementourile, evenimentele și apelanții specificați de tine. Totuși, vei auzi tot ce alegi să redai, inclusiv muzică, videoclipuri și jocuri."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversații"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Șterge toate notificările silențioase"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificări întrerupte prin „Nu deranja”"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Nicio notificare}=1{Notificările au fost întrerupte de {mode}}=2{Notificările au fost întrerupte de {mode} și de un alt mod}few{Notificările au fost întrerupte de {mode} și de alte # moduri}other{Notificările au fost întrerupte de {mode} și de alte # de moduri}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Începe acum"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nicio notificare"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nicio notificare nouă"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Afișează modul demonstrativ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmă"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> este activ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Portofel"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configurează pentru a face achiziții mai rapide și mai sigure cu telefonul"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Afișează-le pe toate"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Învață gesturi pentru touchpad"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navighează folosind tastatura și touchpadul"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Învață gesturi pentru touchpad, comenzi rapide de la tastatură și altele"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gestul Înapoi"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gestul Ecran de pornire"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Vezi aplicațiile recente"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Gata"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Înapoi"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Pentru a reveni, glisează spre stânga sau spre dreapta cu trei degete oriunde pe touchpad.\n\nPoți folosi și comanda rapidă de la tastatură Action + ESC pentru aceasta."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Excelent!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Ai finalizat gestul Înapoi."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Înapoi la pagina de pornire"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Pentru a accesa oricând ecranul de pornire, glisează în sus cu trei degete din partea de jos a ecranului"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bravo!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Ai finalizat gestul „accesează ecranul de pornire”."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Vezi aplicațiile recente"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Glisează în sus și ține apăsat cu trei degete pe touchpad."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Excelent!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Ai finalizat gestul pentru afișarea aplicațiilor recente."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tasta de acțiuni"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Pentru a accesa aplicațiile, apasă tasta de acțiuni de pe tastatură."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Felicitări!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Ai finalizat gestul cu tasta de acțiuni.\n\nAcțiune + / afișează toate comenzile rapide disponibile."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Iluminarea din spate a tastaturii"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivelul %1$d din %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Comenzi pentru locuință"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Ca să vezi toate aplicațiile, apasă tasta de acțiuni de pe tastatură"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Ascunsă"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Deblochează pentru a afișa"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Educație contextuală"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Folosește-ți touchpadul ca să revii"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Glisează la stânga sau la dreapta cu trei degete. Atinge ca să înveți mai multe gesturi."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Folosește-ți touchpadul ca să accesezi pagina de pornire"</string>

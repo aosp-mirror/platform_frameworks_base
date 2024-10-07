@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Ativado"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Ativado • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desativado"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gerenciar nas configurações"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Nenhum modo ativo}=1{{mode} está ativo}one{# modo está ativo}many{# de modos estão ativos}other{# modos estão ativos}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Você não será perturbado por sons e vibrações, exceto alarmes, lembretes, eventos e chamadas de pessoas especificadas. No entanto, você ouvirá tudo o que decidir reproduzir, como músicas, vídeos e jogos."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Apagar todas as notificações silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificações pausadas pelo modo \"Não perturbe\""</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Sem notificações}=1{Notificações pausadas pelo modo {mode}}=2{Notificações pausadas por {mode} e mais um modo}one{Notificações pausadas por {mode} e mais # modo}many{Notificações pausadas por {mode} e mais # de modos}other{Notificações pausadas por {mode} e mais # modos}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Sem notificações"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nenhuma notificação nova"</string>
@@ -706,6 +706,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo de demonstração"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarme"</string>
+    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
+    <skip />
     <string name="wallet_title" msgid="5369767670735827105">"Carteira"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Prepare tudo para fazer compras mais rápidas e seguras com seu smartphone"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar tudo"</string>
@@ -1405,26 +1407,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Aprenda gestos do touchpad"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navegue usando o teclado e o touchpad"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Aprenda gestos do touchpad, atalhos do teclado e muito mais"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gesto de volta"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gesto de início"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Ver os apps recentes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Concluído"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Voltar"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Para voltar, deslize para a esquerda ou direita usando 3 dedos em qualquer lugar do touchpad.\n\nVocê também pode usar o atalho de teclado Ação + ESC."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Muito bem!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Você concluiu o gesto para voltar."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir para a página inicial"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Para acessar sua tela inicial a qualquer momento, deslize de baixo para cima na tela com três dedos."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Legal!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Você concluiu o gesto para acessar a tela inicial."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Ver os apps recentes"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Deslize para cima e pressione com 3 dedos no touchpad."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Muito bem!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Você concluiu o gesto para ver os apps recentes."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tecla de ação"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Para acessar os apps, pressione a tecla de ação no teclado."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Parabéns!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Você concluiu o gesto da tecla de ação.\n\nA tecla de ação + / mostra todos os atalhos disponíveis."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Luz de fundo do teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nível %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Automação residencial"</string>
@@ -1436,6 +1450,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Para ver todos os apps, pressione a tecla de ação no teclado"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Encoberto"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Desbloquear para visualizar"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Educação contextual"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Use o touchpad para voltar"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Deslize para a esquerda ou direita usando três dedos. Toque para aprender outros gestos."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Use o touchpad para acessar a tela inicial"</string>

@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Be"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Be • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Ki"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Beállítás"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"A Beállítások között kezelheti"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Nincs aktív mód}=1{A(z) {mode} aktív}other{# mód aktív}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Az Ön által meghatározott ébresztéseken, emlékeztetőkön, eseményeken és hívókon kívül nem fogja Önt más hang vagy rezgés megzavarni. Továbbra is lesz hangjuk azoknak a tartalmaknak, amelyeket Ön elindít, például zenék, videók és játékok."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Beszélgetések"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Az összes néma értesítés törlése"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Ne zavarjanak funkcióval szüneteltetett értesítések"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Nincs értesítés}=1{A(z) {mode} szüneteltette az értesítéseket}=2{A(z) {mode} és egy másik mód szüneteltette az értesítéseket}other{A(z) {mode} és # másik mód szüneteltette az értesítéseket}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Indítás most"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Nincs értesítés"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nincsenek új értesítések"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Demó mód megjelenítése"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Ébresztés"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"A(z) <xliff:g id="MODENAME">%1$s</xliff:g> aktív"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Végezze el a beállítást a telefonjával való gyorsabb és biztonságosabb vásárláshoz"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Összes mutatása"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Érintőpad-kézmozdulatok megismerése"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigálás a billentyűzet és az érintőpad használatával"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Érintőpad-kézmozdulatok, billentyűparancsok és egyebek megismerése"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Vissza kézmozdulat"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Kezdőképernyő kézmozdulat"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Legutóbbi alkalmazások megtekintése"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Kész"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Vissza"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"A visszalépéshez csúsztasson három ujjal balra vagy a jobbra az érintőpadon.\n\nEnnek végrehajtásához használhatja az Action + Esc billentyűparancsot is."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Kiváló!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Teljesítette a visszalépési kézmozdulatot."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ugrás a főoldalra"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Ha bármikor vissza szeretne térni a kezdőképernyőre, csúsztassa gyorsan felfelé három ujját a képernyő aljáról."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Remek!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Teljesítette a kezdőképernyőre lépés kézmozdulatát."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Legutóbbi alkalmazások megtekintése"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Csúsztasson felfelé három ujjal az érintőpadon, és tartsa lenyomva az ujjait."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Kiváló!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Teljesítette a legutóbbi alkalmazások megtekintésének kézmozdulatát."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Műveletbillentyű"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Az alkalmazásokhoz való hozzáféréshez nyomja meg a billentyűzet műveletbillentyűjét."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Gratulálunk!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Teljesítette a műveletbillentyű kézmozdulatát.\n\nA Művelet + / billentyűkombinációval megjelenítheti az összes használható billentyűparancsot."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"A billentyűzet háttérvilágítása"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Fényerő: %2$d/%1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Otthon vezérlése"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Az összes alkalmazás megtekintéséhez nyomja meg a billentyűzet műveletbillentyűjét."</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Törölve"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Oldja fel a megtekintéshez"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Kontextusfüggő tájékoztató párbeszédpanel"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"A visszalépéshez használja az érintőpadot"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Csúsztatasson gyorsan három ujjal balra vagy jobbra. Koppintson a további kézmozdulatokért."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"A kezdőképernyő megnyitásához használja az érintőpadot"</string>
