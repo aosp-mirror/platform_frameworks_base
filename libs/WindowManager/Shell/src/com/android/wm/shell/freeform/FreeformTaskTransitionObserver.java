@@ -85,7 +85,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             // TODO(b/367268953): Remove when DesktopTaskListener is introduced and the repository
             //  is updated from there **before** the |mWindowDecorViewModel| methods are invoked.
             //  Otherwise window decoration relayout won't run with the immersive state up to date.
-            mImmersiveTransitionHandler.ifPresent(h -> h.onTransitionReady(transition));
+            mImmersiveTransitionHandler.ifPresent(h -> h.onTransitionReady(transition, info));
         }
 
         final ArrayList<ActivityManager.RunningTaskInfo> taskInfoList = new ArrayList<>();
