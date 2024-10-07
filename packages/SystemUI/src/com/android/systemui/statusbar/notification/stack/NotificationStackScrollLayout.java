@@ -1154,11 +1154,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public void addHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mHeadsUpHeightChangedListeners.addIfAbsent(runnable);
     }
 
     @Override
     public void removeHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mHeadsUpHeightChangedListeners.remove(runnable);
     }
 
@@ -1234,11 +1236,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setScrolledToTop(boolean scrolledToTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setScrolledToTop(scrolledToTop);
     }
 
     @Override
     public void setStackTop(float stackTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         if (mAmbientState.getStackTop() != stackTop) {
             mAmbientState.setStackTop(stackTop);
             onTopPaddingChanged(/* animate = */ isAddOrRemoveAnimationPending());
@@ -1247,43 +1251,51 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setStackCutoff(float stackCutoff) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mAmbientState.setStackCutoff(stackCutoff);
     }
 
     @Override
     public void setHeadsUpTop(float headsUpTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mAmbientState.setHeadsUpTop(headsUpTop);
         requestChildrenUpdate();
     }
 
     @Override
     public void setHeadsUpBottom(float headsUpBottom) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mAmbientState.setHeadsUpBottom(headsUpBottom);
         mStateAnimator.setHeadsUpAppearHeightBottom(Math.round(headsUpBottom));
     }
 
     @Override
     public void closeGutsOnSceneTouch() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mController.closeControlsDueToOutsideTouch();
     }
 
     @Override
     public void setSyntheticScrollConsumer(@Nullable Consumer<Float> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setSyntheticScrollConsumer(consumer);
     }
 
     @Override
     public void setCurrentGestureOverscrollConsumer(@Nullable Consumer<Boolean> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setCurrentGestureOverscrollConsumer(consumer);
     }
 
     @Override
     public void setCurrentGestureInGutsConsumer(@Nullable Consumer<Boolean> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setCurrentGestureInGutsConsumer(consumer);
     }
 
     @Override
     public void setRemoteInputRowBottomBoundConsumer(@Nullable Consumer<Float> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setRemoteInputRowBottomBoundConsumer(consumer);
     }
 
@@ -2606,11 +2618,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public int getTopHeadsUpHeight() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
         return getTopHeadsUpIntrinsicHeight();
     }
 
     @Override
     public int getHeadsUpInset() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
         return mHeadsUpInset;
     }
 
