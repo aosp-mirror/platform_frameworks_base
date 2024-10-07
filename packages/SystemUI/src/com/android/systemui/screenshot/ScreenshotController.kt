@@ -170,6 +170,7 @@ internal constructor(
         requestCallback: TakeScreenshotService.RequestCallback,
     ) {
         Assert.isMainThread()
+        screenshotHandler.resetTimeout()
 
         if (screenshot.type == TAKE_SCREENSHOT_FULLSCREEN && screenshot.bitmap == null) {
             val bounds = fullScreenRect
