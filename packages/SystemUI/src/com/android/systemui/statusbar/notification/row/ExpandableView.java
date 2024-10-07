@@ -862,8 +862,8 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
                 pw.println("mClipToActualHeight: " + mClipToActualHeight);
                 pw.println("mExtraWidthForClipping: " + mExtraWidthForClipping);
                 pw.println("mMinimumHeightForClipping: " + mMinimumHeightForClipping);
+                pw.println("getClipBounds(): " + getClipBounds());
             }
-            pw.println("getClipBounds(): " + getClipBounds());
         });
     }
 
