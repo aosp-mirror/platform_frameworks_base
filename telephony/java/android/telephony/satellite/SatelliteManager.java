@@ -1601,6 +1601,12 @@ public final class SatelliteManager {
                         executor.execute(() -> Binder.withCleanCallingIdentity(() ->
                                 callback.onRegistrationFailure(causeCode)));
                     }
+
+                    @Override
+                    public void onTerrestrialNetworkAvailableChanged(boolean isAvailable) {
+                        executor.execute(() -> Binder.withCleanCallingIdentity(() ->
+                                callback.onTerrestrialNetworkAvailableChanged(isAvailable)));
+                    }
                 };
                 sSatelliteModemStateCallbackMap.put(callback, internalCallback);
                 return telephony.registerForSatelliteModemStateChanged(internalCallback);
