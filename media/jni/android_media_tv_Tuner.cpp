@@ -686,12 +686,16 @@ void FilterClientCallbackImpl::getMediaEvent(const jobjectArray& arr, const int 
     } else if (mediaEvent.scIndexMask.getTag() == DemuxFilterScIndexMask::Tag::scVvc) {
         sc = mediaEvent.scIndexMask.get<DemuxFilterScIndexMask::Tag::scVvc>();
     }
+    jint numDataPieces = mediaEvent.numDataPieces;
+    jint indexInDataGroup = mediaEvent.indexInDataGroup;
+    jint dataGroupId = mediaEvent.dataGroupId;
 
     ScopedLocalRef obj(env, env->NewObject(mMediaEventClass, mMediaEventInitID, streamId,
                                            isPtsPresent, pts, isDtsPresent, dts, dataLength,
                                            offset, nullptr, isSecureMemory, avDataId,
                                            mpuSequenceNumber, isPesPrivateData, sc,
-                                           audioDescriptor.get(), presentationsJObj.get()));
+                                           audioDescriptor.get(), presentationsJObj.get(),
+                                           numDataPieces, indexInDataGroup, dataGroupId));
 
     // Protect mFilterClient from being set to null.
     android::Mutex::Autolock autoLock(mLock);
@@ -1048,7 +1052,7 @@ FilterClientCallbackImpl::FilterClientCallbackImpl() {
             "<init>",
             "(IZJZJJJLandroid/media/MediaCodec$LinearBlock;"
             "ZJIZILandroid/media/tv/tuner/filter/AudioDescriptor;"
-            "Ljava/util/List;)V");
+            "Ljava/util/List;III)V");
     mAudioDescriptorInitID = env->GetMethodID(mAudioDescriptorClass, "<init>", "(BBCBBB)V");
     mPesEventInitID = env->GetMethodID(mPesEventClass, "<init>", "(III)V");
     mTsRecordEventInitID = env->GetMethodID(mTsRecordEventClass, "<init>", "(IIIJJI)V");
