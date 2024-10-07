@@ -156,16 +156,47 @@ static jboolean TextShaper_Result_getFakeItalic(CRITICAL_JNI_PARAMS_COMMA jlong 
     return layout->layout.getFakery(i).isFakeItalic();
 }
 
+float findValueFromVariationSettings(const minikin::FontFakery& fakery, minikin::AxisTag tag) {
+    for (const minikin::FontVariation& fv : fakery.variationSettings()) {
+        if (fv.axisTag == tag) {
+            return fv.value;
+        }
+    }
+    return std::numeric_limits<float>::quiet_NaN();
+}
+
 // CriticalNative
 static jfloat TextShaper_Result_getWeightOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    return layout->layout.getFakery(i).wghtAdjustment();
+    if (text_feature::typeface_redesign()) {
+        float value =
+                findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_wght);
+        if (!std::isnan(value)) {
+            return value;
+        } else {
+            const std::shared_ptr<minikin::Font>& font = layout->layout.getFontRef(i);
+            return font->style().weight();
+        }
+    } else {
+        return layout->layout.getFakery(i).wghtAdjustment();
+    }
 }
 
 // CriticalNative
 static jfloat TextShaper_Result_getItalicOverride(CRITICAL_JNI_PARAMS_COMMA jlong ptr, jint i) {
     const LayoutWrapper* layout = reinterpret_cast<LayoutWrapper*>(ptr);
-    return layout->layout.getFakery(i).italAdjustment();
+    if (text_feature::typeface_redesign()) {
+        float value =
+                findValueFromVariationSettings(layout->layout.getFakery(i), minikin::TAG_ital);
+        if (!std::isnan(value)) {
+            return value;
+        } else {
+            const std::shared_ptr<minikin::Font>& font = layout->layout.getFontRef(i);
+            return font->style().isItalic();
+        }
+    } else {
+        return layout->layout.getFakery(i).italAdjustment();
+    }
 }
 
 // CriticalNative
