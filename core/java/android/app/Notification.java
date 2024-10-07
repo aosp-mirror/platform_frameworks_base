@@ -810,6 +810,11 @@ public class Notification implements Parcelable
     }
 
     private static boolean isStandardLayout(int layoutId) {
+        if (Flags.apiRichOngoing()) {
+            if (layoutId == R.layout.notification_template_material_progress) {
+                return true;
+            }
+        }
         return STANDARD_LAYOUTS.contains(layoutId);
     }
 
@@ -7683,6 +7688,10 @@ public class Notification implements Parcelable
             return R.layout.notification_template_material_conversation;
         }
 
+        private int getProgressLayoutResource() {
+            return R.layout.notification_template_material_progress;
+        }
+
         private int getActionLayoutResource() {
             return R.layout.notification_material_action;
         }
@@ -11639,6 +11648,37 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
 
             return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeBigContentView() {
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .allowTextWithProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            // Replace the text with the big text, but only if the big text is not empty.
+            RemoteViews contentView = getStandardView(mBuilder.getProgressLayoutResource(), p,
+                    null /* result */);
+
+            // Bind progress start and end icons.
+            if (mStartIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_start_icon, mStartIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.GONE);
+            }
+
+            if (mEndIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_end_icon, mEndIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.GONE);
+            }
+
+            return contentView;
         }
 
         private static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(
