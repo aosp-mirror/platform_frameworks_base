@@ -2064,12 +2064,14 @@ final class UiModeManagerService extends SystemService {
 
     private void updateComputedNightModeLocked(boolean activate) {
         boolean newComputedValue = activate;
+        boolean appliedOverrides = false;
         if (mNightMode.get() != MODE_NIGHT_YES && mNightMode.get() != UiModeManager.MODE_NIGHT_NO) {
             if (mOverrideNightModeOn && !newComputedValue) {
                 newComputedValue = true;
             } else if (mOverrideNightModeOff && newComputedValue) {
                 newComputedValue = false;
             }
+            appliedOverrides = true;
         }
 
         if (modesApi()) {
@@ -2079,8 +2081,10 @@ final class UiModeManagerService extends SystemService {
                 case (UiModeManager.MODE_ATTENTION_THEME_OVERLAY_DAY) -> false;
                 default -> newComputedValue; // case OFF
             };
-        } else {
-            mComputedNightMode = newComputedValue;
+        }
+
+        if (appliedOverrides) {
+            return;
         }
 
         if (mNightMode.get() != MODE_NIGHT_AUTO || (mTwilightManager != null
