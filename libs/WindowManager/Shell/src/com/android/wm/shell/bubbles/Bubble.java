@@ -56,6 +56,7 @@ import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.shared.bubbles.BubbleInfo;
+import com.android.wm.shell.shared.bubbles.ParcelableFlyoutMessage;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -350,7 +351,22 @@ public class Bubble implements BubbleViewProvider {
                 getTitle(),
                 getAppName(),
                 isImportantConversation(),
-                !isAppLaunchIntent());
+                !isAppLaunchIntent(),
+                getParcelableFlyoutMessage());
+    }
+
+    /** Creates a parcelable flyout message to send to launcher. */
+    @Nullable
+    private ParcelableFlyoutMessage getParcelableFlyoutMessage() {
+        if (mFlyoutMessage == null) {
+            return null;
+        }
+        // the icon is only used in group chats
+        Icon icon = mFlyoutMessage.isGroupChat ? mFlyoutMessage.senderIcon : null;
+        String title =
+                mFlyoutMessage.senderName == null ? null : mFlyoutMessage.senderName.toString();
+        String message = mFlyoutMessage.message == null ? null : mFlyoutMessage.message.toString();
+        return new ParcelableFlyoutMessage(icon, title, message);
     }
 
     @Override
