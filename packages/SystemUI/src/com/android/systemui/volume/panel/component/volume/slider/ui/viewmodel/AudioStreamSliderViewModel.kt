@@ -18,6 +18,9 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 
 import android.content.Context
 import android.media.AudioManager
+import android.media.AudioManager.STREAM_ALARM
+import android.media.AudioManager.STREAM_MUSIC
+import android.media.AudioManager.STREAM_NOTIFICATION
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
@@ -25,7 +28,11 @@ import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
+import com.android.systemui.util.kotlin.combine
 import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
@@ -51,16 +58,14 @@ constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
+    private val zenModeInteractor: ZenModeInteractor,
     private val uiEventLogger: UiEventLogger,
     private val volumePanelLogger: VolumePanelLogger,
 ) : SliderViewModel {
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
     private val streamsAffectedByRing =
-        setOf(
-            AudioManager.STREAM_RING,
-            AudioManager.STREAM_NOTIFICATION,
-        )
+        setOf(AudioManager.STREAM_RING, AudioManager.STREAM_NOTIFICATION)
     private val audioStream = audioStreamWrapper.audioStream
     private val iconsByStream =
         mapOf(
@@ -78,11 +83,6 @@ constructor(
             AudioStream(AudioManager.STREAM_NOTIFICATION) to R.string.stream_notification,
             AudioStream(AudioManager.STREAM_ALARM) to R.string.stream_alarm,
         )
-    private val disabledTextByStream =
-        mapOf(
-            AudioStream(AudioManager.STREAM_NOTIFICATION) to
-                R.string.stream_notification_unavailable,
-        )
     private val uiEventByStream =
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to
@@ -98,15 +98,48 @@ constructor(
         )
 
     override val slider: StateFlow<SliderState> =
-        combine(
-                audioVolumeInteractor.getAudioStream(audioStream),
-                audioVolumeInteractor.canChangeVolume(audioStream),
-                audioVolumeInteractor.ringerMode,
-            ) { model, isEnabled, ringerMode ->
-                volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
-                model.toState(isEnabled, ringerMode)
-            }
-            .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
+        if (ModesUiIcons.isEnabled) {
+            combine(
+                    audioVolumeInteractor.getAudioStream(audioStream),
+                    audioVolumeInteractor.canChangeVolume(audioStream),
+                    audioVolumeInteractor.ringerMode,
+                    zenModeInteractor.activeModesBlockingEverything,
+                    zenModeInteractor.activeModesBlockingAlarms,
+                    zenModeInteractor.activeModesBlockingMedia,
+                ) {
+                    model,
+                    isEnabled,
+                    ringerMode,
+                    modesBlockingEverything,
+                    modesBlockingAlarms,
+                    modesBlockingMedia ->
+                    volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
+                    model.toState(
+                        isEnabled,
+                        ringerMode,
+                        getStreamDisabledMessage(
+                            modesBlockingEverything,
+                            modesBlockingAlarms,
+                            modesBlockingMedia,
+                        ),
+                    )
+                }
+                .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
+        } else {
+            combine(
+                    audioVolumeInteractor.getAudioStream(audioStream),
+                    audioVolumeInteractor.canChangeVolume(audioStream),
+                    audioVolumeInteractor.ringerMode,
+                ) { model, isEnabled, ringerMode ->
+                    volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
+                    model.toState(
+                        isEnabled,
+                        ringerMode,
+                        getStreamDisabledMessageWithoutModes(audioStream),
+                    )
+                }
+                .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
+        }
 
     init {
         volumeChanges
@@ -139,6 +172,7 @@ constructor(
     private fun AudioStreamModel.toState(
         isEnabled: Boolean,
         ringerMode: RingerMode,
+        disabledMessage: String?,
     ): State {
         val label =
             labelsByStream[audioStream]?.let(context::getString)
@@ -148,13 +182,7 @@ constructor(
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
             icon = getIcon(ringerMode),
             label = label,
-            disabledMessage =
-                context.getString(
-                    disabledTextByStream.getOrDefault(
-                        audioStream,
-                        R.string.stream_alarm_unavailable,
-                    )
-                ),
+            disabledMessage = disabledMessage,
             isEnabled = isEnabled,
             a11yStep = volumeRange.step,
             a11yClickDescription =
@@ -189,6 +217,43 @@ constructor(
             audioStreamModel = this,
             isMutable = isAffectedByMute,
         )
+    }
+
+    private fun getStreamDisabledMessage(
+        blockingEverything: ActiveZenModes,
+        blockingAlarms: ActiveZenModes,
+        blockingMedia: ActiveZenModes,
+    ): String {
+        // TODO: b/372213356 - Figure out the correct messages for VOICE_CALL and RING.
+        //  In fact, VOICE_CALL should not be affected by interruption filtering at all.
+        return if (audioStream.value == STREAM_NOTIFICATION) {
+            context.getString(R.string.stream_notification_unavailable)
+        } else {
+            val blockingModeName =
+                when {
+                    blockingEverything.mainMode != null -> blockingEverything.mainMode.name
+                    audioStream.value == STREAM_ALARM -> blockingAlarms.mainMode?.name
+                    audioStream.value == STREAM_MUSIC -> blockingMedia.mainMode?.name
+                    else -> null
+                }
+
+            if (blockingModeName != null) {
+                context.getString(R.string.stream_unavailable_by_modes, blockingModeName)
+            } else {
+                // Should not actually be visible, but as a catch-all.
+                context.getString(R.string.stream_unavailable_by_unknown)
+            }
+        }
+    }
+
+    private fun getStreamDisabledMessageWithoutModes(audioStream: AudioStream): String {
+        // TODO: b/372213356 - Figure out the correct messages for VOICE_CALL and RING.
+        //  In fact, VOICE_CALL should not be affected by interruption filtering at all.
+        return if (audioStream.value == STREAM_NOTIFICATION) {
+            context.getString(R.string.stream_notification_unavailable)
+        } else {
+            context.getString(R.string.stream_alarm_unavailable)
+        }
     }
 
     private fun AudioStreamModel.getIcon(ringerMode: RingerMode): Icon {
