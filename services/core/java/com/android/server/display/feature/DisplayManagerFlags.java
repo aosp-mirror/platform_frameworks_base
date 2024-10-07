@@ -207,6 +207,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_BLOCK_AUTOBRIGHTNESS_CHANGES_ON_STYLUS_USAGE,
             Flags::blockAutobrightnessChangesOnStylusUsage
     );
+    private final FlagState mIsUserRefreshRateForExternalDisplayEnabled = new FlagState(
+            Flags.FLAG_ENABLE_USER_REFRESH_RATE_FOR_EXTERNAL_DISPLAY,
+            Flags::enableUserRefreshRateForExternalDisplay
+    );
 
     private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
             Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
@@ -447,6 +451,14 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return {@code true} if need to use user refresh rate settings for
+     * external displays.
+     */
+    public boolean isUserRefreshRateForExternalDisplayEnabled() {
+        return mIsUserRefreshRateForExternalDisplayEnabled.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -491,6 +503,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
         pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
+        pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
     }
 
     private static class FlagState {
