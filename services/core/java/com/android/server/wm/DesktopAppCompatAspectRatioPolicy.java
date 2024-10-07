@@ -265,7 +265,7 @@ public class DesktopAppCompatAspectRatioPolicy {
         }
 
         final int userAspectRatioCode = mAppCompatOverrides.getAppCompatAspectRatioOverrides()
-                .getUserMinAspectRatioOverrideType();
+                .getUserMinAspectRatioOverrideCode();
 
         return userAspectRatioCode != USER_MIN_ASPECT_RATIO_UNSET
                 && userAspectRatioCode != USER_MIN_ASPECT_RATIO_APP_DEFAULT
