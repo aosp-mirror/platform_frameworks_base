@@ -36,6 +36,7 @@
         android:showDividers="middle" />
 
     <LinearLayout
+        android:id="@+id/volume_dialog"
         android:layout_width="@dimen/volume_dialog_width"
         android:layout_height="wrap_content"
         android:background="@drawable/volume_dialog_background"
@@ -50,9 +51,7 @@
             android:layout_width="@dimen/volume_dialog_button_size"
             android:layout_height="@dimen/volume_dialog_button_size" />
 
-        <include
-            android:id="@+id/volume_dialog_slider"
-            layout="@layout/volume_dialog_slider" />
+        <include layout="@layout/volume_dialog_slider" />
 
         <Button
             android:id="@+id/volume_dialog_settings"

@@ -25,6 +25,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 
 /** Operates a state of particular slider of the Volume Dialog. */
@@ -37,12 +38,23 @@ constructor(
 ) {
 
     val slider: Flow<VolumeDialogStreamModel> =
-        volumeDialogStateInteractor.volumeDialogState.mapNotNull {
-            it.streamModels[sliderType.audioStream]
-        }
+        volumeDialogStateInteractor.volumeDialogState
+            .mapNotNull {
+                it.streamModels[sliderType.audioStream]?.run {
+                    if (level < levelMin || level > levelMax) {
+                        copy(level = level.coerceIn(levelMin, levelMax))
+                    } else {
+                        this
+                    }
+                }
+            }
+            .distinctUntilChanged()
 
     fun setStreamVolume(userLevel: Int) {
-        volumeDialogController.setStreamVolume(sliderType.audioStream, userLevel)
+        with(volumeDialogController) {
+            setStreamVolume(sliderType.audioStream, userLevel)
+            setActiveStream(sliderType.audioStream)
+        }
     }
 
     @VolumeDialogScope
