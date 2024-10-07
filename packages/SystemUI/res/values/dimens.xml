@@ -591,7 +591,7 @@
 
     <dimen name="volume_dialog_panel_width_half">28dp</dimen>
 
-    <dimen name="volume_dialog_slider_width">42dp</dimen>
+    <dimen name="volume_dialog_slider_width_legacy">42dp</dimen>
 
     <dimen name="volume_dialog_slider_corner_radius">21dp</dimen>
 
@@ -621,10 +621,6 @@
     <dimen name="volume_tool_tip_right_margin">76dp</dimen>
 
     <dimen name="volume_tool_tip_arrow_corner_radius">2dp</dimen>
-
-    <!-- Volume panel slices dimensions -->
-    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
-    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
 
     <dimen name="bottom_sheet_corner_radius">28dp</dimen>
 
@@ -2050,4 +2046,22 @@
 
     <dimen name="contextual_edu_dialog_bottom_margin">80dp</dimen>
     <dimen name="contextual_edu_dialog_elevation">2dp</dimen>
+
+    <!-- Volume start -->
+    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
+    <dimen name="volume_dialog_width">60dp</dimen>
+    <dimen name="volume_dialog_vertical_padding">6dp</dimen>
+    <dimen name="volume_dialog_components_spacing">8dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
+    <dimen name="volume_dialog_spacing">4dp</dimen>
+    <dimen name="volume_dialog_button_size">48dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_bottom_padding">48dp</dimen>
+    <dimen name="volume_dialog_slider_width">52dp</dimen>
+    <dimen name="volume_dialog_slider_height">254dp</dimen>
+
+    <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
+    <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
+    <!-- Volume end -->
 </resources>
