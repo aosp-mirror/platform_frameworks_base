@@ -13347,6 +13347,16 @@ public final class Settings {
         public static final String AUTO_TIME_ZONE_EXPLICIT = "auto_time_zone_explicit";
 
         /**
+         * Value to specify if the device should send notifications when {@link #AUTO_TIME_ZONE} is
+         * on and the device's time zone changes.
+         *
+         * <p>1=yes, 0=no.
+         *
+         * @hide
+         */
+        public static final String TIME_ZONE_NOTIFICATIONS = "time_zone_notifications";
+
+        /**
          * URI for the car dock "in" event sound.
          * @hide
          */

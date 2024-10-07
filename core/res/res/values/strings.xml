@@ -853,6 +853,9 @@
     <!-- Text shown when viewing channel settings for notifications related to vpn status -->
     <string name="notification_channel_vpn">VPN status</string>
 
+    <!-- Text shown when viewing channel settings for notifications related to system time -->
+    <string name="notification_channel_system_time">Time and time zones</string>
+
     <!-- Notification channel name. This channel sends high-priority alerts from the user's IT admin for key updates about the user's work device or work profile. -->
     <string name="notification_channel_device_admin">Alerts from your IT admin</string>
 
@@ -3874,6 +3877,12 @@
     <!-- See carrier_app_notification. This is the headline. -->
     <string name="carrier_app_notification_title">New SIM inserted</string>
     <string name="carrier_app_notification_text">Tap to set it up</string>
+
+    <!-- Time zone notification strings -->
+    <!-- Title for time zone change notifications -->
+    <string name="time_zone_change_notification_title">Your time zone changed</string>
+    <!-- Body for time zone change notifications -->
+    <string name="time_zone_change_notification_body">You\'re now in <xliff:g id="time_zone_display_name">%1$s</xliff:g> (<xliff:g id="time_zone_offset">%2$s</xliff:g>)</string>
 
     <!-- Date/Time picker dialogs strings -->
 

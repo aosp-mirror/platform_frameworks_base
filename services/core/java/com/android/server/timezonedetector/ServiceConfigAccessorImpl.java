@@ -68,7 +68,11 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_DEFAULT,
             ServerFlags.KEY_LOCATION_TIME_ZONE_DETECTION_SETTING_ENABLED_OVERRIDE,
             ServerFlags.KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT,
-            ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED
+            ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
+            ServerFlags.KEY_TIME_ZONE_NOTIFICATIONS_SUPPORTED,
+            ServerFlags.KEY_TIME_ZONE_NOTIFICATIONS_ENABLED_DEFAULT,
+            ServerFlags.KEY_TIME_ZONE_NOTIFICATIONS_TRACKING_SUPPORTED,
+            ServerFlags.KEY_TIME_ZONE_MANUAL_CHANGE_TRACKING_SUPPORTED
     );
 
     /**
@@ -100,11 +104,16 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     @Nullable
     private static ServiceConfigAccessor sInstance;
 
-    @NonNull private final Context mContext;
-    @NonNull private final ServerFlags mServerFlags;
-    @NonNull private final ContentResolver mCr;
-    @NonNull private final UserManager mUserManager;
-    @NonNull private final LocationManager mLocationManager;
+    @NonNull
+    private final Context mContext;
+    @NonNull
+    private final ServerFlags mServerFlags;
+    @NonNull
+    private final ContentResolver mCr;
+    @NonNull
+    private final UserManager mUserManager;
+    @NonNull
+    private final LocationManager mLocationManager;
 
     @GuardedBy("this")
     @NonNull
@@ -192,6 +201,9 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true, contentObserver);
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE_EXPLICIT), true,
+                contentObserver);
+        contentResolver.registerContentObserver(
+                Settings.Global.getUriFor(Settings.Global.TIME_ZONE_NOTIFICATIONS), true,
                 contentObserver);
 
         // Add async callbacks for user scoped location settings being changed.
@@ -331,6 +343,14 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 setGeoDetectionEnabledSettingIfRequired(userId, geoDetectionEnabledSetting);
             }
         }
+
+        if (areNotificationsSupported()) {
+            if (requestedConfigurationUpdates.hasIsNotificationsEnabled()) {
+                setNotificationsEnabledSetting(
+                        requestedConfigurationUpdates.areNotificationsEnabled());
+            }
+            setNotificationsEnabledIfRequired(newConfiguration.areNotificationsEnabled());
+        }
     }
 
     @Override
@@ -348,6 +368,10 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
                 .setUserConfigAllowed(isUserConfigAllowed(userId))
                 .setLocationEnabledSetting(getLocationEnabledSetting(userId))
                 .setGeoDetectionEnabledSetting(getGeoDetectionEnabledSetting(userId))
+                .setNotificationsSupported(areNotificationsSupported())
+                .setNotificationsEnabledSetting(getNotificationsEnabledSetting())
+                .setNotificationsTrackingSupported(isNotificationTrackingSupported())
+                .setManualChangeTrackingSupported(isManualChangeTrackingSupported())
                 .build();
     }
 
@@ -421,6 +445,49 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
         }
     }
 
+    private boolean areNotificationsSupported() {
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_TIME_ZONE_NOTIFICATIONS_SUPPORTED,
+                getConfigBoolean(R.bool.config_enableTimeZoneNotificationsSupported));
+    }
+
+    private boolean isNotificationTrackingSupported() {
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_TIME_ZONE_NOTIFICATIONS_TRACKING_SUPPORTED,
+                getConfigBoolean(R.bool.config_enableTimeZoneNotificationsTrackingSupported));
+    }
+
+    private boolean isManualChangeTrackingSupported() {
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_TIME_ZONE_MANUAL_CHANGE_TRACKING_SUPPORTED,
+                getConfigBoolean(R.bool.config_enableTimeZoneManualChangeTrackingSupported));
+    }
+
+    private boolean getNotificationsEnabledSetting() {
+        final boolean notificationsEnabledByDefault = areNotificationsEnabledByDefault();
+        return Settings.Global.getInt(mCr, Settings.Global.TIME_ZONE_NOTIFICATIONS,
+                (notificationsEnabledByDefault ? 1 : 0) /* defaultValue */) != 0;
+    }
+
+    private boolean areNotificationsEnabledByDefault() {
+        return mServerFlags.getBoolean(
+                ServerFlags.KEY_TIME_ZONE_NOTIFICATIONS_ENABLED_DEFAULT, true);
+    }
+
+    private void setNotificationsEnabledSetting(boolean enabled) {
+        Settings.Global.putInt(mCr, Settings.Global.TIME_ZONE_NOTIFICATIONS, enabled ? 1 : 0);
+    }
+
+    private void setNotificationsEnabledIfRequired(boolean enabled) {
+        // This check is racey, but the whole settings update process is racey. This check prevents
+        // a ConfigurationChangeListener callback triggering due to ContentObserver's still
+        // triggering *sometimes* for no-op updates. Because callbacks are async this is necessary
+        // for stable behavior during tests.
+        if (getNotificationsEnabledSetting() != enabled) {
+            Settings.Global.putInt(mCr, Settings.Global.TIME_ZONE_NOTIFICATIONS, enabled ? 1 : 0);
+        }
+    }
+
     @Override
     public void addLocationTimeZoneManagerConfigListener(
             @NonNull StateChangeListener listener) {
@@ -441,8 +508,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
 
     @Override
     public boolean isGeoTimeZoneDetectionFeatureSupportedInConfig() {
-        return mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableGeolocationTimeZoneDetection);
+        return getConfigBoolean(R.bool.config_enableGeolocationTimeZoneDetection);
     }
 
     @Override
@@ -660,8 +726,7 @@ public final class ServiceConfigAccessorImpl implements ServiceConfigAccessor {
     private boolean isTelephonyFallbackSupported() {
         return mServerFlags.getBoolean(
                 ServerFlags.KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
-                getConfigBoolean(
-                        com.android.internal.R.bool.config_supportTelephonyTimeZoneFallback));
+                getConfigBoolean(R.bool.config_supportTelephonyTimeZoneFallback));
     }
 
     private boolean getConfigBoolean(int providerEnabledConfigId) {

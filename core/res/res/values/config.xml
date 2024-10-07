@@ -2083,6 +2083,18 @@
          See com.android.server.timezonedetector.TimeZoneDetectorStrategy for more information. -->
     <bool name="config_supportTelephonyTimeZoneFallback" translatable="false">true</bool>
 
+    <!-- Whether the time notifications feature is enabled. Settings this to false means the feature
+         cannot be used. Setting this to true means the feature can be enabled on the device. -->
+    <bool name="config_enableTimeZoneNotificationsSupported" translatable="false">true</bool>
+
+    <!-- Whether the time zone notifications tracking feature is enabled. Settings this to false
+         means the feature cannot be used. -->
+    <bool name="config_enableTimeZoneNotificationsTrackingSupported" translatable="false">true</bool>
+
+    <!-- Whether the time zone manual change tracking feature is enabled. Settings this to false
+         means the feature cannot be used. -->
+    <bool name="config_enableTimeZoneManualChangeTrackingSupported" translatable="false">true</bool>
+
     <!-- Whether to enable network location overlay which allows network location provider to be
          replaced by an app at run-time. When disabled, only the
          config_networkLocationProviderPackageName package will be searched for network location

@@ -72,8 +72,12 @@ public final class ServerFlags {
             KEY_TIME_ZONE_DETECTOR_AUTO_DETECTION_ENABLED_DEFAULT,
             KEY_TIME_ZONE_DETECTOR_TELEPHONY_FALLBACK_SUPPORTED,
             KEY_ENHANCED_METRICS_COLLECTION_ENABLED,
+            KEY_TIME_ZONE_NOTIFICATIONS_SUPPORTED,
+            KEY_TIME_ZONE_NOTIFICATIONS_ENABLED_DEFAULT,
+            KEY_TIME_ZONE_NOTIFICATIONS_TRACKING_SUPPORTED,
+            KEY_TIME_ZONE_MANUAL_CHANGE_TRACKING_SUPPORTED
     })
-    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @Retention(RetentionPolicy.SOURCE)
     @interface DeviceConfigKey {}
 
@@ -190,6 +194,31 @@ public final class ServerFlags {
      */
     public static final @DeviceConfigKey String KEY_ENHANCED_METRICS_COLLECTION_ENABLED =
             "enhanced_metrics_collection_enabled";
+
+    /**
+     * The key to control support for time zone notifications under certain circumstances.
+     */
+    public static final @DeviceConfigKey String KEY_TIME_ZONE_NOTIFICATIONS_SUPPORTED =
+            "time_zone_notifications_supported";
+
+    /**
+     * The key for the default value used to determine whether time zone notifications is enabled
+     * when the user hasn't explicitly set it yet.
+     */
+    public static final @DeviceConfigKey String KEY_TIME_ZONE_NOTIFICATIONS_ENABLED_DEFAULT =
+            "time_zone_notifications_enabled_default";
+
+    /**
+     * The key to control support for time zone notifications tracking under certain circumstances.
+     */
+    public static final @DeviceConfigKey String KEY_TIME_ZONE_NOTIFICATIONS_TRACKING_SUPPORTED =
+            "time_zone_notifications_tracking_supported";
+
+    /**
+     * The key to control support for time zone manual change tracking under certain circumstances.
+     */
+    public static final @DeviceConfigKey String KEY_TIME_ZONE_MANUAL_CHANGE_TRACKING_SUPPORTED =
+            "time_zone_manual_change_tracking_supported";
 
     /**
      * The registered listeners and the keys to trigger on. The value is explicitly a HashSet to

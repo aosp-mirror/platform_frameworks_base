@@ -31,7 +31,7 @@ import java.util.Optional;
 /**
  * A partially implemented, fake implementation of ServiceConfigAccessor for tests.
  *
- * <p>This class has rudamentary support for multiple users, but unlike the real thing, it doesn't
+ * <p>This class has rudimentary support for multiple users, but unlike the real thing, it doesn't
  * simulate that some settings are global and shared between users. It also delivers config updates
  * synchronously.
  */
