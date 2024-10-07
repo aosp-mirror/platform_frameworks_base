@@ -19,7 +19,6 @@ package com.android.server.wearable;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
 import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 
-import android.app.wearable.Flags;
 import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.WearableSensingManager;
 import android.content.ComponentName;
@@ -87,15 +86,6 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
         if (DEBUG) {
             Slog.i(TAG, "#provideSecureConnection");
         }
-        if (!Flags.enableRestartWssProcess()) {
-            Slog.d(
-                    TAG,
-                    "FLAG_ENABLE_RESTART_WSS_PROCESS is disabled. Do not attempt to restart the"
-                        + " WearableSensingService process");
-            provideSecureConnectionInternal(
-                    secureWearableConnection, wearableSensingCallback, statusCallback);
-            return;
-        }
         synchronized (mSecureConnectionLock) {
             if (mNextSecureConnectionContext != null) {
                 // A process restart is in progress, #binderDied is about to be called. Replace
@@ -105,11 +95,9 @@ final class RemoteWearableSensingService extends ServiceConnector.Impl<IWearable
                         "A new wearable connection is provided before the process restart triggered"
                             + " by the previous connection is complete. Discarding the previous"
                             + " connection.");
-                if (Flags.enableProvideWearableConnectionApi()) {
-                    WearableSensingManagerPerUserService.notifyStatusCallback(
-                            mNextSecureConnectionContext.mStatusCallback,
-                            WearableSensingManager.STATUS_CHANNEL_ERROR);
-                }
+                WearableSensingManagerPerUserService.notifyStatusCallback(
+                        mNextSecureConnectionContext.mStatusCallback,
+                        WearableSensingManager.STATUS_CHANNEL_ERROR);
                 mNextSecureConnectionContext =
                         new SecureWearableConnectionContext(
                                 secureWearableConnection, wearableSensingCallback, statusCallback);

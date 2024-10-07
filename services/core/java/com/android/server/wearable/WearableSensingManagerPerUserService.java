@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppGlobals;
 import android.app.ambientcontext.AmbientContextEvent;
-import android.app.wearable.Flags;
 import android.app.wearable.IWearableSensingCallback;
 import android.app.wearable.WearableSensingManager;
 import android.companion.CompanionDeviceManager;
@@ -245,31 +244,25 @@ final class WearableSensingManagerPerUserService extends
 
                                     @Override
                                     public void onError() {
-                                        if (Flags.enableRestartWssProcess()) {
-                                            synchronized (mSecureChannelLock) {
-                                                if (mSecureChannel != null
-                                                        && mSecureChannel
-                                                                == currentSecureChannelRef.get()) {
-                                                    mRemoteService
-                                                            .killWearableSensingServiceProcess();
-                                                    mSecureChannel = null;
-                                                }
+                                        synchronized (mSecureChannelLock) {
+                                            if (mSecureChannel != null
+                                                    && mSecureChannel
+                                                            == currentSecureChannelRef.get()) {
+                                                mRemoteService
+                                                        .killWearableSensingServiceProcess();
+                                                mSecureChannel = null;
                                             }
                                         }
-                                        if (Flags.enableProvideWearableConnectionApi()) {
-                                            notifyStatusCallback(
-                                                    statusCallback,
-                                                    WearableSensingManager.STATUS_CHANNEL_ERROR);
-                                        }
+                                        notifyStatusCallback(
+                                                statusCallback,
+                                                WearableSensingManager.STATUS_CHANNEL_ERROR);
                                     }
                                 });
                 currentSecureChannelRef.set(mSecureChannel);
             } catch (IOException ex) {
                 Slog.e(TAG, "Unable to create the secure channel.", ex);
-                if (Flags.enableProvideWearableConnectionApi()) {
-                    notifyStatusCallback(
-                            statusCallback, WearableSensingManager.STATUS_CHANNEL_ERROR);
-                }
+                notifyStatusCallback(
+                        statusCallback, WearableSensingManager.STATUS_CHANNEL_ERROR);
             }
         }
     }

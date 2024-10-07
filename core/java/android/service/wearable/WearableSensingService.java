@@ -353,7 +353,6 @@ public abstract class WearableSensingService extends Service {
      * @param secureWearableConnection The secure connection to the wearable.
      * @param statusConsumer The consumer for the service status.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
     @BinderThread
     public void onSecureConnectionProvided(
             @NonNull ParcelFileDescriptor secureWearableConnection,
@@ -419,7 +418,6 @@ public abstract class WearableSensingService extends Service {
      * @param statusConsumer the consumer for the status of the data request observer registration.
      *     This is different from the status for each data request.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @BinderThread
     public void onDataRequestObserverRegistered(
             int dataType,
@@ -447,7 +445,6 @@ public abstract class WearableSensingService extends Service {
      * @param statusConsumer the consumer for the status of the data request observer
      *     unregistration. This is different from the status for each data request.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @BinderThread
     public void onDataRequestObserverUnregistered(
             int dataType,

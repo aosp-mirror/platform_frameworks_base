@@ -132,7 +132,6 @@ public class WearableSensingManager {
      * The value of the status code that indicates the method called is not supported by the
      * implementation of {@link WearableSensingService}.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_UNSUPPORTED_OPERATION_STATUS_CODE)
     public static final int STATUS_UNSUPPORTED_OPERATION = 6;
 
     /**
@@ -140,11 +139,9 @@ public class WearableSensingManager {
      * by the provided connection. See {@link #provideConnection(ParcelFileDescriptor,
      * Executor, Consumer)}.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
     public static final int STATUS_CHANNEL_ERROR = 7;
 
     /** The value of the status code that indicates the provided data type is not supported. */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     public static final int STATUS_UNSUPPORTED_DATA_TYPE = 8;
 
     /** @hide */
@@ -183,7 +180,6 @@ public class WearableSensingManager {
      * @return The WearableSensingDataRequest in the provided Intent, or null if the Intent does not
      *     contain a WearableSensingDataRequest.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @Nullable
     public static WearableSensingDataRequest getDataRequestFromIntent(@NonNull Intent intent) {
         return intent.getParcelableExtra(
@@ -249,7 +245,6 @@ public class WearableSensingManager {
      *     and errors in the encrypted channel.
      */
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
-    @FlaggedApi(Flags.FLAG_ENABLE_PROVIDE_WEARABLE_CONNECTION_API)
     public void provideConnection(
             @NonNull ParcelFileDescriptor wearableConnection,
             @NonNull @CallbackExecutor Executor executor,
@@ -390,7 +385,6 @@ public class WearableSensingManager {
      * @param executor Executor on which to run the consumer callback.
      * @param statusConsumer A consumer that handles the status code for the observer registration.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void registerDataRequestObserver(
             int dataType,
@@ -417,7 +411,6 @@ public class WearableSensingManager {
      * @param statusConsumer A consumer that handles the status code for the observer
      *     unregistration.
      */
-    @FlaggedApi(Flags.FLAG_ENABLE_DATA_REQUEST_OBSERVER_API)
     @RequiresPermission(Manifest.permission.MANAGE_WEARABLE_SENSING_SERVICE)
     public void unregisterDataRequestObserver(
             int dataType,
