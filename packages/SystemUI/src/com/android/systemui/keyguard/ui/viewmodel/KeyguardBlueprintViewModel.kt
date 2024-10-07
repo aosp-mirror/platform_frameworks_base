@@ -24,9 +24,6 @@ import android.util.Log
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Config
 import com.android.systemui.keyguard.ui.view.layout.blueprints.transitions.IntraBlueprintTransition.Type
 import javax.inject.Inject
@@ -40,7 +37,6 @@ class KeyguardBlueprintViewModel
 constructor(
     @Main private val handler: Handler,
     private val keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
-    private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
 ) {
     val blueprint = keyguardBlueprintInteractor.blueprint
     val blueprintId = keyguardBlueprintInteractor.blueprintId
@@ -53,12 +49,12 @@ constructor(
     private val transitionListener =
         object : Transition.TransitionListener {
             override fun onTransitionCancel(transition: Transition) {
-                if (DEBUG) Log.w(TAG, "onTransitionCancel: ${transition::class.simpleName}")
+                if (DEBUG) Log.e(TAG, "onTransitionCancel: ${transition::class.simpleName}")
                 updateTransitions(null) { remove(transition) }
             }
 
             override fun onTransitionEnd(transition: Transition) {
-                if (DEBUG) Log.i(TAG, "onTransitionEnd: ${transition::class.simpleName}")
+                if (DEBUG) Log.e(TAG, "onTransitionEnd: ${transition::class.simpleName}")
                 updateTransitions(null) { remove(transition) }
             }
 
@@ -90,28 +86,6 @@ constructor(
 
     fun runTransition(
         constraintLayout: ConstraintLayout,
-        clockViewModel: KeyguardClockViewModel,
-        smartspaceViewModel: KeyguardSmartspaceViewModel,
-        config: Config,
-        apply: () -> Unit,
-    ) {
-        val newConfig =
-            if (keyguardTransitionInteractor.getCurrentState() == KeyguardState.OFF) {
-                config.copy(type = Type.Init)
-            } else {
-                config
-            }
-
-        runTransition(
-            constraintLayout,
-            IntraBlueprintTransition(newConfig, clockViewModel, smartspaceViewModel),
-            config,
-            apply,
-        )
-    }
-
-    fun runTransition(
-        constraintLayout: ConstraintLayout,
         transition: Transition,
         config: Config,
         apply: () -> Unit,
@@ -129,29 +103,21 @@ constructor(
             return
         }
 
-        // Don't allow transitions with animations while in OFF state
-        val newConfig =
-            if (keyguardTransitionInteractor.getCurrentState() == KeyguardState.OFF) {
-                config.copy(type = Type.Init)
-            } else {
-                config
-            }
-
         if (DEBUG) {
             Log.i(
                 TAG,
                 "runTransition: running ${transition::class.simpleName}: " +
-                    "currentPriority=$currentPriority; config=$newConfig",
+                    "currentPriority=$currentPriority; config=$config",
             )
         }
 
         // beginDelayedTransition makes a copy, so we temporarially add the uncopied transition to
         // the running set until the copy is started by the handler.
-        updateTransitions(TransitionData(newConfig)) { add(transition) }
+        updateTransitions(TransitionData(config)) { add(transition) }
         transition.addListener(transitionListener)
 
         handler.post {
-            if (newConfig.terminatePrevious) {
+            if (config.terminatePrevious) {
                 TransitionManager.endTransitions(constraintLayout)
             }
 
