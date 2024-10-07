@@ -128,7 +128,7 @@ class DraggableHandlerTest {
         val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
 
         var pointerInfoOwner: () -> PointersInfo = {
-            PointersInfo(startedPosition = Offset.Zero, pointersDown = 1)
+            PointersInfo(startedPosition = Offset.Zero, pointersDown = 1, isMouseWheel = false)
         }
 
         fun nestedScrollConnection(
@@ -1188,7 +1188,9 @@ class DraggableHandlerTest {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
 
         // Drag from the **top** of the screen
-        pointerInfoOwner = { PointersInfo(startedPosition = Offset(0f, 0f), pointersDown = 1) }
+        pointerInfoOwner = {
+            PointersInfo(startedPosition = Offset(0f, 0f), pointersDown = 1, isMouseWheel = false)
+        }
         assertIdle(currentScene = SceneC)
 
         nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
@@ -1206,7 +1208,11 @@ class DraggableHandlerTest {
 
         // Drag from the **bottom** of the screen
         pointerInfoOwner = {
-            PointersInfo(startedPosition = Offset(0f, SCREEN_SIZE), pointersDown = 1)
+            PointersInfo(
+                startedPosition = Offset(0f, SCREEN_SIZE),
+                pointersDown = 1,
+                isMouseWheel = false,
+            )
         }
         assertIdle(currentScene = SceneC)
 
@@ -1218,6 +1224,22 @@ class DraggableHandlerTest {
             toScene = SceneA,
             progress = 0.1f,
         )
+    }
+
+    @Test
+    fun ignoreMouseWheel() = runGestureTest {
+        // Start at scene C.
+        navigateToSceneC()
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+
+        // Use mouse wheel
+        pointerInfoOwner = {
+            PointersInfo(startedPosition = Offset(0f, 0f), pointersDown = 1, isMouseWheel = true)
+        }
+        assertIdle(currentScene = SceneC)
+
+        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
+        assertIdle(currentScene = SceneC)
     }
 
     @Test
