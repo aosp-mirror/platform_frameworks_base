@@ -23,6 +23,7 @@ import android.content.res.Resources
 import android.graphics.Point
 import android.os.SystemProperties
 import android.util.Slog
+import androidx.core.content.withStyledAttributes
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.CaptionState
@@ -32,8 +33,11 @@ import com.android.wm.shell.shared.annotations.ShellBackgroundThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
+import com.android.wm.shell.windowdecor.common.DecorThemeUtil
+import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.EducationViewConfig
+import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipColorScheme
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainCoroutineDispatcher
@@ -70,6 +74,7 @@ class AppHandleEducationController(
     @ShellMainThread private val applicationCoroutineScope: CoroutineScope,
     @ShellBackgroundThread private val backgroundDispatcher: MainCoroutineDispatcher,
 ) {
+  private val decorThemeUtil = DecorThemeUtil(context)
   private lateinit var openHandleMenuCallback: (Int) -> Unit
   private lateinit var toDesktopModeCallback: (Int, DesktopModeTransitionSource) -> Unit
 
@@ -97,7 +102,9 @@ class AppHandleEducationController(
             }
             .flowOn(backgroundDispatcher)
             .collectLatest { captionState ->
-              showEducation(captionState)
+              val tooltipColorScheme = tooltipColorScheme(captionState)
+
+              showEducation(captionState, tooltipColorScheme)
               // After showing first tooltip, mark education as viewed
               appHandleEducationDatastoreRepository.updateEducationViewedTimestampMillis(true)
             }
@@ -123,7 +130,7 @@ class AppHandleEducationController(
     if (canEnterDesktopMode(context) && Flags.enableDesktopWindowingAppHandleEducation()) block()
   }
 
-  private fun showEducation(captionState: CaptionState) {
+  private fun showEducation(captionState: CaptionState, tooltipColorScheme: TooltipColorScheme) {
     val appHandleBounds = (captionState as CaptionState.AppHandle).globalAppHandleBounds
     val tooltipGlobalCoordinates =
         Point(appHandleBounds.left + appHandleBounds.width() / 2, appHandleBounds.bottom)
@@ -132,14 +139,17 @@ class AppHandleEducationController(
     val appHandleTooltipConfig =
         EducationViewConfig(
             tooltipViewLayout = R.layout.desktop_windowing_education_top_arrow_tooltip,
+            tooltipColorScheme = tooltipColorScheme,
             tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
             tooltipText = getString(R.string.windowing_app_handle_education_tooltip),
             arrowDirection = DesktopWindowingEducationTooltipController.TooltipArrowDirection.UP,
             onEducationClickAction = {
-              launchWithExceptionHandling { showWindowingImageButtonTooltip() }
+              launchWithExceptionHandling { showWindowingImageButtonTooltip(tooltipColorScheme) }
               openHandleMenuCallback(captionState.runningTaskInfo.taskId)
             },
-            onDismissAction = { launchWithExceptionHandling { showWindowingImageButtonTooltip() } },
+            onDismissAction = {
+              launchWithExceptionHandling { showWindowingImageButtonTooltip(tooltipColorScheme) }
+            },
         )
 
     windowingEducationViewController.showEducationTooltip(
@@ -147,7 +157,7 @@ class AppHandleEducationController(
   }
 
   /** Show tooltip that points to windowing image button in app handle menu */
-  private suspend fun showWindowingImageButtonTooltip() {
+  private suspend fun showWindowingImageButtonTooltip(tooltipColorScheme: TooltipColorScheme) {
     val appInfoPillHeight = getSize(R.dimen.desktop_mode_handle_menu_app_info_pill_height)
     val windowingOptionPillHeight = getSize(R.dimen.desktop_mode_handle_menu_windowing_pill_height)
     val appHandleMenuWidth =
@@ -188,18 +198,21 @@ class AppHandleEducationController(
           val windowingImageButtonTooltipConfig =
               EducationViewConfig(
                   tooltipViewLayout = R.layout.desktop_windowing_education_left_arrow_tooltip,
+                  tooltipColorScheme = tooltipColorScheme,
                   tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
                   tooltipText =
                       getString(R.string.windowing_desktop_mode_image_button_education_tooltip),
                   arrowDirection =
                       DesktopWindowingEducationTooltipController.TooltipArrowDirection.LEFT,
                   onEducationClickAction = {
-                    launchWithExceptionHandling { showExitWindowingTooltip() }
+                    launchWithExceptionHandling { showExitWindowingTooltip(tooltipColorScheme) }
                     toDesktopModeCallback(
                         captionState.runningTaskInfo.taskId,
                         DesktopModeTransitionSource.APP_HANDLE_MENU_BUTTON)
                   },
-                  onDismissAction = { launchWithExceptionHandling { showExitWindowingTooltip() } },
+                  onDismissAction = {
+                    launchWithExceptionHandling { showExitWindowingTooltip(tooltipColorScheme) }
+                  },
               )
 
           windowingEducationViewController.showEducationTooltip(
@@ -209,7 +222,7 @@ class AppHandleEducationController(
   }
 
   /** Show tooltip that points to app chip button and educates user on how to exit desktop mode */
-  private suspend fun showExitWindowingTooltip() {
+  private suspend fun showExitWindowingTooltip(tooltipColorScheme: TooltipColorScheme) {
     windowDecorCaptionHandleRepository.captionStateFlow
         // After the previous tooltip was dismissed, wait for 400 ms and see if the user entered
         // desktop mode.
@@ -238,6 +251,7 @@ class AppHandleEducationController(
           val exitWindowingTooltipConfig =
               EducationViewConfig(
                   tooltipViewLayout = R.layout.desktop_windowing_education_left_arrow_tooltip,
+                  tooltipColorScheme = tooltipColorScheme,
                   tooltipViewGlobalCoordinates = tooltipGlobalCoordinates,
                   tooltipText = getString(R.string.windowing_desktop_mode_exit_education_tooltip),
                   arrowDirection =
@@ -252,6 +266,32 @@ class AppHandleEducationController(
               tooltipViewConfig = exitWindowingTooltipConfig,
           )
         }
+  }
+
+  private fun tooltipColorScheme(captionState: CaptionState): TooltipColorScheme {
+    context.withStyledAttributes(
+        set = null,
+        attrs =
+            intArrayOf(
+                com.android.internal.R.attr.materialColorOnTertiaryFixed,
+                com.android.internal.R.attr.materialColorTertiaryFixed,
+                com.android.internal.R.attr.materialColorTertiaryFixedDim),
+        defStyleAttr = 0,
+        defStyleRes = 0) {
+          val onTertiaryFixed = getColor(/* index= */ 0, /* defValue= */ 0)
+          val tertiaryFixed = getColor(/* index= */ 1, /* defValue= */ 0)
+          val tertiaryFixedDim = getColor(/* index= */ 2, /* defValue= */ 0)
+          val taskInfo = (captionState as CaptionState.AppHandle).runningTaskInfo
+
+          val tooltipContainerColor =
+              if (decorThemeUtil.getAppTheme(taskInfo) == Theme.LIGHT) {
+                tertiaryFixed
+              } else {
+                tertiaryFixedDim
+              }
+          return TooltipColorScheme(tooltipContainerColor, onTertiaryFixed, onTertiaryFixed)
+        }
+    return TooltipColorScheme(0, 0, 0)
   }
 
   /**

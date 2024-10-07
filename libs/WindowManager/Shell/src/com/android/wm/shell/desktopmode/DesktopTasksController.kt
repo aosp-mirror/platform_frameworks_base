@@ -134,6 +134,7 @@ class DesktopTasksController(
     private val desktopModeDragAndDropTransitionHandler: DesktopModeDragAndDropTransitionHandler,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val dragToDesktopTransitionHandler: DragToDesktopTransitionHandler,
+    private val immersiveTransitionHandler: DesktopFullImmersiveTransitionHandler,
     private val taskRepository: DesktopRepository,
     private val desktopModeLoggerTransitionObserver: DesktopModeLoggerTransitionObserver,
     private val launchAdjacentController: LaunchAdjacentController,
@@ -231,6 +232,7 @@ class DesktopTasksController(
         toggleResizeDesktopTaskTransitionHandler.setOnTaskResizeAnimationListener(listener)
         enterDesktopTaskTransitionHandler.setOnTaskResizeAnimationListener(listener)
         dragToDesktopTransitionHandler.onTaskResizeAnimationListener = listener
+        immersiveTransitionHandler.onTaskResizeAnimationListener = listener
     }
 
     fun setOnTaskRepositionAnimationListener(listener: OnTaskRepositionAnimationListener) {
@@ -649,6 +651,35 @@ class DesktopTasksController(
         }
     }
 
+    /** Moves a task in/out of full immersive state within the desktop. */
+    fun toggleDesktopTaskFullImmersiveState(taskInfo: RunningTaskInfo) {
+        if (taskRepository.isTaskInFullImmersiveState(taskInfo.taskId)) {
+            exitDesktopTaskFromFullImmersive(taskInfo)
+        } else {
+            moveDesktopTaskToFullImmersive(taskInfo)
+        }
+    }
+
+    private fun moveDesktopTaskToFullImmersive(taskInfo: RunningTaskInfo) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
+        val wct = WindowContainerTransaction().apply {
+            setBounds(taskInfo.token, Rect())
+        }
+        immersiveTransitionHandler.enterImmersive(taskInfo, wct)
+    }
+
+    private fun exitDesktopTaskFromFullImmersive(taskInfo: RunningTaskInfo) {
+        check(taskInfo.isFreeform) { "Task must already be in freeform" }
+        val displayLayout = displayController.getDisplayLayout(taskInfo.displayId) ?: return
+        val stableBounds = Rect().apply { displayLayout.getStableBounds(this) }
+        val destinationBounds = getMaximizeBounds(taskInfo, stableBounds)
+
+        val wct = WindowContainerTransaction().apply {
+            setBounds(taskInfo.token, destinationBounds)
+        }
+        immersiveTransitionHandler.exitImmersive(taskInfo, wct)
+    }
+
     /**
      * Quick-resizes a desktop task, toggling between a fullscreen state (represented by the stable
      * bounds) and a free floating state (either the last saved bounds if available or the default
@@ -685,18 +716,7 @@ class DesktopTasksController(
             // and toggle to the stable bounds.
             taskRepository.saveBoundsBeforeMaximize(taskInfo.taskId, currentTaskBounds)
 
-            if (taskInfo.isResizeable) {
-                // if resizable then expand to entire stable bounds (full display minus insets)
-                destinationBounds.set(stableBounds)
-            } else {
-                // if non-resizable then calculate max bounds according to aspect ratio
-                val activityAspectRatio = calculateAspectRatio(taskInfo)
-                val newSize = maximizeSizeGivenAspectRatio(taskInfo,
-                    Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
-                val newBounds = centerInArea(
-                    newSize, stableBounds, stableBounds.left, stableBounds.top)
-                destinationBounds.set(newBounds)
-            }
+            destinationBounds.set(getMaximizeBounds(taskInfo, stableBounds))
         }
 
 
@@ -716,6 +736,20 @@ class DesktopTasksController(
             toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
+        if (taskInfo.isResizeable) {
+            // if resizable then expand to entire stable bounds (full display minus insets)
+            return Rect(stableBounds)
+        } else {
+            // if non-resizable then calculate max bounds according to aspect ratio
+            val activityAspectRatio = calculateAspectRatio(taskInfo)
+            val newSize = maximizeSizeGivenAspectRatio(taskInfo,
+                Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
+            return centerInArea(
+                newSize, stableBounds, stableBounds.left, stableBounds.top)
         }
     }
 

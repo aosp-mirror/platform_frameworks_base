@@ -517,8 +517,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             closeManageWindowsMenu();
             closeMaximizeMenu();
         }
-        updateDragResizeListener(oldDecorationSurface);
-        updateMaximizeMenu(startT);
+        updateDragResizeListener(oldDecorationSurface, inFullImmersive);
+        updateMaximizeMenu(startT, inFullImmersive);
         Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
     }
 
@@ -571,11 +571,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mUserContext.getUser();
     }
 
-    private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
-        if (!isDragResizable(mTaskInfo)) {
+    private void updateDragResizeListener(SurfaceControl oldDecorationSurface,
+            boolean inFullImmersive) {
+        if (!isDragResizable(mTaskInfo, inFullImmersive)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
-                updateExclusionRegion();
+                updateExclusionRegion(inFullImmersive);
             }
             closeDragResizeListener();
             return;
@@ -609,11 +610,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         getResizeEdgeHandleSize(res), getResizeHandleEdgeInset(res),
                         getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
-            updateExclusionRegion();
+            updateExclusionRegion(inFullImmersive);
         }
     }
 
-    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo,
+            boolean inFullImmersive) {
+        if (inFullImmersive) {
+            // Task cannot be resized in full immersive.
+            return false;
+        }
         if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()) {
             return taskInfo.isFreeform();
         }
@@ -677,8 +683,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
     }
 
-    private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
-        if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
+    private void updateMaximizeMenu(SurfaceControl.Transaction startT, boolean inFullImmersive) {
+        if (!isDragResizable(mTaskInfo, inFullImmersive) || !isMaximizeMenuActive()) {
             return;
         }
         if (!mTaskInfo.isVisible()) {
@@ -1546,23 +1552,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mPositionInParent.set(mTaskInfo.positionInParent);
     }
 
-    private void updateExclusionRegion() {
+    private void updateExclusionRegion(boolean inFullImmersive) {
         // An outdated position in parent is one reason for this to be called; update it here.
         updatePositionInParent();
         mExclusionRegionListener
-                .onExclusionRegionChanged(mTaskInfo.taskId, getGlobalExclusionRegion());
+                .onExclusionRegionChanged(mTaskInfo.taskId,
+                        getGlobalExclusionRegion(inFullImmersive));
     }
 
     /**
      * Create a new exclusion region from the corner rects (if resizeable) and caption bounds
      * of this task.
      */
-    private Region getGlobalExclusionRegion() {
+    private Region getGlobalExclusionRegion(boolean inFullImmersive) {
         Region exclusionRegion;
-        if (mDragResizeListener != null && isDragResizable(mTaskInfo)) {
+        if (mDragResizeListener != null && isDragResizable(mTaskInfo, inFullImmersive)) {
             exclusionRegion = mDragResizeListener.getCornersRegion();
         } else {
             exclusionRegion = new Region();
+        }
+        if (inFullImmersive) {
+            // Task can't be moved in full immersive, so skip excluding the caption region.
+            return exclusionRegion;
         }
         exclusionRegion.union(new Rect(0, 0, mResult.mWidth,
                 getCaptionHeight(mTaskInfo.getWindowingMode())));

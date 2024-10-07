@@ -37,7 +37,7 @@
         android:layout_marginStart="2dp"
         android:lineHeight="20dp"
         android:maxWidth="150dp"
-        android:textColor="@android:color/system_on_tertiary_fixed"
+        android:textColor="@android:color/system_on_tertiary_container_light"
         android:textFontWeight="500"
         android:textSize="14sp" />
 </LinearLayout>
