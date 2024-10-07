@@ -138,23 +138,37 @@ public class ServiceListing {
         }
 
         final PackageManager pmWrapper = mContext.getPackageManager();
+        // Add requesting apps, with full validation
         List<ResolveInfo> installedServices = pmWrapper.queryIntentServicesAsUser(
                 new Intent(mIntentAction), flags, user);
         for (ResolveInfo resolveInfo : installedServices) {
             ServiceInfo info = resolveInfo.serviceInfo;
 
-            if (!mPermission.equals(info.permission)) {
-                Slog.w(mTag, "Skipping " + mNoun + " service "
-                        + info.packageName + "/" + info.name
-                        + ": it does not require the permission "
-                        + mPermission);
-                continue;
+            if (!mEnabledServices.contains(info.getComponentName())) {
+                if (!mPermission.equals(info.permission)) {
+                    Slog.w(mTag, "Skipping " + mNoun + " service "
+                            + info.packageName + "/" + info.name
+                            + ": it does not require the permission "
+                            + mPermission);
+                    continue;
+                }
+                if (mValidator != null && !mValidator.test(info)) {
+                    continue;
+                }
+                mServices.add(info);
             }
-            if (mValidator != null && !mValidator.test(info)) {
-                continue;
-            }
-            mServices.add(info);
         }
+
+        // Add all apps with access, in case prior approval was granted without full validation
+        for (ComponentName cn : mEnabledServices) {
+            List<ResolveInfo> enabledServices = pmWrapper.queryIntentServicesAsUser(
+                    new Intent().setComponent(cn), flags, user);
+            for (ResolveInfo resolveInfo : enabledServices) {
+                ServiceInfo info = resolveInfo.serviceInfo;
+                mServices.add(info);
+            }
+        }
+
         for (Callback callback : mCallbacks) {
             callback.onServicesReloaded(mServices);
         }
