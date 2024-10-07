@@ -251,6 +251,24 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    void goToSleep() {
+        try {
+            mVirtualDevice.goToSleep();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    void wakeUp() {
+        try {
+            mVirtualDevice.wakeUp();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     void launchPendingIntent(
             int displayId,
             @NonNull PendingIntent pendingIntent,

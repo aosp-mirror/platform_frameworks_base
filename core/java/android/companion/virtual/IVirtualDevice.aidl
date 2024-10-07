@@ -93,6 +93,18 @@ interface IVirtualDevice {
      */
     boolean canCreateMirrorDisplays();
 
+    /*
+     * Turns off all trusted non-mirror displays of the virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void goToSleep();
+
+    /**
+     * Turns on all trusted non-mirror displays of the virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void wakeUp();
+
     /**
      * Closes the virtual device and frees all associated resources.
      */

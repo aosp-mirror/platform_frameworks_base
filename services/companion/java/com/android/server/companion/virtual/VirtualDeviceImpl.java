@@ -99,6 +99,7 @@ import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArrayMap;
@@ -203,6 +204,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private IVirtualDeviceSoundEffectListener mSoundEffectListener;
     private final DisplayManagerGlobal mDisplayManager;
     private final DisplayManagerInternal mDisplayManagerInternal;
+    private final PowerManager mPowerManager;
     @GuardedBy("mVirtualDeviceLock")
     private final Map<IBinder, IntentFilter> mIntentInterceptors = new ArrayMap<>();
     @NonNull
@@ -418,6 +420,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mDevicePolicies = params.getDevicePolicies();
         mDisplayManager = displayManager;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mPowerManager = context.getSystemService(PowerManager.class);
         if (inputController == null) {
             mInputController = new InputController(
                     context.getMainThreadHandler(),
@@ -573,6 +576,52 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mAssociationInfo == null
                 ? VirtualDeviceManagerService.CDM_ASSOCIATION_ID_NONE
                 : mAssociationInfo.getId();
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void goToSleep() {
+        super.goToSleep_enforcePermission();
+        final long now = SystemClock.uptimeMillis();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mVirtualDeviceLock) {
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                    if (!wrapper.isTrusted() || wrapper.isMirror()) {
+                        continue;
+                    }
+                    int displayId = mVirtualDisplays.keyAt(i);
+                    mPowerManager.goToSleep(displayId, now,
+                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, /* flags= */ 0);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void wakeUp() {
+        super.wakeUp_enforcePermission();
+        final long now = SystemClock.uptimeMillis();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mVirtualDeviceLock) {
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                    if (!wrapper.isTrusted() || wrapper.isMirror()) {
+                        continue;
+                    }
+                    int displayId = mVirtualDisplays.keyAt(i);
+                    mPowerManager.wakeUp(now, PowerManager.WAKE_REASON_POWER_BUTTON,
+                            "android.server.companion.virtual:DEVICE_ON", displayId);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     @Override // Binder call
@@ -1423,6 +1472,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         boolean isMirrorDisplay =
                 mDisplayManagerInternal.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
         gwpc.setDisplayId(displayId, isMirrorDisplay);
+        boolean isTrustedDisplay =
+                (mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
+                        == Display.FLAG_TRUSTED;
 
         boolean showPointer;
         synchronized (mVirtualDeviceLock) {
@@ -1433,7 +1485,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             PowerManager.WakeLock wakeLock = createAndAcquireWakeLockForDisplay(displayId);
-            mVirtualDisplays.put(displayId, new VirtualDisplayWrapper(callback, gwpc, wakeLock));
+            mVirtualDisplays.put(displayId, new VirtualDisplayWrapper(callback, gwpc, wakeLock,
+                    isTrustedDisplay, isMirrorDisplay));
             showPointer = mDefaultShowPointerIcon;
         }
 
@@ -1444,8 +1497,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
             // WM throws a SecurityException if the display is untrusted.
-            if ((mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
-                    == Display.FLAG_TRUSTED) {
+            if (isTrustedDisplay) {
                 mInputController.setDisplayImePolicy(displayId,
                         WindowManager.DISPLAY_IME_POLICY_LOCAL);
             }
@@ -1732,13 +1784,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         private final IVirtualDisplayCallback mToken;
         private final GenericWindowPolicyController mWindowPolicyController;
         private final PowerManager.WakeLock mWakeLock;
+        private final boolean mIsTrusted;
+        private final boolean mIsMirror;
 
         VirtualDisplayWrapper(@NonNull IVirtualDisplayCallback token,
                 @NonNull GenericWindowPolicyController windowPolicyController,
-                @NonNull PowerManager.WakeLock wakeLock) {
+                @NonNull PowerManager.WakeLock wakeLock, boolean isTrusted, boolean isMirror) {
             mToken = Objects.requireNonNull(token);
             mWindowPolicyController = Objects.requireNonNull(windowPolicyController);
             mWakeLock = Objects.requireNonNull(wakeLock);
+            mIsTrusted = isTrusted;
+            mIsMirror = isMirror;
         }
 
         GenericWindowPolicyController getWindowPolicyController() {
@@ -1747,6 +1803,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
         PowerManager.WakeLock getWakeLock() {
             return mWakeLock;
+        }
+
+        boolean isTrusted() {
+            return mIsTrusted;
+        }
+
+        boolean isMirror() {
+            return mIsMirror;
         }
 
         IVirtualDisplayCallback getToken() {

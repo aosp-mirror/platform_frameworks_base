@@ -3510,6 +3510,7 @@ package android.companion.virtual {
     method public int getDeviceId();
     method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") @Nullable public String getPersistentDeviceId();
     method @NonNull public java.util.List<android.companion.virtual.sensor.VirtualSensor> getVirtualSensorList();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void goToSleep();
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
@@ -3521,6 +3522,7 @@ package android.companion.virtual {
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDisplayImePolicy(int, int);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void wakeUp();
   }
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
