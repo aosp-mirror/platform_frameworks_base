@@ -27,9 +27,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
 import com.android.systemui.keyguard.data.repository.keyguardOcclusionRepository
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.StatusBarState.KEYGUARD
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -42,10 +44,10 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -53,14 +55,19 @@ import org.mockito.Mockito.spy
 class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
 
     private val testScope = kosmos.testScope
     private val underTest = kosmos.fromLockscreenTransitionInteractor
-    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     private val shadeRepository = kosmos.fakeShadeRepository
     private val keyguardRepository = kosmos.fakeKeyguardRepository
+
+    @Before
+    fun setup() {
+        transitionRepository = kosmos.fakeKeyguardTransitionRepositorySpy
+    }
 
     @Test
     fun testSurfaceBehindVisibility() =
@@ -255,5 +262,44 @@ class FromLockscreenTransitionInteractorTest : SysuiTestCase() {
 
             assertThatRepository(transitionRepository)
                 .startedTransition(from = KeyguardState.LOCKSCREEN, to = KeyguardState.DREAMING)
+        }
+
+    @Test
+    fun testTransitionsBackToOccluded_ifOccluded_andCanceledSwipe() =
+        testScope.runTest {
+            underTest.start()
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            keyguardRepository.setKeyguardDismissible(false)
+            keyguardRepository.setKeyguardOccluded(false)
+            runCurrent()
+
+            reset(transitionRepository)
+
+            shadeRepository.setLegacyShadeTracking(true)
+            runCurrent()
+            shadeRepository.setLegacyShadeExpansion(0.5f)
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.PRIMARY_BOUNCER,
+                )
+            reset(transitionRepository)
+
+            runCurrent()
+
+            shadeRepository.setLegacyShadeExpansion(0.6f)
+            shadeRepository.setLegacyShadeExpansion(0.7f)
+            runCurrent()
+
+            shadeRepository.setLegacyShadeExpansion(1f)
+            runCurrent()
+
+            assertThatRepository(transitionRepository)
+                .startedTransition(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.LOCKSCREEN,
+                )
         }
 }

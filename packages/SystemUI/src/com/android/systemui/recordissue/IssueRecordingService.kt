@@ -23,9 +23,12 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.LongRunning
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
@@ -42,6 +45,7 @@ class IssueRecordingService
 @Inject
 constructor(
     controller: RecordingController,
+    @Background private val bgLooper: Looper,
     @LongRunning private val bgExecutor: Executor,
     @Main handler: Handler,
     uiEventLogger: UiEventLogger,
@@ -50,8 +54,8 @@ constructor(
     keyguardDismissUtil: KeyguardDismissUtil,
     dialogTransitionAnimator: DialogTransitionAnimator,
     panelInteractor: PanelInteractor,
-    traceurMessageSender: TraceurMessageSender,
     private val issueRecordingState: IssueRecordingState,
+    traceurConnectionProvider: TraceurConnection.Provider,
     iActivityManager: IActivityManager,
 ) :
     RecordingService(
@@ -64,17 +68,36 @@ constructor(
         keyguardDismissUtil,
     ) {
 
+    private val traceurConnection: TraceurConnection = traceurConnectionProvider.create()
+
     private val session =
         IssueRecordingServiceSession(
             bgExecutor,
             dialogTransitionAnimator,
             panelInteractor,
-            traceurMessageSender,
+            traceurConnection,
             issueRecordingState,
             iActivityManager,
             notificationManager,
             userContextProvider,
         )
+
+    /**
+     * It is necessary to bind to IssueRecordingService from the Record Issue Tile because there are
+     * instances where this service is not created in the same user profile as the record issue tile
+     * aka, headless system user mode. In those instances, the TraceurConnection will be considered
+     * a leak in between notification actions unless the tile is bound to this service to keep it
+     * alive.
+     */
+    override fun onBind(intent: Intent): IBinder? {
+        traceurConnection.doBind()
+        return super.onBind(intent)
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        traceurConnection.doUnBind()
+        return super.onUnbind(intent)
+    }
 
     override fun getTag(): String = TAG
 
@@ -99,7 +122,6 @@ constructor(
                 session.share(
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId),
                     intent.getParcelableExtra(EXTRA_PATH, Uri::class.java),
-                    this,
                 )
                 // Unlike all other actions, action_share has different behavior for the screen
                 // recording qs tile than it does for the record issue qs tile. Return sticky to

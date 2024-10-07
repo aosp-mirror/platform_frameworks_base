@@ -551,6 +551,12 @@ class RecentTasks {
         long currentElapsedTime = SystemClock.elapsedRealtime();
         for (int i = 0; i < tasks.size(); i++) {
             Task task = tasks.get(i);
+            // Remove the task restored from xml if any existing tasks match.
+            if (findRemoveIndexForAddTask(task) >= 0) {
+                tasks.remove(i);
+                i--;
+                continue;
+            }
             task.lastActiveTime = currentElapsedTime - i;
         }
 
@@ -561,6 +567,7 @@ class RecentTasks {
         if (existedTaskIds.size() > 0) {
             syncPersistentTaskIdsLocked();
         }
+        mTaskNotificationController.notifyTaskListUpdated();
     }
 
     private boolean isRecentTasksLoaded(int userId) {
@@ -679,26 +686,34 @@ class RecentTasks {
         if (isRecentTasksLoaded(userId)) {
             Slog.i(TAG, "Unloading recents for user " + userId + " from memory.");
             mUsersWithRecentsLoaded.delete(userId);
-            removeTasksForUserLocked(userId);
+            removeTasksForUserFromMemoryLocked(userId);
         }
         mPersistedTaskIds.delete(userId);
         mTaskPersister.unloadUserDataFromMemory(userId);
     }
 
     /** Remove recent tasks for a user. */
-    private void removeTasksForUserLocked(int userId) {
+    private void removeTasksForUserFromMemoryLocked(int userId) {
         if (userId <= 0) {
             Slog.i(TAG, "Can't remove recent task on user " + userId);
             return;
         }
 
+        boolean notifyTaskUpdated = false;
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             Task task = mTasks.get(i);
             if (task.mUserId == userId) {
                 ProtoLog.i(WM_DEBUG_TASKS, "remove RecentTask %s when finishing user "
                         + "%d", task, userId);
-                remove(task);
+                mTasks.remove(task);
+                mService.mWindowManager.mSnapshotController.mTaskSnapshotController
+                        .removeSnapshotCache(task.mTaskId);
+                // Only notify if list has changed.
+                notifyTaskUpdated = true;
             }
+        }
+        if (notifyTaskUpdated) {
+            mTaskNotificationController.notifyTaskListUpdated();
         }
     }
 

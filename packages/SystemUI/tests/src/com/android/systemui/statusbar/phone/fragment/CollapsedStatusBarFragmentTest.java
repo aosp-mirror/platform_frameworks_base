@@ -66,7 +66,6 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
-import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
@@ -98,7 +97,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private ShadeExpansionStateManager mShadeExpansionStateManager;
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
-    private StatusBarLocationPublisher mLocationPublisher;
     // Set in instantiate()
     private StatusBarIconController mStatusBarIconController;
     private KeyguardStateController mKeyguardStateController;
@@ -1181,7 +1179,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         setUpDaggerComponent();
         mOngoingCallController = mock(OngoingCallController.class);
         mAnimationScheduler = mock(SystemStatusAnimationScheduler.class);
-        mLocationPublisher = mock(StatusBarLocationPublisher.class);
         mStatusBarIconController = mock(StatusBarIconController.class);
         mStatusBarStateController = mock(StatusBarStateController.class);
         mKeyguardStateController = mock(KeyguardStateController.class);
@@ -1200,7 +1197,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mStatusBarFragmentComponentFactory,
                 mOngoingCallController,
                 mAnimationScheduler,
-                mLocationPublisher,
                 mShadeExpansionStateManager,
                 mStatusBarIconController,
                 mIconManagerFactory,

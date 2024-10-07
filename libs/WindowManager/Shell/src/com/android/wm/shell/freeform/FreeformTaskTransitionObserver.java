@@ -119,6 +119,9 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
                 case WindowManager.TRANSIT_TO_FRONT:
                     onToFrontTransitionReady(change, startT, finishT);
                     break;
+                case WindowManager.TRANSIT_TO_BACK:
+                    onToBackTransitionReady(change, startT, finishT);
+                    break;
                 case WindowManager.TRANSIT_CLOSE: {
                     taskInfoList.add(change.getTaskInfo());
                     onCloseTransitionReady(change, startT, finishT);
@@ -169,6 +172,16 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
             SurfaceControl.Transaction finishT) {
         mTaskChangeListener.ifPresent(
                 listener -> listener.onTaskMovingToFront(change.getTaskInfo()));
+        mWindowDecorViewModel.onTaskChanging(
+                change.getTaskInfo(), change.getLeash(), startT, finishT);
+    }
+
+    private void onToBackTransitionReady(
+            TransitionInfo.Change change,
+            SurfaceControl.Transaction startT,
+            SurfaceControl.Transaction finishT) {
+        mTaskChangeListener.ifPresent(
+                listener -> listener.onTaskMovingToBack(change.getTaskInfo()));
         mWindowDecorViewModel.onTaskChanging(
                 change.getTaskInfo(), change.getLeash(), startT, finishT);
     }

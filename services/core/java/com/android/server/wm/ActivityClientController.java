@@ -442,6 +442,8 @@ class ActivityClientController extends IActivityClientController.Stub {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        mService.mAmInternal.addCreatorToken(resultData);
+
         final ActivityRecord r;
         synchronized (mGlobalLock) {
             r = ActivityRecord.isInRootTaskLocked(token);

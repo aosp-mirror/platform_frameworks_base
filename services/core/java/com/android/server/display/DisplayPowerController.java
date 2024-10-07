@@ -546,7 +546,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mLastBrightnessEvent = new BrightnessEvent(mDisplayId);
         mTempBrightnessEvent = new BrightnessEvent(mDisplayId);
 
-        if (flags.isBatteryStatsEnabledForAllDisplays()) {
+        if (flags.isBatteryStatsEnabledForAllDisplays()
+                && isDisplaySupportedForBatteryStats(displayDeviceInfo)) {
             mBatteryStats = BatteryStatsService.getService();
         } else if (mDisplayId == Display.DEFAULT_DISPLAY) {
             mBatteryStats = BatteryStatsService.getService();
@@ -2769,6 +2770,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 return "RAMP_STATE_SKIP_AUTOBRIGHT";
             default:
                 return Integer.toString(state);
+        }
+    }
+
+    private static boolean isDisplaySupportedForBatteryStats(DisplayDeviceInfo displayDeviceInfo) {
+        switch (displayDeviceInfo.type) {
+            case Display.TYPE_INTERNAL:
+            case Display.TYPE_EXTERNAL:
+                return true;
+            default:
+                return false;
         }
     }
 
