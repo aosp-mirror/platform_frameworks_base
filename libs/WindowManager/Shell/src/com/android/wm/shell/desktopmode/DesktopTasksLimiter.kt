@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.os.Handler
 import android.os.IBinder
@@ -190,17 +189,19 @@ class DesktopTasksLimiter (
             displayId: Int,
             wct: WindowContainerTransaction,
             newFrontTaskId: Int,
-    ): RunningTaskInfo? {
+    ): Int? {
         logV("addAndGetMinimizeTaskChanges, newFrontTask=%d", newFrontTaskId)
-        // This list is ordered from front to back.
-        val newTaskOrderedList = createOrderedTaskListWithNewTask(
-            taskRepository.getExpandedTasksOrdered(displayId), newFrontTaskId)
-        val taskToMinimize = getTaskToMinimize(newTaskOrderedList)
-        if (taskToMinimize != null) {
-            wct.reorder(taskToMinimize.token, false /* onTop */)
-            return taskToMinimize
+
+        val taskIdToMinimize =
+            getTaskIdToMinimize(
+                taskRepository.getExpandedTasksOrdered(displayId),
+                newFrontTaskId
+            )
+        // If it's a running task, reorder it to back.
+        taskIdToMinimize?.let { shellTaskOrganizer.getRunningTaskInfo(it) }?.let {
+            wct.reorder(it.token, false /* onTop */)
         }
-        return null
+        return taskIdToMinimize
     }
 
     /**
@@ -216,31 +217,33 @@ class DesktopTasksLimiter (
      * Returns the minimized task from the list of visible tasks ordered from front to back with
      * the new task placed in front of other tasks.
      */
-    fun getTaskToMinimize(
+    fun getTaskIdToMinimize(
             visibleOrderedTasks: List<Int>,
-            newTaskIdInFront: Int
-    ): RunningTaskInfo? =
-        getTaskToMinimize(createOrderedTaskListWithNewTask(visibleOrderedTasks, newTaskIdInFront))
-
-    /** Returns the Task to minimize given a list of visible tasks ordered from front to back. */
-    fun getTaskToMinimize(visibleOrderedTasks: List<Int>): RunningTaskInfo? {
-        if (visibleOrderedTasks.size <= maxTasksLimit) {
-            logV("No need to minimize; tasks below limit")
-            return null
-        }
-        val taskIdToMinimize = visibleOrderedTasks.last()
-        val taskToMinimize =
-                shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
-        if (taskToMinimize == null) {
-            logE("taskToMinimize(taskId = %d) == null", taskIdToMinimize)
-            return null
-        }
-        return taskToMinimize
+            newTaskIdInFront: Int? = null
+    ): Int? {
+        return getTaskIdToMinimize(
+            createOrderedTaskListWithGivenTaskInFront(
+                visibleOrderedTasks, newTaskIdInFront))
     }
 
-    private fun createOrderedTaskListWithNewTask(
-        orderedTaskIds: List<Int>, newTaskId: Int): List<Int> =
-            listOf(newTaskId) + orderedTaskIds.filter { taskId -> taskId != newTaskId }
+    /** Returns the Task to minimize given a list of visible tasks ordered from front to back. */
+    private fun getTaskIdToMinimize(visibleOrderedTasks: List<Int>): Int? {
+        if (visibleOrderedTasks.size <= maxTasksLimit) {
+            logV("No need to minimize; tasks below limit")
+            // No need to minimize anything
+            return null
+        }
+        return visibleOrderedTasks.last()
+    }
+
+    private fun createOrderedTaskListWithGivenTaskInFront(
+            existingTaskIdsOrderedFrontToBack: List<Int>,
+            newTaskId: Int?
+    ): List<Int> {
+        return if (newTaskId == null) existingTaskIdsOrderedFrontToBack
+        else listOf(newTaskId) +
+                existingTaskIdsOrderedFrontToBack.filter { taskId -> taskId != newTaskId }
+    }
 
     @VisibleForTesting
     fun getTransitionObserver(): TransitionObserver = minimizeTransitionObserver
