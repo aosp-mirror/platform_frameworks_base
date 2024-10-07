@@ -504,7 +504,7 @@
     <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
     <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
-    <string name="stream_notification" msgid="7930294049046243939">"Notificação"</string>
+    <string name="stream_notification" msgid="7930294049046243939">"Notificações"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Multifrequência de dois tons"</string>
     <string name="stream_accessibility" msgid="3873610336741987152">"Acessibilidade"</string>

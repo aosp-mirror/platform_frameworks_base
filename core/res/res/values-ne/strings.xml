@@ -188,7 +188,7 @@
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"तपाईंको कार्य प्रोफाइल अब उप्रान्त यस डिभाइसमा उपलब्ध छैन"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"पासवर्ड प्रविष्ट गर्ने अत्यधिक गलत प्रयासहरू भए"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"व्यवस्थापकले यन्त्रलाई व्यक्तिगत प्रयोगका लागि अस्वीकार गर्नुभयो"</string>
-    <string name="network_logging_notification_title" msgid="554983187553845004">"यन्त्र व्यवस्थित गरिएको छ"</string>
+    <string name="network_logging_notification_title" msgid="554983187553845004">"यो डिभाइस व्यवस्थित गरिएको छ"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तपाईंको संगठनले यस डिभाइसको व्यवस्थापन गर्दछ र नेटवर्क ट्राफिकको अनुगमन गर्न सक्छ। विवरणहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"एपहरूले तपाईंको स्थान प्रयोग गर्न सक्छन्"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"थप जानकारी प्राप्त गर्न आफ्ना IT प्रशासकसँग सम्पर्क गर्नुहोस्"</string>

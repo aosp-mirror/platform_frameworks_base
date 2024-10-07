@@ -422,6 +422,7 @@ public final class KeyboardShortcutListSearch {
                 if (result.isEmpty()) {
                     mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, false);
                 } else {
+                    KeyboardShortcuts.sanitiseShortcuts(result);
                     mSpecificAppGroup = reMapToKeyboardShortcutMultiMappingGroup(result);
                     mKeySearchResultMap.put(SHORTCUT_SPECIFICAPP_INDEX, true);
                 }
