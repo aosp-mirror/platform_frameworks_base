@@ -127,7 +127,7 @@ class Ravenizer {
             }
         }
         if (includeUnsupportedMockito(allClasses)) {
-            log.w("Unsupported Mockito detected in $inJar}!")
+            log.w("Unsupported Mockito detected in $inJar!")
         }
 
         stats.totalProcessTime = log.vTime("$executableName processing $inJar") {
