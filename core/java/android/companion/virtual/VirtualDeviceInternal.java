@@ -242,6 +242,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     List<VirtualSensor> getVirtualSensorList() {
         try {
@@ -269,6 +270,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void launchPendingIntent(
             int displayId,
             @NonNull PendingIntent pendingIntent,
@@ -290,6 +292,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Nullable
     VirtualDisplay createVirtualDisplay(
             @NonNull VirtualDisplayConfig config,
@@ -299,16 +302,15 @@ public class VirtualDeviceInternal {
                 new DisplayManagerGlobal.VirtualDisplayCallback(callback, executor);
         final int displayId;
         try {
-            displayId = mService.createVirtualDisplay(config, callbackWrapper, mVirtualDevice,
-                    mContext.getPackageName());
+            displayId = mVirtualDevice.createVirtualDisplay(config, callbackWrapper);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
         DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-        return displayManager.createVirtualDisplayWrapper(config, callbackWrapper,
-                displayId);
+        return displayManager.createVirtualDisplayWrapper(config, callbackWrapper, displayId);
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void close() {
         try {
             // This also takes care of unregistering all virtual sensors.
@@ -322,6 +324,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
             @VirtualDeviceParams.DevicePolicy int devicePolicy) {
         switch (policyType) {
@@ -341,6 +344,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void addActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
             mVirtualDevice.addActivityPolicyExemption(exemption);
@@ -349,6 +353,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void removeActivityPolicyExemption(@NonNull ActivityPolicyExemption exemption) {
         try {
             mVirtualDevice.removeActivityPolicyExemption(exemption);
@@ -357,6 +362,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void setDevicePolicyForDisplay(int displayId,
             @VirtualDeviceParams.DynamicDisplayPolicyType int policyType,
             @VirtualDeviceParams.DevicePolicy int devicePolicy) {
@@ -376,6 +382,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualDpad createVirtualDpad(@NonNull VirtualDpadConfig config) {
         try {
@@ -388,6 +395,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualKeyboard createVirtualKeyboard(@NonNull VirtualKeyboardConfig config) {
         try {
@@ -400,6 +408,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualMouse createVirtualMouse(@NonNull VirtualMouseConfig config) {
         try {
@@ -412,6 +421,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualTouchscreen createVirtualTouchscreen(
             @NonNull VirtualTouchscreenConfig config) {
@@ -451,6 +461,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualNavigationTouchpad createVirtualNavigationTouchpad(
             @NonNull VirtualNavigationTouchpadConfig config) {
@@ -465,6 +476,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualAudioDevice createVirtualAudioDevice(
             @NonNull VirtualDisplay display,
@@ -501,6 +513,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void setShowPointerIcon(boolean showPointerIcon) {
         try {
             mVirtualDevice.setShowPointerIcon(showPointerIcon);
@@ -509,6 +522,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
         try {
             mVirtualDevice.setDisplayImePolicy(displayId, policy);
@@ -550,6 +564,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void registerIntentInterceptor(
             @NonNull IntentFilter interceptorFilter,
             @CallbackExecutor @NonNull Executor executor,
@@ -569,6 +584,7 @@ public class VirtualDeviceInternal {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     void unregisterIntentInterceptor(
             @NonNull VirtualDeviceManager.IntentInterceptorCallback interceptorCallback) {
         Objects.requireNonNull(interceptorCallback);

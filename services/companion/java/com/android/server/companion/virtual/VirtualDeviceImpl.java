@@ -625,8 +625,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void launchPendingIntent(int displayId, PendingIntent pendingIntent,
             ResultReceiver resultReceiver) {
+        super.launchPendingIntent_enforcePermission();
         Objects.requireNonNull(pendingIntent);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(displayId)) {
@@ -1091,7 +1093,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public int getInputDeviceId(IBinder token) {
+        super.getInputDeviceId_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.getInputDeviceId(token);
@@ -1174,7 +1178,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public PointF getCursorPosition(IBinder token) {
+        super.getCursorPosition_enforcePermission();
         final long ident = Binder.clearCallingIdentity();
         try {
             return mInputController.getCursorPosition(token);
@@ -1460,15 +1466,18 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return gwpc;
     }
 
-    int createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @NonNull IVirtualDisplayCallback callback, String packageName) {
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public int createVirtualDisplay(@NonNull VirtualDisplayConfig virtualDisplayConfig,
+            @NonNull IVirtualDisplayCallback callback) {
+        super.createVirtualDisplay_enforcePermission();
         GenericWindowPolicyController gwpc;
         synchronized (mVirtualDeviceLock) {
             gwpc = createWindowPolicyControllerLocked(virtualDisplayConfig.getDisplayCategories());
         }
         int displayId;
         displayId = mDisplayManagerInternal.createVirtualDisplay(virtualDisplayConfig, callback,
-                this, gwpc, packageName);
+                this, gwpc, mOwnerPackageName);
         boolean isMirrorDisplay =
                 mDisplayManagerInternal.getDisplayIdToMirror(displayId) != Display.INVALID_DISPLAY;
         gwpc.setDisplayId(displayId, isMirrorDisplay);
@@ -1562,7 +1571,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         return result;
     }
-
 
     void onVirtualDisplayRemoved(int displayId) {
         /* This is callback invoked by VirtualDeviceManagerService when VirtualDisplay was released
@@ -1717,6 +1725,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         return mInputController.getInputDeviceDescriptors().values().stream().anyMatch(
                 inputDeviceDescriptor -> inputDeviceDescriptor.getInputDeviceId() == inputDeviceId);
     }
+
     void playSoundEffect(int effectType) {
         try {
             mSoundEffectListener.onPlaySoundEffect(effectType);

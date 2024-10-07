@@ -614,6 +614,7 @@ public final class VirtualDeviceManager {
          *
          * @return A list of all sensors for this device, or an empty list if no sensors exist.
          */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
         public List<VirtualSensor> getVirtualSensorList() {
             return mVirtualDeviceInternal.getVirtualSensorList();
@@ -676,6 +677,7 @@ public final class VirtualDeviceManager {
          *   on the virtual display, or one of the {@code LAUNCH_FAILED} status explaining why it
          *   failed.
          */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void launchPendingIntent(
                 int displayId,
                 @NonNull PendingIntent pendingIntent,
@@ -716,6 +718,7 @@ public final class VirtualDeviceManager {
          * VirtualDisplay.Callback)}
          */
         @Deprecated
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @Nullable
         public VirtualDisplay createVirtualDisplay(
                 @IntRange(from = 1) int width,
@@ -753,6 +756,7 @@ public final class VirtualDeviceManager {
          *
          * @see DisplayManager#createVirtualDisplay
          */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @Nullable
         public VirtualDisplay createVirtualDisplay(
                 @NonNull VirtualDisplayConfig config,
