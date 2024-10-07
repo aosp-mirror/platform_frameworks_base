@@ -14,33 +14,40 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.ui.binder
+package com.android.systemui.volume.dialog.settings.ui.binder
 
 import android.view.View
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
+import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
-import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
+import com.android.systemui.volume.dialog.settings.ui.viewmodel.VolumeDialogSettingsButtonViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
 
 @VolumeDialogScope
-class VolumeDialogViewBinder
+class VolumeDialogSettingsButtonViewBinder
 @Inject
-constructor(private val volumeDialogViewModelFactory: VolumeDialogViewModel.Factory) {
+constructor(private val viewModelFactory: VolumeDialogSettingsButtonViewModel.Factory) {
 
     fun bind(view: View) {
-        view.repeatWhenAttached {
-            view.viewModel(
-                traceName = "VolumeDialogViewBinder",
-                minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { volumeDialogViewModelFactory.create() },
-            ) { viewModel ->
-                view.setSnapshotBinding {}
+        with(view) {
+            val button = requireViewById<View>(R.id.settings)
+            repeatWhenAttached {
+                viewModel(
+                    traceName = "VolumeDialogViewBinder",
+                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
+                    factory = { viewModelFactory.create() },
+                ) { viewModel ->
+                    setSnapshotBinding {
+                        visibility = if (viewModel.isVisible) View.VISIBLE else View.GONE
+                        button.setOnClickListener { viewModel.onButtonClicked() }
+                    }
 
-                awaitCancellation()
+                    awaitCancellation()
+                }
             }
         }
     }
