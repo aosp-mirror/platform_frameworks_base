@@ -162,7 +162,6 @@ fun CommunalContainer(
             initialScene = currentSceneKey,
             canChangeScene = { _ -> viewModel.canChangeScene() },
             transitions = sceneTransitions,
-            enableInterruptions = false,
         )
     }
 
