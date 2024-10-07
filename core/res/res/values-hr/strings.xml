@@ -2130,11 +2130,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Uređaj će vibrirati za pozive i obavijesti"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvučni signal poziva i obavijesti bit će isključen"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Promjene sustava"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne uznemiravaj"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novo: način Ne uznemiravaj sakriva obavijesti"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Dodirnite da biste saznali više i promijenili postavke."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Promijenjena je postavka Ne uznemiravaj"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dodirnite da biste provjerili što je blokirano."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Pregledajte postavke obavijesti"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Od Androida 13 aplikacije koje instalirate trebaju vaše dopuštenje za slanje obavijesti. Dodirnite da biste promijenili to dopuštenje za postojeće aplikacije."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Podsjeti me kasnije"</string>

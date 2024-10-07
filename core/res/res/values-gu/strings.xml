@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"કૉલ અને નોટિફિકેશન માટે ઉપકરણ વાઇબ્રેટ થશે"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"કૉલ અને નોટિફિકેશન મ્યૂટ કરવામાં આવશે"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"સિસ્ટમના ફેરફારો"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ખલેલ પાડશો નહીં"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"નવું: ખલેલ પાડશો નહીં હવે નોટિફિકેશન છુપાવી શકે છે"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"વધુ જાણવા અને બદલવા માટે ટૅપ કરો."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"નોટિફિકેશનના સેટિંગ રિવ્યૂ કરો"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13થી શરૂઆત કરીને, તમે જે પણ ઍપ ઇન્સ્ટૉલ કરશો, તેને નોટિફિકેશન મોકલવા માટે તમારી પરવાનગીની જરૂર રહેશે. હાલની બધી ઍપ માટે આ પરવાનગીમાં ફેરફાર કરવા માટે ટૅપ કરો."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"મને પછી યાદ અપાવજો"</string>
