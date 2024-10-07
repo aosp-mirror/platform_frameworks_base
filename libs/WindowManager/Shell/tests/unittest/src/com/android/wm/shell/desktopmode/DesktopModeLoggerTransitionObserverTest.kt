@@ -123,6 +123,16 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
   }
 
   @Test
+  fun testInitialiseVisibleTasksSystemProperty() {
+    ExtendedMockito.verify {
+      SystemProperties.set(
+          eq(DesktopModeLoggerTransitionObserver.VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY),
+          eq(DesktopModeLoggerTransitionObserver
+              .VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE))
+    }
+  }
+
+  @Test
   fun testRegistersObserverAtInit() {
     verify(transitions).registerObserver(same(transitionObserver))
   }

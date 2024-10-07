@@ -101,6 +101,9 @@ class DesktopModeLoggerTransitionObserver(
 
     fun onInit() {
         transitions.registerObserver(this)
+        SystemProperties.set(
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE)
     }
 
     override fun onTransitionReady(
@@ -441,5 +444,6 @@ class DesktopModeLoggerTransitionObserver(
         @VisibleForTesting
         const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY =
             "debug.tracing." + VISIBLE_TASKS_COUNTER_NAME
+        const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE = "0"
     }
 }
