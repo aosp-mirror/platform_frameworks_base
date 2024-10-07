@@ -288,6 +288,9 @@ public class IntentSender implements Parcelable {
             @Nullable Executor executor, @Nullable OnFinished onFinished)
             throws SendIntentException {
         try {
+            if (intent != null) {
+                intent.collectExtraIntentKeys();
+            }
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
