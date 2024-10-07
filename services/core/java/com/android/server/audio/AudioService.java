@@ -2744,6 +2744,11 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    @Override
+    protected void onUnhandledException(int code, int flags, Exception e) {
+        Slog.wtf(TAG, "Uncaught exception in AudioService: " + code + ", " + flags, e);
+    }
+
     @Override // Binder call
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
