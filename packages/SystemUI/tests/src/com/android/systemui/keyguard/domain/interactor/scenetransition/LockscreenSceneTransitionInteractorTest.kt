@@ -65,7 +65,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             flowOf(Scenes.Lockscreen),
             progress,
             false,
-            flowOf(false),
+            flowOf(false)
         )
 
     private val goneToLs =
@@ -75,7 +75,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             flowOf(Scenes.Lockscreen),
             progress,
             false,
-            flowOf(false),
+            flowOf(false)
         )
 
     @Before
@@ -84,8 +84,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
         kosmos.sceneContainerRepository.setTransitionState(sceneTransitions)
         testScope.launch {
             kosmos.realKeyguardTransitionRepository.emitInitialStepsFromOff(
-                KeyguardState.LOCKSCREEN,
-                testSetup = true,
+                KeyguardState.LOCKSCREEN
             )
         }
     }
@@ -106,7 +105,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
             assertTransition(
@@ -139,7 +142,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
 
@@ -184,7 +191,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
             sceneTransitions.value = lsToGone
@@ -198,7 +205,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
 
@@ -246,7 +257,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
 
@@ -282,7 +297,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -315,7 +330,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
             val stepM3 = allSteps[allSteps.size - 3]
@@ -374,7 +393,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -447,7 +466,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -504,7 +523,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -558,7 +577,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             kosmos.realKeyguardTransitionRepository.startTransition(
                 TransitionInfo(
@@ -566,7 +589,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -618,7 +641,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             kosmos.realKeyguardTransitionRepository.startTransition(
                 TransitionInfo(
@@ -626,7 +653,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -675,7 +702,11 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             )
 
             progress.value = 0.4f
-            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+            assertTransition(
+                step = currentStep!!,
+                state = TransitionState.RUNNING,
+                progress = 0.4f,
+            )
 
             kosmos.realKeyguardTransitionRepository.startTransition(
                 TransitionInfo(
@@ -683,7 +714,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -705,7 +736,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -746,7 +777,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -768,7 +799,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
             allSteps[allSteps.size - 3]
 
@@ -827,7 +858,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -849,7 +880,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -928,7 +959,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.LOCKSCREEN,
                     to = KeyguardState.AOD,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -946,7 +977,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.AOD,
                     to = KeyguardState.DOZING,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -964,7 +995,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     from = KeyguardState.DOZING,
                     to = KeyguardState.OCCLUDED,
                     animator = null,
-                    modeOnCanceled = TransitionModeOnCanceled.RESET,
+                    modeOnCanceled = TransitionModeOnCanceled.RESET
                 )
             )
 
@@ -986,7 +1017,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -1046,7 +1077,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                         from = KeyguardState.LOCKSCREEN,
                         to = KeyguardState.AOD,
                         animator = null,
-                        modeOnCanceled = TransitionModeOnCanceled.RESET,
+                        modeOnCanceled = TransitionModeOnCanceled.RESET
                     )
                 )
 
@@ -1061,7 +1092,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             kosmos.realKeyguardTransitionRepository.updateTransition(
                 ktfUuid!!,
                 1f,
-                TransitionState.FINISHED,
+                TransitionState.FINISHED
             )
 
             assertTransition(
@@ -1079,7 +1110,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -1140,7 +1171,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -1204,7 +1235,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -1260,7 +1291,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
                     flowOf(Scenes.Lockscreen),
                     progress,
                     false,
-                    flowOf(false),
+                    flowOf(false)
                 )
 
             assertTransition(
@@ -1277,7 +1308,7 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
         from: KeyguardState? = null,
         to: KeyguardState? = null,
         state: TransitionState? = null,
-        progress: Float? = null,
+        progress: Float? = null
     ) {
         if (from != null) assertThat(step.from).isEqualTo(from)
         if (to != null) assertThat(step.to).isEqualTo(to)

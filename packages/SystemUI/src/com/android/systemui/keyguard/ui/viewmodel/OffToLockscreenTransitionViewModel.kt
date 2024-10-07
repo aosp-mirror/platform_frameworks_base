@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
@@ -30,29 +29,23 @@ import kotlinx.coroutines.flow.Flow
 @SysUISingleton
 class OffToLockscreenTransitionViewModel
 @Inject
-constructor(animationFlow: KeyguardTransitionAnimationFlow) : DeviceEntryIconTransition {
-
-    private val startTime = 300.milliseconds
-    private val alphaDuration = 633.milliseconds
-    val alphaStartAt = startTime / (alphaDuration + startTime)
+constructor(
+    animationFlow: KeyguardTransitionAnimationFlow,
+) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
         animationFlow.setup(
-            duration = startTime + alphaDuration,
+            duration = 250.milliseconds,
             edge = Edge.create(from = OFF, to = LOCKSCREEN),
         )
 
-    val lockscreenAlpha: Flow<Float> =
+    val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
-            startTime = startTime,
-            duration = alphaDuration,
-            interpolator = EMPHASIZED_ACCELERATE,
+            duration = 250.milliseconds,
             onStep = { it },
+            onCancel = { 0f },
         )
 
-    val shortcutsAlpha: Flow<Float> = lockscreenAlpha
-
-    override val deviceEntryParentViewAlpha: Flow<Float> = lockscreenAlpha
-
-    val deviceEntryBackgroundViewAlpha: Flow<Float> = lockscreenAlpha
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(1f)
 }

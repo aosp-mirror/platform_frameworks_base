@@ -53,11 +53,14 @@ import kotlinx.coroutines.DisposableHandle
 internal fun ConstraintSet.setVisibility(views: Iterable<View>, visibility: Int) =
     views.forEach { view -> this.setVisibility(view.id, visibility) }
 
-internal fun ConstraintSet.setScaleX(views: Iterable<View>, scaleX: Float) =
-    views.forEach { view -> this.setScaleX(view.id, scaleX) }
+internal fun ConstraintSet.setAlpha(views: Iterable<View>, alpha: Float) =
+    views.forEach { view -> this.setAlpha(view.id, alpha) }
 
-internal fun ConstraintSet.setScaleY(views: Iterable<View>, scaleY: Float) =
-    views.forEach { view -> this.setScaleY(view.id, scaleY) }
+internal fun ConstraintSet.setScaleX(views: Iterable<View>, alpha: Float) =
+    views.forEach { view -> this.setScaleX(view.id, alpha) }
+
+internal fun ConstraintSet.setScaleY(views: Iterable<View>, alpha: Float) =
+    views.forEach { view -> this.setScaleY(view.id, alpha) }
 
 @SysUISingleton
 class ClockSection
@@ -123,6 +126,8 @@ constructor(
         return constraintSet.apply {
             setVisibility(getTargetClockFace(clock).views, VISIBLE)
             setVisibility(getNonTargetClockFace(clock).views, GONE)
+            setAlpha(getTargetClockFace(clock).views, 1F)
+            setAlpha(getNonTargetClockFace(clock).views, 0F)
             if (!keyguardClockViewModel.isLargeClockVisible.value) {
                 connect(sharedR.id.bc_smartspace_view, TOP, sharedR.id.date_smartspace_view, BOTTOM)
             } else {

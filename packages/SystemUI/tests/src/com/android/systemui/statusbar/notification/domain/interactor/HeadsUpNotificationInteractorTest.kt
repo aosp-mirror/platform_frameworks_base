@@ -332,10 +332,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             // WHEN a row is pinned
             headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
             // AND the lock screen is shown
-            keyguardTransitionRepository.emitInitialStepsFromOff(
-                to = KeyguardState.LOCKSCREEN,
-                testSetup = true,
-            )
+            keyguardTransitionRepository.emitInitialStepsFromOff(to = KeyguardState.LOCKSCREEN)
 
             assertThat(showHeadsUpStatusBar).isFalse()
         }
@@ -348,10 +345,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
             // WHEN a row is pinned
             headsUpRepository.setNotifications(fakeHeadsUpRowRepository("key 0", isPinned = true))
             // AND the lock screen is shown
-            keyguardTransitionRepository.emitInitialStepsFromOff(
-                to = KeyguardState.LOCKSCREEN,
-                testSetup = true,
-            )
+            keyguardTransitionRepository.emitInitialStepsFromOff(to = KeyguardState.LOCKSCREEN)
             // AND bypass is enabled
             faceAuthRepository.isBypassEnabled.value = true
 
@@ -365,10 +359,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
 
             // WHEN no pinned rows
             // AND the lock screen is shown
-            keyguardTransitionRepository.emitInitialStepsFromOff(
-                to = KeyguardState.LOCKSCREEN,
-                testSetup = true,
-            )
+            keyguardTransitionRepository.emitInitialStepsFromOff(to = KeyguardState.LOCKSCREEN)
             // AND bypass is enabled
             faceAuthRepository.isBypassEnabled.value = true
 

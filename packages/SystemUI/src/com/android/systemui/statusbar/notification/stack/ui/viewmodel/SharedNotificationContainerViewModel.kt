@@ -61,7 +61,6 @@ import com.android.systemui.keyguard.ui.viewmodel.LockscreenToPrimaryBouncerTran
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToAodTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
-import com.android.systemui.keyguard.ui.viewmodel.OffToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
@@ -133,7 +132,6 @@ constructor(
     private val occludedToAodTransitionViewModel: OccludedToAodTransitionViewModel,
     private val occludedToGoneTransitionViewModel: OccludedToGoneTransitionViewModel,
     private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
-    private val offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
@@ -446,7 +444,6 @@ constructor(
             occludedToAodTransitionViewModel.lockscreenAlpha,
             occludedToGoneTransitionViewModel.notificationAlpha(viewState),
             occludedToLockscreenTransitionViewModel.lockscreenAlpha,
-            offToLockscreenTransitionViewModel.lockscreenAlpha,
             primaryBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
             glanceableHubToLockscreenTransitionViewModel.keyguardAlpha,
             lockscreenToGlanceableHubTransitionViewModel.keyguardAlpha,

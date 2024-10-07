@@ -23,7 +23,6 @@ import android.annotation.FloatRange
 import android.annotation.SuppressLint
 import android.os.Trace
 import android.util.Log
-import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.withContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -96,7 +95,7 @@ interface KeyguardTransitionRepository {
      * Emits STARTED and FINISHED transition steps to the given state. This is used during boot to
      * seed the repository with the appropriate initial state.
      */
-    suspend fun emitInitialStepsFromOff(to: KeyguardState, testSetup: Boolean = false)
+    suspend fun emitInitialStepsFromOff(to: KeyguardState)
 
     /**
      * Allows manual control of a transition. When calling [startTransition], the consumer must pass
@@ -109,14 +108,16 @@ interface KeyguardTransitionRepository {
     suspend fun updateTransition(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
-        state: TransitionState,
+        state: TransitionState
     )
 }
 
 @SysUISingleton
 class KeyguardTransitionRepositoryImpl
 @Inject
-constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionRepository {
+constructor(
+    @Main val mainDispatcher: CoroutineDispatcher,
+) : KeyguardTransitionRepository {
     /**
      * Each transition between [KeyguardState]s will have an associated Flow. In order to collect
      * these events, clients should call [transition].
@@ -139,7 +140,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                 ownerName = "",
                 from = KeyguardState.OFF,
                 to = KeyguardState.OFF,
-                animator = null,
+                animator = null
             )
         )
     override var currentTransitionInfoInternal = _currentTransitionInfo.asStateFlow()
@@ -158,7 +159,12 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
         // to either GONE or LOCKSCREEN once we're booted up and can determine which state we should
         // start in.
         emitTransition(
-            TransitionStep(KeyguardState.OFF, KeyguardState.OFF, 1f, TransitionState.FINISHED)
+            TransitionStep(
+                KeyguardState.OFF,
+                KeyguardState.OFF,
+                1f,
+                TransitionState.FINISHED,
+            )
         )
     }
 
@@ -211,7 +217,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                         TransitionStep(
                             info,
                             (animation.animatedValue as Float),
-                            TransitionState.RUNNING,
+                            TransitionState.RUNNING
                         )
                     )
                 }
@@ -260,7 +266,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
     override suspend fun updateTransition(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
-        state: TransitionState,
+        state: TransitionState
     ) {
         // There is no fairness guarantee with 'withContext', which means that transitions could
         // be processed out of order. Use a Mutex to guarantee ordering. [startTransition]
@@ -276,7 +282,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
     private suspend fun updateTransitionInternal(
         transitionId: UUID,
         @FloatRange(from = 0.0, to = 1.0) value: Float,
-        state: TransitionState,
+        state: TransitionState
     ) {
         if (updateTransitionId != transitionId) {
             Log.e(TAG, "Attempting to update with old/invalid transitionId: $transitionId")
@@ -297,51 +303,34 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
         lastStep = nextStep
     }
 
-    override suspend fun emitInitialStepsFromOff(to: KeyguardState, testSetup: Boolean) {
-        val ownerName = "KeyguardTransitionRepository(boot)"
-        // Tests runs on testDispatcher, which is not the main thread, causing the animator thread
-        // check to fail
-        if (testSetup) {
-            _currentTransitionInfo.value =
-                TransitionInfo(
-                    ownerName = ownerName,
-                    from = KeyguardState.OFF,
-                    to = to,
-                    animator = null,
-                )
-            emitTransition(
-                TransitionStep(
-                    KeyguardState.OFF,
-                    to,
-                    0f,
-                    TransitionState.STARTED,
-                    ownerName = ownerName,
-                )
+    override suspend fun emitInitialStepsFromOff(to: KeyguardState) {
+        _currentTransitionInfo.value =
+            TransitionInfo(
+                ownerName = "KeyguardTransitionRepository(boot)",
+                from = KeyguardState.OFF,
+                to = to,
+                animator = null
             )
 
-            emitTransition(
-                TransitionStep(
-                    KeyguardState.OFF,
-                    to,
-                    1f,
-                    TransitionState.FINISHED,
-                    ownerName = ownerName,
-                )
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                0f,
+                TransitionState.STARTED,
+                ownerName = "KeyguardTransitionRepository(boot)",
             )
-        } else {
-            startTransition(
-                TransitionInfo(
-                    ownerName = ownerName,
-                    from = KeyguardState.OFF,
-                    to = to,
-                    animator =
-                        ValueAnimator().apply {
-                            interpolator = Interpolators.LINEAR
-                            duration = 933L
-                        },
-                )
-            )
-        }
+        )
+
+        emitTransition(
+            TransitionStep(
+                KeyguardState.OFF,
+                to,
+                1f,
+                TransitionState.FINISHED,
+                ownerName = "KeyguardTransitionRepository(boot)",
+            ),
+        )
     }
 
     private fun logAndTrace(step: TransitionStep, isManual: Boolean) {
