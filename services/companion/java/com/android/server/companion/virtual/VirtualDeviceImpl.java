@@ -215,6 +215,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @Nullable
     private LocaleList mLocaleList = null;
+    @GuardedBy("mVirtualDeviceLock")
+    private boolean mLockdownActive = false;
+    @GuardedBy("mVirtualDeviceLock")
+    private boolean mRequestedToBeAwake = true;
 
     @NonNull
     private final VirtualDevice mPublicVirtualDeviceObject;
@@ -478,6 +482,20 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    void onLockdownChanged(boolean lockdownActive) {
+        synchronized (mVirtualDeviceLock) {
+            if (lockdownActive != mLockdownActive) {
+                mLockdownActive = lockdownActive;
+                if (mLockdownActive) {
+                    goToSleepInternal(PowerManager.GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF);
+                } else if (mRequestedToBeAwake) {
+                    wakeUpInternal(PowerManager.WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
+                            "android.server.companion.virtual:LOCKDOWN_ENDED");
+                }
+            }
+        }
+    }
+
     @VisibleForTesting
     SensorController getSensorControllerForTest() {
         return mSensorController;
@@ -582,20 +600,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void goToSleep() {
         super.goToSleep_enforcePermission();
-        final long now = SystemClock.uptimeMillis();
+        synchronized (mVirtualDeviceLock) {
+            mRequestedToBeAwake = false;
+        }
         final long ident = Binder.clearCallingIdentity();
         try {
-            synchronized (mVirtualDeviceLock) {
-                for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                    VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
-                    if (!wrapper.isTrusted() || wrapper.isMirror()) {
-                        continue;
-                    }
-                    int displayId = mVirtualDisplays.keyAt(i);
-                    mPowerManager.goToSleep(displayId, now,
-                            PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, /* flags= */ 0);
-                }
-            }
+            goToSleepInternal(PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -605,20 +615,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void wakeUp() {
         super.wakeUp_enforcePermission();
-        final long now = SystemClock.uptimeMillis();
+        synchronized (mVirtualDeviceLock) {
+            mRequestedToBeAwake = true;
+            if (mLockdownActive) {
+                Slog.w(TAG, "Cannot wake up device during lockdown.");
+                return;
+            }
+        }
         final long ident = Binder.clearCallingIdentity();
         try {
-            synchronized (mVirtualDeviceLock) {
-                for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                    VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
-                    if (!wrapper.isTrusted() || wrapper.isMirror()) {
-                        continue;
-                    }
-                    int displayId = mVirtualDisplays.keyAt(i);
-                    mPowerManager.wakeUp(now, PowerManager.WAKE_REASON_POWER_BUTTON,
-                            "android.server.companion.virtual:DEVICE_ON", displayId);
-                }
-            }
+            wakeUpInternal(PowerManager.WAKE_REASON_POWER_BUTTON,
+                    "android.server.companion.virtual:DEVICE_ON");
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -1619,6 +1626,34 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             throw new SecurityException(
                     "Invalid displayId: Display " + displayId
                             + " is not associated with this virtual device");
+        }
+    }
+
+    void goToSleepInternal(@PowerManager.GoToSleepReason int reason) {
+        final long now = SystemClock.uptimeMillis();
+        synchronized (mVirtualDeviceLock) {
+            for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                if (!wrapper.isTrusted() || wrapper.isMirror()) {
+                    continue;
+                }
+                int displayId = mVirtualDisplays.keyAt(i);
+                mPowerManager.goToSleep(displayId, now, reason, /* flags= */ 0);
+            }
+        }
+    }
+
+    void wakeUpInternal(@PowerManager.WakeReason int reason, String details) {
+        final long now = SystemClock.uptimeMillis();
+        synchronized (mVirtualDeviceLock) {
+            for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                if (!wrapper.isTrusted() || wrapper.isMirror()) {
+                    continue;
+                }
+                int displayId = mVirtualDisplays.keyAt(i);
+                mPowerManager.wakeUp(now, reason, details, displayId);
+            }
         }
     }
 
