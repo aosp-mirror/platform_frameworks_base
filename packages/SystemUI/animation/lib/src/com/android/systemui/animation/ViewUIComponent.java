@@ -38,6 +38,7 @@ import java.util.concurrent.Executor;
  * be changed to INVISIBLE in its view tree. This allows the {@link View} to transform in the
  * full-screen size leash without being constrained by the view tree's boundary or inheriting its
  * parent's alpha and transformation.
+ * @hide
  */
 public class ViewUIComponent implements UIComponent {
     private static final String TAG = "ViewUIComponent";
@@ -234,6 +235,9 @@ public class ViewUIComponent implements UIComponent {
         mView.post(this::draw);
     }
 
+    /**
+     * @hide
+     */
     public static class Transaction implements UIComponent.Transaction<ViewUIComponent> {
         private final List<Runnable> mChanges = new ArrayList<>();
 

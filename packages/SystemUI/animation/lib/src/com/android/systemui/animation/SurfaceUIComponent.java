@@ -26,7 +26,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Executor;
 
-/** A {@link UIComponent} representing a {@link SurfaceControl}. */
+/**
+ * A {@link UIComponent} representing a {@link SurfaceControl}.
+ * @hide
+ */
 public class SurfaceUIComponent implements UIComponent {
     private final Collection<SurfaceControl> mSurfaces;
     private final Rect mBaseBounds;
@@ -89,7 +92,10 @@ public class SurfaceUIComponent implements UIComponent {
                 + "}";
     }
 
-    /** A {@link Transaction} wrapping a {@link SurfaceControl.Transaction}. */
+    /**
+     * A {@link Transaction} wrapping a {@link SurfaceControl.Transaction}.
+     * @hide
+     */
     public static class Transaction implements UIComponent.Transaction<SurfaceUIComponent> {
         private final SurfaceControl.Transaction mTransaction;
         private final ArrayList<Runnable> mChanges = new ArrayList<>();
