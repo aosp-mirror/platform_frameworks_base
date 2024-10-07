@@ -42,6 +42,7 @@ import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.os.TimestampedValue;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
@@ -50,6 +51,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemTimeZone.TimeZoneConfidence;
+import com.android.server.flags.Flags;
 import com.android.server.timezonedetector.ConfigurationInternal.DetectionMode;
 
 import java.io.PrintWriter;
@@ -215,6 +217,13 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     private final List<StateChangeListener> mStateChangeListeners = new ArrayList<>();
 
     /**
+     * A component adjunct to the detection behavior that tracks time zone changes and implements
+     * behavior associated with time zone changes.
+     */
+    @NonNull
+    private final TimeZoneChangeListener mChangeTracker;
+
+    /**
      * A snapshot of the current detector status. A local copy is cached because it is relatively
      * heavyweight to obtain and is used more often than it is expected to change.
      */
@@ -256,15 +265,20 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
 
         Environment environment = new EnvironmentImpl(handler);
-        return new TimeZoneDetectorStrategyImpl(serviceConfigAccessor, environment);
+        TimeZoneChangeListener changeEventTracker =
+                NotifyingTimeZoneChangeListener.create(handler, context, serviceConfigAccessor);
+        return new TimeZoneDetectorStrategyImpl(
+                serviceConfigAccessor, environment, changeEventTracker);
     }
 
     @VisibleForTesting
     public TimeZoneDetectorStrategyImpl(
             @NonNull ServiceConfigAccessor serviceConfigAccessor,
-            @NonNull Environment environment) {
+            @NonNull Environment environment,
+            @NonNull TimeZoneChangeListener changeEventTracker) {
         mEnvironment = Objects.requireNonNull(environment);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
+        mChangeTracker = Objects.requireNonNull(changeEventTracker);
 
         // Start with telephony fallback enabled.
         mTelephonyTimeZoneFallbackEnabled =
@@ -833,6 +847,17 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             Slog.d(LOG_TAG, logInfo);
         }
         mEnvironment.setDeviceTimeZoneAndConfidence(newZoneId, newConfidence, logInfo);
+
+        if (Flags.datetimeNotifications()) {
+            // Record the fact that the time zone was changed so that it can be tracked, i.e.
+            // whether the device / user sticks with it.
+            TimeZoneChangeListener.TimeZoneChangeEvent changeEvent =
+                    new TimeZoneChangeListener.TimeZoneChangeEvent(
+                            SystemClock.elapsedRealtime(), System.currentTimeMillis(), origin,
+                            userId,
+                            currentZoneId, newZoneId, newConfidence, cause);
+            mChangeTracker.process(changeEvent);
+        }
     }
 
     @GuardedBy("this")
@@ -947,6 +972,14 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
         ipw.increaseIndent(); // level 2
         mTelephonySuggestionsBySlotIndex.dump(ipw);
         ipw.decreaseIndent(); // level 2
+
+        if (Flags.datetimeNotifications()) {
+            ipw.println("Time zone change tracker:");
+            ipw.increaseIndent(); // level 2
+            mChangeTracker.dump(ipw);
+            ipw.decreaseIndent(); // level 2
+        }
+
         ipw.decreaseIndent(); // level 1
     }
 
