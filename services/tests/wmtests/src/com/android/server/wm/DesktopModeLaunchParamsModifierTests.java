@@ -1322,7 +1322,7 @@ public class DesktopModeLaunchParamsModifierTests extends
         spyOn(appCompatAspectRatioOverrides);
         doReturn(overrideValue).when(appCompatAspectRatioOverrides).getUserMinAspectRatio();
         doReturn(overrideCode).when(appCompatAspectRatioOverrides)
-                .getUserMinAspectRatioOverrideCode();
+                .getUserMinAspectRatioOverrideType();
     }
 
     private TestDisplayContent createDisplayContent(int orientation, Rect displayBounds) {

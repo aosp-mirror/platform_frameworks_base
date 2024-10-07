@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.BackgroundActivityStartControllerTests.setViaReflection;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -227,7 +228,13 @@ class AppCompatActivityRobot {
 
     void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
         doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
+                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideType();
+    }
+
+    void setUserAspectRatioType(@UserMinAspectRatio int aspectRatio) {
+        final AppCompatAspectRatioOverrides aspectRatioOverrides = mActivityStack.top()
+                .mAppCompatController.getAppCompatAspectRatioOverrides();
+        setViaReflection(aspectRatioOverrides, "mUserAspectRatioType", aspectRatio);
     }
 
     void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
