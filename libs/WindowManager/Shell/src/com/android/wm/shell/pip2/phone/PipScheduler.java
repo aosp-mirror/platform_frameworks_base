@@ -19,6 +19,7 @@ package com.android.wm.shell.pip2.phone;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
 import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -38,6 +39,8 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
+import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
+import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.lang.annotation.Retention;
@@ -56,6 +59,8 @@ public class PipScheduler {
     private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
     private PipTransitionController mPipTransitionController;
+    private final PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
+            mSurfaceControlTransactionFactory;
 
     @Nullable private Runnable mUpdateMovementBoundsRunnable;
 
@@ -109,6 +114,8 @@ public class PipScheduler {
             ContextCompat.registerReceiver(mContext, mSchedulerReceiver,
                     new IntentFilter(BROADCAST_FILTER), ContextCompat.RECEIVER_EXPORTED);
         }
+        mSurfaceControlTransactionFactory =
+                new PipSurfaceTransactionHelper.VsyncSurfaceControlTransactionFactory();
     }
 
     ShellExecutor getMainExecutor() {
@@ -133,6 +140,18 @@ public class PipScheduler {
         return wct;
     }
 
+    @Nullable
+    private WindowContainerTransaction getRemovePipTransaction() {
+        if (mPipTransitionState.mPipTaskToken == null) {
+            return null;
+        }
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setBounds(mPipTransitionState.mPipTaskToken, null);
+        wct.setWindowingMode(mPipTransitionState.mPipTaskToken, WINDOWING_MODE_UNDEFINED);
+        wct.reorder(mPipTransitionState.mPipTaskToken, false);
+        return wct;
+    }
+
     /**
      * Schedules exit PiP via expand transition.
      */
@@ -141,6 +160,27 @@ public class PipScheduler {
         if (wct != null) {
             mMainExecutor.execute(() -> {
                 mPipTransitionController.startExitTransition(TRANSIT_EXIT_PIP, wct,
+                        null /* destinationBounds */);
+            });
+        }
+    }
+
+    // TODO: Optimize this by running the animation as part of the transition
+    /** Runs remove PiP animation and schedules remove PiP transition after the animation ends. */
+    public void removePipAfterAnimation() {
+        SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        PipAlphaAnimator animator = new PipAlphaAnimator(mContext,
+                mPipTransitionState.mPinnedTaskLeash, tx, PipAlphaAnimator.FADE_OUT);
+        animator.setAnimationEndCallback(this::scheduleRemovePipImmediately);
+        animator.start();
+    }
+
+    /** Schedules remove PiP transition. */
+    private void scheduleRemovePipImmediately() {
+        WindowContainerTransaction wct = getRemovePipTransaction();
+        if (wct != null) {
+            mMainExecutor.execute(() -> {
+                mPipTransitionController.startExitTransition(TRANSIT_REMOVE_PIP, wct,
                         null /* destinationBounds */);
             });
         }
