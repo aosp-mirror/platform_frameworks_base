@@ -3873,7 +3873,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", mShowingPublicInitialized: " + mShowingPublicInitialized);
             NotificationContentView showingLayout = getShowingLayout();
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
+            pw.print(", childrenContainerShowing: "
+                    + (!shouldShowPublic() && mIsSummaryWithChildren));
             pw.print(", mShowNoBackground: " + mShowNoBackground);
+            pw.print(", clipBounds: " + getClipBounds());
+
             pw.println();
             if (NotificationContentView.INCLUDE_HEIGHTS_TO_DUMP) {
                 dumpHeights(pw);
@@ -3896,6 +3900,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     ? 0 : mChildrenContainer.getTransientViewCount();
             if (mIsSummaryWithChildren || transientViewCount > 0) {
                 pw.println(mChildrenContainer.debugString());
+                pw.println("Children Container Intrinsic Height: "
+                        + mChildrenContainer.getIntrinsicHeight());
                 pw.println();
                 List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
                 pw.print("Children: " + notificationChildren.size() + " {");
