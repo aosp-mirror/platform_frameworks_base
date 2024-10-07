@@ -1287,11 +1287,6 @@ public class NotificationStackScrollLayout
         mScrollViewFields.setRemoteInputRowBottomBoundConsumer(consumer);
     }
 
-    @Override
-    public void setHeadsUpHeightConsumer(@Nullable Consumer<Float> consumer) {
-        mScrollViewFields.setHeadsUpHeightConsumer(consumer);
-    }
-
     /**
      * @param listener to be notified after the location of Notification children might have
      *                 changed.
