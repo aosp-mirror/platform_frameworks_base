@@ -3884,6 +3884,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
             showingLayout.dump(pw, args);
             dumpCustomOutline(pw, args);
+            dumpClipping(pw, args);
             if (getViewState() != null) {
                 getViewState().dump(pw, args);
                 pw.println();
