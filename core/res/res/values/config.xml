@@ -1529,6 +1529,11 @@
         factory reset. -->
     <bool name="config_enableCredentialFactoryResetProtection">true</bool>
 
+    <!-- If true, then work around broken Weaver HALs that don't work reliably before the device has
+         fully booted. Setting this to true weakens a security feature; it should be done only when
+         necessary, though it is still better than not using Weaver at all. -->
+    <bool name="config_disableWeaverOnUnsecuredUsers">false</bool>
+
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
             1 - Launch all apps intent

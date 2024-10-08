@@ -30,9 +30,10 @@ import android.hardware.usb.flags.Flags;
 import android.icu.text.NumberFormat;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TetheringManager;
-import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.VcnUtils;
 import android.net.wifi.WifiInfo;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -739,14 +740,9 @@ public class Utils {
      * @param networkCapabilities NetworkCapabilities of the network.
      */
     @Nullable
-    public static WifiInfo tryGetWifiInfoForVcn(NetworkCapabilities networkCapabilities) {
-        if (networkCapabilities.getTransportInfo() == null
-                || !(networkCapabilities.getTransportInfo() instanceof VcnTransportInfo)) {
-            return null;
-        }
-        VcnTransportInfo vcnTransportInfo =
-                (VcnTransportInfo) networkCapabilities.getTransportInfo();
-        return vcnTransportInfo.getWifiInfo();
+    public static WifiInfo tryGetWifiInfoForVcn(
+            ConnectivityManager connectivityMgr, NetworkCapabilities networkCapabilities) {
+        return VcnUtils.getWifiInfoFromVcnCaps(connectivityMgr, networkCapabilities);
     }
 
     /** Whether there is any incompatible chargers in the current UsbPort? */
