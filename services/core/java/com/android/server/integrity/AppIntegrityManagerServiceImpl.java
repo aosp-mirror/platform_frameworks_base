@@ -214,12 +214,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                                         version, ruleProvider));
                     }
 
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.INTEGRITY_RULES_PUSHED,
-                            success,
-                            ruleProvider,
-                            version);
-
                     Intent intent = new Intent();
                     intent.putExtra(EXTRA_STATUS, success ? STATUS_SUCCESS : STATUS_FAILURE);
                     try {
@@ -346,15 +340,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                                 packageName, result.getEffect(), result.getMatchedRules()));
             }
 
-            FrameworkStatsLog.write(
-                    FrameworkStatsLog.INTEGRITY_CHECK_RESULT_REPORTED,
-                    packageName,
-                    appCertificates.toString(),
-                    appInstallMetadata.getVersionCode(),
-                    installerPackageName,
-                    result.getLoggingResponse(),
-                    result.isCausedByAppCertRule(),
-                    result.isCausedByInstallerRule());
             mPackageManagerInternal.setIntegrityVerificationResult(
                     verificationId,
                     result.getEffect() == IntegrityCheckResult.Effect.ALLOW
