@@ -234,7 +234,6 @@ fun MutableSceneTransitionLayoutState(
     canHideOverlay: (OverlayKey) -> Boolean = { true },
     canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
     stateLinks: List<StateLink> = emptyList(),
-    enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
@@ -245,7 +244,6 @@ fun MutableSceneTransitionLayoutState(
         canHideOverlay,
         canReplaceOverlay,
         stateLinks,
-        enableInterruptions,
     )
 }
 
@@ -261,9 +259,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
         true
     },
     private val stateLinks: List<StateLink> = emptyList(),
-
-    // TODO(b/290930950): Remove this flag.
-    internal val enableInterruptions: Boolean = DEFAULT_INTERRUPTIONS_ENABLED,
 ) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 
@@ -404,13 +399,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
             )
         } else {
             transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
-        }
-
-        if (!enableInterruptions) {
-            // Set the current transition.
-            check(transitionStates.size == 1)
-            transitionStates = listOf(transition)
-            return
         }
 
         when (val currentState = transitionStates.last()) {
@@ -754,9 +742,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
 }
 
 private const val TAG = "SceneTransitionLayoutState"
-
-/** Whether support for interruptions in enabled by default. */
-internal const val DEFAULT_INTERRUPTIONS_ENABLED = true
 
 /**
  * The max number of concurrent transitions. If the number of transitions goes past this number,

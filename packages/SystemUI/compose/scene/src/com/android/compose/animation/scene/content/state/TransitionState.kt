@@ -337,10 +337,6 @@ sealed interface TransitionState {
         }
 
         internal open fun interruptionProgress(layoutImpl: SceneTransitionLayoutImpl): Float {
-            if (!layoutImpl.state.enableInterruptions) {
-                return 0f
-            }
-
             if (replacedTransition != null) {
                 return replacedTransition.interruptionProgress(layoutImpl)
             }
