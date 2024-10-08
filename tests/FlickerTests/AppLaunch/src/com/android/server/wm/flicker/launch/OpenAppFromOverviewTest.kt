@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching an app from the recents app view (the overview)
  *
- * To run this test: `atest FlickerTests:OpenAppFromOverviewTest`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenAppFromOverviewTest`
  *
  * Actions:
  * ```

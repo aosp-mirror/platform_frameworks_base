@@ -48,7 +48,7 @@ class HeadsUpNotificationInteractorTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             fakeKeyguardTransitionRepository =
-                FakeKeyguardTransitionRepository(initInLockscreen = false)
+                FakeKeyguardTransitionRepository(initInLockscreen = false, testScope = testScope)
         }
     private val testScope = kosmos.testScope
     private val faceAuthRepository by lazy { kosmos.fakeDeviceEntryFaceAuthRepository }

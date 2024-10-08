@@ -41,7 +41,10 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
 
 import android.app.StatusBarManager;
+import android.graphics.Rect;
 import android.os.Binder;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
@@ -52,6 +55,7 @@ import android.view.WindowInsets;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -95,6 +99,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
     public void testControlsForDispatch_freeformTaskVisible() {
         addStatusBar();
         addNavigationBar();
@@ -104,6 +109,37 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
 
         // The app must not control any system bars.
+        assertNull(controls);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void testControlsForDispatch_fullscreenFreeformTaskVisible() {
+        addStatusBar();
+        addNavigationBar();
+
+        final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
+                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
+        win.setBounds(new Rect());
+        final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
+
+        // The freeform (w/fullscreen bounds) app window can control both system bars.
+        assertNotNull(controls);
+        assertEquals(2, controls.length);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void testControlsForDispatch_nonFullscreenFreeformTaskVisible() {
+        addStatusBar();
+        addNavigationBar();
+
+        final WindowState win = createWindow(null, WINDOWING_MODE_FREEFORM,
+                ACTIVITY_TYPE_STANDARD, TYPE_APPLICATION, mDisplayContent, "app");
+        win.getTask().setBounds(new Rect(1, 1, 10, 10));
+        final InsetsSourceControl[] controls = addWindowAndGetControlsForDispatch(win);
+
+        // The freeform (but not fullscreen bounds) app window must not control any system bars.
         assertNull(controls);
     }
 

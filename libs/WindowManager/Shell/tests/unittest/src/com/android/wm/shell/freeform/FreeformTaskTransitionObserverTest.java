@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
@@ -158,6 +159,22 @@ public class FreeformTaskTransitionObserverTest {
         mTransitionObserver.onTransitionStarting(transition);
 
         verify(mTaskChangeListener).onTaskMovingToFront(change.getTaskInfo());
+    }
+
+    @Test
+    public void toBackTransition_notifiesOnTaskMovingToBack() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_TO_BACK, /* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TO_BACK, /* flags= */ 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskMovingToBack(change.getTaskInfo());
     }
 
     @Test

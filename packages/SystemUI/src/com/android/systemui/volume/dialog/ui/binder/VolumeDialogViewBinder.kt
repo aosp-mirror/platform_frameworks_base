@@ -21,15 +21,17 @@ import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.lifecycle.viewModel
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.awaitCancellation
 
+@VolumeDialogScope
 class VolumeDialogViewBinder
 @Inject
 constructor(private val volumeDialogViewModelFactory: VolumeDialogViewModel.Factory) {
 
-    suspend fun bind(view: View) {
+    fun bind(view: View) {
         view.repeatWhenAttached {
             view.viewModel(
                 traceName = "VolumeDialogViewBinder",

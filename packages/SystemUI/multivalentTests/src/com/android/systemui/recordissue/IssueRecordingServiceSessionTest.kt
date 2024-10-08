@@ -53,7 +53,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
     private val bgExecutor = kosmos.fakeExecutor
     private val userContextProvider: UserContextProvider = kosmos.userTracker
     private val dialogTransitionAnimator: DialogTransitionAnimator = kosmos.dialogTransitionAnimator
-    private lateinit var traceurMessageSender: TraceurMessageSender
+    private lateinit var traceurConnection: TraceurConnection
     private val issueRecordingState =
         IssueRecordingState(kosmos.userTracker, kosmos.userFileManager)
 
@@ -65,13 +65,13 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        traceurMessageSender = mock<TraceurMessageSender>()
+        traceurConnection = mock<TraceurConnection>()
         underTest =
             IssueRecordingServiceSession(
                 bgExecutor,
                 dialogTransitionAnimator,
                 panelInteractor,
-                traceurMessageSender,
+                traceurConnection,
                 issueRecordingState,
                 iActivityManager,
                 notificationManager,
@@ -85,7 +85,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isTrue()
-        verify(traceurMessageSender).startTracing(any<TraceConfig>())
+        verify(traceurConnection).startTracing(any<TraceConfig>())
     }
 
     @Test
@@ -94,12 +94,12 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         bgExecutor.runAllReady()
 
         Truth.assertThat(issueRecordingState.isRecording).isFalse()
-        verify(traceurMessageSender).stopTracing()
+        verify(traceurConnection).stopTracing()
     }
 
     @Test
     fun cancelsNotification_afterReceivingShareCommand() {
-        underTest.share(0, null, mContext)
+        underTest.share(0, null)
         bgExecutor.runAllReady()
 
         verify(notificationManager).cancelAsUser(isNull(), anyInt(), any<UserHandle>())
@@ -110,7 +110,7 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         issueRecordingState.takeBugreport = true
         val uri = mock<Uri>()
 
-        underTest.share(0, uri, mContext)
+        underTest.share(0, uri)
         bgExecutor.runAllReady()
 
         verify(iActivityManager).requestBugReportWithExtraAttachment(uri)
@@ -121,17 +121,17 @@ class IssueRecordingServiceSessionTest : SysuiTestCase() {
         issueRecordingState.takeBugreport = false
         val uri = mock<Uri>()
 
-        underTest.share(0, uri, mContext)
+        underTest.share(0, uri)
         bgExecutor.runAllReady()
 
-        verify(traceurMessageSender).shareTraces(mContext, uri)
+        verify(traceurConnection).shareTraces(uri)
     }
 
     @Test
     fun closesShade_afterReceivingShareCommand() {
         val uri = mock<Uri>()
 
-        underTest.share(0, uri, mContext)
+        underTest.share(0, uri)
         bgExecutor.runAllReady()
 
         verify(panelInteractor).collapsePanels()

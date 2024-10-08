@@ -60,6 +60,7 @@ constructor(
     primaryBouncerToAodTransitionViewModel: PrimaryBouncerToAodTransitionViewModel,
     primaryBouncerToDozingTransitionViewModel: PrimaryBouncerToDozingTransitionViewModel,
     primaryBouncerToLockscreenTransitionViewModel: PrimaryBouncerToLockscreenTransitionViewModel,
+    lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
 ) {
     val color: Flow<Int> =
         deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBackground ->
@@ -103,7 +104,9 @@ constructor(
                         offToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         primaryBouncerToAodTransitionViewModel.deviceEntryBackgroundViewAlpha,
                         primaryBouncerToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
-                        primaryBouncerToLockscreenTransitionViewModel.deviceEntryBackgroundViewAlpha,
+                        primaryBouncerToLockscreenTransitionViewModel
+                            .deviceEntryBackgroundViewAlpha,
+                        lockscreenToDozingTransitionViewModel.deviceEntryBackgroundViewAlpha,
                     )
                     .merge()
                     .onStart {

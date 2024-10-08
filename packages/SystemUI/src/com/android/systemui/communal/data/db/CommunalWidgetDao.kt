@@ -23,6 +23,7 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
+import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.systemui.communal.nano.CommunalHubState
 import com.android.systemui.communal.shared.model.CommunalContentSize
@@ -171,8 +172,7 @@ interface CommunalWidgetDao {
     @Query("UPDATE communal_item_rank_table SET rank = :order WHERE uid = :itemUid")
     fun updateItemRank(itemUid: Long, order: Int)
 
-    @Query("UPDATE communal_widget_table SET span_y = :spanY WHERE widget_id = :widgetId")
-    fun updateWidgetSpanY(widgetId: Int, spanY: Int)
+    @Update fun updateWidget(widget: CommunalWidgetItem)
 
     @Query("DELETE FROM communal_widget_table") fun clearCommunalWidgetsTable()
 
@@ -186,6 +186,15 @@ interface CommunalWidgetDao {
                 updateItemRank(widget.itemId, rank)
             }
         }
+    }
+
+    @Transaction
+    fun resizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {
+        val widget = getWidgetByIdNow(appWidgetId)
+        if (widget != null) {
+            updateWidget(widget.copy(spanY = spanY))
+        }
+        updateWidgetOrder(widgetIdToRankMap)
     }
 
     @Transaction

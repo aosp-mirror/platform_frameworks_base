@@ -123,7 +123,8 @@ public class BiometricFrameworkStatsLogger {
                 enrollSuccessful,
                 -1, /* sensorId */
                 ambientLightLux,
-                source);
+                source,
+                -1 /* templateId*/);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED}. */

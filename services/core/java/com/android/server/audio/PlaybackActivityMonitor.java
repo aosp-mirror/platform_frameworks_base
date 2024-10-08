@@ -253,7 +253,11 @@ public final class PlaybackActivityMonitor
                 updateAllowedCapturePolicy(apc, mAllowedCapturePolicies.get(uid));
             }
         }
-        sEventLogger.enqueue(new NewPlayerEvent(apc));
+        var packages = mContext.getPackageManager().getPackagesForUid(apc.getClientUid());
+        sEventLogger.enqueue(new NewPlayerEvent(
+                    apc,
+                    packages != null && packages.length > 0 ? packages[0] : null
+                ));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
             maybeMutePlayerAwaitingConnection(apc);
@@ -1402,14 +1406,16 @@ public final class PlaybackActivityMonitor
         private final int mPlayerIId;
         private final int mPlayerType;
         private final int mClientUid;
+        private final String mClientPackageName;
         private final int mClientPid;
         private final AudioAttributes mPlayerAttr;
         private final int mSessionId;
 
-        NewPlayerEvent(AudioPlaybackConfiguration apc) {
+        NewPlayerEvent(AudioPlaybackConfiguration apc, String packageName) {
             mPlayerIId = apc.getPlayerInterfaceId();
             mPlayerType = apc.getPlayerType();
             mClientUid = apc.getClientUid();
+            mClientPackageName = packageName;
             mClientPid = apc.getClientPid();
             mPlayerAttr = apc.getAudioAttributes();
             mSessionId = apc.getSessionId();
@@ -1418,7 +1424,7 @@ public final class PlaybackActivityMonitor
         @Override
         public String eventToString() {
             return new String("new player piid:" + mPlayerIId + " uid/pid:" + mClientUid + "/"
-                    + mClientPid + " type:"
+                    + mClientPid  + " package:" + mClientPackageName + " type:"
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
                     + " attr:" + mPlayerAttr
                     + " session:" + mSessionId);

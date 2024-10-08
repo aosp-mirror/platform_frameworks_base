@@ -447,7 +447,7 @@ public class PipMenuView extends FrameLayout {
                 final LayoutInflater inflater = LayoutInflater.from(mContext);
                 while (mActionsGroup.getChildCount() < mActions.size()) {
                     final PipMenuActionView actionView = (PipMenuActionView) inflater.inflate(
-                            R.layout.pip_menu_action, mActionsGroup, false);
+                            R.layout.pip2_menu_action, mActionsGroup, false);
                     mActionsGroup.addView(actionView);
                 }
 
