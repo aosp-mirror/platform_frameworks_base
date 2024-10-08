@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"បើក"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"បើក • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"បិទ"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"រៀបចំ"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"គ្រប់គ្រង​នៅ​ក្នុង​ការកំណត់"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{គ្មានមុខងារ​ដែលកំពុងដំណើរការទេ}=1{{mode} កំពុង​ដំណើរការ}other{មុខងារ # កំពុងដំណើរការ}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"សំឡេង និងរំញ័រនឹងមិន​រំខានដល់អ្នកឡើយ លើកលែងតែម៉ោងរោទ៍ ការរំលឹក ព្រឹត្តិការណ៍ និងអ្នកហៅទូរសព្ទដែលអ្នកបញ្ជាក់ប៉ុណ្ណោះ។ អ្នកនឹងនៅតែឮសំឡេងសកម្មភាពគ្រប់យ៉ាងដែលអ្នកលេងដដែល រួមទាំងតន្រ្តី វីដេអូ និងហ្គេម។"</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ការសន្ទនា"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"សម្អាត​ការជូនដំណឹង​ស្ងាត់ទាំងអស់"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ការជូនដំណឹង​បានផ្អាក​ដោយ​មុខងារកុំរំខាន"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{គ្មាន​ការជូន​ដំណឹង}=1{ការជូនដំណឹង​ត្រូវបាន​ផ្អាកដោយ {mode}}=2{ការជូនដំណឹង​ត្រូវបាន​ផ្អាកដោយ {mode} និង​មុខងារមួយ​ផ្សេងទៀត}other{ការជូនដំណឹង​ត្រូវបាន​ផ្អាកដោយ {mode} និង​មុខងារ # ផ្សេងទៀត}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ចាប់ផ្ដើម​ឥឡូវ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"គ្មាន​ការ​ជូនដំណឹង"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"គ្មាន​ការ​ជូន​ដំណឹង​​ថ្មីៗទេ"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"បង្ហាញរបៀបសាកល្បង"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"អ៊ីសឺរណិត"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ម៉ោងរោទ៍"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> ត្រូវបាន​បើក"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ធ្វើការ​រៀបចំ ដើម្បី​ធ្វើការទិញ​កាន់តែលឿន​ជាងមុន សុវត្ថិភាព​ជាងមុន ដោយ​ប្រើ​ទូរសព្ទ​របស់អ្នក"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"បង្ហាញ​ទាំងអស់"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ស្វែងយល់អំពីចលនាផ្ទាំងប៉ះ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"រុករកដោយប្រើក្ដារចុច និងផ្ទាំងប៉ះរបស់អ្នក"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ស្វែងយល់អំពីចលនាផ្ទាំងប៉ះ ផ្លូវកាត់​ក្ដារ​ចុច និងអ្វីៗជាច្រើនទៀត"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ចលនាថយក្រោយ"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ចលនាទៅទំព័រដើម"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"មើលកម្មវិធីថ្មីៗ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"រួចរាល់"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ថយ​ក្រោយ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ដើម្បីថយក្រោយ សូមអូសទៅឆ្វេង ឬស្ដាំដោយប្រើ​​ម្រាមដៃបីនៅត្រង់ណាក៏បានលើផ្ទាំងប៉ះ។\n\nអ្នកក៏អាចប្រើសកម្មភាពផ្លូវកាត់ក្ដារចុច + ESC សម្រាប់ការធ្វើបែបនេះ។"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ធ្វើបានល្អ!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"អ្នក​បានបញ្ចប់​ចលនា​ថយក្រោយ​ហើយ។"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ទៅទំព័រដើម"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ដើម្បីចូលទៅអេក្រង់ដើមរបស់អ្នកនៅពេលណាក៏បាន សូមអូសឡើងលើដោយប្រើម្រាមដៃបីពីផ្នែកខាងក្រោមនៃអេក្រង់របស់អ្នក។"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ល្អ!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"អ្នក​បានបញ្ចប់​ចលនា​ចូលទៅកាន់​ទំព័រដើម​ហើយ។"</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"មើលកម្មវិធីថ្មីៗ"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"អូសឡើងលើ ហើយសង្កត់ឱ្យជាប់ដោយប្រើម្រាមដៃបីលើផ្ទាំងប៉ះរបស់អ្នក។"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ធ្វើបានល្អ!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"អ្នកបានបញ្ចប់ការមើលចលនាកម្មវិធីថ្មីៗ។"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"គ្រាប់ចុចសកម្មភាព"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ដើម្បីចូលប្រើប្រាស់កម្មវិធីរបស់អ្នក សូមចុចគ្រាប់ចុចសកម្មភាពនៅលើក្ដារចុចរបស់អ្នក។"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"សូមអបអរសាទរ!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"អ្នកបានបញ្ចប់មេរៀនអំពីចលនាសម្រាប់គ្រាប់ចុចសកម្មភាព។\n\nគ្រាប់ចុចសកម្មភាព + / បង្ហាញផ្លូវកាត់ទាំងអស់ដែលអ្នកអាចប្រើបាន។"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ពន្លឺក្រោយក្ដារចុច"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"កម្រិតទី %1$d នៃ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ការគ្រប់គ្រង​ផ្ទះ"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ដើម្បីមើលកម្មវិធីទាំងអស់របស់អ្នក សូមចុចគ្រាប់ចុចសកម្មភាពនៅលើក្ដារចុចរបស់អ្នក"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"បាន​កែ​លម្អ​ពាក្យពេចន៍"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ដោះសោដើម្បីមើល"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"ការអប់រំ​តាមបរិបទ"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីថយក្រោយ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"អូសទៅឆ្វេង ឬស្ដាំដោយប្រើ​ម្រាមដៃបី។ ចុច ដើម្បីស្វែងយល់បន្ថែមអំពីចលនា។"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ប្រើផ្ទាំងប៉ះរបស់អ្នក ដើម្បីចូលទៅទំព័រដើម"</string>

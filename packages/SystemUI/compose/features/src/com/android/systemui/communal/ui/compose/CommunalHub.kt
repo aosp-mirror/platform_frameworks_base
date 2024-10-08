@@ -148,6 +148,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -165,6 +166,7 @@ import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.Flags
 import com.android.systemui.Flags.communalTimerFlickerFix
+import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalScenes
@@ -176,6 +178,7 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalAppWidgetSe
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
@@ -639,6 +642,38 @@ private fun ObserveNewWidgetAddedEffect(
     }
 }
 
+@Composable
+private fun ResizableItemFrameWrapper(
+    key: String,
+    gridState: LazyGridState,
+    minItemSpan: Int,
+    gridContentPadding: PaddingValues,
+    verticalArrangement: Arrangement.Vertical,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+    alpha: () -> Float = { 1f },
+    onResize: (info: ResizeInfo) -> Unit = {},
+    content: @Composable (modifier: Modifier) -> Unit,
+) {
+    if (!communalWidgetResizing()) {
+        content(modifier)
+    } else {
+        ResizableItemFrame(
+            key = key,
+            gridState = gridState,
+            minItemSpan = minItemSpan,
+            gridContentPadding = gridContentPadding,
+            verticalArrangement = verticalArrangement,
+            enabled = enabled,
+            alpha = alpha,
+            modifier = modifier,
+            onResize = onResize,
+        ) {
+            content(Modifier)
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BoxScope.CommunalHubLazyGrid(
@@ -695,13 +730,14 @@ private fun BoxScope.CommunalHubLazyGrid(
         gridModifier = gridModifier.height(hubDimensions.GridHeight)
     }
 
+    val itemArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing)
     LazyHorizontalGrid(
         modifier = gridModifier,
         state = gridState,
         rows = GridCells.Fixed(CommunalContentSize.FULL.span),
         contentPadding = contentPadding,
-        horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+        horizontalArrangement = itemArrangement,
+        verticalArrangement = itemArrangement,
     ) {
         itemsIndexed(
             items = list,
@@ -710,35 +746,54 @@ private fun BoxScope.CommunalHubLazyGrid(
             span = { _, item -> GridItemSpan(item.size.span) },
         ) { index, item ->
             val size = SizeF(Dimensions.CardWidth.value, item.size.dp().value)
-            val cardModifier = Modifier.requiredSize(width = size.width.dp, height = size.height.dp)
+            val selected = item.key == selectedKey.value
+            val dpSize = DpSize(size.width.dp, size.height.dp)
+
             if (viewModel.isEditMode && dragDropState != null) {
-                val selected = item.key == selectedKey.value
-                DraggableItem(
+                val outlineAlpha by
+                    animateFloatAsState(
+                        targetValue = if (selected) 1f else 0f,
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                        label = "Widget resizing outline alpha",
+                    )
+                ResizableItemFrameWrapper(
+                    key = item.key,
+                    gridState = gridState,
+                    minItemSpan = CommunalContentSize.HALF.span,
+                    gridContentPadding = contentPadding,
+                    verticalArrangement = itemArrangement,
+                    enabled = selected,
+                    alpha = { outlineAlpha },
                     modifier =
-                        if (dragDropState.draggingItemIndex == index) {
-                            Modifier
-                        } else {
+                        Modifier.requiredSize(dpSize).thenIf(
+                            dragDropState.draggingItemIndex != index
+                        ) {
                             Modifier.animateItem(
                                 placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
                             )
                         },
-                    dragDropState = dragDropState,
-                    selected = selected,
-                    enabled = item.isWidgetContent(),
-                    index = index,
-                ) { isDragging ->
-                    CommunalContent(
-                        modifier = cardModifier,
-                        model = item,
-                        viewModel = viewModel,
-                        size = size,
-                        selected = selected && !isDragging,
-                        widgetConfigurator = widgetConfigurator,
+                    onResize = { resizeInfo -> contentListState.resize(index, resizeInfo) },
+                ) { modifier ->
+                    DraggableItem(
+                        modifier = modifier,
+                        dragDropState = dragDropState,
+                        selected = selected,
+                        enabled = item.isWidgetContent(),
                         index = index,
-                        contentListState = contentListState,
-                        interactionHandler = interactionHandler,
-                        widgetSection = widgetSection,
-                    )
+                    ) { isDragging ->
+                        CommunalContent(
+                            modifier = Modifier.fillMaxSize(),
+                            model = item,
+                            viewModel = viewModel,
+                            size = size,
+                            selected = selected && !isDragging,
+                            widgetConfigurator = widgetConfigurator,
+                            index = index,
+                            contentListState = contentListState,
+                            interactionHandler = interactionHandler,
+                            widgetSection = widgetSection,
+                        )
+                    }
                 }
             } else {
                 CommunalContent(
@@ -746,7 +801,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     viewModel = viewModel,
                     size = size,
                     selected = false,
-                    modifier = cardModifier.animateItem(),
+                    modifier = Modifier.requiredSize(dpSize).animateItem(),
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,

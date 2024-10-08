@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ဖွင့်"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ဖွင့် • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ပိတ်"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"စနစ်ထည့်သွင်းရန်"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ဆက်တင်များတွင် စီမံရန်"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{သုံးနေသော မုဒ်မရှိပါ}=1{{mode} ကို သုံးနေသည်}other{မုဒ် # ခု သုံးနေသည်}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"နှိုးစက်သံ၊ သတိပေးချက်အသံများ၊ ပွဲစဉ်သတိပေးသံများနှင့် သင်ခွင့်ပြုထားသူများထံမှ ဖုန်းခေါ်မှုများမှလွဲ၍ အခြားအသံများနှင့် တုန်ခါမှုများက သင့်ကို အနှောင့်အယှက်ပြုမည် မဟုတ်ပါ။ သို့သော်လည်း သီချင်း၊ ဗီဒီယိုနှင့် ဂိမ်းများအပါအဝင် သင်ကရွေးချယ်ဖွင့်ထားသည့် အရာတိုင်း၏ အသံကိုမူ ကြားနေရဆဲဖြစ်ပါလိမ့်မည်။"</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"စကားဝိုင်းများ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"အသံတိတ် အကြောင်းကြားချက်များအားလုံးကို ရှင်းလင်းရန်"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"အကြောင်းကြားချက်များကို \'မနှောင့်ယှက်ရ\' က ခေတ္တရပ်ထားသည်"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{အကြောင်းကြားချက် မရှိပါ}=1{{mode} က ခဏရပ်ထားသော အကြောင်းကြားချက်များ}=2{{mode} နှင့် အခြားမုဒ်တစ်ခုက ခဏရပ်ထားသော အကြောင်းကြားချက်များ}other{{mode} နှင့် အခြားမုဒ် # ခုက ခဏရပ်ထားသော အကြောင်းကြားချက်များ}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ယခု စတင်ပါ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"အကြောင်းကြားချက် မရှိပါ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"အကြောင်းကြားချက်သစ် မရှိပါ"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"သရုပ်ပြမုဒ် ပြရန်"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"အီသာနက်"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"နှိုးစက်"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> ဖွင့်ထားသည်"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"သင့်ဖုန်းဖြင့် ပိုမိုမြန်ဆန်၊ ပိုမိုစိတ်ချရသော ဝယ်ယူမှုများ ပြုလုပ်ရန် စတင်သတ်မှတ်ပါ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"အားလုံးပြရန်"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"တာ့ချ်ပက်လက်ဟန်များကို လေ့လာပါ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"သင်၏ ကီးဘုတ်နှင့် တာ့ချ်ပက်တို့ကိုသုံး၍ လမ်းညွှန်ခြင်း"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"တာ့ချ်ပက်လက်ဟန်များ၊ လက်ကွက်ဖြတ်လမ်းများ စသည်တို့ကို လေ့လာပါ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"နောက်သို့ လက်ဟန်"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ပင်မစာမျက်နှာ လက်ဟန်"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"မကြာသေးမီကအက်ပ်များကို ကြည့်ရန်"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ပြီးပြီ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ပြန်သွားရန်"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"နောက်ပြန်သွားရန် တာ့ချ်ပက်ပေါ်ရှိ မည်သည့်နေရာ၌မဆို လက်သုံးချောင်းဖြင့် ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။\n\n၎င်းအတွက် လက်ကွက်ဖြတ်လမ်း Action + ESC ကိုလည်း သုံးနိုင်သည်။"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"တော်ပါပေသည်။"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"နောက်သို့လက်ဟန် အပြီးသတ်လိုက်ပါပြီ"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ပင်မစာမျက်နှာသို့ သွားရန်"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ပင်မစာမျက်နှာသို့ အချိန်မရွေးသွားရန် စခရင်အောက်ခြေမှ အပေါ်သို့ လက်သုံးချောင်းဖြင့် ပွတ်ဆွဲပါ။"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ကောင်းသည်။"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ပင်မစာမျက်နှာသို့သွားသည့် လက်ဟန် အပြီးသတ်လိုက်ပါပြီ။"</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"မကြာသေးမီကအက်ပ်များကို ကြည့်ခြင်း"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"သင့်တာ့ချ်ပက်တွင် လက်သုံးချောင်းဖြင့် အပေါ်သို့ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"တော်ပါပေသည်။"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"မကြာသေးမီကအက်ပ်များကို ကြည့်ခြင်းလက်ဟန် သင်ခန်းစာပြီးပါပြီ။"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"လုပ်ဆောင်ချက်ကီး"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"သင့်အက်ပ်များသုံးရန် ကီးဘုတ်ပေါ်ရှိ လုပ်ဆောင်ချက်ကီးကို နှိပ်ပါ။"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ဂုဏ်ယူပါသည်။"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"လုပ်ဆောင်ချက်ကီး လက်ဟန် အပြီးသတ်လိုက်ပါပြီ။\n\nလုပ်ဆောင်ချက် + / သည် ရရှိနိုင်သော ဖြတ်လမ်းအားလုံးကို ပြသည်။"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ကီးဘုတ်နောက်မီး"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"အဆင့် %2$d အနက် %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"အိမ်ထိန်းချုပ်မှုများ"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"သင့်အက်ပ်အားလုံးကြည့်ရန် ကီးဘုတ်ပေါ်ရှိ လုပ်ဆောင်ချက်ကီးကို နှိပ်ပါ"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"အစားထိုးထားသည်"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ကြည့်ရန် ဖွင့်ပါ"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"အကြောင်းအရာအလိုက် ပညာရေး"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"နောက်ပြန်သွားရန် သင့်တာ့ချ်ပက်ကို သုံးပါ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"လက်သုံးချောင်းဖြင့် ဘယ် (သို့) ညာသို့ ပွတ်ဆွဲပါ။ လက်ဟန်များ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ပင်မစာမျက်နှာသို့ သွားရန် သင့်တာ့ချ်ပက်ကို သုံးပါ"</string>

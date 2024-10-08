@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Activado"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activado • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivado"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Configurar"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestionar en los ajustes"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hay modos activos}=1{{mode} está activo}many{Hay # modos activos}other{Hay # modos activos}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas, los recordatorios, los eventos y las llamadas que especifiques. Seguirás escuchando el contenido que quieras reproducir, como música, vídeos y juegos."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversaciones"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo No molestar"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{No hay notificaciones}=1{Notificaciones pausadas por {mode}}=2{Notificaciones pausadas por {mode} y un modo más}many{Notificaciones pausadas por {mode} y # modos más}other{Notificaciones pausadas por {mode} y # modos más}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Empezar ahora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hay notificaciones"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hay notificaciones nuevas"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostrar modo Demo"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> activado"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configura un método de pago para comprar de forma más rápida y segura con tu teléfono"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostrar todo"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Aprende gestos del panel táctil"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Desplázate con el teclado y el panel táctil"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Aprende gestos del panel táctil, combinaciones de teclas y más"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gesto para volver"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gesto para ir al inicio"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Ver aplicaciones recientes"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Hecho"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Atrás"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Para volver, desliza con tres dedos hacia la izquierda o la derecha en cualquier parte del panel táctil.\n\nTambién puedes hacerlo con la combinación de teclas asignada + Esc."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"¡Bien hecho!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Has completado el gesto para volver."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ir a Inicio"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Para ir a la pantalla de inicio en cualquier momento, desliza hacia arriba con tres dedos desde la parte inferior de la pantalla."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"¡Muy bien!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Has completado el gesto para ir a la pantalla de inicio."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Ver aplicaciones recientes"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Desliza tres dedos hacia arriba y mantén pulsado en el panel táctil."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"¡Bien hecho!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Has completado el gesto para ver las aplicaciones recientes."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tecla de acción"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Para acceder a tus aplicaciones, pulsa la tecla de acción de tu teclado."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"¡Enhorabuena!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Has completado el gesto de la tecla de acción.\n\nLa combinación de teclas Acción + / muestra todas las combinaciones de teclas que tienes disponibles."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroiluminación del teclado"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivel %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controles de la casa"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Para ver todas tus aplicaciones, pulsa la tecla de acción de tu teclado"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Oculta"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Desbloquea para ver"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Educación contextual"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Usa el panel táctil para volver atrás"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Desliza hacia la izquierda o hacia la derecha con tres dedos. Toca para aprender a usar más gestos."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Usa el panel táctil para ir a la pantalla de inicio"</string>
@@ -1445,7 +1459,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"Usa el teclado para ver todas las aplicaciones"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"Pulsa la tecla de acción en cualquier momento. Toca para aprender a usar más gestos."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"La atenuación extra ahora forma parte del control deslizante de brillo"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes atenuar aún más tu pantalla reduciendo el nivel de brillo incluso más todavía.\n\nComo esta función ahora forma parte del control deslizante de brillo, se van a quitar los accesos directos de atenuación extra."</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"Ahora puedes atenuar aún más tu pantalla reduciendo el nivel de brillo.\n\nComo esta función ahora forma parte del control deslizante de brillo, se van a quitar los accesos directos de atenuación extra."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"Eliminar accesos directos de atenuación extra"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"Accesos directos de atenuación extra eliminados"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"Conectividad"</string>

@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Oproepe en kennisgewings sal vibreer"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Oproepe en kennisgewings sal gedemp wees"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Stelselveranderinge"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Moenie Steur Nie"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nuut: Moenie Steur Nie versteek tans kennisgewings"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tik om meer te wete te kom en te verander."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Moenie Steur Nie het verander"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te kyk wat geblokkeer word."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Gaan kennisgewinginstellings na"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Vanaf Android 13 het programme wat jy installeer jou toestemming nodig om kennisgewings te stuur. Tik om hierdie toestemming vir bestaande programme te verander."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Herinner my later"</string>

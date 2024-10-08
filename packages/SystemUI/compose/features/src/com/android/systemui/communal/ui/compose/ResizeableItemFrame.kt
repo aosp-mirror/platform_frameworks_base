@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,12 +54,11 @@ import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
 import com.android.systemui.lifecycle.rememberViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
 
 @Composable
 private fun UpdateGridLayoutInfo(
     viewModel: ResizeableItemFrameViewModel,
-    index: Int,
+    key: String,
     gridState: LazyGridState,
     minItemSpan: Int,
     gridContentPadding: PaddingValues,
@@ -67,7 +68,7 @@ private fun UpdateGridLayoutInfo(
     LaunchedEffect(
         density,
         viewModel,
-        index,
+        key,
         gridState,
         minItemSpan,
         gridContentPadding,
@@ -85,9 +86,8 @@ private fun UpdateGridLayoutInfo(
                 snapshotFlow { gridState.layoutInfo.maxSpan },
                 snapshotFlow { gridState.layoutInfo.viewportSize.height },
                 snapshotFlow {
-                        gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }
-                    }
-                    .filterNotNull(),
+                    gridState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == key }
+                },
                 ::Triple,
             )
             .collectLatest { (maxItemSpan, viewportHeightPx, itemInfo) ->
@@ -97,8 +97,8 @@ private fun UpdateGridLayoutInfo(
                     viewportHeightPx,
                     maxItemSpan,
                     minItemSpan,
-                    itemInfo.row,
-                    itemInfo.span,
+                    itemInfo?.row,
+                    itemInfo?.span,
                 )
             }
     }
@@ -161,7 +161,7 @@ private fun BoxScope.DragHandle(
  */
 @Composable
 fun ResizableItemFrame(
-    index: Int,
+    key: String,
     gridState: LazyGridState,
     minItemSpan: Int,
     gridContentPadding: PaddingValues,
@@ -177,6 +177,7 @@ fun ResizableItemFrame(
     content: @Composable () -> Unit,
 ) {
     val brush = SolidColor(outlineColor)
+    val onResizeUpdated by rememberUpdatedState(onResize)
     val viewModel =
         rememberViewModel(traceName = "ResizeableItemFrame.viewModel") {
             ResizeableItemFrameViewModel()
@@ -230,13 +231,15 @@ fun ResizableItemFrame(
 
             UpdateGridLayoutInfo(
                 viewModel,
-                index,
+                key,
                 gridState,
                 minItemSpan,
                 gridContentPadding,
                 verticalArrangement,
             )
-            LaunchedEffect(viewModel) { viewModel.resizeInfo.collectLatest(onResize) }
+            LaunchedEffect(viewModel) {
+                viewModel.resizeInfo.collectLatest { info -> onResizeUpdated(info) }
+            }
         }
     }
 }

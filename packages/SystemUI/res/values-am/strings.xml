@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"በርቷል"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"በርቷል • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ጠፍቷል"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"አዋቅር"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"በቅንብሮች ውስጥ አስተዳድር"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ምንም ገቢር ሁነታዎች የሉም}=1{{mode} ገቢር ነው}one{# ሁኔታ ገቢር ነው}other{# ሁኔታዎች ገቢር ናቸው}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"እርስዎ ከወሰንዋቸው ማንቂያዎች፣ አስታዋሾች፣ ክስተቶች እና ደዋዮች በስተቀር፣ በድምጾች እና ንዝረቶች አይረበሹም። ሙዚቃ፣ ቪዲዮዎች እና ጨዋታዎች ጨምሮ ለመጫወት የሚመርጡትን ማንኛውም ነገር አሁንም ይሰማሉ።"</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ውይይቶች"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ሁሉንም ጸጥ ያሉ ማሳወቂያዎችን ያጽዱ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ማሳወቂያዎች በአትረብሽ ባሉበት ቆመዋል"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{ምንም ማሳወቂያዎች የሉም}=1{ማሳወቂያዎች በ{mode} ባሉበት ቆመዋል}=2{ማሳወቂያዎች በ{mode} እና አንድ ሌላ ሁነታ ባሉበት ቆመዋል}one{ማሳወቂያዎች በ{mode} እና # ሌላ ሁነታ ባሉበት ቆመዋል}other{ማሳወቂያዎች በ{mode} እና # ሌላ ሁነታዎች ባሉበት ቆመዋል}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"አሁን ጀምር"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ምንም ማሳወቂያ የለም"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ምንም አዲስ ማሳወቂያዎች የሉም"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ማሳያ ሁነታን አሳይ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ኤተርኔት"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ማንቂያ"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> በርቷል"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"በስልክዎ በመጠቀም ፈጣን እና የበለጠ ደህንነቱ በተጠበቀ መንገድ ግዢዎችን ለመፈጸም ዝግጁ ይሁኑ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ሁሉንም አሳይ"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"የመዳሰሻ ሰሌዳ ምልክቶችን ይወቁ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"የእርስዎን የቁልፍ ሰሌዳ እና የመዳሰሻ ሰሌዳ በመጠቀም ያስሱ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"የመዳሰሻ ሰሌዳ ምልክቶችን፣ የቁልፍ ሰሌዳ አቋራጮችን እና ሌሎችን ይወቁ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"የተመለስ ምልክት"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"የቤት ምልክት"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"የቅርብ ጊዜ መተግበሪያዎችን አሳይ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ተከናውኗል"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ወደኋላ ተመለስ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ወደኋላ ለመመለስ የመዳሰሻ ሰሌዳው ላይ የትኛውም ቦታ በሦስት ጣቶች ወደግራ ወይም ወደቀኝ ያንሸራትቱ።\n\nእንዲሁም የቁልፍ ሰሌዳ አቋራጭ + ESC ለዚህ መጠቀም ይችላሉ።"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ጥሩ ሠርተዋል!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ወደኋላ የመመለስ ምልክትን አጠናቅቀዋል።"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ወደ መነሻ ሂድ"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"በማንኛውም ጊዜ ወደ መነሻ ማያ ገፅዎ ለመሄድ ከማያ ገፅዎ ታች በሦስት ጣቶች ወደላይ ያሸብልሉ።"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"አሪፍ!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ወደ መነሻ ሂድ ምልክትን አጠናቅቀዋል።"</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"የቅርብ ጊዜ መተግበሪያዎችን አሳይ"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"የመዳሰሻ ሰሌዳዎ ላይ ሦስት ጣቶችን በመጠቀም ወደ ላይ ያንሸራትቱ እና ይያዙ።"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ጥሩ ሠርተዋል!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"የቅርብ ጊዜ መተግበሪያዎች አሳይ ምልክትን አጠናቅቀዋል።"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"የተግባር ቁልፍ"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"መተግበሪያዎችዎን ለመድረስ በቁልፍ ሰሌዳዎ ላይ የእርምጃ ቁልፉን ይጫኑ።"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"እንኳን ደስ አለዎት!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"የተግባር ቁልፍ ምልክቱን አጠናቅቀዋል።\n\nእርምጃ + / ለእርስዎ ተገኚ የሆኑትን አቋራጮች በሙሉ ያሳያል።"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"የቁልፍ ሰሌዳ የጀርባ ብርሃን"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ደረጃ %1$d ከ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"የቤት ውስጥ ቁጥጥሮች"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ሁሉንም መተግበሪያዎችዎን ለማየት በቁልፍ ሰሌዳዎ ላይ ያለውን የተግባር ቁልፍ ይጫኑ"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"ጽሁፍ ተቀይሯል"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ለመመልከት ይክፈቱ"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"የዓውድ ትምህርት"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ለመመለስ የመዳሰሻ ሰሌዳዎን ይጠቀሙ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ሦስት ጣቶችን በመጠቀም ወደ ግራ ወይም ወደ ቀኝ ያንሸራትቱ። ምልክቶችን የበለጠ ለማወቅ መታ ያድርጉ።"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ወደ መነሻ ለመመለስ የመዳሰሻ ሰሌዳዎን ይጠቀሙ"</string>

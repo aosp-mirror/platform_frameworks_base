@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Дуудлага болон мэдэгдэл чичирнэ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Дуудлага болон мэдэгдлийн дууг хаана"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системийн өөрчлөлт"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Бүү саад бол"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Шинэ: Бүү саад бол горим мэдэгдлийг нууж байна"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Илүү ихийг мэдэж, өөрчлөхийн тулд товшино уу."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Бүү саад бол горимыг өөрчилсөн"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Мэдэгдлийн тохиргоог шалгах"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13-аас эхлэн таны суулгасан аппууд мэдэгдэл илгээхийн тулд танаас зөвшөөрөл авах шаардлагатай. Одоо байгаа аппуудын уг зөвшөөрлийг өөрчлөхийн тулд товшино уу."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Надад дараа сануул"</string>

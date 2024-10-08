@@ -254,6 +254,23 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
         assertThat(resizeInfo).isEqualTo(ResizeInfo(-1, DragHandle.BOTTOM))
     }
 
+    @Test
+    fun testRowInfoBecomesNull_revertsBackToDefault() =
+        testScope.runTest {
+            val gridLayout = singleSpanGrid.copy(maxItemSpan = 3, currentRow = 1)
+            updateGridLayout(gridLayout)
+
+            val topState = underTest.topDragState
+            assertThat(topState.anchors.toList()).containsExactly(0 to 0f, -1 to -30f)
+
+            val bottomState = underTest.bottomDragState
+            assertThat(bottomState.anchors.toList()).containsExactly(0 to 0f, 1 to 30f)
+
+            updateGridLayout(gridLayout.copy(currentRow = null))
+            assertThat(topState.anchors.toList()).containsExactly(0 to 0f)
+            assertThat(bottomState.anchors.toList()).containsExactly(0 to 0f)
+        }
+
     @Test(expected = IllegalArgumentException::class)
     fun testIllegalState_maxSpanSmallerThanMinSpan() =
         testScope.runTest {
@@ -317,7 +334,7 @@ class ResizeableItemFrameViewModelTest : SysuiTestCase() {
         val viewportHeightPx: Int,
         val maxItemSpan: Int,
         val minItemSpan: Int,
-        val currentRow: Int,
-        val currentSpan: Int,
+        val currentRow: Int?,
+        val currentSpan: Int?,
     )
 }

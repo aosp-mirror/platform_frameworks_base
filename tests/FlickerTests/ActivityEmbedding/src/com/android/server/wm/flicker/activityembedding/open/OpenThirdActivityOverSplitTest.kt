@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
  *
  * Transitions: Let B start C, expect C to cover B and end up in split A|C.
  *
- * To run this test: `atest FlickerTestsOther:OpenThirdActivityOverSplitTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:OpenThirdActivityOverSplitTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

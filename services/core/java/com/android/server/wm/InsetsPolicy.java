@@ -628,8 +628,9 @@ class InsetsPolicy {
         return (mForcedShowingTypes & types) == types;
     }
 
-    void updateSystemBars(WindowState win, boolean inSplitScreenMode, boolean inFreeformMode) {
-        mForcedShowingTypes = (inSplitScreenMode || inFreeformMode)
+    void updateSystemBars(WindowState win, boolean inSplitScreenMode,
+            boolean inNonFullscreenFreeformMode) {
+        mForcedShowingTypes = (inSplitScreenMode || inNonFullscreenFreeformMode)
                 ? (Type.statusBars() | Type.navigationBars())
                 : forceShowingNavigationBars(win)
                         ? Type.navigationBars()

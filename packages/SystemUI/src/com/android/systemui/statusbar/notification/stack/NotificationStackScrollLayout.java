@@ -113,6 +113,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
+import com.android.systemui.statusbar.notification.shared.NotificationContentAlphaOptimization;
 import com.android.systemui.statusbar.notification.shared.NotificationHeadsUpCycling;
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
@@ -1160,11 +1161,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public void addHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mHeadsUpHeightChangedListeners.addIfAbsent(runnable);
     }
 
     @Override
     public void removeHeadsUpHeightChangedListener(@NonNull Runnable runnable) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mHeadsUpHeightChangedListeners.remove(runnable);
     }
 
@@ -1240,11 +1243,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setScrolledToTop(boolean scrolledToTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setScrolledToTop(scrolledToTop);
     }
 
     @Override
     public void setStackTop(float stackTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         if (mAmbientState.getStackTop() != stackTop) {
             mAmbientState.setStackTop(stackTop);
             onTopPaddingChanged(/* animate = */ isAddOrRemoveAnimationPending());
@@ -1253,49 +1258,52 @@ public class NotificationStackScrollLayout
 
     @Override
     public void setStackCutoff(float stackCutoff) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mAmbientState.setStackCutoff(stackCutoff);
     }
 
     @Override
     public void setHeadsUpTop(float headsUpTop) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mAmbientState.setHeadsUpTop(headsUpTop);
         requestChildrenUpdate();
     }
 
     @Override
     public void setHeadsUpBottom(float headsUpBottom) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mAmbientState.setHeadsUpBottom(headsUpBottom);
         mStateAnimator.setHeadsUpAppearHeightBottom(Math.round(headsUpBottom));
     }
 
     @Override
     public void closeGutsOnSceneTouch() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mController.closeControlsDueToOutsideTouch();
     }
 
     @Override
     public void setSyntheticScrollConsumer(@Nullable Consumer<Float> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setSyntheticScrollConsumer(consumer);
     }
 
     @Override
     public void setCurrentGestureOverscrollConsumer(@Nullable Consumer<Boolean> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setCurrentGestureOverscrollConsumer(consumer);
     }
 
     @Override
     public void setCurrentGestureInGutsConsumer(@Nullable Consumer<Boolean> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setCurrentGestureInGutsConsumer(consumer);
     }
 
     @Override
     public void setRemoteInputRowBottomBoundConsumer(@Nullable Consumer<Float> consumer) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
         mScrollViewFields.setRemoteInputRowBottomBoundConsumer(consumer);
-    }
-
-    @Override
-    public void setHeadsUpHeightConsumer(@Nullable Consumer<Float> consumer) {
-        mScrollViewFields.setHeadsUpHeightConsumer(consumer);
     }
 
     /**
@@ -2621,11 +2629,13 @@ public class NotificationStackScrollLayout
 
     @Override
     public int getTopHeadsUpHeight() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
         return getTopHeadsUpIntrinsicHeight();
     }
 
     @Override
     public int getHeadsUpInset() {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return 0;
         return mHeadsUpInset;
     }
 
@@ -4363,6 +4373,16 @@ public class NotificationStackScrollLayout
         }
     }
 
+    private void resetChildAlpha() {
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = getChildAtIndex(i);
+            if (child instanceof ExpandableNotificationRow row) {
+                if (row.isExpandAnimationRunning()) continue;
+                row.resetAllContentAlphas();
+            }
+        }
+    }
+
     private void logTransientNotificationRowTraversalCleaned(
             ExpandableNotificationRow transientView,
             String reason
@@ -4405,6 +4425,9 @@ public class NotificationStackScrollLayout
                 // TODO(b/328390331) Do we need to reset this on QS expanded as well?
                 if (SceneContainerFlag.isEnabled()) {
                     setHeadsUpAnimatingAway(false);
+                }
+                if (NotificationContentAlphaOptimization.isEnabled()) {
+                    resetChildAlpha();
                 }
             } else {
                 mGroupExpansionManager.collapseGroups();

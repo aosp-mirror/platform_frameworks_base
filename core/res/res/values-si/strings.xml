@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ඇමතුම් සහ දැනුම්දීම් කම්පනය වනු ඇත"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ඇමතුම් සහ දැනුම්දීම් නිහඬ වනු ඇත"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"පද්ධති වෙනස් කිරීම්"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"බාධා නොකරන්න"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"නව: බාධා නොකරන්න දැනුම්දීම් සඟවමින්"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"තව දැන ගැනීමට සහ වෙනස් කිරීමට තට්ටු කරන්න."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"බාධා නොකරන්න වෙනස් කර ඇත"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"අවහිර කර ඇති දේ පරීක්ෂා කිරීමට තට්ටු කරන්න."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"දැනුම්දීම් සැකසීම් සමාලෝචනය කරන්න"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 හි සිට ආරම්භ වෙමින්, ඔබ ස්ථාපනය කරන යෙදුම්වලට දැනුම්දීම් යැවීමට ඔබගේ අවසරය අවශ්‍ය වේ. තිබෙන යෙදුම් සඳහා මෙම අවසරය වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"මට පසුව මතක් කරන්න"</string>

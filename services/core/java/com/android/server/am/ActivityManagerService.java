@@ -130,6 +130,7 @@ import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
+import static android.security.Flags.preventIntentRedirect;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -420,6 +421,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
@@ -2420,6 +2422,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBroadcastController = new BroadcastController(mContext, this, mBroadcastQueue);
         mComponentAliasResolver = new ComponentAliasResolver(this);
         mApplicationSharedMemoryReadOnlyFd = null;
+        sCreatorTokenCacheCleaner = new Handler(mHandlerThread.getLooper());
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2526,6 +2529,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mTraceErrorLogger = new TraceErrorLogger();
         mComponentAliasResolver = new ComponentAliasResolver(this);
+        sCreatorTokenCacheCleaner = new Handler(mHandlerThread.getLooper());
         try {
             mApplicationSharedMemoryReadOnlyFd =
                     ApplicationSharedMemory.getInstance().getReadOnlyFileDescriptor();
@@ -5532,6 +5536,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int sendIntentSender(IApplicationThread caller, IIntentSender target,
             IBinder allowlistToken, int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+        addCreatorToken(intent);
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
 
@@ -8269,7 +8274,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                         setThreadScheduler(proc.getRenderThreadTid(),
                                 SCHED_FIFO | SCHED_RESET_ON_FORK, 1);
                     } else {
-                        setThreadPriority(proc.getRenderThreadTid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                        if (Flags.resetOnForkEnabled()) {
+                            if (Process.getThreadScheduler(proc.getRenderThreadTid())
+                                    == Process.SCHED_OTHER) {
+                                Process.setThreadScheduler(proc.getRenderThreadTid(),
+                                    Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK,
+                                    0);
+                            }
+                        }
+                        setThreadPriority(proc.getRenderThreadTid(),
+                            THREAD_PRIORITY_TOP_APP_BOOST);
                     }
                 }
             } else {
@@ -13610,6 +13624,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
+        addCreatorToken(service);
         if (service != null) {
             // Refuse possible leaked file descriptors
             if (service.hasFileDescriptors()) {
@@ -13871,6 +13886,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         validateServiceInstanceName(instanceName);
 
+        addCreatorToken(service);
         try {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                 final ComponentName cn = service.getComponent();
@@ -17148,6 +17164,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.v(TAG_SERVICE,
                         "startServiceInPackage: " + service + " type=" + resolvedType);
             }
+            addCreatorToken(service);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res;
             try {
@@ -17972,6 +17989,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         /* uninstalling= */ false, /* packageStateStopped= */ false,
                         userId, reason, exitInfoReason);
             }
+        }
+
+        @Override
+        public void addCreatorToken(Intent intent) {
+            ActivityManagerService.this.addCreatorToken(intent);
         }
     }
 
@@ -19114,6 +19136,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final Map<IntentCreatorToken.Key, WeakReference<IntentCreatorToken>>
             sIntentCreatorTokenCache = new ConcurrentHashMap<>();
 
+    private static Handler sCreatorTokenCacheCleaner;
     /**
      * A binder token used to keep track of which app created the intent. This token can be used to
      * defend against intent redirect attacks. It stores uid of the intent creator and key fields of
@@ -19121,13 +19144,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @hide
      */
+    @VisibleForTesting
     public static final class IntentCreatorToken extends Binder {
         @NonNull
         private final Key mKeyFields;
+        private final WeakReference<IntentCreatorToken> mRef;
 
         public IntentCreatorToken(int creatorUid, Intent intent) {
             super();
             this.mKeyFields = new Key(creatorUid, intent);
+            mRef = new WeakReference<>(this);
         }
 
         public int getCreatorUid() {
@@ -19143,6 +19169,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return token != null && token.mKeyFields.equals(
                     new Key(token.mKeyFields.mCreatorUid, intent));
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                sCreatorTokenCacheCleaner.sendMessage(PooledLambda.obtainMessage(
+                        IntentCreatorToken::completeFinalize, this));
+            } finally {
+                super.finalize();
+            }
+        }
+
+        private void completeFinalize() {
+            synchronized (sIntentCreatorTokenCache) {
+                WeakReference<IntentCreatorToken> current = sIntentCreatorTokenCache.get(
+                        mKeyFields);
+                if (current == mRef) {
+                    sIntentCreatorTokenCache.remove(mKeyFields);
+                }
+            }
         }
 
         private static class Key {
@@ -19187,9 +19233,57 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Override
             public int hashCode() {
                 return Objects.hash(mCreatorUid, mAction, mData, mType, mPackage, mComponent,
-                        mFlags,
-                        mClipDataUris);
+                        mFlags, mClipDataUris);
             }
         }
+    }
+
+    /**
+     * Add a creator token for all embedded intents (stored as extra) of the given intent.
+     *
+     * @param intent The given intent
+     * @hide
+     */
+    public void addCreatorToken(@Nullable Intent intent) {
+        if (!preventIntentRedirect()) return;
+
+        if (intent == null || intent.getExtraIntentKeys() == null) return;
+        for (String key : intent.getExtraIntentKeys()) {
+            try {
+                Intent extraIntent = intent.getParcelableExtra(key, Intent.class);
+                if (extraIntent == null) {
+                    Slog.w(TAG, "The key {" + key
+                            + "} does not correspond to an intent in the extra bundle.");
+                    continue;
+                }
+                Slog.wtf(TAG, "A creator token is added to an intent.");
+                IBinder creatorToken = createIntentCreatorToken(extraIntent);
+                if (creatorToken != null) {
+                    extraIntent.setCreatorToken(creatorToken);
+                }
+            } catch (Exception e) {
+                Slog.wtf(TAG,
+                        "Something went wrong when trying to add creator token for embedded "
+                                + "intents of intent: ."
+                                + intent, e);
+            }
+        }
+    }
+
+    private IBinder createIntentCreatorToken(Intent intent) {
+        if (IntentCreatorToken.isValid(intent)) return null;
+        int creatorUid = getCallingUid();
+        IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, intent);
+        IntentCreatorToken token;
+        synchronized (sIntentCreatorTokenCache) {
+            WeakReference<IntentCreatorToken> ref = sIntentCreatorTokenCache.get(key);
+            if (ref == null || ref.get() == null) {
+                token = new IntentCreatorToken(creatorUid, intent);
+                sIntentCreatorTokenCache.put(key, token.mRef);
+            } else {
+                token = ref.get();
+            }
+        }
+        return token;
     }
 }

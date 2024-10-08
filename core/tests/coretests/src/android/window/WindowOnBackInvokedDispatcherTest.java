@@ -685,8 +685,6 @@ public class WindowOnBackInvokedDispatcherTest {
                 /* touchX = */ 0,
                 /* touchY = */ 0,
                 /* progress = */ progress,
-                /* velocityX = */ 0,
-                /* velocityY = */ 0,
                 /* triggerBack = */ false,
                 /* swipeEdge = */ BackEvent.EDGE_LEFT,
                 /* departingAnimationTarget = */ null);
