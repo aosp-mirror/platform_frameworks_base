@@ -1753,7 +1753,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     static boolean containsChangeFor(WindowContainer wc, ArrayList<ChangeInfo> list) {
         for (int i = list.size() - 1; i >= 0; --i) {
             if (list.get(i).mContainer == wc) return true;
