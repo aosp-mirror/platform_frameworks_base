@@ -27,7 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SystemUIThemeTest {
+class PlatformThemeTest {
     @get:Rule val composeRule = createComposeRule()
 
     @Test
@@ -40,9 +40,7 @@ class SystemUIThemeTest {
     @Test
     fun testAndroidColorsAreAvailableInsideTheme() {
         composeRule.setContent {
-            PlatformTheme {
-                Text("foo", color = LocalAndroidColorScheme.current.deprecated.colorAccent)
-            }
+            PlatformTheme { Text("foo", color = LocalAndroidColorScheme.current.primaryFixed) }
         }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()
@@ -52,7 +50,7 @@ class SystemUIThemeTest {
     fun testAccessingAndroidColorsWithoutThemeThrows() {
         assertThrows(IllegalStateException::class.java) {
             composeRule.setContent {
-                Text("foo", color = LocalAndroidColorScheme.current.deprecated.colorAccent)
+                Text("foo", color = LocalAndroidColorScheme.current.primaryFixed)
             }
         }
     }

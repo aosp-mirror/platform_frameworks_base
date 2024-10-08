@@ -96,15 +96,12 @@ public class FreeformTaskTransitionObserverTest {
                 context, mShellInit, mTransitions,
                 Optional.of(mDesktopFullImmersiveTransitionHandler),
                 mWindowDecorViewModel, Optional.of(mTaskChangeListener));
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
-                    Runnable.class);
-            verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
-                    same(mTransitionObserver));
-            initRunnableCaptor.getValue().run();
-        } else {
-            mTransitionObserver.onInit();
-        }
+
+        final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
+                Runnable.class);
+        verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
+                same(mTransitionObserver));
+        initRunnableCaptor.getValue().run();
     }
 
     @Test

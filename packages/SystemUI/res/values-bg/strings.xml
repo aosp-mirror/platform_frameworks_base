@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Вкл."</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Вкл. • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Изкл."</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Настройване"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Управление от настройките"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Няма активни режими}=1{Режимът „{mode}“ е активен}other{# активни режима}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Няма да бъдете обезпокоявани от звуци и вибрирания освен от будилници, напомняния, събития и обаждания от посочени от вас контакти. Пак ще чувате всичко, което изберете да се пусне, включително музика, видеоклипове и игри."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Изчистване на всички беззвучни известия"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Известията са поставени на пауза от режима „Не безпокойте“"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Няма известия}=1{Известията са поставени на пауза от {mode}}=2{Известията са поставени на пауза от {mode} и един друг режим}other{Известията са поставени на пауза от {mode} и # други режима}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Стартиране сега"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Няма известия"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Няма нови известия"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Показване на демонстрационния режим"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Будилник"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"Режимът „<xliff:g id="MODENAME">%1$s</xliff:g>“ е включен"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Портфейл"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Купувайте по-бързо и по-сигурно с телефона си"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Показване на всички"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Научете за жестовете със сензорния панел"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Навигирайте посредством клавиатурата и сензорния панел"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Научете за жестовете със сензорния панел, клавишните комбинации и др."</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Жест за връщане назад"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Жест за преминаване към началния екран"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Преглед на скорошните приложения"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"За да се върнете назад, прекарайте три пръста наляво или надясно по сензорния панел.\n\nЗа целта можете също да използвате комбинацията с клавиша за действия + ESC."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Отлично!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Изпълнихте жеста за връщане назад."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Към началния екран"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"За да преминете към началния екран по всяко време, прекарайте три пръста нагоре от долната част на екрана."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Чудесно!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Изпълнихте жеста за преминаване към началния екран."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Преглед на скорошните приложения"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Плъзнете нагоре с три пръста по сензорния панел и задръжте."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Отлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Изпълнихте жеста за преглед на скорошните приложения."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Клавиш за действия"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"За да осъществите достъп до приложенията, натиснете клавиша за действия на клавиатурата си."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Поздравления!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Изпълнихте жеста с клавиша за действия.\n\nНатискането на клавиша за действия и / показва всички налични клавишни комбинации."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка на клавиатурата"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Ниво %1$d от %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Контроли за дома"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"За да прегледате всичките си приложения, натиснете клавиша за действия на клавиатурата си"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Скрито"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Отключете за преглед"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Контекстуално обучение"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Използвайте сензорния панел, за да се върнете назад"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Плъзнете три пръста наляво или надясно. Докоснете, за да научите повече жестове."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Използвайте сензорния панел, за да преминете към началния екран"</string>

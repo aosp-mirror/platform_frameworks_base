@@ -48,9 +48,7 @@ class DesktopTasksTransitionObserver(
 ) : Transitions.TransitionObserver {
 
     init {
-        if (
-            Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.canEnterDesktopMode(context)
-        ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(::onInit, this)
         }
     }

@@ -22,6 +22,7 @@ import static com.android.server.wm.AppCompatConfiguration.MIN_FIXED_ORIENTATION
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.CameraCompatTaskInfo;
 import android.content.pm.ActivityInfo.ScreenOrientation;
 import android.content.res.Configuration;
 import android.widget.Toast;
@@ -248,6 +249,14 @@ class AppCompatCameraPolicy {
                 : MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO;
         return Math.max(displayRotationCompatPolicyAspectRatio,
                 cameraCompatFreeformPolicyAspectRatio);
+    }
+
+    @CameraCompatTaskInfo.FreeformCameraCompatMode
+    static int getCameraCompatFreeformMode(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        return cameraPolicy != null && cameraPolicy.mCameraCompatFreeformPolicy != null
+                ? cameraPolicy.mCameraCompatFreeformPolicy.getCameraCompatMode(activity)
+                : CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
     }
 
     /**

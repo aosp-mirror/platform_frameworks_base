@@ -53,8 +53,8 @@ class ScreenshotDataTest {
 
         assertThat(data.source).isEqualTo(source)
         assertThat(data.type).isEqualTo(type)
-        assertThat(data.screenBounds).isEqualTo(bounds)
-        assertThat(data.insets).isEqualTo(insets)
+        assertThat(data.originalScreenBounds).isEqualTo(bounds)
+        assertThat(data.originalInsets).isEqualTo(insets)
         assertThat(data.taskId).isEqualTo(taskId)
         assertThat(data.userHandle).isEqualTo(UserHandle.of(userId))
         assertThat(data.topComponent).isEqualTo(component)

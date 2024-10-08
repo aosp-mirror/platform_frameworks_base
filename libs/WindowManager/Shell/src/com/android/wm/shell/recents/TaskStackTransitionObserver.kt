@@ -42,9 +42,7 @@ class TaskStackTransitionObserver(
         ArrayMap<TaskStackTransitionObserverListener, Executor>()
 
     init {
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            shellInit.addInitCallback(::onInit, this)
-        }
+        shellInit.addInitCallback(::onInit, this)
     }
 
     fun onInit() {

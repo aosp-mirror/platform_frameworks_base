@@ -94,7 +94,7 @@ constructor(
                 .stateIn(
                     scope = applicationScope,
                     started = SharingStarted.WhileSubscribed(),
-                    initialValue = ClockSize.LARGE
+                    initialValue = ClockSize.LARGE,
                 )
         } else {
             keyguardClockRepository.clockSize
@@ -151,5 +151,9 @@ constructor(
             clock.smallClock.animations.fold(foldFraction)
             clock.largeClock.animations.fold(foldFraction)
         }
+    }
+
+    fun setNotificationStackDefaultTop(top: Float) {
+        keyguardClockRepository.setNotificationDefaultTop(top)
     }
 }

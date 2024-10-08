@@ -65,7 +65,7 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
         mImmersiveTransitionHandler = immersiveTransitionHandler;
         mWindowDecorViewModel = windowDecorViewModel;
         mTaskChangeListener = taskChangeListener;
-        if (Transitions.ENABLE_SHELL_TRANSITIONS && FreeformComponents.isFreeformEnabled(context)) {
+        if (FreeformComponents.isFreeformEnabled(context)) {
             shellInit.addInitCallback(this::onInit, this);
         }
     }

@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityManager
+import android.app.ActivityManager.RunningTaskInfo
 import android.app.ActivityOptions
 import android.app.KeyguardManager
 import android.app.PendingIntent
@@ -44,6 +44,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
+import android.view.WindowManager.TRANSIT_CLOSE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
@@ -51,6 +52,10 @@ import android.window.RemoteTransition
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
+import android.window.flags.DesktopModeFlags
+import android.window.flags.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
+import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+import android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import androidx.annotation.BinderThread
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD
@@ -86,10 +91,6 @@ import com.android.wm.shell.shared.ShellSharedConstants
 import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.annotations.ExternalThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
-import android.window.flags.DesktopModeFlags
-import android.window.flags.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
-import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
-import android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.DESKTOP_DENSITY_OVERRIDE
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.useDesktopOverrideDensity
@@ -261,17 +262,12 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         bringDesktopAppsToFront(displayId, wct)
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            val transitionType = transitionType(remoteTransition)
-            val handler =
-                remoteTransition?.let {
-                    OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
-                }
-            transitions.startTransition(transitionType, wct, handler).also { t ->
-                handler?.setTransition(t)
-            }
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
+        val transitionType = transitionType(remoteTransition)
+        val handler = remoteTransition?.let {
+            OneShotRemoteHandler(transitions.mainExecutor, remoteTransition)
+        }
+        transitions.startTransition(transitionType, wct, handler).also { t ->
+            handler?.setTransition(t)
         }
     }
 
@@ -388,12 +384,8 @@ class DesktopTasksController(
             bringDesktopAppsToFrontBeforeShowingNewTask(task.displayId, wct, task.taskId)
         addMoveToDesktopChanges(wct, task)
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
-            addPendingMinimizeTransition(transition, taskToMinimize)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+        val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        addPendingMinimizeTransition(transition, taskToMinimize)
     }
 
     /**
@@ -499,11 +491,9 @@ class DesktopTasksController(
         // Rather than set windowing mode to multi-window at task level, set it to
         // undefined and inherit from split stage.
         wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+
     }
 
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
@@ -537,17 +527,12 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task)
 
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            exitDesktopTaskTransitionHandler.startTransition(
+        exitDesktopTaskTransitionHandler.startTransition(
                 transitionSource,
                 wct,
                 position,
                 mOnAnimationFinishedCallback
             )
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-            releaseVisualIndicator()
-        }
     }
 
     /** Move a task to the front */
@@ -581,15 +566,12 @@ class DesktopTasksController(
     fun moveTaskToFront(taskInfo: RunningTaskInfo) {
         logV("moveTaskToFront taskId=%s", taskInfo.taskId)
         val wct = WindowContainerTransaction()
-        wct.reorder(taskInfo.token, true)
+        wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
         val taskToMinimize =
             addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo.taskId)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            val transition = transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
-            addPendingMinimizeTransition(transition, taskToMinimize)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        val transition = transitions.startTransition(TRANSIT_TO_FRONT, wct, null /* handler */)
+        addPendingMinimizeTransition(transition, taskToMinimize)
     }
 
     /**
@@ -645,11 +627,9 @@ class DesktopTasksController(
 
         val wct = WindowContainerTransaction()
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+
     }
 
     /** Moves a task in/out of full immersive state within the desktop. */
@@ -733,11 +713,9 @@ class DesktopTasksController(
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(doesAnyTaskRequireTaskbarRounding)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
+
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -847,11 +825,9 @@ class DesktopTasksController(
 
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(true)
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
-        }
+
+        toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
+
     }
 
     @VisibleForTesting
@@ -1498,6 +1474,22 @@ class DesktopTasksController(
         }
     }
 
+    fun removeDesktop(displayId: Int) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
+
+        val tasksToRemove = taskRepository.removeDesktop(displayId)
+        val wct = WindowContainerTransaction()
+        tasksToRemove.forEach {
+            val task = shellTaskOrganizer.getRunningTaskInfo(it)
+            if (task != null) {
+                wct.removeTask(task.token)
+            } else {
+                recentTasksController?.removeBackgroundTask(it)
+            }
+        }
+        if (!wct.isEmpty) transitions.startTransition(TRANSIT_CLOSE, wct, null)
+    }
+
     /** Enter split by using the focused desktop task in given `displayId`. */
     fun enterSplit(displayId: Int, leftOrTop: Boolean) {
         getFocusedFreeformTask(displayId)?.let { requestSplit(it, leftOrTop) }
@@ -2023,6 +2015,12 @@ class DesktopTasksController(
         override fun moveToDesktop(taskId: Int, transitionSource: DesktopModeTransitionSource) {
             executeRemoteCallWithTaskPermission(controller, "moveTaskToDesktop") { c ->
                 c.moveTaskToDesktop(taskId, transitionSource = transitionSource)
+            }
+        }
+
+        override fun removeDesktop(displayId: Int) {
+            executeRemoteCallWithTaskPermission(controller, "removeDesktop") { c ->
+                c.removeDesktop(displayId)
             }
         }
     }

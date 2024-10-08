@@ -3218,7 +3218,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    protected void resetAllContentAlphas() {
+    public void resetAllContentAlphas() {
         mLogger.logResetAllContentAlphas(getEntry());
         mPrivateLayout.setAlpha(1f);
         mPrivateLayout.setLayerType(LAYER_TYPE_NONE, null);
@@ -3883,7 +3883,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 dumpHeights(pw);
             }
             showingLayout.dump(pw, args);
-
+            dumpCustomOutline(pw, args);
+            dumpClipping(pw, args);
             if (getViewState() != null) {
                 getViewState().dump(pw, args);
                 pw.println();

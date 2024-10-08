@@ -199,6 +199,11 @@ public class DisplayManagerFlags {
             Flags.FLAG_IDLE_SCREEN_CONFIG_IN_SUBSCRIBING_LIGHT_SENSOR,
             Flags::idleScreenConfigInSubscribingLightSensor);
 
+    private final FlagState mVirtualDisplayLimit =
+            new FlagState(
+                    Flags.FLAG_VIRTUAL_DISPLAY_LIMIT,
+                    Flags::virtualDisplayLimit);
+
     private final FlagState mNormalBrightnessForDozeParameter = new FlagState(
             Flags.FLAG_NORMAL_BRIGHTNESS_FOR_DOZE_PARAMETER,
             Flags::normalBrightnessForDozeParameter
@@ -206,6 +211,10 @@ public class DisplayManagerFlags {
     private final FlagState mBlockAutobrightnessChangesOnStylusUsage = new FlagState(
             Flags.FLAG_BLOCK_AUTOBRIGHTNESS_CHANGES_ON_STYLUS_USAGE,
             Flags::blockAutobrightnessChangesOnStylusUsage
+    );
+    private final FlagState mIsUserRefreshRateForExternalDisplayEnabled = new FlagState(
+            Flags.FLAG_ENABLE_USER_REFRESH_RATE_FOR_EXTERNAL_DISPLAY,
+            Flags::enableUserRefreshRateForExternalDisplay
     );
 
     private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
@@ -416,6 +425,10 @@ public class DisplayManagerFlags {
         return mNewHdrBrightnessModifier.isEnabled();
     }
 
+    public boolean isVirtualDisplayLimitEnabled() {
+        return mVirtualDisplayLimit.isEnabled();
+    }
+
     /**
      * @return Whether the useDozeBrightness parameter should be used
      */
@@ -444,6 +457,14 @@ public class DisplayManagerFlags {
      */
     public boolean isBlockAutobrightnessChangesOnStylusUsage() {
         return mBlockAutobrightnessChangesOnStylusUsage.isEnabled();
+    }
+
+    /**
+     * @return {@code true} if need to use user refresh rate settings for
+     * external displays.
+     */
+    public boolean isUserRefreshRateForExternalDisplayEnabled() {
+        return mIsUserRefreshRateForExternalDisplayEnabled.isEnabled();
     }
 
     /**
@@ -487,10 +508,12 @@ public class DisplayManagerFlags {
         pw.println(" " + mOffloadDozeOverrideHoldsWakelock);
         pw.println(" " + mOffloadSessionCancelBlockScreenOn);
         pw.println(" " + mNewHdrBrightnessModifier);
+        pw.println(" " + mVirtualDisplayLimit);
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
         pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
+        pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);
     }
 
     private static class FlagState {

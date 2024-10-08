@@ -694,6 +694,7 @@ package android.app {
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
     field @FlaggedApi("android.view.contentprotection.flags.rapid_clear_notifications_by_listener_app_op_enabled") public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER = "android:rapid_clear_notifications_by_listener";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
+    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
     field public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
@@ -11956,6 +11957,7 @@ package android.provider {
   }
 
   @FlaggedApi("android.provider.new_default_account_api_enabled") public static final class ContactsContract.RawContacts.DefaultAccount {
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @NonNull @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static java.util.List<android.accounts.Account> getEligibleCloudAccounts(@NonNull android.content.ContentResolver);
     method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.READ_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static int getNumberOfMovableLocalContacts(@NonNull android.content.ContentResolver);
     method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.READ_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static int getNumberOfMovableSimContacts(@NonNull android.content.ContentResolver);
     method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.WRITE_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static void moveLocalContactsToCloudDefaultAccount(@NonNull android.content.ContentResolver);

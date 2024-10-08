@@ -16,10 +16,18 @@
 package com.android.ravenwoodtest.coretest;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 
 public class RavenwoodMockitoTest {
+
+    private static class MockClass {
+        void foo() {
+            throw new RuntimeException("Unsupported!!");
+        }
+    }
 
     @Test
     public void checkMockitoClasses() {
@@ -31,5 +39,12 @@ public class RavenwoodMockitoTest {
         assertThrows(
                 ClassNotFoundException.class,
                 () -> Class.forName("org.mockito.Matchers"));
+    }
+
+    @Test
+    public void checkMockitoActuallyWorks() {
+        var mock = mock(MockClass.class);
+        doNothing().when(mock).foo();
+        mock.foo();
     }
 }

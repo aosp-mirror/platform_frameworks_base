@@ -61,15 +61,16 @@ import com.airbnb.lottie.compose.LottieDynamicProperty
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottieDynamicProperty
-import com.android.compose.modifiers.background
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.FINISHED
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.IN_PROGRESS
-import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NOT_STARTED
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.Finished
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.InProgress
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState.NotStarted
 
-enum class TutorialActionState {
-    NOT_STARTED,
-    IN_PROGRESS,
-    FINISHED,
+sealed interface TutorialActionState {
+    data object NotStarted : TutorialActionState
+
+    data class InProgress(val progress: Float = 0f) : TutorialActionState
+
+    data object Finished : TutorialActionState
 }
 
 @Composable
@@ -89,11 +90,11 @@ fun ActionTutorialContent(
         Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
             TutorialDescription(
                 titleTextId =
-                    if (actionState == FINISHED) config.strings.titleSuccessResId
+                    if (actionState == Finished) config.strings.titleSuccessResId
                     else config.strings.titleResId,
                 titleColor = config.colors.title,
                 bodyTextId =
-                    if (actionState == FINISHED) config.strings.bodySuccessResId
+                    if (actionState == Finished) config.strings.bodySuccessResId
                     else config.strings.bodyResId,
                 modifier = Modifier.weight(1f),
             )
@@ -104,7 +105,7 @@ fun ActionTutorialContent(
                 modifier = Modifier.weight(1f).padding(top = 8.dp),
             )
         }
-        AnimatedVisibility(visible = actionState == FINISHED, enter = fadeIn()) {
+        AnimatedVisibility(visible = actionState == Finished, enter = fadeIn()) {
             DoneButton(onDoneButtonClicked = onDoneButtonClicked)
         }
     }
@@ -142,7 +143,7 @@ fun TutorialAnimation(
         AnimatedContent(
             targetState = actionState,
             transitionSpec = {
-                if (initialState == NOT_STARTED) {
+                if (initialState == NotStarted) {
                     val transitionDurationMillis = 150
                     fadeIn(animationSpec = tween(transitionDurationMillis, easing = LinearEasing))
                         .togetherWith(
@@ -160,17 +161,17 @@ fun TutorialAnimation(
             },
         ) { state ->
             when (state) {
-                NOT_STARTED ->
+                NotStarted ->
                     EducationAnimation(
                         config.animations.educationResId,
                         config.colors.animationColors,
                     )
-                IN_PROGRESS ->
+                is InProgress ->
                     FrozenSuccessAnimation(
                         config.animations.successResId,
                         config.colors.animationColors,
                     )
-                FINISHED ->
+                Finished ->
                     SuccessAnimation(config.animations.successResId, config.colors.animationColors)
             }
         }

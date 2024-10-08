@@ -23,6 +23,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
 
@@ -157,7 +158,16 @@ public class WindowTokenTests extends WindowTestsBase {
         // Verify that the other token window is still around.
         assertEquals(1, token.getWindowsCount());
 
+        final TransitionController transitionController = token.mTransitionController;
+        spyOn(transitionController);
+        doReturn(true).when(transitionController).isPlayingTarget(token);
         window2.removeImmediately();
+        assertTrue(token.mIsExiting);
+        assertNotNull("Defer removal for playing transition", token.getParent());
+
+        doReturn(false).when(transitionController).isPlayingTarget(token);
+        token.handleCompleteDeferredRemoval();
+        assertFalse(token.mIsExiting);
         // Verify that the token is no-longer attached to its parent
         assertNull(token.getParent());
         // Verify that the token windows are no longer attached to it.

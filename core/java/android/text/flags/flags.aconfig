@@ -188,3 +188,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "tts_span_duration"
+  namespace: "text"
+  description: "Feature flag for adding a TYPE_DURATION to TtsSpan"
+  bug: "337103893"
+}

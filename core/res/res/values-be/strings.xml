@@ -2131,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Для выклікаў і апавяшчэнняў уключаны вібрасігнал"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Для выклікаў і апавяшчэнняў гук выключаны"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Сістэмныя змены"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не турбаваць"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Новае: у рэжыме \"Не турбаваць\" апавяшчэнні не паказваюцца"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Дакраніцеся, каб даведацца больш і змяніць."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Зменены налады рэжыму \"Не турбаваць\""</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Націсніце, каб паглядзець заблакіраванае."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Праверце налады апавяшчэнняў"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Пачынаючы з версіі Android 13 усталяваным вамі праграмам неабходна даваць дазвол на адпраўку апавяшчэнняў. Націсніце, каб змяніць дазвол для існуючых праграм."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Нагадаць пазней"</string>

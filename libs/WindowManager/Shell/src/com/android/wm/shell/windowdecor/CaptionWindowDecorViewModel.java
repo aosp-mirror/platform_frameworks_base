@@ -361,7 +361,7 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 final RunningTaskInfo taskInfo = mTaskOrganizer.getRunningTaskInfo(mTaskId);
                 if (!taskInfo.isFocused) {
                     final WindowContainerTransaction wct = new WindowContainerTransaction();
-                    wct.reorder(mTaskToken, true /* onTop */);
+                    wct.reorder(mTaskToken, true /* onTop */, true /* includingParents */);
                     mSyncQueue.queue(wct);
                 }
             }

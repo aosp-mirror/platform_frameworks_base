@@ -202,7 +202,7 @@
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"För många försök med lösenord"</string>
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Administratören tillåter inte längre privat bruk av enheten"</string>
     <string name="private_space_deleted_by_admin" msgid="1484365588862066939">"Privat område har tagits bort"</string>
-    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Din organisation tillåter inte privata områden på den här hanterade enheten."</string>
+    <string name="private_space_deleted_by_admin_details" msgid="7007781735201818689">"Din organisation tillåter inte privata utrymmen på den här hanterade enheten."</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Enheten hanteras"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organisationen hanterar den här enheten och kan övervaka nätverkstrafiken. Tryck om du vill veta mer."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Appar har åtkomst till din plats"</string>
@@ -2009,8 +2009,8 @@
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Nödsituation"</string>
     <string name="set_up_screen_lock_title" msgid="8346083801616474030">"Ställ in ett skärmlås"</string>
     <string name="set_up_screen_lock_action_label" msgid="2687634803649209367">"Ställ in skärmlås"</string>
-    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ställ in ett skärmlås för enheten om du vill använda ditt privata område."</string>
-    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ange ett skärmlås för enheten om du vill radera privat område"</string>
+    <string name="private_space_set_up_screen_lock_message" msgid="1109956797005149814">"Ställ in ett skärmlås för enheten om du vill använda ditt privata utrymme."</string>
+    <string name="private_space_set_up_screen_lock_for_reset" msgid="7817091386408432097">"Ange ett skärmlås för enheten om du vill radera privat utrymme"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Appen är inte tillgänglig"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> är inte tillgängligt just nu."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> är inte tillgänglig"</string>
@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibrerar vid samtal och aviseringar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Ljudet stängs av för samtal och aviseringar"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systemändringar"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Stör ej"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nytt: Aviseringar döljs av Stör ej"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tryck här om du vill läsa mer och ändra inställningarna."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Stör ej har ändrats"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tryck om du vill se vad som blockeras."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Granska aviseringsinställningarna"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"I Android 13 behöver appar som du installerar behörighet att skicka aviseringar. Tryck om du vill ändra denna behörighet för befintliga appar."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Påminn mig senare"</string>

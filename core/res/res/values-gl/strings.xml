@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"As chamadas e as notificacións vibrarán"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"As chamadas e as notificacións estarán silenciadas"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios no sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Non molestar"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novidade! O modo Non molestar oculta as notificacións"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca para obter máis información e facer cambios."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"O modo Non molestar cambiou"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para comprobar o contido bloqueado."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta a configuración de notificacións"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Desde Android 13, as aplicacións que instales necesitan o teu permiso para enviar notificacións. Toca para cambiar este permiso nas aplicacións que xa teñas."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Lembrarmo máis tarde"</string>
