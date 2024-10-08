@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.SET_BIOMETRIC_DIALOG_ADVANCED;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
@@ -233,17 +234,18 @@ public class Utils {
      * @param promptInfo
      * @return
      */
-    static boolean isValidAuthenticatorConfig(PromptInfo promptInfo) {
+    static boolean isValidAuthenticatorConfig(Context context, PromptInfo promptInfo) {
         final int authenticators = promptInfo.getAuthenticators();
-        return isValidAuthenticatorConfig(authenticators);
+        return isValidAuthenticatorConfig(context, authenticators);
     }
 
     /**
-     * Checks if the authenticator configuration is a valid combination of the public APIs
-     * @param authenticators
-     * @return
+     * Checks if the authenticator configuration is a valid combination of the public APIs.
+     *
+     * throws {@link SecurityException} if the caller requests for mandatory biometrics without
+     * {@link SET_BIOMETRIC_DIALOG_ADVANCED} permission
      */
-    static boolean isValidAuthenticatorConfig(int authenticators) {
+    static boolean isValidAuthenticatorConfig(Context context, int authenticators) {
         // The caller is not required to set the authenticators. But if they do, check the below.
         if (authenticators == 0) {
             return true;
@@ -251,9 +253,15 @@ public class Utils {
 
         // Check if any of the non-biometric and non-credential bits are set. If so, this is
         // invalid.
-        final int testBits = ~(Authenticators.DEVICE_CREDENTIAL
-                | Authenticators.BIOMETRIC_MIN_STRENGTH
-                | Authenticators.MANDATORY_BIOMETRICS);
+        final int testBits;
+        if (Flags.mandatoryBiometrics()) {
+            testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                    | Authenticators.BIOMETRIC_MIN_STRENGTH
+                    | Authenticators.MANDATORY_BIOMETRICS);
+        } else {
+            testBits = ~(Authenticators.DEVICE_CREDENTIAL
+                    | Authenticators.BIOMETRIC_MIN_STRENGTH);
+        }
         if ((authenticators & testBits) != 0) {
             Slog.e(BiometricService.TAG, "Non-biometric, non-credential bits found."
                     + " Authenticators: " + authenticators);
@@ -271,6 +279,9 @@ public class Utils {
         } else if (biometricBits == Authenticators.BIOMETRIC_WEAK) {
             return true;
         } else if (isMandatoryBiometricsRequested(authenticators)) {
+            //TODO(b/347123256): Update CTS test
+            context.enforceCallingOrSelfPermission(SET_BIOMETRIC_DIALOG_ADVANCED,
+                    "Must have SET_BIOMETRIC_DIALOG_ADVANCED permission");
             return true;
         }
 

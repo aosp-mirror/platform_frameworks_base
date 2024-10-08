@@ -5210,7 +5210,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // but not window manager visible (!isVisibleNow()), it can still be the parent of the
             // dim, but can not create a new surface or continue a dim alone.
             Dimmer dimmer;
-            WindowContainer<?> geometryParent = task;
+            WindowContainer<?> geometryParent = null;
             if (Flags.useTasksDimOnly()) {
                 geometryParent = getDimParent();
                 dimmer = getDimController();

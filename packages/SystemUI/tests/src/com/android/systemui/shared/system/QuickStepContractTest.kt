@@ -21,7 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_COMMUNAL_HUB_SHOWING
-import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
+import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import org.junit.runner.RunWith
@@ -41,9 +41,9 @@ class QuickStepContractTest : SysuiTestCase() {
     }
 
     @Test
-    fun isBackGestureDisabled_hubAndShadeShowing() {
+    fun isBackGestureDisabled_hubAndQSExpanded() {
         val sysuiStateFlags =
-            SYSUI_STATE_COMMUNAL_HUB_SHOWING and SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
+            SYSUI_STATE_COMMUNAL_HUB_SHOWING and SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 
         // Gestures are enabled because the shade shows over the hub.
         assertThat(
