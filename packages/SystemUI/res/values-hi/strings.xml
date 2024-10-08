@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"चालू है"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • पर"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"बंद है"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"सेट अप करें"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"सेटिंग में जाकर मैनेज करें"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{कोई मोड चालू नहीं है}=1{{mode} चालू है}one{# मोड चालू है}other{# मोड चालू हैं}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"बातचीत"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"बिना आवाज़ की सभी सूचनाएं हटाएं"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'परेशान न करें\' सुविधा के ज़रिए कुछ समय के लिए सूचनाएं दिखाना रोक दिया गया है"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{कोई सूचना नहीं है}=1{{mode} की वजह से सूचना नहीं दिख रही है}=2{{mode} और एक अन्य मोड की वजह से सूचना नहीं दिख रही है}one{{mode} और # अन्य मोड की वजह से सूचना नहीं दिख रही है}other{{mode} और # अन्य मोड के की वजह से सूचनाएं नहीं दिख रही है}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"अभी शुरू करें"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"कोई सूचना नहीं है"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"कोई नई सूचना नहीं है"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"डेमो मोड दिखाएं"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ईथरनेट"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"अलार्म"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> चालू है"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"फ़ोन के ज़रिए तेज़ी से और सुरक्षित तरीके से खरीदारी करने के लिए सेट अप करें"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"सभी दिखाएं"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"टचपैड पर हाथ के जेस्चर के बारे में जानें"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"कीबोर्ड और टचपैड का इस्तेमाल करके नेविगेट करें"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"टचपैड पर हाथ के जेस्चर, कीबोर्ड शॉर्टकट वगैरह के बारे में जानें"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"पीछे जाने का जेस्चर"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"होम स्क्रीन पर जाने का जेस्चर"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"हो गया"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"वापस जाएं"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"वापस जाने के लिए, टचपैड पर कहीं भी तीन उंगलियों से दाईं या बाईं ओर स्वाइप करें.\n\nइसके अलावा, ऐसा करने के लिए Action + ESC बटन का भी इस्तेमाल किया जा सकता है."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"बहुत बढ़िया!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"अब आपने जान लिया है कि हाथ का जेस्चर इस्तेमाल करके, पिछली स्क्रीन पर वापस कैसे जाएं."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"होम स्क्रीन पर जाएं"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"किसी भी समय फ़ोन की होम स्क्रीन पर जाने के लिए, तीन उंगलियों से फ़ोन पर सबसे नीचे से ऊपर की ओर स्वाइप करें."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"बढ़िया!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"आपने जान लिया कि हाथ का जेस्चर इस्तेमाल करके, होम स्क्रीन पर कैसे जाएं."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"अपने टचपैड पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और फिर होल्ड करें."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"बहुत बढ़िया!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"आपने हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने के लिए, हाथ के जेस्चर के बारे में जान लिया है."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ऐक्शन बटन"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"अपने ऐप्लिकेशन ऐक्सेस करने के लिए, कीबोर्ड पर ऐक्शन बटन दबाएं."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"बधाई हो!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"आपने ऐक्शन बटन का जेस्चर इस्तेमाल करने की प्रोसेस पूरी कर ली है.\n\nऐक्शन बटन और / को साथ में दबाने पर, आपके पास उपलब्ध सभी शॉर्टकट दिखते हैं."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड की बैकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d में से %1$d लेवल"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"सभी ऐप्लिकेशन देखने के लिए, कीबोर्ड पर ऐक्शन बटन दबाएं"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"जानकारी छिपाने के लिए सूचना में बदलाव किया गया"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"देखने के लिए डिवाइस अनलॉक करें"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"कॉन्टेक्स्ट के हिसाब से जानकारी"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"वापस जाने के लिए, अपने डिवाइस के टचपैड का इस्तेमाल करें"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"तीन उंगलियों से बाईं या दाईं ओर स्वाइप करें. जेस्चर के बारे में ज़्यादा जानने के लिए टैप करें."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"होम पर जाने के लिए, अपने डिवाइस के टचपैड का इस्तेमाल करें"</string>

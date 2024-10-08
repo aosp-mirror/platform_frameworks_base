@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Асаалттай"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Асаасан • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Унтраалттай"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Тохируулах"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Тохиргоонд удирдах"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ямар ч идэвхтэй горим байхгүй}=1{{mode} идэвхтэй байна}other{# горим идэвхтэй байна}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Танд сэрүүлэг, сануулга, арга хэмжээ, таны сонгосон дуудлага илгээгчээс бусад дуу, чичиргээ саад болохгүй. Та хөгжим, видео, тоглоом зэрэг тоглуулахыг хүссэн бүх зүйлээ сонсох боломжтой хэвээр байна."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Харилцан яриа"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Бүх чимээгүй мэдэгдлийг арилгах"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Бүү саад бол горимын түр зогсоосон мэдэгдэл"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Мэдэгдэл байхгүй}=1{Мэдэгдлийг {mode} түр зогсоосон}=2{Мэдэгдлийг {mode} болон өөр нэг горим түр зогсоосон}other{Мэдэгдлийг {mode} болон өөр # горим түр зогсоосон}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Одоо эхлүүлэх"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Мэдэгдэл байхгүй"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Шинэ мэдэгдэл алга"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Демо горимыг харуулах"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Этернет"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Сэрүүлэг"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> асаалттай байна"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Утсаараа илүү хурдан, аюулгүй худалдан авалт хийхийн тулд тохируулгыг авна уу"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Бүгдийг харуулах"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Мэдрэгч самбарын зангааг мэдэж аваарай"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Гар эсвэл мэдрэгч самбараа ашиглан шилжээрэй"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Мэдрэгч самбарын зангаа, товчлуурын шууд холбоос болон бусад зүйлийг мэдэж аваарай"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Буцах зангаа"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Үндсэн нүүрний зангаа"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Саяхны аппуудыг харах"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Болсон"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Буцах"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Буцахын тулд мэдрэгч самбар дээр гурван хуруугаар хүссэн газраа зүүн эсвэл баруун тийш шударна уу.\n\nТа мөн үүнийг хийхэд Action + ESC товчлуурын шууд холбоосыг ашиглах боломжтой."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Үнэхээр сайн ажиллалаа!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Та буцах зангааг гүйцэтгэлээ."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Үндсэн нүүр лүү очих"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Үндсэн нүүр лүүгээ хүссэн үедээ очихын тулд дэлгэцийнхээ доод талаас гурван хуруугаараа дээш шударна уу."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Янзтай!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Та үндсэн нүүр лүү очих зангааг гүйцэтгэлээ."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Саяхны аппуудыг харах"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Мэдрэгч самбар дээрээ гурван хуруугаа ашиглан дээш шудраад, удаан дарна уу."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Сайн байна!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Та саяхны аппуудыг харах зангааг гүйцэтгэсэн."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Тусгай товчлуур"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Аппууддаа хандахын тулд гар дээр тань байх тусгай товчлуурыг дарна уу."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Баяр хүргэе!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Та тусгай товчлуурын зангааг гүйцэтгэлээ.\n\nТусгай товчлуур болох + / нь танд боломжтой бүх товчлолыг харуулна."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Гарын арын гэрэл"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d-с %1$d-р түвшин"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Гэрийн удирдлага"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Бүх аппаа харахын тулд гар дээр тань байх тусгай товчлуурыг дарна уу"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Хассан"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Харахын тулд түгжээг тайлна уу"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Хам сэдэвт боловсрол"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Буцахын тулд мэдрэгч самбараа ашиглах"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Гурван хуруугаараа зүүн эсвэл баруун тийш шударна уу. Илүү олон зангаа сурахын тулд товшино уу."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Нүүр хуудас руу очихын тулд мэдрэгч самбараа ашиглах"</string>
