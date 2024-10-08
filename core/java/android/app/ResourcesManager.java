@@ -1517,10 +1517,8 @@ public class ResourcesManager {
                 int changes = mResConfiguration.updateFrom(config);
                 if (compat != null && (mResCompatibilityInfo == null
                         || !mResCompatibilityInfo.equals(compat))) {
+                    changes |= compat.getCompatibilityChangesForConfig(mResCompatibilityInfo);
                     mResCompatibilityInfo = compat;
-                    changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
-                            | ActivityInfo.CONFIG_SCREEN_SIZE
-                            | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
                 }
 
                 // If a application info update was scheduled to occur in this process but has not
