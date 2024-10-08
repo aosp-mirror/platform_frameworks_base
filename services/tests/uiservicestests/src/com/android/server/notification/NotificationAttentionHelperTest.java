@@ -2291,10 +2291,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         NotificationRecord r = getBeepyNotification();
 
@@ -2338,10 +2335,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         NotificationRecord r = getBeepyNotification();
 
@@ -2379,10 +2373,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         NotificationRecord r = getBeepyNotification();
 
@@ -2428,10 +2419,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         NotificationRecord r = getBeepyNotification();
         r.getNotification().category = Notification.CATEGORY_EVENT;
@@ -2504,10 +2492,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         // Regular notification: should beep at 0% volume
         NotificationRecord r = getBeepyNotification();
@@ -2574,10 +2559,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         NotificationRecord r = getBeepyNotification();
 
@@ -2602,10 +2584,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         // CATEGORY_ALARM is exempted
         NotificationRecord r = getBeepyNotification();
@@ -2646,10 +2625,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         flagResolver.setFlagOverride(NotificationFlags.NOTIF_VOLUME2, 0);
         initAttentionHelper(flagResolver);
 
-        // Trigger avalanche trigger intent
-        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        intent.putExtra("state", false);
-        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        triggerAvalancheEvent();
 
         // Create a conversation group with GROUP_ALERT_SUMMARY behavior
         // Where the summary is not MessagingStyle
@@ -2691,6 +2667,16 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
         verifyNeverBeep();
         assertFalse(summary.isInterruptive());
         assertEquals(-1, summary.getLastAudiblyAlertedMs());
+    }
+
+    private void triggerAvalancheEvent() throws Exception {
+        // Trigger avalanche trigger intent
+        final Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        intent.putExtra("state", false);
+        mAvalancheBroadcastReceiver.onReceive(getContext(), intent);
+        // Wait after avalanche trigger before posting notifications
+        // so that notification#getWhen() is not the same value
+        Thread.sleep(100);
     }
 
     @Test

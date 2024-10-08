@@ -208,6 +208,36 @@ flag {
 }
 
 flag {
+    name: "cache_profile_ids"
+    namespace: "multiuser"
+    description: "Cache getProfileIds to avoid unnecessary binder calls"
+    bug: "350421409"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_profile_type"
+    namespace: "multiuser"
+    description: "Cache getProfileType to avoid unnecessary binder calls"
+    bug: "350417403"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+    name: "cache_profiles"
+    namespace: "multiuser"
+    description: "Cache getProfiles to avoid unnecessary binder calls"
+    bug: "350419395"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "fix_disabling_of_mu_toggle_when_restriction_applied"
     namespace: "multiuser"
     description: "When no_user_switch is set but no EnforcedAdmin is present, the toggle has to be disabled"

@@ -65,7 +65,6 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
-import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
@@ -140,7 +139,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
-    private final StatusBarLocationPublisher mLocationPublisher;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
@@ -243,7 +241,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
-            StatusBarLocationPublisher locationPublisher,
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
@@ -267,7 +264,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
-        mLocationPublisher = locationPublisher;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarIconController = statusBarIconController;
         mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
@@ -349,9 +345,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
 
         mStatusBar = (PhoneStatusBarView) view;
-        View contents = mStatusBar.findViewById(R.id.status_bar_contents);
-        contents.addOnLayoutChangeListener(mStatusBarLayoutListener);
-        updateStatusBarLocation(contents.getLeft(), contents.getRight());
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_PANEL_STATE)) {
             mStatusBar.restoreHierarchyState(
                     savedInstanceState.getSparseParcelableArray(EXTRA_PANEL_STATE));
@@ -977,27 +970,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }, /*isAnimationRunning*/ false);
     }
 
-    private void updateStatusBarLocation(int left, int right) {
-        int leftMargin = left - mStatusBar.getLeft();
-        int rightMargin = mStatusBar.getRight() - right;
-
-        mLocationPublisher.updateStatusBarMargin(leftMargin, rightMargin);
-    }
-
     private final ContentObserver mVolumeSettingObserver = new ContentObserver(null) {
         @Override
         public void onChange(boolean selfChange) {
             updateBlockedIcons();
         }
     };
-
-    // Listen for view end changes of PhoneStatusBarView and publish that to the privacy dot
-    private View.OnLayoutChangeListener mStatusBarLayoutListener =
-            (view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                if (left != oldLeft || right != oldRight) {
-                    updateStatusBarLocation(left, right);
-                }
-            };
 
     @Override
     public void dump(PrintWriter printWriter, String[] args) {

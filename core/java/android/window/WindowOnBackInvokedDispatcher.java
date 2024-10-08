@@ -124,7 +124,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         if (!isBackGestureInProgress() || ev == null || ev.getAction() != MotionEvent.ACTION_MOVE) {
             return;
         }
-        mTouchTracker.update(ev.getX(), ev.getY(), Float.NaN, Float.NaN);
+        mTouchTracker.update(ev.getX(), ev.getY());
         if (mTouchTracker.shouldUpdateStartLocation()) {
             // Reset the start location on the first event after starting back, so that
             // the beginning of the animation feels smooth.
