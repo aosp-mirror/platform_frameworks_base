@@ -29,6 +29,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_UNKNOWN;
 import static android.content.ContentResolver.SCHEME_CONTENT;
+import static android.content.Intent.FILL_IN_ACTION;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.UserHandle.USER_ALL;
 import static android.util.DebugUtils.valueToString;
@@ -1298,6 +1299,45 @@ public class ActivityManagerServiceTest {
         assertWithMessage("UserController.startUserOnDisplay() calls")
                 .that(mInjector.usersStartedOnSecondaryDisplays)
                 .containsExactly(new Pair<>(USER_ID, 42));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT)
+    public void testAddCreatorToken() {
+        Intent intent = new Intent();
+        Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
+        intent.putExtra("EXTRA_INTENT0", extraIntent);
+
+        intent.collectExtraIntentKeys();
+        mAms.addCreatorToken(intent);
+
+        ActivityManagerService.IntentCreatorToken token =
+                (ActivityManagerService.IntentCreatorToken) extraIntent.getCreatorToken();
+        assertThat(token).isNotNull();
+        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(android.security.Flags.FLAG_PREVENT_INTENT_REDIRECT)
+    public void testAddCreatorTokenForFillingIntent() {
+        Intent intent = new Intent();
+        Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
+        intent.putExtra("EXTRA_INTENT0", extraIntent);
+        Intent fillinIntent = new Intent();
+        Intent fillinExtraIntent = new Intent("FILLIN_EXTRA_INTENT_ACTION");
+        fillinIntent.putExtra("FILLIN_EXTRA_INTENT0", fillinExtraIntent);
+
+        fillinIntent.collectExtraIntentKeys();
+        intent.fillIn(fillinIntent, FILL_IN_ACTION);
+
+        mAms.addCreatorToken(fillinIntent);
+
+        fillinExtraIntent = intent.getParcelableExtra("FILLIN_EXTRA_INTENT0", Intent.class);
+
+        ActivityManagerService.IntentCreatorToken token =
+                (ActivityManagerService.IntentCreatorToken) fillinExtraIntent.getCreatorToken();
+        assertThat(token).isNotNull();
+        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
     }
 
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,

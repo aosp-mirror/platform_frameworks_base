@@ -1704,6 +1704,7 @@ public class NotificationChildrenContainer extends ViewGroup
                 + "visibility: " + getVisibility()
                 + ", alpha: " + getAlpha()
                 + ", translationY: " + getTranslationY()
+                + ", clipBounds: " + getClipBounds()
                 + ", roundableState: " + getRoundableState().debugString() + "}";
     }
 }

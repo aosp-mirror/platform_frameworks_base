@@ -114,7 +114,7 @@ class TaskStackTransitionObserverTest {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_TASK_STACK_OBSERVER_IN_SHELL)
-    fun taskCreated_fullscreenWindow_listenerNotNotified() {
+    fun taskCreated_fullscreenWindow_listenerNotified() {
         val listener = TestListener()
         val executor = TestShellExecutor()
         transitionObserver.addTaskStackTransitionObserverListener(listener, executor)
@@ -130,9 +130,9 @@ class TaskStackTransitionObserverTest {
         callOnTransitionFinished()
         executor.flushAll()
 
-        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(0)
+        assertThat(listener.taskInfoToBeNotified.taskId).isEqualTo(1)
         assertThat(listener.taskInfoToBeNotified.windowingMode)
-            .isEqualTo(WindowConfiguration.WINDOWING_MODE_UNDEFINED)
+            .isEqualTo(WindowConfiguration.WINDOWING_MODE_FULLSCREEN)
     }
 
     @Test

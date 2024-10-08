@@ -449,6 +449,13 @@ public final class Display {
     public static final int TYPE_VIRTUAL = 5;
 
     /**
+     * The maximum display type value.
+     * Helpful to get all possible display values.
+     * @hide
+     */
+    public static final int TYPE_MAX = TYPE_VIRTUAL;
+
+    /**
      * Display state: The display state is unknown.
      *
      * @see #getState

@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
  * windows are equal in size. B is on the top and A is on the bottom. Transitions: Change the split
  * ratio to A:B=0.7:0.3, expect bounds change for both A and B.
  *
- * To run this test: `atest FlickerTestsOther:HorizontalSplitChangeRatioTest`
+ * To run this test: `atest FlickerTestsActivityEmbedding:HorizontalSplitChangeRatioTest`
  */
 @RequiresDevice
 @RunWith(Parameterized::class)

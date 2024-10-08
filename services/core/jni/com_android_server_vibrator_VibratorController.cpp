@@ -41,8 +41,8 @@ namespace android {
 
 static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnComplete;
-static jclass sFrequencyProfileClass;
-static jmethodID sFrequencyProfileCtor;
+static jclass sFrequencyProfileLegacyClass;
+static jmethodID sFrequencyProfileLegacyCtor;
 static struct {
     jmethodID setCapabilities;
     jmethodID setSupportedEffects;
@@ -53,7 +53,7 @@ static struct {
     jmethodID setPrimitiveDelayMax;
     jmethodID setCompositionSizeMax;
     jmethodID setQFactor;
-    jmethodID setFrequencyProfile;
+    jmethodID setFrequencyProfileLegacy;
     jmethodID setMaxEnvelopeEffectSize;
     jmethodID setMinEnvelopeEffectControlPointDurationMillis;
     jmethodID setMaxEnvelopeEffectControlPointDurationMillis;
@@ -517,11 +517,12 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
         env->SetFloatArrayRegion(maxAmplitudes, 0, amplitudes.size(),
                                  reinterpret_cast<jfloat*>(amplitudes.data()));
     }
-    jobject frequencyProfile =
-            env->NewObject(sFrequencyProfileClass, sFrequencyProfileCtor, resonantFrequency,
-                           minFrequency, frequencyResolution, maxAmplitudes);
-    env->CallObjectMethod(vibratorInfoBuilder, sVibratorInfoBuilderClassInfo.setFrequencyProfile,
-                          frequencyProfile);
+    jobject frequencyProfileLegacy =
+            env->NewObject(sFrequencyProfileLegacyClass, sFrequencyProfileLegacyCtor,
+                           resonantFrequency, minFrequency, frequencyResolution, maxAmplitudes);
+    env->CallObjectMethod(vibratorInfoBuilder,
+                          sVibratorInfoBuilderClassInfo.setFrequencyProfileLegacy,
+                          frequencyProfileLegacy);
 
     return info.shouldRetry() ? JNI_FALSE : JNI_TRUE;
 }
@@ -566,9 +567,12 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sRampClassInfo.endFrequencyHz = GetFieldIDOrDie(env, rampClass, "mEndFrequencyHz", "F");
     sRampClassInfo.duration = GetFieldIDOrDie(env, rampClass, "mDuration", "I");
 
-    jclass frequencyProfileClass = FindClassOrDie(env, "android/os/VibratorInfo$FrequencyProfile");
-    sFrequencyProfileClass = static_cast<jclass>(env->NewGlobalRef(frequencyProfileClass));
-    sFrequencyProfileCtor = GetMethodIDOrDie(env, sFrequencyProfileClass, "<init>", "(FFF[F)V");
+    jclass frequencyProfileLegacyClass =
+            FindClassOrDie(env, "android/os/VibratorInfo$FrequencyProfileLegacy");
+    sFrequencyProfileLegacyClass =
+            static_cast<jclass>(env->NewGlobalRef(frequencyProfileLegacyClass));
+    sFrequencyProfileLegacyCtor =
+            GetMethodIDOrDie(env, sFrequencyProfileLegacyClass, "<init>", "(FFF[F)V");
 
     jclass vibratorInfoBuilderClass = FindClassOrDie(env, "android/os/VibratorInfo$Builder");
     sVibratorInfoBuilderClassInfo.setCapabilities =
@@ -598,9 +602,9 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sVibratorInfoBuilderClassInfo.setQFactor =
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setQFactor",
                              "(F)Landroid/os/VibratorInfo$Builder;");
-    sVibratorInfoBuilderClassInfo.setFrequencyProfile =
-            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfile",
-                             "(Landroid/os/VibratorInfo$FrequencyProfile;)"
+    sVibratorInfoBuilderClassInfo.setFrequencyProfileLegacy =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfileLegacy",
+                             "(Landroid/os/VibratorInfo$FrequencyProfileLegacy;)"
                              "Landroid/os/VibratorInfo$Builder;");
     sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectSize =
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setMaxEnvelopeEffectSize",

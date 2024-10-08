@@ -52,7 +52,6 @@ public class PipScheduler {
 
     private final Context mContext;
     private final PipBoundsState mPipBoundsState;
-    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
     private PipSchedulerReceiver mSchedulerReceiver;
@@ -97,12 +96,10 @@ public class PipScheduler {
 
     public PipScheduler(Context context,
             PipBoundsState pipBoundsState,
-            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
-        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
 
@@ -263,7 +260,6 @@ public class PipScheduler {
             return;
         }
         mPipBoundsState.setBounds(newBounds);
-        mPipMenuController.updateMenuLayout(newBounds);
         maybeUpdateMovementBounds();
     }
 }

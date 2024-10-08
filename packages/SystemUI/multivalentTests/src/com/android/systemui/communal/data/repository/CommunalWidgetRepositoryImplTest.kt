@@ -25,8 +25,10 @@ import android.content.applicationContext
 import android.graphics.Bitmap
 import android.os.UserHandle
 import android.os.userManager
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_COMMUNAL_WIDGET_RESIZING
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.data.repository.fakePackageChangeRepository
 import com.android.systemui.common.shared.model.PackageInstallSession
@@ -156,6 +158,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = communalWidgetItemEntry.widgetId,
                         providerInfo = providerInfoA,
                         rank = communalItemRankEntry.rank,
+                        spanY = communalWidgetItemEntry.spanY,
                     )
                 )
 
@@ -188,11 +191,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
+                        spanY = 3,
                     ),
                 )
         }
@@ -219,11 +224,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
+                        spanY = 3,
                     ),
                 )
 
@@ -238,11 +245,13 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         // Verify that provider info updated
                         providerInfo = providerInfoC,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Available(
                         appWidgetId = 2,
                         providerInfo = providerInfoB,
                         rank = 2,
+                        spanY = 3,
                     ),
                 )
         }
@@ -681,6 +690,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     ),
                     CommunalWidgetContentModel.Pending(
                         appWidgetId = 2,
@@ -688,6 +698,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         componentName = ComponentName("pk_2", "cls_2"),
                         icon = fakeIcon,
                         user = mainUser,
+                        spanY = 3,
                     ),
                 )
         }
@@ -723,6 +734,7 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         componentName = ComponentName("pk_1", "cls_1"),
                         icon = fakeIcon,
                         user = mainUser,
+                        spanY = 3,
                     )
                 )
 
@@ -740,20 +752,23 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
                         appWidgetId = 1,
                         providerInfo = providerInfoA,
                         rank = 1,
+                        spanY = 3,
                     )
                 )
         }
 
     @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
     fun updateWidgetSpanY_updatesWidgetInDaoAndRequestsBackup() =
         testScope.runTest {
             val widgetId = 1
             val newSpanY = 6
+            val widgetIdToRankMap = emptyMap<Int, Int>()
 
-            underTest.updateWidgetSpanY(widgetId, newSpanY)
+            underTest.resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
             runCurrent()
 
-            verify(communalWidgetDao).updateWidgetSpanY(widgetId, newSpanY)
+            verify(communalWidgetDao).resizeWidget(widgetId, newSpanY, widgetIdToRankMap)
             verify(backupManager).dataChanged()
         }
 

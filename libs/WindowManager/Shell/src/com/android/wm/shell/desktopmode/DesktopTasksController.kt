@@ -110,6 +110,7 @@ import com.android.wm.shell.windowdecor.OnTaskRepositionAnimationListener
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import com.android.wm.shell.windowdecor.extension.isMultiWindow
+import com.android.wm.shell.windowdecor.extension.requestingImmersive
 import java.io.PrintWriter
 import java.util.Optional
 import java.util.concurrent.Executor
@@ -580,7 +581,7 @@ class DesktopTasksController(
     fun moveTaskToFront(taskInfo: RunningTaskInfo) {
         logV("moveTaskToFront taskId=%s", taskInfo.taskId)
         val wct = WindowContainerTransaction()
-        wct.reorder(taskInfo.token, true)
+        wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
         val taskToMinimize =
             addAndGetMinimizeChangesIfNeeded(taskInfo.displayId, wct, taskInfo.taskId)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -1842,6 +1843,17 @@ class DesktopTasksController(
     // TODO(b/366397912): Support full multi-user mode in Windowing.
     override fun onUserChanged(newUserId: Int, userContext: Context) {
         userId = newUserId
+    }
+
+    /** Called when a task's info changes. */
+    fun onTaskInfoChanged(taskInfo: RunningTaskInfo) {
+        if (!Flags.enableFullyImmersiveInDesktop()) return
+        val inImmersive = taskRepository.isTaskInFullImmersiveState(taskInfo.taskId)
+        val requestingImmersive = taskInfo.requestingImmersive
+        if (inImmersive && !requestingImmersive) {
+            // Exit immersive if the app is no longer requesting it.
+            exitDesktopTaskFromFullImmersive(taskInfo)
+        }
     }
 
     private fun dump(pw: PrintWriter, prefix: String) {

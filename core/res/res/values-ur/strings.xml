@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"کالز اور اطلاعات پر وائبریٹ کرے گا"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"کالز اور اطلاعات کی آواز خاموش کر دی جائے گی"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"سسٹم کی تبدیلیاں"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ڈسٹرب نہ کریں"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"نئی: \'ڈسٹرب نہ کریں\' اطلاعات کو چھپا رہی ہے"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"مزید جاننے اور تبدیل کرنے کیلئے تھپتھپائیں۔"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"اطلاع کی ترتیبات کا جائزہ لیں"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"‏Android 13 کے ساتھ اب آپ جو بھی ایپس انسٹال کریں گے انہیں اطلاعات بھیجنے کے لیے آپ کی اجازت درکار ہوگی۔ موجودہ ایپس کے لیے اس اجازت کو تبدیل کرنے کی خاطر تھپتھپائیں۔"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"بعد میں یاد دلائیں"</string>

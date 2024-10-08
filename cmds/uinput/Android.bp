@@ -25,7 +25,7 @@ java_binary {
         "src/**/*.java",
         ":uinputcommand_aidl",
     ],
-    required: ["libuinputcommand_jni"],
+    jni_libs: ["libuinputcommand_jni"],
 }
 
 filegroup {

@@ -12221,6 +12221,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Collects keys in the extra bundle whose value are intents.
+     * With these keys collected on the client side, the system server would only unparcel values
+     * of these keys and create IntentCreatorToken for them.
      * @hide
      */
     public void collectExtraIntentKeys() {
@@ -12583,22 +12585,29 @@ public class Intent implements Parcelable, Cloneable {
      */
     @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToLeaveProcess(boolean leavingPackage) {
+        prepareToLeaveProcess(leavingPackage, true);
+    }
+
+    /**
+     * @hide
+     */
+    void prepareToLeaveProcess(boolean leavingPackage, boolean isTopLevel) {
         setAllowFds(false);
 
         if (mSelector != null) {
-            mSelector.prepareToLeaveProcess(leavingPackage);
+            mSelector.prepareToLeaveProcess(leavingPackage, false);
         }
         if (mClipData != null) {
             mClipData.prepareToLeaveProcess(leavingPackage, getFlags());
         }
         if (mOriginalIntent != null) {
-            mOriginalIntent.prepareToLeaveProcess(leavingPackage);
+            mOriginalIntent.prepareToLeaveProcess(leavingPackage, false);
         }
 
         if (mExtras != null && !mExtras.isParcelled()) {
             final Object intent = mExtras.get(Intent.EXTRA_INTENT);
             if (intent instanceof Intent) {
-                ((Intent) intent).prepareToLeaveProcess(leavingPackage);
+                ((Intent) intent).prepareToLeaveProcess(leavingPackage, false);
             }
         }
 
@@ -12671,6 +12680,10 @@ public class Intent implements Parcelable, Cloneable {
                 // conditions are not met.
                 StrictMode.onUnsafeIntentLaunch(this);
             }
+        }
+
+        if (isTopLevel) {
+            collectExtraIntentKeys();
         }
     }
 

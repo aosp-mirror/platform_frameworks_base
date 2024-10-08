@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు వైబ్రేట్ అవుతాయి"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు మ్యూట్ చేయబడతాయి"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"సిస్టమ్ మార్పులు"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"అంతరాయం కలిగించవద్దు"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"కొత్తది: అంతరాయం కలిగించవద్దు నోటిఫికేషన్‌లను దాస్తోంది"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"మరింత తెలుసుకోవడానికి మరియు మార్చడానికి నొక్కండి."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"అంతరాయం కలిగించవద్దు మార్చబడింది"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"బ్లాక్ చేయబడిన దాన్ని చెక్ చేయడానికి నొక్కండి."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"నోటిఫికేషన్ సెట్టింగ్‌లను రివ్యూ చేయండి"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13తో మొదలుకుని, మీరు ఇన్‌స్టాల్ చేసే యాప్‌లకు నోటిఫికేషన్‌లను పంపడానికి మీ అనుమతి అవసరం. ఇప్పటికే ఉన్న యాప్‌ల కోసం ఈ అనుమతిని మార్చడానికి ట్యాప్ చేయండి."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"తర్వాత గుర్తు చేయి"</string>

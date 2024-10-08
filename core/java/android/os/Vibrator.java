@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -33,7 +34,7 @@ import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
-import android.os.vibrator.VibratorFrequencyProfile;
+import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 
@@ -290,13 +291,15 @@ public abstract class Vibrator {
      * @hide
      */
     @TestApi
+    @SuppressLint("UnflaggedApi")
     @Nullable
-    public VibratorFrequencyProfile getFrequencyProfile() {
-        VibratorInfo.FrequencyProfile frequencyProfile = getInfo().getFrequencyProfile();
+    public VibratorFrequencyProfileLegacy getFrequencyProfileLegacy() {
+        VibratorInfo.FrequencyProfileLegacy frequencyProfile =
+                getInfo().getFrequencyProfileLegacy();
         if (frequencyProfile.isEmpty()) {
             return null;
         }
-        return new VibratorFrequencyProfile(frequencyProfile);
+        return new VibratorFrequencyProfileLegacy(frequencyProfile);
     }
 
     /**

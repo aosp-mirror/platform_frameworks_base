@@ -21,8 +21,11 @@ sealed class ContextualEduContentViewModel(open val userId: Int)
 data class ContextualEduNotificationViewModel(
     val title: String,
     val message: String,
-    override val userId: Int
+    override val userId: Int,
 ) : ContextualEduContentViewModel(userId)
 
-data class ContextualEduToastViewModel(val message: String, override val userId: Int) :
-    ContextualEduContentViewModel(userId)
+data class ContextualEduToastViewModel(
+    val message: String,
+    val icon: Int,
+    override val userId: Int,
+) : ContextualEduContentViewModel(userId)

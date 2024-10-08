@@ -2131,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Wibracje przy połączeniach i powiadomieniach"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Wyciszenie połączeń i powiadomień"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Zmiany w systemie"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nie przeszkadzać"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nowość: w trybie Nie przeszkadzać powiadomienia są ukrywane"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Kliknij, by dowiedzieć się więcej i zmienić ustawienia."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Zmiany w trybie Nie przeszkadzać"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Sprawdź ustawienia powiadomień"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"W Androidzie 13 i nowszych zainstalowane aplikacje będą potrzebowały zezwolenia na wysyłanie powiadomień. Kliknij, aby zmienić uprawnienia dla istniejących aplikacji."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Przypomnij później"</string>

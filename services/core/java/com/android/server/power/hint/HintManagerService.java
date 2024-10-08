@@ -1059,8 +1059,22 @@ public final class HintManagerService extends SystemService {
                     throw new SecurityException(errMsg);
                 }
                 if (resetOnForkEnabled()){
-                    for (int tid : tids) {
-                        Process.setThreadScheduler(tid, Process.SCHED_RESET_ON_FORK, 0);
+                    try {
+                        for (int tid : tids) {
+                            int policy = Process.getThreadScheduler(tid);
+                            // If the thread is not using the default scheduling policy (SCHED_OTHER),
+                            // we don't change it.
+                            if (policy != Process.SCHED_OTHER) {
+                                continue;
+                            }
+                            // set the SCHED_RESET_ON_FORK flag.
+                            int prio = Process.getThreadPriority(tid);
+                            Process.setThreadScheduler(tid, Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK, 0);
+                            Process.setThreadPriority(tid, prio);
+                        }
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to set SCHED_RESET_ON_FORK for tids "
+                                + Arrays.toString(tids), e);
                     }
                 }
 
@@ -1454,8 +1468,22 @@ public final class HintManagerService extends SystemService {
                             throw new SecurityException(errMsg);
                         }
                         if (resetOnForkEnabled()){
-                            for (int tid : tids) {
-                                Process.setThreadScheduler(tid, Process.SCHED_RESET_ON_FORK, 0);
+                            try {
+                                for (int tid : tids) {
+                                    int policy = Process.getThreadScheduler(tid);
+                                    // If the thread is not using the default scheduling policy (SCHED_OTHER),
+                                    // we don't change it.
+                                    if (policy != Process.SCHED_OTHER) {
+                                        continue;
+                                    }
+                                    // set the SCHED_RESET_ON_FORK flag.
+                                    int prio = Process.getThreadPriority(tid);
+                                    Process.setThreadScheduler(tid, Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK, 0);
+                                    Process.setThreadPriority(tid, prio);
+                                }
+                            } catch (Exception e) {
+                                Slog.e(TAG, "Failed to set SCHED_RESET_ON_FORK for tids "
+                                        + Arrays.toString(tids), e);
                             }
                         }
                         if (powerhintThreadCleanup()) {

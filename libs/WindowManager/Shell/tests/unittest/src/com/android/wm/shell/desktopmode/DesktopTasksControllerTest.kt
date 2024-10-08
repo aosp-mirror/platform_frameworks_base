@@ -50,6 +50,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.DragEvent
 import android.view.Gravity
 import android.view.SurfaceControl
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_CLOSE
@@ -75,6 +76,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
+import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
 import com.android.wm.shell.MockToken
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
@@ -142,6 +144,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.times
@@ -3149,6 +3152,30 @@ class DesktopTasksControllerTest : ShellTestCase() {
     verify(mockDesktopFullImmersiveTransitionHandler).exitImmersive(eq(task), argThat { wct ->
       wct.hasBoundsChange(task.token, STABLE_BOUNDS)
     })
+  }
+
+  @Test
+  @EnableFlags(FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun onTaskInfoChanged_inImmersiveUnrequestsImmersive_exits() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY)
+    taskRepository.setTaskInFullImmersiveState(DEFAULT_DISPLAY, task.taskId, immersive = true)
+
+    task.requestedVisibleTypes = WindowInsets.Type.statusBars()
+    controller.onTaskInfoChanged(task)
+
+    verify(mockDesktopFullImmersiveTransitionHandler).exitImmersive(eq(task), any())
+  }
+
+  @Test
+  @EnableFlags(FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+  fun onTaskInfoChanged_notInImmersiveUnrequestsImmersive_noReExit() {
+    val task = setUpFreeformTask(DEFAULT_DISPLAY)
+    taskRepository.setTaskInFullImmersiveState(DEFAULT_DISPLAY, task.taskId, immersive = false)
+
+    task.requestedVisibleTypes = WindowInsets.Type.statusBars()
+    controller.onTaskInfoChanged(task)
+
+    verify(mockDesktopFullImmersiveTransitionHandler, never()).exitImmersive(eq(task), any())
   }
 
   /**

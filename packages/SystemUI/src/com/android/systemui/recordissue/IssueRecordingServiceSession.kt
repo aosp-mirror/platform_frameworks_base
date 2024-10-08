@@ -19,7 +19,6 @@ package com.android.systemui.recordissue
 import android.app.IActivityManager
 import android.app.NotificationManager
 import android.content.ContentResolver
-import android.content.Context
 import android.net.Uri
 import android.os.UserHandle
 import android.provider.Settings
@@ -42,7 +41,7 @@ class IssueRecordingServiceSession(
     private val bgExecutor: Executor,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
-    private val traceurMessageSender: TraceurMessageSender,
+    private val traceurConnection: TraceurConnection,
     private val issueRecordingState: IssueRecordingState,
     private val iActivityManager: IActivityManager,
     private val notificationManager: NotificationManager,
@@ -50,7 +49,7 @@ class IssueRecordingServiceSession(
 ) {
 
     fun start() {
-        bgExecutor.execute { traceurMessageSender.startTracing(issueRecordingState.traceConfig) }
+        bgExecutor.execute { traceurConnection.startTracing(issueRecordingState.traceConfig) }
         issueRecordingState.isRecording = true
     }
 
@@ -59,12 +58,12 @@ class IssueRecordingServiceSession(
             if (issueRecordingState.traceConfig.longTrace) {
                 Settings.Global.putInt(contentResolver, NOTIFY_SESSION_ENDED_SETTING, DISABLED)
             }
-            traceurMessageSender.stopTracing()
+            traceurConnection.stopTracing()
         }
         issueRecordingState.isRecording = false
     }
 
-    fun share(notificationId: Int, screenRecording: Uri?, context: Context) {
+    fun share(notificationId: Int, screenRecording: Uri?) {
         bgExecutor.execute {
             notificationManager.cancelAsUser(
                 null,
@@ -75,7 +74,7 @@ class IssueRecordingServiceSession(
             if (issueRecordingState.takeBugreport) {
                 iActivityManager.requestBugReportWithExtraAttachment(screenRecording)
             } else {
-                traceurMessageSender.shareTraces(context, screenRecording)
+                traceurConnection.shareTraces(screenRecording)
             }
         }
 

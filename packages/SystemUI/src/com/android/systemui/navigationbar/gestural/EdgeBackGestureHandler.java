@@ -64,7 +64,6 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -191,7 +190,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 }
             };
 
-    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final Context mContext;
     private final UserTracker mUserTracker;
     private final OverviewProxyService mOverviewProxyService;
@@ -1042,10 +1040,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
             mIsTrackpadThreeFingerSwipe = isTrackpadThreeFingerSwipe(ev);
 
-            // ACTION_UP or ACTION_CANCEL is not guaranteed to be called before a new
-            // ACTION_DOWN, in that case we should just reuse the old instance.
-            mVelocityTracker.clear();
-
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mInputEventReceiver.setBatchingEnabled(false);
@@ -1194,28 +1188,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
 
     private void dispatchToBackAnimation(MotionEvent event) {
         if (mBackAnimation != null) {
-            mVelocityTracker.addMovement(event);
-
-            final float velocityX;
-            final float velocityY;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                // Compute the current velocity is expensive (see computeCurrentVelocity), so we
-                // are only doing it when the user completes the gesture.
-                int unitPixelPerSecond = 1000;
-                int maxVelocity = mViewConfiguration.getScaledMaximumFlingVelocity();
-                mVelocityTracker.computeCurrentVelocity(unitPixelPerSecond, maxVelocity);
-                velocityX = mVelocityTracker.getXVelocity();
-                velocityY = mVelocityTracker.getYVelocity();
-            } else {
-                velocityX = Float.NaN;
-                velocityY = Float.NaN;
-            }
-
             mBackAnimation.onBackMotion(
                     /* touchX = */ event.getX(),
                     /* touchY = */ event.getY(),
-                    /* velocityX = */ velocityX,
-                    /* velocityY = */ velocityY,
                     /* keyAction = */ event.getActionMasked(),
                     /* swipeEdge = */ mIsOnLeftEdge ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }

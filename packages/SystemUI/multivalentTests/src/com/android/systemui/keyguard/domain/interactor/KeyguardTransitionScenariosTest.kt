@@ -41,9 +41,9 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.flags.fakeFeatureFlagsClassic
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepositorySpy
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockMode
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
@@ -76,7 +76,6 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.reset
-import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4
 import platform.test.runner.parameterized.Parameters
@@ -91,7 +90,7 @@ import platform.test.runner.parameterized.Parameters
 class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            fakeKeyguardTransitionRepository = spy(FakeKeyguardTransitionRepository())
+            this.keyguardTransitionRepository = fakeKeyguardTransitionRepositorySpy
         }
     private val testScope = kosmos.testScope
 
@@ -99,7 +98,7 @@ class KeyguardTransitionScenariosTest(flags: FlagsParameterization?) : SysuiTest
     private val keyguardInteractor by lazy { kosmos.keyguardInteractor }
     private val bouncerRepository by lazy { kosmos.fakeKeyguardBouncerRepository }
     private val shadeTestUtil by lazy { kosmos.shadeTestUtil }
-    private val transitionRepository by lazy { kosmos.fakeKeyguardTransitionRepository }
+    private val transitionRepository by lazy { kosmos.fakeKeyguardTransitionRepositorySpy }
     private lateinit var featureFlags: FakeFeatureFlags
 
     // Used to verify transition requests for test output
