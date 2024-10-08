@@ -20,7 +20,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp">
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="16dp">
 
     <TextView
         android:id="@+id/header_text"

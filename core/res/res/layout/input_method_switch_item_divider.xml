@@ -21,12 +21,12 @@
     android:orientation="vertical"
     android:layout_marginHorizontal="16dp"
     android:layout_marginTop="8dp"
-    android:layout_marginBottom="12dp">
+    android:layout_marginBottom="16dp">
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="?attr/materialColorSurfaceVariant"
+        android:background="?attr/materialColorOutlineVariant"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="24dp"
         android:importantForAccessibility="no"/>
