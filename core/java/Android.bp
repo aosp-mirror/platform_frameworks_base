@@ -647,7 +647,6 @@ filegroup {
 
 java_library {
     name: "protolog-lib",
-    platform_apis: true,
     srcs: [
         "com/android/internal/protolog/ProtoLogImpl.java",
         "com/android/internal/protolog/ProtoLogViewerConfigReader.java",
