@@ -308,6 +308,7 @@ cc_library_shared_for_libandroid_runtime {
                 "spatializer-aidl-cpp",
                 "av-types-aidl-cpp",
                 "android.hardware.camera.device@3.2",
+                "camera_platform_flags_c_lib",
                 "libandroid_net",
                 "libbattery",
                 "libnetdutils",
