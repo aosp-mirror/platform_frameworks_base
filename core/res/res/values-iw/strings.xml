@@ -2130,11 +2130,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"שיחות והודעות ירטטו"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"שיחות והתראות יושתקו"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"שינויים במערכת"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"נא לא להפריע"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"חדש: מצב \'נא לא להפריע\' מסתיר התראות"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"אפשר להקיש כדי לקבל מידע נוסף ולבצע שינויים."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"ההגדרה \'נא לא להפריע\' השתנתה"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"יש להקיש כדי לבדוק מה חסום."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"בדיקת הגדרת ההתראות"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"‏החל מגרסת Android 13, אפליקציות שיותקנו יוכלו לשלוח התראות רק אם יקבלו ממך הרשאה. אפשר להקיש כדי לשנות את ההרשאה הזו באפליקציות קיימות."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"תזכירו לי מאוחר יותר"</string>
