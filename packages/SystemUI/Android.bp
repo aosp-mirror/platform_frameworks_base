@@ -802,6 +802,7 @@ android_library {
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
         "kosmos",
+        "testables",
         "androidx.test.rules",
     ],
     libs: [
