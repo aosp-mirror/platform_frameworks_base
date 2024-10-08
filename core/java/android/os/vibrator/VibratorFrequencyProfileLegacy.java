@@ -18,6 +18,7 @@ package android.os.vibrator;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.os.VibratorInfo;
 
@@ -42,12 +43,14 @@ import com.android.internal.util.Preconditions;
  * @hide
  */
 @TestApi
-public final class VibratorFrequencyProfile {
+@SuppressLint("UnflaggedApi")
+public final class VibratorFrequencyProfileLegacy {
 
-    private final VibratorInfo.FrequencyProfile mFrequencyProfile;
+    private final VibratorInfo.FrequencyProfileLegacy mFrequencyProfile;
 
     /** @hide */
-    public VibratorFrequencyProfile(@NonNull VibratorInfo.FrequencyProfile frequencyProfile) {
+    public VibratorFrequencyProfileLegacy(
+            @NonNull VibratorInfo.FrequencyProfileLegacy frequencyProfile) {
         Preconditions.checkArgument(!frequencyProfile.isEmpty(),
                 "Frequency profile must have a non-empty frequency range");
         mFrequencyProfile = frequencyProfile;
@@ -68,6 +71,7 @@ public final class VibratorFrequencyProfile {
      * @hide
      */
     @TestApi
+    @SuppressLint("UnflaggedApi")
     @NonNull
     @FloatRange(from = 0, to = 1)
     public float[] getMaxAmplitudeMeasurements() {
@@ -82,6 +86,7 @@ public final class VibratorFrequencyProfile {
      * @hide
      */
     @TestApi
+    @SuppressLint("UnflaggedApi")
     public float getMaxAmplitudeMeasurementInterval() {
         return mFrequencyProfile.getFrequencyResolutionHz();
     }
@@ -93,6 +98,7 @@ public final class VibratorFrequencyProfile {
      * @hide
      */
     @TestApi
+    @SuppressLint("UnflaggedApi")
     public float getMinFrequency() {
         return mFrequencyProfile.getFrequencyRangeHz().getLower();
     }
@@ -104,6 +110,7 @@ public final class VibratorFrequencyProfile {
      * @hide
      */
     @TestApi
+    @SuppressLint("UnflaggedApi")
     public float getMaxFrequency() {
         return mFrequencyProfile.getFrequencyRangeHz().getUpper();
     }

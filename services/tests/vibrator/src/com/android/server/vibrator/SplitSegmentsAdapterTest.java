@@ -41,8 +41,8 @@ public class SplitSegmentsAdapterTest {
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{
             /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f, /* 200Hz= */ 0.8f};
 
-    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
-            new VibratorInfo.FrequencyProfile(
+    private static final VibratorInfo.FrequencyProfileLegacy TEST_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfileLegacy(
                     /* resonantFrequencyHz= */ 150f, /* minFrequencyHz= */ 50f,
                     /* frequencyResolutionHz= */ 25f, TEST_AMPLITUDE_MAP);
 
@@ -125,7 +125,7 @@ public class SplitSegmentsAdapterTest {
         VibratorInfo vibratorInfo = new VibratorInfo.Builder(0)
                 .setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)
                 .setPwlePrimitiveDurationMax(10)
-                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
+                .setFrequencyProfileLegacy(TEST_FREQUENCY_PROFILE)
                 .build();
 
         // Update repeat index to skip the ramp splits.
@@ -137,7 +137,7 @@ public class SplitSegmentsAdapterTest {
     private static VibratorInfo createVibratorInfo(int... capabilities) {
         return new VibratorInfo.Builder(0)
                 .setCapabilities(IntStream.of(capabilities).reduce((a, b) -> a | b).orElse(0))
-                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
+                .setFrequencyProfileLegacy(TEST_FREQUENCY_PROFILE)
                 .setPwlePrimitiveDurationMax(PWLE_COMPOSITION_PRIMITIVE_DURATION_MAX)
                 .build();
     }
