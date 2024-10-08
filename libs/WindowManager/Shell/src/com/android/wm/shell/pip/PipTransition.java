@@ -665,17 +665,6 @@ public class PipTransition extends PipTransitionController {
         return null;
     }
 
-    @Nullable
-    private TransitionInfo.Change findFixedRotationChange(@NonNull TransitionInfo info) {
-        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
-            final TransitionInfo.Change change = info.getChanges().get(i);
-            if (change.getEndFixedRotation() != ROTATION_UNDEFINED) {
-                return change;
-            }
-        }
-        return null;
-    }
-
     private void startExitAnimation(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,

@@ -406,12 +406,9 @@ public class PipTouchHandler implements PipTransitionState.PipTransitionStateCha
         // We need to remove the callback even if the shelf is visible, in case it the delayed
         // callback hasn't been executed yet to avoid the wrong final state.
         mMainExecutor.removeCallbacks(mMoveOnShelVisibilityChanged);
-        if (shelfVisible) {
-            mMoveOnShelVisibilityChanged.run();
-        } else {
-            // Postpone moving in response to hide of Launcher in case there's another change
-            mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
-        }
+
+        // Postpone moving in response to hide of Launcher in case there's another change
+        mMainExecutor.executeDelayed(mMoveOnShelVisibilityChanged, PIP_KEEP_CLEAR_AREAS_DELAY);
     }
 
     /**
