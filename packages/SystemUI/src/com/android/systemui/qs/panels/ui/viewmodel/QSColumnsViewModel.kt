@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.data.repository
+package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.domain.interactor.QSColumnsInteractor
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+
+interface QSColumnsViewModel {
+    val columns: StateFlow<Int>
+}
 
 @SysUISingleton
-class FixedColumnsRepository @Inject constructor() {
-    // Number of columns in the narrowest state for consistency
-    private val _columns = MutableStateFlow(4)
-    val columns: StateFlow<Int> = _columns.asStateFlow()
+class QSColumnsSizeViewModelImpl @Inject constructor(interactor: QSColumnsInteractor) :
+    QSColumnsViewModel {
+    override val columns: StateFlow<Int> = interactor.columns
 }
