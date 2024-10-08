@@ -514,7 +514,7 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 func combinedApisModuleFactory() android.Module {
 	module := &CombinedApis{}
 	module.AddProperties(&module.properties)
-	android.InitAndroidModule(module)
+	android.InitAndroidArchModule(module, android.DeviceSupported, android.MultilibCommon)
 	android.AddLoadHook(module, func(ctx android.LoadHookContext) { module.createInternalModules(ctx) })
 	return module
 }
