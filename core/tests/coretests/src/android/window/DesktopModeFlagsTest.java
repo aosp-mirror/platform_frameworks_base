@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package android.window.flags;
+package android.window;
 
-import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE;
-import static android.window.flags.DesktopModeFlags.ToggleOverride.OVERRIDE_OFF;
-import static android.window.flags.DesktopModeFlags.ToggleOverride.OVERRIDE_ON;
-import static android.window.flags.DesktopModeFlags.ToggleOverride.OVERRIDE_UNSET;
-import static android.window.flags.DesktopModeFlags.ToggleOverride.fromSetting;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODE;
+import static android.window.DesktopModeFlags.ToggleOverride.OVERRIDE_OFF;
+import static android.window.DesktopModeFlags.ToggleOverride.OVERRIDE_ON;
+import static android.window.DesktopModeFlags.ToggleOverride.OVERRIDE_UNSET;
+import static android.window.DesktopModeFlags.ToggleOverride.fromSetting;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS;
 
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_TRANSITIONS;
@@ -40,6 +41,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,7 +50,7 @@ import org.junit.runner.RunWith;
 import java.lang.reflect.Field;
 
 /**
- * Test class for {@link DesktopModeFlags}
+ * Test class for {@link android.window.DesktopModeFlags}
  *
  * Build/Install/Run:
  * atest FrameworksCoreTests:DesktopModeFlagsTest
@@ -68,8 +70,12 @@ public class DesktopModeFlagsTest {
     private static final int OVERRIDE_UNSET_SETTING = -1;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+    }
+
+    @After
+    public void tearDown() throws Exception {
         resetCache();
     }
 
@@ -203,7 +209,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
@@ -212,7 +218,7 @@ public class DesktopModeFlagsTest {
     public void isTrue_dwFlagOn_overrideUnset_featureFlagOff_returnsFalse() {
         setOverride(OVERRIDE_UNSET_SETTING);
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
@@ -225,7 +231,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
@@ -235,7 +241,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
@@ -248,7 +254,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
@@ -258,7 +264,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
@@ -271,7 +277,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
@@ -284,7 +290,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_UNSET_SETTING);
 
         // For unset overrides, follow flag
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
@@ -297,7 +303,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
@@ -310,7 +316,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_ON_SETTING);
 
         // Follow override if they exist, and is not equal to default toggle state (dw flag)
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
@@ -323,7 +329,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isTrue();
     }
 
     @Test
@@ -336,7 +342,7 @@ public class DesktopModeFlagsTest {
         setOverride(OVERRIDE_OFF_SETTING);
 
         // When toggle override matches its default state (dw flag), don't override flags
-        assertThat(DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
+        assertThat(ENABLE_DESKTOP_WINDOWING_TRANSITIONS.isTrue()).isFalse();
     }
 
     @Test
@@ -375,5 +381,6 @@ public class DesktopModeFlagsTest {
                 "sCachedToggleOverride");
         cachedToggleOverride.setAccessible(true);
         cachedToggleOverride.set(null, null);
+        setOverride(OVERRIDE_UNSET_SETTING);
     }
 }

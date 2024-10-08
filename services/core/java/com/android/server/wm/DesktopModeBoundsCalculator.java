@@ -36,7 +36,7 @@ import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.Size;
 import android.view.Gravity;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import java.util.function.Consumer;
 
