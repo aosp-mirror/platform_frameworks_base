@@ -255,11 +255,11 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         Assert.isMainThread();
 
         mCurrentRequestCallback = requestCallback;
+        Rect bounds = screenshot.getOriginalScreenBounds();
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
                 && screenshot.getBitmap() == null) {
-            Rect bounds = getFullScreenRect();
+            bounds = getFullScreenRect();
             screenshot.setBitmap(mImageCapture.captureDisplay(mDisplay.getDisplayId(), bounds));
-            screenshot.setScreenBounds(bounds);
         }
 
         if (screenshot.getBitmap() == null) {
@@ -325,22 +325,22 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
 
         boolean showFlash;
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
-            if (screenshot.getScreenBounds() != null
-                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getInsets(),
-                    screenshot.getScreenBounds())) {
+            if (bounds != null
+                    && aspectRatiosMatch(screenshot.getBitmap(), screenshot.getOriginalInsets(),
+                    bounds)) {
                 showFlash = false;
             } else {
                 showFlash = true;
-                screenshot.setInsets(Insets.NONE);
-                screenshot.setScreenBounds(new Rect(0, 0, screenshot.getBitmap().getWidth(),
-                        screenshot.getBitmap().getHeight()));
+                bounds = new Rect(0, 0, screenshot.getBitmap().getWidth(),
+                        screenshot.getBitmap().getHeight());
             }
         } else {
             showFlash = true;
         }
 
+        final Rect animationBounds = bounds;
         mViewProxy.prepareEntranceAnimation(
-                () -> startAnimation(screenshot.getScreenBounds(), showFlash,
+                () -> startAnimation(animationBounds, showFlash,
                         () -> mMessageContainerController.onScreenshotTaken(screenshot)));
 
         mViewProxy.setScreenshot(screenshot);
