@@ -20,9 +20,9 @@ import android.view.MotionEvent
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.FINISHED
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.IN_PROGRESS
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NOT_STARTED
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -32,23 +32,23 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class HomeGestureMonitorTest : SysuiTestCase() {
 
-    private var gestureState = NOT_STARTED
+    private var gestureState: GestureState = GestureState.NotStarted
     private val gestureMonitor =
         HomeGestureMonitor(
             gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
-            gestureStateChangedCallback = { gestureState = it }
+            gestureStateChangedCallback = { gestureState = it },
         )
 
     @Test
     fun triggersGestureFinishedForThreeFingerGestureUp() {
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = FINISHED)
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = Finished)
     }
 
     @Test
     fun triggersGestureProgressForThreeFingerGestureStarted() {
         assertStateAfterEvents(
             events = ThreeFingerGesture.startEvents(x = 0f, y = 0f),
-            expectedState = IN_PROGRESS
+            expectedState = InProgress(),
         )
     }
 
@@ -56,28 +56,25 @@ class HomeGestureMonitorTest : SysuiTestCase() {
     fun doesntTriggerGestureFinished_onGestureDistanceTooShort() {
         assertStateAfterEvents(
             events = ThreeFingerGesture.swipeUp(distancePx = SWIPE_DISTANCE / 2),
-            expectedState = NOT_STARTED
+            expectedState = NotStarted,
         )
     }
 
     @Test
     fun doesntTriggerGestureFinished_onThreeFingersSwipeInOtherDirections() {
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeDown(), expectedState = NOT_STARTED)
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeLeft(), expectedState = NOT_STARTED)
-        assertStateAfterEvents(
-            events = ThreeFingerGesture.swipeRight(),
-            expectedState = NOT_STARTED
-        )
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeDown(), expectedState = NotStarted)
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeLeft(), expectedState = NotStarted)
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeRight(), expectedState = NotStarted)
     }
 
     @Test
     fun doesntTriggerGestureFinished_onTwoFingersSwipe() {
-        assertStateAfterEvents(events = TwoFingerGesture.swipeUp(), expectedState = NOT_STARTED)
+        assertStateAfterEvents(events = TwoFingerGesture.swipeUp(), expectedState = NotStarted)
     }
 
     @Test
     fun doesntTriggerGestureFinished_onFourFingersSwipe() {
-        assertStateAfterEvents(events = FourFingerGesture.swipeUp(), expectedState = NOT_STARTED)
+        assertStateAfterEvents(events = FourFingerGesture.swipeUp(), expectedState = NotStarted)
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {
