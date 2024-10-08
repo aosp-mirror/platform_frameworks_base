@@ -255,12 +255,12 @@ public class InputRouteManagerTest {
 
     @Test
     public void getMaxInputGain_returnMaxInputGain() {
-        assertThat(mInputRouteManager.getMaxInputGain()).isEqualTo(15);
+        assertThat(mInputRouteManager.getMaxInputGain()).isEqualTo(100);
     }
 
     @Test
     public void getCurrentInputGain_returnCurrentInputGain() {
-        assertThat(mInputRouteManager.getCurrentInputGain()).isEqualTo(8);
+        assertThat(mInputRouteManager.getCurrentInputGain()).isEqualTo(100);
     }
 
     @Test
