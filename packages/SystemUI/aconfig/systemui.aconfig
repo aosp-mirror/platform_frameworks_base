@@ -1473,3 +1473,11 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "magic_portrait_wallpapers"
+   namespace: "systemui"
+   description: "Magic Portrait related changes in systemui"
+   bug: "370863642"
+}
+

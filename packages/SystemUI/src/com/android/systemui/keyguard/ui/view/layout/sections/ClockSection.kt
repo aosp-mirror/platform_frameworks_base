@@ -44,6 +44,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.res.R
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shared.R as sharedR
 import com.android.systemui.util.ui.value
 import dagger.Lazy
@@ -70,6 +71,7 @@ constructor(
     val blueprintInteractor: Lazy<KeyguardBlueprintInteractor>,
     private val rootViewModel: KeyguardRootViewModel,
     private val aodBurnInViewModel: AodBurnInViewModel,
+    private val largeScreenHeaderHelperLazy: Lazy<LargeScreenHeaderHelper>,
 ) : KeyguardSection() {
     private var disposableHandle: DisposableHandle? = null
 
@@ -172,7 +174,7 @@ constructor(
         }
     }
 
-    open fun applyDefaultConstraints(constraints: ConstraintSet) {
+    fun applyDefaultConstraints(constraints: ConstraintSet) {
         val guideline =
             if (keyguardClockViewModel.clockShouldBeCentered.value) PARENT_ID
             else R.id.split_shade_guideline
@@ -211,6 +213,28 @@ constructor(
 
             // Explicitly clear pivot to force recalculate pivot instead of using legacy value
             setTransformPivot(R.id.lockscreen_clock_view_large, Float.NaN, Float.NaN)
+
+            val smallClockBottom =
+                keyguardClockViewModel.getSmallClockTopMargin() +
+                    context.resources.getDimensionPixelSize(
+                        com.android.systemui.customization.R.dimen.small_clock_height
+                    )
+            val dateWeatherSmartspaceHeight = getDimen(context, DATE_WEATHER_VIEW_HEIGHT).toFloat()
+            val marginBetweenSmartspaceAndNotification =
+                context.resources.getDimensionPixelSize(
+                    R.dimen.keyguard_status_view_bottom_margin
+                ) +
+                    if (context.resources.getBoolean(R.bool.config_use_large_screen_shade_header)) {
+                        largeScreenHeaderHelperLazy.get().getLargeScreenHeaderHeight()
+                    } else {
+                        0
+                    }
+
+            clockInteractor.setNotificationStackDefaultTop(
+                smallClockBottom +
+                    dateWeatherSmartspaceHeight +
+                    marginBetweenSmartspaceAndNotification
+            )
         }
 
         constrainWeatherClockDateIconsBarrier(constraints)

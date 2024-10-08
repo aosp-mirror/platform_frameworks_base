@@ -145,6 +145,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -225,6 +226,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final ActivityStarter mActivityStarter;
     private final SensitiveNotificationProtectionController
             mSensitiveNotificationProtectionController;
+
+    private final WallpaperInteractor mWallpaperInteractor;
 
     private View mLongPressedView;
 
@@ -756,7 +759,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             NotificationDismissibilityProvider dismissibilityProvider,
             ActivityStarter activityStarter,
             SplitShadeStateController splitShadeStateController,
-            SensitiveNotificationProtectionController sensitiveNotificationProtectionController) {
+            SensitiveNotificationProtectionController sensitiveNotificationProtectionController,
+            WallpaperInteractor wallpaperInteractor) {
         mView = view;
         mKeyguardTransitionRepo = keyguardTransitionRepo;
         mViewBinder = viewBinder;
@@ -812,6 +816,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         mDismissibilityProvider = dismissibilityProvider;
         mActivityStarter = activityStarter;
         mSensitiveNotificationProtectionController = sensitiveNotificationProtectionController;
+        mWallpaperInteractor = wallpaperInteractor;
         mView.passSplitShadeStateController(splitShadeStateController);
         if (SceneContainerFlag.isEnabled()) {
             mWakeUpCoordinator.setStackScroller(this);
@@ -948,6 +953,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             collectFlow(mView, mKeyguardTransitionRepo.getTransitions(),
                     this::onKeyguardTransitionChanged);
         }
+
+        mView.setWallpaperInteractor(mWallpaperInteractor);
     }
 
     private boolean isInVisibleLocation(NotificationEntry entry) {
