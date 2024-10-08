@@ -31,7 +31,6 @@
 
         <TextView
             android:id="@android:id/title"
-            android:text="Title"
             style="@style/SettingsLibEntityHeaderTitle"/>
 
         <com.android.settingslib.widget.CollapsableTextView

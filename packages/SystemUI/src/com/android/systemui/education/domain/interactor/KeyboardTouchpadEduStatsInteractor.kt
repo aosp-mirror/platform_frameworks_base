@@ -30,7 +30,7 @@ import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedul
 import java.time.Clock
 import javax.inject.Inject
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.days
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 import kotlinx.coroutines.CoroutineScope
@@ -64,7 +64,7 @@ constructor(
             get() =
                 SystemProperties.getLong(
                         "persist.contextual_edu.initial_delay_sec",
-                        /* defaultValue= */ 72.hours.inWholeSeconds
+                        /* defaultValue= */ 7.days.inWholeSeconds,
                     )
                     .toDuration(DurationUnit.SECONDS)
     }

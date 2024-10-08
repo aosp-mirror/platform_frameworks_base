@@ -352,16 +352,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         public void onBackMotion(
                 float touchX,
                 float touchY,
-                float velocityX,
-                float velocityY,
                 int keyAction,
                 @BackEvent.SwipeEdge int swipeEdge
         ) {
             mShellExecutor.execute(() -> onMotionEvent(
                     /* touchX = */ touchX,
                     /* touchY = */ touchY,
-                    /* velocityX = */ velocityX,
-                    /* velocityY = */ velocityY,
                     /* keyAction = */ keyAction,
                     /* swipeEdge = */ swipeEdge));
         }
@@ -500,14 +496,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     public void onMotionEvent(
             float touchX,
             float touchY,
-            float velocityX,
-            float velocityY,
             int keyAction,
             @BackEvent.SwipeEdge int swipeEdge) {
 
         BackTouchTracker activeTouchTracker = getActiveTracker();
         if (activeTouchTracker != null) {
-            activeTouchTracker.update(touchX, touchY, velocityX, velocityY);
+            activeTouchTracker.update(touchX, touchY);
         }
 
         // two gestures are waiting to be processed at the moment, skip any further user touches

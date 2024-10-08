@@ -23,8 +23,6 @@ import android.companion.virtual.IVirtualDeviceSoundEffectListener;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.AttributionSource;
-import android.hardware.display.IVirtualDisplayCallback;
-import android.hardware.display.VirtualDisplayConfig;
 
 /**
  * Interface for communication between VirtualDeviceManager and VirtualDeviceManagerService.
@@ -94,18 +92,6 @@ interface IVirtualDeviceManager {
      * Returns the device policy for the given virtual device and policy type.
      */
     int getDevicePolicy(int deviceId, int policyType);
-
-    /**
-     * Creates a virtual display owned by a particular virtual device.
-     *
-     * @param virtualDisplayConfig The configuration used in creating the display
-     * @param callback A callback that receives display lifecycle events
-     * @param virtualDevice The device that will own this display
-     * @param packageName The package name of the calling app
-     */
-    int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
-            in IVirtualDisplayCallback callback, in IVirtualDevice virtualDevice,
-            String packageName);
 
     /**
      * Returns device-specific session id for playback, or AUDIO_SESSION_ID_GENERATE

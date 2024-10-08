@@ -62,11 +62,10 @@ sealed interface CommunalContentModel {
             val providerInfo: AppWidgetProviderInfo,
             val appWidgetHost: CommunalAppWidgetHost,
             val inQuietMode: Boolean,
+            override val size: CommunalContentSize,
         ) : WidgetContent {
             override val key = KEY.widget(appWidgetId)
             override val componentName: ComponentName = providerInfo.provider
-            // Widget size is always half.
-            override val size = CommunalContentSize.HALF
 
             /** Whether this widget can be reconfigured after it has already been added. */
             val reconfigurable: Boolean
@@ -79,11 +78,10 @@ sealed interface CommunalContentModel {
             override val appWidgetId: Int,
             override val rank: Int,
             val providerInfo: AppWidgetProviderInfo,
+            override val size: CommunalContentSize,
         ) : WidgetContent {
             override val key = KEY.disabledWidget(appWidgetId)
             override val componentName: ComponentName = providerInfo.provider
-            // Widget size is always half.
-            override val size = CommunalContentSize.HALF
 
             val appInfo: ApplicationInfo?
                 get() = providerInfo.providerInfo?.applicationInfo
@@ -93,11 +91,10 @@ sealed interface CommunalContentModel {
             override val appWidgetId: Int,
             override val rank: Int,
             override val componentName: ComponentName,
+            override val size: CommunalContentSize,
             val icon: Bitmap? = null,
         ) : WidgetContent {
             override val key = KEY.pendingWidget(appWidgetId)
-            // Widget size is always half.
-            override val size = CommunalContentSize.HALF
         }
     }
 

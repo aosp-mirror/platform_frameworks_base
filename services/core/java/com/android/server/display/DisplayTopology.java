@@ -20,12 +20,15 @@ import android.annotation.Nullable;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Represents the relative placement of extended displays.
@@ -45,35 +48,50 @@ class DisplayTopology {
      * This is not necessarily the same as the default display.
      */
     @VisibleForTesting
-    int mPrimaryDisplayId;
+    int mPrimaryDisplayId = Display.INVALID_DISPLAY;
 
     /**
      * Add a display to the topology.
      * If this is the second display in the topology, it will be placed above the first display.
      * Subsequent displays will be places to the left or right of the second display.
-     * @param displayId The ID of the display
+     * @param displayId The logical display ID
      * @param width The width of the display
      * @param height The height of the display
      */
     void addDisplay(int displayId, double width, double height) {
-        if (mRoot == null) {
-            mRoot = new TreeNode(displayId, width, height, /* position= */ null, /* offset= */ 0);
-            mPrimaryDisplayId = displayId;
-            Slog.i(TAG, "First display added: " + mRoot);
-        } else if (mRoot.mChildren.isEmpty()) {
-            // This is the 2nd display. Align the middles of the top and bottom edges.
-            double offset = mRoot.mWidth / 2 - width / 2;
-            TreeNode display = new TreeNode(displayId, width, height,
-                    TreeNode.Position.POSITION_TOP, offset);
-            mRoot.mChildren.add(display);
-            Slog.i(TAG, "Second display added: " + display + ", parent ID: " + mRoot.mDisplayId);
+        addDisplay(displayId, width, height, /* shouldLog= */ true);
+    }
+
+    /**
+     * Remove a display from the topology.
+     * The default topology is created from the remaining displays, as if they were reconnected
+     * one by one.
+     * @param displayId The logical display ID
+     */
+    void removeDisplay(int displayId) {
+        if (!isDisplayPresent(displayId, mRoot)) {
+            return;
+        }
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.add(mRoot);
+        mRoot = null;
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            if (node.mDisplayId != displayId) {
+                addDisplay(node.mDisplayId, node.mWidth, node.mHeight, /* shouldLog= */ false);
+            }
+            queue.addAll(node.mChildren);
+        }
+        if (mPrimaryDisplayId == displayId) {
+            if (mRoot != null) {
+                mPrimaryDisplayId = mRoot.mDisplayId;
+            } else {
+                mPrimaryDisplayId = Display.INVALID_DISPLAY;
+            }
+            Slog.i(TAG,  "Primary display with ID " + displayId
+                    + " removed, new primary display: " + mPrimaryDisplayId);
         } else {
-            TreeNode rightMostDisplay = findRightMostDisplay(mRoot, mRoot.mWidth).first;
-            TreeNode newDisplay = new TreeNode(displayId, width, height,
-                    TreeNode.Position.POSITION_RIGHT, /* offset= */ 0);
-            rightMostDisplay.mChildren.add(newDisplay);
-            Slog.i(TAG, "Display added: " + newDisplay + ", parent ID: "
-                    + rightMostDisplay.mDisplayId);
+            Slog.i(TAG, "Display with ID " + displayId + " removed");
         }
     }
 
@@ -94,6 +112,35 @@ class DisplayTopology {
             ipw.increaseIndent();
             mRoot.dump(ipw);
             ipw.decreaseIndent();
+        }
+    }
+
+    private void addDisplay(int displayId, double width, double height, boolean shouldLog) {
+        if (mRoot == null) {
+            mRoot = new TreeNode(displayId, width, height, /* position= */ null, /* offset= */ 0);
+            mPrimaryDisplayId = displayId;
+            if (shouldLog) {
+                Slog.i(TAG, "First display added: " + mRoot);
+            }
+        } else if (mRoot.mChildren.isEmpty()) {
+            // This is the 2nd display. Align the middles of the top and bottom edges.
+            double offset = mRoot.mWidth / 2 - width / 2;
+            TreeNode display = new TreeNode(displayId, width, height,
+                    TreeNode.Position.POSITION_TOP, offset);
+            mRoot.mChildren.add(display);
+            if (shouldLog) {
+                Slog.i(TAG, "Second display added: " + display + ", parent ID: "
+                        + mRoot.mDisplayId);
+            }
+        } else {
+            TreeNode rightMostDisplay = findRightMostDisplay(mRoot, mRoot.mWidth).first;
+            TreeNode newDisplay = new TreeNode(displayId, width, height,
+                    TreeNode.Position.POSITION_RIGHT, /* offset= */ 0);
+            rightMostDisplay.mChildren.add(newDisplay);
+            if (shouldLog) {
+                Slog.i(TAG, "Display added: " + newDisplay + ", parent ID: "
+                        + rightMostDisplay.mDisplayId);
+            }
         }
     }
 
@@ -124,6 +171,21 @@ class DisplayTopology {
             }
         }
         return result;
+    }
+
+    private boolean isDisplayPresent(int displayId, TreeNode node) {
+        if (node == null) {
+            return false;
+        }
+        if (node.mDisplayId == displayId) {
+            return true;
+        }
+        for (TreeNode child : node.mChildren) {
+            if (isDisplayPresent(displayId, child)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @VisibleForTesting

@@ -18,9 +18,14 @@ package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.kosmos.testScope
+import org.mockito.Mockito.spy
 
 var Kosmos.keyguardTransitionRepository: KeyguardTransitionRepository by
     Kosmos.Fixture { fakeKeyguardTransitionRepository }
-var Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }
+var Kosmos.fakeKeyguardTransitionRepository by
+    Kosmos.Fixture { FakeKeyguardTransitionRepository(testScope = testScope) }
+var Kosmos.fakeKeyguardTransitionRepositorySpy: FakeKeyguardTransitionRepository by
+    Kosmos.Fixture { spy(fakeKeyguardTransitionRepository) }
 var Kosmos.realKeyguardTransitionRepository: KeyguardTransitionRepository by
     Kosmos.Fixture { KeyguardTransitionRepositoryImpl(testDispatcher) }

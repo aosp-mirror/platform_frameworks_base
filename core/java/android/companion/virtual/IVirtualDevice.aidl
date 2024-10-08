@@ -31,6 +31,8 @@ import android.content.ComponentName;
 import android.content.IntentFilter;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.hardware.display.IVirtualDisplayCallback;
+import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.input.VirtualDpadConfig;
 import android.hardware.input.VirtualKeyboardConfig;
 import android.hardware.input.VirtualKeyEvent;
@@ -93,6 +95,18 @@ interface IVirtualDevice {
      */
     boolean canCreateMirrorDisplays();
 
+    /*
+     * Turns off all trusted non-mirror displays of the virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void goToSleep();
+
+    /**
+     * Turns on all trusted non-mirror displays of the virtual device.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    void wakeUp();
+
     /**
      * Closes the virtual device and frees all associated resources.
      */
@@ -135,6 +149,13 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void onAudioSessionEnded();
+
+    /**
+     * Creates a virtual display and registers it with the display framework.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    int createVirtualDisplay(in VirtualDisplayConfig virtualDisplayConfig,
+            in IVirtualDisplayCallback callback);
 
     /**
      * Creates a new dpad and registers it with the input framework with the given token.
@@ -189,6 +210,7 @@ interface IVirtualDevice {
      * Returns the ID of the device corresponding to the given token, as registered with the input
      * framework.
      */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     int getInputDeviceId(IBinder token);
 
     /**
@@ -260,6 +282,7 @@ interface IVirtualDevice {
     /**
      * Launches a pending intent on the given display that is owned by this virtual device.
      */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void launchPendingIntent(int displayId, in PendingIntent pendingIntent,
             in ResultReceiver resultReceiver);
 
@@ -267,6 +290,7 @@ interface IVirtualDevice {
      * Returns the current cursor position of the mouse corresponding to the given token, in x and y
      * coordinates.
      */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     PointF getCursorPosition(IBinder token);
 
     /** Sets whether to show or hide the cursor while this virtual device is active. */
