@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Activat"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Activat • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desactivat"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Configura"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Gestiona a la configuració"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{No hi ha cap mode actiu}=1{{mode} està actiu}many{Hi ha # de modes actius}other{Hi ha # modes actius}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Converses"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Esborra totes les notificacions silencioses"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificacions pausades pel mode No molestis"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{No hi ha cap notificació}=1{{mode} ha posat en pausa les notificacions}=2{{mode} i un altre mode han posat en pausa les notificacions}many{{mode} i # de modes més han posat en pausa les notificacions}other{{mode} i # modes més han posat en pausa les notificacions}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Comença ara"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hi ha cap notificació"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"No hi ha cap notificació nova"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Mostra el mode de demostració"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"El mode <xliff:g id="MODENAME">%1$s</xliff:g> està activat"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Configura una manera més ràpida i segura de fer compres amb el telèfon"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Mostra-ho tot"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Aprèn els gestos del ratolí tàctil"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navega amb el teclat i el ratolí tàctil"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Aprèn els gestos del ratolí tàctil, les tecles de drecera i més"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gest Enrere"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gest Inici"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Mostra les aplicacions recents"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Fet"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Torna"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Per tornar enrere, llisca cap a l\'esquerra o cap a la dreta amb tres dits en qualsevol lloc del ratolí tàctil.\n\nTambé pots utilitzar les tecles d\'accions de drecera+Esc."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Ben fet!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Has completat el gest per tornar enrere."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Ves a la pantalla d\'inici"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Per anar a la pantalla d\'inici en qualsevol moment, fes lliscar tres dits cap amunt des de la part inferior de la pantalla."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Molt bé!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Has completat el gest per anar a la pantalla d\'inici."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Mostra les aplicacions recents"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Llisca cap amunt amb tres dits i mantén premut al ratolí tàctil."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Ben fet!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Has completat el gest per veure les aplicacions recents."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tecla d\'acció"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Per accedir a les aplicacions, prem la tecla d\'acció al teclat."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Enhorabona!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Has completat el gest de la tecla d\'acció.\n\nTecla d\'acció+/ mostra totes les dreceres que tens disponibles."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Retroil·luminació del teclat"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivell %1$d de %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Controls de la llar"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Per veure totes les aplicacions, prem la tecla d\'acció al teclat"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Emmascarat"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Desbloqueja per veure"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Educació contextual"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Utilitza el ratolí tàctil per tornar enrere"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Fes lliscar tres dits cap a l\'esquerra o cap a la dreta. Toca per aprendre més gestos."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Utilitza el ratolí tàctil per anar a la pantalla d\'inici"</string>

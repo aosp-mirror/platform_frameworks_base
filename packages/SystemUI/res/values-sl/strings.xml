@@ -440,7 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Vklopljeno"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Vklopljeno • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Izklopljeno"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Nastavitev"</string>
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"Ni nastavljeno"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Upravljanje v nastavitvah"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ni aktivnih načinov}=1{Način {mode} je aktiven}one{# način je aktiven}two{# načina sta aktivna}few{# načini so aktivni}other{# načinov je aktivnih}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Ne bodo vas motili zvoki ali vibriranje, razen v primeru alarmov, opomnikov, dogodkov in klicateljev, ki jih določite. Še vedno pa boste slišali vse, kar se boste odločili predvajati, vključno z glasbo, videoposnetki in igrami."</string>
@@ -573,8 +573,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pogovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Brisanje vseh tihih obvestil"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Prikazovanje obvestil je začasno zaustavljeno z načinom »ne moti«"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Ni obvestil}=1{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode}}=2{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še enim drugim načinom}one{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugim načinom}two{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugima načinoma}few{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugimi načini}other{Prikazovanje obvestil je začasno zaustavljeno z načinom {mode} in še # drugimi načini}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Začni zdaj"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ni obvestil"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Ni novih obvestil"</string>
@@ -706,6 +705,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Prikaz predstavitvenega načina"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g>: Vklopljeno"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Denarnica"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavite možnost hitrejšega in varnejšega plačevanja s telefonom."</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Prikaži vse"</string>
@@ -1405,26 +1405,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Učenje potez na sledilni ploščici"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Krmarjenje s tipkovnico in sledilno ploščico"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Učenje potez na sledilni ploščici, bližnjičnih tipk in drugega"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Poteza za pomik nazaj"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Poteza za začetni zaslon"</string>
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Nazaj"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Pojdi na začetni zaslon"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Ogled nedavnih aplikacij"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Končano"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Nazaj"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Za pomik nazaj povlecite levo ali desno s tremi prsti kjer koli na sledilni ploščici.\n\nUporabite lahko tudi bližnjični tipki Action + ESC."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Odlično!"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Na sledilni ploščici s tremi prsti povlecite levo ali desno"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Odlično!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Izvedli ste potezo za pomik nazaj."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Pomik na začetni zaslon"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Za pomik na začetni zaslon lahko kadar koli s tremi prsti povlečete navzgor z dna zaslona."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Odlično!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Izvedli ste potezo za pomik na začetni zaslon."</string>
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Na sledilni ploščici s tremi prsti povlecite navzgor"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Odlično!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Izvedli ste potezo za pomik na začetni zaslon"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Ogled nedavnih aplikacij"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Na sledilni ploščici s tremi prsti povlecite navzgor in pridržite."</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Na sledilni ploščici s tremi prsti povlecite navzgor in pridržite"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Odlično!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Izvedli ste potezo za ogled nedavnih aplikacij."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tipka za dejanja"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Za dostop do aplikacij pritisnite tipko za dejanja na tipkovnici."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Čestitamo!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Izvedli ste potezo za tipko za dejanja.\n\nČe hkrati pritisnete tipko za dejanja in poševnico naprej »/«, bodo prikazane vse razpoložljive bližnjice."</string>
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"Ogled vseh aplikacij"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Pritisnite tipko za dejanja na tipkovnici"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Odlično!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Izvedli ste potezo za ogled vseh aplikacij"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Osvetlitev tipkovnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Stopnja %1$d od %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrolniki za dom"</string>
@@ -1436,6 +1436,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Za ogled vseh aplikacij pritisnite tipko za dejanja na tipkovnici"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Zakrito"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Odklenite za ogled"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Kontekstualno izobraževanje"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Uporaba sledilne ploščice za pomik nazaj"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"S tremi prsti povlecite levo ali desno. Dotaknite se, če želite spoznati več potez."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Uporaba sledilne ploščice za pomik na začetni zaslon"</string>

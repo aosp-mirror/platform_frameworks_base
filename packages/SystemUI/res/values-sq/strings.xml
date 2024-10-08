@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktiv"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aktiv • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Joaktiv"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Konfiguro"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Menaxho te cilësimet"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Nuk ka modalitete aktive}=1{\"{mode}\" është aktiv}other{# modalitete janë aktive}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nuk do të shqetësohesh nga tingujt dhe dridhjet, përveç alarmeve, alarmeve rikujtuese, ngjarjeve dhe telefonuesve që specifikon. Do të vazhdosh të dëgjosh çdo gjë që zgjedh të luash duke përfshirë muzikën, videot dhe lojërat."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Bisedat"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Pastro të gjitha njoftimet në heshtje"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Njoftimet janë vendosur në pauzë nga modaliteti \"Mos shqetëso\""</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Asnjë njoftim}=1{Njoftimet u vendosën në pauzë nga {mode}}=2{Njoftimet u vendosën në pauzë nga {mode} dhe një modalitet tjetër}other{Njoftimet u vendosën në pauzë nga {mode} dhe # modalitete të tjera}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Fillo tani"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Asnjë njoftim"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Nuk ka njoftime të reja"</string>
@@ -706,6 +706,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Shfaq modalitetin e demonstrimit"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmi"</string>
+    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
+    <skip />
     <string name="wallet_title" msgid="5369767670735827105">"Portofoli"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguro për të kryer pagesa më të shpejta dhe më të sigurta përmes telefonit"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
@@ -1405,26 +1407,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Mëso gjestet e bllokut me prekje"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigo duke përdorur tastierën dhe bllokun me prekje"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Mëso gjestet e bllokut me prekje, shkurtoret e tastierës etj."</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gjesti i kthimit prapa"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gjesti për të shkuar tek ekrani bazë"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Shiko aplikacionet e fundit"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"U krye"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Kthehu prapa"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Për t\'u kthyer, rrëshqit shpejt majtas ose djathtas duke përdorur tri gishta kudo në bllokun me prekje.\n\nPër ta bërë këtë, mund të përdorësh gjithashtu shkurtoren e tastierës \"Action + ESC\"."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Punë e shkëlqyer!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"E ke përfunduar gjestin e kthimit prapa."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Shko tek ekrani bazë"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Për të shkuar tek ekrani bazë në çdo kohë, rrëshqit shpejt lart me tre gishta nga fundi i ekranit."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bukur!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"E ke përfunduar gjestin e kalimit tek ekrani bazë."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Shiko aplikacionet e fundit"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Rrëshqit shpejt lart dhe mbaj shtypur me tre gishta në bllokun me prekje."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Punë e shkëlqyer!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Përfundove gjestin për shikimin e aplikacioneve të fundit."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Tasti i veprimit"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Për t\'u qasur në aplikacionet e tua, shtyp tastin e veprimit në tastierë."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Urime!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Ke përfunduar gjestin e tastit të veprimit.\n\nVeprimi + / shfaq të gjitha shkurtoret që janë të disponueshme për ty."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Drita e sfondit e tastierës"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Niveli: %1$d nga %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kontrollet e shtëpisë"</string>
@@ -1436,6 +1450,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Për të shikuar të gjitha aplikacionet, shtyp tastin e veprimit në tastierë"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Redaktuar"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Shkyçe për ta parë"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Edukimi kontekstual"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Përdor bllokun me prekje për t\'u kthyer prapa"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Rrëshqit shpejt majtas ose djathtas duke përdorur tre gishta. Trokit për të mësuar më shumë gjeste."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Përdor bllokun me prekje për të shkuar tek ekrani bazë"</string>

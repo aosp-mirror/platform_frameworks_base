@@ -33,11 +33,13 @@
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceControl.h>
 #include <android_runtime/android_view_SurfaceSession.h>
+#include <cutils/ashmem.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
 #include <private/gui/ComposerService.h>
 #include <stdio.h>
@@ -734,6 +736,65 @@ static void nativeSetDesiredHdrHeadroom(JNIEnv* env, jclass clazz, jlong transac
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
     transaction->setDesiredHdrHeadroom(ctrl, desiredRatio);
+}
+
+static void nativeSetLuts(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                          jfloatArray jbufferArray, jintArray joffsetArray,
+                          jintArray jdimensionArray, jintArray jsizeArray,
+                          jintArray jsamplingKeyArray) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
+
+    ScopedIntArrayRW joffsets(env, joffsetArray);
+    if (joffsets.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from joffsetArray");
+        return;
+    }
+    ScopedIntArrayRW jdimensions(env, jdimensionArray);
+    if (jdimensions.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jdimensionArray");
+        return;
+    }
+    ScopedIntArrayRW jsizes(env, jsizeArray);
+    if (jsizes.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsizeArray");
+        return;
+    }
+    ScopedIntArrayRW jsamplingKeys(env, jsamplingKeyArray);
+    if (jsamplingKeys.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedIntArrayRW from jsamplingKeyArray");
+        return;
+    }
+
+    jsize numLuts = env->GetArrayLength(jdimensionArray);
+    std::vector<int32_t> offsets(joffsets.get(), joffsets.get() + numLuts);
+    std::vector<int32_t> dimensions(jdimensions.get(), jdimensions.get() + numLuts);
+    std::vector<int32_t> sizes(jsizes.get(), jsizes.get() + numLuts);
+    std::vector<int32_t> samplingKeys(jsamplingKeys.get(), jsamplingKeys.get() + numLuts);
+
+    ScopedFloatArrayRW jbuffers(env, jbufferArray);
+    if (jbuffers.get() == nullptr) {
+        jniThrowRuntimeException(env, "Failed to get ScopedFloatArrayRW from jbufferArray");
+        return;
+    }
+
+    // create the shared memory and copy jbuffers
+    size_t bufferSize = jbuffers.size() * sizeof(float);
+    int32_t fd = ashmem_create_region("lut_shread_mem", bufferSize);
+    if (fd < 0) {
+        jniThrowRuntimeException(env, "ashmem_create_region() failed");
+        return;
+    }
+    void* ptr = mmap(nullptr, bufferSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (ptr == MAP_FAILED) {
+        jniThrowRuntimeException(env, "Failed to map the shared memory");
+        return;
+    }
+    memcpy(ptr, jbuffers.get(), bufferSize);
+    // unmap
+    munmap(ptr, bufferSize);
+
+    transaction->setLuts(ctrl, base::unique_fd(fd), offsets, dimensions, sizes, samplingKeys);
 }
 
 static void nativeSetCachingHint(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -2541,6 +2602,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*) nativeSetDesiredPresentTimeNanos },
     {"nativeNotifyShutdown", "()V",
             (void*)nativeNotifyShutdown },
+    {"nativeSetLuts", "(JJ[F[I[I[I[I)V", (void*)nativeSetLuts },
         // clang-format on
 };
 

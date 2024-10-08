@@ -25,13 +25,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.ui.binder.CommunalAppWidgetHostViewBinder
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.communal.util.WidgetViewFactory
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dagger.qualifiers.UiBackground
 import com.android.systemui.res.R
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 
@@ -39,6 +43,8 @@ class CommunalAppWidgetSection
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
+    @Main private val mainContext: CoroutineContext,
+    @UiBackground private val backgroundContext: CoroutineContext,
     private val factory: WidgetViewFactory,
 ) {
 
@@ -76,10 +82,12 @@ constructor(
                             context = context,
                             container = this,
                             model = model,
-                            size = size,
+                            size = if (!communalWidgetResizing()) size else null,
                             factory = factory,
                             applicationScope = applicationScope,
-                        )
+                            mainContext = mainContext,
+                            backgroundContext = backgroundContext,
+                        ),
                     )
 
                     accessibilityDelegate = viewModel.widgetAccessibilityDelegate

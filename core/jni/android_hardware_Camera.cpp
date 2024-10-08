@@ -25,6 +25,7 @@
 #include <binder/Parcel.h>
 #include <camera/Camera.h>
 #include <camera/StringUtils.h>
+#include <com_android_internal_camera_flags.h>
 #include <cutils/properties.h>
 #include <gui/GLConsumer.h>
 #include <gui/Surface.h>
@@ -37,6 +38,7 @@
 #include "jni.h"
 
 using namespace android;
+namespace flags = com::android::internal::camera::flags;
 
 enum {
     // Keep up to date with Camera.java
@@ -527,14 +529,19 @@ void JNICameraContext::clearCallbackBuffers_l(JNIEnv *env, Vector<jbyteArray> *b
 }
 
 static bool attributionSourceStateForJavaParcel(JNIEnv *env, jobject jClientAttributionParcel,
+                                                bool useContextAttributionSource,
                                                 AttributionSourceState &clientAttribution) {
     const Parcel *clientAttributionParcel = parcelForJavaObject(env, jClientAttributionParcel);
     if (clientAttribution.readFromParcel(clientAttributionParcel) != ::android::OK) {
         jniThrowRuntimeException(env, "Fail to unparcel AttributionSourceState");
         return false;
     }
-    clientAttribution.uid = Camera::USE_CALLING_UID;
-    clientAttribution.pid = Camera::USE_CALLING_PID;
+
+    if (!(useContextAttributionSource && flags::use_context_attribution_source())) {
+        clientAttribution.uid = Camera::USE_CALLING_UID;
+        clientAttribution.pid = Camera::USE_CALLING_PID;
+    }
+
     return true;
 }
 
@@ -542,7 +549,9 @@ static jint android_hardware_Camera_getNumberOfCameras(JNIEnv *env, jobject thiz
                                                        jobject jClientAttributionParcel,
                                                        jint devicePolicy) {
     AttributionSourceState clientAttribution;
-    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel, clientAttribution)) {
+    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel,
+                                             /* useContextAttributionSource= */ false,
+                                             clientAttribution)) {
         return 0;
     }
     return Camera::getNumberOfCameras(clientAttribution, devicePolicy);
@@ -553,7 +562,9 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz, jin
                                                   jobject jClientAttributionParcel,
                                                   jint devicePolicy, jobject info_obj) {
     AttributionSourceState clientAttribution;
-    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel, clientAttribution)) {
+    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel,
+                                             /* useContextAttributionSource= */ false,
+                                             clientAttribution)) {
         return;
     }
 
@@ -587,7 +598,9 @@ static jint android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz, jobj
                                                  jobject jClientAttributionParcel,
                                                  jint devicePolicy) {
     AttributionSourceState clientAttribution;
-    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel, clientAttribution)) {
+    if (!attributionSourceStateForJavaParcel(env, jClientAttributionParcel,
+                                             /* useContextAttributionSource= */ true,
+                                             clientAttribution)) {
         return -EACCES;
     }
 

@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Aan"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Op • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Af"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Stel op"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Bestuur in instellings"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Geen aktiewe modusse nie}=1{{mode} is aktief}other{# modusse is aktief}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Jy sal nie deur geluide en vibrasies gepla word nie, behalwe deur wekkers, herinneringe, geleenthede en bellers wat jy spesifiseer. Jy sal steeds enigiets hoor wat jy kies om te speel, insluitend musiek, video\'s en speletjies."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Gesprekke"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vee alle stil kennisgewings uit"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Kennisgewings onderbreek deur Moenie Steur Nie"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Geen kennisgewings nie}=1{Kennisgewings is deur {mode} onderbreek}=2{Kennisgewings is deur {mode} en een ander modus onderbreek}other{Kennisgewings is deur {mode} en # ander modusse onderbreek}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Begin nou"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Geen kennisgewings nie"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Geen nuwe kennisgewings nie"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Wys demonstrasiemodus"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Wekker"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> is aan"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Stel op om vinniger, veiliger aankope met jou foon te doen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Wys alles"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Leer raakpaneelgebare"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigeer met jou sleutelbord en raakpaneel"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Leer raakpaneelgebare, kortpadsleutels en meer"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Teruggebaar"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Tuisgebaar"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Bekyk onlangse apps"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Klaar"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gaan terug"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Swiep enige plek op die raakpaneel links of regs met drie vingers om terug te gaan.\n\nJy kan ook die kortpadsleutelhandeling + Esc hiervoor gebruik."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Knap gedaan!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Jy het die Gaan Terug-gebaar voltooi."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Gaan na tuisskerm"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Swiep enige tyd van die onderkant van jou skerm af op met drie vingers om na jou tuisskerm toe te gaan."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Mooi so!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Jy het die Gaan na Tuisskerm-gebaar voltooi."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Bekyk onlangse apps"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Swiep op en hou met drie vingers op jou raakpaneel."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Knap gedaan!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Jy het die Bekyk Onlangse Apps-gebaar voltooi."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Handelingsleutel"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Druk die handelingsleutel op jou sleutelbord om toegang tot jou apps te kry."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Geluk!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Jy het die Handelingsleutel-gebaar voltooi.\n\nHandeling + / wys al die kortpaaie wat vir jou beskikbaar is."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Sleutelbordlig"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Vlak %1$d van %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Huiskontroles"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Druk die handelingsleutel op jou sleutelbord om al jou apps te bekyk"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Gewysig"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Ontsluit om te kyk"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Kontekstuele opvoeding"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Gebruik jou raakpaneel om terug te gaan"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Swiep links of regs met drie vingers. Tik om meer gebare te leer."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Gebruik jou raakpaneel om na die tuisskerm toe te gaan"</string>

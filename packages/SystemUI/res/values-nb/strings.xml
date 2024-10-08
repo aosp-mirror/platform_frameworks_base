@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"På"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"På • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Av"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Konfigurer"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Administrer i innstillingene"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ingen aktive moduser}=1{{mode} er aktiv}other{# moduser er aktive}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Du blir ikke forstyrret av lyder og vibrasjoner, med unntak av alarmer, påminnelser, aktiviteter og oppringere du angir. Du kan fremdeles høre alt du velger å spille av, for eksempel musikk, videoer og spill."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Samtaler"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Fjern alle lydløse varsler"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Varsler er satt på pause av «Ikke forstyrr»"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Ingen varsler}=1{Varsler er satt på pause av {mode}}=2{Varsler er satt på pause av {mode} og én modus til}other{Varsler er satt på pause av {mode} og # moduser til}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Start nå"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ingen varsler"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Ingen nye varsler"</string>
@@ -706,6 +706,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Vis demo-modus"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
+    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
+    <skip />
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Legg til en betalingsmåte for å gjennomføre kjøp raskere og sikrere med telefonen"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Vis alle"</string>
@@ -1405,26 +1407,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Lær deg styreflatebevegelser"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Naviger med tastaturet og styreflaten"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Lær deg styreflatebevegelser, hurtigtaster med mer"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Tilbakebevegelse"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Startskjermbevegelse"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Se nylige apper"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Ferdig"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Gå tilbake"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"For å gå tilbake, sveip mot høyre eller venstre med tre fingre hvor som helst på styreflaten.\n\nDu kan også gjøre dette med hurtigtasten Action + Esc."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Bra jobbet!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Du har fullført bevegelsen for å gå tilbake."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Gå til startsiden"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"For å gå til startskjermen, sveip opp med tre fingre fra bunnen av skjermen når som helst."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Bra!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Du har fullført bevegelsen for å gå til startskjermen."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Se nylige apper"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Sveip opp og hold med tre fingre på styreflaten."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Bra jobbet!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Du har fullført bevegelsen for å se nylige apper."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Handlingstast"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"For å åpne appene dine, trykk på handlingstasten på tastaturet."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Gratulerer!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Du har fullført bevegelsen for handlingstasten.\n\nHandling + / viser alle tilgjengelige snarveier."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Bakgrunnslys for tastatur"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Nivå %1$d av %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Hjemkontroller"</string>
@@ -1436,6 +1450,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"For å se alle appene dine, trykk på handlingstasten på tastaturet"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Fjernet"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Lås opp for å se"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Kontekstuell opplæring"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Bruk styreflaten for å gå tilbake"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Sveip til venstre eller høyre med tre fingre. Trykk for å lære flere bevegelser."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Bruk styreflaten for å gå til startsiden"</string>

@@ -585,7 +585,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此计算机（内部）"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"麦克风（内部）"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"基座音箱"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部设备"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"连接的设备"</string>
@@ -688,9 +687,11 @@
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"设备必须重新启动才能应用此更改。您可以立即重新启动或取消。"</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"有线耳机"</string>
     <string name="media_transfer_headphone_name" msgid="1131962659136578852">"头戴式耳机"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB 音箱"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB 音频"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"麦克风插孔"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB 麦克风"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB 麦克风"</string>
+    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
+    <skip />
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"开启"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"关闭"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"运营商网络正在更改"</string>

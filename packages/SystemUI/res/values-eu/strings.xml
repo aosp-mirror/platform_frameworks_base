@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Aktibatuta"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Aktibo • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Desaktibatuta"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Konfiguratu"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Kudeatu ezarpenetan"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Ez dago modurik aktibo}=1{\"{mode}\" aktibo dago}other{# modu aktibo daude}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Gailuak ez du egingo ez soinurik ez dardararik, baina alarmak, gertaera eta abisuen tonuak, eta aukeratzen dituzun deitzaileen dei-tonuak joko ditu. Bestalde, zuk erreproduzitutako guztia entzungo duzu, besteak beste, musika, bideoak eta jokoak."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Elkarrizketak"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Garbitu soinurik gabeko jakinarazpen guztiak"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Ez molestatzeko moduak pausatu egin ditu jakinarazpenak"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Ez dago jakinarazpenik}=1{Modu honek jakinarazpenak pausatu ditu: {mode}}=2{Modu honek eta beste modu batek jakinarazpenak pausatu dituzte: {mode}}other{Modu honek eta beste # moduk jakinarazpenak pausatu dituzte: {mode}}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Hasi"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ez dago jakinarazpenik"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Ez dago jakinarazpen berririk"</string>
@@ -706,6 +706,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Erakutsi demo modua"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarma"</string>
+    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
+    <skip />
     <string name="wallet_title" msgid="5369767670735827105">"Diru-zorroa"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguratu erosketa bizkorrago eta seguruagoak egiteko telefonoarekin"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Erakutsi guztiak"</string>
@@ -1405,26 +1407,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Ikasi ukipen-paneleko keinuak"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Nabigatu teklatua eta ukipen-panela erabilita"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Ikasi ukipen-paneleko keinuak, lasterbideak eta abar"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Atzera egiteko keinua"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Orri nagusira joateko keinua"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Ikusi azkenaldiko aplikazioak"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Eginda"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Egin atzera"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Atzera egiteko, pasatu 3 hatz ezkerrera edo eskuinera ukipen-panelean.\n\nEkintza + Ihes lasterbidea ere erabil dezakezu horretarako."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Bikain!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Ikasi duzu atzera egiteko keinua."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Joan orri nagusira"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Orri nagusira joateko, pasatu 3 hatz pantailaren behealdetik gora."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Ederki!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Ikasi duzu hasierako pantailara joateko keinua."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Ikusi azkenaldiko aplikazioak"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Pasatu 3 hatz gora eta eduki sakatuta ukipen-panelean."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Bikain!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Osatu duzu azkenaldiko aplikazioak ikusteko keinua."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Ekintza-tekla"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Aplikazioak atzitzeko, sakatu teklatuko ekintza-tekla."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Zorionak!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Ekintza-teklaren keinua egin duzu.\n\nEkintza + / sakatuz gero, erabilgarri dituzun lasterbide guztiak ikusiko dituzu."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Teklatuaren hondoko argia"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d/%2$d maila"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Etxeko gailuen kontrola"</string>
@@ -1436,6 +1450,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Aplikazio guztiak ikusteko, sakatu teklatuko ekintza-tekla"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Desitxuratuta"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Desblokeatu ikusteko"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Testuinguruaren araberako hezkuntza"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Erabili ukipen-panela atzera egiteko"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Pasatu 3 hatz ezkerrera edo eskuinera. Sakatu keinu gehiago ikasteko."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Erabili ukipen-panela hasierako pantailara joateko"</string>
