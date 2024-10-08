@@ -260,8 +260,8 @@ public class CompanionAssociationActivity extends FragmentActivity implements
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
 
         // TODO: handle config changes without cancelling.
         if (!isDone()) {
