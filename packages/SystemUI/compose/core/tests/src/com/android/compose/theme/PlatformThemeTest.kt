@@ -40,9 +40,7 @@ class PlatformThemeTest {
     @Test
     fun testAndroidColorsAreAvailableInsideTheme() {
         composeRule.setContent {
-            PlatformTheme {
-                Text("foo", color = LocalAndroidColorScheme.current.deprecated.colorAccent)
-            }
+            PlatformTheme { Text("foo", color = LocalAndroidColorScheme.current.primaryFixed) }
         }
 
         composeRule.onNodeWithText("foo").assertIsDisplayed()
@@ -52,7 +50,7 @@ class PlatformThemeTest {
     fun testAccessingAndroidColorsWithoutThemeThrows() {
         assertThrows(IllegalStateException::class.java) {
             composeRule.setContent {
-                Text("foo", color = LocalAndroidColorScheme.current.deprecated.colorAccent)
+                Text("foo", color = LocalAndroidColorScheme.current.primaryFixed)
             }
         }
     }
