@@ -21,6 +21,8 @@ import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_RESOUR
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
 import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERSION_JAVA_SYSPROP;
 
+import static org.junit.Assert.assertThrows;
+
 import android.app.ActivityManager;
 import android.app.Instrumentation;
 import android.app.ResourcesManager;
@@ -167,6 +169,8 @@ public class RavenwoodRuntimeEnvironmentController {
         // This will let AndroidJUnit4 use the original runner.
         System.setProperty("android.junit.runner",
                 "androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner");
+
+        assertMockitoVersion();
     }
 
     /**
@@ -379,6 +383,28 @@ public class RavenwoodRuntimeEnvironmentController {
         for (var entry : systemProperties.getValues().entrySet()) {
             RavenwoodRuntimeNative.setSystemProperty(entry.getKey(), entry.getValue());
         }
+    }
+
+    private static final String MOCKITO_ERROR = "FATAL: Unsupported Mockito detected!"
+            + " Your test or its dependencies use one of the \"mockito-target-*\""
+            + " modules as static library, which is unusable on host side."
+            + " Please switch over to use \"mockito-ravenwood-prebuilt\" as shared library, or"
+            + " as a last resort, set `ravenizer: { strip_mockito: true }` in your test module.";
+
+    /**
+     * Assert the Mockito version at runtime to ensure no incorrect Mockito classes are loaded.
+     */
+    private static void assertMockitoVersion() {
+        // DexMaker should not exist
+        assertThrows(
+                MOCKITO_ERROR,
+                ClassNotFoundException.class,
+                () -> Class.forName("com.android.dx.DexMaker"));
+        // Mockito 2 should not exist
+        assertThrows(
+                MOCKITO_ERROR,
+                ClassNotFoundException.class,
+                () -> Class.forName("org.mockito.Matchers"));
     }
 
     @SuppressWarnings("unused")  // Called from native code (ravenwood_sysprop.cpp)
