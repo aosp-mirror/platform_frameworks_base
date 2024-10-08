@@ -646,7 +646,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
     private void saveScreenshotInBackground(ScreenshotData screenshot, UUID requestId,
             Consumer<Uri> finisher, Consumer<ImageExporter.Result> onResult) {
         ListenableFuture<ImageExporter.Result> future = mImageExporter.export(mBgExecutor,
-                requestId, screenshot.getBitmap(), screenshot.getUserOrDefault(),
+                requestId, screenshot.getBitmap(), screenshot.getUserHandle(),
                 mDisplay.getDisplayId());
         future.addListener(() -> {
             try {
