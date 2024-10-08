@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
-import android.os.Process
 import android.os.UserHandle
 import android.view.Display
 import android.view.WindowManager
@@ -29,10 +28,6 @@ data class ScreenshotData(
 ) {
     val packageNameString
         get() = topComponent?.packageName ?: ""
-
-    fun getUserOrDefault(): UserHandle {
-        return userHandle ?: Process.myUserHandle()
-    }
 
     companion object {
         @JvmStatic
