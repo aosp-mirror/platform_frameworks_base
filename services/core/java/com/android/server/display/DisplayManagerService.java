@@ -1769,10 +1769,11 @@ public final class DisplayManagerService extends SystemService {
             flags &= ~VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
         }
         // Put the display in the virtual device's display group only if it's not a mirror display,
-        // and if it doesn't need its own display group. So effectively, mirror displays go into the
-        // default display group.
+        // it is a trusted display, and it doesn't need its own display group. So effectively,
+        // mirror and untrusted displays go into the default display group.
         if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) == 0
+                && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == VIRTUAL_DISPLAY_FLAG_TRUSTED
                 && virtualDevice != null) {
             flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
         }
@@ -1848,9 +1849,7 @@ public final class DisplayManagerService extends SystemService {
 
         if (callingUid != Process.SYSTEM_UID
                 && (flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
-            // The virtualDevice instance has been validated above using isValidVirtualDevice
-            if (virtualDevice == null
-                    && !checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+            if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
                 throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                         + "create a virtual display which is not in the default DisplayGroup.");
             }
