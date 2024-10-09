@@ -290,6 +290,17 @@ flag {
 }
 
 flag {
+    name: "invalidate_cache_on_users_changed_read_only"
+    namespace: "multiuser"
+    description: "Invalidate the cache when users are added or removed to improve caches."
+    bug: "372383485"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
     name: "caches_not_invalidated_at_start_read_only"
     namespace: "multiuser"
     description: "PIC need to be invalidated at start in order to work properly."
