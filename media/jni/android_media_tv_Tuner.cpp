@@ -144,6 +144,7 @@
 #include <aidl/android/hardware/tv/tuner/FrontendScanAtsc3PlpInfo.h>
 #include <aidl/android/hardware/tv/tuner/FrontendScanMessageStandard.h>
 #include <aidl/android/hardware/tv/tuner/FrontendSpectralInversion.h>
+#include <aidl/android/hardware/tv/tuner/FrontendStandardExt.h>
 #include <aidl/android/hardware/tv/tuner/FrontendStatus.h>
 #include <aidl/android/hardware/tv/tuner/FrontendStatusAtsc3PlpInfo.h>
 #include <aidl/android/hardware/tv/tuner/FrontendStatusType.h>
@@ -302,6 +303,7 @@ using ::aidl::android::hardware::tv::tuner::FrontendRollOff;
 using ::aidl::android::hardware::tv::tuner::FrontendScanAtsc3PlpInfo;
 using ::aidl::android::hardware::tv::tuner::FrontendScanMessageStandard;
 using ::aidl::android::hardware::tv::tuner::FrontendSpectralInversion;
+using ::aidl::android::hardware::tv::tuner::FrontendStandardExt;
 using ::aidl::android::hardware::tv::tuner::FrontendStatus;
 using ::aidl::android::hardware::tv::tuner::FrontendStatusAtsc3PlpInfo;
 using ::aidl::android::hardware::tv::tuner::FrontendStatusType;
@@ -2936,6 +2938,33 @@ jobject JTuner::getFrontendStatus(jintArray types) {
                                        s.get<FrontendStatus::Tag::iptvAverageJitterMs>()));
                 env->SetObjectField(statusObj, field, newIntegerObj.get());
                 break;
+            }
+            case FrontendStatus::Tag::standardExt: {
+                jfieldID field = env->GetFieldID(clazz, "mStandardExt",
+                        "Landroid/media/tv/tuner/frontend/StandardExt;");
+                ScopedLocalRef standardExtClazz(env,
+                        env->FindClass("android/media/tv/tuner/frontend/StandardExt"));
+                jmethodID initStandardExt = env->GetMethodID(standardExtClazz.get(), "<init>",
+                        "(II)V");
+
+                jint dvbsStandardExt = static_cast<jint>(FrontendDvbsStandard::UNDEFINED);
+                jint dvbtStandardExt = static_cast<jint>(FrontendDvbtStandard::UNDEFINED);
+                FrontendStandardExt standardExt = s.get<FrontendStatus::Tag::standardExt>();
+                switch (standardExt.getTag()) {
+                    case FrontendStandardExt::Tag::dvbsStandardExt: {
+                        dvbsStandardExt = static_cast<jint>(standardExt
+                                .get<FrontendStandardExt::Tag::dvbsStandardExt>());
+                        break;
+                    }
+                    case FrontendStandardExt::Tag::dvbtStandardExt: {
+                        dvbtStandardExt = static_cast<jint>(standardExt
+                                .get<FrontendStandardExt::Tag::dvbtStandardExt>());
+                        break;
+                    }
+                }
+                ScopedLocalRef standardExtObj(env, env->NewObject(standardExtClazz.get(),
+                        initStandardExt, dvbsStandardExt, dvbtStandardExt));
+                env->SetObjectField(statusObj, field, standardExtObj.get());
             }
         }
     }
