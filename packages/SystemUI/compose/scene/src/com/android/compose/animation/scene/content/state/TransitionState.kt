@@ -21,6 +21,7 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import com.android.compose.animation.scene.ContentKey
@@ -249,18 +250,29 @@ sealed interface TransitionState {
         private var fromOverscrollSpec: OverscrollSpecImpl? = null
         private var toOverscrollSpec: OverscrollSpecImpl? = null
 
-        /** The current [OverscrollSpecImpl], if this transition is currently overscrolling. */
-        internal val currentOverscrollSpec: OverscrollSpecImpl?
-            get() {
-                if (this !is HasOverscrollProperties) return null
-                val progress = progress
-                val bouncingContent = bouncingContent
-                return when {
-                    progress < 0f || bouncingContent == fromContent -> fromOverscrollSpec
-                    progress > 1f || bouncingContent == toContent -> toOverscrollSpec
-                    else -> null
+        /**
+         * The current [OverscrollSpecImpl], if this transition is currently overscrolling.
+         *
+         * Note: This is backed by a State<OverscrollSpecImpl?> because the overscroll spec is
+         * derived from progress, and we don't want readers of currentOverscrollSpec to recompose
+         * every time progress is changed.
+         */
+        private val _currentOverscrollSpec: State<OverscrollSpecImpl?>? =
+            if (this !is HasOverscrollProperties) {
+                null
+            } else {
+                derivedStateOf {
+                    val progress = progress
+                    val bouncingContent = bouncingContent
+                    when {
+                        progress < 0f || bouncingContent == fromContent -> fromOverscrollSpec
+                        progress > 1f || bouncingContent == toContent -> toOverscrollSpec
+                        else -> null
+                    }
                 }
             }
+        internal val currentOverscrollSpec: OverscrollSpecImpl?
+            get() = _currentOverscrollSpec?.value
 
         /**
          * An animatable that animates from 1f to 0f. This will be used to nicely animate the sudden
