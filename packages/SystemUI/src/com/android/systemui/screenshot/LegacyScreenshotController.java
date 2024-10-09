@@ -255,12 +255,6 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
         Assert.isMainThread();
 
         mCurrentRequestCallback = requestCallback;
-        Rect bounds = screenshot.getOriginalScreenBounds();
-        if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_FULLSCREEN
-                && screenshot.getBitmap() == null) {
-            bounds = getFullScreenRect();
-            screenshot.setBitmap(mImageCapture.captureDisplay(mDisplay.getDisplayId(), bounds));
-        }
 
         if (screenshot.getBitmap() == null) {
             Log.e(TAG, "handleScreenshot: Screenshot bitmap was null");
@@ -323,6 +317,7 @@ public class LegacyScreenshotController implements InteractiveScreenshotHandler 
 
         attachWindow();
 
+        Rect bounds = screenshot.getOriginalScreenBounds();
         boolean showFlash;
         if (screenshot.getType() == WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE) {
             if (bounds != null
