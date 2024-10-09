@@ -23,8 +23,6 @@ import android.view.MotionEvent
  * changes. All tracked motion events should be passed to [processTouchpadEvent]
  */
 interface TouchpadGestureMonitor {
-
-    val gestureDistanceThresholdPx: Int
     val gestureStateChangedCallback: (GestureState) -> Unit
 
     fun processTouchpadEvent(event: MotionEvent)
