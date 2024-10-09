@@ -98,3 +98,14 @@ flag {
     bug: "331698645"
     is_fixed_read_only: true
 }
+
+flag {
+  name: "calculate_bounds_in_parent_from_bounds_in_screen"
+  namespace: "accessibility"
+  description: "Calculate bounds in parent of each node in ViewStructure from its bounds set relative to screen and its parent's"
+  bug: "366131857"
+  is_fixed_read_only: true
+  metadata {
+      purpose: PURPOSE_BUGFIX
+  }
+}
