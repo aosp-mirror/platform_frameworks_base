@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -54,6 +55,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.compose.modifiers.background
 import com.android.compose.modifiers.thenIf
@@ -64,7 +66,6 @@ import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.longPressLabel
 import com.android.systemui.qs.panels.ui.viewmodel.AccessibilityUiState
 import com.android.systemui.res.R
-import kotlinx.coroutines.delay
 
 private const val TEST_TAG_TOGGLE = "qs_tile_toggle_target"
 
@@ -138,13 +139,20 @@ fun LargeTileLabels(
     accessibilityUiState: AccessibilityUiState? = null,
 ) {
     Column(verticalArrangement = Arrangement.Center, modifier = modifier.fillMaxHeight()) {
-        Text(label, color = colors.label, modifier = Modifier.tileMarquee())
+        Text(
+            label,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
         if (!TextUtils.isEmpty(secondaryLabel)) {
             Text(
                 secondaryLabel ?: "",
                 color = colors.secondaryLabel,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier =
-                    Modifier.tileMarquee().thenIf(
+                    Modifier.thenIf(
                         accessibilityUiState?.stateDescription?.contains(secondaryLabel ?: "") ==
                             true
                     ) {
@@ -182,10 +190,7 @@ fun SmallTileContent(
                     rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = true)
                 } else {
                     var atEnd by remember(icon.res) { mutableStateOf(false) }
-                    LaunchedEffect(key1 = icon.res) {
-                        delay(350)
-                        atEnd = true
-                    }
+                    LaunchedEffect(key1 = icon.res) { atEnd = true }
                     rememberAnimatedVectorPainter(animatedImageVector = image, atEnd = atEnd)
                 }
             }
