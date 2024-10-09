@@ -209,6 +209,24 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     /**
+     * @hide
+     * @param name
+     * @param versionMajor
+     */
+    public SharedLibraryInfo(String name, long versionMajor, int type) {
+        mPath = null;
+        mPackageName = null;
+        mName = name;
+        mVersion = versionMajor;
+        mType = type;
+        mDeclaringPackage = null;
+        mDependentPackages = null;
+        mDependencies = null;
+        mIsNative = false;
+        mOptionalDependentPackages = null;
+    }
+
+    /**
      * Gets the type of this library.
      *
      * @return The library type.
