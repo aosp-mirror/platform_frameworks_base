@@ -3290,14 +3290,6 @@ package android.service.voice {
 
 }
 
-package android.service.watchdog {
-
-  public abstract class ExplicitHealthCheckService extends android.app.Service {
-    method public void setCallback(@Nullable android.os.RemoteCallback);
-  }
-
-}
-
 package android.speech {
 
   public abstract class RecognitionService extends android.app.Service {
