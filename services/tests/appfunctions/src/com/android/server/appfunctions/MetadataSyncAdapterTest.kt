@@ -391,6 +391,10 @@ class MetadataSyncAdapterTest {
                             return AndroidFuture.completedFuture(mutableListOf())
                         }
                     }
+
+                    override fun close() {
+                        Log.d("FakeRuntimeMetadataSearchSession", "Closing session")
+                    }
                 }
             return AndroidFuture.completedFuture(futureSearchResults)
         }

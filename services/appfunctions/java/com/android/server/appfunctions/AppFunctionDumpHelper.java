@@ -84,15 +84,17 @@ public final class AppFunctionDumpHelper {
                 new FutureGlobalSearchSession(appSearchManager, Runnable::run)) {
             pw.println();
 
-            FutureSearchResults futureSearchResults =
-                    searchSession.search("", buildAppFunctionMetadataSearchSpec()).get();
-            List<SearchResult> searchResultsList;
-            do {
-                searchResultsList = futureSearchResults.getNextPage().get();
-                for (SearchResult searchResult : searchResultsList) {
-                    dumpAppFunctionMetadata(pw, searchResult);
-                }
-            } while (!searchResultsList.isEmpty());
+            try (FutureSearchResults futureSearchResults =
+                    searchSession.search("", buildAppFunctionMetadataSearchSpec()).get(); ) {
+                List<SearchResult> searchResultsList;
+                do {
+                    searchResultsList = futureSearchResults.getNextPage().get();
+                    for (SearchResult searchResult : searchResultsList) {
+                        dumpAppFunctionMetadata(pw, searchResult);
+                    }
+                } while (!searchResultsList.isEmpty());
+            }
+
         } catch (Exception e) {
             pw.println("Failed to dump AppFunction state: " + e);
         }
