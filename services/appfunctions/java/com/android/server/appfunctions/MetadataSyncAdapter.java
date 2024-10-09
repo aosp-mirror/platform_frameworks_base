@@ -45,7 +45,6 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
-import com.android.server.appfunctions.FutureAppSearchSession.FutureSearchResults;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
