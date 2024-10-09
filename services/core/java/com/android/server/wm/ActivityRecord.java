@@ -3198,6 +3198,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!compatEnabled && !mWmService.mConstants.mIgnoreActivityOrientationRequest) {
             return false;
         }
+        if (mWmService.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(packageName)) {
+            return false;
+        }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
         return !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
                 .shouldApplyUserMinAspectRatioOverride();
