@@ -338,6 +338,25 @@ public class AccessibilityFloatingMenuControllerTest extends SysuiTestCase {
         assertThat(mController.mFloatingMenu).isInstanceOf(MenuViewLayerController.class);
     }
 
+    @Test
+    public void onUserInitializationComplete_destroysOldWidget() {
+        enableAccessibilityFloatingMenuConfig();
+        mController = setUpController();
+
+        captureKeyguardUpdateMonitorCallback();
+        mKeyguardCallback.onUserUnlocked();
+        mKeyguardCallback.onKeyguardVisibilityChanged(false);
+
+        IAccessibilityFloatingMenu floatingMenu = mController.mFloatingMenu;
+
+        mController.mUserInitializationCompleteCallback
+                .onUserInitializationComplete(mContext.getUserId());
+        mTestableLooper.processAllMessages();
+
+        assertThat(mController.mFloatingMenu).isNotNull();
+        assertThat(mController.mFloatingMenu).isNotSameInstanceAs(floatingMenu);
+    }
+
     private AccessibilityFloatingMenuController setUpController() {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         final ViewCaptureAwareWindowManager viewCaptureAwareWindowManager =
