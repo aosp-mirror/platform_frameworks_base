@@ -81,9 +81,13 @@ public class RecoverySnapshotStorage {
     public synchronized void put(int uid, KeyChainSnapshot snapshot) {
         mSnapshotByUid.put(uid, snapshot);
 
-        try {
-            writeToDisk(uid, snapshot);
+        File snapshotFile = getSnapshotFile(uid);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(snapshotFile)) {
+            KeyChainSnapshotSerializer.serialize(snapshot, fileOutputStream);
         } catch (IOException | CertificateEncodingException e) {
+            // If we fail to write the latest snapshot, we should delete any older snapshot that
+            // happens to be around. Otherwise snapshot syncs might end up going 'back in time'.
+            snapshotFile.delete();
             Log.e(TAG,
                     String.format(Locale.US, "Error persisting snapshot for %d to disk", uid),
                     e);
@@ -100,9 +104,13 @@ public class RecoverySnapshotStorage {
             return snapshot;
         }
 
-        try {
-            return readFromDisk(uid);
+        File snapshotFile = getSnapshotFile(uid);
+        try (FileInputStream fileInputStream = new FileInputStream(snapshotFile)) {
+            return KeyChainSnapshotDeserializer.deserialize(fileInputStream);
         } catch (IOException | KeyChainSnapshotParserException e) {
+            // If we fail to read the latest snapshot, we should delete it in case it is in some way
+            // corrupted. We can regenerate snapshots anyway.
+            snapshotFile.delete();
             Log.e(TAG, String.format(Locale.US, "Error reading snapshot for %d from disk", uid), e);
             return null;
         }
@@ -114,50 +122,6 @@ public class RecoverySnapshotStorage {
     public synchronized void remove(int uid) {
         mSnapshotByUid.remove(uid);
         getSnapshotFile(uid).delete();
-    }
-
-    /**
-     * Writes the snapshot for recovery agent {@code uid} to disk.
-     *
-     * @throws IOException if an IO error occurs writing to disk.
-     */
-    private void writeToDisk(int uid, KeyChainSnapshot snapshot)
-            throws IOException, CertificateEncodingException {
-        File snapshotFile = getSnapshotFile(uid);
-
-        try (
-            FileOutputStream fileOutputStream = new FileOutputStream(snapshotFile)
-        ) {
-            KeyChainSnapshotSerializer.serialize(snapshot, fileOutputStream);
-        } catch (IOException | CertificateEncodingException e) {
-            // If we fail to write the latest snapshot, we should delete any older snapshot that
-            // happens to be around. Otherwise snapshot syncs might end up going 'back in time'.
-            snapshotFile.delete();
-            throw e;
-        }
-    }
-
-    /**
-     * Reads the last snapshot for recovery agent {@code uid} from disk.
-     *
-     * @return The snapshot, or null if none existed.
-     * @throws IOException if an IO error occurs reading from disk.
-     */
-    @Nullable
-    private KeyChainSnapshot readFromDisk(int uid)
-            throws IOException, KeyChainSnapshotParserException {
-        File snapshotFile = getSnapshotFile(uid);
-
-        try (
-            FileInputStream fileInputStream = new FileInputStream(snapshotFile)
-        ) {
-            return KeyChainSnapshotDeserializer.deserialize(fileInputStream);
-        } catch (IOException | KeyChainSnapshotParserException e) {
-            // If we fail to read the latest snapshot, we should delete it in case it is in some way
-            // corrupted. We can regenerate snapshots anyway.
-            snapshotFile.delete();
-            throw e;
-        }
     }
 
     private File getSnapshotFile(int uid) {
