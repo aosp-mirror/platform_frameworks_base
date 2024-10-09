@@ -248,6 +248,50 @@ flag {
 }
 
 flag {
+    name: "cache_profile_parent_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfileParent to avoid unnecessary binder calls"
+    bug: "350417399"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_profile_ids_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfileIds to avoid unnecessary binder calls"
+    bug: "350421409"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_profile_type_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfileType to avoid unnecessary binder calls"
+    bug: "350417403"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_profiles_read_only"
+    namespace: "multiuser"
+    description: "Cache getProfiles to avoid unnecessary binder calls"
+    bug: "350419395"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
     name: "cache_quiet_mode_state"
     namespace: "multiuser"
     description: "Optimise quiet mode state retrieval"
