@@ -2351,6 +2351,11 @@ public final class Settings {
 
     /**
      * Activity Action: Show the permission screen for allowing apps to post promoted notifications.
+     * Properly formatted priority notifications are elevated in appearance. For example they may be
+     * able to use colors, have richer progress bars, show as chips in the status bar, and/or
+     * permanently appear on always-on-displays. This functionality is intended to be reserved for
+     * user initiated ongoing activities like navigation, phone calls, and ride sharing.
+     *
      * <p>
      *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
      * <p>
