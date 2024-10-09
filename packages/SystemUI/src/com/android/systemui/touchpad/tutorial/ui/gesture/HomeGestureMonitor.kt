@@ -27,10 +27,10 @@ class HomeGestureMonitor(
 
     override fun processTouchpadEvent(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
-        val distanceState = distanceTracker.processEvent(event)
-        updateGestureStateBasedOnDistance(
+        val gestureState = distanceTracker.processEvent(event)
+        updateGestureState(
             gestureStateChangedCallback,
-            distanceState,
+            gestureState,
             isFinished = { -it.deltaY >= gestureDistanceThresholdPx },
             progress = { 0f },
         )

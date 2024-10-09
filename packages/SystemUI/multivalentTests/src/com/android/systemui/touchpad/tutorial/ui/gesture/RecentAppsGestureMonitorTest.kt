@@ -44,7 +44,7 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
     }
 
     private var gestureState: GestureState = GestureState.NotStarted
-    private val velocityTracker =
+    private val velocityTracker1D =
         mock<VelocityTracker1D> {
             // by default return correct speed for the gesture - as if pointer is slowing down
             on { calculateVelocity() } doReturn SLOW
@@ -54,7 +54,7 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
             gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
             gestureStateChangedCallback = { gestureState = it },
             velocityThresholdPxPerMs = THRESHOLD_VELOCITY_PX_PER_MS,
-            velocityTracker = velocityTracker,
+            velocityTracker = VerticalVelocityTracker(velocityTracker1D),
         )
 
     @Test
@@ -64,7 +64,7 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
 
     @Test
     fun doesntTriggerGestureFinished_onGestureSpeedTooHigh() {
-        whenever(velocityTracker.calculateVelocity()).thenReturn(FAST)
+        whenever(velocityTracker1D.calculateVelocity()).thenReturn(FAST)
         assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = NotStarted)
     }
 
