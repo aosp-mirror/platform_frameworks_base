@@ -24,6 +24,8 @@ import com.android.systemui.plugins.clocks.ClockMetadata
 import com.android.systemui.plugins.clocks.ClockPickerConfig
 import com.android.systemui.plugins.clocks.ClockProvider
 import com.android.systemui.plugins.clocks.ClockSettings
+import com.android.systemui.shared.clocks.view.HorizontalAlignment
+import com.android.systemui.shared.clocks.view.VerticalAlignment
 
 private val TAG = DefaultClockProvider::class.simpleName
 const val DEFAULT_CLOCK_ID = "DEFAULT"
@@ -33,8 +35,9 @@ class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
     val resources: Resources,
-    val hasStepClockAnimation: Boolean = false,
-    val migratedClocks: Boolean = false,
+    private val hasStepClockAnimation: Boolean = false,
+    private val migratedClocks: Boolean = false,
+    private val clockReactiveVariants: Boolean = false,
 ) : ClockProvider {
     private var messageBuffers: ClockMessageBuffers? = null
 
@@ -49,15 +52,23 @@ class DefaultClockProvider(
             throw IllegalArgumentException("${settings.clockId} is unsupported by $TAG")
         }
 
-        return DefaultClockController(
-            ctx,
-            layoutInflater,
-            resources,
-            settings,
-            hasStepClockAnimation,
-            migratedClocks,
-            messageBuffers,
-        )
+        return if (clockReactiveVariants) {
+            // TODO handle the case here where only the smallClock message buffer is added
+            val assetLoader =
+                AssetLoader(ctx, ctx, "clocks/", messageBuffers?.smallClockMessageBuffer!!)
+
+            SimpleClockController(ctx, assetLoader, FLEX_DESIGN, messageBuffers)
+        } else {
+            DefaultClockController(
+                ctx,
+                layoutInflater,
+                resources,
+                settings,
+                hasStepClockAnimation,
+                migratedClocks,
+                messageBuffers,
+            )
+        }
     }
 
     override fun getClockPickerConfig(id: ClockId): ClockPickerConfig {
@@ -72,5 +83,164 @@ class DefaultClockProvider(
             // TODO(b/352049256): Update placeholder to actual resource
             resources.getDrawable(R.drawable.clock_default_thumbnail, null),
         )
+    }
+
+    companion object {
+        val FLEX_DESIGN = run {
+            val largeLayer =
+                listOf(
+                    ComposedDigitalHandLayer(
+                        layerBounds = LayerBounds.FIT,
+                        customizedView = "FlexClockView",
+                        digitalLayers =
+                            listOf(
+                                DigitalHandLayer(
+                                    layerBounds = LayerBounds.FIT,
+                                    timespec = DigitalTimespec.FIRST_DIGIT,
+                                    style =
+                                        FontTextStyle(
+                                            fontFamily = "google_sans_flex.ttf",
+                                            lineHeight = 147.25f,
+                                            fontVariation =
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                        ),
+                                    aodStyle =
+                                        FontTextStyle(
+                                            fontVariation =
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                            fontFamily = "google_sans_flex.ttf",
+                                            fillColorLight = "#FFFFFFFF",
+                                            outlineColor = "#00000000",
+                                            renderType = RenderType.CHANGE_WEIGHT,
+                                            transitionInterpolator = InterpolatorEnum.EMPHASIZED,
+                                            transitionDuration = 750,
+                                        ),
+                                    alignment =
+                                        DigitalAlignment(
+                                            HorizontalAlignment.CENTER,
+                                            VerticalAlignment.CENTER
+                                        ),
+                                    dateTimeFormat = "hh"
+                                ),
+                                DigitalHandLayer(
+                                    layerBounds = LayerBounds.FIT,
+                                    timespec = DigitalTimespec.SECOND_DIGIT,
+                                    style =
+                                        FontTextStyle(
+                                            fontFamily = "google_sans_flex.ttf",
+                                            lineHeight = 147.25f,
+                                            fontVariation =
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                        ),
+                                    aodStyle =
+                                        FontTextStyle(
+                                            fontVariation =
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                            fontFamily = "google_sans_flex.ttf",
+                                            fillColorLight = "#FFFFFFFF",
+                                            outlineColor = "#00000000",
+                                            renderType = RenderType.CHANGE_WEIGHT,
+                                            transitionInterpolator = InterpolatorEnum.EMPHASIZED,
+                                            transitionDuration = 750,
+                                        ),
+                                    alignment =
+                                        DigitalAlignment(
+                                            HorizontalAlignment.CENTER,
+                                            VerticalAlignment.CENTER
+                                        ),
+                                    dateTimeFormat = "hh"
+                                ),
+                                DigitalHandLayer(
+                                    layerBounds = LayerBounds.FIT,
+                                    timespec = DigitalTimespec.FIRST_DIGIT,
+                                    style =
+                                        FontTextStyle(
+                                            fontFamily = "google_sans_flex.ttf",
+                                            lineHeight = 147.25f,
+                                            fontVariation =
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                        ),
+                                    aodStyle =
+                                        FontTextStyle(
+                                            fontVariation =
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                            fontFamily = "google_sans_flex.ttf",
+                                            fillColorLight = "#FFFFFFFF",
+                                            outlineColor = "#00000000",
+                                            renderType = RenderType.CHANGE_WEIGHT,
+                                            transitionInterpolator = InterpolatorEnum.EMPHASIZED,
+                                            transitionDuration = 750,
+                                        ),
+                                    alignment =
+                                        DigitalAlignment(
+                                            HorizontalAlignment.CENTER,
+                                            VerticalAlignment.CENTER
+                                        ),
+                                    dateTimeFormat = "mm"
+                                ),
+                                DigitalHandLayer(
+                                    layerBounds = LayerBounds.FIT,
+                                    timespec = DigitalTimespec.SECOND_DIGIT,
+                                    style =
+                                        FontTextStyle(
+                                            fontFamily = "google_sans_flex.ttf",
+                                            lineHeight = 147.25f,
+                                            fontVariation =
+                                                "'wght' 603, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                        ),
+                                    aodStyle =
+                                        FontTextStyle(
+                                            fontVariation =
+                                                "'wght' 74, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                            fontFamily = "google_sans_flex.ttf",
+                                            fillColorLight = "#FFFFFFFF",
+                                            outlineColor = "#00000000",
+                                            renderType = RenderType.CHANGE_WEIGHT,
+                                            transitionInterpolator = InterpolatorEnum.EMPHASIZED,
+                                            transitionDuration = 750,
+                                        ),
+                                    alignment =
+                                        DigitalAlignment(
+                                            HorizontalAlignment.CENTER,
+                                            VerticalAlignment.CENTER
+                                        ),
+                                    dateTimeFormat = "mm"
+                                )
+                            )
+                    )
+                )
+
+            val smallLayer =
+                listOf(
+                    DigitalHandLayer(
+                        layerBounds = LayerBounds.FIT,
+                        timespec = DigitalTimespec.TIME_FULL_FORMAT,
+                        style =
+                            FontTextStyle(
+                                fontFamily = "google_sans_flex.ttf",
+                                fontVariation = "'wght' 600, 'wdth' 100, 'opsz' 144, 'ROND' 100",
+                                fontSizeScale = 0.98f,
+                            ),
+                        aodStyle =
+                            FontTextStyle(
+                                fontFamily = "google_sans_flex.ttf",
+                                fontVariation = "'wght' 133, 'wdth' 43, 'opsz' 144, 'ROND' 100",
+                                fillColorLight = "#FFFFFFFF",
+                                outlineColor = "#00000000",
+                                renderType = RenderType.CHANGE_WEIGHT,
+                            ),
+                        alignment = DigitalAlignment(HorizontalAlignment.LEFT, null),
+                        dateTimeFormat = "h:mm"
+                    )
+                )
+
+            ClockDesign(
+                id = DEFAULT_CLOCK_ID,
+                name = "@string/clock_default_name",
+                description = "@string/clock_default_description",
+                large = ClockFace(layers = largeLayer),
+                small = ClockFace(layers = smallLayer)
+            )
+        }
     }
 }
