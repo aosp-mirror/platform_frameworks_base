@@ -262,6 +262,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     private boolean mIsHeadsUp;
 
+    /**
+     * Whether or not the notification is showing the app icon instead of the small icon.
+     */
+    private boolean mIsShowingAppIcon;
+
     private boolean mLastChronometerRunning = true;
     private ViewStub mChildrenContainerStub;
     private GroupMembershipManager mGroupMembershipManager;
@@ -814,6 +819,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
+    }
+
+    /**
+     * Indicate that the notification is showing the app icon instead of the small icon.
+     */
+    public void setIsShowingAppIcon(boolean isShowingAppIcon) {
+        mIsShowingAppIcon = isShowingAppIcon;
+    }
+
+    /**
+     * Whether or not the notification is showing the app icon instead of the small icon.
+     */
+    public boolean isShowingAppIcon() {
+        return mIsShowingAppIcon;
     }
 
     @Override
