@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.domain.interactor
+package com.android.systemui.volume.dialog.utils
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.volume.dialog.data.repository.volumeDialogVisibilityRepository
-import com.android.systemui.volume.dialog.utils.volumeTracer
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 
-val Kosmos.volumeDialogVisibilityInteractor by
-    Kosmos.Fixture {
-        VolumeDialogVisibilityInteractor(
-            applicationCoroutineScope,
-            volumeDialogCallbacksInteractor,
-            volumeTracer,
-            volumeDialogVisibilityRepository,
-        )
-    }
+class FakeVolumeTracer : VolumeTracer {
+
+    override fun traceVisibilityStart(model: VolumeDialogVisibilityModel) {}
+
+    override fun traceVisibilityEnd(model: VolumeDialogVisibilityModel) {}
+}
