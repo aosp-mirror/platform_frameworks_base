@@ -27,6 +27,8 @@ import android.util.Log
 import android.util.MathUtils
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroupOverlay
+import android.view.ViewOverlay
 import android.view.animation.Interpolator
 import android.window.WindowAnimationState
 import androidx.annotation.VisibleForTesting
@@ -197,8 +199,22 @@ class TransitionAnimator(
     }
 
     interface Animation {
+        /** Start the animation. */
+        fun start()
+
         /** Cancel the animation. */
         fun cancel()
+    }
+
+    @VisibleForTesting
+    class InterpolatedAnimation(@get:VisibleForTesting val animator: Animator) : Animation {
+        override fun start() {
+            animator.start()
+        }
+
+        override fun cancel() {
+            animator.cancel()
+        }
     }
 
     /** The timings (durations and delays) used by this animator. */
@@ -270,33 +286,73 @@ class TransitionAnimator(
                 alpha = 0
             }
 
-        val animator =
-            createAnimator(
+        return createAnimation(
                 controller,
+                controller.createAnimatorState(),
                 endState,
                 windowBackgroundLayer,
                 fadeWindowBackgroundLayer,
                 drawHole,
             )
-        animator.start()
-
-        return object : Animation {
-            override fun cancel() {
-                animator.cancel()
-            }
-        }
+            .apply { start() }
     }
 
     @VisibleForTesting
-    fun createAnimator(
+    fun createAnimation(
         controller: Controller,
+        startState: State,
         endState: State,
         windowBackgroundLayer: GradientDrawable,
         fadeWindowBackgroundLayer: Boolean = true,
         drawHole: Boolean = false,
-    ): ValueAnimator {
-        val state = controller.createAnimatorState()
+    ): Animation {
+        val transitionContainer = controller.transitionContainer
+        val transitionContainerOverlay = transitionContainer.overlay
+        val openingWindowSyncView = controller.openingWindowSyncView
+        val openingWindowSyncViewOverlay = openingWindowSyncView?.overlay
 
+        // Whether we should move the [windowBackgroundLayer] into the overlay of
+        // [Controller.openingWindowSyncView] once the opening app window starts to be visible, or
+        // from it once the closing app window stops being visible.
+        // This is necessary as a one-off sync so we can avoid syncing at every frame, especially
+        // in complex interactions like launching an activity from a dialog. See
+        // b/214961273#comment2 for more details.
+        val moveBackgroundLayerWhenAppVisibilityChanges =
+            openingWindowSyncView != null &&
+                openingWindowSyncView.viewRootImpl != controller.transitionContainer.viewRootImpl
+
+        return createInterpolatedAnimation(
+            controller,
+            startState,
+            endState,
+            windowBackgroundLayer,
+            transitionContainer,
+            transitionContainerOverlay,
+            openingWindowSyncView,
+            openingWindowSyncViewOverlay,
+            fadeWindowBackgroundLayer,
+            drawHole,
+            moveBackgroundLayerWhenAppVisibilityChanges,
+        )
+    }
+
+    /**
+     * Creates an interpolator-based animator that uses [timings] and [interpolators] to calculate
+     * the new bounds and corner radiuses at each frame.
+     */
+    private fun createInterpolatedAnimation(
+        controller: Controller,
+        state: State,
+        endState: State,
+        windowBackgroundLayer: GradientDrawable,
+        transitionContainer: View,
+        transitionContainerOverlay: ViewGroupOverlay,
+        openingWindowSyncView: View? = null,
+        openingWindowSyncViewOverlay: ViewOverlay? = null,
+        fadeWindowBackgroundLayer: Boolean = true,
+        drawHole: Boolean = false,
+        moveBackgroundLayerWhenAppVisibilityChanges: Boolean = false,
+    ): Animation {
         // Start state.
         val startTop = state.top
         val startBottom = state.bottom
@@ -333,45 +389,24 @@ class TransitionAnimator(
             }
         }
 
-        val transitionContainer = controller.transitionContainer
         val isExpandingFullyAbove = isExpandingFullyAbove(transitionContainer, endState)
+        var movedBackgroundLayer = false
 
         // Update state.
         val animator = ValueAnimator.ofFloat(0f, 1f)
         animator.duration = timings.totalDuration
         animator.interpolator = LINEAR
 
-        // Whether we should move the [windowBackgroundLayer] into the overlay of
-        // [Controller.openingWindowSyncView] once the opening app window starts to be visible, or
-        // from it once the closing app window stops being visible.
-        // This is necessary as a one-off sync so we can avoid syncing at every frame, especially
-        // in complex interactions like launching an activity from a dialog. See
-        // b/214961273#comment2 for more details.
-        val openingWindowSyncView = controller.openingWindowSyncView
-        val openingWindowSyncViewOverlay = openingWindowSyncView?.overlay
-        val moveBackgroundLayerWhenAppVisibilityChanges =
-            openingWindowSyncView != null &&
-                openingWindowSyncView.viewRootImpl != controller.transitionContainer.viewRootImpl
-
-        val transitionContainerOverlay = transitionContainer.overlay
-        var movedBackgroundLayer = false
-
         animator.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator, isReverse: Boolean) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Animation started")
-                    }
-                    controller.onTransitionAnimationStart(isExpandingFullyAbove)
-
-                    // Add the drawable to the transition container overlay. Overlays always draw
-                    // drawables after views, so we know that it will be drawn above any view added
-                    // by the controller.
-                    if (controller.isLaunching || openingWindowSyncViewOverlay == null) {
-                        transitionContainerOverlay.add(windowBackgroundLayer)
-                    } else {
-                        openingWindowSyncViewOverlay.add(windowBackgroundLayer)
-                    }
+                    onAnimationStart(
+                        controller,
+                        isExpandingFullyAbove,
+                        windowBackgroundLayer,
+                        transitionContainerOverlay,
+                        openingWindowSyncViewOverlay,
+                    )
                 }
 
                 override fun onAnimationEnd(animation: Animator) {
@@ -413,63 +448,20 @@ class TransitionAnimator(
             state.bottomCornerRadius =
                 MathUtils.lerp(startBottomCornerRadius, endBottomCornerRadius, progress)
 
-            state.visible =
-                if (controller.isLaunching) {
-                    // The expanding view can/should be hidden once it is completely covered by the
-                    // opening window.
-                    getProgress(
-                        timings,
-                        linearProgress,
-                        timings.contentBeforeFadeOutDelay,
-                        timings.contentBeforeFadeOutDuration,
-                    ) < 1
-                } else {
-                    getProgress(
-                        timings,
-                        linearProgress,
-                        timings.contentAfterFadeInDelay,
-                        timings.contentAfterFadeInDuration,
-                    ) > 0
-                }
+            state.visible = checkVisibility(timings, linearProgress, controller.isLaunching)
 
-            if (
-                controller.isLaunching &&
-                    moveBackgroundLayerWhenAppVisibilityChanges &&
-                    !state.visible &&
-                    !movedBackgroundLayer
-            ) {
-                // The expanding view is not visible, so the opening app is visible. If this is
-                // the first frame when it happens, trigger a one-off sync and move the
-                // background layer in its new container.
-                movedBackgroundLayer = true
-
-                transitionContainerOverlay.remove(windowBackgroundLayer)
-                openingWindowSyncViewOverlay!!.add(windowBackgroundLayer)
-
-                ViewRootSync.synchronizeNextDraw(
-                    transitionContainer,
-                    openingWindowSyncView,
-                    then = {},
-                )
-            } else if (
-                !controller.isLaunching &&
-                    moveBackgroundLayerWhenAppVisibilityChanges &&
-                    state.visible &&
-                    !movedBackgroundLayer
-            ) {
-                // The contracting view is now visible, so the closing app is not. If this is
-                // the first frame when it happens, trigger a one-off sync and move the
-                // background layer in its new container.
-                movedBackgroundLayer = true
-
-                openingWindowSyncViewOverlay!!.remove(windowBackgroundLayer)
-                transitionContainerOverlay.add(windowBackgroundLayer)
-
-                ViewRootSync.synchronizeNextDraw(
-                    openingWindowSyncView,
-                    transitionContainer,
-                    then = {},
-                )
+            if (!movedBackgroundLayer) {
+                movedBackgroundLayer =
+                    maybeMoveBackgroundLayer(
+                        controller,
+                        state,
+                        windowBackgroundLayer,
+                        transitionContainer,
+                        transitionContainerOverlay,
+                        openingWindowSyncView,
+                        openingWindowSyncViewOverlay,
+                        moveBackgroundLayerWhenAppVisibilityChanges,
+                    )
             }
 
             val container =
@@ -478,7 +470,6 @@ class TransitionAnimator(
                 } else {
                     controller.transitionContainer
                 }
-
             applyStateToWindowBackgroundLayer(
                 windowBackgroundLayer,
                 state,
@@ -488,10 +479,131 @@ class TransitionAnimator(
                 drawHole,
                 controller.isLaunching,
             )
+
             controller.onTransitionAnimationProgress(state, progress, linearProgress)
         }
 
-        return animator
+        return InterpolatedAnimation(animator)
+    }
+
+    private fun onAnimationStart(
+        controller: Controller,
+        isExpandingFullyAbove: Boolean,
+        windowBackgroundLayer: GradientDrawable,
+        transitionContainerOverlay: ViewGroupOverlay,
+        openingWindowSyncViewOverlay: ViewOverlay?,
+    ) {
+        if (DEBUG) {
+            Log.d(TAG, "Animation started")
+        }
+        controller.onTransitionAnimationStart(isExpandingFullyAbove)
+
+        // Add the drawable to the transition container overlay. Overlays always draw
+        // drawables after views, so we know that it will be drawn above any view added
+        // by the controller.
+        if (controller.isLaunching || openingWindowSyncViewOverlay == null) {
+            transitionContainerOverlay.add(windowBackgroundLayer)
+        } else {
+            openingWindowSyncViewOverlay.add(windowBackgroundLayer)
+        }
+    }
+
+    private fun onAnimationEnd(
+        controller: Controller,
+        isExpandingFullyAbove: Boolean,
+        windowBackgroundLayer: GradientDrawable,
+        transitionContainerOverlay: ViewGroupOverlay,
+        openingWindowSyncViewOverlay: ViewOverlay?,
+        moveBackgroundLayerWhenAppVisibilityChanges: Boolean,
+    ) {
+        if (DEBUG) {
+            Log.d(TAG, "Animation ended")
+        }
+
+        // TODO(b/330672236): Post this to the main thread instead so that it does not
+        // flicker with Flexiglass enabled.
+        controller.onTransitionAnimationEnd(isExpandingFullyAbove)
+        transitionContainerOverlay.remove(windowBackgroundLayer)
+
+        if (moveBackgroundLayerWhenAppVisibilityChanges && controller.isLaunching) {
+            openingWindowSyncViewOverlay?.remove(windowBackgroundLayer)
+        }
+    }
+
+    /** Returns whether is the controller's view should be visible with the given [timings]. */
+    private fun checkVisibility(timings: Timings, progress: Float, isLaunching: Boolean): Boolean {
+        return if (isLaunching) {
+            // The expanding view can/should be hidden once it is completely covered by the opening
+            // window.
+            getProgress(
+                timings,
+                progress,
+                timings.contentBeforeFadeOutDelay,
+                timings.contentBeforeFadeOutDuration,
+            ) < 1
+        } else {
+            // The shrinking view can/should be hidden while it is completely covered by the closing
+            // window.
+            getProgress(
+                timings,
+                progress,
+                timings.contentAfterFadeInDelay,
+                timings.contentAfterFadeInDuration,
+            ) > 0
+        }
+    }
+
+    /**
+     * If necessary, moves the background layer from the view container's overlay to the window sync
+     * view overlay, or vice versa.
+     *
+     * @return true if the background layer vwas moved, false otherwise.
+     */
+    private fun maybeMoveBackgroundLayer(
+        controller: Controller,
+        state: State,
+        windowBackgroundLayer: GradientDrawable,
+        transitionContainer: View,
+        transitionContainerOverlay: ViewGroupOverlay,
+        openingWindowSyncView: View?,
+        openingWindowSyncViewOverlay: ViewOverlay?,
+        moveBackgroundLayerWhenAppVisibilityChanges: Boolean,
+    ): Boolean {
+        if (
+            controller.isLaunching && moveBackgroundLayerWhenAppVisibilityChanges && !state.visible
+        ) {
+            // The expanding view is not visible, so the opening app is visible. If this is the
+            // first frame when it happens, trigger a one-off sync and move the background layer
+            // in its new container.
+            transitionContainerOverlay.remove(windowBackgroundLayer)
+            openingWindowSyncViewOverlay!!.add(windowBackgroundLayer)
+
+            ViewRootSync.synchronizeNextDraw(
+                transitionContainer,
+                openingWindowSyncView!!,
+                then = {},
+            )
+
+            return true
+        } else if (
+            !controller.isLaunching && moveBackgroundLayerWhenAppVisibilityChanges && state.visible
+        ) {
+            // The contracting view is now visible, so the closing app is not. If this is the first
+            // frame when it happens, trigger a one-off sync and move the background layer in its
+            // new container.
+            openingWindowSyncViewOverlay!!.remove(windowBackgroundLayer)
+            transitionContainerOverlay.add(windowBackgroundLayer)
+
+            ViewRootSync.synchronizeNextDraw(
+                openingWindowSyncView!!,
+                transitionContainer,
+                then = {},
+            )
+
+            return true
+        }
+
+        return false
     }
 
     /** Return whether we are expanding fully above the [transitionContainer]. */
