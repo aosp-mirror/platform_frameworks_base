@@ -8274,7 +8274,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                         setThreadScheduler(proc.getRenderThreadTid(),
                                 SCHED_FIFO | SCHED_RESET_ON_FORK, 1);
                     } else {
-                        setThreadPriority(proc.getRenderThreadTid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                        if (Flags.resetOnForkEnabled()) {
+                            if (Process.getThreadScheduler(proc.getRenderThreadTid())
+                                    == Process.SCHED_OTHER) {
+                                Process.setThreadScheduler(proc.getRenderThreadTid(),
+                                    Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK,
+                                    0);
+                            }
+                        }
+                        setThreadPriority(proc.getRenderThreadTid(),
+                            THREAD_PRIORITY_TOP_APP_BOOST);
                     }
                 }
             } else {

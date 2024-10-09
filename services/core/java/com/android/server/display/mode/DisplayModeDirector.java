@@ -1194,6 +1194,13 @@ public class DisplayModeDirector {
         @GuardedBy("mLock")
         private void updateRefreshRateSettingLocked(float minRefreshRate, float peakRefreshRate,
                 float defaultRefreshRate, int displayId) {
+            if (mDisplayObserver.isExternalDisplayLocked(displayId)) {
+                if (mLoggingEnabled) {
+                    Slog.d(TAG, "skip updateRefreshRateSettingLocked for external display "
+                            + displayId);
+                }
+                return;
+            }
             // TODO(b/156304339): The logic in here, aside from updating the refresh rate votes, is
             // used to predict if we're going to be doing frequent refresh rate switching, and if
             // so, enable the brightness observer. The logic here is more complicated and fragile
@@ -1243,6 +1250,8 @@ public class DisplayModeDirector {
         }
 
         private void removeRefreshRateSetting(int displayId) {
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_USER_SETTING_PEAK_REFRESH_RATE,
+                    null);
             mVotesStorage.updateVote(displayId, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
                     null);
             mVotesStorage.updateVote(displayId, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
@@ -1458,11 +1467,11 @@ public class DisplayModeDirector {
         public void onDisplayAdded(int displayId) {
             updateDisplayDeviceConfig(displayId);
             DisplayInfo displayInfo = getDisplayInfo(displayId);
+            registerExternalDisplay(displayInfo);
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
             updateDisplaysPeakRefreshRateAndResolution(displayInfo);
-            addDisplaysSynchronizedPeakRefreshRate(displayInfo);
         }
 
         @Override
@@ -1477,7 +1486,7 @@ public class DisplayModeDirector {
             updateLayoutLimitedFrameRate(displayId, null);
             removeUserSettingDisplayPreferredSize(displayId);
             removeDisplaysPeakRefreshRateAndResolution(displayId);
-            removeDisplaysSynchronizedPeakRefreshRate(displayId);
+            unregisterExternalDisplay(displayId);
         }
 
         @Override
@@ -1487,6 +1496,30 @@ public class DisplayModeDirector {
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
+        }
+
+        private void registerExternalDisplay(DisplayInfo displayInfo) {
+            if (displayInfo == null || displayInfo.type != Display.TYPE_EXTERNAL) {
+                return;
+            }
+            synchronized (mLock) {
+                mExternalDisplaysConnected.add(displayInfo.displayId);
+                if (mExternalDisplaysConnected.size() == 1) {
+                    addDisplaysSynchronizedPeakRefreshRate();
+                }
+            }
+        }
+
+        private void unregisterExternalDisplay(int displayId) {
+            synchronized (mLock) {
+                if (!isExternalDisplayLocked(displayId)) {
+                    return;
+                }
+                mExternalDisplaysConnected.remove(displayId);
+                if (mExternalDisplaysConnected.isEmpty()) {
+                    removeDisplaysSynchronizedPeakRefreshRate();
+                }
+            }
         }
 
         boolean isExternalDisplayLocked(int displayId) {
@@ -1534,10 +1567,24 @@ public class DisplayModeDirector {
                 return;
             }
 
-            mVotesStorage.updateVote(info.displayId,
-                    Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE,
-                    Vote.forSize(/* width */ preferredMode.getPhysicalWidth(),
-                            /* height */ preferredMode.getPhysicalHeight()));
+            if (info.type == Display.TYPE_EXTERNAL
+                    && mDisplayManagerFlags.isUserRefreshRateForExternalDisplayEnabled()
+                    && !isRefreshRateSynchronizationEnabled()) {
+                mVotesStorage.updateVote(info.displayId,
+                        Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE,
+                        Vote.forSizeAndPhysicalRefreshRatesRange(
+                                /* minWidth */ preferredMode.getPhysicalWidth(),
+                                /* minHeight */ preferredMode.getPhysicalHeight(),
+                                /* width */ preferredMode.getPhysicalWidth(),
+                                /* height */ preferredMode.getPhysicalHeight(),
+                                /* minRefreshRate */ preferredMode.getRefreshRate(),
+                                /* maxRefreshRate */ preferredMode.getRefreshRate()));
+            } else {
+                mVotesStorage.updateVote(info.displayId,
+                        Vote.PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE,
+                        Vote.forSize(/* width */ preferredMode.getPhysicalWidth(),
+                                /* height */ preferredMode.getPhysicalHeight()));
+            }
         }
 
         @Nullable
@@ -1584,16 +1631,9 @@ public class DisplayModeDirector {
          * Sets 60Hz target refresh rate as the vote with
          * {@link Vote#PRIORITY_SYNCHRONIZED_REFRESH_RATE} priority.
          */
-        private void addDisplaysSynchronizedPeakRefreshRate(@Nullable final DisplayInfo info) {
-            if (info == null || info.type != Display.TYPE_EXTERNAL
-                    || !isRefreshRateSynchronizationEnabled()) {
+        private void addDisplaysSynchronizedPeakRefreshRate() {
+            if (!isRefreshRateSynchronizationEnabled()) {
                 return;
-            }
-            synchronized (mLock) {
-                mExternalDisplaysConnected.add(info.displayId);
-                if (mExternalDisplaysConnected.size() != 1) {
-                    return;
-                }
             }
             // set minRefreshRate as the max refresh rate.
             mVotesStorage.updateGlobalVote(Vote.PRIORITY_SYNCHRONIZED_REFRESH_RATE,
@@ -1610,18 +1650,9 @@ public class DisplayModeDirector {
                                     + SYNCHRONIZED_REFRESH_RATE_TOLERANCE));
         }
 
-        private void removeDisplaysSynchronizedPeakRefreshRate(final int displayId) {
+        private void removeDisplaysSynchronizedPeakRefreshRate() {
             if (!isRefreshRateSynchronizationEnabled()) {
                 return;
-            }
-            synchronized (mLock) {
-                if (!isExternalDisplayLocked(displayId)) {
-                    return;
-                }
-                mExternalDisplaysConnected.remove(displayId);
-                if (!mExternalDisplaysConnected.isEmpty()) {
-                    return;
-                }
             }
             mVotesStorage.updateGlobalVote(Vote.PRIORITY_SYNCHRONIZED_REFRESH_RATE, null);
             mVotesStorage.updateGlobalVote(Vote.PRIORITY_SYNCHRONIZED_RENDER_FRAME_RATE, null);

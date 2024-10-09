@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ચાલુ"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ચાલુ • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"બંધ"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"સેટઅપ કરો"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"સેટિંગમાં જઈને મેનેજ કરો"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{કોઈ સક્રિય મોડ નથી}=1{{mode} સક્રિય છે}one{# મોડ સક્રિય છે}other{# મોડ સક્રિય છે}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"અલાર્મ, રિમાઇન્ડર, ઇવેન્ટ અને તમે ઉલ્લેખ કરો તે કૉલર સિવાય તમને ધ્વનિ કે વાઇબ્રેશન દ્વારા ખલેલ પહોંચાડવામાં આવશે નહીં. સંગીત, વીડિઓ અને રમતો સહિત તમે જે કંઈપણ ચલાવવાનું પસંદ કરશો તે સંભળાતું રહેશે."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"વાતચીત"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{કોઈ નોટિફિકેશન નથી}=1{{mode} દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}=2{{mode} અને અન્ય એક મોડ દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}one{{mode} અને અન્ય # મોડ દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}other{{mode} અને અન્ય # મોડ દ્વારા નોટિફિકેશન થોભાવવામાં આવ્યા}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"હવે શરૂ કરો"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"કોઈ નોટિફિકેશન નથી"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"કોઈ નવું નોટિફિકેશન નથી"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ડેમો મોડ બતાવો"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ઇથરનેટ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"અલાર્મ"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> ચાલુ છે"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"તમારા ફોન વડે વધુ ઝડપી તેમજ સુરક્ષિત ખરીદીઓ કરવાની રીત સેટઅપ કરી લો"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"બધું બતાવો"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ટચપૅડના સંકેતો વિશે જાણો"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"તમારા કીબોર્ડ અને ટચપૅડ વડે નૅવિગેટ કરો"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ટચપૅડના સંકેતો અને કીબોર્ડના શૉર્ટકટ જેવું બીજું ઘણું જાણો"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"પાછળ જવાનો સંકેત"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"હોમ સ્ક્રીન પર જવાનો સંકેત"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"તાજેતરની ઍપ જુઓ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"થઈ ગયું"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"પાછા જાઓ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"પાછા જવા માટે, ટચપૅડ પર ગમે ત્યાં ત્રણ આંગળી વડે ડાબે અથવા જમણે સ્વાઇપ કરો.\n\nઆના માટે તમે કીબોર્ડ શૉર્ટકટ Action + ESCનો ઉપયોગ કરી શકો છો."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ખૂબ સરસ કામ!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"તમે પાછા જવાનો સંકેત પૂર્ણ કર્યો છે."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"હોમ પર જાઓ"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"કોઈપણ સમયે તમારી હોમ સ્ક્રીન પર જવા માટે, ત્રણ આંગળી વડે તમારી સ્ક્રીનની સૌથી નીચેની બાજુએથી ઉપરની તરફ સ્વાઇપ કરો."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"સરસ!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"તમે હોમ સ્ક્રીન પર જવાનો સંકેત પૂર્ણ કર્યો છે."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"તાજેતરની ઍપ જુઓ"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"તમારા ટચપૅડ પર ત્રણ આંગળીઓનો ઉપયોગ કરીને ઉપર સ્વાઇપ કરો અને દબાવી રાખો."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ખૂબ સરસ કામ!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"તમે \"તાજેતરની ઍપ જુઓ\" સંકેત પૂર્ણ કર્યો."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ઍક્શન કી"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"તમારી ઍપ ઍક્સેસ કરવા માટે, તમારા કીબોર્ડ પરની ઍક્શન કી દબાવો."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"અભિનંદન!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"તમે ઍક્શન કીનો સંકેત પૂર્ણ કર્યો છે.\n\nઍક્શન કી + /ને દબાવવાથી, તમારી પાસે ઉપલબ્ધ હોય તે બધા શૉર્ટકટ જોવા મળે છે."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"કીબોર્ડની બૅકલાઇટ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dમાંથી %1$d લેવલ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ઘરેલું સાધનોના નિયંત્રણો"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"તમારી બધી ઍપ જોવા માટે, તમારા કીબોર્ડ પર ઍક્શન કી દબાવો"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"બદલાવેલું"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"જોવા માટે અનલૉક કરો"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"સંદર્ભાત્મક શિક્ષણ"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"પાછા જવા માટે તમારા ટચપૅડનો ઉપયોગ કરો"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ત્રણ આંગળીનો ઉપયોગ કરીને ડાબે અથવા જમણે સ્વાઇપ કરો. સંકેતો વિશે વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"હોમ સ્ક્રીન પર જવા માટે તમારા ટચપૅડનો ઉપયોગ કરો"</string>
@@ -1444,7 +1458,7 @@
     <string name="overview_edu_notification_content" msgid="3578204677648432500">"ત્રણ આંગળીઓનો ઉપયોગ કરીને ઉપર સ્વાઇપ કરો અને દબાવી રાખો. સંકેતો વિશે વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"બધી ઍપ જોવા માટે તમારા કીબોર્ડનો ઉપયોગ કરો"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"કોઈપણ સમયે ઍક્શન કી દબાવો. સંકેતો વિશે વધુ જાણવા માટે ટૅપ કરો."</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"બ્રાઇટનેસ સ્લાઇડર હવે એક્સ્ટ્રા ડિમનો ભાગ છે"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"એક્સ્ટ્રા ડિમ હવે બ્રાઇટનેસ સ્લાઇડરનો ભાગ છે"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"તમે હવે બ્રાઇટનેસ લેવલને હજી પણ ઘટાડીને સ્ક્રીનને એક્સ્ટ્રા ડિમ બનાવી શકો છો.\n\nઆ સુવિધા હવે બ્રાઇટનેસ સ્લાઇડરનો ભાગ હોવાથી એક્સ્ટ્રા ડિમ શૉર્ટકટને કાઢી નાખવામાં આવી રહ્યાં છે."</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"એક્સ્ટ્રા ડિમ શૉર્ટકટ કાઢી નાખો"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"એક્સ્ટ્રા ડિમ શૉર્ટકટ કાઢી નાખ્યા"</string>

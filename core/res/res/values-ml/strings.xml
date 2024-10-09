@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"കോളുകളും അറിയിപ്പുകളും വൈബ്രേറ്റ് ചെയ്യും"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"കോളുകളും അറിയിപ്പുകളും മ്യൂട്ട് ചെയ്യപ്പെടും"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ശല്യപ്പെടുത്തരുത്"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"പുതിയത്: അറിയിപ്പുകളെ \'ശല്യപ്പെടുത്തരുത്\' അദൃശ്യമാക്കുന്നു"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"കൂടുതലറിയാനും മാറ്റാനും ടാപ്പ് ചെയ്യുക."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"അറിയിപ്പ് ക്രമീകരണം അവലോകനം ചെയ്യുക"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 മുതൽ, നിങ്ങൾ ഇൻസ്‌റ്റാൾ ചെയ്യുന്ന ആപ്പുകൾക്ക് അറിയിപ്പുകൾ അയയ്‌ക്കാൻ നിങ്ങളുടെ അനുമതി വേണം. നിലവിലുള്ള ആപ്പുകൾക്ക് ഈ അനുമതി മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"പിന്നീട് ഓർമ്മിപ്പിക്കൂ"</string>

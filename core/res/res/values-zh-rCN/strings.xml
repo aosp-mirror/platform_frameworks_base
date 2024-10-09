@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"有来电和通知时会振动"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"有来电和通知时会静音"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"系统变更"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"勿扰"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"新功能：勿扰模式目前可隐藏通知"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"点按即可了解详情以及进行更改。"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"“勿扰”设置有变更"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"点按即可查看屏蔽内容。"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"查看通知设置"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"从 Android 13 开始，您安装的应用需要您授予相应权限才能发送通知。点按即可为现有应用更改此权限。"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"稍后提醒我"</string>

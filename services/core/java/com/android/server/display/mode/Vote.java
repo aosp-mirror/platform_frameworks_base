@@ -44,7 +44,7 @@ interface Vote {
     // It votes [minRefreshRate, Float.POSITIVE_INFINITY]
     int PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE = 3;
 
-    // User setting preferred display resolution.
+    // User setting preferred display resolution, for external displays also includes refresh rate.
     int PRIORITY_USER_SETTING_DISPLAY_PREFERRED_SIZE = 4;
 
     // APP_REQUEST_RENDER_FRAME_RATE_RANGE is used to for internal apps to limit the render

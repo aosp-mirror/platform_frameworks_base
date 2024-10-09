@@ -16,8 +16,8 @@
 
 package com.android.wm.shell.dagger;
 
-import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
-import static android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS;
+import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT;
 
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
@@ -71,10 +71,10 @@ import com.android.wm.shell.desktopmode.DesktopModeDragAndDropTransitionHandler;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
 import com.android.wm.shell.desktopmode.DesktopModeLoggerTransitionObserver;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
 import com.android.wm.shell.desktopmode.DesktopTasksTransitionObserver;
-import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler;
 import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
 import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
@@ -92,9 +92,9 @@ import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionHandler;
 import com.android.wm.shell.freeform.FreeformTaskTransitionObserver;
-import com.android.wm.shell.freeform.TaskChangeListener;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarterInitializer;
+import com.android.wm.shell.freeform.TaskChangeListener;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -134,13 +134,13 @@ import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
-import kotlinx.coroutines.CoroutineScope;
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-import kotlinx.coroutines.MainCoroutineDispatcher;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import kotlinx.coroutines.CoroutineScope;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+import kotlinx.coroutines.MainCoroutineDispatcher;
 
 /**
  * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only accessible

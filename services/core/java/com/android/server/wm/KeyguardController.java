@@ -62,6 +62,7 @@ import android.view.WindowManager;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 
@@ -72,6 +73,9 @@ import java.io.PrintWriter;
  * Note that everything in this class should only be accessed with the AM lock being held.
  */
 class KeyguardController {
+
+    private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
+            Flags.ensureKeyguardDoesTransitionStarting();
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_ATM;
 
@@ -201,6 +205,19 @@ class KeyguardController {
             setWakeTransitionReady();
             return;
         }
+
+        if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+            final TransitionController transitionController =
+                    mWindowManager.mAtmService.getTransitionController();
+            final Transition transition = transitionController.getCollectingTransition();
+            if (transition != null && displayId == DEFAULT_DISPLAY) {
+                if (!keyguardShowing && state.mKeyguardShowing) {
+                    transition.addFlag(TRANSIT_FLAG_KEYGUARD_GOING_AWAY);
+                } else if (keyguardShowing && !state.mKeyguardShowing) {
+                    transition.addFlag(TRANSIT_FLAG_KEYGUARD_APPEARING);
+                }
+            }
+        }
         // Update the task snapshot if the screen will not be turned off. To make sure that the
         // unlocking animation can animate consistent content. The conditions are:
         // - Either AOD or keyguard changes to be showing. So if the states change individually,
@@ -231,8 +248,10 @@ class KeyguardController {
                     || (keyguardShowing && !Display.isOffState(dc.getDisplayInfo().state))) {
                 // Keyguard decided to show or stopped going away. Send a transition to animate back
                 // to the locked state before holding the sleep token again
-                dc.requestTransitionAndLegacyPrepare(
-                        TRANSIT_TO_FRONT, TRANSIT_FLAG_KEYGUARD_APPEARING);
+                if (!ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
+                    dc.requestTransitionAndLegacyPrepare(
+                            TRANSIT_TO_FRONT, TRANSIT_FLAG_KEYGUARD_APPEARING);
+                }
                 dc.mWallpaperController.adjustWallpaperWindows();
                 dc.executeAppTransition();
             }

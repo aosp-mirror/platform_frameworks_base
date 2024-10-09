@@ -218,7 +218,7 @@ public final class FakeVibratorControllerProvider {
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
             infoBuilder.setQFactor(mQFactor);
-            infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+            infoBuilder.setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
             infoBuilder.setMaxEnvelopeEffectSize(mMaxEnvelopeEffectSize);
             infoBuilder.setMinEnvelopeEffectControlPointDurationMillis(

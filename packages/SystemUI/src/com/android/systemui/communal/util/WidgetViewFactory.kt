@@ -43,7 +43,7 @@ constructor(
     suspend fun createWidget(
         context: Context,
         model: CommunalContentModel.WidgetContent.Widget,
-        size: SizeF,
+        size: SizeF?,
     ): CommunalAppWidgetHostView =
         withContext("$TAG#createWidget", uiBgContext) {
             val view =
@@ -54,14 +54,16 @@ constructor(
             // Instead of setting the view as the listener directly, we wrap the view in a delegate
             // which ensures the callbacks always get called on the main thread.
             appWidgetHost.setListener(model.appWidgetId, listenerFactory.create(view))
-            view.updateAppWidgetSize(
-                /* newOptions = */ Bundle(),
-                /* minWidth = */ size.width.toInt(),
-                /* minHeight = */ size.height.toInt(),
-                /* maxWidth = */ size.width.toInt(),
-                /* maxHeight = */ size.height.toInt(),
-                /* ignorePadding = */ true,
-            )
+            if (size != null) {
+                view.updateAppWidgetSize(
+                    /* newOptions = */ Bundle(),
+                    /* minWidth = */ size.width.toInt(),
+                    /* minHeight = */ size.height.toInt(),
+                    /* maxWidth = */ size.width.toInt(),
+                    /* maxHeight = */ size.height.toInt(),
+                    /* ignorePadding = */ true,
+                )
+            }
             view
         }
 

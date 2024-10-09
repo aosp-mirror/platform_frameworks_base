@@ -56,7 +56,8 @@ import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
-import com.android.wm.shell.pip2.animation.PipEnterExitAnimator;
+import com.android.wm.shell.pip2.animation.PipEnterAnimator;
+import com.android.wm.shell.pip2.animation.PipExpandAnimator;
 import com.android.wm.shell.shared.TransitionUtil;
 import com.android.wm.shell.shared.pip.PipContentOverlay;
 import com.android.wm.shell.sysui.ShellInit;
@@ -218,6 +219,7 @@ public class PipTransition extends PipTransitionController implements
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mFinishCallback = finishCallback;
         if (transition == mEnterTransition || info.getType() == TRANSIT_PIP) {
             mEnterTransition = null;
             // If we are in swipe PiP to Home transition we are ENTERING_PIP as a jumpcut transition
@@ -258,6 +260,7 @@ public class PipTransition extends PipTransitionController implements
         if (isRemovePipTransition(info)) {
             return removePipImmediately(info, startTransaction, finishTransaction, finishCallback);
         }
+        mFinishCallback = null;
         return false;
     }
 
@@ -297,7 +300,6 @@ public class PipTransition extends PipTransitionController implements
             mBoundsChangeDuration = BOUNDS_CHANGE_JUMPCUT_DURATION;
         }
 
-        mFinishCallback = finishCallback;
         mPipTransitionState.setState(PipTransitionState.CHANGING_PIP_BOUNDS, extra);
         return true;
     }
@@ -349,7 +351,6 @@ public class PipTransition extends PipTransitionController implements
             startTransaction.setMatrix(pipLeash, transformTensor, matrixTmp);
         }
         startTransaction.apply();
-        finishCallback.onTransitionFinished(null /* finishWct */);
         finishInner();
         return true;
     }
@@ -386,14 +387,6 @@ public class PipTransition extends PipTransitionController implements
             return false;
         }
 
-        WindowContainerToken pipTaskToken = pipChange.getContainer();
-        if (pipTaskToken == null) {
-            return false;
-        }
-
-        WindowContainerTransaction finishWct = new WindowContainerTransaction();
-        SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-
         Rect startBounds = pipChange.getStartAbsBounds();
         Rect endBounds = pipChange.getEndAbsBounds();
         SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
@@ -405,29 +398,22 @@ public class PipTransition extends PipTransitionController implements
             sourceRectHint = pipChange.getTaskInfo().pictureInPictureParams.getSourceRectHint();
         }
 
-        // For opening type transitions, if there is a non-pip change of mode TO_FRONT/OPEN,
+        // For opening type transitions, if there is a change of mode TO_FRONT/OPEN,
         // make sure that change has alpha of 1f, since it's init state might be set to alpha=0f
         // by the Transitions framework to simplify Task opening transitions.
         if (TransitionUtil.isOpeningType(info.getType())) {
             for (TransitionInfo.Change change : info.getChanges()) {
-                if (change.getLeash() == null || change == pipChange) continue;
+                if (change.getLeash() == null) continue;
                 if (change.getMode() == TRANSIT_OPEN || change.getMode() == TRANSIT_TO_FRONT) {
                     startTransaction.setAlpha(change.getLeash(), 1f);
                 }
             }
         }
 
-        PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
-                startTransaction, finishTransaction, startBounds, startBounds, endBounds,
-                sourceRectHint, PipEnterExitAnimator.BOUNDS_ENTER, Surface.ROTATION_0);
-
-        tx.addTransactionCommittedListener(mPipScheduler.getMainExecutor(),
-                this::finishInner);
-        finishWct.setBoundsChangeTransaction(pipTaskToken, tx);
-
-        animator.setAnimationEndCallback(() ->
-                finishCallback.onTransitionFinished(finishWct));
-
+        PipEnterAnimator animator = new PipEnterAnimator(mContext, pipLeash,
+                startTransaction, finishTransaction, endBounds, sourceRectHint, Surface.ROTATION_0);
+        animator.setAnimationStartCallback(() -> animator.setEnterStartState(pipChange));
+        animator.setAnimationEndCallback(this::finishInner);
         animator.start();
         return true;
     }
@@ -452,11 +438,8 @@ public class PipTransition extends PipTransitionController implements
 
         PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipLeash, startTransaction,
                 PipAlphaAnimator.FADE_IN);
-        animator.setAnimationEndCallback(() -> {
-            finishCallback.onTransitionFinished(null);
-            // This should update the pip transition state accordingly after we stop playing.
-            finishInner();
-        });
+        // This should update the pip transition state accordingly after we stop playing.
+        animator.setAnimationEndCallback(this::finishInner);
 
         animator.start();
         return true;
@@ -510,9 +493,9 @@ public class PipTransition extends PipTransitionController implements
             sourceRectHint = mPipTaskListener.getPictureInPictureParams().getSourceRectHint();
         }
 
-        PipEnterExitAnimator animator = new PipEnterExitAnimator(mContext, pipLeash,
+        PipExpandAnimator animator = new PipExpandAnimator(mContext, pipLeash,
                 startTransaction, finishTransaction, endBounds, startBounds, endBounds,
-                sourceRectHint, PipEnterExitAnimator.BOUNDS_EXIT, Surface.ROTATION_0);
+                sourceRectHint, Surface.ROTATION_0);
 
         animator.setAnimationEndCallback(() -> {
             mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
@@ -631,6 +614,7 @@ public class PipTransition extends PipTransitionController implements
     //
 
     private void finishInner() {
+        finishTransition(null /* tx */);
         if (mPipTransitionState.getSwipePipToHomeOverlay() != null) {
             startOverlayFadeoutAnimation();
         } else if (mPipTransitionState.getState() == PipTransitionState.ENTERING_PIP) {
@@ -652,6 +636,7 @@ public class PipTransition extends PipTransitionController implements
         }
         if (mFinishCallback != null) {
             mFinishCallback.onTransitionFinished(wct);
+            mFinishCallback = null;
         }
     }
 

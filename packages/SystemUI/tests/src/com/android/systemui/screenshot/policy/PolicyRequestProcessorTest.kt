@@ -60,9 +60,9 @@ class PolicyRequestProcessorTest {
                 SCREENSHOT_KEY_CHORD,
                 UserHandle.CURRENT,
                 topComponent = null,
-                screenBounds = Rect(0, 0, 1, 1),
+                originalScreenBounds = Rect(0, 0, 1, 1),
                 taskId = -1,
-                insets = Insets.NONE,
+                originalInsets = Insets.NONE,
                 bitmap = null,
                 displayId = DEFAULT_DISPLAY,
             )

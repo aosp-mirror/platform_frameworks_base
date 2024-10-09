@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"কল এবং বিজ্ঞপ্তি আসলে ভাইব্রেট হবে"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"কল এবং বিজ্ঞপ্তিগুলি মিউট করা হবে"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"বিরক্ত করবে না"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"নতুন: \'বিরক্ত করবে না\' মোড চালু আছে, তাই বিজ্ঞপ্তি লুকিয়ে ফেলা হচ্ছে"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"আরও জানতে এবং পরিবর্তন করতে ট্যাপ করুন।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'বিরক্ত করবে না\' মোডের সেটিং বদলে গেছে"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"বিজ্ঞপ্তির সেটিংস পর্যালোচনা করুন"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 থেকে শুরু করে, বিজ্ঞপ্তি পাঠানোর জন্য আপনার ইনস্টল করা অ্যাপকে অনুমতি নিতে হবে। বর্তমান অ্যাপের জন্য এই অনুমতি পরিবর্তন করতে ট্যাপ করুন।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"পরে মনে করিয়ে দিও"</string>

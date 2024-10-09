@@ -2131,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Volání a oznámení budou vibrovat"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Volání a oznámení budou ztlumena"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Změny nastavení systému"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nerušit"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novinka: Režim Nerušit skrývá oznámení"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Klepnutím zobrazíte další informace a provedete změny."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Nastavení režimu Nerušit se změnilo"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Klepnutím zkontrolujete, co je blokováno."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Zkontrolujte nastavení oznámení"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Počínaje systémem Android 13 od vás nainstalované aplikace potřebují oprávnění k odesílání oznámení. Klepnutím toto oprávnění změníte pro stávající aplikace."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Připomenout později"</string>
