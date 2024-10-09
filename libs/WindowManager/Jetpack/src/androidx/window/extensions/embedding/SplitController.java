@@ -239,6 +239,11 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         mActivityStartMonitor = new ActivityStartMonitor();
         instrumentation.addMonitor(mActivityStartMonitor);
         foldingFeatureProducer.addDataChangedCallback(new FoldingFeatureListener());
+
+        synchronized (mLock) {
+            // Abort the restoration if any and the application already has running activities.
+            abortRebuildingTaskContainersIfNeeded(null /* launchingActivity */);
+        }
     }
 
     private class FoldingFeatureListener
@@ -282,6 +287,10 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
             mSplitRules.addAll(rules);
 
             if (!Flags.aeBackStackRestore() || !mPresenter.isWaitingToRebuildTaskContainers()) {
+                return;
+            }
+
+            if (abortRebuildingTaskContainersIfNeeded(null /* launchingActivity */)) {
                 return;
             }
 
@@ -2883,6 +2892,53 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
         }
     }
 
+    @GuardedBy("mLock")
+    private boolean abortRebuildingTaskContainersIfNeeded(@Nullable Activity launchingActivity) {
+        if (mPresenter == null || !mPresenter.isWaitingToRebuildTaskContainers()) {
+            return false;
+        }
+
+        final ActivityThread activityThread = ActivityThread.currentActivityThread();
+        if (activityThread == null) {
+            return false;
+        }
+
+        final Activity lastCreatedActivity = activityThread.getLastCreatedActivity();
+        final Activity activity =
+                launchingActivity != null ? launchingActivity : lastCreatedActivity;
+        if (activity == null) {
+            return false;
+        }
+
+        Log.w(TAG, "Rebuilding aborted, clean up.");
+
+        // Retrieve the Task intent.
+        final int taskId = getTaskId(activity);
+
+        // Clean up and abort the restoration
+        // TODO(b/369488857): also to remove the non-organized activities in the Task?
+        final TransactionRecord transactionRecord =
+                mTransactionManager.startNewTransaction();
+        final WindowContainerTransaction wct = transactionRecord.getTransaction();
+        mPresenter.abortTaskContainerRebuilding(wct);
+        transactionRecord.apply(false /* shouldApplyIndependently */);
+
+        // Start the Task root activity if the task is now empty.
+        ActivityManager.RecentTaskInfo taskInfo = null;
+        final ActivityManager am = activity.getSystemService(ActivityManager.class);
+        final List<ActivityManager.AppTask> appTasks = am.getAppTasks();
+        for (ActivityManager.AppTask appTask : appTasks) {
+            if (appTask.getTaskInfo().taskId == taskId) {
+                taskInfo = appTask.getTaskInfo();
+                break;
+            }
+        }
+        if (taskInfo != null && !taskInfo.isRunning) {
+            activity.startActivity(taskInfo.baseIntent.cloneFilter());
+        }
+        return true;
+    }
+
     private final class LifecycleCallbacks extends EmptyLifecycleCallbacksAdapter {
 
         @Override
@@ -2894,33 +2950,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
                 return;
             }
             synchronized (mLock) {
-                if (mPresenter.isWaitingToRebuildTaskContainers()) {
-                    Log.w(TAG, "Rebuilding aborted, clean up and restart");
-
-                    // Retrieve the Task intent.
-                    final int taskId = getTaskId(activity);
-                    Intent taskIntent = null;
-                    final ActivityManager am = activity.getSystemService(ActivityManager.class);
-                    final List<ActivityManager.AppTask> appTasks = am.getAppTasks();
-                    for (ActivityManager.AppTask appTask : appTasks) {
-                        if (appTask.getTaskInfo().taskId == taskId) {
-                            taskIntent = appTask.getTaskInfo().baseIntent.cloneFilter();
-                            break;
-                        }
-                    }
-
-                    // Clean up and abort the restoration
-                    // TODO(b/369488857): also to remove the non-organized activities in the Task?
-                    final TransactionRecord transactionRecord =
-                            mTransactionManager.startNewTransaction();
-                    final WindowContainerTransaction wct = transactionRecord.getTransaction();
-                    mPresenter.abortTaskContainerRebuilding(wct);
-                    transactionRecord.apply(false /* shouldApplyIndependently */);
-
-                    // Start the Task root activity.
-                    if (taskIntent != null) {
-                        activity.startActivity(taskIntent);
-                    }
+                if (abortRebuildingTaskContainersIfNeeded(activity)) {
                     return;
                 }
 
