@@ -156,6 +156,7 @@
         <activity android:name=".LaunchTransparentActivity"
                   android:resizeableActivity="false"
                   android:screenOrientation="portrait"
+                  android:minAspectRatio="1.77"
                   android:theme="@style/OptOutEdgeToEdge"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
                   android:label="LaunchTransparentActivity"
