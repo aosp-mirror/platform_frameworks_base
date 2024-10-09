@@ -5877,6 +5877,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        final State prevState = mState;
         mState = state;
 
         if (getTaskFragment() != null) {
@@ -5916,6 +5917,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             case PAUSED:
                 mAtmService.updateBatteryStats(this, false);
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+                break;
+            case STOPPING:
+                // It is possible that an Activity is scheduled to be STOPPED directly from RESUMED
+                // state. Updating the PAUSED usage state in that case, since the Activity will be
+                // STOPPED while cycled through the PAUSED state.
+                if (prevState == RESUMED) {
+                    mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+                }
                 break;
             case STOPPED:
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
