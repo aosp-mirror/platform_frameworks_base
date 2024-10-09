@@ -60,9 +60,11 @@ private fun UpdateGridLayoutInfo(
     viewModel: ResizeableItemFrameViewModel,
     key: String,
     gridState: LazyGridState,
-    minItemSpan: Int,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
+    minHeightPx: Int,
+    maxHeightPx: Int,
+    resizeMultiple: Int,
 ) {
     val density = LocalDensity.current
     LaunchedEffect(
@@ -70,9 +72,11 @@ private fun UpdateGridLayoutInfo(
         viewModel,
         key,
         gridState,
-        minItemSpan,
         gridContentPadding,
         verticalArrangement,
+        minHeightPx,
+        maxHeightPx,
+        resizeMultiple,
     ) {
         val verticalItemSpacingPx = with(density) { verticalArrangement.spacing.toPx() }
         val verticalContentPaddingPx =
@@ -92,13 +96,15 @@ private fun UpdateGridLayoutInfo(
             )
             .collectLatest { (maxItemSpan, viewportHeightPx, itemInfo) ->
                 viewModel.setGridLayoutInfo(
-                    verticalItemSpacingPx,
-                    verticalContentPaddingPx,
-                    viewportHeightPx,
-                    maxItemSpan,
-                    minItemSpan,
-                    itemInfo?.row,
-                    itemInfo?.span,
+                    verticalItemSpacingPx = verticalItemSpacingPx,
+                    currentRow = itemInfo?.row,
+                    maxHeightPx = maxHeightPx,
+                    minHeightPx = minHeightPx,
+                    currentSpan = itemInfo?.span,
+                    resizeMultiple = resizeMultiple,
+                    totalSpans = maxItemSpan,
+                    viewportHeightPx = viewportHeightPx,
+                    verticalContentPaddingPx = verticalContentPaddingPx,
                 )
             }
     }
@@ -163,7 +169,6 @@ private fun BoxScope.DragHandle(
 fun ResizableItemFrame(
     key: String,
     gridState: LazyGridState,
-    minItemSpan: Int,
     gridContentPadding: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     modifier: Modifier = Modifier,
@@ -172,6 +177,9 @@ fun ResizableItemFrame(
     outlineColor: Color = LocalAndroidColorScheme.current.primary,
     cornerRadius: Dp = 37.dp,
     strokeWidth: Dp = 3.dp,
+    minHeightPx: Int = 0,
+    maxHeightPx: Int = Int.MAX_VALUE,
+    resizeMultiple: Int = 1,
     alpha: () -> Float = { 1f },
     onResize: (info: ResizeInfo) -> Unit = {},
     content: @Composable () -> Unit,
@@ -230,12 +238,14 @@ fun ResizableItemFrame(
             }
 
             UpdateGridLayoutInfo(
-                viewModel,
-                key,
-                gridState,
-                minItemSpan,
-                gridContentPadding,
-                verticalArrangement,
+                viewModel = viewModel,
+                key = key,
+                gridState = gridState,
+                gridContentPadding = gridContentPadding,
+                verticalArrangement = verticalArrangement,
+                minHeightPx = minHeightPx,
+                maxHeightPx = maxHeightPx,
+                resizeMultiple = resizeMultiple,
             )
             LaunchedEffect(viewModel) {
                 viewModel.resizeInfo.collectLatest { info -> onResizeUpdated(info) }
