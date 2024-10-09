@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics.domain.interactor
 
-import android.hardware.biometrics.Flags
 import android.hardware.biometrics.PromptInfo
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.biometrics.Utils
@@ -187,8 +186,7 @@ constructor(
     ) {
         val hasCredentialViewShown = promptKind.value.isCredential()
         val showBpForCredential =
-            Flags.customBiometricPrompt() &&
-                !Utils.isBiometricAllowed(promptInfo) &&
+            !Utils.isBiometricAllowed(promptInfo) &&
                 isDeviceCredentialAllowed(promptInfo) &&
                 promptInfo.contentView != null &&
                 !promptInfo.isContentViewMoreOptionsButtonUsed
@@ -211,10 +209,7 @@ constructor(
                                 PromptKind.Biometric.PaneType.ONE_PANE_NO_SENSOR_LANDSCAPE
                             else -> PromptKind.Biometric.PaneType.TWO_PANE_LANDSCAPE
                         }
-                    PromptKind.Biometric(
-                        modalities,
-                        paneType = paneType,
-                    )
+                    PromptKind.Biometric(modalities, paneType = paneType)
                 } else {
                     PromptKind.Biometric(modalities)
                 }
