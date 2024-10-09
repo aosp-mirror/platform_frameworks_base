@@ -23,6 +23,8 @@ import static android.view.KeyEvent.KEYCODE_POWER;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.hardware.input.Flags.FLAG_ABORT_SLOW_MULTI_PRESS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -35,9 +37,13 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.KeyEvent;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.BlockingQueue;
@@ -52,6 +58,8 @@ import java.util.concurrent.TimeUnit;
  *  atest WmTests:SingleKeyGestureTests
  */
 public class SingleKeyGestureTests {
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private SingleKeyGestureDetector mDetector;
 
     private int mMaxMultiPressCount = 3;
@@ -257,6 +265,44 @@ public class SingleKeyGestureTests {
     public void testVeryLongPress() throws InterruptedException {
         pressKey(KEYCODE_POWER, mVeryLongPressTime);
         assertTrue(mVeryLongPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ABORT_SLOW_MULTI_PRESS)
+    public void testMultipress_noLongPressBehavior_longPressCancelsMultiPress()
+            throws InterruptedException {
+        mLongPressOnPowerBehavior = false;
+
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, mLongPressTime /* pressTime */);
+
+        assertFalse(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    @EnableFlags(FLAG_ABORT_SLOW_MULTI_PRESS)
+    public void testMultipress_noVeryLongPressBehavior_veryLongPressCancelsMultiPress()
+            throws InterruptedException {
+        mLongPressOnPowerBehavior = false;
+        mVeryLongPressOnPowerBehavior = false;
+
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, mVeryLongPressTime /* pressTime */);
+
+        assertFalse(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    @DisableFlags(FLAG_ABORT_SLOW_MULTI_PRESS)
+    public void testMultipress_flagDisabled_noLongPressBehavior_longPressDoesNotCancelMultiPress()
+            throws InterruptedException {
+        mLongPressOnPowerBehavior = false;
+        mExpectedMultiPressCount = 2;
+
+        pressKey(KEYCODE_POWER, 0 /* pressTime */);
+        pressKey(KEYCODE_POWER, mLongPressTime /* pressTime */);
+
+        assertTrue(mMultiPressed.await(mWaitTimeout, TimeUnit.MILLISECONDS));
     }
 
     @Test
