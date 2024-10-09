@@ -27,12 +27,17 @@ import kotlin.math.abs
 class RecentAppsGestureMonitor(
     private val gestureDistanceThresholdPx: Int,
     private val velocityThresholdPxPerMs: Float,
-    override val gestureStateChangedCallback: (GestureState) -> Unit,
     private val distanceTracker: DistanceTracker = DistanceTracker(),
     private val velocityTracker: VerticalVelocityTracker = VerticalVelocityTracker(),
 ) : TouchpadGestureMonitor {
 
-    override fun processTouchpadEvent(event: MotionEvent) {
+    private var gestureStateChangedCallback: (GestureState) -> Unit = {}
+
+    override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
+        gestureStateChangedCallback = callback
+    }
+
+    override fun accept(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
         val gestureState = distanceTracker.processEvent(event)
         velocityTracker.accept(event)

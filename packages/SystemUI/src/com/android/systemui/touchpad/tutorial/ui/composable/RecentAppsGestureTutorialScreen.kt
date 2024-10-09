@@ -60,11 +60,9 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
                 val velocityThresholdPxPerMs =
                     resources.getDimension(R.dimen.touchpad_recent_apps_gesture_velocity_threshold)
                 return remember(distanceThresholdPx, velocityThresholdPxPerMs) {
-                    RecentAppsGestureMonitor(
-                        distanceThresholdPx,
-                        velocityThresholdPxPerMs,
-                        gestureStateChangedCallback,
-                    )
+                    RecentAppsGestureMonitor(distanceThresholdPx, velocityThresholdPxPerMs).also {
+                        it.addGestureStateCallback(gestureStateChangedCallback)
+                    }
                 }
             }
         }

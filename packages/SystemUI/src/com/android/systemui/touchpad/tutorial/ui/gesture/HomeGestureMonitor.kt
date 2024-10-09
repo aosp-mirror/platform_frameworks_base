@@ -19,13 +19,16 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 import android.view.MotionEvent
 
 /** Monitors for touchpad home gesture, that is three fingers swiping up */
-class HomeGestureMonitor(
-    private val gestureDistanceThresholdPx: Int,
-    override val gestureStateChangedCallback: (GestureState) -> Unit,
-) : TouchpadGestureMonitor {
-    private val distanceTracker = DistanceTracker()
+class HomeGestureMonitor(private val gestureDistanceThresholdPx: Int) : TouchpadGestureMonitor {
 
-    override fun processTouchpadEvent(event: MotionEvent) {
+    private val distanceTracker = DistanceTracker()
+    private var gestureStateChangedCallback: (GestureState) -> Unit = {}
+
+    override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
+        gestureStateChangedCallback = callback
+    }
+
+    override fun accept(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
         val gestureState = distanceTracker.processEvent(event)
         updateGestureState(
