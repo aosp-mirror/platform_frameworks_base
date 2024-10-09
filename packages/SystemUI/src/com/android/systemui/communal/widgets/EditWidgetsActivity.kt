@@ -32,9 +32,9 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.Flags.communalEditWidgetsActivityFinishFix
@@ -227,7 +227,7 @@ constructor(
                 Box(
                     modifier =
                         Modifier.fillMaxSize()
-                            .background(LocalAndroidColorScheme.current.surfaceDim),
+                            .background(MaterialTheme.colorScheme.surfaceDim),
                 ) {
                     CommunalHub(
                         viewModel = communalViewModel,

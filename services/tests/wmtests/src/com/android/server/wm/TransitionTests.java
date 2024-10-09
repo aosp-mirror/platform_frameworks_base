@@ -2933,6 +2933,11 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.requestStartTransition(transit, task, null, null);
         player.start();
+        // always include config-at-end activity since it is considered "independent" due to
+        // changing at a different time.
+        assertTrue(player.mLastReady.getChanges().stream()
+                .anyMatch((change -> change.getActivityComponent() != null
+                        && (change.getFlags() & TransitionInfo.FLAG_CONFIG_AT_END) != 0)));
         assertTrue(activity.isConfigurationDispatchPaused());
         player.finish();
         assertFalse(activity.isConfigurationDispatchPaused());
@@ -2962,6 +2967,11 @@ public class TransitionTests extends WindowTestsBase {
 
         controller.requestStartTransition(transit, task, null, null);
         player.start();
+        // always include config-at-end activity since it is considered "independent" due to
+        // changing at a different time.
+        assertTrue(player.mLastReady.getChanges().stream()
+                .anyMatch((change -> change.getActivityComponent() != null
+                        && (change.getFlags() & TransitionInfo.FLAG_CONFIG_AT_END) != 0)));
         assertTrue(activity.isConfigurationDispatchPaused());
         player.finish();
         assertFalse(activity.isConfigurationDispatchPaused());

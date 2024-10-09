@@ -16,15 +16,14 @@
 
 package com.android.systemui.volume.dialog.ui.viewmodel
 
-import android.app.Dialog
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogVisibilityModel
 import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -32,8 +31,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.flow.onEach
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogPluginScope
@@ -49,6 +47,7 @@ constructor(
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             dialogVisibilityInteractor.dialogVisibility
+                .onEach { controller.notifyVisible(it is VolumeDialogVisibilityModel.Visible) }
                 .mapLatest { visibilityModel ->
                     with(visibilityModel) {
                         if (this is VolumeDialogVisibilityModel.Visible) {
@@ -78,15 +77,8 @@ constructor(
                     dialogVisibilityInteractor.dismissDialog(Events.DISMISS_REASON_UNKNOWN)
                 }
             }
-        launch { dialog.awaitShow() }
+        dialog.show()
 
         Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked)
     }
 }
-
-/** Shows [Dialog] until suspend function is cancelled. */
-private suspend fun Dialog.awaitShow() =
-    suspendCancellableCoroutine<Unit> {
-        show()
-        it.invokeOnCancellation { dismiss() }
-    }

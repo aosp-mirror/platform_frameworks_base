@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.layout
@@ -38,6 +40,7 @@ import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MovableElementContentPicker
 import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.modifiers.thenIf
@@ -158,12 +161,10 @@ fun SceneScope.QuickSettings(
     squishiness: () -> Float = { QuickSettings.SharedValues.SquishinessValues.Default },
 ) {
     val contentState = { stateForQuickSettingsContent(isSplitShade, squishiness) }
-    val transitionState = layoutState.transitionState
-    val isClosing =
-        transitionState is TransitionState.Transition &&
-            transitionState.progress >= 0.9f && // almost done closing
-            !(layoutState.isTransitioning(to = Scenes.Shade) ||
-                layoutState.isTransitioning(to = Scenes.QuickSettings))
+
+    // Note: We use derivedStateOf {} here because isClosing() is reading the current transition
+    // progress and we don't want to recompose this scene each time the progress has changed.
+    val isClosing by remember(layoutState) { derivedStateOf { isClosing(layoutState) } }
 
     if (isClosing) {
         DisposableEffect(Unit) {
@@ -188,6 +189,14 @@ fun SceneScope.QuickSettings(
     }
 }
 
+private fun isClosing(layoutState: SceneTransitionLayoutState): Boolean {
+    val transitionState = layoutState.transitionState
+    return transitionState is TransitionState.Transition &&
+        !(layoutState.isTransitioning(to = Scenes.Shade) ||
+            layoutState.isTransitioning(to = Scenes.QuickSettings)) &&
+        transitionState.progress >= 0.9f // almost done closing
+}
+
 @Composable
 private fun QuickSettingsContent(
     qsSceneAdapter: QSSceneAdapter,
@@ -199,7 +208,7 @@ private fun QuickSettingsContent(
     QuickSettingsTheme {
         val context = LocalContext.current
 
-        LaunchedEffect(key1 = context) {
+        LaunchedEffect(context) {
             if (qsView == null) {
                 qsSceneAdapter.inflate(context)
             }

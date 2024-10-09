@@ -52,14 +52,7 @@ class TransitionAnimatorTest : SysuiTestCase() {
         private const val GOLDENS_PATH = "frameworks/base/packages/SystemUI/tests/goldens"
 
         private val emulationSpec =
-            DeviceEmulationSpec(
-                DisplaySpec(
-                    "phone",
-                    width = 320,
-                    height = 690,
-                    densityDpi = 160,
-                )
-            )
+            DeviceEmulationSpec(DisplaySpec("phone", width = 320, height = 690, densityDpi = 160))
     }
 
     private val kosmos = Kosmos()
@@ -68,7 +61,7 @@ class TransitionAnimatorTest : SysuiTestCase() {
         TransitionAnimator(
             kosmos.fakeExecutor,
             ActivityTransitionAnimator.TIMINGS,
-            ActivityTransitionAnimator.INTERPOLATORS
+            ActivityTransitionAnimator.INTERPOLATORS,
         )
 
     @get:Rule(order = 0) val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
@@ -131,16 +124,17 @@ class TransitionAnimatorTest : SysuiTestCase() {
         waitForIdleSync()
 
         val controller = TestController(transitionContainer, isLaunching)
-        val animator =
-            transitionAnimator.createAnimator(
+        val animation =
+            transitionAnimator.createAnimation(
                 controller,
+                controller.createAnimatorState(),
                 createEndState(transitionContainer),
                 backgroundLayer,
-                fadeWindowBackgroundLayer
-            )
+                fadeWindowBackgroundLayer,
+            ) as TransitionAnimator.InterpolatedAnimation
         return AnimatorSet().apply {
-            duration = animator.duration
-            play(animator)
+            duration = animation.animator.duration
+            play(animation.animator)
         }
     }
 
@@ -153,13 +147,13 @@ class TransitionAnimatorTest : SysuiTestCase() {
             right = containerLocation[0] + emulationSpec.display.width,
             bottom = containerLocation[1] + emulationSpec.display.height,
             topCornerRadius = 0f,
-            bottomCornerRadius = 0f
+            bottomCornerRadius = 0f,
         )
     }
 
     private fun recordMotion(
         backgroundLayer: GradientDrawable,
-        animator: AnimatorSet
+        animator: AnimatorSet,
     ): RecordedMotion {
         return motionRule.record(
             animator,
@@ -167,7 +161,7 @@ class TransitionAnimatorTest : SysuiTestCase() {
                 feature(DrawableFeatureCaptures.bounds, "bounds")
                 feature(DrawableFeatureCaptures.cornerRadii, "corner_radii")
                 feature(DrawableFeatureCaptures.alpha, "alpha")
-            }
+            },
         )
     }
 }
@@ -178,7 +172,7 @@ class TransitionAnimatorTest : SysuiTestCase() {
  */
 private class TestController(
     override var transitionContainer: ViewGroup,
-    override val isLaunching: Boolean
+    override val isLaunching: Boolean,
 ) : TransitionAnimator.Controller {
     override fun createAnimatorState(): TransitionAnimator.State {
         val containerLocation = IntArray(2)
@@ -189,7 +183,7 @@ private class TestController(
             right = containerLocation[0] + 200,
             bottom = containerLocation[1] + 400,
             topCornerRadius = 10f,
-            bottomCornerRadius = 20f
+            bottomCornerRadius = 20f,
         )
     }
 }

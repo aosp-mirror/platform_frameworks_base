@@ -212,13 +212,14 @@ public final class InputRouteManager {
 
     public int getMaxInputGain() {
         // TODO (b/357123335): use real input gain implementation.
-        // Using 15 for now since it matches the max index for output.
-        return 15;
+        // Using 100 for now since it matches the maximum input gain index in classic ChromeOS.
+        return 100;
     }
 
     public int getCurrentInputGain() {
         // TODO (b/357123335): use real input gain implementation.
-        return 8;
+        // Show a fixed full gain in UI before it really works per UX requirement.
+        return 100;
     }
 
     public boolean isInputGainFixed() {

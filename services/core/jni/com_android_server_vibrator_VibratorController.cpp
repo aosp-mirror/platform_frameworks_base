@@ -43,6 +43,8 @@ static JavaVM* sJvm = nullptr;
 static jmethodID sMethodIdOnComplete;
 static jclass sFrequencyProfileLegacyClass;
 static jmethodID sFrequencyProfileLegacyCtor;
+static jclass sFrequencyProfileClass;
+static jmethodID sFrequencyProfileCtor;
 static struct {
     jmethodID setCapabilities;
     jmethodID setSupportedEffects;
@@ -54,6 +56,7 @@ static struct {
     jmethodID setCompositionSizeMax;
     jmethodID setQFactor;
     jmethodID setFrequencyProfileLegacy;
+    jmethodID setFrequencyProfile;
     jmethodID setMaxEnvelopeEffectSize;
     jmethodID setMinEnvelopeEffectControlPointDurationMillis;
     jmethodID setMaxEnvelopeEffectControlPointDurationMillis;
@@ -524,6 +527,40 @@ static jboolean vibratorGetInfo(JNIEnv* env, jclass /* clazz */, jlong ptr,
                           sVibratorInfoBuilderClassInfo.setFrequencyProfileLegacy,
                           frequencyProfileLegacy);
 
+    if (info.frequencyToOutputAccelerationMap.isOk()) {
+        size_t mapSize = info.frequencyToOutputAccelerationMap.value().size();
+
+        jfloatArray frequenciesHz = env->NewFloatArray(mapSize);
+        jfloatArray outputAccelerationsGs = env->NewFloatArray(mapSize);
+
+        jfloat* frequenciesHzPtr = env->GetFloatArrayElements(frequenciesHz, nullptr);
+        jfloat* outputAccelerationsGsPtr =
+                env->GetFloatArrayElements(outputAccelerationsGs, nullptr);
+
+        size_t i = 0;
+        for (auto const& dataEntry : info.frequencyToOutputAccelerationMap.value()) {
+            frequenciesHzPtr[i] = static_cast<jfloat>(dataEntry.frequencyHz);
+            outputAccelerationsGsPtr[i] = static_cast<jfloat>(dataEntry.maxOutputAccelerationGs);
+            i++;
+        }
+
+        // Release the float pointers
+        env->ReleaseFloatArrayElements(frequenciesHz, frequenciesHzPtr, 0);
+        env->ReleaseFloatArrayElements(outputAccelerationsGs, outputAccelerationsGsPtr, 0);
+
+        jobject frequencyProfile =
+                env->NewObject(sFrequencyProfileClass, sFrequencyProfileCtor, resonantFrequency,
+                               frequenciesHz, outputAccelerationsGs);
+
+        env->CallObjectMethod(vibratorInfoBuilder,
+                              sVibratorInfoBuilderClassInfo.setFrequencyProfile, frequencyProfile);
+
+        // Delete local references to avoid memory leaks
+        env->DeleteLocalRef(frequenciesHz);
+        env->DeleteLocalRef(outputAccelerationsGs);
+        env->DeleteLocalRef(frequencyProfile);
+    }
+
     return info.shouldRetry() ? JNI_FALSE : JNI_TRUE;
 }
 
@@ -574,6 +611,10 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sFrequencyProfileLegacyCtor =
             GetMethodIDOrDie(env, sFrequencyProfileLegacyClass, "<init>", "(FFF[F)V");
 
+    jclass frequencyProfileClass = FindClassOrDie(env, "android/os/VibratorInfo$FrequencyProfile");
+    sFrequencyProfileClass = static_cast<jclass>(env->NewGlobalRef(frequencyProfileClass));
+    sFrequencyProfileCtor = GetMethodIDOrDie(env, sFrequencyProfileClass, "<init>", "(F[F[F)V");
+
     jclass vibratorInfoBuilderClass = FindClassOrDie(env, "android/os/VibratorInfo$Builder");
     sVibratorInfoBuilderClassInfo.setCapabilities =
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setCapabilities",
@@ -605,6 +646,10 @@ int register_android_server_vibrator_VibratorController(JavaVM* jvm, JNIEnv* env
     sVibratorInfoBuilderClassInfo.setFrequencyProfileLegacy =
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfileLegacy",
                              "(Landroid/os/VibratorInfo$FrequencyProfileLegacy;)"
+                             "Landroid/os/VibratorInfo$Builder;");
+    sVibratorInfoBuilderClassInfo.setFrequencyProfile =
+            GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setFrequencyProfile",
+                             "(Landroid/os/VibratorInfo$FrequencyProfile;)"
                              "Landroid/os/VibratorInfo$Builder;");
     sVibratorInfoBuilderClassInfo.setMaxEnvelopeEffectSize =
             GetMethodIDOrDie(env, vibratorInfoBuilderClass, "setMaxEnvelopeEffectSize",

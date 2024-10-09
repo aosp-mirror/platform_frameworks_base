@@ -24,7 +24,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -126,6 +126,7 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
                         || repository.isClosingTask(taskInfo.taskId)) {
                     // A task that's vanishing should be removed:
                     // - If it's closed by the X button which means it's marked as a closing task.
+                    repository.removeClosingTask(taskInfo.taskId);
                     repository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId);
                 } else {
                     repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId, false);
@@ -150,8 +151,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             mDesktopRepository.ifPresent(repository -> {
                 if (taskInfo.isVisible) {
                     repository.addActiveTask(taskInfo.displayId, taskInfo.taskId);
-                } else if (repository.isClosingTask(taskInfo.taskId)) {
-                    repository.removeClosingTask(taskInfo.taskId);
                 }
                 repository.updateTaskVisibility(taskInfo.displayId, taskInfo.taskId,
                         taskInfo.isVisible);

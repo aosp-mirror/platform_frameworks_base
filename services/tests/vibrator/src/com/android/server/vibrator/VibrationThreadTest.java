@@ -63,9 +63,11 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -112,6 +114,8 @@ public class VibrationThreadTest {
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
@@ -780,6 +784,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorComposedEffects_runsDifferentVibrations() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
@@ -870,6 +875,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorPwle_runsComposePwle() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
@@ -1724,6 +1730,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_pwleWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);

@@ -3428,6 +3428,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             return;
         }
 
+        if (mIsKeyguardExitAnimationCanceled) {
+            Log.d(TAG, "Ignoring exitKeyguardAndFinishSurfaceBehindRemoteAnimation. "
+                    + "mIsKeyguardExitAnimationCanceled==true");
+            return;
+        }
+
         // Block the panel from expanding, in case we were doing a swipe to dismiss gesture.
         mKeyguardViewControllerLazy.get().blockPanelExpansionFromCurrentTouch();
         final boolean wasShowing = mShowing;
