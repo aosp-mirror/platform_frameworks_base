@@ -582,6 +582,22 @@ public final class SatelliteManager {
             "android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED";
 
     /**
+     * Meta-data represents whether the application supports P2P SMS over carrier roaming satellite
+     * which needs manual trigger to connect to satellite. The messaging applications that supports
+     * P2P SMS over carrier roaming satellites should add the following in their AndroidManifest.
+     * {@code
+     * <application
+     *   <meta-data
+     *     android:name="android.telephony.METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT"
+     *     android:value="true"/>
+     * </application>
+     * }
+     * @hide
+     */
+    public static final String METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT =
+            "android.telephony.METADATA_SATELLITE_MANUAL_CONNECT_P2P_SUPPORT";
+
+    /**
      * Request to enable or disable the satellite modem and demo mode.
      * If satellite modem and cellular modem cannot work concurrently,
      * then this will disable the cellular modem if satellite modem is enabled,
