@@ -6918,6 +6918,14 @@
          entering the corresponding modes -->
     <string name="config_rearDisplayPhysicalAddress" translatable="false"></string>
 
+    <!-- The maximum number of virtual displays that can exist at the same time.
+         It must be >= 1. -->
+    <integer name="config_virtualDisplayLimit">100</integer>
+
+    <!-- The maximum number of virtual displays per package that can exist at the same time.
+         It must be >= 1. -->
+    <integer name="config_virtualDisplayLimitPerPackage">50</integer>
+
     <!-- List of certificate to be used for font fs-verity integrity verification -->
     <string-array translatable="false" name="config_fontManagerServiceCerts">
     </string-array>

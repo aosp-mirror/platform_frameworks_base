@@ -130,6 +130,7 @@ import com.android.systemui.util.Assert;
 import com.android.systemui.util.ColorUtilKt;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.wallpapers.domain.interactor.WallpaperInteractor;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
 
@@ -627,6 +628,9 @@ public class NotificationStackScrollLayout
 
     @Nullable
     private OnClickListener mManageButtonClickListener;
+
+    @Nullable
+    private WallpaperInteractor mWallpaperInteractor;
 
     public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
         super(context, attrs, 0, 0);
@@ -1192,6 +1196,7 @@ public class NotificationStackScrollLayout
         if (!SceneContainerFlag.isEnabled()) {
             setMaxLayoutHeight(getHeight());
             updateContentHeight();
+            mWallpaperInteractor.setNotificationStackAbsoluteBottom(mContentHeight);
         }
         clampScrollPosition();
         requestChildrenUpdate();
@@ -1253,6 +1258,7 @@ public class NotificationStackScrollLayout
         if (mAmbientState.getStackTop() != stackTop) {
             mAmbientState.setStackTop(stackTop);
             onTopPaddingChanged(/* animate = */ isAddOrRemoveAnimationPending());
+            mWallpaperInteractor.setNotificationStackAbsoluteBottom((int) stackTop);
         }
     }
 
@@ -5896,6 +5902,10 @@ public class NotificationStackScrollLayout
             NotificationStackScrollLayoutController notificationStackScrollLayoutController) {
         mController = notificationStackScrollLayoutController;
         mController.getNotificationRoundnessManager().setAnimatedChildren(mChildrenToAddAnimated);
+    }
+
+    public void setWallpaperInteractor(WallpaperInteractor wallpaperInteractor) {
+        mWallpaperInteractor = wallpaperInteractor;
     }
 
     void addSwipedOutView(View v) {

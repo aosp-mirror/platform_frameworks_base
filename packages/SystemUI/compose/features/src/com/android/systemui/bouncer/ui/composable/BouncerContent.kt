@@ -522,13 +522,7 @@ private fun FoldAware(
     val currentSceneKey =
         if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
 
-    val state = remember {
-        MutableSceneTransitionLayoutState(
-            currentSceneKey,
-            SceneTransitions,
-            enableInterruptions = false,
-        )
-    }
+    val state = remember { MutableSceneTransitionLayoutState(currentSceneKey, SceneTransitions) }
 
     // Update state whenever currentSceneKey has changed.
     LaunchedEffect(state, currentSceneKey) {

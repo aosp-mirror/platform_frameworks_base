@@ -869,6 +869,24 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Adds a {@link KeyguardState} to apply to the given displays.
+     *
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction addKeyguardState(
+            @NonNull KeyguardState keyguardState) {
+        Objects.requireNonNull(keyguardState);
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE)
+                        .setKeyguardState(keyguardState)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
      * Sets/removes the always on top flag for this {@code windowContainer}. See
      * {@link com.android.server.wm.ConfigurationContainer#setAlwaysOnTop(boolean)}.
      * Please note that this method is only intended to be used for a
@@ -1469,6 +1487,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE = 19;
         public static final int HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION = 20;
         public static final int HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES = 21;
+        public static final int HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE = 22;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1514,6 +1533,9 @@ public final class WindowContainerTransaction implements Parcelable {
         /** Used as options for {@link #addTaskFragmentOperation}. */
         @Nullable
         private TaskFragmentOperation mTaskFragmentOperation;
+
+        @Nullable
+        private KeyguardState mKeyguardState;
 
         @Nullable
         private PendingIntent mPendingIntent;
@@ -1666,6 +1688,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = copy.mLaunchOptions;
             mActivityIntent = copy.mActivityIntent;
             mTaskFragmentOperation = copy.mTaskFragmentOperation;
+            mKeyguardState = copy.mKeyguardState;
             mPendingIntent = copy.mPendingIntent;
             mShortcutInfo = copy.mShortcutInfo;
             mAlwaysOnTop = copy.mAlwaysOnTop;
@@ -1689,6 +1712,7 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = in.readBundle();
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mTaskFragmentOperation = in.readTypedObject(TaskFragmentOperation.CREATOR);
+            mKeyguardState = in.readTypedObject(KeyguardState.CREATOR);
             mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
             mShortcutInfo = in.readTypedObject(ShortcutInfo.CREATOR);
             mAlwaysOnTop = in.readBoolean();
@@ -1767,6 +1791,11 @@ public final class WindowContainerTransaction implements Parcelable {
         @Nullable
         public TaskFragmentOperation getTaskFragmentOperation() {
             return mTaskFragmentOperation;
+        }
+
+        @Nullable
+        public KeyguardState getKeyguardState() {
+            return mKeyguardState;
         }
 
         @Nullable
@@ -1902,6 +1931,9 @@ public final class WindowContainerTransaction implements Parcelable {
                             .append(" mExcludeInsetsTypes= ")
                             .append(WindowInsets.Type.toString(mExcludeInsetsTypes));
                     break;
+                case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE:
+                    sb.append("KeyguardState= ").append(mKeyguardState);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE:
                     sb.append("container= ").append(mContainer)
                             .append(" isTrimmable= ")
@@ -1932,6 +1964,7 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBundle(mLaunchOptions);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeTypedObject(mTaskFragmentOperation, flags);
+            dest.writeTypedObject(mKeyguardState, flags);
             dest.writeTypedObject(mPendingIntent, flags);
             dest.writeTypedObject(mShortcutInfo, flags);
             dest.writeBoolean(mAlwaysOnTop);
@@ -1991,6 +2024,9 @@ public final class WindowContainerTransaction implements Parcelable {
 
             @Nullable
             private TaskFragmentOperation mTaskFragmentOperation;
+
+            @Nullable
+            private KeyguardState mKeyguardState;
 
             @Nullable
             private PendingIntent mPendingIntent;
@@ -2081,6 +2117,12 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setKeyguardState(
+                    @Nullable KeyguardState keyguardState) {
+                mKeyguardState = keyguardState;
+                return this;
+            }
+
             Builder setReparentLeafTaskIfRelaunch(boolean reparentLeafTaskIfRelaunch) {
                 mReparentLeafTaskIfRelaunch = reparentLeafTaskIfRelaunch;
                 return this;
@@ -2130,6 +2172,7 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mPendingIntent = mPendingIntent;
                 hierarchyOp.mAlwaysOnTop = mAlwaysOnTop;
                 hierarchyOp.mTaskFragmentOperation = mTaskFragmentOperation;
+                hierarchyOp.mKeyguardState = mKeyguardState;
                 hierarchyOp.mShortcutInfo = mShortcutInfo;
                 hierarchyOp.mBounds = mBounds;
                 hierarchyOp.mIncludingParents = mIncludingParents;

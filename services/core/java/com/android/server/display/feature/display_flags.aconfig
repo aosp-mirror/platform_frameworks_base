@@ -348,6 +348,14 @@ flag {
 }
 
 flag {
+    name: "virtual_display_limit"
+    namespace: "display_manager"
+    description: "Limit the number of virtual displays that can be created."
+    bug: "261791612"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "idle_screen_config_in_subscribing_light_sensor"
     namespace: "display_manager"
     description: "Account for Idle screen refresh rate configs while subscribing to light sensor"
@@ -372,4 +380,15 @@ flag {
     description: "Block the usage of ALS to control the display brightness when stylus is being used"
     bug: "352411468"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "enable_user_refresh_rate_for_external_display"
+    namespace: "display_manager"
+    description: "Apply refresh rate from user preferred display mode to external displays"
+    bug: "370657357"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
 }

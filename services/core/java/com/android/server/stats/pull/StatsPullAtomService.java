@@ -63,6 +63,7 @@ import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STA
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__TELEPHONY;
 import static com.android.internal.util.FrameworkStatsLog.TIME_ZONE_DETECTOR_STATE__DETECTION_MODE__UNKNOWN;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.stats.Flags.accumulateNetworkStatsSinceBoot;
 import static com.android.server.stats.Flags.addMobileBytesTransferByProcStatePuller;
 import static com.android.server.stats.Flags.applyNetworkStatsPollRateLimit;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
@@ -229,6 +230,7 @@ import com.android.server.power.stats.KernelWakelockStats;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.server.stats.pull.netstats.NetworkStatsAccumulator;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
@@ -423,6 +425,14 @@ public class StatsPullAtomService extends SystemService {
     @NonNull
     @GuardedBy("mDataBytesTransferLock")
     private final ArrayList<NetworkStatsExt> mNetworkStatsBaselines = new ArrayList<>();
+
+    // Accumulates NetworkStats from initialization till the present moment.
+    // It is necessary to accumulate stats internally, because NetworkStats persists data for a
+    // limited amount of time, after which diff becomes incorrect without accumulation.
+    @NonNull
+    @GuardedBy("mDataBytesTransferLock")
+    private final ArrayList<NetworkStatsAccumulator> mNetworkStatsAccumulators =
+            new ArrayList<>();
 
     @GuardedBy("mDataBytesTransferLock")
     private long mLastNetworkStatsPollTime = -NETSTATS_POLL_RATE_LIMIT_MS;
@@ -1568,16 +1578,45 @@ public class StatsPullAtomService extends SystemService {
     private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
             @NonNull NetworkTemplate template, boolean includeTags) {
         final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
-        final long currentTimeInMillis = MICROSECONDS.toMillis(SystemClock.currentTimeMicro());
-        final long bucketDuration = Settings.Global.getLong(mContext.getContentResolver(),
+        final long currentTimeMillis = MICROSECONDS.toMillis(SystemClock.currentTimeMicro());
+        final long bootTimeMillis = currentTimeMillis - elapsedMillisSinceBoot;
+        final long bucketDurationMillis = Settings.Global.getLong(mContext.getContentResolver(),
                 NETSTATS_UID_BUCKET_DURATION, NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS);
 
-        // Set startTime before boot so that NetworkStats includes at least one full bucket.
-        // Set endTime in the future so that NetworkStats includes everything in the active bucket.
-        final long startTime = currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration;
-        final long endTime = currentTimeInMillis + bucketDuration;
+        if (accumulateNetworkStatsSinceBoot()) {
+            NetworkStatsAccumulator accumulator = CollectionUtils.find(
+                    mNetworkStatsAccumulators, it -> it.hasEqualParameters(template, includeTags));
+            if (accumulator == null) {
+                accumulator = new NetworkStatsAccumulator(
+                        template,
+                        includeTags,
+                        bucketDurationMillis,
+                        bootTimeMillis - bucketDurationMillis);
+                mNetworkStatsAccumulators.add(accumulator);
+            }
 
-        // NetworkStatsManager#forceUpdate updates stats for all networks
+            return accumulator.queryStats(currentTimeMillis,
+                    (aTemplate, aIncludeTags, aStartTime, aEndTime) -> {
+                        synchronized (mDataBytesTransferLock) {
+                            return getUidNetworkStatsSnapshotForTemplateLocked(aTemplate,
+                                    aIncludeTags, aStartTime, aEndTime);
+                        }
+                    });
+
+        } else {
+            // Set end time in the future to include all stats in the active bucket.
+            return getUidNetworkStatsSnapshotForTemplateLocked(
+                    template, includeTags,
+                    bootTimeMillis - bucketDurationMillis,
+                    currentTimeMillis + bucketDurationMillis);
+        }
+    }
+
+    @GuardedBy("mDataBytesTransferLock")
+    @Nullable
+    private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
+            @NonNull NetworkTemplate template, boolean includeTags, long startTime, long endTime) {
+        final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
         if (applyNetworkStatsPollRateLimit()) {
             // The new way: rate-limit force-polling for all NetworkStats queries
             if (elapsedMillisSinceBoot - mLastNetworkStatsPollTime >= NETSTATS_POLL_RATE_LIMIT_MS) {

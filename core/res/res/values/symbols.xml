@@ -5240,6 +5240,9 @@
   <java-symbol type="integer" name="config_deviceStateConcurrentRearDisplay" />
   <java-symbol type="string" name="config_rearDisplayPhysicalAddress" />
 
+  <java-symbol type="integer" name="config_virtualDisplayLimit" />
+  <java-symbol type="integer" name="config_virtualDisplayLimitPerPackage" />
+
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />
   <java-symbol type="layout" name="app_language_picker_system_default" />

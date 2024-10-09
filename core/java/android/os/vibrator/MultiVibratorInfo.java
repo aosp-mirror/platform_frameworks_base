@@ -48,7 +48,7 @@ public final class MultiVibratorInfo extends VibratorInfo {
     }
 
     private MultiVibratorInfo(
-            int id, VibratorInfo[] vibrators, VibratorInfo.FrequencyProfile mergedProfile) {
+            int id, VibratorInfo[] vibrators, FrequencyProfileLegacy mergedProfile) {
         super(id,
                 capabilitiesIntersection(vibrators, mergedProfile.isEmpty()),
                 supportedEffectsIntersection(vibrators),
@@ -209,15 +209,15 @@ public final class MultiVibratorInfo extends VibratorInfo {
     }
 
     @NonNull
-    private static FrequencyProfile frequencyProfileIntersection(VibratorInfo[] infos) {
+    private static FrequencyProfileLegacy frequencyProfileIntersection(VibratorInfo[] infos) {
         float freqResolution = floatPropertyIntersection(infos,
-                info -> info.getFrequencyProfile().getFrequencyResolutionHz());
+                info -> info.getFrequencyProfileLegacy().getFrequencyResolutionHz());
         float resonantFreq = floatPropertyIntersection(infos,
                 VibratorInfo::getResonantFrequencyHz);
         Range<Float> freqRange = frequencyRangeIntersection(infos, freqResolution);
 
         if ((freqRange == null) || Float.isNaN(freqResolution)) {
-            return new FrequencyProfile(resonantFreq, Float.NaN, freqResolution, null);
+            return new FrequencyProfileLegacy(resonantFreq, Float.NaN, freqResolution, null);
         }
 
         int amplitudeCount =
@@ -230,8 +230,8 @@ public final class MultiVibratorInfo extends VibratorInfo {
         Arrays.fill(maxAmplitudes, Float.MAX_VALUE);
 
         for (VibratorInfo info : infos) {
-            Range<Float> vibratorFreqRange = info.getFrequencyProfile().getFrequencyRangeHz();
-            float[] vibratorMaxAmplitudes = info.getFrequencyProfile().getMaxAmplitudes();
+            Range<Float> vibratorFreqRange = info.getFrequencyProfileLegacy().getFrequencyRangeHz();
+            float[] vibratorMaxAmplitudes = info.getFrequencyProfileLegacy().getMaxAmplitudes();
             int vibratorStartIdx = Math.round(
                     (freqRange.getLower() - vibratorFreqRange.getLower()) / freqResolution);
             int vibratorEndIdx = vibratorStartIdx + maxAmplitudes.length - 1;
@@ -240,7 +240,7 @@ public final class MultiVibratorInfo extends VibratorInfo {
                 Slog.w(TAG, "Error calculating the intersection of vibrator frequency"
                         + " profiles: attempted to fetch from vibrator "
                         + info.getId() + " max amplitude with bad index " + vibratorStartIdx);
-                return new FrequencyProfile(resonantFreq, Float.NaN, Float.NaN, null);
+                return new FrequencyProfileLegacy(resonantFreq, Float.NaN, Float.NaN, null);
             }
 
             for (int i = 0; i < maxAmplitudes.length; i++) {
@@ -249,14 +249,14 @@ public final class MultiVibratorInfo extends VibratorInfo {
             }
         }
 
-        return new FrequencyProfile(resonantFreq, freqRange.getLower(),
+        return new FrequencyProfileLegacy(resonantFreq, freqRange.getLower(),
                 freqResolution, maxAmplitudes);
     }
 
     @Nullable
     private static Range<Float> frequencyRangeIntersection(VibratorInfo[] infos,
             float frequencyResolution) {
-        Range<Float> firstRange = infos[0].getFrequencyProfile().getFrequencyRangeHz();
+        Range<Float> firstRange = infos[0].getFrequencyProfileLegacy().getFrequencyRangeHz();
         if (firstRange == null) {
             // If one vibrator is undefined then the intersection is undefined.
             return null;
@@ -268,7 +268,7 @@ public final class MultiVibratorInfo extends VibratorInfo {
         // min supported frequencies are aligned w.r.t. the frequency resolution.
 
         for (int i = 1; i < infos.length; i++) {
-            Range<Float> vibratorRange = infos[i].getFrequencyProfile().getFrequencyRangeHz();
+            Range<Float> vibratorRange = infos[i].getFrequencyProfileLegacy().getFrequencyRangeHz();
             if (vibratorRange == null) {
                 // If one vibrator is undefined then the intersection is undefined.
                 return null;
