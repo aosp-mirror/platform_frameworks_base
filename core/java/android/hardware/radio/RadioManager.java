@@ -1556,6 +1556,30 @@ public class RadioManager {
                 @Nullable Collection<ProgramSelector.Identifier> relatedContent,
                 int infoFlags, int signalQuality, @Nullable RadioMetadata metadata,
                 @Nullable Map<String, String> vendorInfo) {
+            this(selector, logicallyTunedTo, physicallyTunedTo, relatedContent, infoFlags,
+                    signalQuality, metadata, vendorInfo, /* alert= */ null);
+        }
+
+        /**
+         * Constructor for program info.
+         *
+         * @param selector Program selector
+         * @param logicallyTunedTo Program identifier logically tuned to
+         * @param physicallyTunedTo Program identifier physically tuned to
+         * @param relatedContent Related content
+         * @param infoFlags Program info flags
+         * @param signalQuality Signal quality
+         * @param metadata Radio metadata
+         * @param vendorInfo Vendor parameters
+         * @param alert Radio alert
+         * @hide
+         */
+        public ProgramInfo(@NonNull ProgramSelector selector,
+                @Nullable ProgramSelector.Identifier logicallyTunedTo,
+                @Nullable ProgramSelector.Identifier physicallyTunedTo,
+                @Nullable Collection<ProgramSelector.Identifier> relatedContent,
+                int infoFlags, int signalQuality, @Nullable RadioMetadata metadata,
+                @Nullable Map<String, String> vendorInfo, @Nullable RadioAlert alert) {
             mSelector = Objects.requireNonNull(selector);
             mLogicallyTunedTo = logicallyTunedTo;
             mPhysicallyTunedTo = physicallyTunedTo;
@@ -1569,8 +1593,7 @@ public class RadioManager {
             mSignalQuality = signalQuality;
             mMetadata = metadata;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
-            // TODO(361348719): implement alert in the constructor
-            mAlert = null;
+            mAlert = alert;
         }
 
         /**
@@ -1802,7 +1825,12 @@ public class RadioManager {
             mSignalQuality = in.readInt();
             mMetadata = in.readTypedObject(RadioMetadata.CREATOR);
             mVendorInfo = Utils.readStringMap(in);
-            mAlert = null;
+            if (Flags.hdRadioEmergencyAlertSystem()) {
+                boolean hasNonNullAlert = in.readBoolean();
+                mAlert = hasNonNullAlert ? in.readTypedObject(RadioAlert.CREATOR) : null;
+            } else {
+                mAlert = null;
+            }
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<ProgramInfo> CREATOR
@@ -1826,6 +1854,14 @@ public class RadioManager {
             dest.writeInt(mSignalQuality);
             dest.writeTypedObject(mMetadata, flags);
             Utils.writeStringMap(dest, mVendorInfo);
+            if (Flags.hdRadioEmergencyAlertSystem()) {
+                if (mAlert == null) {
+                    dest.writeBoolean(false);
+                } else {
+                    dest.writeBoolean(true);
+                    dest.writeTypedObject(mAlert, flags);
+                }
+            }
         }
 
         @Override
@@ -1836,19 +1872,28 @@ public class RadioManager {
         @NonNull
         @Override
         public String toString() {
-            return "ProgramInfo"
+            String prorgamInfoString = "ProgramInfo"
                     + " [selector=" + mSelector
                     + ", logicallyTunedTo=" + Objects.toString(mLogicallyTunedTo)
                     + ", physicallyTunedTo=" + Objects.toString(mPhysicallyTunedTo)
                     + ", relatedContent=" + mRelatedContent.size()
                     + ", infoFlags=" + mInfoFlags
                     + ", signalQuality=" + mSignalQuality
-                    + ", metadata=" + Objects.toString(mMetadata)
-                    + "]";
+                    + ", metadata=" + Objects.toString(mMetadata);
+            if (Flags.hdRadioEmergencyAlertSystem()) {
+                prorgamInfoString += ", alert=" + Objects.toString(mAlert);
+            }
+            prorgamInfoString += "]";
+            return prorgamInfoString;
         }
 
         @Override
         public int hashCode() {
+            if (Flags.hdRadioEmergencyAlertSystem()) {
+                return Objects.hash(mSelector, mLogicallyTunedTo, mPhysicallyTunedTo,
+                        mRelatedContent, mInfoFlags, mSignalQuality, mMetadata, mVendorInfo,
+                        mAlert);
+            }
             return Objects.hash(mSelector, mLogicallyTunedTo, mPhysicallyTunedTo,
                 mRelatedContent, mInfoFlags, mSignalQuality, mMetadata, mVendorInfo);
         }
@@ -1868,6 +1913,9 @@ public class RadioManager {
             if (!Objects.equals(mMetadata, other.mMetadata)) return false;
             if (!Objects.equals(mVendorInfo, other.mVendorInfo)) return false;
 
+            if (Flags.hdRadioEmergencyAlertSystem()) {
+                return Objects.equals(mAlert, other.mAlert);
+            }
             return true;
         }
     }
