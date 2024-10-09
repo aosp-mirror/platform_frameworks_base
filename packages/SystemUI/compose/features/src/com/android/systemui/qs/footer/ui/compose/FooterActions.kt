@@ -73,7 +73,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.Expandable
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.background
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.theme.colorAttr
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
@@ -163,7 +162,7 @@ fun FooterActions(
     }
 
     val backgroundColor = colorAttr(R.attr.underSurface)
-    val contentColor = LocalAndroidColorScheme.current.onSurface
+    val contentColor = MaterialTheme.colorScheme.onSurface
     val backgroundTopRadius = dimensionResource(R.dimen.qs_corner_radius)
     val backgroundModifier =
         remember(
@@ -344,7 +343,7 @@ private fun NumberButton(
 @Composable
 private fun NewChangesDot(modifier: Modifier = Modifier) {
     val contentDescription = stringResource(R.string.fgs_dot_content_description)
-    val color = LocalAndroidColorScheme.current.tertiary
+    val color = MaterialTheme.colorScheme.tertiary
 
     Canvas(modifier.size(12.dp).semantics { this.contentDescription = contentDescription }) {
         drawCircle(color)
@@ -363,7 +362,7 @@ private fun TextButton(
     Expandable(
         shape = CircleShape,
         color = colorAttr(R.attr.underSurface),
-        contentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         borderStroke = BorderStroke(1.dp, colorAttr(R.attr.shadeInactive)),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
