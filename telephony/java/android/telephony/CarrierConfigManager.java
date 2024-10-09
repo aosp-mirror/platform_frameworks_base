@@ -10558,7 +10558,6 @@ public class CarrierConfigManager {
      * @see SubscriptionInfo#getServiceCapabilities()
      * @see SubscriptionManager.OnSubscriptionsChangedListener
      */
-    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
             "cellular_service_capabilities_int_array";
    /**
