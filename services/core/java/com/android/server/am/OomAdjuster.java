@@ -2553,7 +2553,7 @@ public class OomAdjuster {
                     double cachedRestoreThreshold =
                             mProcessList.getCachedRestoreThresholdKb() * thresholdModifier;
 
-                    if (isLastMemoryLevelNormal() && lastPssOrRss >= cachedRestoreThreshold) {
+                    if (!isLastMemoryLevelNormal() && lastPssOrRss >= cachedRestoreThreshold) {
                         state.setServiceHighRam(true);
                         state.setServiceB(true);
                         //Slog.i(TAG, "ADJ " + app + " high ram!");
