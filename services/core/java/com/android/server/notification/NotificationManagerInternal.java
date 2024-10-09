@@ -19,6 +19,7 @@ package com.android.server.notification;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.app.backup.BackupRestoreEventLogger;
 import android.service.notification.DeviceEffectsApplier;
 
 import java.util.Set;
@@ -73,4 +74,9 @@ public interface NotificationManagerInternal {
      * Otherwise an {@link IllegalStateException} will be thrown.
      */
     void setDeviceEffectsApplier(DeviceEffectsApplier applier);
+
+    // Backup/restore interface
+    byte[] getBackupPayload(int user, BackupRestoreEventLogger logger);
+
+    void applyRestore(byte[] payload, int user, BackupRestoreEventLogger logger);
 }

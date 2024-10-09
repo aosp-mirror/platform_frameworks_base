@@ -262,3 +262,10 @@ flag {
   description: "Guards new android.app.richongoingnotification promotion and new uis"
   bug: "337261753"
 }
+
+flag {
+  name: "backup_restore_logging"
+  namespace: "systemui"
+  description: "Adds logging for notification/modes backup and restore events"
+  bug: "289524803"
+}

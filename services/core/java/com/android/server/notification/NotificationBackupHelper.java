@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.server.backup;
+package com.android.server.notification;
 
 import android.app.INotificationManager;
 import android.app.backup.BlobBackupHelper;
 import android.os.ServiceManager;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.server.LocalServices;
 
 public class NotificationBackupHelper extends BlobBackupHelper {
     static final String TAG = "NotifBackupHelper";   // must be < 23 chars
@@ -34,9 +36,13 @@ public class NotificationBackupHelper extends BlobBackupHelper {
 
     private final int mUserId;
 
+    private final NotificationManagerInternal mNm;
+
     public NotificationBackupHelper(int userId) {
         super(BLOB_VERSION, KEY_NOTIFICATIONS);
         mUserId = userId;
+
+        mNm = LocalServices.getService(NotificationManagerInternal.class);
     }
 
     @Override
@@ -44,9 +50,13 @@ public class NotificationBackupHelper extends BlobBackupHelper {
         byte[] newPayload = null;
         if (KEY_NOTIFICATIONS.equals(key)) {
             try {
-                INotificationManager nm = INotificationManager.Stub.asInterface(
-                        ServiceManager.getService("notification"));
-                newPayload = nm.getBackupPayload(mUserId);
+                if (android.app.Flags.backupRestoreLogging()) {
+                    newPayload = mNm.getBackupPayload(mUserId, getLogger());
+                } else {
+                    INotificationManager nm = INotificationManager.Stub.asInterface(
+                            ServiceManager.getService("notification"));
+                    newPayload = nm.getBackupPayload(mUserId);
+                }
             } catch (Exception e) {
                 // Treat as no data
                 Slog.e(TAG, "Couldn't communicate with notification manager", e);
@@ -64,9 +74,13 @@ public class NotificationBackupHelper extends BlobBackupHelper {
 
         if (KEY_NOTIFICATIONS.equals(key)) {
             try {
-                INotificationManager nm = INotificationManager.Stub.asInterface(
-                        ServiceManager.getService("notification"));
-                nm.applyRestore(payload, mUserId);
+                if (android.app.Flags.backupRestoreLogging()) {
+                    mNm.applyRestore(payload, mUserId, getLogger());
+                } else {
+                    INotificationManager nm = INotificationManager.Stub.asInterface(
+                            ServiceManager.getService("notification"));
+                    nm.applyRestore(payload, mUserId);
+                }
             } catch (Exception e) {
                 Slog.e(TAG, "Couldn't communicate with notification manager", e);
             }
