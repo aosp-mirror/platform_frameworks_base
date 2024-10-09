@@ -59,7 +59,7 @@ public class VibratorInfo implements Parcelable {
     private final int mPwlePrimitiveDurationMax;
     private final int mPwleSizeMax;
     private final float mQFactor;
-    private final FrequencyProfile mFrequencyProfile;
+    private final FrequencyProfileLegacy mFrequencyProfileLegacy;
     private final int mMaxEnvelopeEffectSize;
     private final int mMinEnvelopeEffectControlPointDurationMillis;
     private final int mMaxEnvelopeEffectControlPointDurationMillis;
@@ -75,7 +75,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = in.readInt();
         mPwleSizeMax = in.readInt();
         mQFactor = in.readFloat();
-        mFrequencyProfile = FrequencyProfile.CREATOR.createFromParcel(in);
+        mFrequencyProfileLegacy = FrequencyProfileLegacy.CREATOR.createFromParcel(in);
         mMaxEnvelopeEffectSize = in.readInt();
         mMinEnvelopeEffectControlPointDurationMillis = in.readInt();
         mMaxEnvelopeEffectControlPointDurationMillis = in.readInt();
@@ -86,7 +86,7 @@ public class VibratorInfo implements Parcelable {
                 baseVibratorInfo.mSupportedBraking, baseVibratorInfo.mSupportedPrimitives,
                 baseVibratorInfo.mPrimitiveDelayMax, baseVibratorInfo.mCompositionSizeMax,
                 baseVibratorInfo.mPwlePrimitiveDurationMax, baseVibratorInfo.mPwleSizeMax,
-                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfile,
+                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfileLegacy,
                 baseVibratorInfo.mMaxEnvelopeEffectSize,
                 baseVibratorInfo.mMinEnvelopeEffectControlPointDurationMillis,
                 baseVibratorInfo.mMaxEnvelopeEffectControlPointDurationMillis);
@@ -112,7 +112,7 @@ public class VibratorInfo implements Parcelable {
      * @param pwleSizeMax              The maximum number of primitives supported by a PWLE
      *                                 composition.
      * @param qFactor                  The vibrator quality factor.
-     * @param frequencyProfile         The description of the vibrator supported frequencies and max
+     * @param frequencyProfileLegacy   The description of the vibrator supported frequencies and max
      *                                 amplitude mappings.
      * @hide
      */
@@ -120,11 +120,11 @@ public class VibratorInfo implements Parcelable {
             @Nullable SparseBooleanArray supportedBraking,
             @NonNull SparseIntArray supportedPrimitives, int primitiveDelayMax,
             int compositionSizeMax, int pwlePrimitiveDurationMax, int pwleSizeMax,
-            float qFactor, @NonNull FrequencyProfile frequencyProfile,
+            float qFactor, @NonNull FrequencyProfileLegacy frequencyProfileLegacy,
             int maxEnvelopeEffectSize, int minEnvelopeEffectControlPointDurationMillis,
             int maxEnvelopeEffectControlPointDurationMillis) {
         Preconditions.checkNotNull(supportedPrimitives);
-        Preconditions.checkNotNull(frequencyProfile);
+        Preconditions.checkNotNull(frequencyProfileLegacy);
         mId = id;
         mCapabilities = capabilities;
         mSupportedEffects = supportedEffects == null ? null : supportedEffects.clone();
@@ -135,7 +135,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = pwlePrimitiveDurationMax;
         mPwleSizeMax = pwleSizeMax;
         mQFactor = qFactor;
-        mFrequencyProfile = frequencyProfile;
+        mFrequencyProfileLegacy = frequencyProfileLegacy;
         mMaxEnvelopeEffectSize = maxEnvelopeEffectSize;
         mMinEnvelopeEffectControlPointDurationMillis =
                 minEnvelopeEffectControlPointDurationMillis;
@@ -155,7 +155,7 @@ public class VibratorInfo implements Parcelable {
         dest.writeInt(mPwlePrimitiveDurationMax);
         dest.writeInt(mPwleSizeMax);
         dest.writeFloat(mQFactor);
-        mFrequencyProfile.writeToParcel(dest, flags);
+        mFrequencyProfileLegacy.writeToParcel(dest, flags);
         dest.writeInt(mMaxEnvelopeEffectSize);
         dest.writeInt(mMinEnvelopeEffectControlPointDurationMillis);
         dest.writeInt(mMaxEnvelopeEffectControlPointDurationMillis);
@@ -205,7 +205,7 @@ public class VibratorInfo implements Parcelable {
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
                 && Objects.equals(mSupportedBraking, that.mSupportedBraking)
                 && Objects.equals(mQFactor, that.mQFactor)
-                && Objects.equals(mFrequencyProfile, that.mFrequencyProfile)
+                && Objects.equals(mFrequencyProfileLegacy, that.mFrequencyProfileLegacy)
                 && mMaxEnvelopeEffectSize == that.mMaxEnvelopeEffectSize
                 && mMinEnvelopeEffectControlPointDurationMillis
                 == that.mMinEnvelopeEffectControlPointDurationMillis
@@ -216,7 +216,7 @@ public class VibratorInfo implements Parcelable {
     @Override
     public int hashCode() {
         int hashCode = Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                mQFactor, mFrequencyProfile);
+                mQFactor, mFrequencyProfileLegacy);
         for (int i = 0; i < mSupportedPrimitives.size(); i++) {
             hashCode = 31 * hashCode + mSupportedPrimitives.keyAt(i);
             hashCode = 31 * hashCode + mSupportedPrimitives.valueAt(i);
@@ -238,7 +238,7 @@ public class VibratorInfo implements Parcelable {
                 + ", mPwlePrimitiveDurationMax=" + mPwlePrimitiveDurationMax
                 + ", mPwleSizeMax=" + mPwleSizeMax
                 + ", mQFactor=" + mQFactor
-                + ", mFrequencyProfile=" + mFrequencyProfile
+                + ", mFrequencyProfileLegacy=" + mFrequencyProfileLegacy
                 + ", mMaxEnvelopeEffectSize=" + mMaxEnvelopeEffectSize
                 + ", mMinEnvelopeEffectControlPointDurationMillis="
                 + mMinEnvelopeEffectControlPointDurationMillis
@@ -262,7 +262,7 @@ public class VibratorInfo implements Parcelable {
         pw.println("pwlePrimitiveDurationMax = " + mPwlePrimitiveDurationMax);
         pw.println("pwleSizeMax = " + mPwleSizeMax);
         pw.println("q-factor = " + mQFactor);
-        pw.println("frequencyProfile = " + mFrequencyProfile);
+        pw.println("frequencyProfileLegacy = " + mFrequencyProfileLegacy);
         pw.println("mMaxEnvelopeEffectSize = " + mMaxEnvelopeEffectSize);
         pw.println("mMinEnvelopeEffectControlPointDurationMillis = "
                 + mMinEnvelopeEffectControlPointDurationMillis);
@@ -517,7 +517,7 @@ public class VibratorInfo implements Parcelable {
      * this vibrator is a composite of multiple physical devices.
      */
     public float getResonantFrequencyHz() {
-        return mFrequencyProfile.mResonantFrequencyHz;
+        return mFrequencyProfileLegacy.mResonantFrequencyHz;
     }
 
     /**
@@ -537,8 +537,8 @@ public class VibratorInfo implements Parcelable {
      * <p>If the devices does not have frequency control then the profile should be empty.
      */
     @NonNull
-    public FrequencyProfile getFrequencyProfile() {
-        return mFrequencyProfile;
+    public FrequencyProfileLegacy getFrequencyProfileLegacy() {
+        return mFrequencyProfileLegacy;
     }
 
     /** Returns a single int representing all the capabilities of the vibrator. */
@@ -640,7 +640,7 @@ public class VibratorInfo implements Parcelable {
      *
      * @hide
      */
-    public static final class FrequencyProfile implements Parcelable {
+    public static final class FrequencyProfileLegacy implements Parcelable {
         @Nullable
         private final Range<Float> mFrequencyRangeHz;
         private final float mMinFrequencyHz;
@@ -648,7 +648,7 @@ public class VibratorInfo implements Parcelable {
         private final float mFrequencyResolutionHz;
         private final float[] mMaxAmplitudes;
 
-        FrequencyProfile(Parcel in) {
+        FrequencyProfileLegacy(Parcel in) {
             this(in.readFloat(), in.readFloat(), in.readFloat(), in.createFloatArray());
         }
 
@@ -664,7 +664,7 @@ public class VibratorInfo implements Parcelable {
          *                              resolution.
          * @hide
          */
-        public FrequencyProfile(float resonantFrequencyHz, float minFrequencyHz,
+        public FrequencyProfileLegacy(float resonantFrequencyHz, float minFrequencyHz,
                 float frequencyResolutionHz, float[] maxAmplitudes) {
             mMinFrequencyHz = minFrequencyHz;
             mResonantFrequencyHz = resonantFrequencyHz;
@@ -776,10 +776,10 @@ public class VibratorInfo implements Parcelable {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof FrequencyProfile)) {
+            if (!(o instanceof FrequencyProfileLegacy)) {
                 return false;
             }
-            FrequencyProfile that = (FrequencyProfile) o;
+            FrequencyProfileLegacy that = (FrequencyProfileLegacy) o;
             return Float.compare(mMinFrequencyHz, that.mMinFrequencyHz) == 0
                     && Float.compare(mResonantFrequencyHz, that.mResonantFrequencyHz) == 0
                     && Float.compare(mFrequencyResolutionHz, that.mFrequencyResolutionHz) == 0
@@ -796,7 +796,7 @@ public class VibratorInfo implements Parcelable {
 
         @Override
         public String toString() {
-            return "FrequencyProfile{"
+            return "FrequencyProfileLegacy{"
                     + "mFrequencyRange=" + mFrequencyRangeHz
                     + ", mMinFrequency=" + mMinFrequencyHz
                     + ", mResonantFrequency=" + mResonantFrequencyHz
@@ -806,16 +806,16 @@ public class VibratorInfo implements Parcelable {
         }
 
         @NonNull
-        public static final Creator<FrequencyProfile> CREATOR =
-                new Creator<FrequencyProfile>() {
+        public static final Creator<FrequencyProfileLegacy> CREATOR =
+                new Creator<FrequencyProfileLegacy>() {
                     @Override
-                    public FrequencyProfile createFromParcel(Parcel in) {
-                        return new FrequencyProfile(in);
+                    public FrequencyProfileLegacy createFromParcel(Parcel in) {
+                        return new FrequencyProfileLegacy(in);
                     }
 
                     @Override
-                    public FrequencyProfile[] newArray(int size) {
-                        return new FrequencyProfile[size];
+                    public FrequencyProfileLegacy[] newArray(int size) {
+                        return new FrequencyProfileLegacy[size];
                     }
                 };
     }
@@ -832,8 +832,8 @@ public class VibratorInfo implements Parcelable {
         private int mPwlePrimitiveDurationMax;
         private int mPwleSizeMax;
         private float mQFactor = Float.NaN;
-        private FrequencyProfile mFrequencyProfile =
-                new FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
+        private FrequencyProfileLegacy mFrequencyProfileLegacy =
+                new FrequencyProfileLegacy(Float.NaN, Float.NaN, Float.NaN, null);
         private int mMaxEnvelopeEffectSize;
         private int mMinEnvelopeEffectControlPointDurationMillis;
         private int mMaxEnvelopeEffectControlPointDurationMillis;
@@ -908,8 +908,8 @@ public class VibratorInfo implements Parcelable {
 
         /** Configure the vibrator frequency information like resonant frequency and bandwidth. */
         @NonNull
-        public Builder setFrequencyProfile(@NonNull FrequencyProfile frequencyProfile) {
-            mFrequencyProfile = frequencyProfile;
+        public Builder setFrequencyProfileLegacy(@NonNull FrequencyProfileLegacy frequencyProfile) {
+            mFrequencyProfileLegacy = frequencyProfile;
             return this;
         }
 
@@ -950,7 +950,7 @@ public class VibratorInfo implements Parcelable {
         public VibratorInfo build() {
             return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
                     mSupportedPrimitives, mPrimitiveDelayMax, mCompositionSizeMax,
-                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfile,
+                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfileLegacy,
                     mMaxEnvelopeEffectSize, mMinEnvelopeEffectControlPointDurationMillis,
                     mMaxEnvelopeEffectControlPointDurationMillis);
         }

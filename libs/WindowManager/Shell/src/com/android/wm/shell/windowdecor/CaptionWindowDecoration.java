@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.windowdecor;
 
-import static android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING;
+import static android.window.DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING;
 
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getFineResizeCornerSize;
 import static com.android.wm.shell.windowdecor.DragResizeWindowGeometry.getLargeResizeCornerSize;

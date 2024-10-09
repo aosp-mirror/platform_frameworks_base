@@ -49,7 +49,7 @@ import com.android.internal.R.attr.materialColorSurfaceDim
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.enableMinimizeButton
 import com.android.wm.shell.R
-import android.window.flags.DesktopModeFlags
+import android.window.DesktopModeFlags
 import com.android.wm.shell.windowdecor.MaximizeButtonView
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_100

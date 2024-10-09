@@ -24,7 +24,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.util.SparseArray;
 import android.view.SurfaceControl;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.protolog.ProtoLog;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -99,11 +99,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
         state.mTaskInfo = taskInfo;
         state.mLeash = leash;
         mTasks.put(taskInfo.taskId, state);
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            mWindowDecorationViewModel.onTaskOpening(taskInfo, leash, t, t);
-            t.apply();
-        }
 
         if (DesktopModeStatus.canEnterDesktopMode(mContext)) {
             mDesktopRepository.ifPresent(repository -> {
@@ -139,9 +134,6 @@ public class FreeformTaskListener implements ShellTaskOrganizer.TaskListener,
             });
         }
         mWindowDecorationViewModel.onTaskVanished(taskInfo);
-        if (!Transitions.ENABLE_SHELL_TRANSITIONS) {
-            mWindowDecorationViewModel.destroyWindowDecoration(taskInfo);
-        }
         updateLaunchAdjacentController();
     }
 

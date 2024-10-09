@@ -80,6 +80,14 @@ class DesktopRepository (
             freeformTasksInZOrder = ArrayList(freeformTasksInZOrder),
             fullImmersiveTaskId = fullImmersiveTaskId
         )
+        fun clear() {
+            activeTasks.clear()
+            visibleTasks.clear()
+            minimizedTasks.clear()
+            closingTasks.clear()
+            freeformTasksInZOrder.clear()
+            fullImmersiveTaskId = null
+        }
     }
 
     /* Current wallpaper activity token to remove wallpaper activity when last task is removed. */
@@ -411,6 +419,19 @@ class DesktopRepository (
         if (Flags.enableDesktopWindowingPersistence()) {
             updatePersistentRepository(displayId)
         }
+    }
+
+    /**
+     * Removes the desktop for the given [displayId] and returns the active tasks on that desktop.
+     */
+    fun removeDesktop(displayId: Int): ArraySet<Int> {
+        if (!desktopTaskDataByDisplayId.contains(displayId)) {
+            logW("Could not find desktop to remove: displayId=%d", displayId)
+            return ArraySet()
+        }
+        val activeTasks = ArraySet(desktopTaskDataByDisplayId[displayId].activeTasks)
+        desktopTaskDataByDisplayId[displayId].clear()
+        return activeTasks
     }
 
     /**

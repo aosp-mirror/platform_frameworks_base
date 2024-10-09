@@ -22,7 +22,6 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -44,18 +43,14 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
-
-import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
-import java.util.Optional;
-
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -80,6 +75,9 @@ public class FreeformTaskTransitionObserverTest {
     private WindowDecorViewModel mWindowDecorViewModel;
     @Mock
     private TaskChangeListener mTaskChangeListener;
+    @Mock
+    private FocusTransitionObserver mFocusTransitionObserver;
+
     private FreeformTaskTransitionObserver mTransitionObserver;
 
     @Before
@@ -95,16 +93,13 @@ public class FreeformTaskTransitionObserverTest {
         mTransitionObserver = new FreeformTaskTransitionObserver(
                 context, mShellInit, mTransitions,
                 Optional.of(mDesktopFullImmersiveTransitionHandler),
-                mWindowDecorViewModel, Optional.of(mTaskChangeListener));
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
-                    Runnable.class);
-            verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
-                    same(mTransitionObserver));
-            initRunnableCaptor.getValue().run();
-        } else {
-            mTransitionObserver.onInit();
-        }
+                mWindowDecorViewModel, Optional.of(mTaskChangeListener), mFocusTransitionObserver);
+
+        final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
+                Runnable.class);
+        verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
+                same(mTransitionObserver));
+        initRunnableCaptor.getValue().run();
     }
 
     @Test

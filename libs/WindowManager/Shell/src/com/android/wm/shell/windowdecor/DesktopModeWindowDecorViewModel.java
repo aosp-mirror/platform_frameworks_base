@@ -77,10 +77,10 @@ import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
+import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -103,8 +103,8 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
-import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition;
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter;
@@ -133,13 +133,13 @@ import com.android.wm.shell.windowdecor.viewholder.AppHeaderViewHolder;
 import kotlin.Pair;
 import kotlin.Unit;
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * View model for the window decoration with a caption and shadows. Works with

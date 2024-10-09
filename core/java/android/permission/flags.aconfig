@@ -206,17 +206,6 @@ flag {
 }
 
 flag {
-    name: "apex_signature_permission_allowlist_enabled"
-    is_fixed_read_only: true
-    namespace: "permissions"
-    description: "Enable reading signature permission allowlist from APEXes"
-    bug: "308573169"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "check_op_validate_package"
     namespace: "permissions"
     description: "Validate package/uid match in checkOp similar to noteOp"

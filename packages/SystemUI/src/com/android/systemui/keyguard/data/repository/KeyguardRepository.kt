@@ -269,6 +269,9 @@ interface KeyguardRepository {
      */
     val isEncryptedOrLockdown: Flow<Boolean>
 
+    /** The top of shortcut in screen, used by wallpaper to find remaining space in lockscreen */
+    val shortcutAbsoluteTop: StateFlow<Float>
+
     /**
      * Returns `true` if the keyguard is showing; `false` otherwise.
      *
@@ -339,6 +342,8 @@ interface KeyguardRepository {
      * otherwise.
      */
     fun isShowKeyguardWhenReenabled(): Boolean
+
+    fun setShortcutAbsoluteTop(top: Float)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -503,7 +508,7 @@ constructor(
                 trySendWithFailureLogging(
                     statusBarStateController.dozeAmount,
                     TAG,
-                    "initial dozeAmount"
+                    "initial dozeAmount",
                 )
 
                 awaitClose { statusBarStateController.removeCallback(callback) }
@@ -521,7 +526,7 @@ constructor(
             object : DozeTransitionCallback {
                 override fun onDozeTransition(
                     oldState: DozeMachine.State,
-                    newState: DozeMachine.State
+                    newState: DozeMachine.State,
                 ) {
                     trySendWithFailureLogging(
                         DozeTransitionModel(
@@ -529,7 +534,7 @@ constructor(
                             to = dozeMachineStateToModel(newState),
                         ),
                         TAG,
-                        "doze transition model"
+                        "doze transition model",
                     )
                 }
             }
@@ -541,7 +546,7 @@ constructor(
                 to = dozeMachineStateToModel(dozeTransitionListener.newState),
             ),
             TAG,
-            "initial doze transition model"
+            "initial doze transition model",
         )
 
         awaitClose { dozeTransitionListener.removeCallback(callback) }
@@ -579,7 +584,7 @@ constructor(
                             trySendWithFailureLogging(
                                 statusBarStateIntToObject(state),
                                 TAG,
-                                "state"
+                                "state",
                             )
                         }
                     }
@@ -590,7 +595,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
-                statusBarStateIntToObject(statusBarStateController.state)
+                statusBarStateIntToObject(statusBarStateController.state),
             )
 
     private val _biometricUnlockState: MutableStateFlow<BiometricUnlockModel> =
@@ -610,7 +615,7 @@ constructor(
             trySendWithFailureLogging(
                 authController.fingerprintSensorLocation,
                 TAG,
-                "AuthController.Callback#onFingerprintLocationChanged"
+                "AuthController.Callback#onFingerprintLocationChanged",
             )
         }
 
@@ -634,6 +639,9 @@ constructor(
 
     private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
     override val isActiveDreamLockscreenHosted = _isActiveDreamLockscreenHosted.asStateFlow()
+
+    private val _shortcutAbsoluteTop = MutableStateFlow(0F)
+    override val shortcutAbsoluteTop = _shortcutAbsoluteTop.asStateFlow()
 
     init {
         val callback =
@@ -719,6 +727,10 @@ constructor(
             2 -> StatusBarState.SHADE_LOCKED
             else -> throw IllegalArgumentException("Invalid StatusBarState value: $value")
         }
+    }
+
+    override fun setShortcutAbsoluteTop(top: Float) {
+        _shortcutAbsoluteTop.value = top
     }
 
     private fun dozeMachineStateToModel(state: DozeMachine.State): DozeStateModel {

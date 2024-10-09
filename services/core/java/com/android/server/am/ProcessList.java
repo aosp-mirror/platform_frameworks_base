@@ -3439,12 +3439,12 @@ public final class ProcessList {
             state.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_DEFAULT);
             state.setSetSchedGroup(ProcessList.SCHED_GROUP_DEFAULT);
             r.setPersistent(true);
-            state.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
+            mService.mProcessStateController.setMaxAdj(r, ProcessList.PERSISTENT_PROC_ADJ);
         }
         if (isolated && isolatedUid != 0) {
             // Special case for startIsolatedProcess (internal only) - assume the process
             // is required by the system server to prevent it being killed.
-            state.setMaxAdj(ProcessList.PERSISTENT_SERVICE_ADJ);
+            mService.mProcessStateController.setMaxAdj(r, ProcessList.PERSISTENT_SERVICE_ADJ);
         }
         addProcessNameLocked(r);
         return r;

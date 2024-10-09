@@ -28,6 +28,7 @@ import java.lang.annotation.RetentionPolicy;
             DeviceSettingType.DEVICE_SETTING_TYPE_ACTION_SWITCH,
             DeviceSettingType.DEVICE_SETTING_TYPE_MULTI_TOGGLE,
             DeviceSettingType.DEVICE_SETTING_TYPE_FOOTER,
+            DeviceSettingType.DEVICE_SETTING_TYPE_HELP,
         },
         open = true)
 public @interface DeviceSettingType {
