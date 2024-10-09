@@ -1777,6 +1777,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             }
 
             @Override
+            public void onNullBinding(ComponentName name) {
+                mContext.unbindService(this);
+            }
+
+            @Override
             public void onServiceDisconnected(ComponentName name) {
                 // Do nothing
             }
@@ -1913,6 +1918,11 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                                 } catch (RemoteException e) {
                                     Slog.e(TAG, "Error calling onDataSetChangedAsync()", e);
                                 }
+                                mContext.unbindService(this);
+                            }
+
+                            @Override
+                            public void onNullBinding(ComponentName name) {
                                 mContext.unbindService(this);
                             }
 
