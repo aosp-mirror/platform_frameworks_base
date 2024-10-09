@@ -100,6 +100,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.sysui.ShellCommandHandler
 import com.android.wm.shell.sysui.ShellController
 import com.android.wm.shell.sysui.ShellInit
+import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeKeyguardChangeListener
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel.DesktopModeOnInsetsChangedListener
@@ -191,6 +192,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             DesktopModeWindowDecorViewModel.TaskPositionerFactory
     @Mock private lateinit var mockTaskPositioner: TaskPositioner
     @Mock private lateinit var mockAppHandleEducationController: AppHandleEducationController
+    @Mock private lateinit var mockFocusTransitionObserver: FocusTransitionObserver
     @Mock private lateinit var mockCaptionHandleRepository: WindowDecorCaptionHandleRepository
     private lateinit var spyContext: TestableContext
 
@@ -253,7 +255,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 mockAppHandleEducationController,
                 mockCaptionHandleRepository,
                 Optional.of(mockActivityOrientationChangeHandler),
-                mockTaskPositionerFactory
+                mockTaskPositionerFactory,
+                mockFocusTransitionObserver
         )
         desktopModeWindowDecorViewModel.setSplitScreenController(mockSplitScreenController)
         whenever(mockDisplayController.getDisplayLayout(any())).thenReturn(mockDisplayLayout)
@@ -460,7 +463,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsCreatedForTopTranslucentActivitiesWithStyleFloating() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
             isTopActivityTransparent = true
             isTopActivityStyleFloating = true
             numActivities = 1
@@ -475,7 +478,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForTopTranslucentActivitiesWithoutStyleFloating() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true).apply {
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN).apply {
             isTopActivityTransparent = true
             isTopActivityStyleFloating = false
             numActivities = 1
@@ -488,7 +491,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
     fun testDecorationIsNotCreatedForSystemUIActivities() {
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
 
         // Set task as systemUI package
         val systemUIPackageName = context.resources.getString(
@@ -561,7 +564,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         // Simulate default enforce device restrictions system property
         whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
 
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
         // Simulate device that doesn't support desktop mode
         doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
@@ -577,7 +580,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         // Simulate device that doesn't support desktop mode
         doReturn(false).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
 
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
         setUpMockDecorationsForTasks(task)
 
         onTaskOpening(task)
@@ -590,7 +593,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         // Simulate default enforce device restrictions system property
         whenever(DesktopModeStatus.enforceDeviceRestrictions()).thenReturn(true)
 
-        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN, focused = true)
+        val task = createTask(windowingMode = WINDOWING_MODE_FULLSCREEN)
         doReturn(true).`when` { DesktopModeStatus.isDesktopModeSupported(any()) }
         setUpMockDecorationsForTasks(task)
 
@@ -1033,7 +1036,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDisplayRotation_tasksOutOfValidArea_taskBoundsUpdated() {
-        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
         val secondTask =
             createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
         val thirdTask =
@@ -1061,7 +1064,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDisplayRotation_taskInValidArea_taskBoundsNotUpdated() {
-        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
         val secondTask =
             createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
         val thirdTask =
@@ -1088,7 +1091,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDisplayRotation_sameOrientationRotation_taskBoundsNotUpdated() {
-        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
         val secondTask =
             createTask(displayId = task.displayId, windowingMode = WINDOWING_MODE_FREEFORM)
         val thirdTask =
@@ -1112,7 +1115,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDisplayRotation_differentDisplayId_taskBoundsNotUpdated() {
-        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
         val secondTask = createTask(displayId = -2, windowingMode = WINDOWING_MODE_FREEFORM)
         val thirdTask = createTask(displayId = -3, windowingMode = WINDOWING_MODE_FREEFORM)
 
@@ -1137,7 +1140,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     @Test
     fun testOnDisplayRotation_nonFreeformTask_taskBoundsNotUpdated() {
-        val task = createTask(focused = true, windowingMode = WINDOWING_MODE_FREEFORM)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
         val secondTask = createTask(displayId = -2, windowingMode = WINDOWING_MODE_FULLSCREEN)
         val thirdTask = createTask(displayId = -3, windowingMode = WINDOWING_MODE_PINNED)
 
@@ -1310,7 +1313,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             displayId: Int = DEFAULT_DISPLAY,
             @WindowingMode windowingMode: Int,
             activityType: Int = ACTIVITY_TYPE_STANDARD,
-            focused: Boolean = true,
             activityInfo: ActivityInfo = ActivityInfo(),
             requestingImmersive: Boolean = false
     ): RunningTaskInfo {
@@ -1321,7 +1323,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 .setActivityType(activityType)
                 .build().apply {
                     topActivityInfo = activityInfo
-                    isFocused = focused
                     isResizeable = true
                     requestedVisibleTypes = if (requestingImmersive) {
                         statusBars().inv()
@@ -1339,7 +1340,6 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                 any(), any(), any(), any(), any(), any(), any())
         ).thenReturn(decoration)
         decoration.mTaskInfo = task
-        whenever(decoration.isFocused).thenReturn(task.isFocused)
         whenever(decoration.user).thenReturn(mockUserHandle)
         if (task.windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
             whenever(mockSplitScreenController.isTaskInSplitScreen(task.taskId))

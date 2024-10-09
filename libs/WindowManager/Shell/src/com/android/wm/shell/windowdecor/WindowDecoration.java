@@ -125,7 +125,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                     }
 
                     mDisplayController.removeDisplayWindowListener(this);
-                    relayout(mTaskInfo);
+                    relayout(mTaskInfo, mHasGlobalFocus);
                 }
             };
 
@@ -146,6 +146,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
     boolean mIsStatusBarVisible;
     boolean mIsKeyguardVisibleAndOccluded;
+    boolean mHasGlobalFocus;
 
     /** The most recent set of insets applied to this window decoration. */
     private WindowDecorationInsets mWindowDecorationInsets;
@@ -199,8 +200,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      *
      * @param taskInfo The previous {@link RunningTaskInfo} passed into {@link #relayout} or the
      *                 constructor.
+     * @param hasGlobalFocus Whether the task is focused
      */
-    abstract void relayout(RunningTaskInfo taskInfo);
+    abstract void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus);
 
     /**
      * Used by the {@link DragPositioningCallback} associated with the implementing class to
@@ -225,6 +227,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         if (params.mRunningTaskInfo != null) {
             mTaskInfo = params.mRunningTaskInfo;
         }
+        mHasGlobalFocus = params.mHasGlobalFocus;
         final int oldLayoutResId = mLayoutResId;
         mLayoutResId = params.mLayoutResId;
 
@@ -246,7 +249,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final Rect taskBounds = mTaskInfo.getConfiguration().windowConfiguration.getBounds();
         outResult.mWidth = taskBounds.width();
         outResult.mHeight = taskBounds.height();
-        outResult.mRootView.setTaskFocusState(mTaskInfo.isFocused);
+        outResult.mRootView.setTaskFocusState(mHasGlobalFocus);
         final Resources resources = mDecorWindowContext.getResources();
         outResult.mCaptionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId)
                 + params.mCaptionTopPadding;
@@ -512,7 +515,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         mIsKeyguardVisibleAndOccluded = visible && occluded;
         final boolean changed = prevVisAndOccluded != mIsKeyguardVisibleAndOccluded;
         if (changed) {
-            relayout(mTaskInfo);
+            relayout(mTaskInfo, mHasGlobalFocus);
         }
     }
 
@@ -522,7 +525,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final boolean changed = prevStatusBarVisibility != mIsStatusBarVisible;
 
         if (changed) {
-            relayout(mTaskInfo);
+            relayout(mTaskInfo, mHasGlobalFocus);
         }
     }
 
@@ -737,6 +740,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         boolean mApplyStartTransactionOnDraw;
         boolean mSetTaskPositionAndCrop;
+        boolean mHasGlobalFocus;
 
         void reset() {
             mLayoutResId = Resources.ID_NULL;
@@ -756,6 +760,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mApplyStartTransactionOnDraw = false;
             mSetTaskPositionAndCrop = false;
             mWindowDecorConfig = null;
+            mHasGlobalFocus = false;
         }
 
         boolean hasInputFeatureSpy() {
