@@ -1592,7 +1592,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private static int getCaptionHeightIdStatic(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FULLSCREEN
-                ? R.dimen.desktop_mode_fullscreen_decor_caption_height
+                ? com.android.internal.R.dimen.status_bar_height_default
                 : R.dimen.desktop_mode_freeform_decor_caption_height;
     }
 
