@@ -68,9 +68,7 @@ class DesktopModeLoggerTransitionObserver(
     private val idSequence: InstanceIdSequence by lazy { InstanceIdSequence(Int.MAX_VALUE) }
 
     init {
-        if (
-            Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.canEnterDesktopMode(context)
-        ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(this::onInit, this)
         }
     }
@@ -101,6 +99,9 @@ class DesktopModeLoggerTransitionObserver(
 
     fun onInit() {
         transitions.registerObserver(this)
+        SystemProperties.set(
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
+            VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE)
     }
 
     override fun onTransitionReady(
@@ -441,5 +442,6 @@ class DesktopModeLoggerTransitionObserver(
         @VisibleForTesting
         const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY =
             "debug.tracing." + VISIBLE_TASKS_COUNTER_NAME
+        const val VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE = "0"
     }
 }

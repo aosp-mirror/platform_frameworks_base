@@ -141,7 +141,7 @@ class PolicyRequestProcessor(
             userHandle = owner,
             taskId = taskId,
             topComponent = componentName,
-            screenBounds = taskBounds,
+            originalScreenBounds = taskBounds,
         )
     }
 
@@ -159,7 +159,7 @@ class PolicyRequestProcessor(
             bitmap = screenshot,
             userHandle = owner,
             topComponent = componentName,
-            screenBounds = Rect(0, 0, screenshot?.width ?: 0, screenshot?.height ?: 0),
+            originalScreenBounds = Rect(0, 0, screenshot?.width ?: 0, screenshot?.height ?: 0),
             taskId = taskId ?: -1,
         )
     }

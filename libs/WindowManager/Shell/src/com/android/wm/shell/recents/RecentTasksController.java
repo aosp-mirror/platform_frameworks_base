@@ -38,8 +38,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.window.DesktopModeFlags;
 import android.window.WindowContainerToken;
-import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -538,6 +538,14 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
         }
         return null;
+    }
+
+    /**
+     * Remove the background task that match the given taskId. This will remove the task regardless
+     * of whether it's active or recent.
+     */
+    public boolean removeBackgroundTask(int taskId) {
+        return mActivityTaskManager.removeTask(taskId);
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {

@@ -2131,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Vibriranje bo vklopljeno za klice in obvestila"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Zvonjenje bo izklopljeno za klice in obvestila"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemske spremembe"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ne moti"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novi način »ne moti« skriva obvestila"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Dotaknite se, če želite izvedeti več in spremeniti."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Način »ne moti« je spremenjen"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Dotaknite se, da preverite, kaj je blokirano."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Preglejte nastavitve obvestil"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"V Androidu 13 in novejših različicah bodo aplikacije, ki jih namestite, za pošiljanje obvestil potrebovale vaše dovoljenje. Dotaknite se, če želite spremeniti to dovoljenje za obstoječe aplikacije."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Opomni me pozneje"</string>

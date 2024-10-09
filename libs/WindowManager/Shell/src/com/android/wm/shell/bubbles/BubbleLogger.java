@@ -36,6 +36,8 @@ public class BubbleLogger {
     @VisibleForTesting
     public enum Event implements UiEventLogger.UiEventEnum {
 
+        // region bubble events
+
         @UiEvent(doc = "User dismissed the bubble via gesture, add bubble to overflow.")
         BUBBLE_OVERFLOW_ADD_USER_GESTURE(483),
 
@@ -64,7 +66,89 @@ public class BubbleLogger {
         BUBBLE_OVERFLOW_SELECTED(600),
 
         @UiEvent(doc = "Restore bubble to overflow after phone reboot.")
-        BUBBLE_OVERFLOW_RECOVER(691);
+        BUBBLE_OVERFLOW_RECOVER(691),
+
+        // endregion
+
+        // region bubble bar events
+
+        @UiEvent(doc = "new bubble posted")
+        BUBBLE_BAR_BUBBLE_POSTED(1927),
+
+        @UiEvent(doc = "existing bubble updated")
+        BUBBLE_BAR_BUBBLE_UPDATED(1928),
+
+        @UiEvent(doc = "expanded a bubble from bubble bar")
+        BUBBLE_BAR_EXPANDED(1929),
+
+        @UiEvent(doc = "bubble bar collapsed")
+        BUBBLE_BAR_COLLAPSED(1930),
+
+        @UiEvent(doc = "dismissed single bubble from bubble bar by dragging it to dismiss target")
+        BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_BUBBLE(1931),
+
+        @UiEvent(doc = "dismissed single bubble from bubble bar by dragging the expanded view to "
+                + "dismiss target")
+        BUBBLE_BAR_BUBBLE_DISMISSED_DRAG_EXP_VIEW(1932),
+
+        @UiEvent(doc = "dismiss bubble from app handle menu")
+        BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU(1933),
+
+        @UiEvent(doc = "bubble is dismissed due to app finishing the bubble activity")
+        BUBBLE_BAR_BUBBLE_ACTIVITY_FINISH(1934),
+
+        @UiEvent(doc = "dismissed the bubble bar by dragging it to dismiss target")
+        BUBBLE_BAR_DISMISSED_DRAG_BAR(1935),
+
+        @UiEvent(doc = "bubble bar moved to the left edge of the screen by dragging from the "
+                + "expanded view")
+        BUBBLE_BAR_MOVED_LEFT_DRAG_EXP_VIEW(1936),
+
+        @UiEvent(doc = "bubble bar moved to the left edge of the screen by dragging from a single"
+                + " bubble")
+        BUBBLE_BAR_MOVED_LEFT_DRAG_BUBBLE(1937),
+
+        @UiEvent(doc = "bubble bar moved to the left edge of the screen by dragging the bubble bar")
+        BUBBLE_BAR_MOVED_LEFT_DRAG_BAR(1938),
+
+        @UiEvent(doc = "bubble bar moved to the right edge of the screen by dragging from the "
+                + "expanded view")
+        BUBBLE_BAR_MOVED_RIGHT_DRAG_EXP_VIEW(1939),
+
+        @UiEvent(doc = "bubble bar moved to the right edge of the screen by dragging from a "
+                + "single bubble")
+        BUBBLE_BAR_MOVED_RIGHT_DRAG_BUBBLE(1940),
+
+        @UiEvent(doc = "bubble bar moved to the right edge of the screen by dragging the bubble "
+                + "bar")
+        BUBBLE_BAR_MOVED_RIGHT_DRAG_BAR(1941),
+
+        @UiEvent(doc = "stop bubbling conversation from app handle menu")
+        BUBBLE_BAR_APP_MENU_OPT_OUT(1942),
+
+        @UiEvent(doc = "open app settings from app handle menu")
+        BUBBLE_BAR_APP_MENU_GO_TO_SETTINGS(1943),
+
+        @UiEvent(doc = "flyout shown for a bubble")
+        BUBBLE_BAR_FLYOUT(1944),
+
+        @UiEvent(doc = "notification for the bubble was canceled")
+        BUBBLE_BAR_BUBBLE_REMOVED_CANCELED(1945),
+
+        @UiEvent(doc = "user turned off bubbles from settings")
+        BUBBLE_BAR_BUBBLE_REMOVED_BLOCKED(1946),
+
+        @UiEvent(doc = "bubble bar overflow opened")
+        BUBBLE_BAR_OVERFLOW_SELECTED(1947),
+
+        @UiEvent(doc = "max number of bubbles was reached in bubble bar, move bubble to overflow")
+        BUBBLE_BAR_OVERFLOW_ADD_AGED(1948),
+
+        @UiEvent(doc = "bubble promoted from overflow back to bubble bar")
+        BUBBLE_BAR_OVERFLOW_REMOVE_BACK_TO_BAR(1949),
+
+        // endregion
+        ;
 
         private final int mId;
 

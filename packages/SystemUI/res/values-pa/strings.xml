@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ਚਾਲੂ"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • \'ਤੇ"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ਬੰਦ"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"ਸੈੱਟਅੱਪ ਕਰੋ"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ਕੋਈ ਕਿਰਿਆਸ਼ੀਲ ਮੋਡ ਨਹੀਂ ਹੈ}=1{{mode} ਕਿਰਿਆਸ਼ੀਲ ਹੈ}other{# ਮੋਡ ਕਿਰਿਆਸ਼ੀਲ ਹਨ}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ਧੁਨੀਆਂ ਅਤੇ ਥਰਥਰਾਹਟਾਂ ਤੁਹਾਨੂੰ ਪਰੇਸ਼ਾਨ ਨਹੀਂ ਕਰਨਗੀਆਂ, ਸਿਵਾਏ ਅਲਾਰਮਾਂ, ਯਾਦ-ਦਹਾਨੀਆਂ, ਵਰਤਾਰਿਆਂ, ਅਤੇ ਤੁਹਾਡੇ ਵੱਲੋਂ ਨਿਰਧਾਰਤ ਕੀਤੇ ਕਾਲਰਾਂ ਦੀ ਸੂਰਤ ਵਿੱਚ। ਤੁਸੀਂ ਅਜੇ ਵੀ ਸੰਗੀਤ, ਵੀਡੀਓ ਅਤੇ ਗੇਮਾਂ ਸਮੇਤ ਆਪਣੀ ਚੋਣ ਅਨੁਸਾਰ ਕੁਝ ਵੀ ਸੁਣ ਸਕਦੇ ਹੋ।"</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ਗੱਲਾਂਬਾਤਾਂ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ਸਾਰੀਆਂ ਸ਼ਾਂਤ ਸੂਚਨਾਵਾਂ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਰੋਕਿਆ ਗਿਆ"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{ਕੋਈ ਸੂਚਨਾ ਨਹੀਂ ਹੈ}=1{{mode} ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ}=2{{mode} ਅਤੇ ਇੱਕ ਹੋਰ ਮੋਡ ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ}other{{mode} ਅਤੇ # ਹੋਰ ਮੋਡਾਂ ਵੱਲੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ਹੁਣੇ ਸ਼ੁਰੂ ਕਰੋ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ਕੋਈ ਸੂਚਨਾ ਨਹੀਂ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ਕੋਈ ਨਵੀਂ ਸੂਚਨਾ ਨਹੀਂ ਹੈ"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ਡੈਮੋ ਮੋਡ ਦੇਖੋ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ਈਥਰਨੈਟ"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ਅਲਾਰਮ"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> ਚਾਲੂ ਹੈ"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ਆਪਣੇ ਫ਼ੋਨ ਨਾਲ ਜ਼ਿਆਦਾ ਤੇਜ਼ ਅਤੇ ਜ਼ਿਆਦਾ ਸੁਰੱਖਿਅਤ ਖਰੀਦਾਂ ਕਰਨ ਲਈ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ਸਭ ਦਿਖਾਓ"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ਟੱਚਪੈਡ ਇਸ਼ਾਰਿਆਂ ਬਾਰੇ ਜਾਣੋ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ਆਪਣੇ ਕੀ-ਬੋਰਡ ਅਤੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਨੈਵੀਗੇਟ ਕਰੋ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ਟੱਚਪੈਡ ਇਸ਼ਾਰੇ, ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ ਅਤੇ ਹੋਰ ਬਹੁਤ ਕੁਝ ਬਾਰੇ ਜਾਣੋ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ਪਿੱਛੇ ਜਾਣ ਦਾ ਇਸ਼ਾਰਾ"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ਹੋਮ \'ਤੇ ਜਾਣ ਦਾ ਇਸ਼ਾਰਾ"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ਹਾਲੀਆ ਐਪਾਂ ਦੇਖੋ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ਹੋ ਗਿਆ"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ਵਾਪਸ ਜਾਓ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ਵਾਪਸ ਜਾਣ ਲਈ, ਟੱਚਪੈਡ \'ਤੇ ਕਿਤੇ ਵੀ ਤਿੰਨ ਉਂਗਲਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਖੱਬੇ ਜਾਂ ਸੱਜੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ।\n\nਤੁਸੀਂ ਇਸ ਲਈ ਕੀ-ਬੋਰਡ ਸ਼ਾਰਟਕੱਟ Action + ESC ਦੀ ਵਰਤੋਂ ਵੀ ਕਰ ਸਕਦੇ ਹੋ।"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ਬਹੁਤ ਵਧੀਆ!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ਤੁਸੀਂ \'ਵਾਪਸ ਜਾਓ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ਹੋਮ \'ਤੇ ਜਾਓ"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ਕਿਸੇ ਵੀ ਸਮੇਂ ਆਪਣੀ ਹੋਮ ਸਕ੍ਰੀਨ \'ਤੇ ਜਾਣ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ।"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ਵਧੀਆ!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ਤੁਸੀਂ \'ਹੋਮ \'ਤੇ ਜਾਓ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।"</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ਹਾਲੀਆ ਐਪਾਂ ਦੇਖੋ"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"ਆਪਣੇ ਟੱਚਪੈਡ \'ਤੇ ਤਿੰਨ ਉਂਗਲਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ਬਹੁਤ ਵਧੀਆ!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ਤੁਸੀਂ \'ਹਾਲੀਆ ਐਪਾਂ ਦੇਖੋ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ ਹੈ।"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ਕਾਰਵਾਈ ਕੁੰਜੀ"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ਆਪਣੀਆਂ ਐਪਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਲਈ, ਆਪਣੇ ਕੀ-ਬੋਰਡ \'ਤੇ ਕਾਰਵਾਈ ਕੁੰਜੀ ਨੂੰ ਦਬਾਓ।"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ਵਧਾਈਆਂ!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ਤੁਸੀਂ \'ਕਾਰਵਾਈ ਕੁੰਜੀ\' ਦਾ ਇਸ਼ਾਰਾ ਪੂਰਾ ਕੀਤਾ।\n\nਕਾਰਵਾਈ ਬਟਨ ਅਤੇ / ਨੂੰ ਇਕੱਠੇ ਦਬਾਉਣ \'ਤੇ, ਤੁਹਾਡੇ ਕੋਲ ਉਪਲਬਧ ਸਾਰੇ ਸ਼ਾਰਟਕੱਟ ਦਿਖਦੇ ਹਨ।"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ਕੀ-ਬੋਰਡ ਬੈਕਲਾਈਟ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ਵਿੱਚੋਂ %1$d ਪੱਧਰ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ਹੋਮ ਕੰਟਰੋਲ"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ਆਪਣੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਨੂੰ ਦੇਖਣ ਲਈ, ਆਪਣੇ ਕੀ-ਬੋਰਡ \'ਤੇ ਕਾਰਵਾਈ ਕੁੰਜੀ ਨੂੰ ਦਬਾਓ"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"ਅਸਪਸ਼ਟ ਬਣਾਇਆ ਗਿਆ"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ਦੇਖਣ ਲਈ ਅਣਲਾਕ ਕਰੋ"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"ਸੰਦਰਭੀ ਸਿੱਖਿਆ"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ਪਿੱਛੇ ਜਾਣ ਲਈ ਆਪਣੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ਤਿੰਨ ਉਂਗਲਾਂ ਦੀ ਵਰਤੋਂ ਕਰ ਕੇ ਖੱਬੇ ਜਾਂ ਸੱਜੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ। ਹੋਰ ਇਸ਼ਾਰਿਆਂ ਨੂੰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ਹੋਮ \'ਤੇ ਜਾਣ ਲਈ ਆਪਣੇ ਟੱਚਪੈਡ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>

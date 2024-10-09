@@ -39,3 +39,11 @@ flag {
     description: "This flag enables the APIs related to hotword in WearableSensingManager and WearableSensingService."
     bug: "310055381"
 }
+
+flag {
+    name: "enable_concurrent_wearable_connections"
+    is_exported: true
+    namespace: "machine_learning"
+    description: "This flag enables the APIs for providing multiple concurrent connections to the WearableSensingService."
+    bug: "358133158"
+}

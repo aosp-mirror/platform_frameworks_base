@@ -19,7 +19,7 @@ package com.android.server.wm;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.SystemProperties;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;

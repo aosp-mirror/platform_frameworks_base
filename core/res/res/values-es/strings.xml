@@ -1407,7 +1407,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se ha detectado un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Toca para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activa"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar la depuración por USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Toca para desactivar depuración USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para inhabilitar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Depuración inalámbrica conectada"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Toca para desactivar la depuración inalámbrica"</string>
@@ -2130,11 +2130,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Las llamadas y las notificaciones vibrarán"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Las llamadas y las notificaciones se silenciarán"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Cambios del sistema"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"No molestar"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Novedad: El modo No molestar oculta las notificaciones"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Toca para obtener más información y hacer cambios."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Ha cambiado el modo No molestar"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Toca para consultar lo que se está bloqueando."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Consulta los ajustes de notificaciones"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"A partir de Android 13, las aplicaciones que instalas necesitan tu permiso para enviar notificaciones. Toca para cambiar este permiso en las aplicaciones que ya tengas."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Recordar más tarde"</string>

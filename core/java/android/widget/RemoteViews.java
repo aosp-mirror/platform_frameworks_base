@@ -46,6 +46,7 @@ import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
+import android.appwidget.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -4119,6 +4120,71 @@ public class RemoteViews implements Parcelable, Filter {
         public void visitUris(@NonNull Consumer<Uri> visitor) {
             mNestedViews.visitUris(visitor);
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            if (!Flags.remoteViewsProto()) return;
+            final long token = out.start(RemoteViewsProto.Action.VIEW_GROUP_ADD_ACTION);
+            out.write(RemoteViewsProto.ViewGroupAddAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.ViewGroupAddAction.INDEX, mIndex);
+            out.write(RemoteViewsProto.ViewGroupAddAction.STABLE_ID, mStableId);
+            long rvToken = out.start(RemoteViewsProto.ViewGroupAddAction.NESTED_VIEWS);
+            mNestedViews.writePreviewToProto(context, out);
+            out.end(rvToken);
+            out.end(token);
+        }
+    }
+
+    private PendingResources<Action> createViewGroupActionAddFromProto(ProtoInputStream in)
+            throws Exception {
+        final LongSparseArray<Object> values = new LongSparseArray<>();
+
+        final long token = in.start(RemoteViewsProto.Action.VIEW_GROUP_ADD_ACTION);
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) RemoteViewsProto.ViewGroupAddAction.VIEW_ID:
+                    values.put(RemoteViewsProto.ViewGroupAddAction.VIEW_ID,
+                            in.readString(RemoteViewsProto.ViewGroupAddAction.VIEW_ID));
+                    break;
+                case (int) RemoteViewsProto.ViewGroupAddAction.NESTED_VIEWS:
+                    final long nvToken = in.start(RemoteViewsProto.ViewGroupAddAction.NESTED_VIEWS);
+                    values.put(RemoteViewsProto.ViewGroupAddAction.NESTED_VIEWS,
+                            createFromProto(in));
+                    in.end(nvToken);
+                    break;
+                case (int) RemoteViewsProto.ViewGroupAddAction.INDEX:
+                    values.put(RemoteViewsProto.ViewGroupAddAction.INDEX,
+                            in.readInt(RemoteViewsProto.ViewGroupAddAction.INDEX));
+                    break;
+                case (int) RemoteViewsProto.ViewGroupAddAction.STABLE_ID:
+                    values.put(RemoteViewsProto.ViewGroupAddAction.STABLE_ID,
+                            in.readInt(RemoteViewsProto.ViewGroupAddAction.STABLE_ID));
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+        in.end(token);
+
+        checkContainsKeys(values, new long[]{RemoteViewsProto.ViewGroupAddAction.VIEW_ID,
+                RemoteViewsProto.ViewGroupAddAction.NESTED_VIEWS});
+
+        return (context, resources, rootData, depth) -> {
+            int viewId = getAsIdentifier(resources, values,
+                    RemoteViewsProto.ViewGroupAddAction.VIEW_ID);
+            return new ViewGroupActionAdd(viewId, ((PendingResources<RemoteViews>) values.get(
+                    RemoteViewsProto.ViewGroupAddAction.NESTED_VIEWS)).create(context, resources,
+                    rootData, depth),
+                    (int) values.get(RemoteViewsProto.ViewGroupAddAction.INDEX, 0),
+                    (int) values.get(RemoteViewsProto.ViewGroupAddAction.STABLE_ID, 0));
+        };
     }
 
     /**
@@ -4240,6 +4306,60 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int mergeBehavior() {
             return MERGE_APPEND;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.VIEW_GROUP_REMOVE_ACTION);
+            out.write(RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            if (mViewIdToKeep != REMOVE_ALL_VIEWS_ID) {
+                out.write(RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID_TO_KEEP,
+                        appResources.getResourceName(mViewIdToKeep));
+            }
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.VIEW_GROUP_REMOVE_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID:
+                        values.put(RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID_TO_KEEP:
+                        values.put(RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID_TO_KEEP,
+                                in.readString(
+                                        RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID_TO_KEEP));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID);
+                int viewIdToKeep = (values.indexOfKey(
+                        RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID_TO_KEEP) >= 0)
+                        ? getAsIdentifier(resources, values,
+                        RemoteViewsProto.ViewGroupRemoveAction.VIEW_ID_TO_KEEP)
+                        : REMOVE_ALL_VIEWS_ID;
+                return new ViewGroupActionRemove(viewId, viewIdToKeep);
+            };
         }
     }
 
@@ -4497,6 +4617,200 @@ public class RemoteViews implements Parcelable, Filter {
                 visitIconUri(mI4, visitor);
             }
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context,
+                Resources appResources) { // rebase
+            final long token = out.start(RemoteViewsProto.Action.TEXT_VIEW_DRAWABLE_ACTION);
+            out.write(RemoteViewsProto.TextViewDrawableAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.TextViewDrawableAction.IS_RELATIVE, mIsRelative);
+            if (mUseIcons) {
+                long iconsToken = out.start(RemoteViewsProto.TextViewDrawableAction.ICONS);
+                if (mI1 != null) {
+                    writeIconToProto(out, appResources, mI1,
+                            RemoteViewsProto.TextViewDrawableAction.Icons.ONE);
+                }
+                if (mI2 != null) {
+                    writeIconToProto(out, appResources, mI2,
+                            RemoteViewsProto.TextViewDrawableAction.Icons.TWO);
+                }
+                if (mI3 != null) {
+                    writeIconToProto(out, appResources, mI3,
+                            RemoteViewsProto.TextViewDrawableAction.Icons.THREE);
+                }
+                if (mI4 != null) {
+                    writeIconToProto(out, appResources, mI4,
+                            RemoteViewsProto.TextViewDrawableAction.Icons.FOUR);
+                }
+                out.end(iconsToken);
+            } else {
+                long resourcesToken = out.start(RemoteViewsProto.TextViewDrawableAction.RESOURCES);
+                if (mD1 != 0) {
+                    out.write(RemoteViewsProto.TextViewDrawableAction.Resources.ONE,
+                            appResources.getResourceName(mD1));
+                }
+                if (mD2 != 0) {
+                    out.write(RemoteViewsProto.TextViewDrawableAction.Resources.TWO,
+                            appResources.getResourceName(mD2));
+                }
+                if (mD3 != 0) {
+                    out.write(RemoteViewsProto.TextViewDrawableAction.Resources.THREE,
+                            appResources.getResourceName(mD3));
+                }
+                if (mD4 != 0) {
+                    out.write(RemoteViewsProto.TextViewDrawableAction.Resources.FOUR,
+                            appResources.getResourceName(mD4));
+                }
+                out.end(resourcesToken);
+            }
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            values.put(RemoteViewsProto.TextViewDrawableAction.ICONS,
+                    new SparseArray<PendingResources<Icon>>());
+            values.put(RemoteViewsProto.TextViewDrawableAction.RESOURCES,
+                    new SparseArray<String>());
+            final long token = in.start(RemoteViewsProto.Action.TEXT_VIEW_DRAWABLE_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.TextViewDrawableAction.VIEW_ID:
+                        values.put(RemoteViewsProto.TextViewDrawableAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.TextViewDrawableAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.TextViewDrawableAction.IS_RELATIVE:
+                        values.put(RemoteViewsProto.TextViewDrawableAction.IS_RELATIVE,
+                                in.readBoolean(
+                                        RemoteViewsProto.TextViewDrawableAction.IS_RELATIVE));
+                        break;
+                    case (int) RemoteViewsProto.TextViewDrawableAction.RESOURCES:
+                        final long resourcesToken = in.start(
+                                RemoteViewsProto.TextViewDrawableAction.RESOURCES);
+                        while (in.nextField() != NO_MORE_FIELDS) {
+                            switch (in.getFieldNumber()) {
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Resources.ONE:
+                                    ((SparseArray<String>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.RESOURCES)).put(
+                                            1, in.readString(
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction.Resources.ONE));
+                                    break;
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Resources.TWO:
+                                    ((SparseArray<String>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.RESOURCES)).put(
+                                            2, in.readString(
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction.Resources.TWO));
+                                    break;
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Resources.THREE:
+                                    ((SparseArray<String>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.RESOURCES)).put(
+                                            3, in.readString(
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction
+                                                            .Resources.THREE));
+                                    break;
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Resources.FOUR:
+                                    ((SparseArray<String>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.RESOURCES)).put(
+                                            4, in.readString(
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction
+                                                            .Resources.FOUR));
+                                    break;
+                                default:
+                                    Log.w(LOG_TAG,
+                                            "Unhandled field while reading RemoteViews proto!\n"
+                                                    + ProtoUtils.currentFieldToString(in));
+                            }
+                        }
+                        in.end(resourcesToken);
+                        break;
+                    case (int) RemoteViewsProto.TextViewDrawableAction.ICONS:
+                        final long iconsToken = in.start(
+                                RemoteViewsProto.TextViewDrawableAction.ICONS);
+                        while (in.nextField() != NO_MORE_FIELDS) {
+                            switch (in.getFieldNumber()) {
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Icons.ONE:
+                                    ((SparseArray<PendingResources<Icon>>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.ICONS)).put(1,
+                                            createIconFromProto(in,
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction.Icons.ONE));
+                                    break;
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Icons.TWO:
+                                    ((SparseArray<PendingResources<Icon>>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.ICONS)).put(2,
+                                            createIconFromProto(in,
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction.Icons.TWO));
+                                    break;
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Icons.THREE:
+                                    ((SparseArray<PendingResources<Icon>>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.ICONS)).put(3,
+                                            createIconFromProto(in,
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction.Icons.THREE));
+                                    break;
+                                case (int) RemoteViewsProto.TextViewDrawableAction.Icons.FOUR:
+                                    ((SparseArray<PendingResources<Icon>>) values.get(
+                                            RemoteViewsProto.TextViewDrawableAction.ICONS)).put(4,
+                                            createIconFromProto(in,
+                                                    RemoteViewsProto
+                                                            .TextViewDrawableAction.Icons.FOUR));
+                                    break;
+                                default:
+                                    Log.w(LOG_TAG,
+                                            "Unhandled field while reading RemoteViews proto!\n"
+                                                    + ProtoUtils.currentFieldToString(in));
+                            }
+                        }
+                        in.end(iconsToken);
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.TextViewDrawableAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.TextViewDrawableAction.VIEW_ID);
+                SparseArray<PendingResources<Icon>> icons =
+                        (SparseArray<PendingResources<Icon>>) values.get(
+                                RemoteViewsProto.TextViewDrawableAction.ICONS);
+                SparseArray<String> resArray = (SparseArray<String>) values.get(
+                        RemoteViewsProto.TextViewDrawableAction.RESOURCES);
+                boolean isRelative = (boolean) values.get(
+                        RemoteViewsProto.TextViewDrawableAction.IS_RELATIVE, false);
+                if (icons.size() > 0) {
+                    return new TextViewDrawableAction(viewId, isRelative,
+                            icons.get(1).create(context, resources, rootData, depth),
+                            icons.get(2).create(context, resources, rootData, depth),
+                            icons.get(3).create(context, resources, rootData, depth),
+                            icons.get(4).create(context, resources, rootData, depth));
+                } else {
+                    int first = resArray.contains(1) ? getAsIdentifier(resources, resArray, 1) : 0;
+                    int second = resArray.contains(2) ? getAsIdentifier(resources, resArray, 2) : 0;
+                    int third = resArray.contains(3) ? getAsIdentifier(resources, resArray, 3) : 0;
+                    int fourth = resArray.contains(4) ? getAsIdentifier(resources, resArray, 4) : 0;
+                    return new TextViewDrawableAction(viewId, isRelative, first, second, third,
+                            fourth);
+                }
+            };
+        }
     }
 
     /**
@@ -4534,6 +4848,58 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return TEXT_VIEW_SIZE_ACTION_TAG;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.TEXT_VIEW_SIZE_ACTION);
+            out.write(RemoteViewsProto.TextViewSizeAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.TextViewSizeAction.UNITS, mUnits);
+            out.write(RemoteViewsProto.TextViewSizeAction.SIZE, mSize);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.TEXT_VIEW_SIZE_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.TextViewSizeAction.VIEW_ID:
+                        values.put(RemoteViewsProto.TextViewSizeAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.TextViewSizeAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.TextViewSizeAction.UNITS:
+                        values.put(RemoteViewsProto.TextViewSizeAction.UNITS,
+                                in.readInt(RemoteViewsProto.TextViewSizeAction.UNITS));
+                        break;
+                    case (int) RemoteViewsProto.TextViewSizeAction.SIZE:
+                        values.put(RemoteViewsProto.TextViewSizeAction.SIZE,
+                                in.readFloat(RemoteViewsProto.TextViewSizeAction.SIZE));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.TextViewSizeAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.TextViewSizeAction.VIEW_ID);
+                return new TextViewSizeAction(viewId,
+                        (int) values.get(RemoteViewsProto.TextViewSizeAction.UNITS, 0),
+                        (float) values.get(RemoteViewsProto.TextViewSizeAction.SIZE, 0));
+            };
         }
     }
 
@@ -4578,6 +4944,70 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return VIEW_PADDING_ACTION_TAG;
+        }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(RemoteViewsProto.Action.VIEW_PADDING_ACTION);
+            out.write(RemoteViewsProto.ViewPaddingAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.ViewPaddingAction.LEFT, mLeft);
+            out.write(RemoteViewsProto.ViewPaddingAction.RIGHT, mRight);
+            out.write(RemoteViewsProto.ViewPaddingAction.TOP, mTop);
+            out.write(RemoteViewsProto.ViewPaddingAction.BOTTOM, mBottom);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(RemoteViewsProto.Action.VIEW_PADDING_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.ViewPaddingAction.VIEW_ID:
+                        values.put(RemoteViewsProto.ViewPaddingAction.VIEW_ID,
+                                in.readString(RemoteViewsProto.ViewPaddingAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.ViewPaddingAction.LEFT:
+                        values.put(RemoteViewsProto.ViewPaddingAction.LEFT,
+                                in.readInt(RemoteViewsProto.ViewPaddingAction.LEFT));
+                        break;
+                    case (int) RemoteViewsProto.ViewPaddingAction.RIGHT:
+                        values.put(RemoteViewsProto.ViewPaddingAction.RIGHT,
+                                in.readInt(RemoteViewsProto.ViewPaddingAction.RIGHT));
+                        break;
+                    case (int) RemoteViewsProto.ViewPaddingAction.TOP:
+                        values.put(RemoteViewsProto.ViewPaddingAction.TOP,
+                                in.readInt(RemoteViewsProto.ViewPaddingAction.TOP));
+                        break;
+                    case (int) RemoteViewsProto.ViewPaddingAction.BOTTOM:
+                        values.put(RemoteViewsProto.ViewPaddingAction.BOTTOM,
+                                in.readInt(RemoteViewsProto.ViewPaddingAction.BOTTOM));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values, new long[]{RemoteViewsProto.ViewPaddingAction.VIEW_ID});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.ViewPaddingAction.VIEW_ID);
+                return new ViewPaddingAction(viewId,
+                        (int) values.get(RemoteViewsProto.ViewPaddingAction.LEFT, 0),
+                        (int) values.get(RemoteViewsProto.ViewPaddingAction.TOP, 0),
+                        (int) values.get(RemoteViewsProto.ViewPaddingAction.RIGHT, 0),
+                        (int) values.get(RemoteViewsProto.ViewPaddingAction.BOTTOM, 0));
+            };
         }
     }
 
@@ -5241,6 +5671,69 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_VIEW_OUTLINE_RADIUS_TAG;
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return true;
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            final long token = out.start(
+                    RemoteViewsProto.Action.SET_VIEW_OUTLINE_PREFERRED_RADIUS_ACTION);
+            out.write(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VIEW_ID,
+                    appResources.getResourceName(mViewId));
+            out.write(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE_TYPE, mValueType);
+            out.write(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE, mValue);
+            out.end(token);
+        }
+
+        public static PendingResources<Action> createFromProto(ProtoInputStream in)
+                throws Exception {
+            final LongSparseArray<Object> values = new LongSparseArray<>();
+
+            final long token = in.start(
+                    RemoteViewsProto.Action.SET_VIEW_OUTLINE_PREFERRED_RADIUS_ACTION);
+            while (in.nextField() != NO_MORE_FIELDS) {
+                switch (in.getFieldNumber()) {
+                    case (int) RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VIEW_ID:
+                        values.put(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VIEW_ID,
+                                in.readString(
+                                        RemoteViewsProto
+                                                .SetViewOutlinePreferredRadiusAction.VIEW_ID));
+                        break;
+                    case (int) RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE_TYPE:
+                        values.put(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE_TYPE,
+                                in.readInt(
+                                        RemoteViewsProto
+                                                .SetViewOutlinePreferredRadiusAction.VALUE_TYPE));
+                        break;
+                    case (int) RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE:
+                        values.put(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE,
+                                in.readInt(
+                                        RemoteViewsProto
+                                                .SetViewOutlinePreferredRadiusAction.VALUE));
+                        break;
+                    default:
+                        Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                                + ProtoUtils.currentFieldToString(in));
+                }
+            }
+            in.end(token);
+
+            checkContainsKeys(values,
+                    new long[]{RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VIEW_ID,
+                            RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE_TYPE});
+
+            return (context, resources, rootData, depth) -> {
+                int viewId = getAsIdentifier(resources, values,
+                        RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VIEW_ID);
+                return new SetViewOutlinePreferredRadiusAction(viewId,
+                        (int) values.get(RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE,
+                                0), (int) values.get(
+                        RemoteViewsProto.SetViewOutlinePreferredRadiusAction.VALUE_TYPE));
+            };
+        }
     }
 
     /**
@@ -5324,6 +5817,46 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_DRAW_INSTRUCTION_TAG;
         }
+
+        @Override
+        public boolean canWriteToProto() {
+            return drawDataParcel();
+        }
+
+        @Override
+        public void writeToProto(ProtoOutputStream out, Context context, Resources appResources) {
+            if (!drawDataParcel()) return;
+            final long token = out.start(RemoteViewsProto.Action.SET_DRAW_INSTRUCTION_ACTION);
+            if (mInstructions != null) {
+                for (byte[] bytes : mInstructions.mInstructions) {
+                    out.write(RemoteViewsProto.SetDrawInstructionAction.INSTRUCTIONS, bytes);
+                }
+            }
+            out.end(token);
+        }
+    }
+
+    @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
+    private PendingResources<Action> createSetDrawInstructionActionFromProto(ProtoInputStream in)
+            throws Exception {
+        List<byte[]> instructions = new ArrayList<byte[]>();
+
+        final long token = in.start(RemoteViewsProto.Action.SET_DRAW_INSTRUCTION_ACTION);
+        while (in.nextField() != NO_MORE_FIELDS) {
+            switch (in.getFieldNumber()) {
+                case (int) RemoteViewsProto.SetDrawInstructionAction.INSTRUCTIONS:
+                    instructions.add(
+                            in.readBytes(RemoteViewsProto.SetDrawInstructionAction.INSTRUCTIONS));
+                    break;
+                default:
+                    Log.w(LOG_TAG, "Unhandled field while reading RemoteViews proto!\n"
+                            + ProtoUtils.currentFieldToString(in));
+            }
+        }
+        in.end(token);
+
+        return (context, resources, rootData, depth) -> new SetDrawInstructionAction(
+                new DrawInstructions.Builder(instructions).build());
     }
 
     /**
@@ -9604,11 +10137,19 @@ public class RemoteViews implements Parcelable, Filter {
             }
             if (ref.mMode == MODE_NORMAL) {
                 rv.setIdealSize(ref.mIdealSize);
+                boolean hasDrawInstructionAction = false;
                 for (PendingResources<Action> pendingAction : ref.mActions) {
                     Action action = pendingAction.create(appContext, appResources, rootData, depth);
                     if (action != null) {
+                        if (action instanceof SetDrawInstructionAction) {
+                            hasDrawInstructionAction = true;
+                        }
                         rv.addAction(action);
                     }
+                }
+                if (rv.mHasDrawInstructions && !hasDrawInstructionAction) {
+                    throw new InvalidProtoException(
+                            "RemoteViews proto is missing DrawInstructions");
                 }
                 return rv;
             } else if (ref.mMode == MODE_HAS_SIZED_REMOTEVIEWS) {
@@ -9685,6 +10226,23 @@ public class RemoteViews implements Parcelable, Filter {
                 return rv.createSetRemoteCollectionItemListAdapterActionFromProto(in);
             case (int) RemoteViewsProto.Action.SET_RIPPLE_DRAWABLE_COLOR_ACTION:
                 return SetRippleDrawableColor.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_VIEW_OUTLINE_PREFERRED_RADIUS_ACTION:
+                return SetViewOutlinePreferredRadiusAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.TEXT_VIEW_DRAWABLE_ACTION:
+                return TextViewDrawableAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.TEXT_VIEW_SIZE_ACTION:
+                return TextViewSizeAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.VIEW_GROUP_ADD_ACTION:
+                return rv.createViewGroupActionAddFromProto(in);
+            case (int) RemoteViewsProto.Action.VIEW_GROUP_REMOVE_ACTION:
+                return ViewGroupActionRemove.createFromProto(in);
+            case (int) RemoteViewsProto.Action.VIEW_PADDING_ACTION:
+                return ViewPaddingAction.createFromProto(in);
+            case (int) RemoteViewsProto.Action.SET_DRAW_INSTRUCTION_ACTION:
+                if (!drawDataParcel()) {
+                    return null;
+                }
+                return rv.createSetDrawInstructionActionFromProto(in);
             default:
                 throw new RuntimeException("Unhandled field while reading Action proto!\n"
                         + ProtoUtils.currentFieldToString(in));

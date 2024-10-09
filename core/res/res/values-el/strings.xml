@@ -507,7 +507,7 @@
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Επιτρέπει στην εφαρμογή την τροποποίηση καθολικών ρυθμίσεων ήχου, όπως η ένταση και ποιο ηχείο χρησιμοποιείται για έξοδο."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"εγγράφει ήχο"</string>
     <string name="permdesc_recordAudio" msgid="5857246765327514062">"Αυτή η εφαρμογή μπορεί να εγγράφει ήχο μέσω του μικροφώνου, όταν τη χρησιμοποιείτε."</string>
-    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"εγγραφή ήχου στο παρασκήνιο"</string>
+    <string name="permlab_recordBackgroundAudio" msgid="5891032812308878254">"ηχογράφηση στο παρασκήνιο"</string>
     <string name="permdesc_recordBackgroundAudio" msgid="1992623135737407516">"Αυτή η εφαρμογή μπορεί να εγγράφει ήχο μέσω του μικροφώνου, ανά πάσα στιγμή."</string>
     <string name="permlab_detectScreenCapture" msgid="4447042362828799433">"ανίχνευση καταγραφών οθόνης που περιέχουν τα παράθυρα της εφαρμογής"</string>
     <string name="permdesc_detectScreenCapture" msgid="3485784917960342284">"Η εφαρμογή θα λάβει ειδοποίηση όταν ληφθεί ένα στιγμιότυπο οθόνης ενώ βρίσκεται σε χρήση."</string>
@@ -541,7 +541,7 @@
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"προβολή και έλεγχος κλήσεων μέσω του συστήματος."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Επιτρέπει στην εφαρμογή να βλέπει και να ελέγχει τις εισερχόμενες κλήσεις στη συσκευή. Αυτό περιλαμβάνει πληροφορίες όπως τους αριθμούς κλήσεων για τις κλήσεις και την κατάσταση των κλήσεων."</string>
     <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"εξαίρεση από περιορισμούς εγγραφής ήχου"</string>
-    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Εξαιρέστε την εφαρμογή από περιορισμούς για την εγγραφή ήχου."</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Εξαιρέστε την εφαρμογή από περιορισμούς για την ηχογράφηση."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"συνέχιση κλήσης από άλλη συσκευή"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ανάγνωση αριθμών τηλεφώνου"</string>
@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Θα υπάρχει δόνηση για κλήσεις και ειδοποιήσεις"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Οι κλήσεις και οι ειδοποιήσεις θα τεθούν σε παύση"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Αλλαγές στο σύστημα"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Μην ενοχλείτε"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Νέο: Η λειτουργία \"Μην ενοχλείτε\" αποκρύπτει ειδοποιήσεις"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Πατήστε για να μάθετε περισσότερα και να κάνετε αλλαγές."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Έλεγχος ρυθμίσεων ειδοποιήσεων"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Από το Android 13 και έπειτα, οι εφαρμογές που εγκαθιστάτε θα χρειάζονται την άδειά σας για την αποστολή ειδοποιήσεων. Πατήστε για να αλλάξετε αυτή την άδεια για υπάρχουσες εφαρμογές."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Υπενθύμιση αργότερα"</string>

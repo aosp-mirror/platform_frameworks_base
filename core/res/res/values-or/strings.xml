@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଭାଇବ୍ରେଟ୍ ହେବ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ନିଃଶବ୍ଦ କରିଦିଆଯିବ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"ସିଷ୍ଟମ୍‌ରେ ପରିବର୍ତ୍ତନ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ନୂଆ: \"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବା ଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ଅଧିକ ଜାଣିବାକୁ ଟ୍ୟାପ୍‌ କରନ୍ତୁ ଏବଂ ବଦଳାନ୍ତୁ।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"ବିଜ୍ଞପ୍ତି ସେଟିଂସକୁ ସମୀକ୍ଷା କରନ୍ତୁ"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13ଠାରୁ, ଆପଣ ଇନଷ୍ଟଲ କରୁଥିବା ଆପ୍ସ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ପଠାଇବା ପାଇଁ ଆପଣଙ୍କ ଅନୁମତି ଆବଶ୍ୟକ କରେ। ପୂର୍ବରୁ ଥିବା ଆପ୍ସ ପାଇଁ ଏହି ଅନୁମତିକୁ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"ମୋତେ ପରେ ରିମାଇଣ୍ଡ କର"</string>

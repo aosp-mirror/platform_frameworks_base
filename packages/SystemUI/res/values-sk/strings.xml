@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"Zapnuté"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"Zapnuté • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"Vypnuté"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"Nastaviť"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Správa v nastaveniach"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Žiadne aktívne režimy}=1{{mode} je aktívny}few{# režimy sú aktívne}many{# modes are active}other{# režimov je aktívnych}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky, pripomenutia, udalosti a volajúci, ktorých určíte. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzácie"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazať všetky tiché upozornenia"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Upozornenia sú pozastavené režimom bez vyrušení"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Žiadne upozornenia}=1{Upozornenia boli pozastavené režimom {mode}}=2{Upozornenia boli pozastavené režimom {mode} a jedným ďalším}few{Upozornenia boli pozastavené režimom {mode} a # ďalšími}many{Notifications paused by {mode} and # other modes}other{Upozornenia boli pozastavené režimom {mode} a # ďalšími}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Spustiť"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Žiadne upozornenia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Žiadne nové upozornenia"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Zobraziť režim ukážky"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Budík"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"Režim <xliff:g id="MODENAME">%1$s</xliff:g> je zapnutý"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Peňaženka"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Nastavte si všetko potrebné na rýchlejšie a bezpečnejšie nákupy telefónom"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Zobraziť všetko"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Naučte sa gestá touchpadu"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Prechádzajte pomocou klávesnice a touchpadu"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Naučte sa gestá touchpadu, klávesové skratky a ďalšie funkcie"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"Gesto prechodu späť"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"Gesto prechodu domov"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Zobrazenie nedávnych aplikácií"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Hotovo"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Prejsť späť"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"Ak chcete prejsť späť, potiahnite kdekoľvek na touchpade troma prstami doľava alebo doprava.\n\nMôžete použiť aj klávesovú skratku, teda akčný kláves + ESC."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"Skvelé!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Dokončili ste gesto na prechod späť."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Prechod na plochu"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"Na plochu môžete kedykoľvek prejsť potiahnutím troma prstami zdola obrazovky."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"Výborne!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"Dokončili ste gesto na prechod na plochu."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Zobrazenie nedávnych aplikácií"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"Potiahnite troma prstami na touchpade nahor a pridržte ich."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Skvelé!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Dokončili ste gesto na zobrazenie nedávnych aplikácií."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"Akčný kláves"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"Ak chcete získať prístup k aplikáciám, stlačte na klávesnici akčný kláves."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"Blahoželáme!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"Dokončili ste gesto akčného klávesa.\n\nStlačením kombinácie akčný kláves + / zobrazíte všetky skratky, ktoré máte k dispozícii"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Podsvietenie klávesnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. úroveň z %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Ovládanie domácnosti"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Ak si chcete zobraziť všetky aplikácie, stlačte na klávesnici akčný kláves"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Zamaskované"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Zobrazíte odomknutím"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"Kontextová náuka"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"Prechádzajte späť pomocou touchpadu"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"Potiahnite troma prstami doľava alebo doprava. Viac o gestách sa dozviete klepnutím."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"Vráťte sa na plochu pomocou touchpadu"</string>
