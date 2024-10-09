@@ -161,12 +161,12 @@ public class MultiVibratorInfoTest {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(1f)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1, null))
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, 1, 1, null))
                 .build();
         VibratorInfo secondInfo = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(2f)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(2, 2, 2, null))
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(2, 2, 2, null))
                 .build();
 
         VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
@@ -191,13 +191,13 @@ public class MultiVibratorInfoTest {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(10f)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                         /* resonantFrequencyHz= */ 11, 10, 0.5f, null))
                 .build();
         VibratorInfo secondInfo = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
                 .setQFactor(10f)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(
                         /* resonantFrequencyHz= */ 11, 5, 1, null))
                 .build();
 
@@ -207,20 +207,20 @@ public class MultiVibratorInfoTest {
         assertEquals(10f, info.getQFactor(), TEST_TOLERANCE);
         assertEquals(11f, info.getResonantFrequencyHz(), TEST_TOLERANCE);
         // No frequency range defined.
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertTrue(info.getFrequencyProfileLegacy().isEmpty());
         assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
     }
 
     @Test
-    public void testGetFrequencyProfile_differentResonantFrequencyOrResolutions_returnsEmpty() {
+    public void testGetFrequencyProfileLegacy_differentResonantFreqOrResolutions_returnsEmpty() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo differentResonantFrequency = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(2, 1, 1,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(2, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
@@ -230,7 +230,7 @@ public class MultiVibratorInfoTest {
 
         VibratorInfo differentFrequencyResolution = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 2,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, 1, 2,
                         new float[] { 0, 1 }))
                 .build();
         info = new MultiVibratorInfo(/* id= */ 1,
@@ -240,15 +240,15 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
-    public void testGetFrequencyProfile_missingValues_returnsEmpty() {
+    public void testGetFrequencyProfileLegacy_missingValues_returnsEmpty() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
         VibratorInfo missingResonantFrequency = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(Float.NaN, 1, 1,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(Float.NaN, 1, 1,
                         new float[] { 0, 1 }))
                 .build();
 
@@ -259,7 +259,7 @@ public class MultiVibratorInfoTest {
 
         VibratorInfo missingMinFrequency = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, Float.NaN, 1,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, Float.NaN, 1,
                         new float[] { 0, 1 }))
                 .build();
         info = new MultiVibratorInfo(/* id= */ 1,
@@ -269,7 +269,7 @@ public class MultiVibratorInfoTest {
 
         VibratorInfo missingFrequencyResolution = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, Float.NaN,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, 1, Float.NaN,
                         new float[] { 0, 1 }))
                 .build();
         info = new MultiVibratorInfo(/* id= */ 1,
@@ -279,7 +279,7 @@ public class MultiVibratorInfoTest {
 
         VibratorInfo missingMaxAmplitudes = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(1, 1, 1, null))
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(1, 1, 1, null))
                 .build();
         info = new MultiVibratorInfo(/* id= */ 1,
                 new VibratorInfo[]{firstInfo, missingMaxAmplitudes});
@@ -288,20 +288,20 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
-    public void testGetFrequencyProfile_unalignedMaxAmplitudes_returnsEmpty() {
+    public void testGetFrequencyProfileLegacy_unalignedMaxAmplitudes_returnsEmpty() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10, 0.5f,
                         new float[] { 0, 1, 1, 0 }))
                 .build();
         VibratorInfo unalignedMinFrequency = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.1f, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10.1f, 0.5f,
                         new float[] { 0, 1, 1, 0 }))
                 .build();
         VibratorInfo thirdVibrator = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10.5f, 0.5f,
                         new float[] { 0, 1, 1, 0 }))
                 .build();
 
@@ -312,20 +312,20 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
-    public void testGetFrequencyProfile_alignedProfiles_returnsIntersection() {
+    public void testGetFrequencyProfileLegacy_alignedProfiles_returnsIntersection() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10, 0.5f,
                         new float[] { 0.5f, 1, 1, 0.5f }))
                 .build();
         VibratorInfo secondInfo = new VibratorInfo.Builder(/* id= */ 2)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10.5f, 0.5f,
                         new float[] { 1, 1, 1 }))
                 .build();
         VibratorInfo thirdVibrator = new VibratorInfo.Builder(/* id= */ 3)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10.5f, 0.5f,
                         new float[] { 0.8f, 1, 0.8f, 0.5f }))
                 .build();
 
@@ -333,21 +333,23 @@ public class MultiVibratorInfoTest {
                 new VibratorInfo[]{firstInfo, secondInfo, thirdVibrator});
 
         assertEquals(
-                new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f, new float[] { 0.8f, 1, 0.5f }),
-                info.getFrequencyProfile());
+                new VibratorInfo.FrequencyProfileLegacy(11, 10.5f, 0.5f,
+                        new float[]{0.8f, 1, 0.5f}),
+                info.getFrequencyProfileLegacy());
         assertEquals(true, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
 
         // Third vibrator without frequency control capability.
         thirdVibrator = new VibratorInfo.Builder(/* id= */ 3)
-                .setFrequencyProfile(new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f,
+                .setFrequencyProfileLegacy(new VibratorInfo.FrequencyProfileLegacy(11, 10.5f, 0.5f,
                         new float[] { 0.8f, 1, 0.8f, 0.5f }))
                 .build();
         info = new MultiVibratorInfo(/* id= */ 1,
                 new VibratorInfo[]{firstInfo, secondInfo, thirdVibrator});
 
         assertEquals(
-                new VibratorInfo.FrequencyProfile(11, 10.5f, 0.5f, new float[] { 0.8f, 1, 0.5f }),
-                info.getFrequencyProfile());
+                new VibratorInfo.FrequencyProfileLegacy(11, 10.5f, 0.5f,
+                        new float[]{0.8f, 1, 0.5f}),
+                info.getFrequencyProfileLegacy());
         assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
     }
 
@@ -355,7 +357,7 @@ public class MultiVibratorInfoTest {
      * Asserts that the frequency profile is empty, and therefore frequency control isn't supported.
      */
     private void assertEmptyFrequencyProfileAndControl(VibratorInfo info) {
-        assertTrue(info.getFrequencyProfile().isEmpty());
+        assertTrue(info.getFrequencyProfileLegacy().isEmpty());
         assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
     }
 }

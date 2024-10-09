@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"開啟"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"開 • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"關閉"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"設定"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"在「設定」中管理"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{沒有啟用模式}=1{已啟用{mode}}other{已啟用 # 個模式}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"你不會受到聲音和震動騷擾 (鬧鐘、提醒、活動和你指定的來電者鈴聲除外)。當你選擇播放音樂、影片和遊戲等，仍可以聽到該內容的聲音。"</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"對話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"清除所有靜音通知"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"「請勿騷擾」模式已將通知暫停"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{沒有通知}=1{{mode}已暫停通知}=2{{mode}和另外一個模式已暫停通知}other{{mode}和另外 # 個模式已暫停通知}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"立即開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"沒有通知"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"沒有新通知"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"顯示示範模式"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"以太網"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"鬧鐘"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g>開咗"</string>
     <string name="wallet_title" msgid="5369767670735827105">"錢包"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"完成設定後即可透過手機更快速安全地購物"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"顯示全部"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"瞭解觸控板手勢"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"使用鍵盤和觸控板導覽"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"瞭解觸控板手勢、鍵盤快速鍵等等"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"返去手勢"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"主畫面手勢"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"查看最近使用的應用程式"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完成"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"返回"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"用三隻手指在觸控板上任何一處向左或向右滑動即可返回。\n\n你也可使用鍵盤快速鍵 Action 鍵 + Esc 鍵執行此操作。"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"太好了！"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"你已完成「返回」手勢的教學課程。"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"返回主畫面"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"只要用三隻手指從螢幕底部向上滑動，隨時可以返回主畫面。"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"做得好！"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"你已完成「返回主畫面」手勢的教學課程。"</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"查看最近使用的應用程式"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"用三隻手指在觸控板向上滑動並按住。"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"做得好！"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"你已完成「查看最近使用的應用程式」手勢的教學課程。"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"快捷操作鍵"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"如要存取應用程式，請在鍵盤上按下快捷操作鍵。"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"恭喜！"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"你已完成「快捷操作鍵」手勢的教學課程。\n\n按下動作 + / 鍵即可顯示所有可使用的快速鍵。"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"鍵盤背光"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"第 %1$d 級，共 %2$d 級"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"智能家居"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"如要查看所有應用程式，請在鍵盤上按下快捷操作鍵"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"已剔除"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"解鎖即可查看"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"內容教學"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"使用觸控板返回"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"用三隻手指向左或向右滑動。輕按即可瞭解更多手勢。"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"使用觸控板返回主畫面"</string>
@@ -1445,7 +1459,7 @@
     <string name="all_apps_edu_notification_title" msgid="372262997265569063">"使用鍵盤查看所有應用程式"</string>
     <string name="all_apps_edu_notification_content" msgid="3255070575694025585">"隨時按下快捷操作鍵。輕按即可瞭解更多手勢。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_title" msgid="910988771011857460">"亮度滑桿現已加入超暗功能"</string>
-    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"而家只要將亮度校得越低，螢幕就會更加暗。\n\n由於亮度滑桿而家加入咗呢個功能，所以系統將會移除超暗功能捷徑。"</string>
+    <string name="accessibility_deprecate_extra_dim_dialog_description" msgid="4453123359258743230">"現在，只要調校亮度就能將螢幕變得超暗。\n\n由於超暗功能已加到亮度滑桿，其功能捷徑將被移除。"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_button" msgid="3947537827396916005">"移除超暗功能捷徑"</string>
     <string name="accessibility_deprecate_extra_dim_dialog_toast" msgid="165474092660941104">"超暗功能捷徑已移除"</string>
     <string name="qs_edit_mode_category_connectivity" msgid="4559726936546032672">"裝置連接"</string>

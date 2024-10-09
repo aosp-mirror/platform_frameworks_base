@@ -43,14 +43,14 @@ class RecentAppsGestureMonitor(
                 if (isThreeFingerTouchpadSwipe(event)) {
                     xStart = event.x
                     yStart = event.y
-                    gestureStateChangedCallback(GestureState.IN_PROGRESS)
+                    gestureStateChangedCallback(GestureState.InProgress())
                 }
             }
             MotionEvent.ACTION_UP -> {
                 if (isThreeFingerTouchpadSwipe(event) && isRecentAppsGesture(event)) {
-                    gestureStateChangedCallback(GestureState.FINISHED)
+                    gestureStateChangedCallback(GestureState.Finished)
                 } else {
-                    gestureStateChangedCallback(GestureState.NOT_STARTED)
+                    gestureStateChangedCallback(GestureState.NotStarted)
                 }
                 velocityTracker.resetTracking()
             }

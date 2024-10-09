@@ -27,6 +27,9 @@ android_test {
         "servicestests-utils",
         "platform-test-annotations",
         "flag-junit",
+        "statsdprotolite",
+        "StatsdTestUtils",
+        "platformprotoslite",
     ],
 
     libs: [
@@ -68,6 +71,9 @@ android_ravenwood_test {
         "androidx.test.uiautomator_uiautomator",
         "modules-utils-binary-xml",
         "flag-junit",
+        "statsdprotolite",
+        "StatsdTestUtils",
+        "platformprotoslite",
     ],
     srcs: [
         "src/com/android/server/power/stats/*.java",

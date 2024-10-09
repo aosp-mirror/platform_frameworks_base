@@ -1256,7 +1256,8 @@ public class MediaProjectionManagerServiceTest {
                     Manifest.permission.BYPASS_ROLE_QUALIFICATION);
 
             roleManager.setBypassingRoleQualification(true);
-            roleManager.addRoleHolderAsUser(role, packageName, /*  flags = */ 0, user,
+            roleManager.addRoleHolderAsUser(role, packageName,
+                    /* flags= */ RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP, user,
                     mContext.getMainExecutor(), success -> {
                         if (success) {
                             latch.countDown();
@@ -1271,9 +1272,9 @@ public class MediaProjectionManagerServiceTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
-            roleManager.removeRoleHolderAsUser(role, packageName, 0, user,
-                    mContext.getMainExecutor(), (aBool) -> {
-                    });
+            roleManager.removeRoleHolderAsUser(role, packageName,
+                    /* flags= */ RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP, user,
+                    mContext.getMainExecutor(), (aBool) -> {});
             roleManager.setBypassingRoleQualification(false);
             instrumentation.getUiAutomation()
                     .dropShellPermissionIdentity();

@@ -18,7 +18,7 @@ package com.android.wm.shell.windowdecor;
 
 import static android.view.InputDevice.SOURCE_MOUSE;
 import static android.view.InputDevice.SOURCE_TOUCHSCREEN;
-import static android.window.flags.DesktopModeFlags.ENABLE_WINDOWING_EDGE_DRAG_RESIZE;
+import static android.window.DesktopModeFlags.ENABLE_WINDOWING_EDGE_DRAG_RESIZE;
 
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;

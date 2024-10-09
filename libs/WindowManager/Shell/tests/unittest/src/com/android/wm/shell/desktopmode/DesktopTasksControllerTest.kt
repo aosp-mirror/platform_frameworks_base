@@ -2466,6 +2466,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
   }
 
   @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun removeDesktop_multipleTasks_removesAll() {
+    val task1 = setUpFreeformTask()
+    val task2 = setUpFreeformTask()
+    val task3 = setUpFreeformTask()
+    taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
+
+    controller.removeDesktop(displayId = DEFAULT_DISPLAY)
+
+    val wct = getLatestWct(TRANSIT_CLOSE)
+    assertThat(wct.hierarchyOps).hasSize(3)
+    wct.assertRemoveAt(index = 0, task1.token)
+    wct.assertRemoveAt(index = 1, task2.token)
+    wct.assertRemoveAt(index = 2, task3.token)
+  }
+
+  @Test
+  @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
+  fun removeDesktop_multipleTasksWithBackgroundTask_removesAll() {
+    val task1 = setUpFreeformTask()
+    val task2 = setUpFreeformTask()
+    val task3 = setUpFreeformTask()
+    taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
+    whenever(shellTaskOrganizer.getRunningTaskInfo(task3.taskId)).thenReturn(null)
+
+    controller.removeDesktop(displayId = DEFAULT_DISPLAY)
+
+    val wct = getLatestWct(TRANSIT_CLOSE)
+    assertThat(wct.hierarchyOps).hasSize(2)
+    wct.assertRemoveAt(index = 0, task1.token)
+    wct.assertRemoveAt(index = 1, task2.token)
+    verify(recentTasksController).removeBackgroundTask(task3.taskId)
+  }
+
+  @Test
   @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
   fun dragToDesktop_landscapeDevice_resizable_undefinedOrientation_defaultLandscapeBounds() {
     val spyController = spy(controller)

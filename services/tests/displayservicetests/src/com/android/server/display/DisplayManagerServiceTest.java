@@ -50,6 +50,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -3443,6 +3444,31 @@ public class DisplayManagerServiceTest {
         updateDisplayDeviceInfo(displayManager, displayDevice, displayDeviceInfo2);
 
         verify(dpc).onDisplayChanged(/* hbmMetadata= */ null, Layout.NO_LEAD_DISPLAY);
+    }
+
+    @Test
+    public void testCreateAndReleaseVirtualDisplay_CalledWithTheSameUid() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mShortMockedInjector);
+        registerDefaultDisplays(displayManager);
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+        VirtualDisplayConfig config = mock(VirtualDisplayConfig.class);
+        Surface surface = mock(Surface.class);
+        when(config.getSurface()).thenReturn(surface);
+        int callingUid = Binder.getCallingUid();
+        IBinder binder = mock(IBinder.class);
+        when(mMockAppToken.asBinder()).thenReturn(binder);
+        String uniqueId = "123";
+        when(config.getUniqueId()).thenReturn(uniqueId);
+
+        bs.createVirtualDisplay(config, mMockAppToken, /* projection= */ null, PACKAGE_NAME);
+        verify(mMockVirtualDisplayAdapter).createVirtualDisplayLocked(eq(mMockAppToken),
+                /* projection= */ isNull(), eq(callingUid), eq(PACKAGE_NAME),
+                eq("virtual:" + PACKAGE_NAME + ":" + uniqueId), eq(surface), /* flags= */ anyInt(),
+                eq(config));
+
+        bs.releaseVirtualDisplay(mMockAppToken);
+        verify(mMockVirtualDisplayAdapter).releaseVirtualDisplayLocked(binder, callingUid);
     }
 
     private void initDisplayPowerController(DisplayManagerInternal localService) {

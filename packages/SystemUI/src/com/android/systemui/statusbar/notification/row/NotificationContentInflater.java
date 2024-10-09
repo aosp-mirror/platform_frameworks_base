@@ -360,11 +360,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         if ((contentViews & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_CONTRACTED);
         }
-        if (AsyncHybridViewInflation.isEnabled()
+        if (LockscreenOtpRedaction.isEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE) != 0) {
             row.getPublicLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }
-        if (LockscreenOtpRedaction.isEnabled()
+        if (AsyncHybridViewInflation.isEnabled()
                 && (contentViews & FLAG_CONTENT_VIEW_SINGLE_LINE) != 0) {
             row.getPrivateLayout().removeContentInactiveRunnable(VISIBLE_TYPE_SINGLELINE);
         }

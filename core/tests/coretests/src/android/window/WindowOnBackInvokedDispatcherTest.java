@@ -586,13 +586,13 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test(expected = IllegalArgumentException.class)
     @RequiresFlagsDisabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_registrationFailsWithoutFlaggedApiEnabled() {
+    public void testObserverCallback_registrationFailsWithoutFlaggedApiEnabled() {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback2);
     }
 
     @Test
     @RequiresFlagsEnabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_invokedWithSystemCallback() throws RemoteException {
+    public void testObserverCallback_invokedWithSystemCallback() throws RemoteException {
         mDispatcher.registerSystemOnBackInvokedCallback(mCallback1);
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback2);
 
@@ -607,7 +607,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
         callbackInfo.getCallback().onBackProgressed(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackProgressed(any());
+        verify(mCallback1, atLeast(1)).onBackProgressed(any());
         verify(mCallback2, never()).onBackProgressed(any());
 
         callbackInfo.getCallback().onBackCancelled();
@@ -625,7 +625,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_notInvokedWithNonSystemCallback() throws RemoteException {
+    public void testObserverCallback_notInvokedWithNonSystemCallback() throws RemoteException {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_DEFAULT, mCallback1);
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback2);
 
@@ -640,7 +640,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
         callbackInfo.getCallback().onBackProgressed(mBackEvent);
         waitForIdle();
-        verify(mCallback1).onBackProgressed(any());
+        verify(mCallback1, atLeast(1)).onBackProgressed(any());
         verify(mCallback2, never()).onBackProgressed(any());
 
         callbackInfo.getCallback().onBackCancelled();
@@ -658,7 +658,7 @@ public class WindowOnBackInvokedDispatcherTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_PREDICTIVE_BACK_PRIORITY_SYSTEM_NAVIGATION_OBSERVER)
-    public void testNoUiCallback_reregistrations() {
+    public void testObserverCallback_reregistrations() {
         mDispatcher.registerOnBackInvokedCallback(PRIORITY_SYSTEM_NAVIGATION_OBSERVER, mCallback1);
         assertCallbacksSize(/* default */ 0, /* overlay */ 0, /* observer */ 1);
         assertEquals(mCallback1, mDispatcher.mSystemNavigationObserverCallback);

@@ -213,10 +213,6 @@ class ElementTest {
                         from(SceneA, to = SceneB) { spec = tween }
                         from(SceneB, to = SceneC) { spec = tween }
                     },
-
-                    // Disable interruptions so that the current transition is directly removed
-                    // when starting a new one.
-                    enableInterruptions = false,
                 )
             }
 
@@ -243,7 +239,12 @@ class ElementTest {
                 onElement(TestElements.Bar).assertExists()
 
                 // Start transition from SceneB to SceneC
-                rule.runOnUiThread { state.setTargetScene(SceneC, coroutineScope) }
+                rule.runOnUiThread {
+                    // We snap to scene B so that the transition A => B is removed from the list of
+                    // transitions.
+                    state.snapToScene(SceneB)
+                    state.setTargetScene(SceneC, coroutineScope)
+                }
             }
 
             at(3 * frameDuration) { onElement(TestElements.Bar).assertIsNotDisplayed() }

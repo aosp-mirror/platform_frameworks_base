@@ -234,10 +234,6 @@ android_library {
         // *.kt sources are inside a filegroup.
         "kotlin-annotations",
     ],
-    required: [
-        "wmshell.protolog.json.gz",
-        "wmshell.protolog.pb",
-    ],
     flags_packages: [
         "com_android_wm_shell_flags",
     ],
@@ -245,4 +241,12 @@ android_library {
     manifest: "AndroidManifest.xml",
     plugins: ["dagger2-compiler"],
     use_resource_processor: true,
+}
+
+java_defaults {
+    name: "wmshell_defaults",
+    required: [
+        "wmshell.protolog.json.gz",
+        "wmshell.protolog.pb",
+    ],
 }

@@ -29,9 +29,10 @@ import com.android.systemui.keyguard.ui.viewmodel.keyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import java.util.Optional
 import org.mockito.Mockito.spy
+import org.mockito.kotlin.mock
 
 val Kosmos.keyguardClockSection: ClockSection by
     Kosmos.Fixture {
@@ -43,6 +44,7 @@ val Kosmos.keyguardClockSection: ClockSection by
             blueprintInteractor = { keyguardBlueprintInteractor },
             rootViewModel = keyguardRootViewModel,
             aodBurnInViewModel = aodBurnInViewModel,
+            largeScreenHeaderHelperLazy = { mock<LargeScreenHeaderHelper>() },
         )
     }
 

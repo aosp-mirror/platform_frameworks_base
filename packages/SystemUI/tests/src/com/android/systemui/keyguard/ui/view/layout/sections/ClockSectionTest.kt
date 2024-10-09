@@ -39,13 +39,13 @@ import com.android.systemui.keyguard.ui.viewmodel.keyguardSmartspaceViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
+import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.policy.fakeConfigurationController
 import com.android.systemui.statusbar.ui.fakeSystemBarUtilsProxy
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,6 +57,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -122,6 +123,7 @@ class ClockSectionTest : SysuiTestCase() {
                     { keyguardBlueprintInteractor },
                     keyguardRootViewModel,
                     aodBurnInViewModel,
+                    largeScreenHeaderHelperLazy = { mock<LargeScreenHeaderHelper>() },
                 )
         }
     }

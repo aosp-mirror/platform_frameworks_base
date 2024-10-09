@@ -84,19 +84,25 @@ import java.util.List;
  * @attr ref android.R.styleable#AccessibilityService_accessibilityEventTypes
  * @attr ref android.R.styleable#AccessibilityService_accessibilityFeedbackType
  * @attr ref android.R.styleable#AccessibilityService_accessibilityFlags
+ * @attr ref android.R.styleable#AccessibilityService_animatedImageDrawable
+ * @attr ref android.R.styleable#AccessibilityService_canControlMagnification
+ * @attr ref android.R.styleable#AccessibilityService_canPerformGestures
  * @attr ref android.R.styleable#AccessibilityService_canRequestFilterKeyEvents
+ * @attr ref android.R.styleable#AccessibilityService_canRequestFingerprintGestures
  * @attr ref android.R.styleable#AccessibilityService_canRequestTouchExplorationMode
  * @attr ref android.R.styleable#AccessibilityService_canRetrieveWindowContent
- * @attr ref android.R.styleable#AccessibilityService_intro
+ * @attr ref android.R.styleable#AccessibilityService_canTakeScreenshot
  * @attr ref android.R.styleable#AccessibilityService_description
- * @attr ref android.R.styleable#AccessibilityService_summary
+ * @attr ref android.R.styleable#AccessibilityService_htmlDescription
+ * @attr ref android.R.styleable#AccessibilityService_interactiveUiTimeout
+ * @attr ref android.R.styleable#AccessibilityService_intro
+ * @attr ref android.R.styleable#AccessibilityService_isAccessibilityTool
+ * @attr ref android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
  * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
  * @attr ref android.R.styleable#AccessibilityService_packageNames
  * @attr ref android.R.styleable#AccessibilityService_settingsActivity
+ * @attr ref android.R.styleable#AccessibilityService_summary
  * @attr ref android.R.styleable#AccessibilityService_tileService
- * @attr ref android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
- * @attr ref android.R.styleable#AccessibilityService_interactiveUiTimeout
- * @attr ref android.R.styleable#AccessibilityService_canTakeScreenshot
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager

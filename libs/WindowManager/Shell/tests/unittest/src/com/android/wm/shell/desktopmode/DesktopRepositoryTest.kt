@@ -940,6 +940,23 @@ class DesktopRepositoryTest : ShellTestCase() {
         assertThat(repo.isTaskInFullImmersiveState(taskId = 2)).isTrue()
     }
 
+    @Test
+    fun removeDesktop_multipleTasks_removesAll() {
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addActiveTask(displayId = DEFAULT_DISPLAY, taskId = 3)
+        // The front-most task will be the one added last through `addOrMoveFreeformTaskToTop`
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 3)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 2)
+        repo.addOrMoveFreeformTaskToTop(displayId = DEFAULT_DISPLAY, taskId = 1)
+        repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
+
+        val tasksBeforeRemoval = repo.removeDesktop(displayId = DEFAULT_DISPLAY)
+
+        assertThat(tasksBeforeRemoval).containsExactly(1, 2, 3).inOrder()
+        assertThat(repo.getActiveTasks(displayId = DEFAULT_DISPLAY)).isEmpty()
+    }
+
     class TestListener : DesktopRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0
         var activeChangesOnSecondaryDisplay = 0

@@ -108,7 +108,8 @@ public class VeiledResizeTaskPositioner implements TaskPositioner, Transitions.T
                     mDesktopWindowDecoration.mContext, mHandler, CUJ_DESKTOP_MODE_RESIZE_WINDOW);
             if (!mDesktopWindowDecoration.mTaskInfo.isFocused) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true);
+                wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true /* onTop */,
+                        true /* includingParents */);
                 mTaskOrganizer.applyTransaction(wct);
             }
         }
