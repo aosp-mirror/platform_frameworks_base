@@ -328,6 +328,10 @@ class DesktopRepository (
         return desktopTaskDataSequence().any { taskId == it.fullImmersiveTaskId }
     }
 
+    /** Returns the task that is currently in immersive mode in this display, or null. */
+    fun getTaskInFullImmersiveState(displayId: Int): Int? =
+        desktopTaskDataByDisplayId.getOrCreate(displayId).fullImmersiveTaskId
+
     private fun notifyVisibleTaskListeners(displayId: Int, visibleTasksCount: Int) {
         visibleTasksListeners.forEach { (listener, executor) ->
             executor.execute { listener.onTasksVisibilityChanged(displayId, visibleTasksCount) }

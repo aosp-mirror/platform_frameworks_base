@@ -123,6 +123,29 @@ fun calculateInitialBounds(
 }
 
 /**
+ * Calculates the maximized bounds of a task given in the given [DisplayLayout], taking
+ * resizability into consideration.
+ */
+fun calculateMaximizeBounds(
+    displayLayout: DisplayLayout,
+    taskInfo: RunningTaskInfo,
+): Rect {
+    val stableBounds = Rect()
+    displayLayout.getStableBounds(stableBounds)
+    if (taskInfo.isResizeable) {
+        // if resizable then expand to entire stable bounds (full display minus insets)
+        return Rect(stableBounds)
+    } else {
+        // if non-resizable then calculate max bounds according to aspect ratio
+        val activityAspectRatio = calculateAspectRatio(taskInfo)
+        val newSize = maximizeSizeGivenAspectRatio(taskInfo,
+            Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
+        return centerInArea(
+            newSize, stableBounds, stableBounds.left, stableBounds.top)
+    }
+}
+
+/**
  * Calculates the largest size that can fit in a given area while maintaining a specific aspect
  * ratio.
  */
