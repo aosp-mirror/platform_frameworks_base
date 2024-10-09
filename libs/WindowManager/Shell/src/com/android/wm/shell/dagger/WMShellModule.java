@@ -695,10 +695,16 @@ public abstract class WMShellModule {
     static Optional<DesktopFullImmersiveTransitionHandler> provideDesktopImmersiveHandler(
             Context context,
             Transitions transitions,
-            @DynamicOverride DesktopRepository desktopRepository) {
+            @DynamicOverride DesktopRepository desktopRepository,
+            DisplayController displayController,
+            ShellTaskOrganizer shellTaskOrganizer) {
         if (DesktopModeStatus.canEnterDesktopMode(context)) {
             return Optional.of(
-                    new DesktopFullImmersiveTransitionHandler(transitions, desktopRepository));
+                    new DesktopFullImmersiveTransitionHandler(
+                            transitions,
+                            desktopRepository,
+                            displayController,
+                            shellTaskOrganizer));
         }
         return Optional.empty();
     }

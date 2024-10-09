@@ -28,6 +28,7 @@ import com.android.internal.R
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
+import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -144,13 +145,13 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
 
             // Tile starts with the generic Modes icon.
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.icon).isEqualTo(MODES_RESOURCE_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
 
             // Add an inactive mode -> Still modes icon
             zenModeRepository.addMode(id = "Mode", active = false)
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.icon).isEqualTo(MODES_RESOURCE_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
 
             // Add an active mode with a default icon: icon should be the mode icon, and the
@@ -158,7 +159,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             zenModeRepository.addMode(
                 id = "Bedtime with default icon",
                 type = AutomaticZenRule.TYPE_BEDTIME,
-                active = true
+                active = true,
             )
             runCurrent()
             assertThat(tileData?.icon).isEqualTo(BEDTIME_ICON)
@@ -189,7 +190,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
             // Deactivate remaining mode: back to the default modes icon
             zenModeRepository.deactivateMode("Driving with custom icon")
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.icon).isEqualTo(MODES_RESOURCE_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
         }
 
@@ -204,18 +205,18 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
                 )
 
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.icon).isEqualTo(MODES_RESOURCE_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
 
             // Activate a Mode -> Icon doesn't change.
             zenModeRepository.addMode(id = "Mode", active = true)
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.icon).isEqualTo(MODES_RESOURCE_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
 
             zenModeRepository.deactivateMode(id = "Mode")
             runCurrent()
-            assertThat(tileData?.icon).isEqualTo(MODES_ICON)
+            assertThat(tileData?.icon).isEqualTo(MODES_RESOURCE_ICON)
             assertThat(tileData?.iconResId).isEqualTo(MODES_DRAWABLE_ID)
         }
 
@@ -263,7 +264,7 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
         val BEDTIME_DRAWABLE = TestStubDrawable("bedtime")
         val CUSTOM_DRAWABLE = TestStubDrawable("custom")
 
-        val MODES_ICON = MODES_DRAWABLE.asIcon()
+        val MODES_RESOURCE_ICON = Icon.Resource(MODES_DRAWABLE_ID, null)
         val BEDTIME_ICON = BEDTIME_DRAWABLE.asIcon()
         val CUSTOM_ICON = CUSTOM_DRAWABLE.asIcon()
     }

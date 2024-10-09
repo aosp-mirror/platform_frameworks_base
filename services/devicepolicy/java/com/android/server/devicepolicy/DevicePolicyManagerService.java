@@ -11874,75 +11874,51 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("Invalid package name: " + validationResult);
         }
 
-        if (Flags.setApplicationRestrictionsCoexistence()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
-                    who,
-                    MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
-                    caller.getPackageName(),
-                    caller.getUserId()
-            );
-
+        final boolean isRoleHolder;
+        if (who != null) {
+            // DO or PO
+            Preconditions.checkCallAuthorization(
+                    (isProfileOwner(caller) || isDefaultDeviceOwner(caller)));
+            Preconditions.checkCallAuthorization(!parent,
+                    "DO or PO cannot call this on parent");
+            // Caller has opted to be treated as DPC (by passing a non-null who), so don't
+            // consider it as the DMRH, even if the caller is both the DPC and the DMRH.
+            isRoleHolder = false;
+        } else {
+            // Delegates, or the DMRH. Only DMRH can call this on COPE parent
+            isRoleHolder = isCallerDevicePolicyManagementRoleHolder(caller);
+            if (parent) {
+                Preconditions.checkCallAuthorization(isRoleHolder);
+                Preconditions.checkState(isOrganizationOwnedDeviceWithManagedProfile(),
+                        "Role Holder can only operate parent app restriction on COPE devices");
+            } else {
+                Preconditions.checkCallAuthorization(isRoleHolder
+                        || isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS));
+            }
+        }
+        // DMRH caller uses policy engine, others still use legacy code path
+        if (isRoleHolder) {
+            EnforcingAdmin enforcingAdmin = getEnforcingAdminForCaller(/* who */ null,
+                    caller.getPackageName());
+            int affectedUserId = parent
+                    ? getProfileParentId(caller.getUserId()) : caller.getUserId();
             if (restrictions == null || restrictions.isEmpty()) {
                 mDevicePolicyEngine.removeLocalPolicy(
                         PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
                         enforcingAdmin,
-                        caller.getUserId());
+                        affectedUserId);
             } else {
                 mDevicePolicyEngine.setLocalPolicy(
                         PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
                         enforcingAdmin,
                         new BundlePolicyValue(restrictions),
-                        caller.getUserId());
+                        affectedUserId);
             }
-            setBackwardsCompatibleAppRestrictions(
-                    caller, packageName, restrictions, caller.getUserHandle());
         } else {
-            final boolean isRoleHolder;
-            if (who != null) {
-                // DO or PO
-                Preconditions.checkCallAuthorization(
-                        (isProfileOwner(caller) || isDefaultDeviceOwner(caller)));
-                Preconditions.checkCallAuthorization(!parent,
-                        "DO or PO cannot call this on parent");
-                // Caller has opted to be treated as DPC (by passing a non-null who), so don't
-                // consider it as the DMRH, even if the caller is both the DPC and the DMRH.
-                isRoleHolder = false;
-            } else {
-                // Delegates, or the DMRH. Only DMRH can call this on COPE parent
-                isRoleHolder = isCallerDevicePolicyManagementRoleHolder(caller);
-                if (parent) {
-                    Preconditions.checkCallAuthorization(isRoleHolder);
-                    Preconditions.checkState(isOrganizationOwnedDeviceWithManagedProfile(),
-                            "Role Holder can only operate parent app restriction on COPE devices");
-                } else {
-                    Preconditions.checkCallAuthorization(isRoleHolder
-                            || isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS));
-                }
-            }
-            // DMRH caller uses policy engine, others still use legacy code path
-            if (isRoleHolder) {
-                EnforcingAdmin enforcingAdmin = getEnforcingAdminForCaller(/* who */ null,
-                        caller.getPackageName());
-                int affectedUserId = parent
-                        ? getProfileParentId(caller.getUserId()) : caller.getUserId();
-                if (restrictions == null || restrictions.isEmpty()) {
-                    mDevicePolicyEngine.removeLocalPolicy(
-                            PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
-                            enforcingAdmin,
-                            affectedUserId);
-                } else {
-                    mDevicePolicyEngine.setLocalPolicy(
-                            PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
-                            enforcingAdmin,
-                            new BundlePolicyValue(restrictions),
-                            affectedUserId);
-                }
-            } else {
-                mInjector.binderWithCleanCallingIdentity(() -> {
-                    mUserManager.setApplicationRestrictions(packageName, restrictions,
-                            caller.getUserHandle());
-                });
-            }
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                mUserManager.setApplicationRestrictions(packageName, restrictions,
+                        caller.getUserHandle());
+            });
         }
 
         DevicePolicyEventLogger
@@ -11951,31 +11927,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 .setBoolean(/* isDelegate */ isCallerDelegate(caller))
                 .setStrings(packageName)
                 .write();
-    }
-
-    /**
-     * Set app restrictions in user manager for DPC callers only to keep backwards compatibility
-     * for the old getApplicationRestrictions API.
-     */
-    private void setBackwardsCompatibleAppRestrictions(
-            CallerIdentity caller, String packageName, Bundle restrictions, UserHandle userHandle) {
-        if ((caller.hasAdminComponent() && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
-                || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS))) {
-            Bundle restrictionsToApply = restrictions == null || restrictions.isEmpty()
-                    ? getAppRestrictionsSetByAnyAdmin(packageName, userHandle)
-                    : restrictions;
-            mInjector.binderWithCleanCallingIdentity(() -> {
-                mUserManager.setApplicationRestrictions(packageName, restrictionsToApply,
-                        userHandle);
-            });
-        } else {
-            // Notify package of changes via an intent - only sent to explicitly registered
-            // receivers. Sending here because For DPCs, this is being sent in UMS.
-            final Intent changeIntent = new Intent(Intent.ACTION_APPLICATION_RESTRICTIONS_CHANGED);
-            changeIntent.setPackage(packageName);
-            changeIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mContext.sendBroadcastAsUser(changeIntent, userHandle);
-        }
     }
 
     private Bundle getAppRestrictionsSetByAnyAdmin(String packageName, UserHandle userHandle) {
@@ -13257,68 +13208,47 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String packageName, boolean parent) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        // IMPORTANT: The code behind the if branch is OUTDATED and requires additional work before
-        // enabling the feature flag below.
-        // TODO(b/369141952): Update DPM.getApplicationRestrictions coexistence code
-        if (Flags.setApplicationRestrictionsCoexistence()) {
-            EnforcingAdmin enforcingAdmin = enforceCanQueryAndGetEnforcingAdmin(
-                    who,
-                    MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
-                    caller.getPackageName(),
-                    caller.getUserId()
-            );
-
+        final boolean isRoleHolder;
+        if (who != null) {
+            // Caller is DO or PO. They cannot call this on parent
+            Preconditions.checkCallAuthorization(!parent
+                    && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)));
+            // Caller has opted to be treated as DPC (by passing a non-null who), so don't
+            // consider it as the DMRH, even if the caller is both the DPC and the DMRH.
+            isRoleHolder = false;
+        } else {
+            // Caller is delegates or the DMRH. Only DMRH can call this on parent
+            isRoleHolder = isCallerDevicePolicyManagementRoleHolder(caller);
+            if (parent) {
+                Preconditions.checkCallAuthorization(isRoleHolder);
+                Preconditions.checkState(isOrganizationOwnedDeviceWithManagedProfile(),
+                        "Role Holder can only operate parent app restriction on COPE devices");
+            } else {
+                Preconditions.checkCallAuthorization(isRoleHolder
+                        || isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS));
+            }
+        }
+        if (isRoleHolder) {
+            EnforcingAdmin enforcingAdmin = getEnforcingAdminForCaller(/* who */ null,
+                    caller.getPackageName());
+            int affectedUserId = parent
+                    ? getProfileParentId(caller.getUserId()) : caller.getUserId();
             LinkedHashMap<EnforcingAdmin, PolicyValue<Bundle>> policies =
                     mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
                             PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
-                            caller.getUserId());
-            if (policies.isEmpty() || !policies.containsKey(enforcingAdmin)) {
+                            affectedUserId);
+            if (!policies.containsKey(enforcingAdmin)) {
                 return Bundle.EMPTY;
             }
             return policies.get(enforcingAdmin).getValue();
         } else {
-            final boolean isRoleHolder;
-            if (who != null) {
-                // Caller is DO or PO. They cannot call this on parent
-                Preconditions.checkCallAuthorization(!parent
-                        && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)));
-                // Caller has opted to be treated as DPC (by passing a non-null who), so don't
-                // consider it as the DMRH, even if the caller is both the DPC and the DMRH.
-                isRoleHolder = false;
-            } else {
-                // Caller is delegates or the DMRH. Only DMRH can call this on parent
-                isRoleHolder = isCallerDevicePolicyManagementRoleHolder(caller);
-                if (parent) {
-                    Preconditions.checkCallAuthorization(isRoleHolder);
-                    Preconditions.checkState(isOrganizationOwnedDeviceWithManagedProfile(),
-                            "Role Holder can only operate parent app restriction on COPE devices");
-                } else {
-                    Preconditions.checkCallAuthorization(isRoleHolder
-                            || isCallerDelegate(caller, DELEGATION_APP_RESTRICTIONS));
-                }
-            }
-            if (isRoleHolder) {
-                EnforcingAdmin enforcingAdmin = getEnforcingAdminForCaller(/* who */ null,
-                        caller.getPackageName());
-                int affectedUserId = parent
-                        ? getProfileParentId(caller.getUserId()) : caller.getUserId();
-                LinkedHashMap<EnforcingAdmin, PolicyValue<Bundle>> policies =
-                        mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
-                                PolicyDefinition.APPLICATION_RESTRICTIONS(packageName),
-                                affectedUserId);
-                if (!policies.containsKey(enforcingAdmin)) {
-                    return Bundle.EMPTY;
-                }
-                return policies.get(enforcingAdmin).getValue();
-            } else {
-                return mInjector.binderWithCleanCallingIdentity(() -> {
-                    Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
-                            caller.getUserHandle());
-                    // if no restrictions were saved, mUserManager.getApplicationRestrictions
-                    // returns null, but DPM method should return an empty Bundle as per JavaDoc
-                    return bundle != null ? bundle : Bundle.EMPTY;
-                });
-            }
+            return mInjector.binderWithCleanCallingIdentity(() -> {
+                Bundle bundle = mUserManager.getApplicationRestrictions(packageName,
+                        caller.getUserHandle());
+                // if no restrictions were saved, mUserManager.getApplicationRestrictions
+                // returns null, but DPM method should return an empty Bundle as per JavaDoc
+                return bundle != null ? bundle : Bundle.EMPTY;
+            });
         }
     }
 

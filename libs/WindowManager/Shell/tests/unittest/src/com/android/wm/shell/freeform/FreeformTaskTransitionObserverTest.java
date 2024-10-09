@@ -329,7 +329,7 @@ public class FreeformTaskTransitionObserverTest {
 
         mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
 
-        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition);
+        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition, info);
     }
 
     private static TransitionInfo.Change createChange(int mode, int taskId, int windowingMode) {
