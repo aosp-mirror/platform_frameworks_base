@@ -154,6 +154,8 @@ java_library {
         "framework-annotations-lib",
         "ravenwood-helper-framework-runtime",
         "ravenwood-helper-libcore-runtime",
+        "hoststubgen-helper-runtime.ravenwood",
+        "mockito-ravenwood-prebuilt",
     ],
     visibility: ["//frameworks/base"],
     jarjar_rules: ":ravenwood-services-jarjar-rules",
