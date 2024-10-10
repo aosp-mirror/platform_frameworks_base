@@ -1746,6 +1746,11 @@
     <!-- A message shown when the media volume changing is disabled because of the don't disturb mode [CHAR_LIMIT=50]-->
     <string name="stream_media_unavailable">Unavailable because Do Not Disturb is on</string>
 
+    <!-- A message shown when a specific volume (e.g. Alarms, Media, etc) is disabled because an active mode is muting that audio stream altogether [CHAR_LIMIT=50]-->
+    <string name="stream_unavailable_by_modes">Unavailable because <xliff:g id="mode" example="Bedtime">%s</xliff:g> is on</string>
+    <!-- A message shown when a specific volume (e.g. Alarms, Media, etc) is disabled but we don't know which mode (or anything else) is responsible. [CHAR_LIMIT=50]-->
+    <string name="stream_unavailable_by_unknown">Unavailable</string>
+
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
     <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->
 
