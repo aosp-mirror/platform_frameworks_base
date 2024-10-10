@@ -245,6 +245,8 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     private IDisplayManager mIDisplayManager;
     @Mock
+    private WindowManager mWindowManager;
+    @Mock
     private VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback;
     @Mock
     private DevicePolicyManager mDevicePolicyManagerMock;
@@ -383,8 +385,7 @@ public class VirtualDeviceManagerServiceTest {
         // Allow virtual devices to be created on the looper thread for testing.
         final InputController.DeviceCreationThreadVerifier threadVerifier = () -> true;
         mInputController = new InputController(mNativeWrapperMock,
-                new Handler(TestableLooper.get(this).getLooper()),
-                mContext.getSystemService(WindowManager.class),
+                new Handler(TestableLooper.get(this).getLooper()), mWindowManager,
                 AttributionSource.myAttributionSource(), threadVerifier);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
@@ -535,11 +536,26 @@ public class VirtualDeviceManagerServiceTest {
                 .build();
         mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
 
         GenericWindowPolicyController gwpc =
                 mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
         assertThat(gwpc.canShowTasksInHostDeviceRecents()).isFalse();
+    }
+
+    @Test
+    public void getDevicePolicy_customRecentsPolicy_untrustedDisplaygwpcShowsRecentsOnHostDevice() {
+        VirtualDeviceParams params = new VirtualDeviceParams
+                .Builder()
+                .setDevicePolicy(POLICY_TYPE_RECENTS, DEVICE_POLICY_CUSTOM)
+                .build();
+        mDeviceImpl.close();
+        mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+
+        GenericWindowPolicyController gwpc =
+                mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
+        assertThat(gwpc.canShowTasksInHostDeviceRecents()).isTrue();
     }
 
     @Test
@@ -692,7 +708,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void getPreferredLocaleListForApp_keyboardAttached_returnLocaleHints() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER);
 
         mVdms.notifyRunningAppsChanged(mDeviceImpl.getDeviceId(), Sets.newArraySet(UID_1));
@@ -732,8 +748,8 @@ public class VirtualDeviceManagerServiceTest {
                         .setLanguageTag("fr-FR")
                         .build();
 
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        addVirtualDisplay(secondDevice, DISPLAY_ID_2);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
+        addVirtualDisplay(secondDevice, DISPLAY_ID_2, Display.FLAG_TRUSTED);
 
         mDeviceImpl.createVirtualKeyboard(firstKeyboardConfig, BINDER);
         secondDevice.createVirtualKeyboard(secondKeyboardConfig, secondBinder);
@@ -910,11 +926,24 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void onVirtualDisplayCreatedLocked_wakeLockIsAcquired() throws RemoteException {
+    public void onVirtualDisplayCreatedLocked_notTrustedDisplay_noWakeLockIsAcquired()
+            throws RemoteException {
         verify(mIPowerManagerMock, never()).acquireWakeLock(any(Binder.class), anyInt(),
                 nullable(String.class), nullable(String.class), nullable(WorkSource.class),
                 nullable(String.class), anyInt(), eq(null));
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        TestableLooper.get(this).processAllMessages();
+        verify(mIPowerManagerMock, never()).acquireWakeLock(any(Binder.class), anyInt(),
+                nullable(String.class), nullable(String.class), nullable(WorkSource.class),
+                nullable(String.class), anyInt(), eq(null));
+    }
+
+    @Test
+    public void onVirtualDisplayCreatedLocked_wakeLockIsAcquired() throws RemoteException {
+        verify(mIPowerManagerMock, never()).acquireWakeLock(any(Binder.class), anyInt(),
+                nullable(String.class), nullable(String.class), nullable(WorkSource.class),
+                nullable(String.class), anyInt(), eq(null));
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         verify(mIPowerManagerMock).acquireWakeLock(any(Binder.class), anyInt(),
                 nullable(String.class), nullable(String.class), nullable(WorkSource.class),
                 nullable(String.class), eq(DISPLAY_ID_1), eq(null));
@@ -923,7 +952,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void onVirtualDisplayCreatedLocked_duplicateCalls_onlyOneWakeLockIsAcquired()
             throws RemoteException {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         assertThrows(IllegalStateException.class,
                 () -> addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1));
         TestableLooper.get(this).processAllMessages();
@@ -934,7 +963,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void onVirtualDisplayRemovedLocked_wakeLockIsReleased() throws RemoteException {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         ArgumentCaptor<IBinder> wakeLockCaptor = ArgumentCaptor.forClass(IBinder.class);
         TestableLooper.get(this).processAllMessages();
         verify(mIPowerManagerMock).acquireWakeLock(wakeLockCaptor.capture(),
@@ -949,7 +978,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void addVirtualDisplay_displayNotReleased_wakeLockIsReleased() throws RemoteException {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         ArgumentCaptor<IBinder> wakeLockCaptor = ArgumentCaptor.forClass(IBinder.class);
         TestableLooper.get(this).processAllMessages();
         verify(mIPowerManagerMock).acquireWakeLock(wakeLockCaptor.capture(),
@@ -970,7 +999,21 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualDpad_untrustedDisplay_failsSecurityException() {
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER));
+    }
+
+    @Test
     public void createVirtualKeyboard_noDisplay_failsSecurityException() {
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
+    }
+
+    @Test
+    public void createVirtualKeyboard_untrustedDisplay_failsSecurityException() {
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
     }
@@ -982,7 +1025,21 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualMouse_untrustedDisplay_failsSecurityException() {
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER));
+    }
+
+    @Test
     public void createVirtualTouchscreen_noDisplay_failsSecurityException() {
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
+    }
+
+    @Test
+    public void createVirtualTouchscreen_untrustedDisplay_failsSecurityException() {
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
     }
@@ -1003,7 +1060,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualTouchscreen_positiveDisplayDimension_successful() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         VirtualTouchscreenConfig positiveConfig =
                 new VirtualTouchscreenConfig.Builder(
                         /* touchscrenWidth= */ 600, /* touchscreenHeight= */ 800)
@@ -1026,6 +1083,14 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void createVirtualNavigationTouchpad_untrustedDisplay_failsSecurityException() {
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
+                        BINDER));
+    }
+
+    @Test
     public void createVirtualNavigationTouchpad_zeroDisplayDimension_failsWithException() {
         assertThrows(IllegalArgumentException.class,
                 () -> new VirtualNavigationTouchpadConfig.Builder(
@@ -1041,7 +1106,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualNavigationTouchpad_positiveDisplayDimension_successful() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         VirtualNavigationTouchpadConfig positiveConfig =
                 new VirtualNavigationTouchpadConfig.Builder(
                         /* touchpadHeight= */ 50, /* touchpadWidth= */ 50)
@@ -1130,7 +1195,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualDpad_hasDisplay_obtainFileDescriptor() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER);
         assertWithMessage("Virtual dpad should register fd when the display matches").that(
                 mInputController.getInputDeviceDescriptors()).isNotEmpty();
@@ -1140,7 +1205,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualKeyboard_hasDisplay_obtainFileDescriptor() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER);
         assertWithMessage("Virtual keyboard should register fd when the display matches").that(
                 mInputController.getInputDeviceDescriptors()).isNotEmpty();
@@ -1150,7 +1215,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualKeyboard_keyboardCreated_localeUpdated() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER);
         assertWithMessage("Virtual keyboard should register fd when the display matches")
                 .that(mInputController.getInputDeviceDescriptors())
@@ -1171,7 +1236,7 @@ public class VirtualDeviceManagerServiceTest {
                         .setAssociatedDisplayId(DISPLAY_ID_1)
                         .build();
 
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualKeyboard(configWithoutExplicitLayoutInfo, BINDER);
         assertWithMessage("Virtual keyboard should register fd when the display matches")
                 .that(mInputController.getInputDeviceDescriptors())
@@ -1192,7 +1257,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualMouse_hasDisplay_obtainFileDescriptor() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER);
         assertWithMessage("Virtual mouse should register fd when the display matches").that(
                 mInputController.getInputDeviceDescriptors()).isNotEmpty();
@@ -1202,7 +1267,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualTouchscreen_hasDisplay_obtainFileDescriptor() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER);
         assertWithMessage("Virtual touchscreen should register fd when the display matches").that(
                 mInputController.getInputDeviceDescriptors()).isNotEmpty();
@@ -1212,7 +1277,7 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void createVirtualNavigationTouchpad_hasDisplay_obtainFileDescriptor() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1, Display.FLAG_TRUSTED);
         mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG, BINDER);
         assertWithMessage("Virtual navigation touchpad should register fd when the display matches")
                 .that(
@@ -1472,9 +1537,9 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void setShowPointerIcon_setsValueForAllDisplays() {
-        addVirtualDisplay(mDeviceImpl, 1);
-        addVirtualDisplay(mDeviceImpl, 2);
-        addVirtualDisplay(mDeviceImpl, 3);
+        addVirtualDisplay(mDeviceImpl, 1, Display.FLAG_TRUSTED);
+        addVirtualDisplay(mDeviceImpl, 2, Display.FLAG_TRUSTED);
+        addVirtualDisplay(mDeviceImpl, 3, Display.FLAG_TRUSTED);
         VirtualMouseConfig config1 = new VirtualMouseConfig.Builder()
                 .setAssociatedDisplayId(1)
                 .setInputDeviceName(DEVICE_NAME_1)
@@ -1504,6 +1569,14 @@ public class VirtualDeviceManagerServiceTest {
         verify(mInputManagerInternalMock, never()).setPointerIconVisible(eq(true), anyInt());
         mDeviceImpl.setShowPointerIcon(true);
         verify(mInputManagerInternalMock, times(3)).setPointerIconVisible(eq(true), anyInt());
+    }
+
+    @Test
+    public void setShowPointerIcon_untrustedDisplay_pointerIconIsAlwaysShown() {
+        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
+        clearInvocations(mInputManagerInternalMock);
+        mDeviceImpl.setShowPointerIcon(false);
+        verify(mInputManagerInternalMock, times(0)).setPointerIconVisible(eq(false), anyInt());
     }
 
     @Test
@@ -1968,15 +2041,20 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     private void addVirtualDisplay(VirtualDeviceImpl virtualDevice, int displayId) {
+        addVirtualDisplay(virtualDevice, displayId, /* flags= */ 0);
+    }
+
+    private void addVirtualDisplay(VirtualDeviceImpl virtualDevice, int displayId, int flags) {
         when(mDisplayManagerInternalMock.createVirtualDisplay(any(), eq(mVirtualDisplayCallback),
                 eq(virtualDevice), any(), any())).thenReturn(displayId);
-        virtualDevice.createVirtualDisplay(VIRTUAL_DISPLAY_CONFIG, mVirtualDisplayCallback);
         final String uniqueId = UNIQUE_ID + displayId;
         doAnswer(inv -> {
             final DisplayInfo displayInfo = new DisplayInfo();
             displayInfo.uniqueId = uniqueId;
+            displayInfo.flags = flags;
             return displayInfo;
         }).when(mDisplayManagerInternalMock).getDisplayInfo(eq(displayId));
+        virtualDevice.createVirtualDisplay(VIRTUAL_DISPLAY_CONFIG, mVirtualDisplayCallback);
         mInputManagerMockHelper.addDisplayIdMapping(uniqueId, displayId);
     }
 
