@@ -232,3 +232,11 @@ flag {
     bug: "361329788"
     is_exported: true
 }
+
+flag {
+    name: "enable_angle_allow_list"
+    namespace: "gpu"
+    description: "Whether to read from angle allowlist to determine if app should use ANGLE"
+    is_fixed_read_only: true
+    bug: "370845648"
+}
