@@ -12,6 +12,14 @@ package {
 }
 
 filegroup {
+    name: "ravenwood-common-policies",
+    srcs: [
+        "texts/ravenwood-common-policies.txt",
+    ],
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
     name: "ravenwood-services-policies",
     srcs: [
         "texts/ravenwood-services-policies.txt",
