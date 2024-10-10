@@ -462,7 +462,7 @@ public class NotificationManagerService extends SystemService {
     static final int INVALID_UID = -1;
     static final String ROOT_PKG = "root";
 
-    static final String[] ALLOWED_ADJUSTMENTS = new String[] {
+    static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_PEOPLE,
             Adjustment.KEY_SNOOZE_CRITERIA,
             Adjustment.KEY_USER_SENTIMENT,
@@ -4119,6 +4119,24 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void allowAssistantAdjustment(String adjustmentType) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            mAssistants.allowAdjustmentType(adjustmentType);
+
+            handleSavePolicyFile();
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        public void disallowAssistantAdjustment(String adjustmentType) {
+            checkCallerIsSystemOrSystemUiOrShell();
+            mAssistants.disallowAdjustmentType(adjustmentType);
+
+            handleSavePolicyFile();
+        }
+
+        @Override
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
         public void setAdjustmentTypeSupportedState(INotificationListener token,
                 @Adjustment.Keys String key, boolean supported) {
             final long identity = Binder.clearCallingIdentity();
@@ -4133,6 +4151,7 @@ public class NotificationManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+            handleSavePolicyFile();
         }
 
         @Override
@@ -4891,7 +4910,7 @@ public class NotificationManagerService extends SystemService {
                     throw new SecurityException("Not currently an assistant");
             }
 
-            return mAssistants.getAllowedAssistantAdjustments();
+            return new ArrayList<>(mAssistants.getAllowedAssistantAdjustments());
         }
 
         /**
@@ -11395,12 +11414,16 @@ public class NotificationManagerService extends SystemService {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
         private static final String ATT_TYPES = "types";
+        private static final String ATT_DENIED = "denied_adjustments";
         private static final String ATT_NAS_UNSUPPORTED = "unsupported_adjustments";
 
         private final Object mLock = new Object();
 
         @GuardedBy("mLock")
         private Set<String> mAllowedAdjustments = new ArraySet<>();
+
+        @GuardedBy("mLock")
+        private Set<String> mDeniedAdjustments = new ArraySet<>();
 
         @GuardedBy("mLock")
         private Map<Integer, HashSet<String>> mNasUnsupported = new ArrayMap<>();
@@ -11474,9 +11497,11 @@ public class NotificationManagerService extends SystemService {
                 IPackageManager pm) {
             super(context, lock, up, pm);
 
-            // Add all default allowed adjustment types.
-            for (int i = 0; i < ALLOWED_ADJUSTMENTS.length; i++) {
-                mAllowedAdjustments.add(ALLOWED_ADJUSTMENTS[i]);
+            if (!notificationClassification()) {
+                // Add all default allowed adjustment types.
+                for (int i = 0; i < DEFAULT_ALLOWED_ADJUSTMENTS.length; i++) {
+                    mAllowedAdjustments.add(DEFAULT_ALLOWED_ADJUSTMENTS[i]);
+                }
             }
         }
 
@@ -11539,17 +11564,28 @@ public class NotificationManagerService extends SystemService {
             return android.Manifest.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE;
         }
 
-        protected List<String> getAllowedAssistantAdjustments() {
+        protected Set<String> getAllowedAssistantAdjustments() {
             synchronized (mLock) {
-                List<String> types = new ArrayList<>();
-                types.addAll(mAllowedAdjustments);
-                return types;
+                if (notificationClassification()) {
+                    Set<String> types = new HashSet<>(Set.of(DEFAULT_ALLOWED_ADJUSTMENTS));
+                    types.removeAll(mDeniedAdjustments);
+                    return types;
+                } else {
+                    Set<String> types = new HashSet<>();
+                    types.addAll(mAllowedAdjustments);
+                    return types;
+                }
             }
         }
 
         protected boolean isAdjustmentAllowed(String type) {
             synchronized (mLock) {
-                return mAllowedAdjustments.contains(type);
+                if (notificationClassification()) {
+                    return List.of(DEFAULT_ALLOWED_ADJUSTMENTS).contains(type)
+                            && !mDeniedAdjustments.contains(type);
+                } else {
+                    return mAllowedAdjustments.contains(type);
+                }
             }
         }
 
@@ -11911,6 +11947,30 @@ public class NotificationManagerService extends SystemService {
 
         @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
         @GuardedBy("mNotificationLock")
+        public void allowAdjustmentType(@Adjustment.Keys String key) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            mDeniedAdjustments.remove(key);
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> notifyCapabilitiesChanged(info));
+            }
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        @GuardedBy("mNotificationLock")
+        public void disallowAdjustmentType(@Adjustment.Keys String key) {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            mDeniedAdjustments.add(key);
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                mHandler.post(() -> notifyCapabilitiesChanged(info));
+            }
+        }
+
+        @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+        @GuardedBy("mNotificationLock")
         public void setAdjustmentTypeSupportedState(ManagedServiceInfo info,
                 @Adjustment.Keys String key, boolean supported) {
             if (!android.service.notification.Flags.notificationClassification()) {
@@ -11963,6 +12023,43 @@ public class NotificationManagerService extends SystemService {
                         mNasUnsupported.put(approvedUserId, new HashSet(List.of(types.split(","))));
                     }
                 }
+            }
+        }
+
+        @Override
+        protected void writeExtraXmlTags(TypedXmlSerializer out) throws IOException {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            synchronized (mLock) {
+                out.startTag(null, ATT_DENIED);
+                out.attribute(null, ATT_TYPES, TextUtils.join(",", mDeniedAdjustments));
+                out.endTag(null, ATT_DENIED);
+            }
+        }
+
+        @Override
+        protected void readExtraTag(String tag, TypedXmlPullParser parser) throws IOException {
+            if (!android.service.notification.Flags.notificationClassification()) {
+                return;
+            }
+            if (ATT_DENIED.equals(tag)) {
+                final String types = XmlUtils.readStringAttribute(parser, ATT_TYPES);
+                synchronized (mLock) {
+                    mDeniedAdjustments.clear();
+                    if (!TextUtils.isEmpty(types)) {
+                        mDeniedAdjustments.addAll(Arrays.asList(types.split(",")));
+                    }
+                }
+            }
+        }
+
+        private void notifyCapabilitiesChanged(final ManagedServiceInfo info) {
+            final INotificationListener assistant = (INotificationListener) info.service;
+            try {
+                assistant.onAllowedAdjustmentsChanged();
+            } catch (RemoteException ex) {
+                Slog.e(TAG, "unable to notify assistant (capabilities): " + info, ex);
             }
         }
     }
