@@ -48,6 +48,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -434,11 +435,13 @@ private fun ShortcutHelperTwoPane(
 
 @Composable
 private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: ShortcutCategory?) {
+    val listState = rememberLazyListState()
+    LaunchedEffect(key1 = category) { if (category != null) listState.animateScrollToItem(0) }
     if (category == null) {
         NoSearchResultsText(horizontalPadding = 24.dp, fillHeight = false)
         return
     }
-    LazyColumn(modifier = modifier) {
+    LazyColumn(modifier = modifier, state = listState) {
         items(category.subCategories) { subcategory ->
             SubCategoryContainerDualPane(searchQuery = searchQuery, subCategory = subcategory)
             Spacer(modifier = Modifier.height(8.dp))
