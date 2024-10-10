@@ -557,6 +557,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         });
     }
 
+    /** Set a transition to be a back gesture animation. */
+    void setBackGestureAnimation(@NonNull WindowContainer wc, boolean isTop) {
+        final ChangeInfo info = mChanges.get(wc);
+        if (info == null) return;
+        info.mFlags = info.mFlags | (isTop ? ChangeInfo.FLAG_BACK_GESTURE_ANIMATION
+                : ChangeInfo.FLAG_BELOW_BACK_GESTURE_ANIMATION);
+    }
+
     /** Set a transition to be a seamless-rotation. */
     void setSeamlessRotation(@NonNull WindowContainer wc) {
         final ChangeInfo info = mChanges.get(wc);
@@ -3405,6 +3413,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         /** Whether this change contains config-at-end members. */
         private static final int FLAG_CHANGE_CONFIG_AT_END = 0x40;
 
+        /**
+         * Whether this change is forced participant transition because it is current top target
+         * of predictive back animation.
+         */
+        private static final int FLAG_BACK_GESTURE_ANIMATION = 0x80;
+
+        /**
+         * Whether this change is forced participant transition because it is previous target of
+         * predictive back animation
+         */
+        private static final int FLAG_BELOW_BACK_GESTURE_ANIMATION = 0x100;
+
         @IntDef(prefix = { "FLAG_" }, value = {
                 FLAG_NONE,
                 FLAG_SEAMLESS_ROTATION,
@@ -3413,7 +3433,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 FLAG_CHANGE_NO_ANIMATION,
                 FLAG_CHANGE_YES_ANIMATION,
                 FLAG_CHANGE_MOVED_TO_TOP,
-                FLAG_CHANGE_CONFIG_AT_END
+                FLAG_CHANGE_CONFIG_AT_END,
+                FLAG_BACK_GESTURE_ANIMATION,
+                FLAG_BELOW_BACK_GESTURE_ANIMATION
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Flag {}
@@ -3487,7 +3509,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final boolean currVisible = mContainer.isVisibleRequested();
             // the task including transient launch must promote to root task
             if (currVisible && ((mFlags & ChangeInfo.FLAG_TRANSIENT_LAUNCH) != 0
-                    || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0)) {
+                    || (mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0)
+                    || (mFlags & ChangeInfo.FLAG_BACK_GESTURE_ANIMATION) != 0
+                    || (mFlags & ChangeInfo.FLAG_BELOW_BACK_GESTURE_ANIMATION) != 0) {
                 return true;
             }
             // If it's invisible and hasn't changed visibility, always return false since even if
@@ -3508,6 +3532,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         int getTransitMode(@NonNull WindowContainer wc) {
             if ((mFlags & ChangeInfo.FLAG_ABOVE_TRANSIENT_LAUNCH) != 0) {
                 return mExistenceChanged ? TRANSIT_CLOSE : TRANSIT_TO_BACK;
+            }
+            if ((mFlags & ChangeInfo.FLAG_BELOW_BACK_GESTURE_ANIMATION) != 0) {
+                return TRANSIT_TO_FRONT;
             }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
@@ -3540,7 +3567,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             && topActivity.mStartingData.hasImeSurface()) {
                         flags |= FLAG_WILL_IME_SHOWN;
                     }
-                    if (topActivity.mLaunchTaskBehind) {
+                    if (topActivity.mLaunchTaskBehind
+                            && !topActivity.isAnimating(PARENTS, ANIMATION_TYPE_PREDICT_BACK)) {
                         Slog.e(TAG, "Unexpected launch-task-behind operation in shell transition");
                         flags |= FLAG_TASK_LAUNCHING_BEHIND;
                     }
