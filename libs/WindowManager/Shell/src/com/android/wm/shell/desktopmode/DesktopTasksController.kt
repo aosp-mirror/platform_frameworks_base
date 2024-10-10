@@ -465,6 +465,12 @@ class DesktopTasksController(
             removeWallpaperActivity(wct)
         }
         taskRepository.addClosingTask(displayId, taskId)
+        taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
+            doesAnyTaskRequireTaskbarRounding(
+                displayId,
+                taskId
+            )
+        )
     }
 
     fun minimizeTask(taskInfo: RunningTaskInfo) {
