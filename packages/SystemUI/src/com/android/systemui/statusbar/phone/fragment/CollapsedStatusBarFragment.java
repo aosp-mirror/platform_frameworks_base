@@ -66,8 +66,8 @@ import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent.Startable;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
@@ -115,7 +115,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public static final int FADE_IN_DELAY = 50;
     private static final int SOURCE_SYSTEM_EVENT_ANIMATOR = 1;
     private static final int SOURCE_OTHER = 2;
-    private StatusBarFragmentComponent mStatusBarFragmentComponent;
+    private HomeStatusBarComponent mHomeStatusBarComponent;
     private PhoneStatusBarView mStatusBar;
     private final StatusBarStateController mStatusBarStateController;
     private final KeyguardStateController mKeyguardStateController;
@@ -134,7 +134,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private StatusBarVisibilityModel mLastModifiedVisibility =
             StatusBarVisibilityModel.createDefaultModel();
     private DarkIconManager mDarkIconManager;
-    private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
+    private final HomeStatusBarComponent.Factory mHomeStatusBarComponentFactory;
     private final CommandQueue mCommandQueue;
     private final CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
     private final OperatorNameViewController.Factory mOperatorNameViewControllerFactory;
@@ -239,7 +239,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Inject
     public CollapsedStatusBarFragment(
-            StatusBarFragmentComponent.Factory statusBarFragmentComponentFactory,
+            HomeStatusBarComponent.Factory homeStatusBarComponentFactory,
             OngoingCallController ongoingCallController,
             SystemStatusAnimationScheduler animationScheduler,
             ShadeExpansionStateManager shadeExpansionStateManager,
@@ -262,7 +262,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarWindowStateController statusBarWindowStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DemoModeController demoModeController) {
-        mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
+        mHomeStatusBarComponentFactory = homeStatusBarComponentFactory;
         mOngoingCallController = ongoingCallController;
         mAnimationScheduler = animationScheduler;
         mShadeExpansionStateManager = shadeExpansionStateManager;
@@ -335,11 +335,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mDumpManager.registerDumpable(getDumpableName(), this);
-        mStatusBarFragmentComponent = mStatusBarFragmentComponentFactory.create(
+        mHomeStatusBarComponent = mHomeStatusBarComponentFactory.create(
                 (PhoneStatusBarView) getView());
-        mStatusBarFragmentComponent.init();
+        mHomeStatusBarComponent.init();
         mStartableStates.clear();
-        for (Startable startable : mStatusBarFragmentComponent.getStartables()) {
+        for (Startable startable : mHomeStatusBarComponent.getStartables()) {
             mStartableStates.put(startable, Startable.State.STARTING);
             startable.start();
             mStartableStates.put(startable, Startable.State.STARTED);
@@ -474,7 +474,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.removeCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.removeDataSubscriptionChangedListener(mDefaultDataListener);
 
-        for (Startable startable : mStatusBarFragmentComponent.getStartables()) {
+        for (Startable startable : mHomeStatusBarComponent.getStartables()) {
             mStartableStates.put(startable, Startable.State.STOPPING);
             startable.stop();
             mStartableStates.put(startable, Startable.State.STOPPED);
@@ -515,8 +515,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
      *   fragment functionality and we won't need to expose it here anymore.
      */
     @Nullable
-    public StatusBarFragmentComponent getStatusBarFragmentComponent() {
-        return mStatusBarFragmentComponent;
+    public HomeStatusBarComponent getHomeStatusBarComponent() {
+        return mHomeStatusBarComponent;
     }
 
     private StatusBarVisibilityChangeListener mStatusBarVisibilityChangeListener =
@@ -622,7 +622,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         // TODO(b/328393714) use HeadsUpNotificationInteractor.showHeadsUpStatusBar instead.
         boolean headsUpVisible =
-                mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
+                mHomeStatusBarComponent.getHeadsUpAppearanceController().shouldBeVisible();
 
         if (SceneContainerFlag.isEnabled()) {
             // With the scene container, only use the value calculated by the view model to
@@ -997,7 +997,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         pw.println("mHasPrimaryOngoingActivity=" + mHasPrimaryOngoingActivity);
         pw.println("mHasSecondaryOngoingActivity=" + mHasSecondaryOngoingActivity);
         pw.println("mAnimationsEnabled=" + mAnimationsEnabled);
-        StatusBarFragmentComponent component = mStatusBarFragmentComponent;
+        HomeStatusBarComponent component = mHomeStatusBarComponent;
         if (component == null) {
             pw.println("StatusBarFragmentComponent is null");
         } else {

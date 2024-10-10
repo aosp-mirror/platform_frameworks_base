@@ -27,7 +27,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent
 import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import dagger.assisted.Assisted
@@ -60,7 +60,7 @@ interface StatusBarInitializer : CoreStartable {
          *   Can be used to retrieve dependencies from that scope, including the status bar root
          *   view.
          */
-        fun onStatusBarViewInitialized(component: StatusBarFragmentComponent)
+        fun onStatusBarViewInitialized(component: HomeStatusBarComponent)
     }
 
     interface OnStatusBarViewUpdatedListener {
@@ -81,10 +81,10 @@ constructor(
     @Assisted private val statusBarWindowController: StatusBarWindowController,
     private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
     private val statusBarRootFactory: StatusBarRootFactory,
-    private val componentFactory: StatusBarFragmentComponent.Factory,
+    private val componentFactory: HomeStatusBarComponent.Factory,
     private val creationListeners: Set<@JvmSuppressWildcards OnStatusBarViewInitializedListener>,
 ) : StatusBarInitializer {
-    private var component: StatusBarFragmentComponent? = null
+    private var component: HomeStatusBarComponent? = null
 
     @get:VisibleForTesting
     var initialized = false
@@ -157,7 +157,7 @@ constructor(
                 object : FragmentHostManager.FragmentListener {
                     override fun onFragmentViewCreated(tag: String, fragment: Fragment) {
                         component =
-                            (fragment as CollapsedStatusBarFragment).statusBarFragmentComponent
+                            (fragment as CollapsedStatusBarFragment).homeStatusBarComponent
                                 ?: throw IllegalStateException()
                         statusBarViewUpdatedListener?.onStatusBarViewUpdated(
                             component!!.phoneStatusBarViewController,

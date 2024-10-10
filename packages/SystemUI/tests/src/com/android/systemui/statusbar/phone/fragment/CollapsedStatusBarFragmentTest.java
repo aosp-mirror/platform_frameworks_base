@@ -66,7 +66,7 @@ import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerStatusBarViewBinder;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
@@ -109,9 +109,9 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private final CarrierConfigTracker mCarrierConfigTracker = mock(CarrierConfigTracker.class);
 
     @Mock
-    private StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
+    private HomeStatusBarComponent.Factory mStatusBarFragmentComponentFactory;
     @Mock
-    private StatusBarFragmentComponent mStatusBarFragmentComponent;
+    private HomeStatusBarComponent mHomeStatusBarComponent;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -1060,7 +1060,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     public void setUp_fragmentCreatesDaggerComponent() {
         CollapsedStatusBarFragment fragment = resumeAndGetFragment();
 
-        assertEquals(mStatusBarFragmentComponent, fragment.getStatusBarFragmentComponent());
+        assertEquals(mHomeStatusBarComponent, fragment.getHomeStatusBarComponent());
     }
 
     @Test
@@ -1224,8 +1224,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private void setUpDaggerComponent() {
         when(mStatusBarFragmentComponentFactory.create(any()))
-                .thenReturn(mStatusBarFragmentComponent);
-        when(mStatusBarFragmentComponent.getHeadsUpAppearanceController())
+                .thenReturn(mHomeStatusBarComponent);
+        when(mHomeStatusBarComponent.getHeadsUpAppearanceController())
                 .thenReturn(mHeadsUpAppearanceController);
     }
 

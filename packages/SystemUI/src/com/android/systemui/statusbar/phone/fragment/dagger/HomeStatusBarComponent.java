@@ -42,27 +42,29 @@ import java.util.Set;
  * fragment is recreated.
  *
  * Anything that depends on {@link CollapsedStatusBarFragment} or {@link PhoneStatusBarView}
- * should be included here or in {@link StatusBarFragmentModule}.
+ * should be included here or in {@link HomeStatusBarModule}.
  */
-
 @Subcomponent(modules = {
-        StatusBarFragmentModule.class,
+        HomeStatusBarModule.class,
         StatusBarStartablesModule.class
 })
-@StatusBarFragmentScope
-public interface StatusBarFragmentComponent {
+@HomeStatusBarScope
+public interface HomeStatusBarComponent {
     /** Simple factory. */
     @Subcomponent.Factory
     interface Factory {
-        StatusBarFragmentComponent create(
+        /** */
+        HomeStatusBarComponent create(
                 @BindsInstance @RootView PhoneStatusBarView phoneStatusBarView);
     }
 
     /**
-     * Performs initialization logic after {@link StatusBarFragmentComponent} has been constructed.
+     * Performs initialization logic after {@link HomeStatusBarComponent} has been constructed.
      */
     interface Startable {
+        /** */
         void start();
+        /** */
         void stop();
 
         enum State {
@@ -86,32 +88,32 @@ public interface StatusBarFragmentComponent {
     }
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     BatteryMeterViewController getBatteryMeterViewController();
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     @RootView
     PhoneStatusBarView getPhoneStatusBarView();
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     PhoneStatusBarViewController getPhoneStatusBarViewController();
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     HeadsUpAppearanceController getHeadsUpAppearanceController();
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     LegacyLightsOutNotifController getLegacyLightsOutNotifController();
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     StatusBarDemoMode getStatusBarDemoMode();
 
     /** */
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     PhoneStatusBarTransitions getPhoneStatusBarTransitions();
 
     /** */

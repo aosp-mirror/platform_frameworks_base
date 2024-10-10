@@ -186,7 +186,7 @@ import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
+import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarComponent;
 import com.android.systemui.statusbar.pipeline.shared.ui.composable.StatusBarRootFactory;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -517,7 +517,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mStatusBarWindowController,
                         mCollapsedStatusBarFragmentProvider,
                         mock(StatusBarRootFactory.class),
-                        mock(StatusBarFragmentComponent.Factory.class),
+                        mock(HomeStatusBarComponent.Factory.class),
                         emptySet()),
                 mStatusBarWindowControllerStore,
                 mStatusBarWindowStateController,

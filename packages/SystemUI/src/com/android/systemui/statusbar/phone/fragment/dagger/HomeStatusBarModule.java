@@ -28,7 +28,6 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.Clock;
-import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import dagger.Module;
@@ -38,9 +37,9 @@ import java.util.Optional;
 
 import javax.inject.Named;
 
-/** Dagger module for {@link StatusBarFragmentComponent}. */
+/** Dagger module for {@link HomeStatusBarComponent}. */
 @Module
-public interface StatusBarFragmentModule {
+public interface HomeStatusBarModule {
 
     String LIGHTS_OUT_NOTIF_VIEW = "lights_out_notif_view";
     String OPERATOR_NAME_VIEW = "operator_name_view";
@@ -50,21 +49,21 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     static BatteryMeterView provideBatteryMeterView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.battery);
     }
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     static StatusBarLocation getStatusBarLocation() {
         return StatusBarLocation.HOME;
     }
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     @Named(START_SIDE_CONTENT)
     static View startSideContent(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.status_bar_start_side_content);
@@ -72,7 +71,7 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     @Named(END_SIDE_CONTENT)
     static View endSideContent(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.status_bar_end_side_content);
@@ -80,7 +79,7 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     @Named(LIGHTS_OUT_NOTIF_VIEW)
     static View provideLightsOutNotifView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.notification_lights_out);
@@ -88,7 +87,7 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     @Named(OPERATOR_NAME_VIEW)
     static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
         View operatorName = ((ViewStub) view.findViewById(R.id.operator_name_stub)).inflate();
@@ -98,7 +97,7 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     @Named(OPERATOR_NAME_FRAME_VIEW)
     static Optional<View> provideOperatorFrameNameView(@RootView PhoneStatusBarView view) {
         return Optional.ofNullable(view.findViewById(R.id.operator_name_frame));
@@ -106,14 +105,14 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     static Clock provideClock(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.clock);
     }
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     static PhoneStatusBarViewController providePhoneStatusBarViewController(
             PhoneStatusBarViewController.Factory phoneStatusBarViewControllerFactory,
             @RootView PhoneStatusBarView phoneStatusBarView) {
@@ -123,7 +122,7 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     static PhoneStatusBarTransitions providePhoneStatusBarTransitions(
             @RootView PhoneStatusBarView view,
             StatusBarWindowControllerStore statusBarWindowControllerStore) {
@@ -133,7 +132,7 @@ public interface StatusBarFragmentModule {
 
     /** */
     @Provides
-    @StatusBarFragmentScope
+    @HomeStatusBarScope
     static HeadsUpStatusBarView providesHeasdUpStatusBarView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.heads_up_status_bar_view);
     }
