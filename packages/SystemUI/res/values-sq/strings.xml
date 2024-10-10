@@ -673,6 +673,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"Nuk ofrohet; ziles i është hequr zëri"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"Nuk ofrohet; \"Mos shqetëso\" është aktiv"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"Nuk ofrohet; \"Mos shqetëso\" është aktiv"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Trokit për të aktivizuar."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Trokit për ta caktuar te dridhja. Shërbimet e qasshmërisë mund të çaktivizohen."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Trokit për të çaktivizuar. Shërbimet e qasshmërisë mund të çaktivizohen."</string>
@@ -706,8 +710,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"Shfaq modalitetin e demonstrimit"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Eternet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarmi"</string>
-    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
-    <skip />
+    <string name="active_mode_content_description" msgid="1627555562186515927">"\"<xliff:g id="MODENAME">%1$s</xliff:g>\" është aktiv"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Portofoli"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"Konfiguro për të kryer pagesa më të shpejta dhe më të sigurta përmes telefonit"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"Shfaqi të gjitha"</string>
