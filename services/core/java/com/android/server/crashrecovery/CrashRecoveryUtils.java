@@ -18,7 +18,7 @@ package com.android.server.crashrecovery;
 
 import android.os.Environment;
 import android.util.IndentingPrintWriter;
-import android.util.Slog;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,7 +41,7 @@ public class CrashRecoveryUtils {
 
     /** Persist recovery related events in crashrecovery events file.**/
     public static void logCrashRecoveryEvent(int priority, String msg) {
-        Slog.println(priority, TAG, msg);
+        Log.println(priority, TAG, msg);
         try {
             File fname = getCrashRecoveryEventsFile();
             synchronized (sFileLock) {
@@ -52,7 +52,7 @@ public class CrashRecoveryUtils {
                 pw.close();
             }
         } catch (IOException e) {
-            Slog.e(TAG, "Unable to log CrashRecoveryEvents " + e.getMessage());
+            Log.e(TAG, "Unable to log CrashRecoveryEvents " + e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public class CrashRecoveryUtils {
                     pw.println(line);
                 }
             } catch (IOException e) {
-                Slog.e(TAG, "Unable to dump CrashRecoveryEvents " + e.getMessage());
+                Log.e(TAG, "Unable to dump CrashRecoveryEvents " + e.getMessage());
             }
         }
         pw.decreaseIndent();
