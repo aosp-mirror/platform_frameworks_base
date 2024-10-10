@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include <utils/StatsUtils.h>
 
 #include <memory>
 
@@ -630,6 +631,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         }
         bitmap::reinitBitmap(env, javaBitmap, outputBitmap.info(), isPremultiplied);
         outputBitmap.notifyPixelsChanged();
+        uirenderer::logBitmapDecode(*reuseBitmap);
         // If a java bitmap was passed in for reuse, pass it back
         return javaBitmap;
     }
@@ -650,6 +652,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
             }
         }
 
+        uirenderer::logBitmapDecode(*hardwareBitmap);
         return bitmap::createBitmap(env, hardwareBitmap.release(), bitmapCreateFlags,
                 ninePatchChunk, ninePatchInsets, -1);
     }
@@ -659,6 +662,7 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         heapBitmap->setGainmap(std::move(gainmap));
     }
 
+    uirenderer::logBitmapDecode(*heapBitmap);
     // now create the java bitmap
     return bitmap::createBitmap(env, heapBitmap, bitmapCreateFlags, ninePatchChunk, ninePatchInsets,
                                 -1);
