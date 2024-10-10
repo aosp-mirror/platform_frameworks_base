@@ -75,3 +75,10 @@ flag {
        purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+   name: "enforce_quota_policy_to_fgs_jobs"
+   namespace: "backstage_power"
+   description: "Applies the normal quota policy to FGS jobs"
+   bug: "341201311"
+}
