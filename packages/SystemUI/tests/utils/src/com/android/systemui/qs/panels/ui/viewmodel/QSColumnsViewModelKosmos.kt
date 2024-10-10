@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.FixedColumnsRepository
-import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.panels.domain.interactor.qsColumnsInteractor
 
-@SysUISingleton
-class FixedColumnsSizeInteractor @Inject constructor(repo: FixedColumnsRepository) {
-    val columns: StateFlow<Int> = repo.columns
-}
+val Kosmos.qsColumnsViewModel by Kosmos.Fixture { QSColumnsSizeViewModelImpl(qsColumnsInteractor) }

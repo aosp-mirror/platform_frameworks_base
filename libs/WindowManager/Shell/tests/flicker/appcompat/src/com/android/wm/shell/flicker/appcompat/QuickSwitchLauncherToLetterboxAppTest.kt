@@ -20,7 +20,6 @@ import android.graphics.Rect
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.RequiresDevice
 import android.tools.NavBar
-import android.tools.Rotation
 import android.tools.flicker.assertions.FlickerTest
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
@@ -266,8 +265,7 @@ class QuickSwitchLauncherToLetterboxAppTest(flicker: LegacyFlickerTest) : BaseAp
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
             return LegacyFlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL),
-                supportedRotations = listOf(Rotation.ROTATION_90)
+                supportedNavigationModes = listOf(NavBar.MODE_GESTURAL)
             )
         }
     }

@@ -84,7 +84,7 @@ private fun TutorialSelectionButtons(
     ) {
         TutorialButton(
             text = stringResource(R.string.touchpad_tutorial_home_gesture_button),
-            icon = Icons.AutoMirrored.Outlined.ArrowBack,
+            icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_home_icon),
             iconColor = MaterialTheme.colorScheme.onPrimary,
             onClick = onHomeTutorialClicked,
             backgroundColor = MaterialTheme.colorScheme.primary,
@@ -92,7 +92,7 @@ private fun TutorialSelectionButtons(
         )
         TutorialButton(
             text = stringResource(R.string.touchpad_tutorial_back_gesture_button),
-            icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_home_icon),
+            icon = Icons.AutoMirrored.Outlined.ArrowBack,
             iconColor = MaterialTheme.colorScheme.onTertiary,
             onClick = onBackTutorialClicked,
             backgroundColor = MaterialTheme.colorScheme.tertiary,

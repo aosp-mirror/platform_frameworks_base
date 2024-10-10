@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.display.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.partitionedGridViewModel by
-    Kosmos.Fixture {
-        PartitionedGridViewModel(
-            iconTilesViewModel,
-            fixedColumnsSizeViewModel,
-            iconLabelVisibilityViewModel,
-        )
-    }
+val Kosmos.fakeDisplayWindowPropertiesRepository by
+    Kosmos.Fixture { FakeDisplayWindowPropertiesRepository() }
+
+var Kosmos.displayWindowPropertiesRepository: DisplayWindowPropertiesRepository by
+    Kosmos.Fixture { fakeDisplayWindowPropertiesRepository }

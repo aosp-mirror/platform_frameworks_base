@@ -23,7 +23,7 @@ import com.android.systemui.plugins.VolumeDialogController
 
 /** Models a state of the Volume Dialog. */
 data class VolumeDialogStateModel(
-    val states: Map<Int, VolumeDialogStreamStateModel>,
+    val states: Map<Int, VolumeDialogStreamModel>,
     val ringerModeInternal: Int = 0,
     val ringerModeExternal: Int = 0,
     val zenMode: Int = 0,
@@ -39,7 +39,7 @@ data class VolumeDialogStateModel(
     constructor(
         legacyState: VolumeDialogController.State
     ) : this(
-        states = legacyState.states.mapToMap { VolumeDialogStreamStateModel(it) },
+        states = legacyState.states.mapToMap { VolumeDialogStreamModel(it) },
         ringerModeInternal = legacyState.ringerModeInternal,
         ringerModeExternal = legacyState.ringerModeExternal,
         zenMode = legacyState.zenMode,

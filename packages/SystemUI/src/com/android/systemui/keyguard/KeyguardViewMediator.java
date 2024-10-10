@@ -2460,6 +2460,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             android.util.Log.i(TAG, "Ignoring request to dismiss (user switch in progress?)");
             return;
         }
+
+        if (mKeyguardStateController.isKeyguardGoingAway()) {
+            Log.i(TAG, "Ignoring dismiss because we're already going away.");
+            return;
+        }
+
         mHandler.obtainMessage(DISMISS, new DismissMessage(callback, message)).sendToTarget();
     }
 

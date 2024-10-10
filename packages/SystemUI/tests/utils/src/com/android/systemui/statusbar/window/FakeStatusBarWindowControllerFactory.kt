@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.statusbar.window
 
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.domain.interactor.FixedColumnsSizeInteractor
-import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import android.content.Context
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager
 
-interface FixedColumnsSizeViewModel {
-    val columns: StateFlow<Int>
-}
-
-@SysUISingleton
-class FixedColumnsSizeViewModelImpl @Inject constructor(interactor: FixedColumnsSizeInteractor) :
-    FixedColumnsSizeViewModel {
-    override val columns: StateFlow<Int> = interactor.columns
+class FakeStatusBarWindowControllerFactory : StatusBarWindowController.Factory {
+    override fun create(
+        context: Context,
+        viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
+    ) = FakeStatusBarWindowController()
 }

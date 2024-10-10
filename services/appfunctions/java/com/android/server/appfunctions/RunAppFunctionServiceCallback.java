@@ -27,38 +27,23 @@ import android.util.Slog;
 import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
 import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
 
-
 /**
  * A callback to forward a request to the {@link IAppFunctionService} and report back the result.
  */
 public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAppFunctionService> {
+    private static final String TAG = RunAppFunctionServiceCallback.class.getSimpleName();
 
     private final ExecuteAppFunctionAidlRequest mRequestInternal;
     private final SafeOneTimeExecuteAppFunctionCallback mSafeExecuteAppFunctionCallback;
     private final ICancellationCallback mCancellationCallback;
 
-    private RunAppFunctionServiceCallback(
+    public RunAppFunctionServiceCallback(
             ExecuteAppFunctionAidlRequest requestInternal,
             ICancellationCallback cancellationCallback,
             SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
         this.mRequestInternal = requestInternal;
         this.mSafeExecuteAppFunctionCallback = safeExecuteAppFunctionCallback;
         this.mCancellationCallback = cancellationCallback;
-    }
-
-    /**
-     * Creates a new instance of {@link RunAppFunctionServiceCallback}.
-     *
-     * @param requestInternal a request to send to the service.
-     * @param cancellationCallback a callback to forward cancellation signal to the service.
-     * @param safeExecuteAppFunctionCallback a callback to report back the result of the operation.
-     */
-    public static RunAppFunctionServiceCallback create(
-            ExecuteAppFunctionAidlRequest requestInternal,
-            ICancellationCallback cancellationCallback,
-            SafeOneTimeExecuteAppFunctionCallback safeExecuteAppFunctionCallback) {
-        return new RunAppFunctionServiceCallback(
-                requestInternal, cancellationCallback, safeExecuteAppFunctionCallback);
     }
 
     @Override
@@ -68,6 +53,7 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
         try {
             service.executeAppFunction(
                     mRequestInternal.getClientRequest(),
+                    mRequestInternal.getCallingPackage(),
                     mCancellationCallback,
                     new IExecuteAppFunctionCallback.Stub() {
                         @Override
@@ -88,7 +74,7 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
 
     @Override
     public void onFailedToConnect() {
-        Slog.e("AppFunctionManagerServiceImpl", "Failed to connect to service");
+        Slog.e(TAG, "Failed to connect to service");
         mSafeExecuteAppFunctionCallback.onResult(
                 ExecuteAppFunctionResponse.newFailure(
                         ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,

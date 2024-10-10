@@ -92,6 +92,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.composefragment.SceneKeys.QuickQuickSettings
 import com.android.systemui.qs.composefragment.SceneKeys.QuickSettings
 import com.android.systemui.qs.composefragment.SceneKeys.toIdleSceneKey
+import com.android.systemui.qs.composefragment.ui.NotificationScrimClipParams
 import com.android.systemui.qs.composefragment.ui.notificationScrimClip
 import com.android.systemui.qs.composefragment.ui.quickQuickSettingsToQuickSettings
 import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel
@@ -149,20 +150,12 @@ constructor(
     private val notificationScrimClippingParams =
         object {
             var isEnabled by mutableStateOf(false)
-            var leftInset by mutableStateOf(0)
-            var rightInset by mutableStateOf(0)
-            var top by mutableStateOf(0)
-            var bottom by mutableStateOf(0)
-            var radius by mutableStateOf(0)
+            var params by mutableStateOf(NotificationScrimClipParams())
 
             fun dump(pw: IndentingPrintWriter) {
                 pw.printSection("NotificationScrimClippingParams") {
                     pw.println("isEnabled", isEnabled)
-                    pw.println("leftInset", "${leftInset}px")
-                    pw.println("rightInset", "${rightInset}px")
-                    pw.println("top", "${top}px")
-                    pw.println("bottom", "${bottom}px")
-                    pw.println("radius", "${radius}px")
+                    pw.println("params", params)
                 }
             }
         }
@@ -216,7 +209,7 @@ constructor(
             FrameLayoutTouchPassthrough(
                 context,
                 { notificationScrimClippingParams.isEnabled },
-                { notificationScrimClippingParams.top },
+                { notificationScrimClippingParams.params.top },
             )
         frame.addView(
             composeView,
@@ -237,13 +230,7 @@ constructor(
                     Modifier.windowInsetsPadding(WindowInsets.navigationBars).thenIf(
                         notificationScrimClippingParams.isEnabled
                     ) {
-                        Modifier.notificationScrimClip(
-                            notificationScrimClippingParams.leftInset,
-                            notificationScrimClippingParams.top,
-                            notificationScrimClippingParams.rightInset,
-                            notificationScrimClippingParams.bottom,
-                            notificationScrimClippingParams.radius,
-                        )
+                        Modifier.notificationScrimClip { notificationScrimClippingParams.params }
                     },
             ) {
                 val isEditing by
@@ -445,13 +432,14 @@ constructor(
         fullWidth: Boolean,
     ) {
         notificationScrimClippingParams.isEnabled = visible
-        notificationScrimClippingParams.top = top
-        notificationScrimClippingParams.bottom = bottom
-        // Full width means that QS will show in the entire width allocated to it (for example
-        // phone) vs. showing in a narrower column (for example, tablet portrait).
-        notificationScrimClippingParams.leftInset = if (fullWidth) 0 else leftInset
-        notificationScrimClippingParams.rightInset = if (fullWidth) 0 else rightInset
-        notificationScrimClippingParams.radius = cornerRadius
+        notificationScrimClippingParams.params =
+            NotificationScrimClipParams(
+                top,
+                bottom,
+                if (fullWidth) 0 else leftInset,
+                if (fullWidth) 0 else rightInset,
+                cornerRadius,
+            )
     }
 
     override fun isFullyCollapsed(): Boolean {

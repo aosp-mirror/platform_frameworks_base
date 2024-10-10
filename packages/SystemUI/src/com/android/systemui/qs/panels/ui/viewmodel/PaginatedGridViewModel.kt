@@ -29,13 +29,13 @@ class PaginatedGridViewModel
 @Inject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
-    gridSizeViewModel: FixedColumnsSizeViewModel,
+    gridSizeViewModel: QSColumnsViewModel,
     iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
     paginatedGridInteractor: PaginatedGridInteractor,
     @Application applicationScope: CoroutineScope,
 ) :
     IconTilesViewModel by iconTilesViewModel,
-    FixedColumnsSizeViewModel by gridSizeViewModel,
+    QSColumnsViewModel by gridSizeViewModel,
     IconLabelVisibilityViewModel by iconLabelVisibilityViewModel {
     val rows =
         paginatedGridInteractor.rows.stateIn(

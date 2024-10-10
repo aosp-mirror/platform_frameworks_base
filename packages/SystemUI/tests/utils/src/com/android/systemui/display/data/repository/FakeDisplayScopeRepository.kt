@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.display.data.repository
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.data.repository.fixedColumnsRepository
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 
-val Kosmos.fixedColumnsSizeInteractor by
-    Kosmos.Fixture { FixedColumnsSizeInteractor(fixedColumnsRepository) }
+class FakeDisplayScopeRepository(private val dispatcher: CoroutineDispatcher) :
+    DisplayScopeRepository {
+
+    private val perDisplayScopes = mutableMapOf<Int, CoroutineScope>()
+
+    override fun scopeForDisplay(displayId: Int): CoroutineScope {
+        return perDisplayScopes.computeIfAbsent(displayId) { CoroutineScope(dispatcher) }
+    }
+}

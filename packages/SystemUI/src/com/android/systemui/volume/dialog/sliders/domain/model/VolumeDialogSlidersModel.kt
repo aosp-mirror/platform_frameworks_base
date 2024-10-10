@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.ui.viewmodel
+package com.android.systemui.volume.dialog.sliders.domain.model
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.fixedColumnsSizeInteractor
-
-val Kosmos.fixedColumnsSizeViewModel by
-    Kosmos.Fixture { FixedColumnsSizeViewModelImpl(fixedColumnsSizeInteractor) }
+/** Models a state of the sliders section of the Volume Dialog. */
+data class VolumeDialogSlidersModel(
+    val slider: VolumeDialogSliderType,
+    val floatingSliders: List<VolumeDialogSliderType>,
+)
