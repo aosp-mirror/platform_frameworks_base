@@ -85,4 +85,6 @@ object SettingsDimension {
     val illustrationMaxHeight = 300.dp
     val illustrationPadding = paddingLarge
     val illustrationCornerRadius = 28.dp
+
+    val preferenceMinHeight = 72.dp
 }
