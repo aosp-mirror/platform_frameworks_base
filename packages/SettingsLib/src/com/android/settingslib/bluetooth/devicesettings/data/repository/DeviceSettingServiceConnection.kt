@@ -23,6 +23,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.IInterface
+import android.os.RemoteException
 import android.text.TextUtils
 import android.util.Log
 import com.android.settingslib.bluetooth.BluetoothUtils
@@ -55,6 +56,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -100,6 +102,9 @@ class DeviceSettingServiceConnection(
     private var isServiceEnabled =
         coroutineScope.async(backgroundCoroutineContext, start = CoroutineStart.LAZY) {
             val states = getSettingsProviderServices()?.values ?: return@async false
+            if (states.isEmpty()) {
+                return@async true
+            }
             combine(states) { it.toList() }
                 .mapNotNull { allStatus ->
                     if (allStatus.any { it is ServiceConnectionStatus.Failed }) {
@@ -114,7 +119,7 @@ class DeviceSettingServiceConnection(
                         null
                     }
                 }
-                .first()
+                .firstOrNull() ?: false
         }
 
     private var config =
@@ -131,9 +136,15 @@ class DeviceSettingServiceConnection(
                         is ServiceConnectionStatus.Connected ->
                             flowOf(
                                 getDeviceSettingsConfigFromService(
-                                    deviceInfo { setBluetoothAddress(cachedDevice.address) },
-                                    it.service,
-                                )
+                                        deviceInfo { setBluetoothAddress(cachedDevice.address) },
+                                        it.service,
+                                    )
+                                    .also { config ->
+                                        Log.i(
+                                            TAG,
+                                            "device setting config for $cachedDevice is $config",
+                                        )
+                                    }
                             )
                         ServiceConnectionStatus.Connecting -> flowOf()
                         ServiceConnectionStatus.Failed -> flowOf(null)
@@ -146,21 +157,26 @@ class DeviceSettingServiceConnection(
         deviceInfo: DeviceInfo,
         service: IDeviceSettingsConfigProviderService,
     ): DeviceSettingsConfig? = suspendCancellableCoroutine { continuation ->
-        service.getDeviceSettingsConfig(
-            deviceInfo,
-            object : IGetDeviceSettingsConfigCallback.Stub() {
-                override fun onResult(
-                    status: DeviceSettingsConfigServiceStatus,
-                    config: DeviceSettingsConfig?,
-                ) {
-                    if (!status.success) {
-                        continuation.resume(null)
-                    } else {
-                        continuation.resume(config)
+        try {
+            service.getDeviceSettingsConfig(
+                deviceInfo,
+                object : IGetDeviceSettingsConfigCallback.Stub() {
+                    override fun onResult(
+                        status: DeviceSettingsConfigServiceStatus,
+                        config: DeviceSettingsConfig?,
+                    ) {
+                        if (!status.success) {
+                            continuation.resume(null)
+                        } else {
+                            continuation.resume(config)
+                        }
                     }
-                }
-            },
-        )
+                },
+            )
+        } catch (e: RemoteException) {
+            Log.i(TAG, "Fail to get config")
+            continuation.resume(null)
+        }
     }
 
     private val settingIdToItemMapping =
@@ -298,13 +314,16 @@ class DeviceSettingServiceConnection(
                 val serviceConnection =
                     object : ServiceConnection {
                         override fun onServiceConnected(name: ComponentName, service: IBinder) {
+                            Log.i(TAG, "Service connected for $intent")
                             launch { send(ServiceConnectionStatus.Connected(transform(service))) }
                         }
 
                         override fun onServiceDisconnected(name: ComponentName?) {
+                            Log.i(TAG, "Service disconnected for $intent")
                             launch { send(ServiceConnectionStatus.Connecting) }
                         }
                     }
+                Log.i(TAG, "Try to bind service for $intent")
                 if (
                     !context.bindService(
                         intent,
