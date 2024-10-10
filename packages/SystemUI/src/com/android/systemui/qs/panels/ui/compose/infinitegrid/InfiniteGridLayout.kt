@@ -31,8 +31,8 @@ import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.rememberEditListState
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
-import com.android.systemui.qs.panels.ui.viewmodel.FixedColumnsSizeViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.QSColumnsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileSquishinessViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -45,7 +45,7 @@ class InfiniteGridLayout
 @Inject
 constructor(
     private val iconTilesViewModel: IconTilesViewModel,
-    private val gridSizeViewModel: FixedColumnsSizeViewModel,
+    private val gridSizeViewModel: QSColumnsViewModel,
     private val squishinessViewModel: TileSquishinessViewModel,
 ) : PaginatableGridLayout {
 

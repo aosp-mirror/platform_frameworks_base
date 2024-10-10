@@ -25,7 +25,7 @@ val Kosmos.quickQuickSettingsViewModel by
     Kosmos.Fixture {
         QuickQuickSettingsViewModel(
             currentTilesInteractor,
-            fixedColumnsSizeViewModel,
+            qsColumnsViewModel,
             quickQuickSettingsRowInteractor,
             tileSquishinessViewModel,
             iconTilesViewModel,
