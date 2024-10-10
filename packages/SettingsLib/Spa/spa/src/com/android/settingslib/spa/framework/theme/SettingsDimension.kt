@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 object SettingsDimension {
     val paddingTiny = 2.dp
     val paddingExtraSmall = 4.dp
+    val paddingExtraSmall1 = 6.dp
     val paddingSmall = if (isSpaExpressiveEnabled) 8.dp else 4.dp
     val paddingExtraSmall5 = 10.dp
     val paddingExtraSmall6 = 12.dp
@@ -87,4 +88,7 @@ object SettingsDimension {
     val illustrationCornerRadius = 28.dp
 
     val preferenceMinHeight = 72.dp
+
+    val spinnerOptionMinHeight = 48.dp
+    val spinnerIconSize = 20.dp
 }
