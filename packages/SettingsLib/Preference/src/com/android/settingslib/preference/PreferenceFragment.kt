@@ -18,6 +18,7 @@ package com.android.settingslib.preference
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.XmlRes
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
@@ -42,7 +43,9 @@ open class PreferenceFragment :
     override fun createPreferenceScreen(factory: PreferenceScreenFactory): PreferenceScreen? {
         val context = factory.context
         fun createPreferenceScreenFromResource() =
-            factory.inflate(getPreferenceScreenResId(context))
+            factory.inflate(getPreferenceScreenResId(context))?.also {
+                Log.i(TAG, "Load screen " + it.key + " from resource")
+            }
 
         val screenCreator =
             getPreferenceScreenCreator(context) ?: return createPreferenceScreenFromResource()
@@ -50,10 +53,12 @@ open class PreferenceFragment :
         val preferenceHierarchy = screenCreator.getPreferenceHierarchy(context)
         val preferenceScreen =
             if (screenCreator.hasCompleteHierarchy()) {
+                Log.i(TAG, "Load screen " + screenCreator.key + " from hierarchy")
                 factory.getOrCreatePreferenceScreen().apply {
                     inflatePreferenceHierarchy(preferenceBindingFactory, preferenceHierarchy)
                 }
             } else {
+                Log.i(TAG, "Screen " + screenCreator.key + " is hybrid")
                 createPreferenceScreenFromResource()?.also {
                     bindRecursively(it, preferenceBindingFactory, preferenceHierarchy)
                 } ?: return null
@@ -82,5 +87,9 @@ open class PreferenceFragment :
     override fun onDestroy() {
         preferenceScreenBindingHelper?.close()
         super.onDestroy()
+    }
+
+    companion object {
+        private const val TAG = "PreferenceFragment"
     }
 }

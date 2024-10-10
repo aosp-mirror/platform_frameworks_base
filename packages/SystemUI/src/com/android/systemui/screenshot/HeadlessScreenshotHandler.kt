@@ -19,7 +19,6 @@ package com.android.systemui.screenshot
 import android.net.Uri
 import android.os.UserManager
 import android.util.Log
-import android.view.WindowManager
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
@@ -51,10 +50,6 @@ constructor(
         finisher: Consumer<Uri?>,
         requestCallback: TakeScreenshotService.RequestCallback,
     ) {
-        if (screenshot.type == WindowManager.TAKE_SCREENSHOT_FULLSCREEN) {
-            screenshot.bitmap = imageCapture.captureDisplay(screenshot.displayId, crop = null)
-        }
-
         if (screenshot.bitmap == null) {
             Log.e(TAG, "handleScreenshot: Screenshot bitmap was null")
             notificationsControllerFactory

@@ -151,7 +151,11 @@ private constructor(
 
         startSideContainer = mView.requireViewById(R.id.status_bar_start_side_content)
         startSideContainer.setOnHoverListener(
-            statusOverlayHoverListenerFactory.createDarkAwareListener(startSideContainer)
+            statusOverlayHoverListenerFactory.createDarkAwareListener(
+                startSideContainer,
+                topHoverMargin = 6,
+                bottomHoverMargin = 6,
+            )
         )
         startSideContainer.setOnTouchListener(iconsOnTouchListener)
     }
@@ -210,7 +214,7 @@ private constructor(
                 event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL
             centralSurfaces.setInteracting(
                 WINDOW_STATUS_BAR,
-                !upOrCancel || shadeController.isExpandedVisible
+                !upOrCancel || shadeController.isExpandedVisible,
             )
         }
     }
@@ -247,7 +251,7 @@ private constructor(
                         String.format(
                             "onTouchForwardedFromStatusBar: panel disabled, " +
                                 "ignoring touch at (${event.x.toInt()},${event.y.toInt()})"
-                        )
+                        ),
                     )
                 }
                 return false
@@ -266,7 +270,7 @@ private constructor(
                 if (!shadeViewController.isViewEnabled) {
                     shadeLogger.logMotionEvent(
                         event,
-                        "onTouchForwardedFromStatusBar: panel view disabled"
+                        "onTouchForwardedFromStatusBar: panel view disabled",
                     )
                     return true
                 }

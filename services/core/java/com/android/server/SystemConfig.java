@@ -727,10 +727,8 @@ public class SystemConfig {
             return;
         }
         // Read configuration of features, libs and priv-app permissions from apex module.
-        int apexPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS;
-        if (android.permission.flags.Flags.apexSignaturePermissionAllowlistEnabled()) {
-            apexPermissionFlag |= ALLOW_SIGNATURE_PERMISSIONS;
-        }
+        int apexPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PRIVAPP_PERMISSIONS
+                | ALLOW_SIGNATURE_PERMISSIONS;
         // TODO: Use a solid way to filter apex module folders?
         for (File f: FileUtils.listFilesOrEmpty(Environment.getApexDirectory())) {
             if (f.isFile() || f.getPath().contains("@")) {

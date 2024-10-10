@@ -22,7 +22,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager
+import android.content.pm.verify.domain.DomainVerificationManager
+import android.content.pm.verify.domain.DomainVerificationUserState
 import android.net.Uri
+import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.protolog.ShellProtoLogGroup
+
+private const val TAG = "AppToWebUtils"
 
 private val GenericBrowserIntent = Intent()
     .setAction(Intent.ACTION_VIEW)
@@ -58,4 +64,25 @@ fun getBrowserIntent(uri: Uri, packageManager: PackageManager): Intent? {
     val component = intent.resolveActivity(packageManager) ?: return null
     intent.setComponent(component)
     return intent
+}
+
+/**
+ * Returns the [DomainVerificationUserState] of the user associated with the given
+ * [DomainVerificationManager] and the given package.
+ */
+fun getDomainVerificationUserState(
+    manager: DomainVerificationManager,
+    packageName: String
+): DomainVerificationUserState? {
+    try {
+        return manager.getDomainVerificationUserState(packageName)
+    } catch (e: PackageManager.NameNotFoundException) {
+        ProtoLog.w(
+            ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+            "%s: Failed to get domain verification user state: %s",
+            TAG,
+            e.message!!
+        )
+        return null
+    }
 }

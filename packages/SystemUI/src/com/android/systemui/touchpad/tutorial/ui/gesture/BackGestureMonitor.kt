@@ -16,26 +16,24 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
+import android.view.MotionEvent
 import kotlin.math.abs
 
 /** Monitors for touchpad back gesture, that is three fingers swiping left or right */
 class BackGestureMonitor(
-    override val gestureDistanceThresholdPx: Int,
-    override val gestureStateChangedCallback: (GestureState) -> Unit
-) :
-    TouchpadGestureMonitor by ThreeFingerDistanceBasedGestureMonitor(
-        gestureDistanceThresholdPx = gestureDistanceThresholdPx,
-        gestureStateChangedCallback = gestureStateChangedCallback,
-        donePredicate =
-            object : GestureDonePredicate {
-                override fun wasGestureDone(
-                    startX: Float,
-                    startY: Float,
-                    endX: Float,
-                    endY: Float
-                ): Boolean {
-                    val distance = abs(endX - startX)
-                    return distance >= gestureDistanceThresholdPx
-                }
-            }
-    )
+    private val gestureDistanceThresholdPx: Int,
+    override val gestureStateChangedCallback: (GestureState) -> Unit,
+) : TouchpadGestureMonitor {
+    private val distanceTracker = DistanceTracker()
+
+    override fun processTouchpadEvent(event: MotionEvent) {
+        if (!isThreeFingerTouchpadSwipe(event)) return
+        val distanceState = distanceTracker.processEvent(event)
+        updateGestureStateBasedOnDistance(
+            gestureStateChangedCallback,
+            distanceState,
+            isFinished = { abs(it.deltaX) >= gestureDistanceThresholdPx },
+            progress = { 0f },
+        )
+    }
+}

@@ -361,6 +361,7 @@ private fun SceneScope.SingleShade(
                     carouselController = mediaCarouselController,
                     modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media),
                     usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
+                    isInSplitShade = false,
                 )
 
                 NotificationScrollingStack(
@@ -565,6 +566,7 @@ private fun SceneScope.SplitShade(
                                         Modifier.zIndex(1f)
                                     },
                                 carouselController = mediaCarouselController,
+                                isInSplitShade = true,
                             )
                         }
                         FooterActionsWithAnimatedVisibility(
@@ -619,6 +621,7 @@ private fun SceneScope.ShadeMediaCarousel(
     mediaOffsetProvider: ShadeMediaOffsetProvider,
     modifier: Modifier = Modifier,
     usingCollapsedLandscapeMedia: Boolean = false,
+    isInSplitShade: Boolean,
 ) {
     MediaCarousel(
         modifier = modifier.fillMaxWidth(),
@@ -632,5 +635,6 @@ private fun SceneScope.ShadeMediaCarousel(
                 { mediaOffsetProvider.offset }
             },
         usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
+        isInSplitShade = isInSplitShade,
     )
 }

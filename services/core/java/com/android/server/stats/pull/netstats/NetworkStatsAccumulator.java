@@ -17,7 +17,6 @@
 package com.android.server.stats.pull.netstats;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 
@@ -55,7 +54,7 @@ public class NetworkStatsAccumulator {
      * This method method may call {@code queryFunction} more than once, which includes maintaining
      * an internal cumulative stats snapshot and querying stats after the snapshot.
      */
-    @Nullable
+    @NonNull
     public NetworkStats queryStats(long currentTimeMillis,
             @NonNull StatsQueryFunction queryFunction) {
         maybeExpandSnapshot(currentTimeMillis, queryFunction);
@@ -80,23 +79,21 @@ public class NetworkStatsAccumulator {
         if (newEndTimeMillis - mSnapshotEndTimeMillis > mBucketDurationMillis) {
             NetworkStats extraStats = queryFunction.queryNetworkStats(mTemplate, mWithTags,
                     mSnapshotEndTimeMillis, newEndTimeMillis);
-            if (extraStats != null) {
-                mSnapshot = mSnapshot.add(extraStats);
-                mSnapshotEndTimeMillis = newEndTimeMillis;
-            }
+            mSnapshot = mSnapshot.add(extraStats);
+            mSnapshotEndTimeMillis = newEndTimeMillis;
         }
     }
 
     /**
      * Adds up stats in the internal cumulative snapshot and the stats that follow after it.
      */
-    @Nullable
+    @NonNull
     private NetworkStats snapshotPlusFollowingStats(long currentTimeMillis,
             @NonNull StatsQueryFunction queryFunction) {
         // Set end time in the future to include all stats in the active bucket.
         NetworkStats extraStats = queryFunction.queryNetworkStats(mTemplate, mWithTags,
                 mSnapshotEndTimeMillis, currentTimeMillis + mBucketDurationMillis);
-        return extraStats != null ? mSnapshot.add(extraStats) : null;
+        return mSnapshot.add(extraStats);
     }
 
     @FunctionalInterface
@@ -104,7 +101,7 @@ public class NetworkStatsAccumulator {
         /**
          * Returns network stats during the given time period.
          */
-        @Nullable
+        @NonNull
         NetworkStats queryNetworkStats(@NonNull NetworkTemplate template, boolean includeTags,
                 long startTime, long endTime);
     }

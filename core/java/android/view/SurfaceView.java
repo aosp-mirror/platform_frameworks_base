@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.flags.Flags.FLAG_SURFACE_VIEW_SET_COMPOSITION_ORDER;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_OVERLAY_SUBLAYER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_MEDIA_SUBLAYER;
@@ -770,6 +771,36 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     /**
+     * Controls the composition order of the SurfaceView. A non-negative composition order
+     * value indicates that the SurfaceView is composited on top of the parent window, while
+     * a negative composition order indicates that the SurfaceView is behind the parent
+     * window. A SurfaceView with a higher value appears above its peers with lower values.
+     * For SurfaceViews with the same composition order value, their relative order is
+     * undefined.
+     *
+     * @param compositionOrder the composition order of the surface view.
+     */
+    @FlaggedApi(FLAG_SURFACE_VIEW_SET_COMPOSITION_ORDER)
+    public void setCompositionOrder(int compositionOrder) {
+        mRequestedSubLayer = compositionOrder;
+        if (mSubLayer != mRequestedSubLayer) {
+            updateSurface();
+        }
+    }
+
+    /**
+     * Returns the composition order of the SurfaceView.
+     *
+     * @return composition order of the SurfaceView.
+     *
+     * @see #setCompositionOrder(int)
+     */
+    @FlaggedApi(FLAG_SURFACE_VIEW_SET_COMPOSITION_ORDER)
+    public int getCompositionOrder() {
+        return mRequestedSubLayer;
+    }
+
+    /**
      * Control whether the surface view's surface is placed on top of another
      * regular surface view in the window (but still behind the window itself).
      * This is typically used to place overlays on top of an underlying media
@@ -1257,7 +1288,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 final Transaction surfaceUpdateTransaction = new Transaction();
                 if (creating) {
                     updateOpaqueFlag();
-                    final String name = "SurfaceView[" + viewRoot.getTitle().toString() + "]";
+                    final String name = Integer.toHexString(System.identityHashCode(this))
+                            + " SurfaceView[" + viewRoot.getTitle().toString() + "]";
                     createBlastSurfaceControls(viewRoot, name, surfaceUpdateTransaction);
                 } else if (mSurfaceControl == null) {
                     return;

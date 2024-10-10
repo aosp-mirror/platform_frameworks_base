@@ -26,7 +26,7 @@ import kotlin.math.abs
  * is based on [com.android.quickstep.util.TriggerSwipeUpTouchTracker]
  */
 class RecentAppsGestureMonitor(
-    override val gestureDistanceThresholdPx: Int,
+    private val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit,
     private val velocityThresholdPxPerMs: Float,
     private val velocityTracker: VelocityTracker1D = VelocityTracker1D(isDataDifferential = false),

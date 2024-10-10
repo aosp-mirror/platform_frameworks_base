@@ -126,7 +126,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
@@ -455,18 +454,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         onClickListenerCaptor.value.onClick(view)
 
-        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
-        verify(mockFreeformTaskTransitionStarter)
-            .startMinimizedModeTransition(transactionCaptor.capture())
-        val wct = transactionCaptor.firstValue
-
-        verify(mockTasksLimiter).addPendingMinimizeChange(
-                anyOrNull(), eq(DEFAULT_DISPLAY), eq(decor.mTaskInfo.taskId))
-
-        assertEquals(1, wct.getHierarchyOps().size)
-        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REORDER, wct.getHierarchyOps().get(0).getType())
-        assertFalse(wct.getHierarchyOps().get(0).getToTop())
-        assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
+        verify(mockDesktopTasksController).minimizeTask(decor.mTaskInfo)
     }
 
     @Test

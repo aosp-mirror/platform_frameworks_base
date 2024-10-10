@@ -27,6 +27,9 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 /**
@@ -44,13 +47,18 @@ public final class MultiVibratorInfo extends VibratorInfo {
     private static final float EPSILON = 1e-5f;
 
     public MultiVibratorInfo(int id, VibratorInfo[] vibrators) {
-        this(id, vibrators, frequencyProfileIntersection(vibrators));
+        this(id, vibrators, frequencyProfileLegacyIntersection(vibrators),
+                frequencyProfileIntersection(vibrators));
     }
 
     private MultiVibratorInfo(
-            int id, VibratorInfo[] vibrators, FrequencyProfileLegacy mergedProfile) {
+            int id, VibratorInfo[] vibrators,
+            VibratorInfo.FrequencyProfileLegacy mergedLegacyProfile,
+            FrequencyProfile mergedProfile) {
         super(id,
-                capabilitiesIntersection(vibrators, mergedProfile.isEmpty()),
+                capabilitiesIntersection(vibrators,
+                        Flags.normalizedPwleEffects() ? mergedProfile.isEmpty()
+                                : mergedLegacyProfile.isEmpty()),
                 supportedEffectsIntersection(vibrators),
                 supportedBrakingIntersection(vibrators),
                 supportedPrimitivesAndDurationsIntersection(vibrators),
@@ -59,6 +67,7 @@ public final class MultiVibratorInfo extends VibratorInfo {
                 integerLimitIntersection(vibrators, VibratorInfo::getPwlePrimitiveDurationMax),
                 integerLimitIntersection(vibrators, VibratorInfo::getPwleSizeMax),
                 floatPropertyIntersection(vibrators, VibratorInfo::getQFactor),
+                mergedLegacyProfile,
                 mergedProfile,
                 integerLimitIntersection(vibrators,
                         VibratorInfo::getMaxEnvelopeEffectSize),
@@ -209,7 +218,82 @@ public final class MultiVibratorInfo extends VibratorInfo {
     }
 
     @NonNull
-    private static FrequencyProfileLegacy frequencyProfileIntersection(VibratorInfo[] infos) {
+    private static FrequencyProfile frequencyProfileIntersection(VibratorInfo[] infos) {
+        if (infos == null || infos.length == 0) {
+            return new FrequencyProfile(Float.NaN,
+                    /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+        }
+
+        float resonantFreq = floatPropertyIntersection(infos, VibratorInfo::getResonantFrequencyHz);
+
+        if (Float.isNaN(resonantFreq)) {
+            return new FrequencyProfile(Float.NaN,
+                    /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+        }
+
+        float minFrequency = 0.0f;
+        float maxFrequency = Float.MAX_VALUE;
+        Set<Float> allFrequencies = new TreeSet<>(); // Using TreeSet for automatic sorting
+
+        for (VibratorInfo info : infos) {
+            float newMinFrequency = info.getFrequencyProfile().getMinFrequencyHz();
+            float newMaxFrequency = info.getFrequencyProfile().getMaxFrequencyHz();
+
+            if (Float.isNaN(newMinFrequency) || Float.isNaN(newMaxFrequency)) {
+                // If one vibrator is undefined then the intersection is undefined.
+                return new FrequencyProfile(Float.NaN,
+                        /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+            }
+
+            minFrequency = Math.max(minFrequency, newMinFrequency);
+            maxFrequency = Math.min(maxFrequency, newMaxFrequency);
+
+            if (info.getFrequencyProfile().getFrequenciesHz() == null) {
+                return new FrequencyProfile(Float.NaN,
+                        /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+            }
+
+            for (float frequency : info.getFrequencyProfile().getFrequenciesHz()) {
+                allFrequencies.add(frequency);
+            }
+        }
+
+        if (minFrequency > maxFrequency) {
+            // If the range and intersection are disjoint then the intersection is undefined
+            return new FrequencyProfile(Float.NaN,
+                    /*frequenciesHz=*/ null, /*outputAccelerationsGs=*/ null);
+        }
+
+        // Trim frequencies to the min/max range
+        Iterator<Float> iterator = allFrequencies.iterator();
+        while (iterator.hasNext()) {
+            float frequency = iterator.next();
+            if (frequency < minFrequency || frequency > maxFrequency) {
+                iterator.remove();
+            }
+        }
+
+        float[] frequencies = new float[allFrequencies.size()];
+        float[] accelerations = new float[allFrequencies.size()];
+        int idx = 0;
+
+        for (Float frequency : allFrequencies) {
+            float outputAcceleration = Float.MAX_VALUE;
+            for (VibratorInfo info : infos) {
+                // This will find the mapped value or interpolate it if needed.
+                outputAcceleration = Math.min(outputAcceleration,
+                        info.getFrequencyProfile().getOutputAccelerationGs(frequency));
+            }
+            frequencies[idx] = frequency;
+            accelerations[idx] = outputAcceleration;
+            idx++;
+        }
+
+        return new FrequencyProfile(resonantFreq, frequencies, accelerations);
+    }
+
+    @NonNull
+    private static FrequencyProfileLegacy frequencyProfileLegacyIntersection(VibratorInfo[] infos) {
         float freqResolution = floatPropertyIntersection(infos,
                 info -> info.getFrequencyProfileLegacy().getFrequencyResolutionHz());
         float resonantFreq = floatPropertyIntersection(infos,
