@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
+class FakeHomeStatusBarViewModel : HomeStatusBarViewModel {
     private val areNotificationLightsOut = MutableStateFlow(false)
 
     override val isTransitioningFromLockscreenToOccluded = MutableStateFlow(false)
@@ -39,7 +39,7 @@ class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
 
     override val isClockVisible =
         MutableStateFlow(
-            CollapsedStatusBarViewModel.VisibilityModel(
+            HomeStatusBarViewModel.VisibilityModel(
                 visibility = View.GONE,
                 shouldAnimateChange = false,
             )
@@ -47,7 +47,7 @@ class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
 
     override val isNotificationIconContainerVisible =
         MutableStateFlow(
-            CollapsedStatusBarViewModel.VisibilityModel(
+            HomeStatusBarViewModel.VisibilityModel(
                 visibility = View.GONE,
                 shouldAnimateChange = false,
             )
@@ -55,7 +55,7 @@ class FakeCollapsedStatusBarViewModel : CollapsedStatusBarViewModel {
 
     override val isSystemInfoVisible =
         MutableStateFlow(
-            CollapsedStatusBarViewModel.VisibilityModel(
+            HomeStatusBarViewModel.VisibilityModel(
                 visibility = View.GONE,
                 shouldAnimateChange = false,
             )

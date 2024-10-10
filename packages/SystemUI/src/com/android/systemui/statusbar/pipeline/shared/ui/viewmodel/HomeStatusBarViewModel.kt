@@ -38,7 +38,7 @@ import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotif
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel.VisibilityModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -61,7 +61,7 @@ import kotlinx.coroutines.flow.stateIn
  * [StatusBarHideIconsForBouncerManager]. We should move those pieces of logic to this class instead
  * so that it's all in one place and easily testable outside of the fragment.
  */
-interface CollapsedStatusBarViewModel {
+interface HomeStatusBarViewModel {
     /**
      * True if the device is currently transitioning from lockscreen to occluded and false
      * otherwise.
@@ -116,7 +116,7 @@ interface CollapsedStatusBarViewModel {
 }
 
 @SysUISingleton
-class CollapsedStatusBarViewModelImpl
+class HomeStatusBarViewModelImpl
 @Inject
 constructor(
     collapsedStatusBarInteractor: CollapsedStatusBarInteractor,
@@ -128,7 +128,7 @@ constructor(
     shadeInteractor: ShadeInteractor,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
     @Application coroutineScope: CoroutineScope,
-) : CollapsedStatusBarViewModel {
+) : HomeStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
         keyguardTransitionInteractor
             .isInTransition(Edge.create(from = LOCKSCREEN, to = OCCLUDED))

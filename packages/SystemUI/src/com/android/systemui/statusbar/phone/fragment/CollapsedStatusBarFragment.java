@@ -72,9 +72,9 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder;
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener;
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
@@ -143,8 +143,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
-    private final CollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
-    private final CollapsedStatusBarViewBinder mCollapsedStatusBarViewBinder;
+    private final HomeStatusBarViewModel mHomeStatusBarViewModel;
+    private final HomeStatusBarViewBinder mHomeStatusBarViewBinder;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final DarkIconManager.Factory mDarkIconManagerFactory;
     private final SecureSettings mSecureSettings;
@@ -245,8 +245,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
-            CollapsedStatusBarViewModel collapsedStatusBarViewModel,
-            CollapsedStatusBarViewBinder collapsedStatusBarViewBinder,
+            HomeStatusBarViewModel homeStatusBarViewModel,
+            HomeStatusBarViewBinder homeStatusBarViewBinder,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             PanelExpansionInteractor panelExpansionInteractor,
@@ -267,8 +267,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mAnimationScheduler = animationScheduler;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarIconController = statusBarIconController;
-        mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
-        mCollapsedStatusBarViewBinder = collapsedStatusBarViewBinder;
+        mHomeStatusBarViewModel = homeStatusBarViewModel;
+        mHomeStatusBarViewBinder = homeStatusBarViewBinder;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
@@ -371,8 +371,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
-        mCollapsedStatusBarViewBinder.bind(
-                mStatusBar, mCollapsedStatusBarViewModel, mStatusBarVisibilityChangeListener);
+        mHomeStatusBarViewBinder.bind(
+                mStatusBar, mHomeStatusBarViewModel, mStatusBarVisibilityChangeListener);
     }
 
     private String getDumpableName() {
@@ -757,7 +757,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         // transition to occluding to finish before allowing us to potentially show the status bar
         // again. (This status bar is always hidden on keyguard, so it's safe to continue hiding it
         // during this transition.) See b/273314977.
-        if (mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().getValue()) {
+        if (mHomeStatusBarViewModel.isTransitioningFromLockscreenToOccluded().getValue()) {
             return true;
         }
 

@@ -40,9 +40,9 @@ import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ui.DarkIconManager
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 
@@ -51,8 +51,8 @@ class StatusBarRootFactory
 @Inject
 constructor(
     private val context: Context,
-    private val collapsedStatusBarViewModel: CollapsedStatusBarViewModel,
-    private val collapsedStatusBarViewBinder: CollapsedStatusBarViewBinder,
+    private val homeStatusBarViewModel: HomeStatusBarViewModel,
+    private val homeStatusBarViewBinder: HomeStatusBarViewBinder,
     private val notificationIconsBinder: NotificationIconContainerStatusBarViewBinder,
     private val darkIconManagerFactory: DarkIconManager.Factory,
     private val iconController: StatusBarIconController,
@@ -64,8 +64,8 @@ constructor(
             setContent {
                 StatusBarRoot(
                     parent = root,
-                    statusBarViewModel = collapsedStatusBarViewModel,
-                    statusBarViewBinder = collapsedStatusBarViewBinder,
+                    statusBarViewModel = homeStatusBarViewModel,
+                    statusBarViewBinder = homeStatusBarViewBinder,
                     notificationIconsBinder = notificationIconsBinder,
                     darkIconManagerFactory = darkIconManagerFactory,
                     iconController = iconController,
@@ -92,8 +92,8 @@ constructor(
 @Composable
 fun StatusBarRoot(
     parent: ViewGroup,
-    statusBarViewModel: CollapsedStatusBarViewModel,
-    statusBarViewBinder: CollapsedStatusBarViewBinder,
+    statusBarViewModel: HomeStatusBarViewModel,
+    statusBarViewBinder: HomeStatusBarViewBinder,
     notificationIconsBinder: NotificationIconContainerStatusBarViewBinder,
     darkIconManagerFactory: DarkIconManager.Factory,
     iconController: StatusBarIconController,
@@ -178,11 +178,11 @@ fun StatusBarRoot(
  * This is our analog of the flexi "ribbon", which just shows some text so we know if the flag is on
  */
 @Composable
-fun Disambiguation(viewModel: CollapsedStatusBarViewModel) {
+fun Disambiguation(viewModel: HomeStatusBarViewModel) {
     val clockVisibilityModel =
         viewModel.isClockVisible.collectAsStateWithLifecycle(
             initialValue =
-                CollapsedStatusBarViewModel.VisibilityModel(
+                HomeStatusBarViewModel.VisibilityModel(
                     visibility = View.GONE,
                     shouldAnimateChange = false,
                 )

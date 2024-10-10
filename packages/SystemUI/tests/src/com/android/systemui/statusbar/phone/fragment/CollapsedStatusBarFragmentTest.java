@@ -70,8 +70,8 @@ import com.android.systemui.statusbar.phone.fragment.dagger.HomeStatusBarCompone
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewBinder;
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewBinder;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
@@ -122,8 +122,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private DarkIconManager.Factory mIconManagerFactory;
     @Mock
     private DarkIconManager mIconManager;
-    private FakeCollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
-    private FakeCollapsedStatusBarViewBinder mCollapsedStatusBarViewBinder;
+    private FakeHomeStatusBarViewModel mCollapsedStatusBarViewModel;
+    private FakeHomeStatusBarViewBinder mCollapsedStatusBarViewBinder;
     @Mock
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock
@@ -1190,8 +1190,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mSecureSettings = mock(SecureSettings.class);
 
         mShadeExpansionStateManager = new ShadeExpansionStateManager();
-        mCollapsedStatusBarViewModel = new FakeCollapsedStatusBarViewModel();
-        mCollapsedStatusBarViewBinder = new FakeCollapsedStatusBarViewBinder();
+        mCollapsedStatusBarViewModel = new FakeHomeStatusBarViewModel();
+        mCollapsedStatusBarViewBinder = new FakeHomeStatusBarViewBinder();
 
         return new CollapsedStatusBarFragment(
                 mStatusBarFragmentComponentFactory,

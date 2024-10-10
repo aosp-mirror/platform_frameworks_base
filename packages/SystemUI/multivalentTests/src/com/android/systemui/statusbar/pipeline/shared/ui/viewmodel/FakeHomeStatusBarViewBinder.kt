@@ -17,21 +17,21 @@
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import android.view.View
-import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 
 /**
  * A fake view binder that can be used from Java tests.
  *
  * Since Java tests can't run tests within test scopes, we need to bypass the flows from
- * [CollapsedStatusBarViewModel] and just trigger the listener directly.
+ * [HomeStatusBarViewModel] and just trigger the listener directly.
  */
-class FakeCollapsedStatusBarViewBinder : CollapsedStatusBarViewBinder {
+class FakeHomeStatusBarViewBinder : HomeStatusBarViewBinder {
     var listener: StatusBarVisibilityChangeListener? = null
 
     override fun bind(
         view: View,
-        viewModel: CollapsedStatusBarViewModel,
+        viewModel: HomeStatusBarViewModel,
         listener: StatusBarVisibilityChangeListener,
     ) {
         this.listener = listener
