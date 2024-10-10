@@ -367,6 +367,17 @@ flag {
 }
 
 flag {
+    name: "enable_waiting_confirmation_before_mirroring"
+    namespace: "display_manager"
+    description: "Allow ContentRecorder checking whether user confirmed mirroring after boot"
+    bug: "361698995"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_battery_stats_for_all_displays"
     namespace: "display_manager"
     description: "Flag to enable battery stats for all displays."

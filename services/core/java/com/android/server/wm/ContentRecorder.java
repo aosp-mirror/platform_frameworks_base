@@ -285,6 +285,11 @@ final class ContentRecorder implements WindowContainerListener {
         }
     }
 
+    private boolean isDisplayReadyForMirroring() {
+        return mDisplayContent.getDisplayInfo().type != Display.TYPE_EXTERNAL
+                || mDisplayContent.mWmService.mDisplayManagerInternal.isDisplayReadyForMirroring(
+                        mDisplayContent.getDisplayId());
+    }
 
     /**
      * Ensure recording does not fall back to the display stack; ensure the recording is stopped
@@ -335,7 +340,7 @@ final class ContentRecorder implements WindowContainerListener {
             return;
         }
 
-        if (mContentRecordingSession.isWaitingForConsent()) {
+        if (mContentRecordingSession.isWaitingForConsent() || !isDisplayReadyForMirroring()) {
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING, "Content Recording: waiting to record, so do "
                     + "nothing");
             return;
