@@ -24,6 +24,7 @@ aconfig_declarations_group {
         "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
+        "android.app.assist.flags-aconfig-java",
         "android.app.contextualsearch.flags-aconfig-java",
         "android.app.flags-aconfig-java",
         "android.app.jank.flags-aconfig-java",
@@ -1227,6 +1228,20 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.contextualsearch.flags-aconfig-java",
     aconfig_declarations: "android.app.contextualsearch.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Assist
+aconfig_declarations {
+    name: "android.app.assist.flags-aconfig",
+    package: "android.app.assist.flags",
+    container: "system",
+    srcs: ["core/java/android/app/assist/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.assist.flags-aconfig-java",
+    aconfig_declarations: "android.app.assist.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
