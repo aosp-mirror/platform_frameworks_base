@@ -338,6 +338,7 @@ public:
     void setPointerSpeed(int32_t speed);
     void setMousePointerAccelerationEnabled(ui::LogicalDisplayId displayId, bool enabled);
     void setMouseReverseVerticalScrollingEnabled(bool enabled);
+    void setMouseSwapPrimaryButtonEnabled(bool enabled);
     void setTouchpadPointerSpeed(int32_t speed);
     void setTouchpadNaturalScrollingEnabled(bool enabled);
     void setTouchpadTapToClickEnabled(bool enabled);
@@ -485,6 +486,9 @@ private:
 
         // True if mouse vertical scrolling is reversed.
         bool mouseReverseVerticalScrollingEnabled{false};
+
+        // True if the mouse primary button is swapped (left/right buttons).
+        bool mouseSwapPrimaryButtonEnabled{false};
 
         // The touchpad pointer speed, as a number from -7 (slowest) to 7 (fastest).
         int32_t touchpadPointerSpeed{0};
@@ -768,6 +772,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->mouseReverseVerticalScrollingEnabled =
                 mLocked.mouseReverseVerticalScrollingEnabled;
+        outConfig->mouseSwapPrimaryButtonEnabled = mLocked.mouseSwapPrimaryButtonEnabled;
 
         outConfig->touchpadPointerSpeed = mLocked.touchpadPointerSpeed;
         outConfig->touchpadNaturalScrollingEnabled = mLocked.touchpadNaturalScrollingEnabled;
@@ -1333,6 +1338,21 @@ void NativeInputManager::setMouseReverseVerticalScrollingEnabled(bool enabled) {
         }
 
         mLocked.mouseReverseVerticalScrollingEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::MOUSE_SETTINGS);
+}
+
+void NativeInputManager::setMouseSwapPrimaryButtonEnabled(bool enabled) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.mouseSwapPrimaryButtonEnabled == enabled) {
+            return;
+        }
+
+        mLocked.mouseSwapPrimaryButtonEnabled = enabled;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -3030,6 +3050,12 @@ static void nativeSetMouseReverseVerticalScrollingEnabled(JNIEnv* env, jobject n
     im->setMouseReverseVerticalScrollingEnabled(enabled);
 }
 
+static void nativeSetMouseSwapPrimaryButtonEnabled(JNIEnv* env, jobject nativeImplObj,
+                                                   bool enabled) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setMouseSwapPrimaryButtonEnabled(enabled);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -3078,6 +3104,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetMousePointerAccelerationEnabled},
         {"setMouseReverseVerticalScrollingEnabled", "(Z)V",
          (void*)nativeSetMouseReverseVerticalScrollingEnabled},
+        {"setMouseSwapPrimaryButtonEnabled", "(Z)V", (void*)nativeSetMouseSwapPrimaryButtonEnabled},
         {"setTouchpadPointerSpeed", "(I)V", (void*)nativeSetTouchpadPointerSpeed},
         {"setTouchpadNaturalScrollingEnabled", "(Z)V",
          (void*)nativeSetTouchpadNaturalScrollingEnabled},

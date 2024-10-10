@@ -6219,6 +6219,16 @@ public final class Settings {
                 "mouse_reverse_vertical_scrolling";
 
         /**
+         * Whether to enable swapping the primary button for connected mice.
+         *
+         * When enabled, right clicking will be the primary button and left clicking will be the
+         * secondary button (e.g. show menu).
+         * @hide
+         */
+        public static final String MOUSE_SWAP_PRIMARY_BUTTON =
+                "mouse_swap_primary_button";
+
+        /**
          * Pointer fill style, specified by
          * {@link android.view.PointerIcon.PointerIconVectorStyleFill} constants.
          *
@@ -6457,6 +6467,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);
             PRIVATE_SETTINGS.add(DEFAULT_DEVICE_FONT_SCALE);
             PRIVATE_SETTINGS.add(MOUSE_REVERSE_VERTICAL_SCROLLING);
+            PRIVATE_SETTINGS.add(MOUSE_SWAP_PRIMARY_BUTTON);
         }
 
         /**
