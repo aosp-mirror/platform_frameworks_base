@@ -428,8 +428,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         ArgumentCaptor<FooterView> captor = ArgumentCaptor.forClass(FooterView.class);
         verify(mStackScroller).setFooterView(captor.capture());
 
-        assertNotNull(captor.getValue().findViewById(R.id.manage_text).hasOnClickListeners());
-        assertNotNull(captor.getValue().findViewById(R.id.dismiss_text).hasOnClickListeners());
+        assertNotNull(captor.getValue().findViewById(R.id.manage_text));
+        assertNotNull(captor.getValue().findViewById(R.id.dismiss_text));
     }
 
     @Test
