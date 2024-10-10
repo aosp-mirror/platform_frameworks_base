@@ -3,6 +3,8 @@ package com.android.systemui.bouncer.ui.binder
 import android.view.ViewGroup
 import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.Flags.contAuthPlugin
+import com.android.systemui.biometrics.plugins.AuthContextPlugins
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
@@ -17,6 +19,7 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.log.BouncerLogger
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import dagger.Lazy
+import java.util.Optional
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,6 +63,7 @@ class BouncerViewBinder
 constructor(
     private val legacyBouncerDependencies: Lazy<LegacyBouncerDependencies>,
     private val composeBouncerDependencies: Lazy<ComposeBouncerDependencies>,
+    private val contextPlugins: Optional<AuthContextPlugins>,
 ) {
     fun bind(view: ViewGroup) {
         if (ComposeBouncerFlags.isOnlyComposeBouncerEnabled()) {
@@ -85,6 +89,7 @@ constructor(
                 deps.bouncerMessageInteractor,
                 deps.bouncerLogger,
                 deps.selectedUserInteractor,
+                if (contAuthPlugin()) contextPlugins.orElse(null) else null,
             )
         }
     }
