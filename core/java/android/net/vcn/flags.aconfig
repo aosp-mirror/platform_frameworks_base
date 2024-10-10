@@ -46,13 +46,3 @@ flag{
       purpose: PURPOSE_BUGFIX
     }
 }
-
-flag{
-    name: "handle_seq_num_leap"
-    namespace: "vcn"
-    description: "Do not report bad network when there is a suspected sequence number leap"
-    bug: "332598276"
-    metadata {
-      purpose: PURPOSE_BUGFIX
-    }
-}
