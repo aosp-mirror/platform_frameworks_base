@@ -219,6 +219,13 @@ flag {
 }
 
 flag {
+    name: "tri_state_checked"
+    namespace: "accessibility"
+    description: "Feature flag for adding tri-state checked api"
+    bug: "333784774"
+}
+
+flag {
     name: "warning_use_default_dialog_type"
     namespace: "accessibility"
     description: "Uses the default type for the A11yService warning dialog, instead of SYSTEM_ALERT_DIALOG"
@@ -226,4 +233,4 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
+ }
