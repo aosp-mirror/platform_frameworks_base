@@ -50,7 +50,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
 
-import android.Manifest;
 import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
@@ -113,10 +112,11 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.KeyEvent;
 import android.view.WindowManager;
+import android.virtualdevice.cts.common.VirtualDeviceRule;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.compatibility.common.util.AdoptShellPermissionsRule;
+import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
@@ -224,9 +224,7 @@ public class VirtualDeviceManagerServiceTest {
     public SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Rule
-    public AdoptShellPermissionsRule mAdoptShellPermissionsRule = new AdoptShellPermissionsRule(
-            InstrumentationRegistry.getInstrumentation().getUiAutomation(),
-            Manifest.permission.CREATE_VIRTUAL_DEVICE);
+    public VirtualDeviceRule mVirtualDeviceRule = VirtualDeviceRule.createDefault();
 
     private Context mContext;
     private InputManagerMockHelper mInputManagerMockHelper;
@@ -1069,64 +1067,65 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void createVirtualDpad_noPermission_failsSecurityException() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class,
-                    () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER));
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class,
+                        () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER)));
     }
 
     @Test
     public void createVirtualKeyboard_noPermission_failsSecurityException() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class,
-                    () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER));
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class,
+                        () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER)));
     }
 
     @Test
     public void createVirtualMouse_noPermission_failsSecurityException() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class,
-                    () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER));
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class,
+                        () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER)));
     }
 
     @Test
     public void createVirtualTouchscreen_noPermission_failsSecurityException() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class,
-                    () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER));
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class,
+                        () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER)));
     }
 
     @Test
     public void createVirtualNavigationTouchpad_noPermission_failsSecurityException() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class,
-                    () -> mDeviceImpl.createVirtualNavigationTouchpad(NAVIGATION_TOUCHPAD_CONFIG,
-                            BINDER));
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class,
+                        () -> mDeviceImpl.createVirtualNavigationTouchpad(
+                                NAVIGATION_TOUCHPAD_CONFIG,
+                                BINDER)));
     }
 
     @Test
     public void onAudioSessionStarting_noPermission_failsSecurityException() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class,
-                    () -> mDeviceImpl.onAudioSessionStarting(
-                            DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback));
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class,
+                        () -> mDeviceImpl.onAudioSessionStarting(
+                                DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback)));
     }
 
     @Test
     public void onAudioSessionEnded_noPermission_failsSecurityException() {
-        try (DropShellPermissionsTemporarily drop = new DropShellPermissionsTemporarily()) {
-            assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded());
-        }
+        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
+        SystemUtil.runWithShellPermissionIdentity(() ->
+                assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded()));
     }
 
     @Test
@@ -2001,19 +2000,5 @@ public class VirtualDeviceManagerServiceTest {
                 /* notifyOnDeviceNearby= */ false, /* revoked= */ false, /* pending= */ false,
                 /* timeApprovedMs= */0, /* lastTimeConnectedMs= */0,
                 /* systemDataSyncFlags= */ -1, /* deviceIcon= */ null);
-    }
-
-    /** Helper class to drop permissions temporarily and restore them at the end of a test. */
-    static final class DropShellPermissionsTemporarily implements AutoCloseable {
-        DropShellPermissionsTemporarily() {
-            InstrumentationRegistry.getInstrumentation().getUiAutomation()
-                    .dropShellPermissionIdentity();
-        }
-
-        @Override
-        public void close() {
-            InstrumentationRegistry.getInstrumentation().getUiAutomation()
-                    .adoptShellPermissionIdentity();
-        }
     }
 }
