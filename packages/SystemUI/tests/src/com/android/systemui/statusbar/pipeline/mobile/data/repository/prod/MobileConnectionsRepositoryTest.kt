@@ -136,6 +136,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private val wifiLogBuffer = LogBuffer("wifi", maxSize = 100, logcatEchoTracker = mock())
     private val wifiPickerTrackerCallback =
         argumentCaptor<WifiPickerTracker.WifiPickerTrackerCallback>()
+    private val vcnTransportInfo = VcnTransportInfo.Builder().build()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -1003,6 +1004,18 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(latest).isTrue()
         }
 
+    private fun newWifiNetwork(wifiInfo: WifiInfo): Network {
+        val network = mock<Network>()
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(wifiInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(network)).thenReturn(capabilities)
+
+        return network
+    }
+
     /** Regression test for b/272586234. */
     @Test
     fun hasCarrierMergedConnection_carrierMergedViaWifiWithVcnTransport_isTrue() =
@@ -1012,10 +1025,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     whenever(this.isCarrierMerged).thenReturn(true)
                     whenever(this.isPrimary).thenReturn(true)
                 }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val caps =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
 
             val latest by collectLastValue(underTest.hasCarrierMergedConnection)
@@ -1034,10 +1049,12 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     whenever(this.isCarrierMerged).thenReturn(true)
                     whenever(this.isPrimary).thenReturn(true)
                 }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val caps =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
 
             val latest by collectLastValue(underTest.hasCarrierMergedConnection)
@@ -1094,10 +1111,15 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                     whenever(this.isCarrierMerged).thenReturn(true)
                     whenever(this.isPrimary).thenReturn(true)
                 }
+
+            // The Wifi network that is under the VCN network
+            val physicalWifiNetwork = newWifiNetwork(carrierMergedInfo)
+
             val underlyingCapabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(physicalWifiNetwork))
                 }
             whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
                 .thenReturn(underlyingCapabilities)
