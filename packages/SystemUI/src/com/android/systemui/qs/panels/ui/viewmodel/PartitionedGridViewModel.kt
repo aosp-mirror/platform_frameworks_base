@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.panels.domain.interactor
+package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.data.repository.qsColumnsRepository
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
 
-val Kosmos.qsColumnsInteractor by Kosmos.Fixture { QSColumnsInteractor(qsColumnsRepository) }
+@SysUISingleton
+class PartitionedGridViewModel
+@Inject
+constructor(
+    iconTilesViewModel: IconTilesViewModel,
+    gridSizeViewModel: FixedColumnsSizeViewModel,
+    iconLabelVisibilityViewModel: IconLabelVisibilityViewModel,
+) :
+    IconTilesViewModel by iconTilesViewModel,
+    FixedColumnsSizeViewModel by gridSizeViewModel,
+    IconLabelVisibilityViewModel by iconLabelVisibilityViewModel

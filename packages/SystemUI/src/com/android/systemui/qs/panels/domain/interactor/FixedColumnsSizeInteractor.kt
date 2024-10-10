@@ -17,11 +17,11 @@
 package com.android.systemui.qs.panels.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.panels.data.repository.QSColumnsRepository
+import com.android.systemui.qs.panels.data.repository.FixedColumnsRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 
 @SysUISingleton
-class QSColumnsInteractor @Inject constructor(repo: QSColumnsRepository) {
+class FixedColumnsSizeInteractor @Inject constructor(repo: FixedColumnsRepository) {
     val columns: StateFlow<Int> = repo.columns
 }

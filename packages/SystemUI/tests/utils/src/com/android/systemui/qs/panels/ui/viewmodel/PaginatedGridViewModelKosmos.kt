@@ -24,7 +24,7 @@ val Kosmos.paginatedGridViewModel by
     Kosmos.Fixture {
         PaginatedGridViewModel(
             iconTilesViewModel,
-            qsColumnsViewModel,
+            fixedColumnsSizeViewModel,
             iconLabelVisibilityViewModel,
             paginatedGridInteractor,
             applicationCoroutineScope,

@@ -16,7 +16,17 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.qs.panels.domain.interactor.qsColumnsInteractor
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.panels.domain.interactor.FixedColumnsSizeInteractor
+import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
-val Kosmos.qsColumnsViewModel by Kosmos.Fixture { QSColumnsSizeViewModelImpl(qsColumnsInteractor) }
+interface FixedColumnsSizeViewModel {
+    val columns: StateFlow<Int>
+}
+
+@SysUISingleton
+class FixedColumnsSizeViewModelImpl @Inject constructor(interactor: FixedColumnsSizeInteractor) :
+    FixedColumnsSizeViewModel {
+    override val columns: StateFlow<Int> = interactor.columns
+}
