@@ -8464,6 +8464,14 @@
     <permission android:name="android.permission.SETUP_FSVERITY"
                 android:protectionLevel="signature|privileged"/>
 
+    <!-- Allows app to enter trade-in-mode.
+        <p>Protection level: signature|privileged
+        @hide
+    -->
+    <permission android:name="android.permission.ENTER_TRADE_IN_MODE"
+                android:protectionLevel="signature|privileged"
+                android:featureFlag="com.android.tradeinmode.flags.enable_trade_in_mode" />
+
     <!--
         @TestApi
         Signature permission reserved for testing. This should never be used to

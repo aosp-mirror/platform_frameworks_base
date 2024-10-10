@@ -1398,6 +1398,10 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(BatteryService.class);
         t.traceEnd();
 
+        t.traceBegin("StartTradeInModeService");
+        mSystemServiceManager.startService(TradeInModeService.class);
+        t.traceEnd();
+
         // Tracks application usage stats.
         t.traceBegin("StartUsageService");
         mSystemServiceManager.startService(UsageStatsService.class);
