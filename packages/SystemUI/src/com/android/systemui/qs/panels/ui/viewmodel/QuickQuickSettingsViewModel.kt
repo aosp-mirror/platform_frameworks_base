@@ -40,14 +40,14 @@ class QuickQuickSettingsViewModel
 @Inject
 constructor(
     tilesInteractor: CurrentTilesInteractor,
-    qsColumnsViewModel: QSColumnsViewModel,
+    fixedColumnsSizeViewModel: FixedColumnsSizeViewModel,
     quickQuickSettingsRowInteractor: QuickQuickSettingsRowInteractor,
     val squishinessViewModel: TileSquishinessViewModel,
     private val iconTilesViewModel: IconTilesViewModel,
     @Application private val applicationScope: CoroutineScope,
 ) {
 
-    val columns = qsColumnsViewModel.columns
+    val columns = fixedColumnsSizeViewModel.columns
 
     private val rows =
         quickQuickSettingsRowInteractor.rows.stateIn(
