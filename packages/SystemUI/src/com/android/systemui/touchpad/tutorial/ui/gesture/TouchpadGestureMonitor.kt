@@ -17,15 +17,11 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
+import java.util.function.Consumer
 
-/**
- * Monitor for touchpad gestures that calls [gestureStateChangedCallback] when [GestureState]
- * changes. All tracked motion events should be passed to [processTouchpadEvent]
- */
-interface TouchpadGestureMonitor {
-    val gestureStateChangedCallback: (GestureState) -> Unit
-
-    fun processTouchpadEvent(event: MotionEvent)
+/** Monitor for touchpad gestures that can notify callback when [GestureState] changes. */
+interface TouchpadGestureMonitor : Consumer<MotionEvent> {
+    fun addGestureStateCallback(callback: (GestureState) -> Unit)
 }
 
 fun isThreeFingerTouchpadSwipe(event: MotionEvent) = isNFingerTouchpadSwipe(event, fingerCount = 3)

@@ -27,10 +27,7 @@ import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.BackGestureMonitor
 
 @Composable
-fun BackGestureTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun BackGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -39,18 +36,20 @@ fun BackGestureTutorialScreen(
                     titleResId = R.string.touchpad_back_gesture_action_title,
                     bodyResId = R.string.touchpad_back_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_back_gesture_success_title,
-                    bodySuccessResId = R.string.touchpad_back_gesture_success_body
+                    bodySuccessResId = R.string.touchpad_back_gesture_success_body,
                 ),
             animations =
                 TutorialScreenConfig.Animations(
                     educationResId = R.raw.trackpad_back_edu,
-                    successResId = R.raw.trackpad_back_success
-                )
+                    successResId = R.raw.trackpad_back_success,
+                ),
         )
     val gestureMonitorProvider =
         DistanceBasedGestureMonitorProvider(
             monitorFactory = { distanceThresholdPx, gestureStateCallback ->
-                BackGestureMonitor(distanceThresholdPx, gestureStateCallback)
+                BackGestureMonitor(distanceThresholdPx).also {
+                    it.addGestureStateCallback(gestureStateCallback)
+                }
             }
         )
     GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
@@ -67,7 +66,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
             rememberColorFilterProperty(".tertiaryFixedDim", tertiaryFixedDim),
             rememberColorFilterProperty(".onTertiaryFixed", onTertiaryFixed),
             rememberColorFilterProperty(".onTertiary", onTertiary),
-            rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant)
+            rememberColorFilterProperty(".onTertiaryFixedVariant", onTertiaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {

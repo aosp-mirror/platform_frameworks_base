@@ -26,10 +26,7 @@ import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureMonitor
 
 @Composable
-fun HomeGestureTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -38,18 +35,20 @@ fun HomeGestureTutorialScreen(
                     titleResId = R.string.touchpad_home_gesture_action_title,
                     bodyResId = R.string.touchpad_home_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_home_gesture_success_title,
-                    bodySuccessResId = R.string.touchpad_home_gesture_success_body
+                    bodySuccessResId = R.string.touchpad_home_gesture_success_body,
                 ),
             animations =
                 TutorialScreenConfig.Animations(
                     educationResId = R.raw.trackpad_home_edu,
-                    successResId = R.raw.trackpad_home_success
-                )
+                    successResId = R.raw.trackpad_home_success,
+                ),
         )
     val gestureMonitorProvider =
         DistanceBasedGestureMonitorProvider(
             monitorFactory = { distanceThresholdPx, gestureStateCallback ->
-                HomeGestureMonitor(distanceThresholdPx, gestureStateCallback)
+                HomeGestureMonitor(distanceThresholdPx).also {
+                    it.addGestureStateCallback(gestureStateCallback)
+                }
             }
         )
     GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
@@ -64,7 +63,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".primaryFixedDim", primaryFixedDim),
             rememberColorFilterProperty(".onPrimaryFixed", onPrimaryFixed),
-            rememberColorFilterProperty(".onPrimaryFixedVariant", onPrimaryFixedVariant)
+            rememberColorFilterProperty(".onPrimaryFixedVariant", onPrimaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {
