@@ -54,8 +54,9 @@ per-file Broadcast* = file:/BROADCASTS_OWNERS
 per-file *Permission* = patb@google.com
 per-file *Package* = patb@google.com
 
-# OOM Adjuster
+# OOM Adjuster & ProcessStateController
 per-file *Oom* = file:/OOM_ADJUSTER_OWNERS
+per-file ProcessStateController.java = file:/OOM_ADJUSTER_OWNERS
 
 # Miscellaneous
 per-file SettingsToPropertiesMapper.java = omakoto@google.com, yamasani@google.com, dzshen@google.com, zhidou@google.com, tedbauer@google.com

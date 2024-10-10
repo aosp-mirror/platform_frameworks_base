@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.approachLayout
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsDisplayed
@@ -70,11 +71,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
+import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.junit.Assert.assertThrows
@@ -2579,6 +2582,63 @@ class ElementTest {
                     .assertSizeIsEqualTo(50.dp)
                     .assertPositionInRootIsEqualTo(50.dp, 50.dp)
             }
+        }
+    }
+
+    @Test
+    fun staticSharedElementShouldNotRemeasureOrReplaceDuringOverscrollableTransition() {
+        val size = 30.dp
+        var numberOfMeasurements = 0
+        var numberOfPlacements = 0
+
+        // Foo is a simple element that does not move or resize during the transition.
+        @Composable
+        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+            Box(
+                modifier
+                    .element(TestElements.Foo)
+                    .layout { measurable, constraints ->
+                        numberOfMeasurements++
+                        measurable.measure(constraints).run {
+                            numberOfPlacements++
+                            layout(width, height) { place(0, 0) }
+                        }
+                    }
+                    .size(size)
+            )
+        }
+
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val scope =
+            rule.setContentAndCreateMainScope {
+                SceneTransitionLayout(state) {
+                    scene(SceneA) { Box(Modifier.fillMaxSize()) { Foo() } }
+                    scene(SceneB) { Box(Modifier.fillMaxSize()) { Foo() } }
+                }
+            }
+
+        // Start an overscrollable transition driven by progress.
+        var progress by mutableFloatStateOf(0f)
+        val transition = transition(from = SceneA, to = SceneB, progress = { progress })
+        assertThat(transition).isInstanceOf(TransitionState.HasOverscrollProperties::class.java)
+        scope.launch { state.startTransition(transition) }
+
+        // Reset the counters after the first animation frame.
+        rule.waitForIdle()
+        numberOfMeasurements = 0
+        numberOfPlacements = 0
+
+        // Change the progress a bunch of times.
+        val nFrames = 20
+        repeat(nFrames) { i ->
+            progress = i / nFrames.toFloat()
+            rule.waitForIdle()
+
+            // We shouldn't have remeasured or replaced Foo.
+            assertWithMessage("Frame $i didn't remeasure Foo")
+                .that(numberOfMeasurements)
+                .isEqualTo(0)
+            assertWithMessage("Frame $i didn't replace Foo").that(numberOfPlacements).isEqualTo(0)
         }
     }
 }

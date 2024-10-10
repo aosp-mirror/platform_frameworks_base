@@ -68,6 +68,8 @@ import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.flag.DualShade
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
@@ -75,6 +77,7 @@ import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.FlowDumperImpl
 import com.android.systemui.util.kotlin.Utils.Companion.sample as sampleCombine
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -137,8 +140,10 @@ constructor(
     private val primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
     private val primaryBouncerToLockscreenTransitionViewModel:
         PrimaryBouncerToLockscreenTransitionViewModel,
-    private val aodBurnInViewModel: AodBurnInViewModel,
+    aodBurnInViewModel: AodBurnInViewModel,
     private val communalSceneInteractor: CommunalSceneInteractor,
+    // Lazy because it's only used in the SceneContainer + Dual Shade configuration.
+    headsUpNotificationInteractor: Lazy<HeadsUpNotificationInteractor>,
     unfoldTransitionInteractor: UnfoldTransitionInteractor,
 ) : FlowDumperImpl(dumpManager) {
 
@@ -390,20 +395,36 @@ constructor(
      * notifications unless in splitshade.
      */
     private val alphaForShadeAndQsExpansion: Flow<Float> =
-        interactor.configurationBasedDimensions
-            .flatMapLatest { configurationBasedDimensions ->
-                combineTransform(shadeInteractor.shadeExpansion, shadeInteractor.qsExpansion) {
-                    shadeExpansion,
-                    qsExpansion ->
-                    if (shadeExpansion > 0f || qsExpansion > 0f) {
-                        if (configurationBasedDimensions.useSplitShade) {
-                            emit(1f)
-                        } else if (qsExpansion == 1f) {
-                            // Ensure HUNs will be visible in QS shade (at least while unlocked)
-                            emit(1f)
-                        } else {
-                            // Fade as QS shade expands
-                            emit(1f - qsExpansion)
+        if (DualShade.isEnabled) {
+                combineTransform(
+                    headsUpNotificationInteractor.get().isHeadsUpOrAnimatingAway,
+                    shadeInteractor.shadeExpansion,
+                    shadeInteractor.qsExpansion,
+                ) { isHeadsUpOrAnimatingAway, shadeExpansion, qsExpansion ->
+                    if (isHeadsUpOrAnimatingAway) {
+                        // Ensure HUNs will be visible in QS shade (at least while unlocked)
+                        emit(1f)
+                    } else if (shadeExpansion > 0f || qsExpansion > 0f) {
+                        // Fade out as QS shade expands
+                        emit(1f - qsExpansion)
+                    }
+                }
+            } else {
+                interactor.configurationBasedDimensions.flatMapLatest { configurationBasedDimensions
+                    ->
+                    combineTransform(shadeInteractor.shadeExpansion, shadeInteractor.qsExpansion) {
+                        shadeExpansion,
+                        qsExpansion ->
+                        if (shadeExpansion > 0f || qsExpansion > 0f) {
+                            if (configurationBasedDimensions.useSplitShade) {
+                                emit(1f)
+                            } else if (qsExpansion == 1f) {
+                                // Ensure HUNs will be visible in QS shade (at least while unlocked)
+                                emit(1f)
+                            } else {
+                                // Fade as QS shade expands
+                                emit(1f - qsExpansion)
+                            }
                         }
                     }
                 }
@@ -427,7 +448,7 @@ constructor(
     private fun alphaForTransitions(viewState: ViewStateAccessor): Flow<Float> {
         return merge(
             keyguardInteractor.dismissAlpha.dumpWhileCollecting("keyguardInteractor.dismissAlpha"),
-            // All transition view models are mututally exclusive, and safe to merge
+            // All transition view models are mutually exclusive, and safe to merge
             bouncerToGoneNotificationAlpha(viewState),
             aodToGoneTransitionViewModel.notificationAlpha(viewState),
             aodToLockscreenTransitionViewModel.notificationAlpha,

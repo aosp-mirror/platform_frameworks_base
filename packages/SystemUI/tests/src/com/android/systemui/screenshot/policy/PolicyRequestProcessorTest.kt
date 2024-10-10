@@ -16,6 +16,7 @@
 package com.android.systemui.screenshot.policy
 
 import android.content.ComponentName
+import android.graphics.Bitmap
 import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
@@ -27,10 +28,12 @@ import com.android.systemui.screenshot.ImageCapture
 import com.android.systemui.screenshot.ScreenshotData
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.ActivityNames.FILES
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.TaskSpec
+import com.android.systemui.screenshot.data.model.DisplayContentScenarios.launcherOnly
 import com.android.systemui.screenshot.data.model.DisplayContentScenarios.singleFullScreen
 import com.android.systemui.screenshot.data.repository.DisplayContentRepository
 import com.android.systemui.screenshot.policy.TestUserIds.PERSONAL
 import com.android.systemui.screenshot.policy.TestUserIds.WORK
+import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -39,14 +42,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class PolicyRequestProcessorTest {
-
-    val imageCapture =
-        object : ImageCapture {
-            override fun captureDisplay(displayId: Int, crop: Rect?) = null
-
-            override suspend fun captureTask(taskId: Int) = null
-        }
-
     /** Tests behavior when no policies are applied */
     @Test
     fun testProcess_defaultOwner_whenNoPolicyApplied() {
@@ -71,7 +66,7 @@ class PolicyRequestProcessorTest {
         val requestProcessor =
             PolicyRequestProcessor(
                 Dispatchers.Unconfined,
-                imageCapture,
+                createImageCapture(),
                 policies = emptyList(),
                 defaultOwner = UserHandle.of(PERSONAL),
                 defaultComponent = ComponentName("default", "Component"),
@@ -90,6 +85,70 @@ class PolicyRequestProcessorTest {
 
         assertWithMessage("Task ID").that(result.taskId).isEqualTo(TASK_ID)
     }
+
+    @Test
+    fun testProcess_throwsWhenCaptureFails() {
+        val request = ScreenshotData.forTesting()
+
+        /* Create a policy request processor with no capture policies */
+        val requestProcessor =
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
+                createImageCapture(display = null),
+                policies = emptyList(),
+                defaultComponent = ComponentName("default", "Component"),
+                displayTasks = DisplayContentRepository { launcherOnly() },
+            )
+
+        val result = runCatching { runBlocking { requestProcessor.process(request) } }
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun testProcess_throwsWhenTaskCaptureFails() {
+        val request = ScreenshotData.forTesting()
+        val fullScreenWork = DisplayContentRepository {
+            singleFullScreen(TaskSpec(taskId = TASK_ID, name = FILES, userId = WORK))
+        }
+
+        val captureTaskPolicy = CapturePolicy {
+            CapturePolicy.PolicyResult.Matched(
+                policy = "",
+                reason = "",
+                parameters =
+                    CaptureParameters(
+                        CaptureType.IsolatedTask(taskId = 0, taskBounds = null),
+                        null,
+                        UserHandle.CURRENT,
+                    ),
+            )
+        }
+
+        /* Create a policy request processor with no capture policies */
+        val requestProcessor =
+            PolicyRequestProcessor(
+                Dispatchers.Unconfined,
+                createImageCapture(task = null),
+                policies = listOf(captureTaskPolicy),
+                defaultComponent = ComponentName("default", "Component"),
+                displayTasks = fullScreenWork,
+            )
+
+        val result = runCatching { runBlocking { requestProcessor.process(request) } }
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    private fun createImageCapture(
+        display: Bitmap? = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+        task: Bitmap? = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888),
+    ) =
+        object : ImageCapture {
+            override fun captureDisplay(displayId: Int, crop: Rect?) = display
+
+            override suspend fun captureTask(taskId: Int) = task
+        }
 
     companion object {
         const val TASK_ID = 1001

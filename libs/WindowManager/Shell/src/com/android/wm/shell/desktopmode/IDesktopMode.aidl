@@ -51,5 +51,5 @@ interface IDesktopMode {
     void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource);
 
     /** Remove desktop on the given display */
-    void removeDesktop(int displayId);
+    oneway void removeDesktop(int displayId);
 }

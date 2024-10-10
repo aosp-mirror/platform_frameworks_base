@@ -26,8 +26,11 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -47,6 +50,9 @@ public class StepToRampAdapterTest {
             IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
 
     private StepToRampAdapter mAdapter;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() throws Exception {
@@ -134,6 +140,7 @@ public class StepToRampAdapterTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testStepSegments_withPwleCapabilityAndFrequency_convertsStepsToRamps() {
         List<VibrationEffectSegment> segments = new ArrayList<>(Arrays.asList(
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 100, /* duration= */ 10),

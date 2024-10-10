@@ -35,7 +35,6 @@ import android.util.Log
 import android.view.Display
 import android.view.ScrollCaptureResponse
 import android.view.ViewRootImpl.ActivityConfigCallback
-import android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN
 import android.view.WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE
 import android.widget.Toast
 import android.window.WindowContext
@@ -161,11 +160,6 @@ internal constructor(
     ) {
         Assert.isMainThread()
         screenshotHandler.resetTimeout()
-
-        if (screenshot.type == TAKE_SCREENSHOT_FULLSCREEN && screenshot.bitmap == null) {
-            val bounds = fullScreenRect
-            screenshot.bitmap = imageCapture.captureDisplay(display.displayId, bounds)
-        }
 
         val currentBitmap = screenshot.bitmap
         if (currentBitmap == null) {

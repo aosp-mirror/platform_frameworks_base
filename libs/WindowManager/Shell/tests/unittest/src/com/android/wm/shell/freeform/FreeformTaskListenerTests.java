@@ -178,6 +178,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onTaskVanished(task);
 
         verify(mDesktopRepository, never()).minimizeTask(task.displayId, task.taskId);
+        verify(mDesktopRepository).removeClosingTask(task.taskId);
         verify(mDesktopRepository).removeFreeformTask(task.displayId, task.taskId);
     }
 

@@ -16,6 +16,8 @@
 
 package android.os.vibrator;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertEquals;
@@ -24,7 +26,11 @@ import android.hardware.vibrator.IVibrator;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.os.VibratorInfo;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -32,6 +38,9 @@ import org.junit.runners.JUnit4;
 @RunWith(JUnit4.class)
 public class MultiVibratorInfoTest {
     private static final float TEST_TOLERANCE = 1e-5f;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testGetId() {
@@ -157,6 +166,7 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testGetQFactorAndResonantFrequency_differentValues_returnsNaN() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
@@ -187,6 +197,7 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testGetQFactorAndResonantFrequency_sameValues_returnsValue() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
@@ -212,6 +223,7 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testGetFrequencyProfileLegacy_differentResonantFreqOrResolutions_returnsEmpty() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
@@ -240,6 +252,7 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testGetFrequencyProfileLegacy_missingValues_returnsEmpty() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
@@ -288,6 +301,7 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testGetFrequencyProfileLegacy_unalignedMaxAmplitudes_returnsEmpty() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
@@ -312,6 +326,7 @@ public class MultiVibratorInfoTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testGetFrequencyProfileLegacy_alignedProfiles_returnsIntersection() {
         VibratorInfo firstInfo = new VibratorInfo.Builder(/* id= */ 1)
                 .setCapabilities(IVibrator.CAP_FREQUENCY_CONTROL)
@@ -351,6 +366,132 @@ public class MultiVibratorInfoTest {
                         new float[]{0.8f, 1, 0.5f}),
                 info.getFrequencyProfileLegacy());
         assertEquals(false, info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL));
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testGetFrequencyProfile_alignedProfiles_returnsIntersection() {
+        VibratorInfo firstInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 1,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{30f, 60f, 120f, 150f, 180f, 210f, 270f, 300f},
+                /*accelerations=*/new float[]{0.1f, 0.6f, 1.8f, 2.4f, 3.0f, 2.2f, 1.0f, 0.5f});
+
+        VibratorInfo secondInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 2,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{120f, 150f, 180f, 210f},
+                /*accelerations=*/new float[]{1.5f, 2.6f, 2.7f, 2.1f});
+
+        VibratorInfo.FrequencyProfile expectedFrequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/
+                        180f, /*frequenciesHz=*/new float[]{120.0f, 150.0f, 180.0f, 210.0f},
+                        /*outputAccelerationsGs=*/new float[]{1.5f, 2.4f, 2.7f, 2.1f});
+
+        VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
+                new VibratorInfo[]{firstInfo, secondInfo});
+
+        assertThat(info.getFrequencyProfile()).isEqualTo(expectedFrequencyProfile);
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testGetFrequencyProfile_alignedProfilesUsingInterpolation_returnsIntersection() {
+        VibratorInfo firstInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 1,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{30f, 60f, 120f},
+                /*accelerations=*/new float[]{0.25f, 1.0f, 4.0f});
+
+        VibratorInfo secondInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 2,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{40f, 70f, 110f},
+                /*accelerations=*/new float[]{1.0f, 2.5f, 4.0f});
+
+        VibratorInfo.FrequencyProfile expectedFrequencyProfile =
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/
+                        180f, /*frequenciesHz=*/new float[]{40f, 60f, 70f, 110f},
+                        /*outputAccelerationsGs=*/new float[]{0.5f, 1.0f, 1.5f, 3.5f});
+
+        VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
+                new VibratorInfo[]{firstInfo, secondInfo});
+
+        assertThat(info.getFrequencyProfile()).isEqualTo(expectedFrequencyProfile);
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testGetFrequencyProfile_disjointFrequencyRange_returnsEmpty() {
+
+        VibratorInfo firstInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 1,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{30f, 60f, 120f, 150f, 180f, 210f, 270f, 300f},
+                /*accelerations=*/new float[]{0.1f, 0.6f, 1.8f, 2.4f, 3.0f, 2.2f, 1.0f, 0.5f});
+
+        VibratorInfo secondInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 2,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{310f, 320f, 350f, 380f, 410f, 440f},
+                /*accelerations=*/new float[]{0.3f, 0.75f, 1.82f, 2.11f, 2.8f, 2.12f, 1.4f, 0.42f});
+
+        VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
+                new VibratorInfo[]{firstInfo, secondInfo});
+
+        assertThat(info.getFrequencyProfile()).isEqualTo(
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/ Float.NaN,
+                        /*frequenciesHz=*/null, /*outputAccelerationsGs=*/null));
+        assertThat(info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testGetFrequencyProfile_emptyFrequencyRange_returnsEmpty() {
+        VibratorInfo firstInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 1,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/180f,
+                /*frequencies=*/null, /*accelerations=*/null);
+
+        VibratorInfo secondInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 2,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/180f,
+                /*frequencies=*/new float[]{30f, 60f, 150f, 180f, 210f, 240f, 300f},
+                /*accelerations=*/new float[]{0.1f, 0.6f, 2.4f, 3.0f, 2.2f, 1.9f, 0.5f});
+
+        VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
+                new VibratorInfo[]{firstInfo, secondInfo});
+
+        assertThat(info.getFrequencyProfile()).isEqualTo(
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/ Float.NaN,
+                        /*frequenciesHz=*/null,
+                        /*outputAccelerationsGs=*/null));
+        assertThat(info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL)).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
+    public void testGetFrequencyProfile_differentResonantFrequency_returnsEmpty() {
+        VibratorInfo firstInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 1,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 160f,
+                /*frequencies=*/new float[]{30f, 60f, 120f, 150f, 180f, 210f, 270f, 300f},
+                /*accelerations=*/new float[]{0.1f, 0.6f, 1.8f, 2.4f, 3.0f, 2.2f, 1.0f, 0.5f});
+
+        VibratorInfo secondInfo = createVibratorInfoWithFrequencyProfile(/*id=*/ 2,
+                IVibrator.CAP_FREQUENCY_CONTROL, /*resonantFrequencyHz=*/ 180f,
+                /*frequencies=*/new float[]{30f, 60f, 120f, 150f, 180f, 210f, 270f, 300f},
+                /*accelerations=*/new float[]{0.1f, 0.6f, 1.8f, 2.4f, 3.0f, 2.2f, 1.0f, 0.5f});
+
+        VibratorInfo info = new MultiVibratorInfo(/* id= */ 1,
+                new VibratorInfo[]{firstInfo, secondInfo});
+
+        assertThat(info.getFrequencyProfile()).isEqualTo(
+                new VibratorInfo.FrequencyProfile(/*resonantFrequencyHz=*/ Float.NaN,
+                        /*frequenciesHz=*/null,
+                        /*outputAccelerationsGs=*/null));
+        assertThat(info.hasCapability(IVibrator.CAP_FREQUENCY_CONTROL)).isFalse();
+    }
+
+    private VibratorInfo createVibratorInfoWithFrequencyProfile(int id, long capabilities,
+            float resonantFrequencyHz, float[] frequencies, float[] accelerations) {
+        return new VibratorInfo.Builder(id)
+                .setCapabilities(capabilities)
+                .setFrequencyProfile(
+                        new VibratorInfo.FrequencyProfile(resonantFrequencyHz, frequencies,
+                                accelerations))
+                .build();
     }
 
     /**

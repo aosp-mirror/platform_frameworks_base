@@ -24,6 +24,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -80,25 +81,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -113,9 +107,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
-import androidx.compose.ui.zIndex
+import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
-import com.android.systemui.keyboard.shortcut.shared.model.Shortcut
+import com.android.systemui.keyboard.shortcut.shared.model.Shortcut as ShortcutModel
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategory
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCommand
@@ -405,7 +399,7 @@ private fun ShortcutSubCategorySinglePane(searchQuery: String, subCategory: Shor
         if (index > 0) {
             HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
         }
-        ShortcutView(Modifier.padding(vertical = 24.dp), searchQuery, shortcut)
+        Shortcut(Modifier.padding(vertical = 24.dp), searchQuery, shortcut)
     }
 }
 
@@ -444,9 +438,9 @@ private fun EndSidePanel(searchQuery: String, modifier: Modifier, category: Shor
         NoSearchResultsText(horizontalPadding = 24.dp, fillHeight = false)
         return
     }
-    LazyColumn(modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
-        items(items = category.subCategories, key = { item -> item.label }) {
-            SubCategoryContainerDualPane(searchQuery, it)
+    LazyColumn(modifier = modifier) {
+        items(category.subCategories) { subcategory ->
+            SubCategoryContainerDualPane(searchQuery = searchQuery, subCategory = subcategory)
             Spacer(modifier = Modifier.height(8.dp))
         }
     }
@@ -477,14 +471,21 @@ private fun SubCategoryContainerDualPane(searchQuery: String, subCategory: Short
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceBright,
     ) {
-        Column(Modifier.padding(24.dp)) {
+        Column(Modifier.padding(16.dp)) {
             SubCategoryTitle(subCategory.label)
             Spacer(Modifier.height(8.dp))
             subCategory.shortcuts.fastForEachIndexed { index, shortcut ->
                 if (index > 0) {
-                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    )
                 }
-                ShortcutView(Modifier.padding(vertical = 16.dp), searchQuery, shortcut)
+                Shortcut(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    searchQuery = searchQuery,
+                    shortcut = shortcut,
+                )
             }
         }
     }
@@ -500,18 +501,17 @@ private fun SubCategoryTitle(title: String) {
 }
 
 @Composable
-private fun ShortcutView(modifier: Modifier, searchQuery: String, shortcut: Shortcut) {
+private fun Shortcut(modifier: Modifier, searchQuery: String, shortcut: ShortcutModel) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    val focusColor = MaterialTheme.colorScheme.secondary
     Row(
         modifier
+            .thenIf(isFocused) {
+                Modifier.border(width = 3.dp, color = focusColor, shape = RoundedCornerShape(16.dp))
+            }
             .focusable(interactionSource = interactionSource)
-            .outlineFocusModifier(
-                isFocused = isFocused,
-                focusColor = MaterialTheme.colorScheme.secondary,
-                padding = 8.dp,
-                cornerRadius = 16.dp,
-            )
+            .padding(8.dp)
     ) {
         Row(
             modifier = Modifier.width(128.dp).align(Alignment.CenterVertically),
@@ -523,7 +523,7 @@ private fun ShortcutView(modifier: Modifier, searchQuery: String, shortcut: Shor
             }
             ShortcutDescriptionText(searchQuery = searchQuery, shortcut = shortcut)
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(24.dp))
         ShortcutKeyCombinations(modifier = Modifier.weight(1f), shortcut = shortcut)
     }
 }
@@ -548,7 +548,7 @@ fun ShortcutIcon(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ShortcutKeyCombinations(modifier: Modifier = Modifier, shortcut: Shortcut) {
+private fun ShortcutKeyCombinations(modifier: Modifier = Modifier, shortcut: ShortcutModel) {
     FlowRow(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -628,7 +628,7 @@ private fun FlowRowScope.ShortcutOrSeparator(spacing: Dp) {
 @Composable
 private fun ShortcutDescriptionText(
     searchQuery: String,
-    shortcut: Shortcut,
+    shortcut: ShortcutModel,
     modifier: Modifier = Modifier,
 ) {
     Text(
@@ -748,39 +748,6 @@ private fun CategoryItemTwoPane(
                 )
             }
         }
-    }
-}
-
-private fun Modifier.outlineFocusModifier(
-    isFocused: Boolean,
-    focusColor: Color,
-    padding: Dp,
-    cornerRadius: Dp,
-): Modifier {
-    if (isFocused) {
-        return this.drawWithContent {
-                val focusOutline =
-                    Rect(Offset.Zero, size).let {
-                        if (padding > 0.dp) {
-                            it.inflate(padding.toPx())
-                        } else {
-                            it.deflate(padding.unaryMinus().toPx())
-                        }
-                    }
-                drawContent()
-                drawRoundRect(
-                    color = focusColor,
-                    style = Stroke(width = 3.dp.toPx()),
-                    topLeft = focusOutline.topLeft,
-                    size = focusOutline.size,
-                    cornerRadius = CornerRadius(cornerRadius.toPx()),
-                )
-            }
-            // Increasing Z-Index so focus outline is drawn on top of "selected" category
-            // background.
-            .zIndex(1f)
-    } else {
-        return this
     }
 }
 
