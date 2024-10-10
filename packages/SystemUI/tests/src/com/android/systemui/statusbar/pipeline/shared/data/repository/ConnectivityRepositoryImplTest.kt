@@ -22,6 +22,7 @@ import android.net.NetworkCapabilities
 import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
 import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
 import android.net.NetworkCapabilities.TRANSPORT_WIFI
+import android.net.TelephonyNetworkSpecifier
 import android.net.vcn.VcnTransportInfo
 import android.net.wifi.WifiInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
@@ -67,6 +68,8 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var logger: ConnectivityInputLogger
     private lateinit var testScope: TestScope
     @Mock private lateinit var tunerService: TunerService
+
+    private val vcnTransportInfo = VcnTransportInfo.Builder().build()
 
     @Before
     fun setUp() {
@@ -376,6 +379,30 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             job.cancel()
         }
 
+    private fun newWifiNetwork(wifiInfo: WifiInfo): Network {
+        val network = mock<Network>()
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(wifiInfo)
+            }
+        whenever(connectivityManager.getNetworkCapabilities(network)).thenReturn(capabilities)
+
+        return network
+    }
+
+    private fun newCellNetwork(subId: Int): Network {
+        val network = mock<Network>()
+        val capabilities =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
+                whenever(it.networkSpecifier).thenReturn(TelephonyNetworkSpecifier(subId))
+            }
+        whenever(connectivityManager.getNetworkCapabilities(network)).thenReturn(capabilities)
+
+        return network
+    }
+
     @Test
     fun defaultConnections_carrierMergedViaWifiWithVcnTransport_wifiAndCarrierMergedDefault() =
         testScope.runTest {
@@ -384,10 +411,12 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
             val carrierMergedInfo =
                 mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val capabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(false)
                     whenever(it.hasTransport(TRANSPORT_ETHERNET)).thenReturn(false)
                 }
@@ -409,10 +438,12 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
             val carrierMergedInfo =
                 mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val capabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                     whenever(it.hasTransport(TRANSPORT_ETHERNET)).thenReturn(false)
                     whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(false)
                 }
@@ -572,10 +603,12 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             val underlyingCarrierMergedNetwork = mock<Network>()
             val carrierMergedInfo =
                 mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+            val underlyingWifi = newWifiNetwork(carrierMergedInfo)
             val underlyingCapabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
             whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
                 .thenReturn(underlyingCapabilities)
@@ -664,7 +697,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     @Test
     fun vcnSubId_tracksVcnTransportInfo() =
         testScope.runTest {
-            val vcnInfo = VcnTransportInfo(SUB_1_ID)
+            val underlyingCell = newCellNetwork(SUB_1_ID)
 
             var latest: Int? = null
             val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
@@ -672,7 +705,8 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             val capabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(vcnInfo)
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingCell))
                 }
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
@@ -684,7 +718,7 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     @Test
     fun vcnSubId_filersOutInvalid() =
         testScope.runTest {
-            val vcnInfo = VcnTransportInfo(INVALID_SUBSCRIPTION_ID)
+            val underlyingCell = newCellNetwork(INVALID_SUBSCRIPTION_ID)
 
             var latest: Int? = null
             val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
@@ -692,7 +726,8 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             val capabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(vcnInfo)
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingCell))
                 }
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
@@ -729,11 +764,12 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
 
             val wifiInfo = mock<WifiInfo>()
-            val vcnInfo = VcnTransportInfo(wifiInfo)
+            val underlyingWifi = newWifiNetwork(wifiInfo)
             val capabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(vcnInfo)
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
@@ -749,14 +785,15 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
             val job = underTest.vcnSubId.onEach { latest = it }.launchIn(this)
 
             val wifiInfo = mock<WifiInfo>()
-            val wifiVcnInfo = VcnTransportInfo(wifiInfo)
-            val sub1VcnInfo = VcnTransportInfo(SUB_1_ID)
-            val sub2VcnInfo = VcnTransportInfo(SUB_2_ID)
+            val underlyingWifi = newWifiNetwork(wifiInfo)
+            val underlyingCell1 = newCellNetwork(SUB_1_ID)
+            val underlyingCell2 = newCellNetwork(SUB_2_ID)
 
             val capabilities =
                 mock<NetworkCapabilities>().also {
                     whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                    whenever(it.transportInfo).thenReturn(wifiVcnInfo)
+                    whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                    whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
                 }
 
             // WIFI VCN info
@@ -766,14 +803,16 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
 
             // Cellular VCN info with subId 1
             whenever(capabilities.hasTransport(eq(TRANSPORT_CELLULAR))).thenReturn(true)
-            whenever(capabilities.transportInfo).thenReturn(sub1VcnInfo)
+            whenever(capabilities.transportInfo).thenReturn(vcnTransportInfo)
+            whenever(capabilities.underlyingNetworks).thenReturn(listOf(underlyingCell1))
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
 
             assertThat(latest).isEqualTo(SUB_1_ID)
 
             // Cellular VCN info with subId 2
-            whenever(capabilities.transportInfo).thenReturn(sub2VcnInfo)
+            whenever(capabilities.transportInfo).thenReturn(vcnTransportInfo)
+            whenever(capabilities.underlyingNetworks).thenReturn(listOf(underlyingCell2))
 
             getDefaultNetworkCallback().onCapabilitiesChanged(NETWORK, capabilities)
 
@@ -806,11 +845,12 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     @Test
     fun getMainOrUnderlyingWifiInfo_vcnWithWifi_hasInfo() {
         val wifiInfo = mock<WifiInfo>()
-        val vcnInfo = VcnTransportInfo(wifiInfo)
+        val underlyingWifi = newWifiNetwork(wifiInfo)
         val capabilities =
             mock<NetworkCapabilities>().also {
                 whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                whenever(it.transportInfo).thenReturn(vcnInfo)
+                whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                whenever(it.underlyingNetworks).thenReturn(listOf(underlyingWifi))
             }
 
         val result = capabilities.getMainOrUnderlyingWifiInfo(connectivityManager)
@@ -889,11 +929,15 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     fun getMainOrUnderlyingWifiInfo_cellular_underlyingVcnWithWifi_hasInfo() {
         val wifiInfo = mock<WifiInfo>()
         val underlyingNetwork = mock<Network>()
-        val underlyingVcnInfo = VcnTransportInfo(wifiInfo)
+
+        // The Wifi network that is under the VCN network
+        val physicalWifiNetwork = newWifiNetwork(wifiInfo)
+
         val underlyingWifiCapabilities =
             mock<NetworkCapabilities>().also {
                 whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                whenever(it.transportInfo).thenReturn(underlyingVcnInfo)
+                whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                whenever(it.underlyingNetworks).thenReturn(listOf(physicalWifiNetwork))
             }
         whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
             .thenReturn(underlyingWifiCapabilities)
@@ -915,11 +959,15 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
     @Test
     fun getMainOrUnderlyingWifiInfo_notCellular_underlyingVcnWithWifi_noInfo() {
         val underlyingNetwork = mock<Network>()
-        val underlyingVcnInfo = VcnTransportInfo(mock<WifiInfo>())
+
+        // The Wifi network that is under the VCN network
+        val physicalWifiNetwork = newWifiNetwork(mock<WifiInfo>())
+
         val underlyingWifiCapabilities =
             mock<NetworkCapabilities>().also {
                 whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
-                whenever(it.transportInfo).thenReturn(underlyingVcnInfo)
+                whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                whenever(it.underlyingNetworks).thenReturn(listOf(physicalWifiNetwork))
             }
         whenever(connectivityManager.getNetworkCapabilities(underlyingNetwork))
             .thenReturn(underlyingWifiCapabilities)
@@ -945,10 +993,15 @@ class ConnectivityRepositoryImplTest : SysuiTestCase() {
         val underlyingCarrierMergedNetwork = mock<Network>()
         val carrierMergedInfo =
             mock<WifiInfo>().apply { whenever(this.isCarrierMerged).thenReturn(true) }
+
+        // The Wifi network that is under the VCN network
+        val physicalWifiNetwork = newWifiNetwork(carrierMergedInfo)
+
         val underlyingCapabilities =
             mock<NetworkCapabilities>().also {
                 whenever(it.hasTransport(TRANSPORT_CELLULAR)).thenReturn(true)
-                whenever(it.transportInfo).thenReturn(VcnTransportInfo(carrierMergedInfo))
+                whenever(it.transportInfo).thenReturn(vcnTransportInfo)
+                whenever(it.underlyingNetworks).thenReturn(listOf(physicalWifiNetwork))
             }
         whenever(connectivityManager.getNetworkCapabilities(underlyingCarrierMergedNetwork))
             .thenReturn(underlyingCapabilities)
