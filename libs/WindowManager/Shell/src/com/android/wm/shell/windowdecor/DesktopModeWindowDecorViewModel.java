@@ -56,7 +56,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -407,6 +406,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     @Override
     public void setFreeformTaskTransitionStarter(FreeformTaskTransitionStarter transitionStarter) {
         mTaskOperations = new TaskOperations(transitionStarter, mContext, mSyncQueue);
+        mDesktopTasksController.setFreeformTaskTransitionStarter(transitionStarter);
     }
 
     @Override
@@ -774,11 +774,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     onMaximizeOrRestore(decoration.mTaskInfo.taskId, "caption_bar_button");
                 }
             } else if (id == R.id.minimize_window) {
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                mDesktopTasksController.onDesktopWindowMinimize(wct, mTaskId);
-                final IBinder transition = mTaskOperations.minimizeTask(mTaskToken, wct);
-                mDesktopTasksLimiter.ifPresent(limiter ->
-                        limiter.addPendingMinimizeChange(transition, mDisplayId, mTaskId));
+                mDesktopTasksController.minimizeTask(decoration.mTaskInfo);
             }
         }
 

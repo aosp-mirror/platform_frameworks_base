@@ -161,7 +161,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
 import com.android.compose.modifiers.thenIf
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.Flags
@@ -473,7 +472,7 @@ fun CommunalHub(
             if (showBottomSheet) {
                 val scope = rememberCoroutineScope()
                 val sheetState = rememberModalBottomSheetState()
-                val colors = LocalAndroidColorScheme.current
+                val colors = MaterialTheme.colorScheme
 
                 ModalBottomSheet(
                     onDismissRequest = viewModel::onDisclaimerDismissed,
@@ -501,7 +500,7 @@ val hubDimensions: Dimensions
 
 @Composable
 private fun DisclaimerBottomSheetContent(onButtonClicked: () -> Unit) {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp, vertical = 24.dp),
@@ -817,7 +816,7 @@ private fun BoxScope.CommunalHubLazyGrid(
  */
 @Composable
 private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunalViewModel) {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.height(hubDimensions.GridHeight).padding(contentPadding),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -963,7 +962,7 @@ private fun ToolbarButton(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit,
 ) {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     AnimatedVisibility(
         visible = isPrimary,
         modifier = modifier,
@@ -1010,7 +1009,7 @@ private fun ToolbarButton(
 
 @Composable
 private fun filledButtonColors(): ButtonColors {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     return ButtonDefaults.buttonColors(
         containerColor = colors.primary,
         contentColor = colors.onPrimary,
@@ -1058,7 +1057,7 @@ private fun CommunalContent(
 /** Creates an empty card used to highlight a particular spot on the grid. */
 @Composable
 fun HighlightedItem(modifier: Modifier = Modifier, alpha: Float = 1.0f) {
-    val brush = SolidColor(LocalAndroidColorScheme.current.primary)
+    val brush = SolidColor(MaterialTheme.colorScheme.primary)
     Box(
         modifier =
             // drawBehind lets us draw outside the bounds of the widgets so that we don't need to
@@ -1085,7 +1084,7 @@ private fun CtaTileInViewModeContent(
     viewModel: BaseCommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     Card(
         modifier = modifier,
         colors =
@@ -1301,7 +1300,7 @@ fun WidgetConfigureButton(
     modifier: Modifier = Modifier,
     widgetConfigurator: WidgetConfigurator,
 ) {
-    val colors = LocalAndroidColorScheme.current
+    val colors = MaterialTheme.colorScheme
     val scope = rememberCoroutineScope()
 
     AnimatedVisibility(

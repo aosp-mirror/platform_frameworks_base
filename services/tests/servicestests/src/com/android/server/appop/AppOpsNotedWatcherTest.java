@@ -22,14 +22,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OnOpNotedListener;
 import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
 import android.content.AttributionSource;
 import android.content.Context;
 import android.os.Process;
-import android.virtualdevice.cts.common.VirtualDeviceRule;
+import android.virtualdevice.cts.common.FakeAssociationRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -40,6 +42,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Tests watching noted ops.
  */
@@ -47,7 +51,7 @@ import org.mockito.InOrder;
 @RunWith(AndroidJUnit4.class)
 public class AppOpsNotedWatcherTest {
     @Rule
-    public VirtualDeviceRule mVirtualDeviceRule = VirtualDeviceRule.createDefault();
+    public FakeAssociationRule mFakeAssociationRule = new FakeAssociationRule();
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 5000;
 
     @Test
@@ -115,12 +119,19 @@ public class AppOpsNotedWatcherTest {
     public void testWatchNotedOpsForExternalDevice() {
         final AppOpsManager.OnOpNotedListener listener = mock(
                 AppOpsManager.OnOpNotedListener.class);
-        final VirtualDeviceManager.VirtualDevice virtualDevice =
-                mVirtualDeviceRule.createManagedVirtualDevice();
-        final int virtualDeviceId = virtualDevice.getDeviceId();
+        final VirtualDeviceManager virtualDeviceManager = getContext().getSystemService(
+                VirtualDeviceManager.class);
+        AtomicInteger virtualDeviceId = new AtomicInteger();
+        runWithShellPermissionIdentity(() -> {
+            final VirtualDeviceManager.VirtualDevice virtualDevice =
+                    virtualDeviceManager.createVirtualDevice(
+                            mFakeAssociationRule.getAssociationInfo().getId(),
+                            new VirtualDeviceParams.Builder().setName("virtual_device").build());
+            virtualDeviceId.set(virtualDevice.getDeviceId());
+        });
         AttributionSource attributionSource = new AttributionSource(Process.myUid(),
                 getContext().getOpPackageName(), getContext().getAttributionTag(),
-                virtualDeviceId);
+                virtualDeviceId.get());
 
         final AppOpsManager appOpsManager = getContext().getSystemService(AppOpsManager.class);
         appOpsManager.startWatchingNoted(new int[]{AppOpsManager.OP_FINE_LOCATION,
@@ -131,7 +142,7 @@ public class AppOpsNotedWatcherTest {
         verify(listener, timeout(NOTIFICATION_TIMEOUT_MILLIS)
                 .times(1)).onOpNoted(eq(AppOpsManager.OPSTR_FINE_LOCATION),
                 eq(Process.myUid()), eq(getContext().getOpPackageName()),
-                eq(getContext().getAttributionTag()), eq(virtualDeviceId),
+                eq(getContext().getAttributionTag()), eq(virtualDeviceId.get()),
                 eq(AppOpsManager.OP_FLAG_SELF), eq(AppOpsManager.MODE_ALLOWED));
 
         appOpsManager.finishOp(getContext().getAttributionSource().getToken(),

@@ -18,3 +18,11 @@ flag {
     bug: "310653407"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "user_agent_reduction"
+    is_exported: true
+    namespace: "webview"
+    description: "New feature reduce user-agent for webview"
+    bug: "371034303"
+}

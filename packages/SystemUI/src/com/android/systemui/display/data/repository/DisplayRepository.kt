@@ -61,8 +61,11 @@ interface DisplayRepository {
     /** Display addition event indicating a new display has been added. */
     val displayAdditionEvent: Flow<Display?>
 
+    /** Display removal event indicating a display has been removed. */
+    val displayRemovalEvent: Flow<Int>
+
     /** Provides the current set of displays. */
-    val displays: Flow<Set<Display>>
+    val displays: StateFlow<Set<Display>>
 
     /**
      * Pending display id that can be enabled/disabled.
@@ -79,8 +82,8 @@ interface DisplayRepository {
      *
      * This method is guaranteed to not result in any binder call.
      */
-    suspend fun getDisplay(displayId: Int): Display? =
-        displays.first().firstOrNull { it.displayId == displayId }
+    fun getDisplay(displayId: Int): Display? =
+        displays.value.firstOrNull { it.displayId == displayId }
 
     /** Represents a connected display that has not been enabled yet. */
     interface PendingDisplay {
@@ -148,6 +151,9 @@ constructor(
             getDisplayFromDisplayManager(it.displayId)
         }
 
+    override val displayRemovalEvent: Flow<Int> =
+        allDisplayEvents.filterIsInstance<DisplayEvent.Removed>().map { it.displayId }
+
     // This is necessary because there might be multiple displays, and we could
     // have missed events for those added before this process or flow started.
     // Note it causes a binder call from the main thread (it's traced).
@@ -180,7 +186,7 @@ constructor(
      *
      * Those are commonly the ones provided by [DisplayManager.getDisplays] by default.
      */
-    private val enabledDisplays: Flow<Set<Display>> =
+    private val enabledDisplays: StateFlow<Set<Display>> =
         enabledDisplayIds
             .mapElementsLazily { displayId -> getDisplayFromDisplayManager(displayId) }
             .onEach {
@@ -204,7 +210,7 @@ constructor(
      *
      * Those are commonly the ones provided by [DisplayManager.getDisplays] by default.
      */
-    override val displays: Flow<Set<Display>> = enabledDisplays
+    override val displays: StateFlow<Set<Display>> = enabledDisplays
 
     val _ignoredDisplayIds = MutableStateFlow<Set<Int>>(emptySet())
     private val ignoredDisplayIds: Flow<Set<Int>> = _ignoredDisplayIds.debugLog("ignoredDisplayIds")

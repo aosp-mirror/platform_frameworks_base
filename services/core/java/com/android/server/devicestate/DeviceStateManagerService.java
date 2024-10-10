@@ -785,8 +785,8 @@ public final class DeviceStateManagerService extends SystemService {
                         + " IDeviceStateManagerCallback.");
             }
 
-            ProcessRecord record = new ProcessRecord(callback, pid, this::handleProcessDied,
-                    mHandler);
+            final ProcessRecord record =
+                    new ProcessRecord(callback, pid, this::handleProcessDied, mHandler);
             try {
                 callback.asBinder().linkToDeath(record, 0);
             } catch (RemoteException ex) {
@@ -797,8 +797,8 @@ public final class DeviceStateManagerService extends SystemService {
             // Callback clients should not be notified of invalid device states, so calls to
             // #getDeviceStateInfoLocked should be gated on checks if a committed state is present
             // before getting the device state info.
-            DeviceStateInfo currentInfo = mCommittedState.isPresent()
-                    ? getDeviceStateInfoLocked() : null;
+            final DeviceStateInfo currentInfo =
+                    mCommittedState.isPresent() ? getDeviceStateInfoLocked() : null;
             if (currentInfo != null) {
                 // If there is not a committed state we'll wait to notify the process of the initial
                 // value.

@@ -1407,7 +1407,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             displayId = rootTask != null ? rootTask.getDisplayId() : DEFAULT_DISPLAY;
         }
 
-        final DisplayContent display = getDisplayContent(displayId);
+        final DisplayContent display = getDisplayContentOrCreate(displayId);
         return display.reduceOnAllTaskDisplayAreas((taskDisplayArea, result) ->
                         result | startHomeOnTaskDisplayArea(userId, reason, taskDisplayArea,
                                 allowInstrumenting, fromHomeKey),

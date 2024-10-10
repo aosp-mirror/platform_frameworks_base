@@ -236,6 +236,27 @@ class MouseKeysInterceptorTest {
     }
 
     @Test
+    fun whenScrollToggleOn_ScrollRightKeyIsPressed_scrollEventIsSent() {
+        // There should be some delay between the downTime of the key event and calling onKeyEvent
+        val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS
+        val keyCodeScrollToggle = MouseKeysInterceptor.MouseKeyEvent.SCROLL_TOGGLE.keyCodeValue
+        val keyCodeScroll = MouseKeysInterceptor.MouseKeyEvent.RIGHT_MOVE_OR_SCROLL.keyCodeValue
+
+        val scrollToggleDownEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
+            keyCodeScrollToggle, 0, 0, DEVICE_ID, 0)
+        val scrollDownEvent = KeyEvent(downTime, downTime, KeyEvent.ACTION_DOWN,
+            keyCodeScroll, 0, 0, DEVICE_ID, 0)
+
+        mouseKeysInterceptor.onKeyEvent(scrollToggleDownEvent, 0)
+        mouseKeysInterceptor.onKeyEvent(scrollDownEvent, 0)
+        testLooper.dispatchAll()
+
+        // Verify the sendScrollEvent method is called once and capture the arguments
+        verifyScrollEvents(arrayOf<Float>(-MouseKeysInterceptor.MOUSE_SCROLL_STEP),
+	    arrayOf<Float>(0f))
+    }
+
+    @Test
     fun whenScrollToggleOff_DirectionalUpKeyIsPressed_RelativeEventIsSent() {
         // There should be some delay between the downTime of the key event and calling onKeyEvent
         val downTime = clock.now() - KEYBOARD_POST_EVENT_DELAY_MILLIS

@@ -63,10 +63,13 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService.TargetUser;
 import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
 import com.android.server.appfunctions.RemoteServiceCaller.ServiceUsageCompleteListener;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Objects;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
@@ -119,6 +122,20 @@ public class AppFunctionManagerServiceImpl extends IAppFunctionManager.Stub {
         Objects.requireNonNull(user);
 
         MetadataSyncPerUser.removeUserSyncAdapter(user.getUserHandle());
+    }
+
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) {
+            return;
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            AppFunctionDumpHelper.dumpAppFunctionsState(mContext, pw);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override

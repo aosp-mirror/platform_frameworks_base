@@ -45,6 +45,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * This is used by NotificationProgressBar for displaying a custom background. It composes of
@@ -126,7 +127,7 @@ public final class NotificationProgressDrawable extends Drawable {
      * @see #setStroke(int, int, float, float)
      */
     public void setStrokeDefaultColor(@ColorInt int color) {
-        mState.mStrokeColor = color;
+        mState.setStrokeColor(color);
     }
 
     /**
@@ -138,7 +139,7 @@ public final class NotificationProgressDrawable extends Drawable {
      * @see #mutate()
      */
     public void setPointRectDefaultColor(@ColorInt int color) {
-        mState.mPointRectColor = color;
+        mState.setPointRectColor(color);
     }
 
     private void setStrokeInternal(int width, float dashWidth, float dashGap) {
@@ -194,7 +195,7 @@ public final class NotificationProgressDrawable extends Drawable {
                 mStrokePaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
                         : mState.mStrokeColor);
                 mDashedStrokePaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
-                        : mState.mStrokeColor);
+                        : mState.mFadedStrokeColor);
 
                 // Leave space for the rounded line cap which extends beyond start/end.
                 final float capWidth = mStrokePaint.getStrokeWidth() / 2F;
@@ -220,7 +221,8 @@ public final class NotificationProgressDrawable extends Drawable {
                     mPointRectF.inset(inset, inset);
 
                     mFillPaint.setColor(point.mColor != Color.TRANSPARENT ? point.mColor
-                            : mState.mPointRectColor);
+                            : (point.mFaded ? mState.mFadedPointRectColor
+                                    : mState.mPointRectColor));
 
                     canvas.drawRoundRect(mPointRectF, cornerRadius, cornerRadius, mFillPaint);
                 }
@@ -424,8 +426,9 @@ public final class NotificationProgressDrawable extends Drawable {
         state.mPointRectCornerRadius = a.getDimension(
                 R.styleable.NotificationProgressDrawablePoints_cornerRadius,
                 state.mPointRectCornerRadius);
-        state.mPointRectColor = a.getColor(R.styleable.NotificationProgressDrawablePoints_color,
+        final int color = a.getColor(R.styleable.NotificationProgressDrawablePoints_color,
                 state.mPointRectColor);
+        setPointRectDefaultColor(color);
     }
 
     static int resolveDensity(@Nullable Resources r, int parentDensity) {
@@ -478,7 +481,6 @@ public final class NotificationProgressDrawable extends Drawable {
      * {@link Point} with zero length.
      */
     public interface Part {
-
     }
 
     /**
@@ -521,6 +523,24 @@ public final class NotificationProgressDrawable extends Drawable {
             return "Segment(fraction=" + this.mFraction + ", color=" + this.mColor + ", dashed="
                     + this.mDashed + ')';
         }
+
+        // Needed for unit tests
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (this == other) return true;
+
+            if (other == null || getClass() != other.getClass()) return false;
+
+            Segment that = (Segment) other;
+            if (Float.compare(this.mFraction, that.mFraction) != 0) return false;
+            if (this.mColor != that.mColor) return false;
+            return this.mDashed == that.mDashed;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFraction, mColor, mDashed);
+        }
     }
 
     /**
@@ -532,14 +552,21 @@ public final class NotificationProgressDrawable extends Drawable {
         @Nullable
         private final Drawable mIcon;
         @ColorInt private final int mColor;
+        private final boolean mFaded;
 
         public Point(@Nullable Drawable icon) {
-            this(icon, Color.TRANSPARENT);
+            this(icon, Color.TRANSPARENT, false);
         }
 
         public Point(@Nullable Drawable icon, @ColorInt int color) {
+            this(icon, color, false);
+
+        }
+
+        public Point(@Nullable Drawable icon, @ColorInt int color, boolean faded) {
             mIcon = icon;
             mColor = color;
+            mFaded = faded;
         }
 
         @Nullable
@@ -547,9 +574,37 @@ public final class NotificationProgressDrawable extends Drawable {
             return this.mIcon;
         }
 
+        public int getColor() {
+            return this.mColor;
+        }
+
+        public boolean getFaded() {
+            return this.mFaded;
+        }
+
         @Override
         public String toString() {
-            return "Point(icon=" + this.mIcon + ", color=" + this.mColor + ')';
+            return "Point(icon=" + this.mIcon + ", color=" + this.mColor + ", faded=" + this.mFaded
+                    + ")";
+        }
+
+        // Needed for unit tests.
+        @Override
+        public boolean equals(@Nullable Object other) {
+            if (this == other) return true;
+
+            if (other == null || getClass() != other.getClass()) return false;
+
+            Point that = (Point) other;
+
+            if (!Objects.equals(this.mIcon, that.mIcon)) return false;
+            if (this.mColor != that.mColor) return false;
+            return this.mFaded == that.mFaded;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mIcon, mColor, mFaded);
         }
     }
 
@@ -576,12 +631,14 @@ public final class NotificationProgressDrawable extends Drawable {
         float mSegPointGap = 0.0f;
         int mStrokeWidth = 0;
         int mStrokeColor;
+        int mFadedStrokeColor;
         float mStrokeDashWidth = 0.0f;
         float mStrokeDashGap = 0.0f;
         float mPointRadius;
         float mPointRectInset;
         float mPointRectCornerRadius;
         int mPointRectColor;
+        int mFadedPointRectColor;
 
         int[] mThemeAttrs;
         int[] mThemeAttrsSegments;
@@ -595,6 +652,7 @@ public final class NotificationProgressDrawable extends Drawable {
         State(@NonNull State orig, @Nullable Resources res) {
             mChangingConfigurations = orig.mChangingConfigurations;
             mStrokeColor = orig.mStrokeColor;
+            mFadedStrokeColor = orig.mFadedStrokeColor;
             mStrokeWidth = orig.mStrokeWidth;
             mStrokeDashWidth = orig.mStrokeDashWidth;
             mStrokeDashGap = orig.mStrokeDashGap;
@@ -602,6 +660,7 @@ public final class NotificationProgressDrawable extends Drawable {
             mPointRectInset = orig.mPointRectInset;
             mPointRectCornerRadius = orig.mPointRectCornerRadius;
             mPointRectColor = orig.mPointRectColor;
+            mFadedPointRectColor = orig.mFadedPointRectColor;
 
             mThemeAttrs = orig.mThemeAttrs;
             mThemeAttrsSegments = orig.mThemeAttrsSegments;
@@ -683,10 +742,30 @@ public final class NotificationProgressDrawable extends Drawable {
 
         public void setStroke(int width, int color, float dashWidth, float dashGap) {
             mStrokeWidth = width;
-            mStrokeColor = color;
             mStrokeDashWidth = dashWidth;
             mStrokeDashGap = dashGap;
+
+            setStrokeColor(color);
         }
+
+        public void setStrokeColor(int color) {
+            mStrokeColor = color;
+            mFadedStrokeColor = getFadedColor(color);
+        }
+
+        public void setPointRectColor(int color) {
+            mPointRectColor = color;
+            mFadedPointRectColor = getFadedColor(color);
+        }
+    }
+
+    /**
+     * Get a color with an opacity that's 50% of the input color.
+     */
+    @ColorInt
+    static int getFadedColor(@ColorInt int color) {
+        return Color.argb(Color.alpha(color) / 2, Color.red(color), Color.green(color),
+                Color.blue(color));
     }
 
     @Override

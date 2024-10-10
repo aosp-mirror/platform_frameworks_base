@@ -957,6 +957,15 @@ class DesktopRepositoryTest : ShellTestCase() {
         assertThat(repo.getActiveTasks(displayId = DEFAULT_DISPLAY)).isEmpty()
     }
 
+    @Test
+    fun getTaskInFullImmersiveState_byDisplay() {
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID, taskId = 1, immersive = true)
+        repo.setTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1, taskId = 2, immersive = true)
+
+        assertThat(repo.getTaskInFullImmersiveState(DEFAULT_DESKTOP_ID)).isEqualTo(1)
+        assertThat(repo.getTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1)).isEqualTo(2)
+    }
+
     class TestListener : DesktopRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0
         var activeChangesOnSecondaryDisplay = 0

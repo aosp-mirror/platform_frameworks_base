@@ -1275,49 +1275,39 @@ public class StatsPullAtomService extends SystemService {
             case FrameworkStatsLog.WIFI_BYTES_TRANSFER: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTransportLocked(
                         TRANSPORT_WIFI);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
-                            new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/false));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
+                        new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/false));
                 break;
             }
             case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTransportLocked(
                         TRANSPORT_WIFI);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/true));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{TRANSPORT_WIFI}, /*slicedByFgbg=*/true));
                 break;
             }
             case FrameworkStatsLog.MOBILE_BYTES_TRANSFER: {
                 final NetworkStats stats =
                         getUidNetworkStatsSnapshotForTransportLocked(TRANSPORT_CELLULAR);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
-                            new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/false));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUid(stats),
+                        new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/false));
                 break;
             }
             case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats =
                         getUidNetworkStatsSnapshotForTransportLocked(TRANSPORT_CELLULAR);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true));
                 break;
             }
             case FrameworkStatsLog.PROXY_BYTES_TRANSFER_BY_FG_BG: {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_PROXY).build(),  /*includeTags=*/false);
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{TRANSPORT_BLUETOOTH},
-                            /*slicedByFgbg=*/true, /*slicedByTag=*/false,
-                            /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/true));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{TRANSPORT_BLUETOOTH},
+                        /*slicedByFgbg=*/true, /*slicedByTag=*/false,
+                        /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/true));
                 break;
             }
             case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED: {
@@ -1326,14 +1316,12 @@ public class StatsPullAtomService extends SystemService {
                 final NetworkStats cellularStats = getUidNetworkStatsSnapshotForTemplateLocked(
                         new NetworkTemplate.Builder(MATCH_MOBILE)
                                 .setMeteredness(METERED_YES).build(), /*includeTags=*/true);
-                if (wifiStats != null && cellularStats != null) {
-                    final NetworkStats stats = wifiStats.add(cellularStats);
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
-                            new int[]{TRANSPORT_WIFI, TRANSPORT_CELLULAR},
-                            /*slicedByFgbg=*/false, /*slicedByTag=*/true,
-                            /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/false));
-                }
+                final NetworkStats stats = wifiStats.add(cellularStats);
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
+                        new int[]{TRANSPORT_WIFI, TRANSPORT_CELLULAR},
+                        /*slicedByFgbg=*/false, /*slicedByTag=*/true,
+                        /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        /*subInfo=*/null, OEM_MANAGED_ALL, /*isTypeProxy=*/false));
                 break;
             }
             case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER: {
@@ -1519,12 +1507,10 @@ public class StatsPullAtomService extends SystemService {
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplateLocked(
                         template, false);
                 final Integer transport = ruleAndTransport.second;
-                if (stats != null) {
-                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
-                            new int[]{transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/false,
-                            /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                            /*subInfo=*/null, oemManaged, /*isTypeProxy=*/false));
-                }
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                        new int[]{transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/false,
+                        /*slicedByMetered=*/false, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                        /*subInfo=*/null, oemManaged, /*isTypeProxy=*/false));
             }
         }
 
@@ -1535,7 +1521,7 @@ public class StatsPullAtomService extends SystemService {
      * Create a snapshot of NetworkStats for a given transport.
      */
     @GuardedBy("mDataBytesTransferLock")
-    @Nullable
+    @NonNull
     private NetworkStats getUidNetworkStatsSnapshotForTransportLocked(int transport) {
         NetworkTemplate template = null;
         switch (transport) {
@@ -1574,7 +1560,7 @@ public class StatsPullAtomService extends SystemService {
      * some traffic before boot.
      */
     @GuardedBy("mDataBytesTransferLock")
-    @Nullable
+    @NonNull
     private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
             @NonNull NetworkTemplate template, boolean includeTags) {
         final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
@@ -1613,7 +1599,7 @@ public class StatsPullAtomService extends SystemService {
     }
 
     @GuardedBy("mDataBytesTransferLock")
-    @Nullable
+    @NonNull
     private NetworkStats getUidNetworkStatsSnapshotForTemplateLocked(
             @NonNull NetworkTemplate template, boolean includeTags, long startTime, long endTime) {
         final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
@@ -1660,12 +1646,10 @@ public class StatsPullAtomService extends SystemService {
                             .setMeteredness(METERED_YES).build();
             final NetworkStats stats =
                     getUidNetworkStatsSnapshotForTemplateLocked(template, /*includeTags=*/false);
-            if (stats != null) {
-                ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
-                        new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
-                        /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo,
-                        OEM_MANAGED_ALL, /*isTypeProxy=*/false));
-            }
+            ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
+                    new int[]{TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
+                    /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo,
+                    OEM_MANAGED_ALL, /*isTypeProxy=*/false));
         }
         return ret;
     }

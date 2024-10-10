@@ -17,6 +17,13 @@
 package com.android.systemui.volume.dialog.dagger.module
 
 import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
+import com.android.systemui.volume.dialog.utils.VolumeTracer
+import com.android.systemui.volume.dialog.utils.VolumeTracerImpl
+import dagger.Binds
 import dagger.Module
 
-@Module(subcomponents = [VolumeDialogComponent::class]) interface VolumeDialogPluginModule
+@Module(subcomponents = [VolumeDialogComponent::class])
+interface VolumeDialogPluginModule {
+
+    @Binds fun bindVolumeTracer(volumeTracer: VolumeTracerImpl): VolumeTracer
+}
