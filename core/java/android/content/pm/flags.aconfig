@@ -284,3 +284,12 @@ flag {
     description: "Feature flag to enable the feature to retrieve package info without installation with a file descriptor."
     bug: "340879905"
 }
+
+flag {
+    name: "audio_playback_capture_allowance"
+    is_exported: true
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the feature to retrieve info about audio playback capture allowance at manifest level."
+    bug: "362425551"
+    is_fixed_read_only: true
+}

@@ -48,6 +48,9 @@ import android.os.SystemProperties;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.ravenwood.annotation.RavenwoodKeep;
+import android.ravenwood.annotation.RavenwoodKeepPartialClass;
+import android.ravenwood.annotation.RavenwoodReplace;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.Display;
@@ -80,7 +83,7 @@ import java.util.concurrent.TimeoutException;
  * implementation is described to the system through an AndroidManifest.xml's
  * &lt;instrumentation&gt; tag.
  */
-@android.ravenwood.annotation.RavenwoodKeepPartialClass
+@RavenwoodKeepPartialClass
 public class Instrumentation {
 
     /**
@@ -134,7 +137,7 @@ public class Instrumentation {
     private UiAutomation mUiAutomation;
     private final Object mAnimationCompleteLock = new Object();
 
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public Instrumentation() {
     }
 
@@ -145,7 +148,7 @@ public class Instrumentation {
      * reflection, but it will serve as noticeable discouragement from
      * doing such a thing.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     private void checkInstrumenting(String method) {
         // Check if we have an instrumentation context, as init should only get called by
         // the system in startup processes that are being instrumented.
@@ -160,7 +163,7 @@ public class Instrumentation {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public boolean isInstrumenting() {
         // Check if we have an instrumentation context, as init should only get called by
         // the system in startup processes that are being instrumented.
@@ -324,7 +327,7 @@ public class Instrumentation {
      * 
      * @see #getTargetContext
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public Context getContext() {
         return mInstrContext;
     }
@@ -349,7 +352,7 @@ public class Instrumentation {
      * 
      * @see #getContext
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public Context getTargetContext() {
         return mAppContext;
     }
@@ -2405,10 +2408,11 @@ public class Instrumentation {
      *
      * @hide
      */
-    @android.ravenwood.annotation.RavenwoodKeep
-    public final void basicInit(Context instrContext, Context appContext) {
+    @RavenwoodKeep
+    public final void basicInit(Context instrContext, Context appContext, UiAutomation ui) {
         mInstrContext = instrContext;
         mAppContext = appContext;
+        mUiAutomation = ui;
     }
 
     /** @hide */
@@ -2499,6 +2503,7 @@ public class Instrumentation {
      *
      * @see UiAutomation
      */
+    @RavenwoodKeep
     public UiAutomation getUiAutomation() {
         return getUiAutomation(0);
     }
@@ -2537,6 +2542,7 @@ public class Instrumentation {
      *
      * @see UiAutomation
      */
+    @RavenwoodReplace
     public UiAutomation getUiAutomation(@UiAutomationFlags int flags) {
         boolean mustCreateNewAutomation = (mUiAutomation == null) || (mUiAutomation.isDestroyed());
 
@@ -2567,11 +2573,15 @@ public class Instrumentation {
         return null;
     }
 
+    private UiAutomation getUiAutomation$ravenwood(@UiAutomationFlags int flags) {
+        return mUiAutomation;
+    }
+
     /**
      * Takes control of the execution of messages on the specified looper until
      * {@link TestLooperManager#release} is called.
      */
-    @android.ravenwood.annotation.RavenwoodKeep
+    @RavenwoodKeep
     public TestLooperManager acquireLooperManager(Looper looper) {
         checkInstrumenting("acquireLooperManager");
         return new TestLooperManager(looper);
