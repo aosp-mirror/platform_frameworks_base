@@ -14,10 +14,9 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false"
-          android:alpha="?attr/primaryContentAlpha"
-          android:color="?attr/materialColorOnSurface" />
-    <item android:state_enabled="true"
-          android:color="?attr/materialColorOnSurface" />
-</selector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/dialog_alert_button_background_positive"/>
+    <item
+        android:drawable="@drawable/ic_check"
+        android:gravity="center" />
+</layer-list>

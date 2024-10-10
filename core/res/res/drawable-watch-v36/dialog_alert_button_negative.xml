@@ -14,9 +14,9 @@
   ~ limitations under the License.
   -->
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false"
-          android:alpha="?attr/disabledAlpha"
-          android:color="?attr/materialColorOnSurface" />
-    <item android:color="?attr/materialColorPrimary" />
-</selector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/dialog_alert_button_background_negative"/>
+    <item
+        android:drawable="@drawable/ic_close"
+        android:gravity="center" />
+</layer-list>
