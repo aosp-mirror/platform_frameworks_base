@@ -35,12 +35,19 @@ import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 
 import static com.android.wm.shell.common.split.SplitLayout.PARALLAX_ALIGN_CENTER;
+import static com.android.wm.shell.common.split.SplitScreenUtils.isPartiallyOffscreen;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.common.split.SplitScreenUtils.splitFailureMessage;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
+import static com.android.wm.shell.shared.TransitionUtil.isOrderOnly;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_10_90;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_90_10;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_0;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_1;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -117,6 +124,7 @@ import com.android.internal.logging.InstanceId;
 import com.android.internal.policy.FoldLockSettingsObserver;
 import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
@@ -2060,6 +2068,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.setDividerInteractive(true, false, "onSplitResizeFinish");
         }, mMainStage.getSplitDecorManager(), mSideStage.getSplitDecorManager());
 
+        if (Flags.enableFlexibleTwoAppSplit()) {
+            switch (layout.calculateCurrentSnapPosition()) {
+                case SNAP_TO_2_10_90 -> grantFocusToPosition(false /* leftOrTop */);
+                case SNAP_TO_2_90_10 -> grantFocusToPosition(true /* leftOrTop */);
+            }
+        }
+
         mLogger.logResize(mSplitLayout.getDividerPositionAsFraction());
     }
 
@@ -2513,6 +2528,26 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         mTaskOrganizer.applyTransaction(wct);
                     }
                     continue;
+                } else if (Flags.enableFlexibleTwoAppSplit() && isOrderOnly(change)) {
+                    int focusedStageIndex = SPLIT_INDEX_UNDEFINED;
+                    if (taskInfo.token.equals(mMainStage.mRootTaskInfo.token)) {
+                        focusedStageIndex = mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                ? SPLIT_INDEX_0 : SPLIT_INDEX_1;
+                    } else if (taskInfo.token.equals(mSideStage.mRootTaskInfo.token)) {
+                        focusedStageIndex = mSideStagePosition == SPLIT_POSITION_BOTTOM_OR_RIGHT
+                                ? SPLIT_INDEX_1 : SPLIT_INDEX_0;
+                    }
+
+                    if (focusedStageIndex != SPLIT_INDEX_UNDEFINED) {
+                        @PersistentSnapPosition int currentSnapPosition =
+                                mSplitLayout.calculateCurrentSnapPosition();
+                        boolean offscreenTaskFocused =
+                                isPartiallyOffscreen(focusedStageIndex, currentSnapPosition);
+
+                        if (offscreenTaskFocused) {
+                            mSplitLayout.flingDividerToOtherSide(currentSnapPosition);
+                        }
+                    }
                 }
                 final StageTaskListener stage = getStageOfTask(taskInfo);
                 if (stage == null) {
