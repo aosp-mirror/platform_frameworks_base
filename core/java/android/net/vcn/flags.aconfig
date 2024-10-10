@@ -22,10 +22,3 @@ flag{
     description: "Feature flag for enabling network metric monitor"
     bug: "282996138"
 }
-
-flag{
-    name: "validate_network_on_ipsec_loss"
-    namespace: "vcn"
-    description: "Trigger network validation when IPsec packet loss exceeds the threshold"
-    bug: "329139898"
-}

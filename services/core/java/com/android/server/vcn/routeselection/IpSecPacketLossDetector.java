@@ -29,7 +29,6 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.IpSecTransformState;
 import android.net.Network;
-import android.net.vcn.Flags;
 import android.net.vcn.VcnManager;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -436,13 +435,10 @@ public class IpSecPacketLossDetector extends NetworkMetricMonitor {
                 onValidationResultReceivedInternal(true /* isFailed */);
             }
 
-            // In both "valid" or "unusual_seq_num_leap" cases, trigger network validation
-            if (Flags.validateNetworkOnIpsecLoss()) {
-                // Trigger re-validation of the underlying network; if it fails, the VCN will
-                // attempt to migrate away.
-                mConnectivityManager.reportNetworkConnectivity(
-                        getNetwork(), false /* hasConnectivity */);
-            }
+            // In both "invalid" and "unusual_seq_num_leap" cases, trigger network validation. If
+            // validation fails, the VCN will attempt to migrate away.
+            mConnectivityManager.reportNetworkConnectivity(
+                    getNetwork(), false /* hasConnectivity */);
         }
     }
 
