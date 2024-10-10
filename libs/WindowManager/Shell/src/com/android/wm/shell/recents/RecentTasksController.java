@@ -38,8 +38,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.window.DesktopModeFlags;
 import android.window.WindowContainerToken;
-import android.window.flags.DesktopModeFlags;
 
 import androidx.annotation.BinderThread;
 import androidx.annotation.NonNull;
@@ -54,7 +54,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.GroupedRecentTaskInfo;
 import com.android.wm.shell.shared.annotations.ExternalThread;
@@ -81,14 +81,14 @@ import java.util.function.Consumer;
  * Manages the recent task list from the system, caching it as necessary.
  */
 public class RecentTasksController implements TaskStackListenerCallback,
-        RemoteCallable<RecentTasksController>, DesktopModeTaskRepository.ActiveTasksListener,
+        RemoteCallable<RecentTasksController>, DesktopRepository.ActiveTasksListener,
         TaskStackTransitionObserver.TaskStackTransitionObserverListener {
     private static final String TAG = RecentTasksController.class.getSimpleName();
 
     private final Context mContext;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
-    private final Optional<DesktopModeTaskRepository> mDesktopModeTaskRepository;
+    private final Optional<DesktopRepository> mDesktopRepository;
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasksImpl mImpl = new RecentTasksImpl();
@@ -121,7 +121,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
@@ -129,7 +129,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             return null;
         }
         return new RecentTasksController(context, shellInit, shellController, shellCommandHandler,
-                taskStackListener, activityTaskManager, desktopModeTaskRepository,
+                taskStackListener, activityTaskManager, desktopRepository,
                 taskStackTransitionObserver, mainExecutor);
     }
 
@@ -139,7 +139,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             TaskStackTransitionObserver taskStackTransitionObserver,
             ShellExecutor mainExecutor) {
         mContext = context;
@@ -148,7 +148,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mActivityTaskManager = activityTaskManager;
         mPcFeatureEnabled = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
-        mDesktopModeTaskRepository = desktopModeTaskRepository;
+        mDesktopRepository = desktopRepository;
         mTaskStackTransitionObserver = taskStackTransitionObserver;
         mMainExecutor = mainExecutor;
         shellInit.addInitCallback(this::onInit, this);
@@ -168,7 +168,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mTaskStackListener.addListener(this);
-        mDesktopModeTaskRepository.ifPresent(it -> it.addActiveTaskListener(this));
+        mDesktopRepository.ifPresent(it -> it.addActiveTaskListener(this));
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mTaskStackTransitionObserver.addTaskStackTransitionObserverListener(this,
                     mMainExecutor);
@@ -417,8 +417,8 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
 
             if (DesktopModeStatus.canEnterDesktopMode(mContext)
-                    && mDesktopModeTaskRepository.isPresent()
-                    && mDesktopModeTaskRepository.get().isActiveTask(taskInfo.taskId)) {
+                    && mDesktopRepository.isPresent()
+                    && mDesktopRepository.get().isActiveTask(taskInfo.taskId)) {
                 // Freeform tasks will be added as a separate entry
                 if (mostRecentFreeformTaskIndex == Integer.MAX_VALUE) {
                     mostRecentFreeformTaskIndex = recentTasks.size();
@@ -434,7 +434,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                             taskInfo.lastNonFullscreenBounds.top);
                 }
                 freeformTasks.add(taskInfo);
-                if (mDesktopModeTaskRepository.get().isMinimizedTask(taskInfo.taskId)) {
+                if (mDesktopRepository.get().isMinimizedTask(taskInfo.taskId)) {
                     minimizedFreeformTasks.add(taskInfo.taskId);
                 }
                 continue;
@@ -538,6 +538,14 @@ public class RecentTasksController implements TaskStackListenerCallback,
             }
         }
         return null;
+    }
+
+    /**
+     * Remove the background task that match the given taskId. This will remove the task regardless
+     * of whether it's active or recent.
+     */
+    public boolean removeBackgroundTask(int taskId) {
+        return mActivityTaskManager.removeTask(taskId);
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {

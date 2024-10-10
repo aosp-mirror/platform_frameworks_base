@@ -31,6 +31,7 @@ import com.android.systemui.qs.FooterActionsController
 import com.android.systemui.qs.composefragment.viewmodel.QSFragmentComposeViewModel.QSExpansionState
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.qs.panels.domain.interactor.TileSquishinessInteractor
+import com.android.systemui.qs.panels.ui.viewmodel.PaginatedGridViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
@@ -71,6 +72,7 @@ constructor(
     private val configurationInteractor: ConfigurationInteractor,
     private val largeScreenHeaderHelper: LargeScreenHeaderHelper,
     private val squishinessInteractor: TileSquishinessInteractor,
+    private val paginatedGridViewModel: PaginatedGridViewModel,
     @Assisted private val lifecycleScope: LifecycleCoroutineScope,
 ) : Dumpable, ExclusiveActivatable() {
     val footerActionsViewModel =
@@ -291,6 +293,9 @@ constructor(
      * determining the correct action based on the expansion state.
      */
     var collapseExpandAccessibilityAction: Runnable? = null
+
+    val inFirstPage: Boolean
+        get() = paginatedGridViewModel.inFirstPage
 
     override suspend fun onActivated(): Nothing {
         hydrateSquishinessInteractor()

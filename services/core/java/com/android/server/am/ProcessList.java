@@ -3401,8 +3401,7 @@ public final class ProcessList {
         // Check if we should mark the processrecord for first launch after force-stopping
         if (wasStopped) {
             boolean wasEverLaunched = false;
-            if (android.app.Flags.useAppInfoNotLaunched()
-                    || mService.mConstants.mFlagUseAppInfoNotLaunched) {
+            if (android.app.Flags.useAppInfoNotLaunched()) {
                 wasEverLaunched = !info.isNotLaunched();
             } else {
                 try {
@@ -3423,8 +3422,7 @@ public final class ProcessList {
                         : STOPPED_STATE_FIRST_LAUNCH;
                 r.getWindowProcessController().setStoppedState(stoppedState);
             } else {
-                if (android.app.Flags.useAppInfoNotLaunched()
-                        || mService.mConstants.mFlagUseAppInfoNotLaunched) {
+                if (android.app.Flags.useAppInfoNotLaunched()) {
                     // If it was launched before, then it must be a force-stop
                     r.setWasForceStopped(wasEverLaunched);
                 } else {
@@ -3441,12 +3439,12 @@ public final class ProcessList {
             state.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_DEFAULT);
             state.setSetSchedGroup(ProcessList.SCHED_GROUP_DEFAULT);
             r.setPersistent(true);
-            state.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
+            mService.mProcessStateController.setMaxAdj(r, ProcessList.PERSISTENT_PROC_ADJ);
         }
         if (isolated && isolatedUid != 0) {
             // Special case for startIsolatedProcess (internal only) - assume the process
             // is required by the system server to prevent it being killed.
-            state.setMaxAdj(ProcessList.PERSISTENT_SERVICE_ADJ);
+            mService.mProcessStateController.setMaxAdj(r, ProcessList.PERSISTENT_SERVICE_ADJ);
         }
         addProcessNameLocked(r);
         return r;

@@ -320,3 +320,10 @@ flag {
     description: "Enables custom transitions for alt-tab app launches in Desktop Mode."
     bug: "370735595"
 }
+
+flag {
+    name: "enable_move_to_next_display_shortcut"
+    namespace: "lse_desktop_experience"
+    description: "Add new keyboard shortcut of moving a task into next display"
+    bug: "364154795"
+}

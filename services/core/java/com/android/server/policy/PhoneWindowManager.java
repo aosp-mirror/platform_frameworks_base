@@ -731,7 +731,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     KeyEvent.KEYCODE_ASSIST,
                     KeyEvent.KEYCODE_VOICE_ASSIST,
                     KeyEvent.KEYCODE_MUTE,
-                    KeyEvent.KEYCODE_VOLUME_MUTE
+                    KeyEvent.KEYCODE_VOLUME_MUTE,
+                    KeyEvent.KEYCODE_RECENT_APPS,
+                    KeyEvent.KEYCODE_APP_SWITCH,
+                    KeyEvent.KEYCODE_NOTIFICATION
             ));
 
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -1141,9 +1144,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + mShortPressOnPowerBehavior);
 
         if (count == 2) {
-            powerMultiPressAction(displayId, eventTime, interactive, mDoublePressOnPowerBehavior);
+            powerMultiPressAction(eventTime, interactive, mDoublePressOnPowerBehavior);
         } else if (count == 3) {
-            powerMultiPressAction(displayId, eventTime, interactive, mTriplePressOnPowerBehavior);
+            powerMultiPressAction(eventTime, interactive, mTriplePressOnPowerBehavior);
         } else if (count > 3 && count <= getMaxMultiPressPowerCount()) {
             Slog.d(TAG, "No behavior defined for power press count " + count);
         } else if (count == 1 && shouldHandleShortPressPowerAction(interactive, eventTime)) {
@@ -1307,8 +1310,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void powerMultiPressAction(int displayId, long eventTime, boolean interactive,
-            int behavior) {
+    private void powerMultiPressAction(long eventTime, boolean interactive, int behavior) {
         switch (behavior) {
             case MULTI_PRESS_POWER_NOTHING:
                 break;
@@ -1323,7 +1325,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Global.putInt(mContext.getContentResolver(),
                             Settings.Global.THEATER_MODE_ON, 0);
                     if (!interactive) {
-                        wakeUpFromWakeKey(displayId, eventTime, KEYCODE_POWER, /* isDown= */ false);
+                        wakeUpFromWakeKey(eventTime, KEYCODE_POWER, /* isDown= */ false);
                     }
                 } else {
                     Slog.i(TAG, "Toggling theater mode on.");
@@ -1339,7 +1341,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case MULTI_PRESS_POWER_BRIGHTNESS_BOOST:
                 Slog.i(TAG, "Starting brightness boost.");
                 if (!interactive) {
-                    wakeUpFromWakeKey(displayId, eventTime, KEYCODE_POWER, /* isDown= */ false);
+                    wakeUpFromWakeKey(eventTime, KEYCODE_POWER, /* isDown= */ false);
                 }
                 mPowerManager.boostScreenBrightness(eventTime);
                 break;
@@ -2083,12 +2085,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             switch (mDoubleTapOnHomeBehavior) {
                 case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "toggleRecentApps")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_APP_SWITCH);
                     mHomeConsumed = true;
                     toggleRecentApps();
                     break;
                 case DOUBLE_TAP_HOME_PIP_MENU:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(),
+                            "showPictureInPictureMenu")) {
+                        break;
+                    }
                     mHomeConsumed = true;
                     showPictureInPictureMenuInternal();
                     break;
@@ -2117,12 +2128,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     break;
                 case LONG_PRESS_HOME_ASSIST:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "launchAssistAction")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
                     launchAssistAction(null, event.getDeviceId(), event.getEventTime(),
                             AssistUtils.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
                     break;
                 case LONG_PRESS_HOME_NOTIFICATION_PANEL:
+                    if (!isKeyEventForCurrentUser(
+                            event.getDisplayId(), event.getKeyCode(), "toggleNotificationPanel")) {
+                        break;
+                    }
                     notifyKeyGestureCompleted(event,
                             KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL);
                     toggleNotificationPanel();
@@ -3498,7 +3517,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (isUserSetupComplete() && !keyguardOn) {
             if (mModifierShortcutManager.interceptKey(event)) {
-                dismissKeyboardShortcutsMenu();
+                if (isKeyEventForCurrentUser(
+                        event.getDisplayId(), event.getKeyCode(),
+                        "dismissKeyboardShortcutsMenu")) {
+                    dismissKeyboardShortcutsMenu();
+                }
                 mPendingMetaAction = false;
                 mPendingCapsLockToggle = false;
                 return true;
@@ -4821,7 +4844,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // no keyguard stuff to worry about, just launch home!
-        if (mRecentsVisible) {
+        // If Recents is visible and the action is not from visible background users,
+        // hide Recents and notify it to launch Home.
+        if (mRecentsVisible
+                && (!mVisibleBackgroundUsersEnabled || displayId == DEFAULT_DISPLAY)) {
             try {
                 ActivityManager.getService().stopAppSwitches();
             } catch (RemoteException e) {}
@@ -5547,7 +5573,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mRequestedOrSleepingDefaultDisplay) {
             mCameraGestureTriggeredDuringGoingToSleep = true;
             // Wake device up early to prevent display doing redundant turning off/on stuff.
-            mWindowWakeUpPolicy.wakeUpFromPowerKeyCameraGesture(event.getDisplayId());
+            mWindowWakeUpPolicy.wakeUpFromPowerKeyCameraGesture();
         }
         return true;
     }
@@ -5571,6 +5597,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Notify the StatusBar that a system key was pressed.
      */
     private void sendSystemKeyToStatusBar(KeyEvent key) {
+        if (!isKeyEventForCurrentUser(key.getDisplayId(), key.getKeyCode(), "handleSystemKey")) {
+            return;
+        }
         IStatusBarService statusBar = getStatusBarService();
         if (statusBar != null) {
             try {
@@ -5645,8 +5674,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public int interceptMotionBeforeQueueingNonInteractive(int displayId, int source, int action,
             long whenNanos, int policyFlags) {
         if ((policyFlags & FLAG_WAKE) != 0) {
-            if (mWindowWakeUpPolicy.wakeUpFromMotion(displayId, whenNanos / 1000000, source,
-                    action == MotionEvent.ACTION_DOWN)) {
+            if (mWindowWakeUpPolicy.wakeUpFromMotion(
+                        whenNanos / 1000000, source, action == MotionEvent.ACTION_DOWN)) {
                 // Woke up. Pass motion events to user.
                 return ACTION_PASS_TO_USER;
             }
@@ -5660,8 +5689,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // there will be no dream to intercept the touch and wake into ambient.  The device should
         // wake up in this case.
         if (isTheaterModeEnabled() && (policyFlags & FLAG_WAKE) != 0) {
-            if (mWindowWakeUpPolicy.wakeUpFromMotion(displayId, whenNanos / 1000000, source,
-                    action == MotionEvent.ACTION_DOWN)) {
+            if (mWindowWakeUpPolicy.wakeUpFromMotion(
+                        whenNanos / 1000000, source, action == MotionEvent.ACTION_DOWN)) {
                 // Woke up. Pass motion events to user.
                 return ACTION_PASS_TO_USER;
             }
@@ -6003,14 +6032,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
         wakeUpFromWakeKey(
-                event.getDisplayId(),
                 event.getEventTime(),
                 event.getKeyCode(),
                 event.getAction() == KeyEvent.ACTION_DOWN);
     }
 
-    private void wakeUpFromWakeKey(int displayId, long eventTime, int keyCode, boolean isDown) {
-        if (mWindowWakeUpPolicy.wakeUpFromKey(displayId, eventTime, keyCode, isDown)) {
+    private void wakeUpFromWakeKey(long eventTime, int keyCode, boolean isDown) {
+        if (mWindowWakeUpPolicy.wakeUpFromKey(eventTime, keyCode, isDown)) {
             final boolean keyCanLaunchHome = keyCode == KEYCODE_HOME || keyCode == KEYCODE_POWER;
             // Start HOME with "reason" extra if sleeping for more than mWakeUpToLastStateTimeout
             if (shouldWakeUpWithHomeIntent() &&  keyCanLaunchHome) {

@@ -440,7 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ON"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ON • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"OFF"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"設定"</string>
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"未設定"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"設定で管理"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{アクティブなモードはありません}=1{{mode} がアクティブです}other{# 個のモードがアクティブです}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"アラーム、リマインダー、予定、指定した人からの着信以外の音やバイブレーションに煩わされることはありません。音楽、動画、ゲームなど再生対象として選択したコンテンツは引き続き再生されます。"</string>
@@ -573,8 +573,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"サイレント通知がすべて消去されます"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"サイレント モードにより通知は一時停止中です"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{通知なし}=1{{mode} により通知は一時停止中です}=2{{mode} と他 1 個のモードにより通知は一時停止中です}other{{mode} と他 # 個のモードにより通知は一時停止中です}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"通知はありません"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"新しい通知はありません"</string>
@@ -706,6 +705,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"デモモードを表示"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"イーサネット"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"アラーム"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g>: ON"</string>
     <string name="wallet_title" msgid="5369767670735827105">"ウォレット"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"スマートフォンを使ってよりすばやく安全に購入できるように設定しましょう"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"すべて表示"</string>
@@ -1405,26 +1405,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"タッチパッド操作の詳細"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"キーボードとタッチパッドを使用して移動する"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"タッチパッド操作やキーボード ショートカットなどの詳細"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"「戻る」ジェスチャー"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"「ホーム」ジェスチャー"</string>
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"戻る"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ホームに移動"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"最近使ったアプリを表示する"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完了"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"戻る"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"戻るには、3 本の指でタッチパッドを左右にスワイプします。\n\nキーボード ショートカットのアクション + ESC キーを使用して、この操作を行うこともできます。"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"お疲れさまでした。"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"タッチパッドを 3 本の指で左右にスワイプします"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"その調子です！"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"「戻る」操作を学習しました。"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ホームに移動"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"3 本の指で画面を下から上にスワイプすると、ホーム画面にいつでも移動できます。"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"お疲れさまでした。"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"「ホームに移動」操作を学習しました。"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"タッチパッドを 3 本の指で上にスワイプします"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"よくできました！"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"「ホームに移動」操作を学習しました"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"最近使ったアプリを表示する"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"タッチパッドを 3 本の指で上にスワイプして長押しします。"</string>
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"タッチパッドを 3 本の指で上にスワイプして長押しします"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"よくできました"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"「最近使ったアプリを表示する」操作を学習しました。"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"アクションキー"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"アプリにアクセスするには、キーボードのアクションキーを押します。"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"お疲れさまでした。"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"アクションキー操作を学習しました。\n\nアクションキーと + キーを同時に押すと、利用可能なショートカットがすべて表示されます。"</string>
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"すべてのアプリを表示"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"キーボードのアクションキーを押します"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"完了です！"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"「すべてのアプリを表示する」操作を学習しました"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>
@@ -1436,6 +1436,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"すべてのアプリを表示するには、キーボードのアクションキーを押してください"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"削除済み"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"表示するにはロックを解除してください"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"コンテキスト メニューに関する説明"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"タッチパッドを使用して、前の画面に戻る"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"3 本の指で左または右にスワイプします。ジェスチャーの詳細を確認するにはタップしてください。"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"タッチパッドを使用して、ホームに移動する"</string>

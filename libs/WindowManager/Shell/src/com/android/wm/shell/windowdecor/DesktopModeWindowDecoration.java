@@ -24,8 +24,8 @@ import static android.view.InsetsSource.FLAG_FORCE_CONSUMING_OPAQUE_CAPTION_BAR;
 import static android.view.MotionEvent.ACTION_CANCEL;
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_UP;
-import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
-import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
+import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
+import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION_ALWAYS;
 
 import static com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT;
 import static com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode;
@@ -72,9 +72,9 @@ import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.window.DesktopModeFlags;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerTransaction;
-import android.window.flags.DesktopModeFlags;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -87,13 +87,14 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AppToWebUtils;
 import com.android.wm.shell.apptoweb.AssistContentRequester;
+import com.android.wm.shell.apptoweb.OpenByDefaultDialog;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.CaptionState;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.WindowDecorCaptionHandleRepository;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
@@ -163,6 +164,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private MaximizeMenu mMaximizeMenu;
 
+    private OpenByDefaultDialog mOpenByDefaultDialog;
+
     private ResizeVeil mResizeVeil;
     private Bitmap mAppIconBitmap;
     private Bitmap mResizeVeilBitmap;
@@ -193,14 +196,14 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final Runnable mCapturedLinkExpiredRunnable = this::onCapturedLinkExpired;
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
-    private final DesktopModeTaskRepository mDesktopRepository;
+    private final DesktopRepository mDesktopRepository;
 
     DesktopModeWindowDecoration(
             Context context,
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -232,7 +235,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             @NonNull Context userContext,
             DisplayController displayController,
             SplitScreenController splitScreenController,
-            DesktopModeTaskRepository desktopRepository,
+            DesktopRepository desktopRepository,
             ShellTaskOrganizer taskOrganizer,
             ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl taskSurface,
@@ -448,6 +451,10 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             mHandleMenu.relayout(startT, mResult.mCaptionX);
         }
 
+        if (isOpenByDefaultDialogActive()) {
+            mOpenByDefaultDialog.relayout(taskInfo);
+        }
+
         final boolean inFullImmersive = mDesktopRepository
                 .isTaskInFullImmersiveState(taskInfo.taskId);
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
@@ -510,8 +517,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             closeManageWindowsMenu();
             closeMaximizeMenu();
         }
-        updateDragResizeListener(oldDecorationSurface);
-        updateMaximizeMenu(startT);
+        updateDragResizeListener(oldDecorationSurface, inFullImmersive);
+        updateMaximizeMenu(startT, inFullImmersive);
         Trace.endSection(); // DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces
     }
 
@@ -564,11 +571,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         return mUserContext.getUser();
     }
 
-    private void updateDragResizeListener(SurfaceControl oldDecorationSurface) {
-        if (!isDragResizable(mTaskInfo)) {
+    private void updateDragResizeListener(SurfaceControl oldDecorationSurface,
+            boolean inFullImmersive) {
+        if (!isDragResizable(mTaskInfo, inFullImmersive)) {
             if (!mTaskInfo.positionInParent.equals(mPositionInParent)) {
                 // We still want to track caption bar's exclusion region on a non-resizeable task.
-                updateExclusionRegion();
+                updateExclusionRegion(inFullImmersive);
             }
             closeDragResizeListener();
             return;
@@ -602,11 +610,16 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         getResizeEdgeHandleSize(res), getResizeHandleEdgeInset(res),
                         getFineResizeCornerSize(res), getLargeResizeCornerSize(res)), touchSlop)
                 || !mTaskInfo.positionInParent.equals(mPositionInParent)) {
-            updateExclusionRegion();
+            updateExclusionRegion(inFullImmersive);
         }
     }
 
-    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo) {
+    private static boolean isDragResizable(ActivityManager.RunningTaskInfo taskInfo,
+            boolean inFullImmersive) {
+        if (inFullImmersive) {
+            // Task cannot be resized in full immersive.
+            return false;
+        }
         if (DesktopModeFlags.ENABLE_WINDOWING_SCALED_RESIZING.isTrue()) {
             return taskInfo.isFreeform();
         }
@@ -670,8 +683,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mWindowDecorCaptionHandleRepository.notifyCaptionChanged(captionState);
     }
 
-    private void updateMaximizeMenu(SurfaceControl.Transaction startT) {
-        if (!isDragResizable(mTaskInfo) || !isMaximizeMenuActive()) {
+    private void updateMaximizeMenu(SurfaceControl.Transaction startT, boolean inFullImmersive) {
+        if (!isDragResizable(mTaskInfo, inFullImmersive) || !isMaximizeMenuActive()) {
             return;
         }
         if (!mTaskInfo.isVisible()) {
@@ -938,6 +951,33 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     boolean isHandleMenuActive() {
         return mHandleMenu != null;
+    }
+
+    boolean isOpenByDefaultDialogActive() {
+        return mOpenByDefaultDialog != null;
+    }
+
+    void createOpenByDefaultDialog() {
+        mOpenByDefaultDialog = new OpenByDefaultDialog(
+                mContext,
+                mTaskInfo,
+                mTaskSurface,
+                mDisplayController,
+                mSurfaceControlTransactionSupplier,
+                new OpenByDefaultDialog.DialogLifecycleListener() {
+                    @Override
+                    public void onDialogCreated() {
+                        closeHandleMenu();
+                    }
+
+                    @Override
+                    public void onDialogDismissed() {
+                        mOpenByDefaultDialog = null;
+                    }
+                },
+                mAppIconBitmap,
+                mAppName
+        );
     }
 
     boolean shouldResizeListenerHandleEvent(@NonNull MotionEvent e, @NonNull Point offset) {
@@ -1236,6 +1276,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     onCapturedLinkExpired();
                     return Unit.INSTANCE;
                 },
+                /* onOpenByDefaultClickListener= */ () -> {
+                    if (!isOpenByDefaultDialogActive()) {
+                        createOpenByDefaultDialog();
+                    }
+                    return Unit.INSTANCE;
+                },
                 /* onCloseMenuClickListener= */ () -> {
                     closeHandleMenu();
                     return Unit.INSTANCE;
@@ -1506,23 +1552,28 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         mPositionInParent.set(mTaskInfo.positionInParent);
     }
 
-    private void updateExclusionRegion() {
+    private void updateExclusionRegion(boolean inFullImmersive) {
         // An outdated position in parent is one reason for this to be called; update it here.
         updatePositionInParent();
         mExclusionRegionListener
-                .onExclusionRegionChanged(mTaskInfo.taskId, getGlobalExclusionRegion());
+                .onExclusionRegionChanged(mTaskInfo.taskId,
+                        getGlobalExclusionRegion(inFullImmersive));
     }
 
     /**
      * Create a new exclusion region from the corner rects (if resizeable) and caption bounds
      * of this task.
      */
-    private Region getGlobalExclusionRegion() {
+    private Region getGlobalExclusionRegion(boolean inFullImmersive) {
         Region exclusionRegion;
-        if (mDragResizeListener != null && isDragResizable(mTaskInfo)) {
+        if (mDragResizeListener != null && isDragResizable(mTaskInfo, inFullImmersive)) {
             exclusionRegion = mDragResizeListener.getCornersRegion();
         } else {
             exclusionRegion = new Region();
+        }
+        if (inFullImmersive) {
+            // Task can't be moved in full immersive, so skip excluding the caption region.
+            return exclusionRegion;
         }
         exclusionRegion.union(new Rect(0, 0, mResult.mWidth,
                 getCaptionHeight(mTaskInfo.getWindowingMode())));
@@ -1591,7 +1642,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 @NonNull Context userContext,
                 DisplayController displayController,
                 SplitScreenController splitScreenController,
-                DesktopModeTaskRepository desktopRepository,
+                DesktopRepository desktopRepository,
                 ShellTaskOrganizer taskOrganizer,
                 ActivityManager.RunningTaskInfo taskInfo,
                 SurfaceControl taskSurface,

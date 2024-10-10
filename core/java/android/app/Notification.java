@@ -809,6 +809,15 @@ public class Notification implements Parcelable
         return false;
     }
 
+    private static boolean isStandardLayout(int layoutId) {
+        if (Flags.apiRichOngoing()) {
+            if (layoutId == R.layout.notification_template_material_progress) {
+                return true;
+            }
+        }
+        return STANDARD_LAYOUTS.contains(layoutId);
+    }
+
     /** @hide */
     @IntDef(flag = true, prefix = {"FLAG_"}, value = {
             FLAG_SHOW_LIGHTS,
@@ -5983,9 +5992,9 @@ public class Notification implements Parcelable
                 }
             }
             boolean contentViewUsesHeader = mN.contentView == null
-                    || STANDARD_LAYOUTS.contains(mN.contentView.getLayoutId());
+                    || isStandardLayout(mN.contentView.getLayoutId());
             boolean bigContentViewUsesHeader = mN.bigContentView == null
-                    || STANDARD_LAYOUTS.contains(mN.bigContentView.getLayoutId());
+                    || isStandardLayout(mN.bigContentView.getLayoutId());
             return contentViewUsesHeader && bigContentViewUsesHeader;
         }
 
@@ -6781,7 +6790,7 @@ public class Notification implements Parcelable
                 return false;
             }
             if (fullyCustomViewRequiresDecoration(false)
-                    && STANDARD_LAYOUTS.contains(customContent.getLayoutId())) {
+                    && isStandardLayout(customContent.getLayoutId())) {
                 // If the app's custom views are objects returned from Builder.create*ContentView()
                 // then the app is most likely attempting to spoof the user.  Even if they are not,
                 // the result would be broken (b/189189308) so we will ignore it.
@@ -7677,6 +7686,10 @@ public class Notification implements Parcelable
 
         private int getConversationLayoutResource() {
             return R.layout.notification_template_material_conversation;
+        }
+
+        private int getProgressLayoutResource() {
+            return R.layout.notification_template_material_progress;
         }
 
         private int getActionLayoutResource() {
@@ -11635,6 +11648,37 @@ public class Notification implements Parcelable
                     .fillTextsFrom(mBuilder);
 
             return getStandardView(mBuilder.getHeadsUpBaseLayoutResource(), p, null /* result */);
+        }
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeBigContentView() {
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_BIG)
+                    .allowTextWithProgress(true)
+                    .fillTextsFrom(mBuilder);
+
+            // Replace the text with the big text, but only if the big text is not empty.
+            RemoteViews contentView = getStandardView(mBuilder.getProgressLayoutResource(), p,
+                    null /* result */);
+
+            // Bind progress start and end icons.
+            if (mStartIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_start_icon, mStartIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_start_icon, View.GONE);
+            }
+
+            if (mEndIcon != null) {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.VISIBLE);
+                contentView.setImageViewIcon(R.id.notification_progress_end_icon, mEndIcon);
+            } else {
+                contentView.setViewVisibility(R.id.notification_progress_end_icon, View.GONE);
+            }
+
+            return contentView;
         }
 
         private static @NonNull ArrayList<Bundle> getProgressSegmentsAsBundleList(

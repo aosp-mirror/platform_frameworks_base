@@ -28,6 +28,7 @@ import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TAS
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.app.WindowConfiguration;
@@ -44,6 +45,7 @@ import android.util.ArrayMap;
 import android.view.InsetsFrameProvider;
 import android.view.InsetsSource;
 import android.view.SurfaceControl;
+import android.view.WindowInsets;
 import android.view.WindowInsets.Type.InsetsType;
 
 import com.android.window.flags.Flags;
@@ -263,6 +265,23 @@ public final class WindowContainerTransaction implements Parcelable {
         Change chg = getOrCreateChange(container.asBinder());
         chg.mFocusable = focusable;
         chg.mChangeMask |= Change.CHANGE_FOCUSABLE;
+        return this;
+    }
+
+    /**
+     * Sets whether the IME insets should be excluded by {@link com.android.server.wm.InsetsPolicy}.
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi")
+    @NonNull
+    public WindowContainerTransaction setExcludeImeInsets(
+            @NonNull WindowContainerToken container, boolean exclude) {
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(HierarchyOp.HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES)
+                        .setContainer(container.asBinder())
+                        .setExcludeInsetsTypes(exclude ? WindowInsets.Type.ime() : 0)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
         return this;
     }
 
@@ -844,6 +863,24 @@ public final class WindowContainerTransaction implements Parcelable {
                         HierarchyOp.HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION)
                         .setContainer(fragmentToken)
                         .setTaskFragmentOperation(taskFragmentOperation)
+                        .build();
+        mHierarchyOps.add(hierarchyOp);
+        return this;
+    }
+
+    /**
+     * Adds a {@link KeyguardState} to apply to the given displays.
+     *
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction addKeyguardState(
+            @NonNull KeyguardState keyguardState) {
+        Objects.requireNonNull(keyguardState);
+        final HierarchyOp hierarchyOp =
+                new HierarchyOp.Builder(
+                        HierarchyOp.HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE)
+                        .setKeyguardState(keyguardState)
                         .build();
         mHierarchyOps.add(hierarchyOp);
         return this;
@@ -1449,6 +1486,8 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_MOVE_PIP_ACTIVITY_TO_PINNED_TASK = 18;
         public static final int HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE = 19;
         public static final int HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION = 20;
+        public static final int HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES = 21;
+        public static final int HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE = 22;
 
         // The following key(s) are for use with mLaunchOptions:
         // When launching a task (eg. from recents), this is the taskId to be launched.
@@ -1496,6 +1535,9 @@ public final class WindowContainerTransaction implements Parcelable {
         private TaskFragmentOperation mTaskFragmentOperation;
 
         @Nullable
+        private KeyguardState mKeyguardState;
+
+        @Nullable
         private PendingIntent mPendingIntent;
 
         @Nullable
@@ -1511,6 +1553,8 @@ public final class WindowContainerTransaction implements Parcelable {
         private boolean mReparentLeafTaskIfRelaunch;
 
         private boolean mIsTrimmableFromRecents;
+
+        private @InsetsType int mExcludeInsetsTypes;
 
         public static HierarchyOp createForReparent(
                 @NonNull IBinder container, @Nullable IBinder reparent, boolean toTop) {
@@ -1644,11 +1688,13 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = copy.mLaunchOptions;
             mActivityIntent = copy.mActivityIntent;
             mTaskFragmentOperation = copy.mTaskFragmentOperation;
+            mKeyguardState = copy.mKeyguardState;
             mPendingIntent = copy.mPendingIntent;
             mShortcutInfo = copy.mShortcutInfo;
             mAlwaysOnTop = copy.mAlwaysOnTop;
             mReparentLeafTaskIfRelaunch = copy.mReparentLeafTaskIfRelaunch;
             mIsTrimmableFromRecents = copy.mIsTrimmableFromRecents;
+            mExcludeInsetsTypes = copy.mExcludeInsetsTypes;
         }
 
         protected HierarchyOp(Parcel in) {
@@ -1666,11 +1712,13 @@ public final class WindowContainerTransaction implements Parcelable {
             mLaunchOptions = in.readBundle();
             mActivityIntent = in.readTypedObject(Intent.CREATOR);
             mTaskFragmentOperation = in.readTypedObject(TaskFragmentOperation.CREATOR);
+            mKeyguardState = in.readTypedObject(KeyguardState.CREATOR);
             mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
             mShortcutInfo = in.readTypedObject(ShortcutInfo.CREATOR);
             mAlwaysOnTop = in.readBoolean();
             mReparentLeafTaskIfRelaunch = in.readBoolean();
             mIsTrimmableFromRecents = in.readBoolean();
+            mExcludeInsetsTypes = in.readInt();
         }
 
         public int getType() {
@@ -1746,6 +1794,11 @@ public final class WindowContainerTransaction implements Parcelable {
         }
 
         @Nullable
+        public KeyguardState getKeyguardState() {
+            return mKeyguardState;
+        }
+
+        @Nullable
         public PendingIntent getPendingIntent() {
             return mPendingIntent;
         }
@@ -1772,6 +1825,10 @@ public final class WindowContainerTransaction implements Parcelable {
             return mIsTrimmableFromRecents;
         }
 
+        public @InsetsType int getExcludeInsetsTypes() {
+            return mExcludeInsetsTypes;
+        }
+
         /** Gets a string representation of a hierarchy-op type. */
         public static String hopToString(int type) {
             switch (type) {
@@ -1795,6 +1852,7 @@ public final class WindowContainerTransaction implements Parcelable {
                     return "setReparentLeafTaskIfRelaunch";
                 case HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION:
                     return "addTaskFragmentOperation";
+                case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES: return "setExcludeInsetsTypes";
                 default: return "HOP(" + type + ")";
             }
         }
@@ -1868,6 +1926,14 @@ public final class WindowContainerTransaction implements Parcelable {
                     sb.append("fragmentToken= ").append(mContainer)
                             .append(" operation= ").append(mTaskFragmentOperation);
                     break;
+                case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES:
+                    sb.append("container= ").append(mContainer)
+                            .append(" mExcludeInsetsTypes= ")
+                            .append(WindowInsets.Type.toString(mExcludeInsetsTypes));
+                    break;
+                case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE:
+                    sb.append("KeyguardState= ").append(mKeyguardState);
+                    break;
                 case HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE:
                     sb.append("container= ").append(mContainer)
                             .append(" isTrimmable= ")
@@ -1898,11 +1964,13 @@ public final class WindowContainerTransaction implements Parcelable {
             dest.writeBundle(mLaunchOptions);
             dest.writeTypedObject(mActivityIntent, flags);
             dest.writeTypedObject(mTaskFragmentOperation, flags);
+            dest.writeTypedObject(mKeyguardState, flags);
             dest.writeTypedObject(mPendingIntent, flags);
             dest.writeTypedObject(mShortcutInfo, flags);
             dest.writeBoolean(mAlwaysOnTop);
             dest.writeBoolean(mReparentLeafTaskIfRelaunch);
             dest.writeBoolean(mIsTrimmableFromRecents);
+            dest.writeInt(mExcludeInsetsTypes);
         }
 
         @Override
@@ -1958,6 +2026,9 @@ public final class WindowContainerTransaction implements Parcelable {
             private TaskFragmentOperation mTaskFragmentOperation;
 
             @Nullable
+            private KeyguardState mKeyguardState;
+
+            @Nullable
             private PendingIntent mPendingIntent;
 
             @Nullable
@@ -1973,6 +2044,8 @@ public final class WindowContainerTransaction implements Parcelable {
             private boolean mReparentLeafTaskIfRelaunch;
 
             private boolean mIsTrimmableFromRecents;
+
+            private @InsetsType int mExcludeInsetsTypes;
 
             Builder(int type) {
                 mType = type;
@@ -2044,6 +2117,12 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setKeyguardState(
+                    @Nullable KeyguardState keyguardState) {
+                mKeyguardState = keyguardState;
+                return this;
+            }
+
             Builder setReparentLeafTaskIfRelaunch(boolean reparentLeafTaskIfRelaunch) {
                 mReparentLeafTaskIfRelaunch = reparentLeafTaskIfRelaunch;
                 return this;
@@ -2069,6 +2148,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 return this;
             }
 
+            Builder setExcludeInsetsTypes(@InsetsType int excludeInsetsTypes) {
+                mExcludeInsetsTypes = excludeInsetsTypes;
+                return this;
+            }
+
             HierarchyOp build() {
                 final HierarchyOp hierarchyOp = new HierarchyOp(mType);
                 hierarchyOp.mContainer = mContainer;
@@ -2088,11 +2172,13 @@ public final class WindowContainerTransaction implements Parcelable {
                 hierarchyOp.mPendingIntent = mPendingIntent;
                 hierarchyOp.mAlwaysOnTop = mAlwaysOnTop;
                 hierarchyOp.mTaskFragmentOperation = mTaskFragmentOperation;
+                hierarchyOp.mKeyguardState = mKeyguardState;
                 hierarchyOp.mShortcutInfo = mShortcutInfo;
                 hierarchyOp.mBounds = mBounds;
                 hierarchyOp.mIncludingParents = mIncludingParents;
                 hierarchyOp.mReparentLeafTaskIfRelaunch = mReparentLeafTaskIfRelaunch;
                 hierarchyOp.mIsTrimmableFromRecents = mIsTrimmableFromRecents;
+                hierarchyOp.mExcludeInsetsTypes = mExcludeInsetsTypes;
 
                 return hierarchyOp;
             }

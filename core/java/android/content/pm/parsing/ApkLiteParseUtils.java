@@ -24,6 +24,7 @@ import android.annotation.NonNull;
 import android.app.admin.DeviceAdminReceiver;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.VerifierInfo;
 import android.content.pm.parsing.result.ParseInput;
@@ -92,6 +93,8 @@ public class ApkLiteParseUtils {
     private static final String[] SDK_CODENAMES = Build.VERSION.ACTIVE_CODENAMES;
     private static final String TAG_PROCESSES = "processes";
     private static final String TAG_PROCESS = "process";
+    private static final String TAG_STATIC_LIBRARY = "static-library";
+    private static final String TAG_LIBRARY = "library";
 
     /**
      * Parse only lightweight details about the package at the given location.
@@ -457,6 +460,7 @@ public class ApkLiteParseUtils {
         boolean hasDeviceAdminReceiver = false;
 
         boolean isSdkLibrary = false;
+        List<SharedLibraryInfo> declaredLibraries = new ArrayList<>();
 
         // Only search the tree when the tag is the direct child of <manifest> tag
         int type;
@@ -521,6 +525,51 @@ public class ApkLiteParseUtils {
                             break;
                         case TAG_SDK_LIBRARY:
                             isSdkLibrary = true;
+                            // Mirrors ParsingPackageUtils#parseSdkLibrary until lite and full
+                            // parsing are combined
+                            String sdkLibName = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "name");
+                            int sdkLibVersionMajor = parser.getAttributeIntValue(
+                                        ANDROID_RES_NAMESPACE, "versionMajor", -1);
+                            if (sdkLibName == null || sdkLibVersionMajor < 0) {
+                                return input.error(
+                                        PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
+                                        "Bad uses-sdk-library declaration name: " + sdkLibName
+                                                + " version: " + sdkLibVersionMajor);
+                            }
+                            declaredLibraries.add(new SharedLibraryInfo(
+                                    sdkLibName, sdkLibVersionMajor,
+                                    SharedLibraryInfo.TYPE_SDK_PACKAGE));
+                            break;
+                        case TAG_STATIC_LIBRARY:
+                            // Mirrors ParsingPackageUtils#parseStaticLibrary until lite and full
+                            // parsing are combined
+                            String staticLibName = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "name");
+                            int staticLibVersion = parser.getAttributeIntValue(
+                                    ANDROID_RES_NAMESPACE, "version", -1);
+                            int staticLibVersionMajor = parser.getAttributeIntValue(
+                                    ANDROID_RES_NAMESPACE, "versionMajor", 0);
+                            if (staticLibName == null || staticLibVersion < 0) {
+                                return input.error("Bad static-library declaration name: "
+                                        + staticLibName + " version: " + staticLibVersion);
+                            }
+                            declaredLibraries.add(new SharedLibraryInfo(staticLibName,
+                                    PackageInfo.composeLongVersionCode(staticLibVersionMajor,
+                                            staticLibVersion), SharedLibraryInfo.TYPE_STATIC));
+                            break;
+                        case TAG_LIBRARY:
+                            // Mirrors ParsingPackageUtils#parseLibrary until lite and full parsing
+                            // are combined
+                            String libName = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "name");
+                            if (libName == null) {
+                                return input.error("Bad library declaration name: null");
+                            }
+                            libName = libName.intern();
+                            declaredLibraries.add(new SharedLibraryInfo(libName,
+                                    SharedLibraryInfo.VERSION_UNDEFINED,
+                                    SharedLibraryInfo.TYPE_DYNAMIC));
                             break;
                         case TAG_PROCESSES:
                             final int processesDepth = parser.getDepth();
@@ -645,7 +694,8 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem, emergencyInstaller));
+                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem, emergencyInstaller,
+                        declaredLibraries));
     }
 
     private static boolean isDeviceAdminReceiver(

@@ -2109,7 +2109,7 @@ public class WindowManagerService extends IWindowManager.Stub
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Removing %s from %s", win, token);
         // Window will already be removed from token before this post clean-up method is called.
         if (token.isEmpty() && !token.mPersistOnEmpty) {
-            token.removeImmediately();
+            token.removeIfPossible();
         }
 
         if (win.mActivityRecord != null) {
@@ -6810,30 +6810,36 @@ public class WindowManagerService extends IWindowManager.Stub
      * @param logLevel  Determines the amount of data to be written to the Protobuf.
      */
     void dumpDebugLocked(ProtoOutputStream proto, @WindowTracingLogLevel int logLevel) {
-        mPolicy.dumpDebug(proto, POLICY);
-        mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
-        final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
-        if (topFocusedDisplayContent.mCurrentFocus != null) {
-            topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
-        }
-        if (topFocusedDisplayContent.mFocusedApp != null) {
-            topFocusedDisplayContent.mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
-        }
-        final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
-        if (imeWindow != null) {
-            imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
-        }
-        proto.write(DISPLAY_FROZEN, mDisplayFrozen);
-        proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
-        proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "dumpDebugLocked");
+        try {
+            mPolicy.dumpDebug(proto, POLICY);
+            mRoot.dumpDebug(proto, ROOT_WINDOW_CONTAINER, logLevel);
+            final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
+            if (topFocusedDisplayContent.mCurrentFocus != null) {
+                topFocusedDisplayContent.mCurrentFocus
+                        .writeIdentifierToProto(proto, FOCUSED_WINDOW);
+            }
+            if (topFocusedDisplayContent.mFocusedApp != null) {
+                topFocusedDisplayContent.mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
+            }
+            final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
+            if (imeWindow != null) {
+                imeWindow.writeIdentifierToProto(proto, INPUT_METHOD_WINDOW);
+            }
+            proto.write(DISPLAY_FROZEN, mDisplayFrozen);
+            proto.write(FOCUSED_DISPLAY_ID, topFocusedDisplayContent.getDisplayId());
+            proto.write(HARD_KEYBOARD_AVAILABLE, mHardKeyboardAvailable);
 
-        // This is always true for now since we still update the window frames at the server side.
-        // Once we move the window layout to the client side, this can be false when we are waiting
-        // for the frames.
-        proto.write(WINDOW_FRAMES_VALID, true);
+            // This is always true for now since we still update the window frames at the server
+            // side. Once we move the window layout to the client side, this can be false when we
+            // are waiting for the frames.
+            proto.write(WINDOW_FRAMES_VALID, true);
 
-        // Write the BackNavigationController's state into the protocol buffer
-        mAtmService.mBackNavigationController.dumpDebug(proto, BACK_NAVIGATION);
+            // Write the BackNavigationController's state into the protocol buffer
+            mAtmService.mBackNavigationController.dumpDebug(proto, BACK_NAVIGATION);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        }
     }
 
     private void dumpWindowsLocked(PrintWriter pw, boolean dumpAll,

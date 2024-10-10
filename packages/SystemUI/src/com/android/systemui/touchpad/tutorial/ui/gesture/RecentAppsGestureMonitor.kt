@@ -26,7 +26,7 @@ import kotlin.math.abs
  * is based on [com.android.quickstep.util.TriggerSwipeUpTouchTracker]
  */
 class RecentAppsGestureMonitor(
-    override val gestureDistanceThresholdPx: Int,
+    private val gestureDistanceThresholdPx: Int,
     override val gestureStateChangedCallback: (GestureState) -> Unit,
     private val velocityThresholdPxPerMs: Float,
     private val velocityTracker: VelocityTracker1D = VelocityTracker1D(isDataDifferential = false),
@@ -43,14 +43,14 @@ class RecentAppsGestureMonitor(
                 if (isThreeFingerTouchpadSwipe(event)) {
                     xStart = event.x
                     yStart = event.y
-                    gestureStateChangedCallback(GestureState.IN_PROGRESS)
+                    gestureStateChangedCallback(GestureState.InProgress())
                 }
             }
             MotionEvent.ACTION_UP -> {
                 if (isThreeFingerTouchpadSwipe(event) && isRecentAppsGesture(event)) {
-                    gestureStateChangedCallback(GestureState.FINISHED)
+                    gestureStateChangedCallback(GestureState.Finished)
                 } else {
-                    gestureStateChangedCallback(GestureState.NOT_STARTED)
+                    gestureStateChangedCallback(GestureState.NotStarted)
                 }
                 velocityTracker.resetTracking()
             }

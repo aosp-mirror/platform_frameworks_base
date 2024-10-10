@@ -198,13 +198,10 @@ flag {
 
 flag {
     name: "logcat_longer_timeout"
-    namespace: "backstage_power"
+    namespace: "stability"
     description: "Wait longer during the logcat gathering operation"
     bug: "292533246"
     is_fixed_read_only: true
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
 }
 
 flag {
@@ -220,4 +217,11 @@ flag {
     namespace: "system_performance"
     description: "Set reset_on_fork flag."
     bug: "370988407"
+}
+
+flag {
+    name: "push_global_state_to_oomadjuster"
+    namespace: "backstage_power"
+    description: "Migrate OomAdjuster pulled device state to a push model"
+    bug: "302575389"
 }

@@ -24,8 +24,8 @@ import android.view.WindowManager
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
-import android.window.flags.DesktopModeFlags
-import android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
+import android.window.DesktopModeFlags
+import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -36,21 +36,19 @@ import com.android.wm.shell.transition.Transitions
 
 /**
  * A [Transitions.TransitionObserver] that observes shell transitions and updates the
- * [DesktopModeTaskRepository] state TODO: b/332682201 This observes transitions related to desktop
+ * [DesktopRepository] state TODO: b/332682201 This observes transitions related to desktop
  * mode and other transitions that originate both within and outside shell.
  */
 class DesktopTasksTransitionObserver(
     private val context: Context,
-    private val desktopModeTaskRepository: DesktopModeTaskRepository,
+    private val desktopRepository: DesktopRepository,
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     shellInit: ShellInit
 ) : Transitions.TransitionObserver {
 
     init {
-        if (
-            Transitions.ENABLE_SHELL_TRANSITIONS && DesktopModeStatus.canEnterDesktopMode(context)
-        ) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
             shellInit.addInitCallback(::onInit, this)
         }
     }
@@ -83,10 +81,10 @@ class DesktopTasksTransitionObserver(
             val taskInfo = change.taskInfo
             if (taskInfo == null || taskInfo.taskId == -1) continue
 
-            if (desktopModeTaskRepository.isActiveTask(taskInfo.taskId)
+            if (desktopRepository.isActiveTask(taskInfo.taskId)
                 && taskInfo.windowingMode != WINDOWING_MODE_FREEFORM
             ) {
-                desktopModeTaskRepository.removeFreeformTask(
+                desktopRepository.removeFreeformTask(
                     taskInfo.displayId,
                     taskInfo.taskId
                 )
@@ -104,11 +102,11 @@ class DesktopTasksTransitionObserver(
                     continue
                 }
 
-                if (desktopModeTaskRepository.getVisibleTaskCount(taskInfo.displayId) > 0 &&
+                if (desktopRepository.getVisibleTaskCount(taskInfo.displayId) > 0 &&
                     change.mode == TRANSIT_TO_BACK &&
                     taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
                 ) {
-                    desktopModeTaskRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
+                    desktopRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)
                 }
             }
         }
@@ -135,7 +133,7 @@ class DesktopTasksTransitionObserver(
                 if (DesktopWallpaperActivity.isWallpaperTask(taskInfo)) {
                     when (change.mode) {
                         WindowManager.TRANSIT_OPEN -> {
-                            desktopModeTaskRepository.wallpaperActivityToken = taskInfo.token
+                            desktopRepository.wallpaperActivityToken = taskInfo.token
                             // After the task for the wallpaper is created, set it non-trimmable.
                             // This is important to prevent recents from trimming and removing the
                             // task.
@@ -145,7 +143,7 @@ class DesktopTasksTransitionObserver(
                             )
                         }
                         WindowManager.TRANSIT_CLOSE ->
-                            desktopModeTaskRepository.wallpaperActivityToken = null
+                            desktopRepository.wallpaperActivityToken = null
                         else -> {}
                     }
                 }

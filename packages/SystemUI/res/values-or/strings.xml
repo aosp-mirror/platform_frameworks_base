@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ଚାଲୁ ଅଛି"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ଚାଲୁ ଅଛି • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ବନ୍ଦ ଅଛି"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"ସେଟ ଅପ କରନ୍ତୁ"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"ସେଟିଂସରେ ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{କୌଣସି ସକ୍ରିୟ ମୋଡ ନାହିଁ}=1{{mode} ସକ୍ରିୟ ଅଛି}other{# ମୋଡ ସକ୍ରିୟ ଅଛି}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"ଆଲାର୍ମ, ରିମାଇଣ୍ଡର୍‌, ଇଭେଣ୍ଟ ଏବଂ ଆପଣ ନିର୍ଦ୍ଦିଷ୍ଟ କରିଥିବା କଲର୍‌ଙ୍କ ବ୍ୟତୀତ ଆପଣଙ୍କ ଧ୍ୟାନ ଅନ୍ୟ କୌଣସି ଧ୍ୱନୀ ଏବଂ ଭାଇବ୍ରେଶନ୍‌ରେ ଆକର୍ଷଣ କରାଯିବନାହିଁ। ମ୍ୟୁଜିକ୍‍, ଭିଡିଓ ଏବଂ ଗେମ୍‌ ସମେତ ନିଜେ ଚଲାଇବାକୁ ବାଛିଥିବା ଅନ୍ୟ ସବୁକିଛି ଆପଣ ଶୁଣିପାରିବେ।"</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ସମସ୍ତ ନୀରବ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଖାଲି କରନ୍ତୁ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ବିକଳ୍ପ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତି ପଜ୍‍ ହୋଇଛି"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ}=1{{mode} ଦ୍ୱାରା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବିରତ କରାଯାଇଛି}=2{{mode} ଏବଂ ଅନ୍ୟ ଏକ ମୋଡ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବିରତ କରାଯାଇଛି}other{{mode} ଏବଂ ଅନ୍ୟ # ମୋଡ ଦ୍ୱାରା ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ବିରତ କରାଯାଇଛି}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"କୌଣସି ନୂଆ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ନାହିଁ"</string>
@@ -706,6 +706,8 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ଡେମୋ ମୋଡ୍‍ ଦେଖାନ୍ତୁ"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ଇଥରନେଟ୍‌"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"ଆଲାରାମ"</string>
+    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
+    <skip />
     <string name="wallet_title" msgid="5369767670735827105">"ୱାଲେଟ୍"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ଆପଣଙ୍କ ଫୋନ୍ ମାଧ୍ୟମରେ ଆହୁରି ଶୀଘ୍ର, ଅଧିକ ସୁରକ୍ଷିତ କ୍ରୟ କରିବା ପାଇଁ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"ସବୁ ଦେଖାନ୍ତୁ"</string>
@@ -1405,26 +1407,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ଟଚପେଡର ଜେଶ୍ଚରଗୁଡ଼ିକ ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ଆପଣଙ୍କ କୀବୋର୍ଡ ଏବଂ ଟଚପେଡ ବ୍ୟବହାର କରି ନାଭିଗେଟ କରନ୍ତୁ"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ଟଚପେଡ ଜେଶ୍ଚର, କୀବୋର୍ଡ ସର୍ଟକଟ ଏବଂ ଆହୁରି ଅନେକ କିଛି ବିଷୟରେ ଜାଣନ୍ତୁ"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"ବେକ ଜେଶ୍ଚର"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"ହୋମ ଜେଶ୍ଚର"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ବର୍ତ୍ତମାନର ଆପ୍ସ ଭ୍ୟୁ କରନ୍ତୁ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ହୋଇଗଲା"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ପଛକୁ ଫେରନ୍ତୁ"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"ପଛକୁ ଫେରିବା ପାଇଁ ଯେ କୌଣସି ସ୍ଥାନରେ ତିନି ଆଙ୍ଗୁଠି ବ୍ୟବହାର କରି ବାମ କିମ୍ବା ଡାହାଣକୁ ସ୍ୱାଇପ କରନ୍ତୁ।\n\nଏଥିପାଇଁ ଆପଣ କୀବୋର୍ଡ ସର୍ଟକଟ ଆକ୍ସନ + ESC ମଧ୍ୟ ବ୍ୟବହାର କରିପାରିବେ।"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"ବଢ଼ିଆ କାମ!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ଆପଣ \'ପଛକୁ ଫେରନ୍ତୁ\' ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ହୋମକୁ ଯାଆନ୍ତୁ"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"ଯେ କୌଣସି ସମୟରେ ଆପଣଙ୍କ ହୋମ ସ୍କ୍ରିନକୁ ଯିବା ପାଇଁ ଆପଣଙ୍କ ସ୍କିନର ତଳୁ ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ କରନ୍ତୁ।"</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"ବଢ଼ିଆ!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"ଆପଣ \'ହୋମକୁ ଯାଆନ୍ତୁ\' ଜେଶ୍ଚର ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ବର୍ତ୍ତମାନର ଆପ୍ସ ଭ୍ୟୁ କରନ୍ତୁ"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"ଆପଣଙ୍କ ଟଚପେଡରେ ତିନୋଟି ଆଙ୍ଗୁଠିକୁ ବ୍ୟବହାର କରି ଉପରକୁ ସ୍ୱାଇପ କରି ଧରି ରଖନ୍ତୁ।"</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ବଢ଼ିଆ କାମ!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ଆପଣ ବର୍ତ୍ତମାନର ଆପ୍ସ ଜେଶ୍ଚରକୁ ଭ୍ୟୁ କରିବା ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।"</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ଆକ୍ସନ କୀ"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ଆପଣଙ୍କ ଆପ୍ସ ଆକ୍ସେସ କରିବା ପାଇଁ ଆପଣଙ୍କର କୀବୋର୍ଡରେ ଆକ୍ସନ କୀ\'କୁ ଦବାନ୍ତୁ।"</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"ଅଭିନନ୍ଦନ!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ଆପଣ ଆକ୍ସନ କୀ ଜେଶ୍ଚରକୁ ସମ୍ପୂର୍ଣ୍ଣ କରିଛନ୍ତି।\n\nଆକ୍ସନ + / ଆପଣଙ୍କ ପାଖରେ ଉପଲବ୍ଧ ଥିବା ସମସ୍ତ ସଟକର୍ଟକୁ ଦେଖାଇଥାଏ।"</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"କୀବୋର୍ଡ ବେକଲାଇଟ"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dରୁ %1$d ନମ୍ବର ଲେଭେଲ"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ହୋମ କଣ୍ଟ୍ରୋଲ୍ସ"</string>
@@ -1436,6 +1450,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"ଆପଣଙ୍କ ସମସ୍ତ ଆପ୍ସ ଭ୍ୟୁ କରିବା ପାଇଁ ଆପଣଙ୍କ କୀବୋର୍ଡରେ ଆକ୍ସନ କୀ\'କୁ ଦବାନ୍ତୁ"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"ଲୁଚା ଯାଇଥିବା"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"ଭ୍ୟୁ କରିବାକୁ ଅନଲକ କରନ୍ତୁ"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"ପ୍ରାସଙ୍ଗିକ ଶିକ୍ଷା"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"ପଛକୁ ଫେରିବା ପାଇଁ ଆପଣଙ୍କ ଟଚପେଡକୁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"ତିନୋଟି ଆଙ୍ଗୁଠିରେ ବାମ ବା ଡାହାଣକୁ ସ୍ୱାଇପ କରନ୍ତୁ। ଜେଶ୍ଚରଗୁଡ଼ିକ ବିଷୟରେ ଅଧିକ ଜାଣିବାକୁ ଟାପ କରନ୍ତୁ।"</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"ହୋମକୁ ଯିବା ପାଇଁ ଆପଣଙ୍କ ଟଚପେଡ ବ୍ୟବହାର କରନ୍ତୁ"</string>

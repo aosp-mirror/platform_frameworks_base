@@ -27,6 +27,9 @@ android_test {
         "servicestests-utils",
         "platform-test-annotations",
         "flag-junit",
+        "statsdprotolite",
+        "StatsdTestUtils",
+        "platformprotoslite",
     ],
 
     libs: [
@@ -73,6 +76,10 @@ android_ravenwood_test {
         "src/com/android/server/power/stats/*.java",
         "src/com/android/server/power/stats/format/*.java",
         "src/com/android/server/power/stats/processor/*.java",
+    ],
+    // TODO(b/372292543): Enable this test.
+    exclude_srcs: [
+        "src/com/android/server/power/stats/WakelockStatsFrameworkEventsTest.java",
     ],
     java_resources: [
         "res/xml/power_profile*.xml",

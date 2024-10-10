@@ -24,7 +24,7 @@ import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_TO_BACK
 import android.window.TransitionInfo
 import android.window.WindowContainerTransaction
-import android.window.flags.DesktopModeFlags
+import android.window.DesktopModeFlags
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_MINIMIZE_WINDOW
 import com.android.internal.jank.InteractionJankMonitor
@@ -39,12 +39,12 @@ import com.android.wm.shell.transition.Transitions.TransitionObserver
  * Limits the number of tasks shown in Desktop Mode.
  *
  * This class should only be used if
- * [android.window.flags.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
+ * [android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_TASK_LIMIT]
  * is enabled and [maxTasksLimit] is strictly greater than 0.
  */
 class DesktopTasksLimiter (
         transitions: Transitions,
-        private val taskRepository: DesktopModeTaskRepository,
+        private val taskRepository: DesktopRepository,
         private val shellTaskOrganizer: ShellTaskOrganizer,
         private val maxTasksLimit: Int,
         private val interactionJankMonitor: InteractionJankMonitor,
@@ -160,7 +160,7 @@ class DesktopTasksLimiter (
     }
 
     @VisibleForTesting
-    inner class LeftoverMinimizedTasksRemover : DesktopModeTaskRepository.ActiveTasksListener {
+    inner class LeftoverMinimizedTasksRemover : DesktopRepository.ActiveTasksListener {
         override fun onActiveTasksChanged(displayId: Int) {
             // If back navigation is enabled, we shouldn't remove the leftover tasks
             if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return

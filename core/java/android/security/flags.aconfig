@@ -106,3 +106,10 @@ flag {
     description: "Clear StrongAuth on add credential"
     bug: "320817991"
 }
+
+flag {
+    name: "afl_api"
+    namespace: "platform_security"
+    description: "AFL feature"
+    bug: "365994454"
+}

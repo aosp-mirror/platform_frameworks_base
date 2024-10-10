@@ -1529,6 +1529,11 @@
         factory reset. -->
     <bool name="config_enableCredentialFactoryResetProtection">true</bool>
 
+    <!-- If true, then work around broken Weaver HALs that don't work reliably before the device has
+         fully booted. Setting this to true weakens a security feature; it should be done only when
+         necessary, though it is still better than not using Weaver at all. -->
+    <bool name="config_disableWeaverOnUnsecuredUsers">false</bool>
+
     <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
             1 - Launch all apps intent
@@ -6912,6 +6917,14 @@
          and concurrent display mode. Used to get information about the display before
          entering the corresponding modes -->
     <string name="config_rearDisplayPhysicalAddress" translatable="false"></string>
+
+    <!-- The maximum number of virtual displays that can exist at the same time.
+         It must be >= 1. -->
+    <integer name="config_virtualDisplayLimit">100</integer>
+
+    <!-- The maximum number of virtual displays per package that can exist at the same time.
+         It must be >= 1. -->
+    <integer name="config_virtualDisplayLimitPerPackage">50</integer>
 
     <!-- List of certificate to be used for font fs-verity integrity verification -->
     <string-array translatable="false" name="config_fontManagerServiceCerts">

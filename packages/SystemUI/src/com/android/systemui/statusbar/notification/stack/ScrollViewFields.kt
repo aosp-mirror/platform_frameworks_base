@@ -86,9 +86,6 @@ class ScrollViewFields {
     fun sendRemoteInputRowBottomBound(bottomY: Float?) =
         remoteInputRowBottomBoundConsumer?.accept(bottomY)
 
-    /** send the [headsUpHeight] to the [headsUpHeightConsumer], if present. */
-    fun sendHeadsUpHeight(headsUpHeight: Float) = headsUpHeightConsumer?.accept(headsUpHeight)
-
     fun dump(pw: IndentingPrintWriter) {
         pw.printSection("StackViewStates") {
             pw.println("scrimClippingShape", scrimClippingShape)

@@ -92,7 +92,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     private lateinit var mockitoSession: StaticMockitoSession
     private lateinit var desktopTasksLimiter: DesktopTasksLimiter
-    private lateinit var desktopTaskRepo: DesktopModeTaskRepository
+    private lateinit var desktopTaskRepo: DesktopRepository
     private lateinit var shellInit: ShellInit
     private lateinit var testScope: CoroutineScope
 
@@ -106,7 +106,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         testScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
         desktopTaskRepo =
-            DesktopModeTaskRepository(context, shellInit, persistentRepository, testScope)
+            DesktopRepository(context, shellInit, persistentRepository, testScope)
         desktopTasksLimiter =
             DesktopTasksLimiter(transitions, desktopTaskRepo, shellTaskOrganizer, MAX_TASK_LIMIT,
                 interactionJankMonitor, mContext, handler)

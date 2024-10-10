@@ -48,7 +48,7 @@ constructor(
 ) {
 
     companion object {
-        const val DEFAULT_DIALOG_TIMEOUT_MILLIS = 3500
+        const val DEFAULT_DIALOG_TIMEOUT_MILLIS = 5000
     }
 
     private val timeoutMillis: Long
@@ -71,7 +71,7 @@ constructor(
                         it.userId,
                     )
                 } else {
-                    ContextualEduToastViewModel(getEduContent(it), it.userId)
+                    ContextualEduToastViewModel(getEduContent(it), getEduIcon(it), it.userId)
                 }
             }
             .timeout(timeoutMillis, emitAfterTimeout = null)
@@ -117,5 +117,14 @@ constructor(
             }
 
         return resources.getString(resourceId)
+    }
+
+    private fun getEduIcon(educationInfo: EducationInfo): Int {
+        return when (educationInfo.gestureType) {
+            BACK -> R.drawable.contextual_edu_swipe_back
+            HOME,
+            OVERVIEW -> R.drawable.contextual_edu_swipe_up
+            ALL_APPS -> R.drawable.contextual_edu_all_apps
+        }
     }
 }

@@ -17,13 +17,23 @@
 package com.android.systemui.volume.dialog.ui.viewmodel
 
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.Flow
 
-class VolumeDialogViewModel @AssistedInject constructor() : ExclusiveActivatable() {
+/** Provides a state for the Volume Dialog. */
+class VolumeDialogViewModel
+@AssistedInject
+constructor(dialogVisibilityInteractor: VolumeDialogVisibilityInteractor) : ExclusiveActivatable() {
+
+    val dialogVisibilityModel: Flow<VolumeDialogVisibilityModel> =
+        dialogVisibilityInteractor.dialogVisibility
 
     override suspend fun onActivated(): Nothing {
-        TODO("Not yet implemented")
+        awaitCancellation()
     }
 
     @AssistedFactory

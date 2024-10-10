@@ -17,12 +17,12 @@
 package com.android.systemui.screenshot
 
 import android.content.ComponentName
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.graphics.Insets
 import android.graphics.Rect
 import android.os.UserHandle
 import android.view.Display
 import android.view.WindowManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.util.ScreenshotRequest
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -53,8 +53,8 @@ class ScreenshotDataTest {
 
         assertThat(data.source).isEqualTo(source)
         assertThat(data.type).isEqualTo(type)
-        assertThat(data.screenBounds).isEqualTo(bounds)
-        assertThat(data.insets).isEqualTo(insets)
+        assertThat(data.originalScreenBounds).isEqualTo(bounds)
+        assertThat(data.originalInsets).isEqualTo(insets)
         assertThat(data.taskId).isEqualTo(taskId)
         assertThat(data.userHandle).isEqualTo(UserHandle.of(userId))
         assertThat(data.topComponent).isEqualTo(component)
@@ -68,15 +68,6 @@ class ScreenshotDataTest {
         val data = ScreenshotData.fromRequest(request, displayId = 42)
 
         assertThat(data.displayId).isEqualTo(42)
-    }
-
-    @Test
-    fun testNegativeUserId() {
-        val request = ScreenshotRequest.Builder(type, source).setUserId(-1).build()
-
-        val data = ScreenshotData.fromRequest(request)
-
-        assertThat(data.userHandle).isNull()
     }
 
     @Test

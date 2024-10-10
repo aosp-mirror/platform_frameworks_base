@@ -36,7 +36,7 @@ import org.junit.runners.Parameterized
 /**
  * Test quick switching to letterboxed app from launcher
  *
- * To run this test: `atest WMShellFlickerTestsOther:QuickSwitchLauncherToLetterboxAppTest`
+ * To run this test: `atest WMShellFlickerTestsAppCompat:QuickSwitchLauncherToLetterboxAppTest`
  *
  * Actions:
  * ```

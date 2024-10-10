@@ -125,7 +125,7 @@ import static android.view.flags.Flags.toolkitMetricsForFrameRateDecision;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
-import static android.window.flags.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
+import static android.window.DesktopModeFlags.ENABLE_CAPTION_COMPAT_INSET_FORCE_CONSUMPTION;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
@@ -7531,6 +7531,7 @@ public final class ViewRootImpl implements ViewParent,
                         if (keyEvent.isCanceled()) {
                             animationCallback.onBackCancelled();
                         } else {
+                            dispatcher.tryInvokeSystemNavigationObserverCallback();
                             topCallback.onBackInvoked();
                         }
                         break;
@@ -7538,6 +7539,7 @@ public final class ViewRootImpl implements ViewParent,
             } else if (topCallback != null) {
                 if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
                     if (!keyEvent.isCanceled()) {
+                        dispatcher.tryInvokeSystemNavigationObserverCallback();
                         topCallback.onBackInvoked();
                     } else {
                         Log.d(mTag, "Skip onBackInvoked(), reason: keyEvent.isCanceled=true");

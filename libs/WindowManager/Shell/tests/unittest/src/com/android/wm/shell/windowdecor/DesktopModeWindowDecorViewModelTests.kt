@@ -87,7 +87,7 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository
+import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksLimiter
@@ -126,7 +126,6 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doNothing
@@ -161,7 +160,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     @Mock private lateinit var mockTaskOrganizer: ShellTaskOrganizer
     @Mock private lateinit var mockDisplayController: DisplayController
     @Mock private lateinit var mockSplitScreenController: SplitScreenController
-    @Mock private lateinit var mockDesktopRepository: DesktopModeTaskRepository
+    @Mock private lateinit var mockDesktopRepository: DesktopRepository
     @Mock private lateinit var mockDisplayLayout: DisplayLayout
     @Mock private lateinit var displayInsetsController: DisplayInsetsController
     @Mock private lateinit var mockSyncQueue: SyncTransactionQueue
@@ -455,18 +454,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
         onClickListenerCaptor.value.onClick(view)
 
-        val transactionCaptor = argumentCaptor<WindowContainerTransaction>()
-        verify(mockFreeformTaskTransitionStarter)
-            .startMinimizedModeTransition(transactionCaptor.capture())
-        val wct = transactionCaptor.firstValue
-
-        verify(mockTasksLimiter).addPendingMinimizeChange(
-                anyOrNull(), eq(DEFAULT_DISPLAY), eq(decor.mTaskInfo.taskId))
-
-        assertEquals(1, wct.getHierarchyOps().size)
-        assertEquals(HierarchyOp.HIERARCHY_OP_TYPE_REORDER, wct.getHierarchyOps().get(0).getType())
-        assertFalse(wct.getHierarchyOps().get(0).getToTop())
-        assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
+        verify(mockDesktopTasksController).minimizeTask(decor.mTaskInfo)
     }
 
     @Test
@@ -1221,9 +1209,48 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         assertEquals(decor.mTaskInfo.token.asBinder(), wct.getHierarchyOps().get(0).getContainer())
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testMaximizeButtonClick_requestingImmersive_togglesDesktopImmersiveState() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor,
+            requestingImmersive = true,
+        )
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.maximize_window)
+
+        onClickListenerCaptor.value.onClick(view)
+
+        verify(mockDesktopTasksController)
+            .toggleDesktopTaskFullImmersiveState(decor.mTaskInfo)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    fun testMaximizeButtonClick_notRequestingImmersive_togglesDesktopTaskSize() {
+        val onClickListenerCaptor = forClass(View.OnClickListener::class.java)
+                as ArgumentCaptor<View.OnClickListener>
+        val decor = createOpenTaskDecoration(
+            windowingMode = WINDOWING_MODE_FREEFORM,
+            onCaptionButtonClickListener = onClickListenerCaptor,
+            requestingImmersive = false,
+        )
+        val view = mock(View::class.java)
+        whenever(view.id).thenReturn(R.id.maximize_window)
+
+        onClickListenerCaptor.value.onClick(view)
+
+        verify(mockDesktopTasksController)
+            .toggleDesktopTaskSize(decor.mTaskInfo)
+    }
+
     private fun createOpenTaskDecoration(
         @WindowingMode windowingMode: Int,
         taskSurface: SurfaceControl = SurfaceControl(),
+        requestingImmersive: Boolean = false,
         onMaxOrRestoreListenerCaptor: ArgumentCaptor<Function0<Unit>> =
             forClass(Function0::class.java) as ArgumentCaptor<Function0<Unit>>,
         onLeftSnapClickListenerCaptor: ArgumentCaptor<Function0<Unit>> =
@@ -1243,7 +1270,10 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
         onCaptionButtonTouchListener: ArgumentCaptor<View.OnTouchListener> =
             forClass(View.OnTouchListener::class.java) as ArgumentCaptor<View.OnTouchListener>
     ): DesktopModeWindowDecoration {
-        val decor = setUpMockDecorationForTask(createTask(windowingMode = windowingMode))
+        val decor = setUpMockDecorationForTask(createTask(
+            windowingMode = windowingMode,
+            requestingImmersive = requestingImmersive
+        ))
         onTaskOpening(decor.mTaskInfo, taskSurface)
         verify(decor).setOnMaximizeOrRestoreClickListener(onMaxOrRestoreListenerCaptor.capture())
         verify(decor).setOnLeftSnapClickListener(onLeftSnapClickListenerCaptor.capture())
@@ -1282,6 +1312,7 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
             activityType: Int = ACTIVITY_TYPE_STANDARD,
             focused: Boolean = true,
             activityInfo: ActivityInfo = ActivityInfo(),
+            requestingImmersive: Boolean = false
     ): RunningTaskInfo {
         return TestRunningTaskInfoBuilder()
                 .setDisplayId(displayId)
@@ -1292,6 +1323,11 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
                     topActivityInfo = activityInfo
                     isFocused = focused
                     isResizeable = true
+                    requestedVisibleTypes = if (requestingImmersive) {
+                        statusBars().inv()
+                    } else {
+                        statusBars()
+                    }
                 }
     }
 

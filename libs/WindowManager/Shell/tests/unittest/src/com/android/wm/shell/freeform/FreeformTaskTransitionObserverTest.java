@@ -17,8 +17,11 @@
 package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -30,6 +33,8 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 import android.window.IWindowContainerToken;
 import android.window.TransitionInfo;
@@ -37,7 +42,10 @@ import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
+import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -48,18 +56,27 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /**
- * Tests of {@link FreeformTaskTransitionObserver}
+ * Tests for {@link FreeformTaskTransitionObserver}.
  */
 @SmallTest
 public class FreeformTaskTransitionObserverTest {
 
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Mock
     private ShellInit mShellInit;
     @Mock
     private Transitions mTransitions;
     @Mock
+    private DesktopFullImmersiveTransitionHandler mDesktopFullImmersiveTransitionHandler;
+    @Mock
     private WindowDecorViewModel mWindowDecorViewModel;
+    @Mock
+    private TaskChangeListener mTaskChangeListener;
+    @Mock
+    private FocusTransitionObserver mFocusTransitionObserver;
 
     private FreeformTaskTransitionObserver mTransitionObserver;
 
@@ -69,30 +86,29 @@ public class FreeformTaskTransitionObserverTest {
 
         PackageManager pm = mock(PackageManager.class);
         doReturn(true).when(pm).hasSystemFeature(
-                PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
+            PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT);
         final Context context = mock(Context.class);
         doReturn(pm).when(context).getPackageManager();
 
         mTransitionObserver = new FreeformTaskTransitionObserver(
-                context, mShellInit, mTransitions, mWindowDecorViewModel);
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
-                    Runnable.class);
-            verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
-                    same(mTransitionObserver));
-            initRunnableCaptor.getValue().run();
-        } else {
-            mTransitionObserver.onInit();
-        }
+                context, mShellInit, mTransitions,
+                Optional.of(mDesktopFullImmersiveTransitionHandler),
+                mWindowDecorViewModel, Optional.of(mTaskChangeListener), mFocusTransitionObserver);
+
+        final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
+                Runnable.class);
+        verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
+                same(mTransitionObserver));
+        initRunnableCaptor.getValue().run();
     }
 
     @Test
-    public void testRegistersObserverAtInit() {
+    public void init_registersObserver() {
         verify(mTransitions).registerObserver(same(mTransitionObserver));
     }
 
     @Test
-    public void testCreatesWindowDecorOnOpenTransition_freeform() {
+    public void openTransition_createsWindowDecor() {
         final TransitionInfo.Change change =
                 createChange(TRANSIT_OPEN, 1, WINDOWING_MODE_FREEFORM);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
@@ -109,7 +125,71 @@ public class FreeformTaskTransitionObserverTest {
     }
 
     @Test
-    public void testPreparesWindowDecorOnCloseTransition_freeform() {
+    public void openTransition_notifiesOnTaskOpening() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_OPEN, 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN, 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskOpening(change.getTaskInfo());
+    }
+
+    @Test
+    public void toFrontTransition_notifiesOnTaskMovingToFront() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_TO_FRONT, /* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TO_FRONT, /* flags= */ 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskMovingToFront(change.getTaskInfo());
+    }
+
+    @Test
+    public void toBackTransition_notifiesOnTaskMovingToBack() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_TO_BACK, /* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TO_BACK, /* flags= */ 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskMovingToBack(change.getTaskInfo());
+    }
+
+    @Test
+    public void changeTransition_notifiesOnTaskChanging() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_CHANGE, /* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CHANGE, /* flags= */ 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskChanging(change.getTaskInfo());
+    }
+
+    @Test
+    public void closeTransition_preparesWindowDecor() {
         final TransitionInfo.Change change =
                 createChange(TRANSIT_CLOSE, 1, WINDOWING_MODE_FREEFORM);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
@@ -126,7 +206,23 @@ public class FreeformTaskTransitionObserverTest {
     }
 
     @Test
-    public void testDoesntCloseWindowDecorDuringCloseTransition() throws Exception {
+    public void closeTransition_notifiesOnTaskClosing() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_CLOSE, 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskClosing(change.getTaskInfo());
+    }
+
+    @Test
+    public void closeTransition_doesntCloseWindowDecorDuringTransition() throws Exception {
         final TransitionInfo.Change change =
                 createChange(TRANSIT_CLOSE, 1, WINDOWING_MODE_FREEFORM);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
@@ -142,7 +238,7 @@ public class FreeformTaskTransitionObserverTest {
     }
 
     @Test
-    public void testClosesWindowDecorAfterCloseTransition() throws Exception {
+    public void closeTransition_closesWindowDecorAfterTransition() throws Exception {
         final TransitionInfo.Change change =
                 createChange(TRANSIT_CLOSE, 1, WINDOWING_MODE_FREEFORM);
         final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CLOSE, 0)
@@ -161,7 +257,7 @@ public class FreeformTaskTransitionObserverTest {
     }
 
     @Test
-    public void testClosesMergedWindowDecorationAfterTransitionFinishes() throws Exception {
+    public void transitionFinished_closesMergedWindowDecoration() throws Exception {
         // The playing transition
         final TransitionInfo.Change change1 =
                 createChange(TRANSIT_OPEN, 1, WINDOWING_MODE_FREEFORM);
@@ -192,7 +288,7 @@ public class FreeformTaskTransitionObserverTest {
     }
 
     @Test
-    public void testClosesAllWindowDecorsOnTransitionMergeAfterCloseTransitions() throws Exception {
+    public void closeTransition_closesWindowDecorsOnTransitionMerge() throws Exception {
         // The playing transition
         final TransitionInfo.Change change1 =
                 createChange(TRANSIT_CLOSE, 1, WINDOWING_MODE_FREEFORM);
@@ -221,6 +317,19 @@ public class FreeformTaskTransitionObserverTest {
 
         verify(mWindowDecorViewModel).destroyWindowDecoration(change1.getTaskInfo());
         verify(mWindowDecorViewModel).destroyWindowDecoration(change2.getTaskInfo());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP)
+    public void onTransitionReady_forwardsToDesktopImmersiveHandler() {
+        final IBinder transition = mock(IBinder.class);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_CHANGE, 0).build();
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+
+        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition, info);
     }
 
     private static TransitionInfo.Change createChange(int mode, int taskId, int windowingMode) {

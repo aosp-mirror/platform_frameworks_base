@@ -49,6 +49,7 @@ import android.gui.DropInputMode;
 import android.gui.StalledTransactionInfo;
 import android.gui.TrustedOverlay;
 import android.hardware.DataSpace;
+import android.hardware.DisplayLuts;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
 import android.hardware.SyncFence;
@@ -152,6 +153,8 @@ public final class SurfaceControl implements Parcelable {
             long nativeObject, int priority);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
+    private static native void nativeSetCrop(long transactionObj, long nativeObject,
+            float l, float t, float r, float b);
     private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
             float cornerRadius);
     private static native void nativeSetBackgroundBlurRadius(long transactionObj, long nativeObject,
@@ -305,9 +308,9 @@ public final class SurfaceControl implements Parcelable {
     private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
     private static native void nativeSetDesiredPresentTimeNanos(long transactionObj,
                                                                 long desiredPresentTimeNanos);
-    private static native void nativeSetFrameTimeline(long transactionObj,
-                                                           long vsyncId);
     private static native void nativeNotifyShutdown();
+    private static native void nativeSetLuts(long transactionObj, long nativeObject,
+            float[] buffers, int[] slots, int[] dimensions, int[] sizes, int[] samplingKeys);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -3452,6 +3455,29 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
+         * Bounds the surface and its children to the bounds specified. Size of the surface will be
+         * ignored and only the crop and buffer size will be used to determine the bounds of the
+         * surface. If no crop is specified and the surface has no buffer, the surface bounds is
+         * only constrained by the size of its parent bounds.
+         *
+         * @param sc   SurfaceControl to set crop of.
+         * @param crop Bounds of the crop to apply.
+         * @return this This transaction for chaining
+         * @hide
+         */
+        public @NonNull Transaction setCrop(@NonNull SurfaceControl sc, float top, float left,
+                float bottom, float right) {
+            checkPreconditions(sc);
+            if (SurfaceControlRegistry.sCallStackDebuggingEnabled) {
+                SurfaceControlRegistry.getProcessInstance().checkCallStackDebugging(
+                        "setCrop", this, sc, "crop={" + top + ", " + left + ", " +
+                        bottom + ", " + right + "}");
+            }
+            nativeSetCrop(mNativeObject, sc.mNativeObject, top, left, bottom, right);
+            return this;
+        }
+
+        /**
          * Sets the corner radius of a {@link SurfaceControl}.
          * @param sc SurfaceControl
          * @param cornerRadius Corner radius in pixels.
@@ -4371,6 +4397,17 @@ public final class SurfaceControl implements Parcelable {
                         "desiredRatio must be finite && >= 1.0f or 0; got " + desiredRatio);
             }
             nativeSetDesiredHdrHeadroom(mNativeObject, sc.mNativeObject, desiredRatio);
+            return this;
+        }
+
+        /** @hide */
+        public @NonNull Transaction setLuts(@NonNull SurfaceControl sc,
+                @NonNull DisplayLuts displayLuts) {
+            checkPreconditions(sc);
+
+            nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
+                    displayLuts.getOffsets(), displayLuts.getLutDimensions(),
+                    displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
             return this;
         }
 

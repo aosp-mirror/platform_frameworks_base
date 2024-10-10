@@ -286,6 +286,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -2747,6 +2748,11 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    @Override
+    protected void onUnhandledException(int code, int flags, Exception e) {
+        Slog.wtf(TAG, "Uncaught exception in AudioService: " + code + ", " + flags, e);
+    }
+
     @Override // Binder call
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
@@ -4030,7 +4036,6 @@ public class AudioService extends IAudioService.Stub
                             && isFullVolumeDevice(device);
                     boolean tvConditions = mHdmiTvClient != null
                             && mHdmiSystemAudioSupported
-                            && isFullVolumeDevice(device)
                             && !isAbsoluteVolumeDevice(device)
                             && !isA2dpAbsoluteVolumeDevice(device);
 

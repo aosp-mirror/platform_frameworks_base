@@ -173,6 +173,16 @@ flag {
 }
 
 flag {
+  name: "filter_irrelevant_input_device_change"
+  namespace: "windowing_frontend"
+  description: "Recompute display configuration only for necessary input device changes"
+  bug: "368461853"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "respect_non_top_visible_fixed_orientation"
   namespace: "windowing_frontend"
   description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
@@ -306,4 +316,12 @@ flag {
   description: "Ensure that keyguard is the one starting transitions, instead of delegating to Core"
   bug: "364930619"
   is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_priority_system_navigation_observer"
+    namespace: "systemui"
+    description: "PRIORITY_SYSTEM_NAVIGATION_OBSERVER predictive back API extension"
+    is_fixed_read_only: true
+    bug: "362938401"
 }

@@ -92,7 +92,7 @@ class PolicyRequestProcessor(
                         updates.component,
                         updates.owner,
                         type.taskId,
-                        type.taskBounds
+                        type.taskBounds,
                     )
                 is FullScreen ->
                     replaceWithScreenshot(
@@ -122,11 +122,11 @@ class PolicyRequestProcessor(
             componentName = topMainRootTask?.topActivity ?: defaultComponent,
             taskId = topMainRootTask?.taskId,
             owner = defaultOwner,
-            displayId = original.displayId
+            displayId = original.displayId,
         )
     }
 
-    suspend fun replaceWithTaskSnapshot(
+    private suspend fun replaceWithTaskSnapshot(
         original: ScreenshotData,
         componentName: ComponentName?,
         owner: UserHandle,
@@ -134,32 +134,32 @@ class PolicyRequestProcessor(
         taskBounds: Rect?,
     ): ScreenshotData {
         Log.i(TAG, "Capturing task snapshot: $componentName / $owner")
-        val taskSnapshot = capture.captureTask(taskId)
+        val taskSnapshot = capture.captureTask(taskId) ?: error("Failed to capture task")
         return original.copy(
             type = TAKE_SCREENSHOT_PROVIDED_IMAGE,
             bitmap = taskSnapshot,
             userHandle = owner,
             taskId = taskId,
             topComponent = componentName,
-            screenBounds = taskBounds
+            originalScreenBounds = taskBounds,
         )
     }
 
     private suspend fun replaceWithScreenshot(
         original: ScreenshotData,
         componentName: ComponentName?,
-        owner: UserHandle?,
+        owner: UserHandle,
         displayId: Int,
         taskId: Int? = null,
     ): ScreenshotData {
         Log.i(TAG, "Capturing screenshot: $componentName / $owner")
-        val screenshot = captureDisplay(displayId)
+        val screenshot = captureDisplay(displayId) ?: error("Failed to capture screenshot")
         return original.copy(
             type = TAKE_SCREENSHOT_FULLSCREEN,
             bitmap = screenshot,
             userHandle = owner,
             topComponent = componentName,
-            screenBounds = Rect(0, 0, screenshot?.width ?: 0, screenshot?.height ?: 0),
+            originalScreenBounds = Rect(0, 0, screenshot.width, screenshot.height),
             taskId = taskId ?: -1,
         )
     }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
@@ -57,7 +58,7 @@ fun BackGestureTutorialScreen(
 
 @Composable
 private fun rememberScreenColors(): TutorialScreenConfig.Colors {
-    val onTertiary = LocalAndroidColorScheme.current.onTertiary
+    val onTertiary = MaterialTheme.colorScheme.onTertiary
     val onTertiaryFixed = LocalAndroidColorScheme.current.onTertiaryFixed
     val onTertiaryFixedVariant = LocalAndroidColorScheme.current.onTertiaryFixedVariant
     val tertiaryFixedDim = LocalAndroidColorScheme.current.tertiaryFixedDim

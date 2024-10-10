@@ -43,10 +43,13 @@ object MediaCarouselStateLoader {
 
     /** Returns the corresponding media location for the given [scene] */
     @MediaLocation
-    private fun getMediaLocation(scene: SceneKey): Int {
+    private fun getMediaLocation(scene: SceneKey, isSplitShade: Boolean): Int {
         return when (scene) {
             Scenes.QuickSettings -> MediaHierarchyManager.LOCATION_QS
-            Scenes.Shade -> MediaHierarchyManager.LOCATION_QQS
+            Scenes.Shade -> {
+                if (isSplitShade) MediaHierarchyManager.LOCATION_QS
+                else MediaHierarchyManager.LOCATION_QQS
+            }
             Scenes.Lockscreen -> MediaHierarchyManager.LOCATION_LOCKSCREEN
             Scenes.Communal -> MediaHierarchyManager.LOCATION_COMMUNAL_HUB
             else -> MediaHierarchyManager.LOCATION_UNKNOWN
@@ -97,11 +100,11 @@ object MediaCarouselStateLoader {
     }
 
     /** Returns the state of media carousel */
-    fun SceneScope.stateForMediaCarouselContent(): State {
+    fun SceneScope.stateForMediaCarouselContent(isInSplitShade: Boolean): State {
         return when (val transitionState = layoutState.transitionState) {
             is TransitionState.Idle -> {
                 if (MediaContentPicker.contents.contains(transitionState.currentScene)) {
-                    State.Idle(getMediaLocation(transitionState.currentScene))
+                    State.Idle(getMediaLocation(transitionState.currentScene, isInSplitShade))
                 } else {
                     State.Gone
                 }
@@ -114,14 +117,14 @@ object MediaCarouselStateLoader {
                     ) {
                         State.InProgress(
                             min(progress, 1.0F),
-                            getMediaLocation(fromScene),
-                            getMediaLocation(toScene),
+                            getMediaLocation(fromScene, isInSplitShade),
+                            getMediaLocation(toScene, isInSplitShade),
                         )
                     } else if (MediaContentPicker.contents.contains(toScene)) {
                         State.InProgress(
                             transitionProgress = 1.0F,
                             startLocation = MediaHierarchyManager.LOCATION_UNKNOWN,
-                            getMediaLocation(toScene),
+                            getMediaLocation(toScene, isInSplitShade),
                         )
                     } else {
                         State.Gone

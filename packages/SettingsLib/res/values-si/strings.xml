@@ -585,7 +585,6 @@
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"මෙම පරිගණකය (අභ්‍යන්තර)"</string>
     <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
     <skip />
-    <string name="media_transfer_internal_mic" msgid="797333824290228595">"මයික්‍රෆෝනය (අභ්‍යන්තර)"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ඩොක් ස්පීකරය"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"බාහිර උපාංගය"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"සම්බන්ධ කළ උපාංගය"</string>
@@ -688,9 +687,11 @@
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"මෙම වෙනස යෙදීමට ඔබේ උපාංගය නැවත පණ ගැන්විය යුතුය. දැන් නැවත පණ ගන්වන්න හෝ අවලංගු කරන්න."</string>
     <string name="media_transfer_wired_headphone_name" msgid="8698668536022665254">"රැහැන්ගත හෙඩ්ෆෝන්"</string>
     <string name="media_transfer_headphone_name" msgid="1131962659136578852">"හෙඩ්ෆෝන්"</string>
-    <string name="media_transfer_usb_speaker_name" msgid="4736537022543593896">"USB ස්පීකරය"</string>
+    <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ශ්‍රව්‍ය"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"මයික් ජැක්කුව"</string>
-    <string name="media_transfer_usb_device_mic_name" msgid="9189914846215516322">"USB මයික්"</string>
+    <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB මයික්‍රෆෝනය"</string>
+    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
+    <skip />
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ක්‍රියාත්මකයි"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ක්‍රියාවිරහිතයි"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"වාහක ජාලය වෙනස් වෙමින්"</string>

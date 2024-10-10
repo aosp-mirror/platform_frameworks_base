@@ -51,6 +51,7 @@ import static android.window.WindowContainerTransaction.Change.CHANGE_FOCUSABLE;
 import static android.window.WindowContainerTransaction.Change.CHANGE_FORCE_TRANSLUCENT;
 import static android.window.WindowContainerTransaction.Change.CHANGE_HIDDEN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
@@ -67,6 +68,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_IS_TRIMMABLE;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ADJACENT_FLAG_ROOT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
@@ -120,6 +122,7 @@ import android.window.ITransitionMetricsReporter;
 import android.window.ITransitionPlayer;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
+import android.window.KeyguardState;
 import android.window.RemoteTransition;
 import android.window.TaskFragmentAnimationParams;
 import android.window.TaskFragmentCreationParams;
@@ -1252,6 +1255,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         caller, errorCallbackToken, organizer);
                 break;
             }
+            case HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE: {
+                effects |= applyKeyguardState(hop);
+                break;
+            }
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
                 final Bundle launchOpts = hop.getLaunchOptions();
                 ActivityOptions activityOptions = launchOpts != null
@@ -1447,6 +1454,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (mService.mBackNavigationController.restoreBackNavigation()) {
                     effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 }
+                break;
+            }
+            case HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
+                if (container == null) {
+                    Slog.e(TAG, "Attempt to operate on unknown or detached container: "
+                            + container);
+                    break;
+                }
+                container.setExcludeInsetsTypes(hop.getExcludeInsetsTypes());
                 break;
             }
         }
@@ -1773,6 +1790,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskFragment.setPinned(pinned);
                 break;
             }
+        }
+        return effects;
+    }
+
+    private int applyKeyguardState(@NonNull WindowContainerTransaction.HierarchyOp hop) {
+        int effects = TRANSACT_EFFECTS_NONE;
+
+        final KeyguardState keyguardState = hop.getKeyguardState();
+        if (keyguardState != null) {
+            int displayId = keyguardState.getDisplayId();
+            boolean keyguardShowing = keyguardState.getKeyguardShowing();
+            boolean aodShowing = keyguardState.getAodShowing();
+            mService.mKeyguardController.setKeyguardShown(displayId, keyguardShowing, aodShowing);
         }
         return effects;
     }

@@ -62,6 +62,7 @@ import androidx.test.filters.FlakyTest;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityTraceManager;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import org.junit.Before;
@@ -92,12 +93,16 @@ public class MagnificationConnectionManagerTest {
     private MagnificationConnectionManager.Callback mMockCallback;
     private MockContentResolver mResolver;
     private MagnificationConnectionManager mMagnificationConnectionManager;
+    @Mock
+    private UserManagerInternal mMockUserManagerInternal;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
+        LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
         mResolver = new MockContentResolver();
         mMockConnection = new MockMagnificationConnection();
         mMagnificationConnectionManager = new MagnificationConnectionManager(mContext, new Object(),
@@ -110,6 +115,8 @@ public class MagnificationConnectionManagerTest {
         Settings.Secure.putFloatForUser(mResolver,
                 Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, 2.5f,
                 CURRENT_USER_ID);
+
+        when(mMockUserManagerInternal.isVisibleBackgroundFullUser(anyInt())).thenReturn(false);
     }
 
     private void stubSetConnection(boolean needDelay) {

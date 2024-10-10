@@ -87,7 +87,7 @@ import com.android.wm.shell.compatui.impl.DefaultCompatUIHandler;
 import com.android.wm.shell.compatui.impl.DefaultCompatUIRepository;
 import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
-import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
@@ -267,7 +267,7 @@ public abstract class WMShellBaseModule {
             Lazy<CompatUIShellCommandHandler> compatUIShellCommandHandler,
             Lazy<AccessibilityManager> accessibilityManager,
             CompatUIRepository compatUIRepository,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
             @NonNull CompatUIComponentFactory compatUIComponentFactory,
@@ -281,7 +281,7 @@ public abstract class WMShellBaseModule {
                             componentIdGenerator, compatUIComponentFactory, mainExecutor));
         }
         final IntPredicate inDesktopModePredicate =
-                desktopModeTaskRepository.<IntPredicate>map(modeTaskRepository -> displayId ->
+                desktopRepository.<IntPredicate>map(modeTaskRepository -> displayId ->
                         modeTaskRepository.getVisibleTaskCount(displayId) > 0)
                             .orElseGet(() -> displayId -> false);
         return Optional.of(
@@ -707,14 +707,14 @@ public abstract class WMShellBaseModule {
             ShellCommandHandler shellCommandHandler,
             TaskStackListenerImpl taskStackListener,
             ActivityTaskManager activityTaskManager,
-            Optional<DesktopModeTaskRepository> desktopModeTaskRepository,
+            Optional<DesktopRepository> desktopRepository,
             TaskStackTransitionObserver taskStackTransitionObserver,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
         return Optional.ofNullable(
                 RecentTasksController.create(context, shellInit, shellController,
                         shellCommandHandler, taskStackListener, activityTaskManager,
-                        desktopModeTaskRepository, taskStackTransitionObserver, mainExecutor));
+                        desktopRepository, taskStackTransitionObserver, mainExecutor));
     }
 
     @BindsOptionalOf
@@ -1003,16 +1003,16 @@ public abstract class WMShellBaseModule {
 
     @BindsOptionalOf
     @DynamicOverride
-    abstract DesktopModeTaskRepository optionalDesktopModeTaskRepository();
+    abstract DesktopRepository optionalDesktopRepository();
 
     @WMSingleton
     @Provides
-    static Optional<DesktopModeTaskRepository> provideDesktopTaskRepository(Context context,
-            @DynamicOverride Optional<Lazy<DesktopModeTaskRepository>> desktopModeTaskRepository) {
+    static Optional<DesktopRepository> provideDesktopRepository(Context context,
+            @DynamicOverride Optional<Lazy<DesktopRepository>> desktopRepository) {
         // Use optional-of-lazy for the dependency that this provider relies on.
         // Lazy ensures that this provider will not be the cause the dependency is created
         // when it will not be returned due to the condition below.
-        return desktopModeTaskRepository.flatMap((lazy) -> {
+        return desktopRepository.flatMap((lazy) -> {
             if (DesktopModeStatus.canEnterDesktopMode(context)) {
                 return Optional.of(lazy.get());
             }

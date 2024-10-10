@@ -440,7 +440,8 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"இயக்கப்பட்டுள்ளது"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ஆன் • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"முடக்கப்பட்டுள்ளது"</string>
-    <string name="zen_mode_set_up" msgid="7457957033034460064">"அமையுங்கள்"</string>
+    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
+    <skip />
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"அமைப்புகளில் நிர்வகியுங்கள்"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{செயலிலுள்ள பயன்முறைகள் எதுவுமில்லை}=1{{mode} செயலில் உள்ளது}other{# பயன்முறைகள் செயலில் உள்ளன}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"அலாரங்கள், நினைவூட்டல்கள், நிகழ்வுகள் மற்றும் குறிப்பிட்ட அழைப்பாளர்களைத் தவிர்த்து, பிற ஒலிகள் மற்றும் அதிர்வுகளின் தொந்தரவு இருக்காது. எனினும், நீங்கள் எதையேனும் (இசை, வீடியோக்கள், கேம்ஸ் போன்றவை) ஒலிக்கும்படி தேர்ந்தெடுத்திருந்தால், அவை வழக்கம் போல் ஒலிக்கும்."</string>
@@ -573,8 +574,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"சைலன்ட் அறிவிப்புகள் அனைத்தையும் அழிக்கும்"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
-    <!-- no translation found for modes_suppressing_shade_text (6037581130837903239) -->
-    <skip />
+    <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{அறிவிப்புகள் இல்லை}=1{{mode} பயன்முறையால் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன}=2{{mode} மற்றும் வேறொரு பயன்முறையால் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன}other{{mode} மற்றும் வேறு # பயன்முறைகளால் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"அறிவிப்புகள் இல்லை"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"புதிய அறிவிப்புகள் இல்லை"</string>
@@ -706,6 +706,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"டெமோ முறையைக் காட்டு"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"ஈதர்நெட்"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"அலாரம்"</string>
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> இயக்கப்பட்டுள்ளது"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"மொபைல் மூலம் விரைவாகவும் பாதுகாப்பாகவும் பர்ச்சேஸ்கள் செய்ய பேமெண்ட் முறையை அமைக்கவும்"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"அனைத்தையும் காட்டு"</string>
@@ -1405,26 +1406,38 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"டச்பேட் சைகைள் குறித்துத் தெரிந்துகொள்ளுங்கள்"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"உங்கள் டச்பேட் மற்றும் கீபோர்டைப் பயன்படுத்திச் செல்லுதல்"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"டச்பேட் சைகைகள், கீபோர்டு ஷார்ட்கட்கள் மற்றும் பலவற்றைத் தெரிந்துகொள்ளுங்கள்"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="2746834288077265946">"பின்செல்வதற்கான சைகை"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="7640544867625955304">"முகப்பிற்குச் செல்வதற்கான சைகை"</string>
+    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
+    <skip />
+    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
+    <skip />
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"முடிந்தது"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"பின்செல்"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="6263750214998421587">"பின்செல்ல, உங்கள் டச்பேடில் எங்கு வேண்டுமானாலும் இடது அல்லது வலதுபுறமாக மூன்று விரல்களால் ஸ்வைப் செய்யவும்.\n\nஇதற்கு நீங்கள் கீபோர்டு ஷார்ட்கட் செயல்பாடுகள் + Esc பட்டனையும் பயன்படுத்தலாம்."</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7240576648330612171">"அருமை!"</string>
+    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
+    <skip />
+    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
+    <skip />
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"பின்செல்வதற்கான சைகையை நிறைவுசெய்துவிட்டீர்கள்."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"முகப்பிற்குச் செல்"</string>
-    <string name="touchpad_home_gesture_guidance" msgid="3043931356096731966">"எப்போது வேண்டுமானாலும் உங்கள் முகப்புத் திரைக்குச் செல்ல, மூன்று விரல்களால் திரையின் கீழிருந்து மேல்நோக்கி ஸ்வைப் செய்யவும்."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3778407003948209795">"அற்புதம்!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2404031094918807067">"முகப்புக்குச் செல்வதற்கான சைகையை நிறைவுசெய்துவிட்டீர்கள்."</string>
+    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
+    <skip />
+    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
-    <string name="touchpad_recent_apps_gesture_guidance" msgid="6012057247259983871">"உங்கள் டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்."</string>
+    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
+    <skip />
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"அருமை!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"சமீபத்தில் பயன்படுத்திய ஆப்ஸுக்கான சைகை பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்."</string>
-    <string name="tutorial_action_key_title" msgid="2659466586996495447">"ஆக்‌ஷன் பட்டன்"</string>
-    <string name="tutorial_action_key_guidance" msgid="5718948664616999196">"ஆப்ஸை அணுக உங்கள் கீபோர்டில் உள்ள ஆக்‌ஷன் பட்டனை அழுத்துங்கள்."</string>
-    <string name="tutorial_action_key_success_title" msgid="466467860120112933">"வாழ்த்துகள்!"</string>
-    <string name="tutorial_action_key_success_body" msgid="7201991081652850430">"ஆக்‌ஷன் பட்டன் சைகையை நிறைவுசெய்துவிட்டீர்கள்.\n\nAction + / உங்களுக்குக் கிடைக்கக்கூடிய எல்லா ஷார்ட்கட்களையும் காட்டும்."</string>
+    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
+    <skip />
+    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
+    <skip />
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"கீபோர்டு பேக்லைட்"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"நிலை, %2$d இல் %1$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ஹோம் கன்ட்ரோல்கள்"</string>
@@ -1436,6 +1449,7 @@
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"அனைத்து ஆப்ஸையும் பார்க்க, உங்கள் கீபோர்டில் உள்ள ஆக்ஷன் பட்டனை அழுத்தவும்"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"அர்த்தம் புரியாதபடி திருத்தப்பட்டது"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"பார்ப்பதற்கு அன்லாக் செய்யவும்"</string>
+    <string name="contextual_education_dialog_title" msgid="4630392552837487324">"சூழல் சார்ந்த கல்வி"</string>
     <string name="back_edu_notification_title" msgid="5624780717751357278">"பின்செல்ல, உங்கள் டச்பேடைப் பயன்படுத்துங்கள்"</string>
     <string name="back_edu_notification_content" msgid="2497557451540954068">"மூன்று விரல்களால் இடது அல்லது வலதுபுறம் ஸ்வைப் செய்யவும். சைகைகள் குறித்து மேலும் அறிய தட்டவும்."</string>
     <string name="home_edu_notification_title" msgid="6097902076909654045">"முகப்புக்குச் செல்ல, உங்கள் டச்பேடைப் பயன்படுத்துங்கள்"</string>

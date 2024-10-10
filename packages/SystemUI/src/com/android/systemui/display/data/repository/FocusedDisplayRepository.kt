@@ -37,16 +37,21 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 /** Repository tracking display focus. */
+interface FocusedDisplayRepository {
+    /** Provides the currently focused display. */
+    val focusedDisplayId: StateFlow<Int>
+}
+
 @SysUISingleton
 @MainThread
-class FocusedDisplayRepository
+class FocusedDisplayRepositoryImpl
 @Inject
 constructor(
     @Background val backgroundScope: CoroutineScope,
     @Background private val backgroundExecutor: Executor,
     transitions: ShellTransitions,
     @FocusedDisplayRepoLog logBuffer: LogBuffer,
-) {
+) : FocusedDisplayRepository {
     val focusedTask: Flow<Int> =
         conflatedCallbackFlow<Int> {
                 val listener =
@@ -67,7 +72,6 @@ constructor(
                 )
             }
 
-    /** Provides the currently focused display. */
-    val focusedDisplayId: StateFlow<Int>
+    override val focusedDisplayId: StateFlow<Int>
         get() = focusedTask.stateIn(backgroundScope, SharingStarted.Eagerly, DEFAULT_DISPLAY)
 }

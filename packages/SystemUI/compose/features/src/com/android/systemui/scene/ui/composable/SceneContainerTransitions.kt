@@ -15,11 +15,13 @@ import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransit
 import com.android.systemui.scene.ui.composable.transitions.bouncerToLockscreenPreview
 import com.android.systemui.scene.ui.composable.transitions.communalToBouncerTransition
 import com.android.systemui.scene.ui.composable.transitions.communalToShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.dreamToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToSplitShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToBouncerTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToCommunalTransition
+import com.android.systemui.scene.ui.composable.transitions.lockscreenToDreamTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToGoneTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.lockscreenToShadeTransition
@@ -44,6 +46,7 @@ import com.android.systemui.shade.ui.composable.Shade
  * Please keep the list sorted alphabetically.
  */
 val SceneContainerTransitions = transitions {
+    interruptionHandler = SceneContainerInterruptionHandler
 
     // Overscroll progress starts linearly with some resistance (3f) and slowly approaches 0.2f
     defaultOverscrollProgressConverter = ProgressConverter.tanh(maxProgress = 0.2f, tilt = 3f)
@@ -52,6 +55,7 @@ val SceneContainerTransitions = transitions {
     // Scene transitions
 
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
+    from(Scenes.Dream, to = Scenes.Gone) { dreamToGoneTransition() }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade, key = ToSplitShade) { goneToSplitShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade, key = SlightlyFasterShadeCollapse) {
@@ -72,6 +76,7 @@ val SceneContainerTransitions = transitions {
         lockscreenToBouncerTransition()
     }
     from(Scenes.Lockscreen, to = Scenes.Communal) { lockscreenToCommunalTransition() }
+    from(Scenes.Lockscreen, to = Scenes.Dream) { lockscreenToDreamTransition() }
     from(Scenes.Lockscreen, to = Scenes.Shade) { lockscreenToShadeTransition() }
     from(Scenes.Lockscreen, to = Scenes.Shade, key = ToSplitShade) {
         lockscreenToSplitShadeTransition()

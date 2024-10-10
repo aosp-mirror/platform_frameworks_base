@@ -792,6 +792,7 @@
     <protected-broadcast android:name="com.android.cellbroadcastreceiver.GET_LATEST_CB_AREA_INFO" />
     <protected-broadcast android:name="com.android.internal.telephony.ACTION_CARRIER_CERTIFICATE_DOWNLOAD" />
     <protected-broadcast android:name="com.android.internal.telephony.action.COUNTRY_OVERRIDE" />
+    <protected-broadcast android:name="com.android.internal.telephony.action.SILENCE_WIFI_CALLING_NOTIFICATION"/>
     <protected-broadcast android:name="com.android.internal.telephony.OPEN_DEFAULT_SMS_APP" />
     <protected-broadcast android:name="com.android.internal.telephony.ACTION_TEST_OVERRIDE_CARRIER_ID" />
     <protected-broadcast android:name="android.telephony.action.SIM_CARD_STATE_CHANGED" />
@@ -844,6 +845,8 @@
     <protected-broadcast android:name="android.intent.action.MAIN_USER_LOCKSCREEN_KNOWLEDGE_FACTOR_CHANGED" />
     <protected-broadcast android:name="com.android.uwb.uwbcountrycode.GEOCODE_RETRY" />
     <protected-broadcast android:name="android.telephony.action.ACTION_SATELLITE_SUBSCRIBER_ID_LIST_CHANGED" />
+    <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_LOADED" />
+    <protected-broadcast android:name="android.service.ondeviceintelligence.MODEL_UNLOADED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

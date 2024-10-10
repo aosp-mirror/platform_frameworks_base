@@ -34,7 +34,6 @@ import android.util.ArraySet
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.internal.infra.AndroidFuture
-import com.android.server.appfunctions.FutureAppSearchSession.FutureSearchResults
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.atomic.AtomicBoolean
 import org.junit.Test

@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toOffset
 import androidx.compose.ui.unit.toSize
+import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.communal.ui.compose.extensions.firstItemAtOffset
 import com.android.systemui.communal.ui.compose.extensions.plus
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
@@ -65,7 +66,7 @@ fun rememberGridDragDropState(
                 state = gridState,
                 contentListState = contentListState,
                 scope = scope,
-                updateDragPositionForRemove = updateDragPositionForRemove
+                updateDragPositionForRemove = updateDragPositionForRemove,
             )
         }
     LaunchedEffect(state) {
@@ -90,7 +91,7 @@ internal constructor(
     private val state: LazyGridState,
     private val contentListState: ContentListState,
     private val scope: CoroutineScope,
-    private val updateDragPositionForRemove: (offset: Offset) -> Boolean
+    private val updateDragPositionForRemove: (offset: Offset) -> Boolean,
 ) {
     var draggingItemIndex by mutableStateOf<Int?>(null)
         private set
@@ -122,12 +123,12 @@ internal constructor(
         offset: Offset,
         screenWidth: Int,
         layoutDirection: LayoutDirection,
-        contentOffset: Offset
+        contentOffset: Offset,
     ): Boolean {
         val normalizedOffset =
             Offset(
                 if (layoutDirection == LayoutDirection.Ltr) offset.x else screenWidth - offset.x,
-                offset.y
+                offset.y,
             )
         state.layoutInfo.visibleItemsInfo
             .filter { item -> contentListState.isItemEditable(item.index) }
@@ -248,7 +249,7 @@ fun Modifier.dragContainer(
                             offset,
                             screenWidth,
                             layoutDirection,
-                            contentOffset
+                            contentOffset,
                         )
                     ) {
                         viewModel.onReorderWidgetStart()
@@ -261,7 +262,7 @@ fun Modifier.dragContainer(
                 onDragCancel = {
                     dragDropState.onDragInterrupted()
                     viewModel.onReorderWidgetCancel()
-                }
+                },
             )
         }
     )
@@ -276,7 +277,7 @@ fun LazyGridItemScope.DraggableItem(
     enabled: Boolean,
     selected: Boolean,
     modifier: Modifier = Modifier,
-    content: @Composable (isDragging: Boolean) -> Unit
+    content: @Composable (isDragging: Boolean) -> Unit,
 ) {
     if (!enabled) {
         return content(false)
@@ -286,7 +287,7 @@ fun LazyGridItemScope.DraggableItem(
     val itemAlpha: Float by
         animateFloatAsState(
             targetValue = if (dragDropState.isDraggingToRemove) 0.5f else 1f,
-            label = "DraggableItemAlpha"
+            label = "DraggableItemAlpha",
         )
     val direction = LocalLayoutDirection.current
     val draggingModifier =
@@ -303,12 +304,17 @@ fun LazyGridItemScope.DraggableItem(
 
     // Animate the highlight alpha manually as alpha modifier (and AnimatedVisibility) clips the
     // widget to bounds, which cuts off the highlight as we are drawing outside the widget bounds.
+    val highlightSelected = !communalWidgetResizing() && selected
     val alpha by
         animateFloatAsState(
             targetValue =
-                if ((dragging || selected) && !dragDropState.isDraggingToRemove) 1f else 0f,
+                if ((dragging || highlightSelected) && !dragDropState.isDraggingToRemove) {
+                    1f
+                } else {
+                    0f
+                },
             animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-            label = "Widget outline alpha"
+            label = "Widget outline alpha",
         )
 
     Box(modifier) {

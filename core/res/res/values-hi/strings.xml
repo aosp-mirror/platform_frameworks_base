@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं आने पर डिवाइस वाइब्रेट हाेगा"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कॉल और सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"सिस्टम में हुए बदलाव"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"परेशान न करें"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नई सुविधा: परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ज़्यादा जानने और बदलाव करने के लिए टैप करें."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"परेशान न करें की सुविधा बदल गई है"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचना सेटिंग देखें"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android 13 में जो ऐप्लिकेशन इंस्टॉल किए जाएंगे, उन्हें आपको सूचनाएं भेजने के लिए अनुमति लेनी होगी. पहले से इंस्टॉल किए गए ऐप्लिकेशन को दी गई अनुमति बदलने के लिए टैप करें."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"बाद में याद दिलाएं"</string>

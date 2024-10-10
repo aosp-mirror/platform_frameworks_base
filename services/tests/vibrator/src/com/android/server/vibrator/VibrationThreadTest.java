@@ -47,7 +47,6 @@ import android.hardware.vibrator.IVibrator;
 import android.hardware.vibrator.IVibratorManager;
 import android.os.CombinedVibration;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
@@ -64,9 +63,11 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -114,12 +115,13 @@ public class VibrationThreadTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
     @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
     public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private VibrationThread.VibratorManagerHooks mManagerHooks;
     @Mock private VibratorController.OnVibrationCompleteListener mControllerCallbacks;
-    @Mock private IBinder mVibrationToken;
     @Mock private VibrationConfig mVibrationConfigMock;
     @Mock private VibratorFrameworkStatsLogger mStatsLoggerMock;
 
@@ -668,7 +670,7 @@ public class VibrationThreadTest {
         VibrationEffect fallback = VibrationEffect.createOneShot(10, 100);
         HalVibration vibration = createVibration(CombinedVibration.createParallel(
                 VibrationEffect.get(VibrationEffect.EFFECT_CLICK)));
-        vibration.addFallback(VibrationEffect.EFFECT_CLICK, fallback);
+        vibration.fillFallbacks(unused -> fallback);
         startThreadAndDispatcher(vibration);
         waitForCompletion();
 
@@ -782,6 +784,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorComposedEffects_runsDifferentVibrations() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setSupportedEffects(VibrationEffect.EFFECT_CLICK);
@@ -848,7 +851,7 @@ public class VibrationThreadTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
                 .compose();
         HalVibration vibration = createVibration(CombinedVibration.createParallel(effect));
-        vibration.addFallback(VibrationEffect.EFFECT_TICK, fallback);
+        vibration.fillFallbacks(unused -> fallback);
         startThreadAndDispatcher(vibration);
         waitForCompletion();
 
@@ -872,6 +875,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_singleVibratorPwle_runsComposePwle() {
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
@@ -954,7 +958,8 @@ public class VibrationThreadTest {
         assertTrue(mThread.isRunningVibrationId(vibration.id));
         assertTrue(mControllers.get(VIBRATOR_ID).isVibrating());
 
-        mVibrationConductor.binderDied();
+        mVibrationConductor.notifyCancelled(
+                new Vibration.EndInfo(Status.CANCELLED_BINDER_DIED), /* immediate= */ false);
         waitForCompletion();
         assertFalse(mControllers.get(VIBRATOR_ID).isVibrating());
 
@@ -1575,7 +1580,8 @@ public class VibrationThreadTest {
                 TEST_TIMEOUT_MILLIS));
         assertTrue(mThread.isRunningVibrationId(vibration.id));
 
-        mVibrationConductor.binderDied();
+        mVibrationConductor.notifyCancelled(
+                new Vibration.EndInfo(Status.CANCELLED_BINDER_DIED), /* immediate= */ false);
         waitForCompletion();
 
         verifyCallbacksTriggered(vibration, Status.CANCELLED_BINDER_DIED);
@@ -1724,6 +1730,7 @@ public class VibrationThreadTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void vibrate_pwleWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
@@ -1865,9 +1872,9 @@ public class VibrationThreadTest {
         VibrationAttributes attrs = new VibrationAttributes.Builder()
                 .setUsage(usage)
                 .build();
-        HalVibration vib = new HalVibration(mVibrationToken,
-                CombinedVibration.createParallel(effect),
-                new CallerInfo(attrs, UID, DEVICE_ID, PACKAGE_NAME, "reason"));
+        HalVibration vib = new HalVibration(
+                new CallerInfo(attrs, UID, DEVICE_ID, PACKAGE_NAME, "reason"),
+                CombinedVibration.createParallel(effect));
         return startThreadAndDispatcher(vib, requestVibrationParamsFuture);
     }
 
@@ -1903,8 +1910,8 @@ public class VibrationThreadTest {
     }
 
     private HalVibration createVibration(CombinedVibration effect) {
-        return new HalVibration(mVibrationToken, effect,
-                new CallerInfo(ATTRS, UID, DEVICE_ID, PACKAGE_NAME, "reason"));
+        return new HalVibration(new CallerInfo(ATTRS, UID, DEVICE_ID, PACKAGE_NAME, "reason"),
+                effect);
     }
 
     private SparseArray<VibratorController> createVibratorControllers() {

@@ -92,6 +92,7 @@ public class RankingHelperTest extends UiServiceTestCase {
     @Mock ZenModeHelper mMockZenModeHelper;
     @Mock RankingConfig mConfig;
     @Mock Vibrator mVibrator;
+    @Mock GroupHelper mGroupHelper;
 
     private NotificationManager.Policy mTestNotificationPolicy;
     private Notification mNotiGroupGSortA;
@@ -157,7 +158,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new RankingHelper(getContext(), mHandler, mConfig, mMockZenModeHelper,
                 mUsageStats, new String[] {ImportanceExtractor.class.getName()},
-                mock(IPlatformCompat.class));
+                mock(IPlatformCompat.class), mGroupHelper);
 
         mNotiGroupGSortA = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setContentTitle("A")

@@ -756,18 +756,9 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             new ComputeConnectionsConsumer();
 
     OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
-            ActiveUids activeUids) {
-        this(service, processList, activeUids, createAdjusterThread());
-    }
-
-    OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
-            ActiveUids activeUids, ServiceThread adjusterThread) {
-        super(service, processList, activeUids, adjusterThread);
-    }
-
-    OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
-            ActiveUids activeUids, Injector injector) {
-        super(service, processList, activeUids, injector);
+            ActiveUids activeUids, ServiceThread adjusterThread, GlobalState globalState,
+            Injector injector) {
+        super(service, processList, activeUids, adjusterThread, globalState, injector);
     }
 
     private final ProcessRecordNodes mProcessRecordProcStateNodes = new ProcessRecordNodes(
