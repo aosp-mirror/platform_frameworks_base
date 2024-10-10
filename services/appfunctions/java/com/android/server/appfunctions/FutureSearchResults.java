@@ -24,11 +24,12 @@ import android.app.appsearch.SearchResults;
 
 import com.android.internal.infra.AndroidFuture;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.List;
 
 /** A future API wrapper of {@link android.app.appsearch.SearchResults}. */
-public interface FutureSearchResults {
+public interface FutureSearchResults extends Closeable {
 
     /** Converts a failed app search result codes into an exception. */
     @NonNull
@@ -52,4 +53,7 @@ public interface FutureSearchResults {
      * there are no more results.
      */
     AndroidFuture<List<SearchResult>> getNextPage();
+
+    @Override
+    void close();
 }
