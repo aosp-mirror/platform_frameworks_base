@@ -5144,10 +5144,28 @@ public class ComputerEngine implements Computer {
         }
 
         updateOwnerPackageName = installSource.mUpdateOwnerPackageName;
+
+        if (DEBUG_INSTALL) {
+            Log.d(TAG, "ComputerEngine getInstallSourceInfo updateOwnerPackageName = "
+                    + updateOwnerPackageName + ", callingUid = " + callingUid + ", packageName = "
+                    + packageName + ", userId = " + userId);
+        }
+
         if (updateOwnerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(updateOwnerPackageName);
             final boolean isCallerSystemOrUpdateOwner = callingUid == Process.SYSTEM_UID
                             || isCallerSameApp(updateOwnerPackageName, callingUid);
+
+            if (DEBUG_INSTALL) {
+                Log.d(TAG, "ComputerEngine getInstallSourceInfo ps = "
+                        + ps + ", isCallerSystemOrUpdateOwner =" + isCallerSystemOrUpdateOwner
+                        + ", isCallerSameApp = "
+                        + isCallerSameApp(updateOwnerPackageName, callingUid) + ", filter = "
+                        + shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)
+                        + ", FromManagedUserOrProfile = "
+                        + isCallerFromManagedUserOrProfile(userId));
+            }
+
             // Except for package visibility filtering, we also hide update owner if the installer
             // is in the managed user or profile. As we don't enforce the update ownership for the
             // managed user and profile, knowing there's an update owner is meaningless in that
@@ -5157,6 +5175,11 @@ public class ComputerEngine implements Computer {
                     || (!isCallerSystemOrUpdateOwner && isCallerFromManagedUserOrProfile(userId))) {
                 updateOwnerPackageName = null;
             }
+        }
+
+        if (DEBUG_INSTALL) {
+            Log.d(TAG, "ComputerEngine getInstallSourceInfo updateOwnerPackageName = "
+                    + updateOwnerPackageName);
         }
 
         if (installSource.mIsInitiatingPackageUninstalled) {
