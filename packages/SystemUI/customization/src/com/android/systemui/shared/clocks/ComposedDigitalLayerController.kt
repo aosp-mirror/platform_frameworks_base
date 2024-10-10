@@ -30,16 +30,16 @@ import com.android.systemui.plugins.clocks.ClockFaceEvents
 import com.android.systemui.plugins.clocks.ClockReactiveSetting
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
-import com.android.systemui.shared.clocks.view.DigitalClockFaceView
 import com.android.systemui.shared.clocks.view.FlexClockView
+import com.android.systemui.shared.clocks.view.SimpleDigitalClockTextView
 import java.util.Locale
 import java.util.TimeZone
 
 class ComposedDigitalLayerController(
     private val ctx: Context,
-    private val assets: AssetLoader,
+    private val resources: Resources,
+    private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
     private val layer: ComposedDigitalHandLayer,
-    private val isLargeClock: Boolean,
     messageBuffer: MessageBuffer,
 ) : SimpleClockLayerController {
     private val logger = Logger(messageBuffer, ComposedDigitalLayerController::class.simpleName!!)
@@ -48,34 +48,22 @@ class ComposedDigitalLayerController(
     val dozeState = DefaultClockController.AnimationState(1F)
     var isRegionDark = true
 
-    override var view: DigitalClockFaceView =
-        when (layer.customizedView) {
-            "FlexClockView" -> FlexClockView(ctx, assets, messageBuffer)
-            else -> {
-                throw IllegalStateException("CustomizedView string is not valid")
-            }
-        }
-
-    // Matches LayerControllerConstructor
-    internal constructor(
-        ctx: Context,
-        assets: AssetLoader,
-        layer: ClockLayer,
-        isLargeClock: Boolean,
-        messageBuffer: MessageBuffer,
-    ) : this(ctx, assets, layer as ComposedDigitalHandLayer, isLargeClock, messageBuffer)
+    override val view = FlexClockView(ctx, assets, messageBuffer)
 
     init {
         layer.digitalLayers.forEach {
+            val childView = SimpleDigitalClockTextView(ctx, messageBuffer)
             val controller =
-                SimpleClockLayerController.Factory.create(
+                SimpleDigitalHandLayerController(
                     ctx,
+                    resources,
                     assets,
-                    it,
-                    isLargeClock,
+                    it as DigitalHandLayer,
+                    childView,
                     messageBuffer,
                 )
-            view.addView(controller.view)
+
+            view.addView(childView)
             layerControllers.add(controller)
         }
     }

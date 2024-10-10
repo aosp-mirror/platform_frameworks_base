@@ -156,8 +156,12 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         when(mResources.getInteger(R.integer.keyguard_date_weather_view_invisibility))
                 .thenReturn(INVISIBLE);
 
-        when(mView.findViewById(R.id.lockscreen_clock_view_large)).thenReturn(mLargeClockFrame);
-        when(mView.findViewById(R.id.lockscreen_clock_view)).thenReturn(mSmallClockFrame);
+        when(mView
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view_large))
+                .thenReturn(mLargeClockFrame);
+        when(mView
+                .findViewById(com.android.systemui.customization.R.id.lockscreen_clock_view))
+                .thenReturn(mSmallClockFrame);
         when(mSmallClockView.getContext()).thenReturn(getContext());
         when(mLargeClockView.getContext()).thenReturn(getContext());
 
