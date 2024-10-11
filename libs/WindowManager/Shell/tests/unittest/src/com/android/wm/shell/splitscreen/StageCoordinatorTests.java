@@ -232,17 +232,6 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testRemoveFromSideStage() {
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-
-        doReturn(false).when(mMainStage).isActive();
-        mStageCoordinator.removeFromSideStage(task.taskId);
-
-        verify(mSideStage).removeTask(
-                eq(task.taskId), any(), any(WindowContainerTransaction.class));
-    }
-
-    @Test
     public void testResolveStartStage_beforeSplitActivated_setsStagePosition() {
         mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null /* wct */);
 

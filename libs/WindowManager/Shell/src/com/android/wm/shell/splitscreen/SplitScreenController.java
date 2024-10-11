@@ -378,10 +378,6 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         return mStageCoordinator.moveToStage(task, stagePosition, wct);
     }
 
-    public boolean removeFromSideStage(int taskId) {
-        return mStageCoordinator.removeFromSideStage(taskId);
-    }
-
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition, null /* wct */);
     }
@@ -1174,12 +1170,6 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreenOnHide",
                     (controller) -> controller.exitSplitScreenOnHide(exitSplitScreenOnHide));
-        }
-
-        @Override
-        public void removeFromSideStage(int taskId) {
-            executeRemoteCallWithTaskPermission(mController, "removeFromSideStage",
-                    (controller) -> controller.removeFromSideStage(taskId));
         }
 
         @Override
