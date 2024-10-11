@@ -30,6 +30,7 @@ genrule_defaults {
     tools: ["hoststubgen"],
     srcs: [
         ":framework-minus-apex-for-host",
+        ":ravenwood-common-policies",
         ":ravenwood-framework-policies",
         ":ravenwood-standard-options",
         ":ravenwood-annotation-allowed-classes",
@@ -46,6 +47,7 @@ framework_minus_apex_cmd = "$(location hoststubgen) " +
     "--debug-log $(location hoststubgen_framework-minus-apex.log) " +
     "--out-jar $(location ravenwood.jar) " +
     "--in-jar $(location :framework-minus-apex-for-host) " +
+    "--policy-override-file $(location :ravenwood-common-policies) " +
     "--policy-override-file $(location :ravenwood-framework-policies) " +
     "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) "
 
@@ -180,17 +182,18 @@ java_genrule {
         "--debug-log $(location hoststubgen_services.core.log) " +
         "--stats-file $(location hoststubgen_services.core_stats.csv) " +
         "--supported-api-list-file $(location hoststubgen_services.core_apis.csv) " +
-
-        "--out-jar $(location ravenwood.jar) " +
-
         "--gen-keep-all-file $(location hoststubgen_services.core_keep_all.txt) " +
         "--gen-input-dump-file $(location hoststubgen_services.core_dump.txt) " +
 
+        "--out-jar $(location ravenwood.jar) " +
         "--in-jar $(location :services.core-for-host) " +
+
+        "--policy-override-file $(location :ravenwood-common-policies) " +
         "--policy-override-file $(location :ravenwood-services-policies) " +
         "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) ",
     srcs: [
         ":services.core-for-host",
+        ":ravenwood-common-policies",
         ":ravenwood-services-policies",
         ":ravenwood-standard-options",
         ":ravenwood-annotation-allowed-classes",
@@ -247,21 +250,20 @@ java_genrule {
         "--debug-log $(location hoststubgen_core-icu4j-for-host.log) " +
         "--stats-file $(location hoststubgen_core-icu4j-for-host_stats.csv) " +
         "--supported-api-list-file $(location hoststubgen_core-icu4j-for-host_apis.csv) " +
-
-        "--out-jar $(location ravenwood.jar) " +
-
         "--gen-keep-all-file $(location hoststubgen_core-icu4j-for-host_keep_all.txt) " +
         "--gen-input-dump-file $(location hoststubgen_core-icu4j-for-host_dump.txt) " +
 
+        "--out-jar $(location ravenwood.jar) " +
         "--in-jar $(location :core-icu4j-for-host) " +
-        "--policy-override-file $(location :icu-ravenwood-policies) " +
-        "--annotation-allowed-classes-file $(location :ravenwood-annotation-allowed-classes) ",
+
+        "--policy-override-file $(location :ravenwood-common-policies) " +
+        "--policy-override-file $(location :icu-ravenwood-policies) ",
     srcs: [
         ":core-icu4j-for-host",
 
+        ":ravenwood-common-policies",
         ":icu-ravenwood-policies",
         ":ravenwood-standard-options",
-        ":ravenwood-annotation-allowed-classes",
     ],
     out: [
         "ravenwood.jar",
