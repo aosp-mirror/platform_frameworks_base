@@ -712,13 +712,21 @@ abstract public class ManagedServices {
                         }
                     }
                     readExtraAttributes(tag, parser, resolvedUserId);
-                    if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(
-                            getPackageName(approved), resolvedUserId, getRequiredPermission())
-                            || approved.isEmpty()) {
-                        if (mUm.getUserInfo(resolvedUserId) != null) {
-                            addApprovedList(approved, resolvedUserId, isPrimary, userSetComponent);
-                        }
+                    if (isUserChanged != null && approved.isEmpty()) {
+                        // NAS
+                        denyPregrantedAppUserSet(resolvedUserId, isPrimary);
                         mUseXml = true;
+                    } else {
+                        if (allowedManagedServicePackages == null
+                                || allowedManagedServicePackages.test(
+                                getPackageName(approved), resolvedUserId, getRequiredPermission())
+                                || approved.isEmpty()) {
+                            if (mUm.getUserInfo(resolvedUserId) != null) {
+                                addApprovedList(approved, resolvedUserId, isPrimary,
+                                        userSetComponent);
+                            }
+                            mUseXml = true;
+                        }
                     }
                 } else {
                     readExtraTag(tag, parser);
@@ -823,6 +831,17 @@ abstract public class ManagedServices {
                     userSetList.add(approvedItem);
                 }
             }
+        }
+    }
+
+    protected void denyPregrantedAppUserSet(int userId, boolean isPrimary) {
+        synchronized (mApproved) {
+            ArrayMap<Boolean, ArraySet<String>> approvedByType = mApproved.get(userId);
+            if (approvedByType == null) {
+                approvedByType = new ArrayMap<>();
+                mApproved.put(userId, approvedByType);
+            }
+            approvedByType.put(isPrimary, new ArraySet<>());
         }
     }
 
