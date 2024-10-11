@@ -1080,6 +1080,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         switch (attr.getUsage()) {
             case AudioAttributes.USAGE_MEDIA:
             case AudioAttributes.USAGE_GAME:
+            case AudioAttributes.USAGE_SPEAKER_CLEANUP:
                 return 1000;
             case AudioAttributes.USAGE_ALARM:
             case AudioAttributes.USAGE_NOTIFICATION_RINGTONE:
