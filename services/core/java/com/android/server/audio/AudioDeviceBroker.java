@@ -389,13 +389,18 @@ public class AudioDeviceBroker {
     /**
      * Indicates if a Bluetooth SCO activation request owner is controlling
      * the SCO audio state itself or not.
-     * @param uid the UID of the SOC request owner app
+     * @param attributionSource the AttributionSource of the SCO request owner app
      * @return true if we should control SCO audio state, false otherwise
      */
-    private boolean shouldStartScoForUid(int uid) {
+    private boolean shouldStartScoForAttributionSource(AttributionSource attributionSource) {
+        if (attributionSource == null) {
+            return true;
+        }
+        int uid = attributionSource.getUid();
         return !(UserHandle.isSameApp(uid, Process.BLUETOOTH_UID)
                 || UserHandle.isSameApp(uid, Process.PHONE_UID)
-                || UserHandle.isSameApp(uid, Process.SYSTEM_UID));
+                || (UserHandle.isSameApp(uid, Process.SYSTEM_UID)
+                    && "com.android.server.telecom".equals(attributionSource.getPackageName())));
     }
 
     @GuardedBy("mDeviceStateLock")
@@ -412,8 +417,8 @@ public class AudioDeviceBroker {
                                         + " device: " + device + " isPrivileged: " + isPrivileged
                                         + " from API: " + eventSource)).printLog(TAG));
 
-        final int previousBtScoRequesterUid =
-                safeUidFromAttributionSource(bluetoothScoRequestOwnerAttributionSource());
+        final AttributionSource previousBtScoRequesterAS =
+                bluetoothScoRequestOwnerAttributionSource();
         CommunicationRouteClient client;
 
         // Save previous client route in case of failure to start BT SCO audio
@@ -437,16 +442,15 @@ public class AudioDeviceBroker {
         if (client == null) {
             return;
         }
-        final int btScoRequesterUid = safeUidFromAttributionSource(
-                                              bluetoothScoRequestOwnerAttributionSource());
-        final boolean isBtScoRequested = btScoRequesterUid != -1;
-        final boolean wasBtScoRequested = previousBtScoRequesterUid != -1;
+        final AttributionSource btScoRequesterAS = bluetoothScoRequestOwnerAttributionSource();
+        final boolean isBtScoRequested = btScoRequesterAS != null;
+        final boolean wasBtScoRequested = previousBtScoRequesterAS != null;
 
         if (mScoManagedByAudio) {
             if (isBtScoRequested && (!wasBtScoRequested || !isBluetoothScoActive()
                     || !mBtHelper.isBluetoothScoRequestedInternally())) {
                 boolean scoStarted = false;
-                if (shouldStartScoForUid(btScoRequesterUid)) {
+                if (shouldStartScoForAttributionSource(btScoRequesterAS)) {
                     scoStarted = mBtHelper.startBluetoothSco(scoAudioMode, eventSource);
                     if (!scoStarted) {
                         Log.w(TAG, "setCommunicationRouteForClient: "
@@ -467,7 +471,7 @@ public class AudioDeviceBroker {
                     setBluetoothScoOn(true, "setCommunicationRouteForClient");
                 }
             } else if (!isBtScoRequested && wasBtScoRequested) {
-                if (shouldStartScoForUid(previousBtScoRequesterUid)) {
+                if (shouldStartScoForAttributionSource(previousBtScoRequesterAS)) {
                     mBtHelper.stopBluetoothSco(eventSource);
                 }
                 setBluetoothScoOn(false, "setCommunicationRouteForClient");
@@ -2609,8 +2613,7 @@ public class AudioDeviceBroker {
             boolean wasScoRequested = previousBtScoRequesterAS != null;
             if (!isBluetoothScoRequested() && wasScoRequested) {
                 if (mScoManagedByAudio) {
-                    if (shouldStartScoForUid(
-                            safeUidFromAttributionSource(previousBtScoRequesterAS))) {
+                    if (shouldStartScoForAttributionSource(previousBtScoRequesterAS)) {
                         mBtHelper.stopBluetoothSco(eventSource);
                     }
                     setBluetoothScoOn(false, eventSource);
