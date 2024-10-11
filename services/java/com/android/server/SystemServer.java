@@ -1617,7 +1617,7 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
-            if (android.app.supervision.flags.Flags.supervisionApi()) {
+            if (!isWatch && android.app.supervision.flags.Flags.supervisionApi()) {
                 t.traceBegin("StartSupervisionService");
                 mSystemServiceManager.startService(SupervisionService.Lifecycle.class);
                 t.traceEnd();
