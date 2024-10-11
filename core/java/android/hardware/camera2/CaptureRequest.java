@@ -1358,6 +1358,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * camera device auto-exposure routine for the overridden
      * fields for a given capture will be available in its
      * CaptureResult.</p>
+     * <p>When {@link CaptureRequest#CONTROL_AE_MODE android.control.aeMode} is AE_MODE_ON and if the device
+     * supports manual flash strength control, i.e.,
+     * if {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1, then
+     * the auto-exposure (AE) precapture metering sequence should be
+     * triggered to avoid the image being incorrectly exposed at
+     * different {@link CaptureRequest#FLASH_STRENGTH_LEVEL android.flash.strengthLevel}.</p>
      * <p><b>Possible values:</b></p>
      * <ul>
      *   <li>{@link #CONTROL_AE_MODE_OFF OFF}</li>
@@ -1373,9 +1380,13 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * <p>This key is available on all devices.</p>
      *
      * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES
+     * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_MODE
      * @see CameraCharacteristics#FLASH_INFO_AVAILABLE
      * @see CaptureRequest#FLASH_MODE
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CaptureRequest#FLASH_STRENGTH_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY

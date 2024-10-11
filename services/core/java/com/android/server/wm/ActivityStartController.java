@@ -43,7 +43,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -550,14 +549,14 @@ public class ActivityStartController {
      * Starts an activity in the TaskFragment.
      * @param taskFragment TaskFragment {@link TaskFragment} to start the activity in.
      * @param activityIntent intent to start the activity.
-     * @param activityOptions ActivityOptions to start the activity with.
+     * @param activityOptions SafeActivityOptions to start the activity with.
      * @param resultTo the caller activity
      * @param callingUid the caller uid
      * @param callingPid the caller pid
      * @return the start result.
      */
     int startActivityInTaskFragment(@NonNull TaskFragment taskFragment,
-            @NonNull Intent activityIntent, @Nullable Bundle activityOptions,
+            @NonNull Intent activityIntent, @Nullable SafeActivityOptions activityOptions,
             @Nullable IBinder resultTo, int callingUid, int callingPid,
             @Nullable IBinder errorCallbackToken) {
         final ActivityRecord caller =

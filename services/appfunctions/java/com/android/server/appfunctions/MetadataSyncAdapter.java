@@ -420,26 +420,29 @@ public class MetadataSyncAdapter {
         Objects.requireNonNull(propertyPackageName);
         ArrayMap<String, ArraySet<String>> packageToFunctionIds = new ArrayMap<>();
 
-        FutureSearchResults futureSearchResults =
+        try (FutureSearchResults futureSearchResults =
                 searchSession
                         .search(
                                 "",
                                 buildMetadataSearchSpec(
                                         schemaType, propertyFunctionId, propertyPackageName))
-                        .get();
-        List<SearchResult> searchResultsList = futureSearchResults.getNextPage().get();
-        // TODO(b/357551503): This could be expensive if we have more functions
-        while (!searchResultsList.isEmpty()) {
-            for (SearchResult searchResult : searchResultsList) {
-                String packageName =
-                        searchResult.getGenericDocument().getPropertyString(propertyPackageName);
-                String functionId =
-                        searchResult.getGenericDocument().getPropertyString(propertyFunctionId);
-                packageToFunctionIds
-                        .computeIfAbsent(packageName, k -> new ArraySet<>())
-                        .add(functionId);
+                        .get(); ) {
+            List<SearchResult> searchResultsList = futureSearchResults.getNextPage().get();
+            // TODO(b/357551503): This could be expensive if we have more functions
+            while (!searchResultsList.isEmpty()) {
+                for (SearchResult searchResult : searchResultsList) {
+                    String packageName =
+                            searchResult
+                                    .getGenericDocument()
+                                    .getPropertyString(propertyPackageName);
+                    String functionId =
+                            searchResult.getGenericDocument().getPropertyString(propertyFunctionId);
+                    packageToFunctionIds
+                            .computeIfAbsent(packageName, k -> new ArraySet<>())
+                            .add(functionId);
+                }
+                searchResultsList = futureSearchResults.getNextPage().get();
             }
-            searchResultsList = futureSearchResults.getNextPage().get();
         }
         return packageToFunctionIds;
     }

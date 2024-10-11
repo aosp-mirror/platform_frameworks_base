@@ -25,6 +25,7 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 import static android.view.Display.HdrCapabilities.HDR_TYPE_INVALID;
@@ -1068,9 +1069,9 @@ public class DisplayManagerServiceTest {
                 firstDisplayId);
     }
 
-    /** Tests that the virtual device is created in a device display group. */
+    /** Tests that a trusted virtual display is created in a device display group. */
     @Test
-    public void createVirtualDisplay_addsDisplaysToDeviceDisplayGroups() throws Exception {
+    public void createVirtualDisplay_addsTrustedDisplaysToDeviceDisplayGroups() throws Exception {
         DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
 
@@ -1081,12 +1082,16 @@ public class DisplayManagerServiceTest {
         IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
         when(virtualDevice.getDeviceId()).thenReturn(1);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
         // Create a first virtual display. A display group should be created for this display on the
         // virtual device.
         final VirtualDisplayConfig.Builder builder1 =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
-                        .setUniqueId("uniqueId --- device display group 1");
-
+                        .setUniqueId("uniqueId --- device display group")
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_TRUSTED);
         int displayId1 =
                 localService.createVirtualDisplay(
                         builder1.build(),
@@ -1097,12 +1102,14 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
         int displayGroupId1 = localService.getDisplayInfo(displayId1).displayGroupId;
+        assertNotEquals(displayGroupId1, Display.DEFAULT_DISPLAY_GROUP);
 
         // Create a second virtual display. This should be added to the previously created display
         // group.
         final VirtualDisplayConfig.Builder builder2 =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
-                        .setUniqueId("uniqueId --- device display group 1");
+                        .setUniqueId("uniqueId --- device display group")
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_TRUSTED);
 
         int displayId2 =
                 localService.createVirtualDisplay(
@@ -1119,6 +1126,36 @@ public class DisplayManagerServiceTest {
                 "Both displays should be added to the same displayGroup.",
                 displayGroupId1,
                 displayGroupId2);
+    }
+
+    /** Tests that an untrusted virtual display is created in the default display group. */
+    @Test
+    public void createVirtualDisplay_addsUntrustedDisplayToDefaultDisplayGroups() throws Exception {
+        DisplayManagerService displayManager = new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerInternal localService = displayManager.new LocalService();
+
+        registerDefaultDisplays(displayManager);
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+
+        IVirtualDevice virtualDevice = mock(IVirtualDevice.class);
+        when(virtualDevice.getDeviceId()).thenReturn(1);
+        when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
+        // Create the virtual display. It is untrusted, so it should go into the default group.
+        final VirtualDisplayConfig.Builder builder =
+                new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
+                        .setUniqueId("uniqueId --- device display group");
+
+        int displayId =
+                localService.createVirtualDisplay(
+                        builder.build(),
+                        mMockAppToken /* callback */,
+                        virtualDevice /* virtualDeviceToken */,
+                        mock(DisplayWindowPolicyController.class),
+                        PACKAGE_NAME);
+        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
+                nullable(IMediaProjection.class));
+        int displayGroupId = localService.getDisplayInfo(displayId).displayGroupId;
+        assertEquals(displayGroupId, Display.DEFAULT_DISPLAY_GROUP);
     }
 
     /**
@@ -1138,11 +1175,15 @@ public class DisplayManagerServiceTest {
         when(virtualDevice.getDeviceId()).thenReturn(1);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
+        when(mContext.checkCallingPermission(ADD_TRUSTED_DISPLAY))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
         // Create a first virtual display. A display group should be created for this display on the
         // virtual device.
         final VirtualDisplayConfig.Builder builder1 =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
-                        .setUniqueId("uniqueId --- device display group");
+                        .setUniqueId("uniqueId --- device display group")
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_TRUSTED);
 
         int displayId1 =
                 localService.createVirtualDisplay(
@@ -1154,12 +1195,14 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
         int displayGroupId1 = localService.getDisplayInfo(displayId1).displayGroupId;
+        assertNotEquals(displayGroupId1, Display.DEFAULT_DISPLAY_GROUP);
 
         // Create a second virtual display. With the flag VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP,
         // the display should not be added to the previously created display group.
         final VirtualDisplayConfig.Builder builder2 =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
-                        .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP
+                                | VIRTUAL_DISPLAY_FLAG_TRUSTED)
                         .setUniqueId("uniqueId --- own display group");
 
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
@@ -1174,6 +1217,7 @@ public class DisplayManagerServiceTest {
         verify(mMockProjectionService, never()).setContentRecordingSession(any(),
                 nullable(IMediaProjection.class));
         int displayGroupId2 = localService.getDisplayInfo(displayId2).displayGroupId;
+        assertNotEquals(displayGroupId2, Display.DEFAULT_DISPLAY_GROUP);
 
         assertNotEquals(
                 "Display 1 should be in the device display group and display 2 in its own display"
@@ -1208,7 +1252,8 @@ public class DisplayManagerServiceTest {
         final VirtualDisplayConfig deviceDisplayGroupDisplayConfig =
                 new VirtualDisplayConfig.Builder(VIRTUAL_DISPLAY_NAME, 600, 800, 320)
                         .setUniqueId("uniqueId --- device display group 1")
-                        .setFlags(VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED)
+                        .setFlags(VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED
+                                | VIRTUAL_DISPLAY_FLAG_TRUSTED)
                         .build();
 
         int deviceDisplayGroupDisplayId =
@@ -1235,6 +1280,7 @@ public class DisplayManagerServiceTest {
                         .setUniqueId("uniqueId --- own display group 1")
                         .setFlags(
                                 VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED
+                                        | VIRTUAL_DISPLAY_FLAG_TRUSTED
                                         | VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP)
                         .build();
 
@@ -1852,7 +1898,7 @@ public class DisplayManagerServiceTest {
 
     /**
      * Tests that specifying VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP is allowed when the permission
-     * ADD_TRUSTED_DISPLAY is granted.
+     * ADD_TRUSTED_DISPLAY is granted and that display is not in the default display group.
      */
     @Test
     public void testOwnDisplayGroup_allowCreationWithAddTrustedDisplayPermission()
@@ -1881,6 +1927,9 @@ public class DisplayManagerServiceTest {
         DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
         assertNotNull(ddi);
         assertNotEquals(0, ddi.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+
+        int displayGroupId = bs.getDisplayInfo(displayId).displayGroupId;
+        assertNotEquals(displayGroupId, Display.DEFAULT_DISPLAY_GROUP);
     }
 
     /**
@@ -1915,11 +1964,11 @@ public class DisplayManagerServiceTest {
     }
 
     /**
-     * Tests that specifying VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP is allowed when called with
-     * a virtual device, even if ADD_TRUSTED_DISPLAY is not granted.
+     * Tests that specifying VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP is not allowed when called with
+     * a virtual device, if ADD_TRUSTED_DISPLAY is not granted.
      */
     @Test
-    public void testOwnDisplayGroup_allowCreationWithVirtualDevice() throws Exception {
+    public void testOwnDisplayGroup_disallowCreationWithVirtualDevice() throws Exception {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         DisplayManagerInternal localService = displayManager.new LocalService();
@@ -1940,16 +1989,16 @@ public class DisplayManagerServiceTest {
         when(virtualDevice.getDeviceId()).thenReturn(1);
         when(mIVirtualDeviceManager.isValidVirtualDeviceId(1)).thenReturn(true);
 
-        int displayId = localService.createVirtualDisplay(builder.build(),
-                mMockAppToken /* callback */, virtualDevice /* virtualDeviceToken */,
-                mock(DisplayWindowPolicyController.class), PACKAGE_NAME);
-        verify(mMockProjectionService, never()).setContentRecordingSession(any(),
-                nullable(IMediaProjection.class));
-        performTraversalInternal(displayManager);
-        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
-        DisplayDeviceInfo ddi = displayManager.getDisplayDeviceInfoInternal(displayId);
-        assertNotNull(ddi);
-        assertNotEquals(0, ddi.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP);
+        try {
+            localService.createVirtualDisplay(builder.build(),
+                    mMockAppToken /* callback */, virtualDevice /* virtualDeviceToken */,
+                    mock(DisplayWindowPolicyController.class), PACKAGE_NAME);
+            fail("Creating virtual display with VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP without "
+                    + "ADD_TRUSTED_DISPLAY permission should throw SecurityException even if "
+                    + "called with a virtual device.");
+        } catch (SecurityException e) {
+            // SecurityException is expected
+        }
     }
 
     /**

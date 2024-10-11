@@ -84,6 +84,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
@@ -119,6 +120,7 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -448,6 +450,8 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     private AudioManagerInternal mAudioManagerInternal = null;
     @Nullable
     private VirtualDeviceManagerInternal mVdmInternal = null;
+    @Nullable
+    private DisplayManagerInternal mDisplayManagerInternal = null;
 
     // Mapping from deviceId to the device-specific imeId for that device.
     @GuardedBy("ImfLock.class")
@@ -2165,7 +2169,18 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         final var bindingController = getInputMethodBindingController(userId);
         final int oldDeviceId = bindingController.getDeviceIdToShowIme();
         final int displayIdToShowIme = bindingController.getDisplayIdToShowIme();
-        final int newDeviceId = mVdmInternal.getDeviceIdForDisplayId(displayIdToShowIme);
+        int newDeviceId = mVdmInternal.getDeviceIdForDisplayId(displayIdToShowIme);
+        if (newDeviceId != DEVICE_ID_DEFAULT) {
+            // Only show custom IME on trusted displays.
+            if (mDisplayManagerInternal == null) {
+                mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+            }
+            int displayFlags = mDisplayManagerInternal.getDisplayInfo(displayIdToShowIme).flags;
+            if ((displayFlags & Display.FLAG_TRUSTED) != Display.FLAG_TRUSTED) {
+                // If the display is not trusted, fallback to the default device IME.
+                newDeviceId = DEVICE_ID_DEFAULT;
+            }
+        }
         bindingController.setDeviceIdToShowIme(newDeviceId);
         if (newDeviceId == DEVICE_ID_DEFAULT) {
             if (oldDeviceId == DEVICE_ID_DEFAULT) {

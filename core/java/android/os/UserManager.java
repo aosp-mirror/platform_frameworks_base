@@ -6368,8 +6368,12 @@ public class UserManager {
                 Settings.Global.DEVICE_DEMO_MODE, 0) > 0;
     }
 
-    /** @hide */
-    public static final void invalidateUserSerialNumberCache() {
+
+    /**
+     * This method is used to invalidate caches, when user was added or removed.
+     * @hide
+     */
+    public static final void invalidateCacheOnUserListChange() {
         UserManagerCache.invalidateUserSerialNumber();
     }
 
@@ -6382,7 +6386,7 @@ public class UserManager {
      * @hide
      */
     @UnsupportedAppUsage
-    @CachedProperty(modsFlagOnOrNone = {})
+    @CachedProperty(modsFlagOnOrNone = {}, api = "user_manager_users")
     public int getUserSerialNumber(@UserIdInt int userId) {
         // Read only flag should is to fix early access to this API
         // cacheUserSerialNumber to be removed after the

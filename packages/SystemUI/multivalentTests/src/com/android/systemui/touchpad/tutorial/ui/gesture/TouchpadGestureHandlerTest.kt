@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -35,14 +36,14 @@ import org.junit.runner.RunWith
 class TouchpadGestureHandlerTest : SysuiTestCase() {
 
     private var gestureState: GestureState = GestureState.NotStarted
-    private val handler =
-        TouchpadGestureHandler(
-            BackGestureMonitor(
-                gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
-                gestureStateChangedCallback = { gestureState = it },
-            ),
-            EasterEggGestureMonitor {},
-        )
+    private val gestureMonitor =
+        BackGestureMonitor(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
+    private val handler = TouchpadGestureHandler(gestureMonitor, EasterEggGestureMonitor {})
+
+    @Before
+    fun before() {
+        gestureMonitor.addGestureStateCallback { gestureState = it }
+    }
 
     @Test
     fun handlesEventsFromTouchpad() {

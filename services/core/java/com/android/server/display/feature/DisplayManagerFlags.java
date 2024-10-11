@@ -217,6 +217,11 @@ public class DisplayManagerFlags {
             Flags::enableUserRefreshRateForExternalDisplay
     );
 
+    private final FlagState mEnableWaitingConfirmationBeforeMirroring = new FlagState(
+            Flags.FLAG_ENABLE_WAITING_CONFIRMATION_BEFORE_MIRRORING,
+            Flags::enableWaitingConfirmationBeforeMirroring
+    );
+
     private final FlagState mEnableBatteryStatsForAllDisplays = new FlagState(
             Flags.FLAG_ENABLE_BATTERY_STATS_FOR_ALL_DISPLAYS,
             Flags::enableBatteryStatsForAllDisplays
@@ -445,6 +450,14 @@ public class DisplayManagerFlags {
     }
 
     /**
+      * @return {@code true} if mirroring won't be enabled until boot completes and the user enables
+      * the display.
+      */
+    public boolean isWaitingConfirmationBeforeMirroringEnabled() {
+        return mEnableWaitingConfirmationBeforeMirroring.isEnabled();
+    }
+
+    /**
       * @return {@code true} if battery stats is enabled for all displays, not just the primary
       * display.
       */
@@ -511,6 +524,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mVirtualDisplayLimit);
         pw.println(" " + mNormalBrightnessForDozeParameter);
         pw.println(" " + mIdleScreenConfigInSubscribingLightSensor);
+        pw.println(" " + mEnableWaitingConfirmationBeforeMirroring);
         pw.println(" " + mEnableBatteryStatsForAllDisplays);
         pw.println(" " + mBlockAutobrightnessChangesOnStylusUsage);
         pw.println(" " + mIsUserRefreshRateForExternalDisplayEnabled);

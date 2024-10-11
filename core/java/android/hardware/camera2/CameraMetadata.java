@@ -2270,7 +2270,17 @@ public abstract class CameraMetadata<TKey> {
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration} are ignored. The
      * application has control over the various
      * android.flash.* fields.</p>
+     * <p>If the device supports manual flash strength control, i.e.,
+     * if {@link CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL android.flash.singleStrengthMaxLevel} and
+     * {@link CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL android.flash.torchStrengthMaxLevel} are greater than 1, then
+     * the auto-exposure (AE) precapture metering sequence should be
+     * triggered for the configured flash mode and strength to avoid
+     * the image being incorrectly exposed at different
+     * {@link CaptureRequest#FLASH_STRENGTH_LEVEL android.flash.strengthLevel}.</p>
      *
+     * @see CameraCharacteristics#FLASH_SINGLE_STRENGTH_MAX_LEVEL
+     * @see CaptureRequest#FLASH_STRENGTH_LEVEL
+     * @see CameraCharacteristics#FLASH_TORCH_STRENGTH_MAX_LEVEL
      * @see CaptureRequest#SENSOR_EXPOSURE_TIME
      * @see CaptureRequest#SENSOR_FRAME_DURATION
      * @see CaptureRequest#SENSOR_SENSITIVITY

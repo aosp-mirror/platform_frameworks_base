@@ -29,10 +29,7 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureMonito
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
 
 @Composable
-fun RecentAppsGestureTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -41,20 +38,20 @@ fun RecentAppsGestureTutorialScreen(
                     titleResId = R.string.touchpad_recent_apps_gesture_action_title,
                     bodyResId = R.string.touchpad_recent_apps_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_recent_apps_gesture_success_title,
-                    bodySuccessResId = R.string.touchpad_recent_apps_gesture_success_body
+                    bodySuccessResId = R.string.touchpad_recent_apps_gesture_success_body,
                 ),
             animations =
                 TutorialScreenConfig.Animations(
                     educationResId = R.raw.trackpad_recent_apps_edu,
-                    successResId = R.raw.trackpad_recent_apps_success
-                )
+                    successResId = R.raw.trackpad_recent_apps_success,
+                ),
         )
     val gestureMonitorProvider =
         object : GestureMonitorProvider {
             @Composable
             override fun rememberGestureMonitor(
                 resources: Resources,
-                gestureStateChangedCallback: (GestureState) -> Unit
+                gestureStateChangedCallback: (GestureState) -> Unit,
             ): TouchpadGestureMonitor {
                 val distanceThresholdPx =
                     resources.getDimensionPixelSize(
@@ -63,11 +60,9 @@ fun RecentAppsGestureTutorialScreen(
                 val velocityThresholdPxPerMs =
                     resources.getDimension(R.dimen.touchpad_recent_apps_gesture_velocity_threshold)
                 return remember(distanceThresholdPx, velocityThresholdPxPerMs) {
-                    RecentAppsGestureMonitor(
-                        distanceThresholdPx,
-                        gestureStateChangedCallback,
-                        velocityThresholdPxPerMs
-                    )
+                    RecentAppsGestureMonitor(distanceThresholdPx, velocityThresholdPxPerMs).also {
+                        it.addGestureStateCallback(gestureStateChangedCallback)
+                    }
                 }
             }
         }
@@ -83,7 +78,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".secondaryFixedDim", secondaryFixedDim),
             rememberColorFilterProperty(".onSecondaryFixed", onSecondaryFixed),
-            rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant)
+            rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {

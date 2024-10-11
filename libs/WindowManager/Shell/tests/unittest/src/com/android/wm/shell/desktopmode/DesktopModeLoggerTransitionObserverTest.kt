@@ -115,6 +115,9 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     val initRunnableCaptor = ArgumentCaptor.forClass(Runnable::class.java)
     verify(mockShellInit).addInitCallback(initRunnableCaptor.capture(), same(transitionObserver))
     initRunnableCaptor.value.run()
+    // verify this initialisation interaction to leave the desktopmodeEventLogger mock in a
+    // consistent state with no outstanding interactions when test cases start executing.
+    verify(desktopModeEventLogger).logTaskInfoStateInit()
   }
 
   @Test
