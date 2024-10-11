@@ -54,7 +54,6 @@ import com.android.systemui.common.ui.view.onLayoutChanged
 import com.android.systemui.common.ui.view.onTouchListener
 import com.android.systemui.customization.R as customR
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.MigrateClocksToBlueprint
@@ -181,16 +180,12 @@ object KeyguardRootViewBinder {
                         }
                     }
 
-                    if (
-                        KeyguardBottomAreaRefactor.isEnabled || DeviceEntryUdfpsRefactor.isEnabled
-                    ) {
-                        launch("$TAG#alpha") {
-                            viewModel.alpha(viewState).collect { alpha ->
-                                view.alpha = alpha
-                                if (KeyguardBottomAreaRefactor.isEnabled) {
-                                    childViews[statusViewId]?.alpha = alpha
-                                    childViews[burnInLayerId]?.alpha = alpha
-                                }
+                    launch("$TAG#alpha") {
+                        viewModel.alpha(viewState).collect { alpha ->
+                            view.alpha = alpha
+                            if (KeyguardBottomAreaRefactor.isEnabled) {
+                                childViews[statusViewId]?.alpha = alpha
+                                childViews[burnInLayerId]?.alpha = alpha
                             }
                         }
                     }
@@ -224,7 +219,6 @@ object KeyguardRootViewBinder {
                                                 indicationArea,
                                                 startButton,
                                                 endButton,
-                                                lockIcon,
                                                 deviceEntryIcon -> {
                                                     // Do not move these views
                                                 }
@@ -628,7 +622,6 @@ object KeyguardRootViewBinder {
     private val indicationArea = R.id.keyguard_indication_area
     private val startButton = R.id.start_button
     private val endButton = R.id.end_button
-    private val lockIcon = R.id.lock_icon_view
     private val deviceEntryIcon = R.id.device_entry_icon_view
     private val nsslPlaceholderId = R.id.nssl_placeholder
     private val authInteractionProperties = AuthInteractionProperties()
