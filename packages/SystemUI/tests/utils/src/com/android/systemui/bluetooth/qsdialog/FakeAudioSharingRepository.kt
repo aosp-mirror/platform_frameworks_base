@@ -14,30 +14,43 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.data.repository
+package com.android.systemui.bluetooth.qsdialog
 
-import com.android.settingslib.volume.data.repository.AudioSharingRepository
-import com.android.settingslib.volume.data.repository.GroupIdToVolumes
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class FakeAudioSharingRepository : AudioSharingRepository {
     private var mutableAvailable: Boolean = false
+
     private val mutableInAudioSharing: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private val mutablePrimaryGroupId: MutableStateFlow<Int> =
-        MutableStateFlow(TEST_GROUP_ID_INVALID)
-    private val mutableSecondaryGroupId: MutableStateFlow<Int> =
-        MutableStateFlow(TEST_GROUP_ID_INVALID)
-    private val mutableVolumeMap: MutableStateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
+
+    private val mutableAudioSourceStateUpdate = MutableSharedFlow<Unit>()
+
+    var sourceAdded: Boolean = false
+        private set
+
+    private var profile: LocalBluetoothLeBroadcast? = null
+
+    override val leAudioBroadcastProfile: LocalBluetoothLeBroadcast?
+        get() = profile
+
+    override val audioSourceStateUpdate: Flow<Unit> = mutableAudioSourceStateUpdate
 
     override val inAudioSharing: StateFlow<Boolean> = mutableInAudioSharing
-    override val primaryGroupId: StateFlow<Int> = mutablePrimaryGroupId
-    override val secondaryGroupId: StateFlow<Int> = mutableSecondaryGroupId
-    override val volumeMap: StateFlow<GroupIdToVolumes> = mutableVolumeMap
 
     override suspend fun audioSharingAvailable(): Boolean = mutableAvailable
 
-    override suspend fun setSecondaryVolume(volume: Int) {}
+    override suspend fun addSource() {
+        sourceAdded = true
+    }
+
+    override suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
+
+    override suspend fun startAudioSharing() {}
 
     fun setAudioSharingAvailable(available: Boolean) {
         mutableAvailable = available
@@ -47,19 +60,11 @@ class FakeAudioSharingRepository : AudioSharingRepository {
         mutableInAudioSharing.value = state
     }
 
-    fun setPrimaryGroupId(groupId: Int) {
-        mutablePrimaryGroupId.value = groupId
+    fun setLeAudioBroadcastProfile(leAudioBroadcastProfile: LocalBluetoothLeBroadcast?) {
+        profile = leAudioBroadcastProfile
     }
 
-    fun setSecondaryGroupId(groupId: Int) {
-        mutableSecondaryGroupId.value = groupId
-    }
-
-    fun setVolumeMap(volumeMap: GroupIdToVolumes) {
-        mutableVolumeMap.value = volumeMap
-    }
-
-    private companion object {
-        const val TEST_GROUP_ID_INVALID = -1
+    fun emitAudioSourceStateUpdate() {
+        mutableAudioSourceStateUpdate.tryEmit(Unit)
     }
 }
