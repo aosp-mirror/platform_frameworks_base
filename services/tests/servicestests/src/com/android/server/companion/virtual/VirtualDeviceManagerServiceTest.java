@@ -116,7 +116,6 @@ import android.virtualdevice.cts.common.VirtualDeviceRule;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
@@ -556,6 +555,68 @@ public class VirtualDeviceManagerServiceTest {
         GenericWindowPolicyController gwpc =
                 mDeviceImpl.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_1);
         assertThat(gwpc.canShowTasksInHostDeviceRecents()).isTrue();
+    }
+
+    @Test
+    public void deviceOwner_cannotMessWithAnotherDeviceTheyDoNotOwn() {
+        VirtualDeviceImpl unownedDevice =
+                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_2);
+
+        // The arguments don't matter, the owner uid check is always the first statement.
+        assertThrows(SecurityException.class, () -> unownedDevice.goToSleep());
+        assertThrows(SecurityException.class, () -> unownedDevice.wakeUp());
+
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.launchPendingIntent(0, null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.registerIntentInterceptor(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.unregisterIntentInterceptor(null));
+
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.addActivityPolicyExemption(null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.removeActivityPolicyExemption(null));
+        assertThrows(SecurityException.class, () -> unownedDevice.setDevicePolicy(0, 0));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.setDevicePolicyForDisplay(0, 0, 0));
+        assertThrows(SecurityException.class, () -> unownedDevice.setDisplayImePolicy(0, 0));
+
+        assertThrows(SecurityException.class, () -> unownedDevice.registerVirtualCamera(null));
+        assertThrows(SecurityException.class, () -> unownedDevice.unregisterVirtualCamera(null));
+
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.onAudioSessionStarting(0, null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.onAudioSessionEnded());
+
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualDisplay(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualDpad(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualMouse(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.createVirtualTouchscreen(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.createVirtualNavigationTouchpad(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualStylus(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.createVirtualRotaryEncoder(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.unregisterInputDevice(null));
+
+        assertThrows(SecurityException.class, () -> unownedDevice.sendDpadKeyEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendKeyEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendButtonEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendTouchEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendRelativeEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendScrollEvent(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.sendStylusMotionEvent(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.sendStylusButtonEvent(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.sendRotaryEncoderScrollEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.setShowPointerIcon(true));
+
+        assertThrows(SecurityException.class, () -> unownedDevice.getVirtualSensorList());
+        assertThrows(SecurityException.class, () -> unownedDevice.sendSensorEvent(null, null));
     }
 
     @Test
