@@ -44,7 +44,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -101,8 +100,7 @@ public class PackageInstallerActivity extends Activity {
     private int mActivityResultCode = Activity.RESULT_CANCELED;
     private int mPendingUserActionReason = -1;
 
-    private final boolean mLocalLOGV =
-            TextUtils.equals("userdebug", SystemProperties.get("ro.build.type", ""));
+    private final boolean mLocalLOGV = false;
     PackageManager mPm;
     AppOpsManager mAppOpsManager;
     UserManager mUserManager;
@@ -145,11 +143,6 @@ public class PackageInstallerActivity extends Activity {
     private AlertDialog mDialog;
 
     private void startInstallConfirm() {
-        if (mLocalLOGV) {
-            Log.d(TAG, "startInstallConfirm mAppInfo = " + mAppInfo
-                    + ", existingUpdateOwner = " + getExistingUpdateOwner()
-                    + ", mOriginatingPackage = " + mOriginatingPackage);
-        }
         TextView viewToEnable;
 
         if (mAppInfo != null) {
@@ -190,10 +183,6 @@ public class PackageInstallerActivity extends Activity {
         try {
             final String packageName = mPkgInfo.packageName;
             final InstallSourceInfo sourceInfo = mPm.getInstallSourceInfo(packageName);
-            if (mLocalLOGV) {
-                Log.d(TAG, "getExistingUpdateOwner mAppInfo = " + mAppInfo
-                        + ", packageName = " + packageName + ", sourceInfo = " + sourceInfo);
-            }
             return sourceInfo.getUpdateOwnerPackageName();
         } catch (NameNotFoundException e) {
             return null;
@@ -314,12 +303,6 @@ public class PackageInstallerActivity extends Activity {
 
     private void initiateInstall() {
         final String existingUpdateOwner = getExistingUpdateOwner();
-        if (mLocalLOGV) {
-            Log.d(TAG, "initiateInstall mAppInfo = " + mAppInfo
-                    + ", existingUpdateOwner = " + existingUpdateOwner
-                    + ", mOriginatingPackage = " + mOriginatingPackage
-                    + ", mSessionId = " + mSessionId);
-        }
         if (mSessionId == SessionInfo.INVALID_ID &&
             !TextUtils.isEmpty(existingUpdateOwner) &&
             !TextUtils.equals(existingUpdateOwner, mOriginatingPackage)) {
@@ -831,28 +814,15 @@ public class PackageInstallerActivity extends Activity {
 
         @Override
         public void onOpChanged(String op, String packageName) {
-            if (mLocalLOGV) {
-                Log.d(TAG, "UnknownSourcesListener onOpChanged op = " + op
-                        + ", packageName = " + packageName
-                        + ", mOriginatingPackage = " + mOriginatingPackage);
-            }
             if (!mOriginatingPackage.equals(packageName)) {
                 return;
             }
             unregister(this);
             mActiveUnknownSourcesListeners.remove(this);
-            if (mLocalLOGV) {
-                Log.d(TAG, "UnknownSourcesListener onOpChanged isDestroyed() = "
-                        + isDestroyed());
-            }
             if (isDestroyed()) {
                 return;
             }
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (mLocalLOGV) {
-                    Log.d(TAG, "UnknownSourcesListener onOpChanged post isDestroyed()"
-                            + "= " + isDestroyed() + ", getIntent() = " + getIntent());
-                }
                 if (!isDestroyed()) {
                     startActivity(getIntent());
                     // The start flag (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_SINGLE_TOP) doesn't
@@ -870,9 +840,6 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private void register(UnknownSourcesListener listener) {
-        if (mLocalLOGV) {
-            Log.d(TAG, "UnknownSourcesListener register");
-        }
         mAppOpsManager.startWatchingMode(
                 AppOpsManager.OPSTR_REQUEST_INSTALL_PACKAGES, mOriginatingPackage,
                 listener);
@@ -880,9 +847,6 @@ public class PackageInstallerActivity extends Activity {
     }
 
     private void unregister(UnknownSourcesListener listener) {
-        if (mLocalLOGV) {
-            Log.d(TAG, "UnknownSourcesListener unregister");
-        }
         mAppOpsManager.stopWatchingMode(listener);
         mActiveUnknownSourcesListeners.remove(listener);
     }
