@@ -18,6 +18,7 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -43,6 +44,8 @@ import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.system.VMRuntime;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -1273,6 +1276,12 @@ public class Build {
         public static final int VANILLA_ICE_CREAM = 35;
     }
 
+    /** @hide */
+    @IntDef(value = {
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SdkIntFull {}
+
     /**
      * Enumeration of the currently known SDK major and minor version codes.
      * The numbers increase for every release, and are guaranteed to be ordered
@@ -1290,6 +1299,28 @@ public class Build {
         // Use the last 5 digits for the minor version. This allows the
         // minor version to be set to CUR_DEVELOPMENT.
         private static final int SDK_INT_MULTIPLIER = 100000;
+    }
+
+    /**
+     * Obtain the major version encoded in a VERSION_CODES_FULL value.
+     * This value is guaranteed to be non-negative.
+     *
+     * @return The major version encoded in a VERSION_CODES_FULL value
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    public static int getMajorSdkVersion(@SdkIntFull int sdkIntFull) {
+        return sdkIntFull / VERSION_CODES_FULL.SDK_INT_MULTIPLIER;
+    }
+
+    /**
+     * Obtain the minor version encoded in a VERSION_CODES_FULL value.
+     * This value is guaranteed to be non-negative.
+     *
+     * @return The minor version encoded in a VERSION_CODES_FULL value
+     */
+    @FlaggedApi(Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME)
+    public static int getMinorSdkVersion(@SdkIntFull int sdkIntFull) {
+        return sdkIntFull % VERSION_CODES_FULL.SDK_INT_MULTIPLIER;
     }
 
     /**
