@@ -16,8 +16,6 @@
 
 package com.android.server.rollback;
 
-import static android.content.pm.Flags.provideInfoOfApkInApex;
-
 import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.AnyThread;
@@ -38,13 +36,13 @@ import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.crashrecovery.flags.Flags;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.sysprop.CrashRecoveryProperties;
 import android.util.ArraySet;
+import android.util.FileUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -56,7 +54,6 @@ import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
 import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
-import com.android.server.pm.ApexManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -91,7 +88,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
     private final Context mContext;
     private final Handler mHandler;
-    private final ApexManager mApexManager;
     private final File mLastStagedRollbackIdsFile;
     private final File mTwoPhaseRollbackEnabledFile;
     // Staged rollback ids that have been committed but their session is not yet ready
@@ -99,9 +95,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     // True if needing to roll back only rebootless apexes when native crash happens
     private boolean mTwoPhaseRollbackEnabled;
 
-    /** @hide */
     @VisibleForTesting
-    public RollbackPackageHealthObserver(Context context, ApexManager apexManager) {
+    public RollbackPackageHealthObserver(@NonNull Context context) {
         mContext = context;
         HandlerThread handlerThread = new HandlerThread("RollbackPackageHealthObserver");
         handlerThread.start();
@@ -111,7 +106,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         mTwoPhaseRollbackEnabledFile = new File(dataDir, "two-phase-rollback-enabled");
         PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
-        mApexManager = apexManager;
 
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
             // Load the value from the file if system server has crashed and restarted
@@ -122,10 +116,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             mTwoPhaseRollbackEnabled = false;
             writeBoolean(mTwoPhaseRollbackEnabledFile, false);
         }
-    }
-
-    public RollbackPackageHealthObserver(@NonNull Context context) {
-        this(context, ApexManager.getInstance());
     }
 
     @Override
@@ -500,36 +490,19 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
      */
     @AnyThread
     private boolean isModule(String packageName) {
-        PackageManager pm = mContext.getPackageManager();
-
-        if (Flags.refactorCrashrecovery() && provideInfoOfApkInApex()) {
-            // Check if the package is listed among the system modules or is an
-            // APK inside an updatable APEX.
-            try {
-                final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
-                String apexPackageName = pkg.getApexPackageName();
-                if (apexPackageName != null) {
-                    packageName = apexPackageName;
-                }
-
-                return pm.getModuleInfo(packageName, 0 /* flags */) != null;
-            } catch (PackageManager.NameNotFoundException e) {
-                return false;
-            }
-        } else {
-            // Check if the package is an APK inside an APEX. If it is, use the parent APEX package
-            // when querying PackageManager.
-            String apexPackageName = mApexManager.getActiveApexPackageNameContainingPackage(
-                    packageName);
+        // Check if the package is listed among the system modules or is an
+        // APK inside an updatable APEX.
+        try {
+            final PackageInfo pkg = mContext.getPackageManager()
+                    .getPackageInfo(packageName, 0 /* flags */);
+            String apexPackageName = pkg.getApexPackageName();
             if (apexPackageName != null) {
                 packageName = apexPackageName;
             }
 
-            try {
-                return pm.getModuleInfo(packageName, 0) != null;
-            } catch (PackageManager.NameNotFoundException ignore) {
-                return false;
-            }
+            return pm.getModuleInfo(packageName, 0 /* flags */) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
         }
     }
 
@@ -604,42 +577,33 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             }
         };
 
-        if (Flags.refactorCrashrecovery()) {
-            // Define a BroadcastReceiver to handle the result
-            BroadcastReceiver rollbackReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent result) {
-                    mHandler.post(() -> onResult.accept(result));
-                }
-            };
-
-            String intentActionName = CLASS_NAME + rollback.getRollbackId();
-            // Register the BroadcastReceiver
-            mContext.registerReceiver(rollbackReceiver,
-                    new IntentFilter(intentActionName),
-                    Context.RECEIVER_NOT_EXPORTED);
-
-            Intent intentReceiver = new Intent(intentActionName);
-            intentReceiver.putExtra("rollbackId", rollback.getRollbackId());
-            intentReceiver.setPackage(mContext.getPackageName());
-            intentReceiver.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-
-            PendingIntent rollbackPendingIntent = PendingIntent.getBroadcast(mContext,
-                    rollback.getRollbackId(),
-                    intentReceiver,
-                    PendingIntent.FLAG_MUTABLE);
-
-            rollbackManager.commitRollback(rollback.getRollbackId(),
-                    Collections.singletonList(failedPackage),
-                    rollbackPendingIntent.getIntentSender());
-        } else {
-            final LocalIntentReceiver rollbackReceiver = new LocalIntentReceiver(result -> {
+        // Define a BroadcastReceiver to handle the result
+        BroadcastReceiver rollbackReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent result) {
                 mHandler.post(() -> onResult.accept(result));
-            });
+            }
+        };
 
-            rollbackManager.commitRollback(rollback.getRollbackId(),
-                    Collections.singletonList(failedPackage), rollbackReceiver.getIntentSender());
-        }
+        String intentActionName = CLASS_NAME + rollback.getRollbackId();
+        // Register the BroadcastReceiver
+        mContext.registerReceiver(rollbackReceiver,
+                new IntentFilter(intentActionName),
+                Context.RECEIVER_NOT_EXPORTED);
+
+        Intent intentReceiver = new Intent(intentActionName);
+        intentReceiver.putExtra("rollbackId", rollback.getRollbackId());
+        intentReceiver.setPackage(mContext.getPackageName());
+        intentReceiver.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+
+        PendingIntent rollbackPendingIntent = PendingIntent.getBroadcast(mContext,
+                rollback.getRollbackId(),
+                intentReceiver,
+                PendingIntent.FLAG_MUTABLE);
+
+        rollbackManager.commitRollback(rollback.getRollbackId(),
+                Collections.singletonList(failedPackage),
+                rollbackPendingIntent.getIntentSender());
     }
 
     /**

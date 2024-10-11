@@ -35,7 +35,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.crashrecovery.flags.Flags;
-import android.net.ConnectivityModuleConnector;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -52,11 +51,11 @@ import android.util.IndentingPrintWriter;
 import android.util.LongArrayQueue;
 import android.util.Slog;
 import android.util.Xml;
+import android.util.XmlUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.XmlUtils;
+import com.android.modules.utils.BackgroundThread;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -227,7 +226,6 @@ public class PackageWatchdog {
     // File containing the XML data of monitored packages /data/system/package-watchdog.xml
     private final AtomicFile mPolicyFile;
     private final ExplicitHealthCheckController mHealthCheckController;
-    private final ConnectivityModuleConnector mConnectivityModuleConnector;
     private final Runnable mSyncRequests = this::syncRequests;
     private final Runnable mSyncStateWithScheduledReason = this::syncStateWithScheduledReason;
     private final Runnable mSaveToFile = this::saveToFile;
@@ -274,7 +272,6 @@ public class PackageWatchdog {
                                 "package-watchdog.xml")),
                 new Handler(Looper.myLooper()), BackgroundThread.getHandler(),
                 new ExplicitHealthCheckController(context),
-                ConnectivityModuleConnector.getInstance(),
                 android.os.SystemClock::uptimeMillis);
     }
 
@@ -284,13 +281,12 @@ public class PackageWatchdog {
     @VisibleForTesting
     PackageWatchdog(Context context, AtomicFile policyFile, Handler shortTaskHandler,
             Handler longTaskHandler, ExplicitHealthCheckController controller,
-            ConnectivityModuleConnector connectivityModuleConnector, SystemClock clock) {
+            SystemClock clock) {
         mContext = context;
         mPolicyFile = policyFile;
         mShortTaskHandler = shortTaskHandler;
         mLongTaskHandler = longTaskHandler;
         mHealthCheckController = controller;
-        mConnectivityModuleConnector = connectivityModuleConnector;
         mSystemClock = clock;
         mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
         mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
@@ -323,9 +319,6 @@ public class PackageWatchdog {
                     this::onSyncRequestNotified);
             setPropertyChangedListenerLocked();
             updateConfigs();
-            if (!Flags.refactorCrashrecovery()) {
-                registerConnectivityModuleHealthListener();
-            }
         }
     }
 
@@ -1211,22 +1204,6 @@ public class PackageWatchdog {
                     PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
                     DEFAULT_EXPLICIT_HEALTH_CHECK_ENABLED));
         }
-    }
-
-    private void registerConnectivityModuleHealthListener() {
-        // TODO: have an internal method to trigger a rollback by reporting high severity errors,
-        // and rely on ActivityManager to inform the watchdog of severe network stack crashes
-        // instead of having this listener in parallel.
-        mConnectivityModuleConnector.registerHealthListener(
-                packageName -> {
-                    final VersionedPackage pkg = getVersionedPackage(packageName);
-                    if (pkg == null) {
-                        Slog.wtf(TAG, "NetworkStack failed but could not find its package");
-                        return;
-                    }
-                    final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
-                    onPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
-                });
     }
 
     /**

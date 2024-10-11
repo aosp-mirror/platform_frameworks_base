@@ -16,14 +16,11 @@
 
 package com.android.server;
 
-import static android.provider.DeviceConfig.Properties;
-
 import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -31,7 +28,6 @@ import android.content.pm.VersionedPackage;
 import android.crashrecovery.flags.Flags;
 import android.os.Build;
 import android.os.Environment;
-import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
@@ -42,17 +38,17 @@ import android.provider.Settings;
 import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.ArrayUtils;
 import android.util.EventLog;
+import android.util.FileUtils;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.PackageWatchdog.FailureReasons;
 import com.android.server.PackageWatchdog.PackageHealthObserver;
 import com.android.server.PackageWatchdog.PackageHealthObserverImpact;
-import com.android.server.am.SettingsToPropertiesMapper;
 import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 
 import java.io.File;
@@ -61,11 +57,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -245,74 +239,6 @@ public class RescueParty {
         CrashRecoveryProperties.maxRescueLevelAttempted(level);
     }
 
-    /**
-     * Called when {@code SettingsProvider} has been published, which is a good
-     * opportunity to reset any settings depending on our rescue level.
-     */
-    public static void onSettingsProviderPublished(Context context) {
-        if (!Flags.deprecateFlagsAndSettingsResets()) {
-            handleNativeRescuePartyResets();
-            ContentResolver contentResolver = context.getContentResolver();
-            DeviceConfig.setMonitorCallback(
-                    contentResolver,
-                    Executors.newSingleThreadExecutor(),
-                    new RescuePartyMonitorCallback(context));
-        }
-    }
-
-
-    /**
-     * Called when {@code RollbackManager} performs Mainline module rollbacks,
-     * to avoid rolled back modules consuming flag values only expected to work
-     * on modules of newer versions.
-     */
-    public static void resetDeviceConfigForPackages(List<String> packageNames) {
-        if (!Flags.deprecateFlagsAndSettingsResets()) {
-            if (packageNames == null) {
-                return;
-            }
-            Set<String> namespacesToReset = new ArraySet<String>();
-            Iterator<String> it = packageNames.iterator();
-            RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstanceIfCreated();
-            // Get runtime package to namespace mapping if created.
-            if (rescuePartyObserver != null) {
-                while (it.hasNext()) {
-                    String packageName = it.next();
-                    Set<String> runtimeAffectedNamespaces =
-                            rescuePartyObserver.getAffectedNamespaceSet(packageName);
-                    if (runtimeAffectedNamespaces != null) {
-                        namespacesToReset.addAll(runtimeAffectedNamespaces);
-                    }
-                }
-            }
-            // Get preset package to namespace mapping if created.
-            Set<String> presetAffectedNamespaces = getPresetNamespacesForPackages(
-                    packageNames);
-            if (presetAffectedNamespaces != null) {
-                namespacesToReset.addAll(presetAffectedNamespaces);
-            }
-
-            // Clear flags under the namespaces mapped to these packages.
-            // Using setProperties since DeviceConfig.resetToDefaults bans the current flag set.
-            Iterator<String> namespaceIt = namespacesToReset.iterator();
-            while (namespaceIt.hasNext()) {
-                String namespaceToReset = namespaceIt.next();
-                Properties properties = new Properties.Builder(namespaceToReset).build();
-                try {
-                    if (!DeviceConfig.setProperties(properties)) {
-                        logCrashRecoveryEvent(Log.ERROR, "Failed to clear properties under "
-                            + namespaceToReset
-                            + ". Running `device_config get_sync_disabled_for_tests` will confirm"
-                            + " if config-bulk-update is enabled.");
-                    }
-                } catch (DeviceConfig.BadConfigException exception) {
-                    logCrashRecoveryEvent(Log.WARN, "namespace " + namespaceToReset
-                            + " is already banned, skip reset.");
-                }
-            }
-        }
-    }
-
     private static Set<String> getPresetNamespacesForPackages(List<String> packageNames) {
         Set<String> resultSet = new ArraySet<String>();
         if (!Flags.deprecateFlagsAndSettingsResets()) {
@@ -391,23 +317,6 @@ public class RescueParty {
                     rescuePartyObserver,
                     callingPackageList,
                     DEFAULT_OBSERVING_DURATION_MS);
-        }
-    }
-
-    private static void handleNativeRescuePartyResets() {
-        if (!Flags.deprecateFlagsAndSettingsResets()) {
-            if (SettingsToPropertiesMapper.isNativeFlagsResetPerformed()) {
-                String[] resetNativeCategories =
-                        SettingsToPropertiesMapper.getResetNativeCategories();
-                for (int i = 0; i < resetNativeCategories.length; i++) {
-                    // Don't let RescueParty reset the namespace for RescueParty switches.
-                    if (NAMESPACE_CONFIGURATION.equals(resetNativeCategories[i])) {
-                        continue;
-                    }
-                    DeviceConfig.resetToDefaults(DEVICE_CONFIG_RESET_MODE,
-                            resetNativeCategories[i]);
-                }
-            }
         }
     }
 
@@ -599,22 +508,13 @@ public class RescueParty {
                 executeWarmReboot(context, level, failedPackage);
                 break;
             case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_DEFAULTS:
-                if (!Flags.deprecateFlagsAndSettingsResets()) {
-                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_DEFAULTS,
-                            level);
-                }
+                // do nothing
                 break;
             case RESCUE_LEVEL_RESET_SETTINGS_UNTRUSTED_CHANGES:
-                if (!Flags.deprecateFlagsAndSettingsResets()) {
-                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_UNTRUSTED_CHANGES,
-                            level);
-                }
+                // do nothing
                 break;
             case RESCUE_LEVEL_RESET_SETTINGS_TRUSTED_DEFAULTS:
-                if (!Flags.deprecateFlagsAndSettingsResets()) {
-                    resetAllSettingsIfNecessary(context, Settings.RESET_MODE_TRUSTED_DEFAULTS,
-                            level);
-                }
+                // do nothing
                 break;
             case RESCUE_LEVEL_FACTORY_RESET:
                 // Before the completion of Reboot, if any crash happens then PackageWatchdog
@@ -753,37 +653,6 @@ public class RescueParty {
                     return PackageHealthObserverImpact.USER_IMPACT_LEVEL_100;
                 default:
                     return PackageHealthObserverImpact.USER_IMPACT_LEVEL_0;
-            }
-        }
-    }
-
-    private static void resetAllSettingsIfNecessary(Context context, int mode,
-            int level) throws Exception {
-        if (!Flags.deprecateFlagsAndSettingsResets()) {
-            // No need to reset Settings again if they are already reset in the current level once.
-            if (getMaxRescueLevelAttempted() >= level) {
-                return;
-            }
-            setMaxRescueLevelAttempted(level);
-            // Try our best to reset all settings possible, and once finished
-            // rethrow any exception that we encountered
-            Exception res = null;
-            final ContentResolver resolver = context.getContentResolver();
-            try {
-                Settings.Global.resetToDefaultsAsUser(resolver, null, mode,
-                        UserHandle.SYSTEM.getIdentifier());
-            } catch (Exception e) {
-                res = new RuntimeException("Failed to reset global settings", e);
-            }
-            for (int userId : getAllUserIds()) {
-                try {
-                    Settings.Secure.resetToDefaultsAsUser(resolver, null, mode, userId);
-                } catch (Exception e) {
-                    res = new RuntimeException("Failed to reset secure settings for " + userId, e);
-                }
-            }
-            if (res != null) {
-                throw res;
             }
         }
     }
