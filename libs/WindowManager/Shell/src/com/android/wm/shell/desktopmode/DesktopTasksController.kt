@@ -127,6 +127,10 @@ import java.util.Optional
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
+import com.android.wm.shell.desktopmode.DragToDesktopTransitionHandler.Companion.DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS
+import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler.FREEFORM_ANIMATION_DURATION
+import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCREEN_ANIMATION_DURATION
+
 /** Handles moving tasks in and out of desktop */
 class DesktopTasksController(
     private val context: Context,
@@ -194,6 +198,9 @@ class DesktopTasksController(
 
     @VisibleForTesting
     var taskbarDesktopTaskListener: TaskbarDesktopTaskListener? = null
+
+    @VisibleForTesting
+    var desktopModeEnterExitTransitionListener: DesktopModeEntryExitTransitionListener? = null
 
     /** Task id of the task currently being dragged from fullscreen/split. */
     val draggingTaskId
@@ -380,6 +387,7 @@ class DesktopTasksController(
         )
         // TODO(343149901): Add DPI changes for task launch
         val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
         taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
         exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         return true
@@ -409,6 +417,7 @@ class DesktopTasksController(
         addMoveToDesktopChanges(wct, task)
 
         val transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+        desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(FREEFORM_ANIMATION_DURATION)
         taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
         exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
     }
@@ -450,6 +459,9 @@ class DesktopTasksController(
         val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(
             wct, taskInfo.displayId)
         val transition = dragToDesktopTransitionHandler.finishDragToDesktopTransition(wct)
+        desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
+            DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS.toInt()
+        )
         transition?.let {
             taskIdToMinimize?.let { taskId -> addPendingMinimizeTransition(it, taskId) }
             exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
@@ -485,9 +497,7 @@ class DesktopTasksController(
     ): ((IBinder) -> Unit)? {
         val taskId = taskInfo.taskId
         desktopTilingDecorViewModel.removeTaskIfTiled(displayId, taskId)
-        if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
-            removeWallpaperActivity(wct)
-        }
+        performDesktopExitCleanupIfNeeded(taskId, wct)
         taskRepository.addClosingTask(displayId, taskId)
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(
@@ -503,11 +513,7 @@ class DesktopTasksController(
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
-        if (taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
-            // Perform clean up of the desktop wallpaper activity if the minimized window task is
-            // the last active task.
-            removeWallpaperActivity(wct)
-        }
+        performDesktopExitCleanupIfNeeded(taskId, wct)
         // Notify immersive handler as it might need to exit immersive state.
         val exitResult = desktopImmersiveController.exitImmersiveIfApplicable(wct, taskInfo)
 
@@ -576,6 +582,11 @@ class DesktopTasksController(
                 position,
                 mOnAnimationFinishedCallback
             )
+
+        // handles case where we are moving to full screen without closing all DW tasks.
+        if (!taskRepository.isOnlyVisibleNonClosingTask(task.taskId)) {
+            desktopModeEnterExitTransitionListener?.onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
+        }
     }
 
     /**
@@ -1226,6 +1237,21 @@ class DesktopTasksController(
         }
     }
 
+    /**
+     * Remove wallpaper activity if task provided is last task and wallpaper activity token is not
+     * null
+     */
+    private fun performDesktopExitCleanupIfNeeded(taskId: Int, wct: WindowContainerTransaction) {
+        if (!taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
+            return
+        }
+        desktopModeEnterExitTransitionListener?.onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
+        if (taskRepository.wallpaperActivityToken != null) {
+            removeWallpaperActivity(wct)
+        }
+    }
+
+
     fun releaseVisualIndicator() {
         val t = SurfaceControl.Transaction()
         visualIndicator?.releaseVisualIndicator(t)
@@ -1662,12 +1688,7 @@ class DesktopTasksController(
             return null
 
         val wct = WindowContainerTransaction()
-        if (taskRepository.isOnlyVisibleNonClosingTask(task.taskId)
-            && taskRepository.wallpaperActivityToken != null
-        ) {
-            // Remove wallpaper activity when the last active task is removed
-            removeWallpaperActivity(wct)
-        }
+        performDesktopExitCleanupIfNeeded(task.taskId, wct)
 
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
@@ -1758,10 +1779,8 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
-        if (taskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
-            // Remove wallpaper activity when leaving desktop mode
-            removeWallpaperActivity(wct)
-        }
+
+        performDesktopExitCleanupIfNeeded(taskInfo.taskId, wct)
     }
 
     private fun cascadeWindow(bounds: Rect, displayLayout: DisplayLayout, displayId: Int) {
@@ -1790,10 +1809,8 @@ class DesktopTasksController(
         // The task's density may have been overridden in freeform; revert it here as we don't
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
-        if (taskRepository.isOnlyVisibleNonClosingTask(taskInfo.taskId)) {
-            // Remove wallpaper activity when leaving desktop mode
-            removeWallpaperActivity(wct)
-        }
+
+        performDesktopExitCleanupIfNeeded(taskInfo.taskId, wct)
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */
@@ -2331,7 +2348,7 @@ class DesktopTasksController(
                 }
             }
 
-        private val mTaskbarDesktopTaskListener: TaskbarDesktopTaskListener =
+        private val taskbarDesktopTaskListener: TaskbarDesktopTaskListener =
                 object : TaskbarDesktopTaskListener {
                     override fun onTaskbarCornerRoundingUpdate(
                         hasTasksRequiringTaskbarRounding: Boolean) {
@@ -2348,6 +2365,27 @@ class DesktopTasksController(
                     }
                 }
 
+        private val desktopModeEntryExitTransitionListener: DesktopModeEntryExitTransitionListener =
+            object : DesktopModeEntryExitTransitionListener {
+                override fun onEnterDesktopModeTransitionStarted(transitionDuration: Int) {
+                    ProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "IDesktopModeImpl: onEnterDesktopModeTransitionStarted transitionTime=%s",
+                        transitionDuration
+                    )
+                    remoteListener.call { l -> l.onEnterDesktopModeTransitionStarted(transitionDuration) }
+                }
+
+                override fun onExitDesktopModeTransitionStarted(transitionDuration: Int) {
+                    ProtoLog.v(
+                        WM_SHELL_DESKTOP_MODE,
+                        "IDesktopModeImpl: onExitDesktopModeTransitionStarted transitionTime=%s",
+                        transitionDuration
+                    )
+                    remoteListener.call { l -> l.onExitDesktopModeTransitionStarted(transitionDuration) }
+                }
+            }
+
         init {
             remoteListener =
                 SingleInstanceRemoteListener<DesktopTasksController, IDesktopTaskListener>(
@@ -2355,13 +2393,16 @@ class DesktopTasksController(
                     { c ->
                         run {
                             c.taskRepository.addVisibleTasksListener(listener, c.mainExecutor)
-                            c.taskbarDesktopTaskListener = mTaskbarDesktopTaskListener
+                            c.taskbarDesktopTaskListener = taskbarDesktopTaskListener
+                            c.desktopModeEnterExitTransitionListener =
+                                desktopModeEntryExitTransitionListener
                         }
                     },
                     { c ->
                         run {
                             c.taskRepository.removeVisibleTasksListener(listener)
                             c.taskbarDesktopTaskListener = null
+                            c.desktopModeEnterExitTransitionListener = null
                         }
                     }
                 )
@@ -2466,6 +2507,15 @@ class DesktopTasksController(
          * left/right and rounded corners are enabled.
          */
         fun onTaskbarCornerRoundingUpdate(hasTasksRequiringTaskbarRounding: Boolean)
+    }
+
+    /** Defines interface for entering and exiting desktop windowing mode. */
+    interface DesktopModeEntryExitTransitionListener {
+        /** [transitionDuration] time it takes to run enter desktop mode transition */
+        fun onEnterDesktopModeTransitionStarted(transitionDuration: Int)
+
+        /** [transitionDuration] time it takes to run exit desktop mode transition */
+        fun onExitDesktopModeTransitionStarted(transitionDuration: Int)
     }
 
     /** The positions on a screen that a task can snap to. */
