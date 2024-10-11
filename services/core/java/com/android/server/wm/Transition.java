@@ -3559,6 +3559,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wc.mWmService.mAtmService.mBackNavigationController.isMonitorTransitionTarget(wc)) {
                 flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
             }
+            final TaskDisplayArea tda = wc.asTaskDisplayArea();
+            if (tda != null) {
+                flags |= TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA;
+            }
             final Task task = wc.asTask();
             if (task != null) {
                 final ActivityRecord topActivity = task.getTopNonFinishingActivity();
