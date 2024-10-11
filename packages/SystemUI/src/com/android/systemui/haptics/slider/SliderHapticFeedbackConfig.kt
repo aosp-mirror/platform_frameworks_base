@@ -38,7 +38,7 @@ data class SliderHapticFeedbackConfig(
     /** Number of low ticks in a drag texture composition. This is not expected to change */
     val numberOfLowTicks: Int = 5,
     /** Maximum velocity allowed for vibration scaling. This is not expected to change. */
-    val maxVelocityToScale: Float = 2000f, /* In pixels/sec */
+    val maxVelocityToScale: Float = 2000f, /* In units/sec. The default units are pixels */
     /** Axis to use when computing velocity. Must be the same as the slider's axis of movement */
     val velocityAxis: Int = MotionEvent.AXIS_X,
     /** Vibration scale at the upper bookend of the slider */
