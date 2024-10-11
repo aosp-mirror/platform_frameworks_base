@@ -34,6 +34,7 @@ class SettingsSecureStore private constructor(contentResolver: ContentResolver) 
 
     override fun contains(key: String): Boolean = Secure.getString(contentResolver, key) != null
 
+    @Suppress("UNCHECKED_CAST")
     override fun <T : Any> getValue(key: String, valueType: Class<T>): T? =
         try {
             when (valueType) {
