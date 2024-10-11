@@ -159,7 +159,7 @@ import com.android.server.contentsuggestions.ContentSuggestionsManagerService;
 import com.android.server.contextualsearch.ContextualSearchManagerService;
 import com.android.server.coverage.CoverageService;
 import com.android.server.cpu.CpuMonitorService;
-import com.android.server.crashrecovery.CrashRecoveryModule;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.credentials.CredentialManagerService;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.devicepolicy.DevicePolicyManagerService;
@@ -1230,12 +1230,12 @@ public final class SystemServer implements Dumpable {
 
         if (!Flags.refactorCrashrecovery()) {
             // Initialize RescueParty.
-            RescueParty.registerHealthObserver(mSystemContext);
+            CrashRecoveryAdaptor.rescuePartyRegisterHealthObserver(mSystemContext);
             if (!Flags.recoverabilityDetection()) {
                 // Now that we have the bare essentials of the OS up and running, take
                 // note that we just booted, which might send out a rescue party if
                 // we're stuck in a runtime restart loop.
-                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+                CrashRecoveryAdaptor.packageWatchdogNoteBoot(mSystemContext);
             }
         }
 
@@ -2979,7 +2979,7 @@ public final class SystemServer implements Dumpable {
 
         if (Flags.refactorCrashrecovery()) {
             t.traceBegin("StartCrashRecoveryModule");
-            mSystemServiceManager.startService(CrashRecoveryModule.Lifecycle.class);
+            CrashRecoveryAdaptor.initializeCrashrecoveryModuleService(mSystemServiceManager);
             t.traceEnd();
         } else {
             if (Flags.recoverabilityDetection()) {
@@ -2987,7 +2987,7 @@ public final class SystemServer implements Dumpable {
                 // with package watchdog.
                 // Note that we just booted, which might send out a rescue party if we're stuck in a
                 // runtime restart loop.
-                PackageWatchdog.getInstance(mSystemContext).noteBoot();
+                CrashRecoveryAdaptor.packageWatchdogNoteBoot(mSystemContext);
             }
         }
 

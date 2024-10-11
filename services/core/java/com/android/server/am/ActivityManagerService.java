@@ -441,6 +441,7 @@ import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.firewall.IntentFirewall;
@@ -2210,7 +2211,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mService.mBroadcastController.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 if (!refactorCrashrecovery()) {
-                    mService.mPackageWatchdog.onPackagesReady();
+                    CrashRecoveryAdaptor.packageWatchdogOnPackagesReady(mService.mPackageWatchdog);
                 } else {
                     mService.mCrashRecoveryHelper.registerConnectivityModuleHealthListener();
                 }
