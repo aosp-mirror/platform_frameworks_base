@@ -47,6 +47,7 @@ public class PromptInfo implements Parcelable {
     private boolean mAllowBackgroundAuthentication;
     private boolean mIgnoreEnrollmentState;
     private boolean mIsForLegacyFingerprintManager = false;
+    private String mClassNameIfItIsConfirmDeviceCredentialActivity = null;
 
     public PromptInfo() {
 
@@ -70,6 +71,7 @@ public class PromptInfo implements Parcelable {
         mAllowBackgroundAuthentication = in.readBoolean();
         mIgnoreEnrollmentState = in.readBoolean();
         mIsForLegacyFingerprintManager = in.readBoolean();
+        mClassNameIfItIsConfirmDeviceCredentialActivity = in.readString();
     }
 
     public static final Creator<PromptInfo> CREATOR = new Creator<PromptInfo>() {
@@ -108,6 +110,7 @@ public class PromptInfo implements Parcelable {
         dest.writeBoolean(mAllowBackgroundAuthentication);
         dest.writeBoolean(mIgnoreEnrollmentState);
         dest.writeBoolean(mIsForLegacyFingerprintManager);
+        dest.writeString(mClassNameIfItIsConfirmDeviceCredentialActivity);
     }
 
     public boolean containsTestConfigurations() {
@@ -118,6 +121,8 @@ public class PromptInfo implements Parcelable {
         } else if (!mAllowedSensorIds.isEmpty()) {
             return true;
         } else if (mAllowBackgroundAuthentication) {
+            return true;
+        } else if (mClassNameIfItIsConfirmDeviceCredentialActivity != null) {
             return true;
         }
         return false;
@@ -213,6 +218,13 @@ public class PromptInfo implements Parcelable {
         mAllowedSensorIds.add(sensorId);
     }
 
+    /**
+     * Set the class name of ConfirmDeviceCredentialActivity.
+     */
+    void setClassNameIfItIsConfirmDeviceCredentialActivity(String className) {
+        mClassNameIfItIsConfirmDeviceCredentialActivity = className;
+    }
+
     // Getters
 
     public CharSequence getTitle() {
@@ -289,5 +301,13 @@ public class PromptInfo implements Parcelable {
 
     public boolean isForLegacyFingerprintManager() {
         return mIsForLegacyFingerprintManager;
+    }
+
+    /**
+     * Get the class name of ConfirmDeviceCredentialActivity. Returns null if the direct caller is
+     * not ConfirmDeviceCredentialActivity.
+     */
+    public String getClassNameIfItIsConfirmDeviceCredentialActivity() {
+        return mClassNameIfItIsConfirmDeviceCredentialActivity;
     }
 }
