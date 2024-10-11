@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ScheduleCalendar;
@@ -112,6 +113,11 @@ public class ScheduleConditionProvider extends SystemConditionProviderService {
     @Override
     public void onBootComplete() {
         // noop
+    }
+
+    @Override
+    public void onUserSwitched(UserHandle user) {
+        // Nothing to do because time-based schedules are not tied to any user data.
     }
 
     @Override
