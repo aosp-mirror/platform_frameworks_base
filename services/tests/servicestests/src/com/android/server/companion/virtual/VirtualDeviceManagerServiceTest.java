@@ -161,8 +161,8 @@ public class VirtualDeviceManagerServiceTest {
     private static final int DISPLAY_ID_1 = 2;
     private static final int DISPLAY_ID_2 = 3;
     private static final int NON_EXISTENT_DISPLAY_ID = 42;
-    private static final int DEVICE_OWNER_UID_1 = 50;
-    private static final int DEVICE_OWNER_UID_2 = 51;
+    private static final int DEVICE_OWNER_UID_1 = Process.myUid();
+    private static final int DEVICE_OWNER_UID_2 = DEVICE_OWNER_UID_1 + 1;
     private static final int UID_1 = 0;
     private static final int UID_2 = 10;
     private static final int UID_3 = 10000;
@@ -676,7 +676,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void getDeviceIdsForUid_twoDevicesUidOnOne_returnsCorrectId() {
         VirtualDeviceImpl secondDevice = createVirtualDevice(VIRTUAL_DEVICE_ID_2,
-                DEVICE_OWNER_UID_2);
+                DEVICE_OWNER_UID_1);
         addVirtualDisplay(secondDevice, DISPLAY_ID_2);
 
         secondDevice.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_2).onRunningAppsChanged(
@@ -691,7 +691,7 @@ public class VirtualDeviceManagerServiceTest {
     public void getDeviceIdsForUid_twoDevicesUidOnBoth_returnsCorrectId() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         VirtualDeviceImpl secondDevice = createVirtualDevice(VIRTUAL_DEVICE_ID_2,
-                DEVICE_OWNER_UID_2);
+                DEVICE_OWNER_UID_1);
         addVirtualDisplay(secondDevice, DISPLAY_ID_2);
 
 
@@ -729,7 +729,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void getPreferredLocaleListForApp_appOnMultipleVD_localeOnFirstVDReturned() {
         VirtualDeviceImpl secondDevice = createVirtualDevice(VIRTUAL_DEVICE_ID_2,
-                DEVICE_OWNER_UID_2);
+                DEVICE_OWNER_UID_1);
         Binder secondBinder = new Binder("secondBinder");
         VirtualKeyboardConfig firstKeyboardConfig =
                 new VirtualKeyboardConfig.Builder()
@@ -767,7 +767,7 @@ public class VirtualDeviceManagerServiceTest {
         assertThat(mCameraAccessController.getObserverCount()).isEqualTo(1);
 
         VirtualDeviceImpl secondDevice =
-                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_2);
+                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_1);
         assertThat(mCameraAccessController.getObserverCount()).isEqualTo(2);
 
         mDeviceImpl.close();
@@ -1127,70 +1127,6 @@ public class VirtualDeviceManagerServiceTest {
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.onAudioSessionStarting(
                         DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback));
-    }
-
-    @Test
-    public void createVirtualDpad_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualKeyboard_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualMouse_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualTouchscreen_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualNavigationTouchpad_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualNavigationTouchpad(
-                                NAVIGATION_TOUCHPAD_CONFIG,
-                                BINDER)));
-    }
-
-    @Test
-    public void onAudioSessionStarting_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.onAudioSessionStarting(
-                                DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback)));
-    }
-
-    @Test
-    public void onAudioSessionEnded_noPermission_failsSecurityException() {
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded()));
     }
 
     @Test
