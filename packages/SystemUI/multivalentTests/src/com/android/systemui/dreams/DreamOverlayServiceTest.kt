@@ -712,6 +712,9 @@ class DreamOverlayServiceTest : SysuiTestCase() {
 
         // Verify DreamOverlayContainerViewController is destroyed.
         verify(mDreamOverlayContainerViewController).destroy()
+
+        // DreamOverlay callback receives onWakeUp.
+        verify(mDreamOverlayCallbackController).onWakeUp()
     }
 
     @Test

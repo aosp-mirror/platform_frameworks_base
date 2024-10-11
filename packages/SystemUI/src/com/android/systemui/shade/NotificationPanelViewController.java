@@ -2710,6 +2710,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private int calculatePanelHeightShade() {
+        // Bypass should always occupy the full height
+        if (mBarState == KEYGUARD && mKeyguardBypassController.getBypassEnabled()) {
+            return mNotificationStackScrollLayoutController.getHeight();
+        }
+
         int emptyBottomMargin = mNotificationStackScrollLayoutController.getEmptyBottomMargin();
         int maxHeight = mNotificationStackScrollLayoutController.getHeight() - emptyBottomMargin;
 
