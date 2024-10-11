@@ -909,7 +909,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 break;
             case POLICY_TYPE_CLIPBOARD:
                 if (Flags.crossDeviceClipboard()) {
-                    if (policyType == DEVICE_POLICY_CUSTOM
+                    if (devicePolicy == DEVICE_POLICY_CUSTOM
                             && mContext.checkCallingOrSelfPermission(ADD_TRUSTED_DISPLAY)
                             != PackageManager.PERMISSION_GRANTED) {
                         throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
