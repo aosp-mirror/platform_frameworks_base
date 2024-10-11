@@ -64,6 +64,9 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.pkg.AndroidPackage;
@@ -80,6 +83,8 @@ import java.util.function.BiFunction;
  */
 public final class BroadcastHelper {
     private static final boolean DEBUG_BROADCASTS = false;
+    private static final String PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED =
+            "android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED";
 
     private final UserManagerInternal mUmInternal;
     private final ActivityManagerInternal mAmInternal;
@@ -291,6 +296,57 @@ public final class BroadcastHelper {
         return bOptions;
     }
 
+    private ArrayList<String> getAllNotExportedComponents(@NonNull AndroidPackage pkg,
+            @NonNull ArrayList<String> inputComponentNames) {
+        final ArrayList<String> outputNotExportedComponentNames = new ArrayList<>();
+        int remainingComponentCount = inputComponentNames.size();
+        for (ParsedActivity component : pkg.getReceivers()) {
+            if (inputComponentNames.contains(component.getClassName())) {
+                if (!component.isExported()) {
+                    outputNotExportedComponentNames.add(component.getClassName());
+                }
+                remainingComponentCount--;
+                if (remainingComponentCount <= 0) {
+                    return outputNotExportedComponentNames;
+                }
+            }
+        }
+        for (ParsedProvider component : pkg.getProviders()) {
+            if (inputComponentNames.contains(component.getClassName())) {
+                if (!component.isExported()) {
+                    outputNotExportedComponentNames.add(component.getClassName());
+                }
+                remainingComponentCount--;
+                if (remainingComponentCount <= 0) {
+                    return outputNotExportedComponentNames;
+                }
+            }
+        }
+        for (ParsedService component : pkg.getServices()) {
+            if (inputComponentNames.contains(component.getClassName())) {
+                if (!component.isExported()) {
+                    outputNotExportedComponentNames.add(component.getClassName());
+                }
+                remainingComponentCount--;
+                if (remainingComponentCount <= 0) {
+                    return outputNotExportedComponentNames;
+                }
+            }
+        }
+        for (ParsedActivity component : pkg.getActivities()) {
+            if (inputComponentNames.contains(component.getClassName())) {
+                if (!component.isExported()) {
+                    outputNotExportedComponentNames.add(component.getClassName());
+                }
+                remainingComponentCount--;
+                if (remainingComponentCount <= 0) {
+                    return outputNotExportedComponentNames;
+                }
+            }
+        }
+        return outputNotExportedComponentNames;
+    }
+
     private void sendPackageChangedBroadcastInternal(@NonNull String packageName,
             boolean dontKillApp,
             @NonNull ArrayList<String> componentNames,
@@ -298,10 +354,48 @@ public final class BroadcastHelper {
             @Nullable String reason,
             @Nullable int[] userIds,
             @Nullable int[] instantUserIds,
-            @Nullable SparseArray<int[]> broadcastAllowList) {
-        sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp, componentNames,
-                packageUid, reason, userIds, instantUserIds, broadcastAllowList,
-                null /* targetPackageName */, null /* requiredPermissions */);
+            @Nullable SparseArray<int[]> broadcastAllowList,
+            @NonNull AndroidPackage pkg) {
+        final boolean isForWholeApp = componentNames.contains(packageName);
+        if (isForWholeApp || !android.content.pm.Flags.reduceBroadcastsForComponentStateChanges()) {
+            sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp, componentNames,
+                    packageUid, reason, userIds, instantUserIds, broadcastAllowList,
+                    null /* targetPackageName */, null /* requiredPermissions */);
+            return;
+        }
+        // Currently only these four components of activity, receiver, provider and service are
+        // considered to send only the broadcast to the system and the application itself when the
+        // component is not exported. In order to avoid losing to send the broadcast for other
+        // components, it gets the not exported components for these four components of activity,
+        // receiver, provider and service and the others are considered the exported components.
+        final ArrayList<String> notExportedComponentNames = getAllNotExportedComponents(pkg,
+                componentNames);
+        final ArrayList<String> exportedComponentNames = (ArrayList<String>) componentNames.clone();
+        exportedComponentNames.removeAll(notExportedComponentNames);
+
+        if (!notExportedComponentNames.isEmpty()) {
+            // Limit sending of the PACKAGE_CHANGED broadcast to only the system and the
+            // application itself when the component is not exported.
+
+            // First, send the PACKAGE_CHANGED broadcast to the system.
+            sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
+                    notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
+                    broadcastAllowList, "android" /* targetPackageName */,
+                    new String[]{PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED});
+
+            // Second, send the PACKAGE_CHANGED broadcast to the application itself.
+            sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
+                    notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
+                    broadcastAllowList, packageName /* targetPackageName */,
+                    null /* requiredPermissions */);
+        }
+
+        if (!exportedComponentNames.isEmpty()) {
+            sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
+                    exportedComponentNames, packageUid, reason, userIds, instantUserIds,
+                    broadcastAllowList, null /* targetPackageName */,
+                    null /* requiredPermissions */);
+        }
     }
 
     private void sendPackageChangedBroadcastWithPermissions(@NonNull String packageName,
@@ -830,7 +924,7 @@ public final class BroadcastHelper {
                                      @NonNull String reason) {
         PackageStateInternal setting = snapshot.getPackageStateInternal(packageName,
                 Process.SYSTEM_UID);
-        if (setting == null) {
+        if (setting == null || setting.getPkg() == null) {
             return;
         }
         final int userId = UserHandle.getUserId(packageUid);
@@ -842,7 +936,7 @@ public final class BroadcastHelper {
                 isInstantApp ? null : snapshot.getVisibilityAllowLists(packageName, userIds);
         mHandler.post(() -> sendPackageChangedBroadcastInternal(
                 packageName, dontKillApp, componentNames, packageUid, reason, userIds,
-                instantUserIds, broadcastAllowList));
+                instantUserIds, broadcastAllowList, setting.getPkg()));
         mPackageMonitorCallbackHelper.notifyPackageChanged(packageName, dontKillApp, componentNames,
                 packageUid, reason, userIds, instantUserIds, broadcastAllowList, mHandler);
     }
