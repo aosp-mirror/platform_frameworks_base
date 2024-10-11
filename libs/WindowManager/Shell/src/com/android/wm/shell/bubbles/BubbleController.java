@@ -1979,11 +1979,15 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public void addBubble(Bubble addedBubble) {
+            // Only log metrics event
+            mLogger.log(addedBubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_POSTED);
             // Nothing to do for adds, these are handled by launcher / in the bubble bar.
         }
 
         @Override
         public void updateBubble(Bubble updatedBubble) {
+            // Only log metrics event
+            mLogger.log(updatedBubble, BubbleLogger.Event.BUBBLE_BAR_BUBBLE_UPDATED);
             // Nothing to do for updates, these are handled by launcher / in the bubble bar.
         }
 
