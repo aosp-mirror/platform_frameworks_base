@@ -148,6 +148,12 @@ public interface AuthDialog {
     String getOpPackageName();
 
     /**
+     * Get the class name of ConfirmDeviceCredentialActivity. Returns null if the direct caller is
+     * not ConfirmDeviceCredentialActivity.
+     */
+    String getClassNameIfItIsConfirmDeviceCredentialActivity();
+
+    /**
      * Animate to credential UI. Typically called after biometric is locked out.
      */
     void animateToCredentialUI();
