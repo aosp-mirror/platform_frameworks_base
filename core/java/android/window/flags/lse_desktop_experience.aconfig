@@ -228,7 +228,7 @@ flag {
     name: "enable_desktop_windowing_app_handle_education"
     namespace: "lse_desktop_experience"
     description: "Enables desktop windowing app handle education"
-    bug: "348208342"
+    bug: "316006079"
 }
 
 flag {

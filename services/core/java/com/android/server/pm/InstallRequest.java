@@ -16,7 +16,6 @@
 
 package com.android.server.pm;
 
-import static android.content.pm.Flags.improveInstallFreeze;
 import static android.content.pm.PackageInstaller.SessionParams.USER_ACTION_UNSPECIFIED;
 import static android.content.pm.PackageManager.INSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.INSTALL_SCENARIO_DEFAULT;
@@ -1050,13 +1049,13 @@ final class InstallRequest {
     }
 
     public void onFreezeStarted() {
-        if (mPackageMetrics != null && improveInstallFreeze()) {
+        if (mPackageMetrics != null) {
             mPackageMetrics.onStepStarted(PackageMetrics.STEP_FREEZE_INSTALL);
         }
     }
 
     public void onFreezeCompleted() {
-        if (mPackageMetrics != null && improveInstallFreeze()) {
+        if (mPackageMetrics != null) {
             mPackageMetrics.onStepFinished(PackageMetrics.STEP_FREEZE_INSTALL);
         }
     }

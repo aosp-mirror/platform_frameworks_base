@@ -65,7 +65,9 @@ public enum DesktopModeFlags {
     ENABLE_DESKTOP_WINDOWING_TASKBAR_RUNNING_APPS(
             Flags::enableDesktopWindowingTaskbarRunningApps, true),
     ENABLE_DESKTOP_WINDOWING_TRANSITIONS(Flags::enableDesktopWindowingTransitions, false),
-    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false);
+    ENABLE_DESKTOP_WINDOWING_EXIT_TRANSITIONS(Flags::enableDesktopWindowingExitTransitions, false),
+    ENABLE_WINDOWING_TRANSITION_HANDLERS_OBSERVERS(
+            Flags::enableWindowingTransitionHandlersObservers, false);
 
     private static final String TAG = "DesktopModeFlagsUtil";
     // Function called to obtain aconfig flag value.

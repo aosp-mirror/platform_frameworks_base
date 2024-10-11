@@ -19,6 +19,7 @@ package com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel
 import android.content.applicationContext
 import com.android.internal.logging.uiEventLogger
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.volume.domain.interactor.audioVolumeInteractor
 import com.android.systemui.volume.shared.volumePanelLogger
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +37,7 @@ val Kosmos.audioStreamSliderViewModelFactory by
                     coroutineScope,
                     applicationContext,
                     audioVolumeInteractor,
+                    zenModeInteractor,
                     uiEventLogger,
                     volumePanelLogger,
                 )

@@ -1135,8 +1135,11 @@ public final class VirtualDeviceManager {
         /**
          * Sets the visibility of the pointer icon for this VirtualDevice's associated displays.
          *
+         * <p>Only applicable to trusted displays.</p>
+         *
          * @param showPointerIcon True if the pointer should be shown; false otherwise. The default
          *   visibility is true.
+         * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void setShowPointerIcon(boolean showPointerIcon) {

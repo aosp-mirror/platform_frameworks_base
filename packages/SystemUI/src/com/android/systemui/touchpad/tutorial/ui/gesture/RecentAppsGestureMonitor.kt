@@ -17,7 +17,6 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
-import androidx.compose.ui.input.pointer.util.VelocityTracker1D
 import kotlin.math.abs
 
 /**
@@ -27,45 +26,30 @@ import kotlin.math.abs
  */
 class RecentAppsGestureMonitor(
     private val gestureDistanceThresholdPx: Int,
-    override val gestureStateChangedCallback: (GestureState) -> Unit,
     private val velocityThresholdPxPerMs: Float,
-    private val velocityTracker: VelocityTracker1D = VelocityTracker1D(isDataDifferential = false),
+    private val distanceTracker: DistanceTracker = DistanceTracker(),
+    private val velocityTracker: VerticalVelocityTracker = VerticalVelocityTracker(),
 ) : TouchpadGestureMonitor {
 
-    private var xStart = 0f
-    private var yStart = 0f
+    private var gestureStateChangedCallback: (GestureState) -> Unit = {}
 
-    override fun processTouchpadEvent(event: MotionEvent) {
-        val action = event.actionMasked
-        velocityTracker.addDataPoint(event.eventTime, event.y)
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                if (isThreeFingerTouchpadSwipe(event)) {
-                    xStart = event.x
-                    yStart = event.y
-                    gestureStateChangedCallback(GestureState.InProgress())
-                }
-            }
-            MotionEvent.ACTION_UP -> {
-                if (isThreeFingerTouchpadSwipe(event) && isRecentAppsGesture(event)) {
-                    gestureStateChangedCallback(GestureState.Finished)
-                } else {
-                    gestureStateChangedCallback(GestureState.NotStarted)
-                }
-                velocityTracker.resetTracking()
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                velocityTracker.resetTracking()
-            }
-        }
+    override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
+        gestureStateChangedCallback = callback
     }
 
-    private fun isRecentAppsGesture(event: MotionEvent): Boolean {
-        // below is trying to mirror behavior of TriggerSwipeUpTouchTracker#onGestureEnd.
-        // We're diving velocity by 1000, to have the same unit of measure: pixels/ms.
-        val swipeDistance = yStart - event.y
-        val velocity = velocityTracker.calculateVelocity() / 1000
-        return swipeDistance >= gestureDistanceThresholdPx &&
-            abs(velocity) <= velocityThresholdPxPerMs
+    override fun accept(event: MotionEvent) {
+        if (!isThreeFingerTouchpadSwipe(event)) return
+        val gestureState = distanceTracker.processEvent(event)
+        velocityTracker.accept(event)
+
+        updateGestureState(
+            gestureStateChangedCallback,
+            gestureState,
+            isFinished = { state ->
+                -state.deltaY >= gestureDistanceThresholdPx &&
+                    abs(velocityTracker.calculateVelocity().value) <= velocityThresholdPxPerMs
+            },
+            progress = { 0f },
+        )
     }
 }

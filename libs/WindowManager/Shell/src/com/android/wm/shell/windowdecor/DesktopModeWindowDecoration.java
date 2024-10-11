@@ -352,7 +352,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     @Override
-    void relayout(ActivityManager.RunningTaskInfo taskInfo) {
+    void relayout(ActivityManager.RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
         final SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         // The crop and position of the task should only be set when a task is fluid resizing. In
         // all other cases, it is expected that the transition handler positions and crops the task
@@ -365,7 +365,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // the View). Both will be shown on screen at the same, whereas applying them independently
         // causes flickering. See b/270202228.
         final boolean applyTransactionOnDraw = taskInfo.isFreeform();
-        relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskPositionAndCrop);
+        relayout(taskInfo, t, t, applyTransactionOnDraw, shouldSetTaskPositionAndCrop,
+                hasGlobalFocus);
         if (!applyTransactionOnDraw) {
             t.apply();
         }
@@ -373,18 +374,19 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     void relayout(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean hasGlobalFocus) {
         Trace.beginSection("DesktopModeWindowDecoration#relayout");
         if (taskInfo.isFreeform()) {
             // The Task is in Freeform mode -> show its header in sync since it's an integral part
             // of the window itself - a delayed header might cause bad UX.
             relayoutInSync(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskPositionAndCrop);
+                    shouldSetTaskPositionAndCrop, hasGlobalFocus);
         } else {
             // The Task is outside Freeform mode -> allow the handle view to be delayed since the
             // handle is just a small addition to the window.
             relayoutWithDelayedViewHost(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                    shouldSetTaskPositionAndCrop);
+                    shouldSetTaskPositionAndCrop, hasGlobalFocus);
         }
         Trace.endSection();
     }
@@ -392,11 +394,12 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     /** Run the whole relayout phase immediately without delay. */
     private void relayoutInSync(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean hasGlobalFocus) {
         // Clear the current ViewHost runnable as we will update the ViewHost here
         clearCurrentViewHostRunnable();
         updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT, applyStartTransactionOnDraw,
-                shouldSetTaskPositionAndCrop);
+                shouldSetTaskPositionAndCrop, hasGlobalFocus);
         if (mResult.mRootView != null) {
             updateViewHost(mRelayoutParams, startT, mResult);
         }
@@ -418,7 +421,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
      */
     private void relayoutWithDelayedViewHost(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean hasGlobalFocus) {
         if (applyStartTransactionOnDraw) {
             throw new IllegalArgumentException(
                     "We cannot both sync viewhost ondraw and delay viewhost creation.");
@@ -426,7 +430,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         // Clear the current ViewHost runnable as we will update the ViewHost here
         clearCurrentViewHostRunnable();
         updateRelayoutParamsAndSurfaces(taskInfo, startT, finishT,
-                false /* applyStartTransactionOnDraw */, shouldSetTaskPositionAndCrop);
+                false /* applyStartTransactionOnDraw */, shouldSetTaskPositionAndCrop,
+                hasGlobalFocus);
         if (mResult.mRootView == null) {
             // This means something blocks the window decor from showing, e.g. the task is hidden.
             // Nothing is set up in this case including the decoration surface.
@@ -440,7 +445,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     @SuppressLint("MissingPermission")
     private void updateRelayoutParamsAndSurfaces(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop) {
+            boolean applyStartTransactionOnDraw, boolean shouldSetTaskPositionAndCrop,
+            boolean hasGlobalFocus) {
         Trace.beginSection("DesktopModeWindowDecoration#updateRelayoutParamsAndSurfaces");
 
         if (Flags.enableDesktopWindowingAppToWeb()) {
@@ -459,7 +465,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 .isTaskInFullImmersiveState(taskInfo.taskId);
         updateRelayoutParams(mRelayoutParams, mContext, taskInfo, applyStartTransactionOnDraw,
                 shouldSetTaskPositionAndCrop, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
-                inFullImmersive, mDisplayController.getInsetsState(taskInfo.displayId));
+                inFullImmersive, mDisplayController.getInsetsState(taskInfo.displayId),
+                hasGlobalFocus);
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -507,12 +514,13 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             ));
         } else {
             mWindowDecorViewHolder.bindData(new AppHeaderViewHolder.HeaderData(
-                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo), inFullImmersive
+                    mTaskInfo, TaskInfoKt.getRequestingImmersive(mTaskInfo), inFullImmersive,
+                    hasGlobalFocus
             ));
         }
         Trace.endSection();
 
-        if (!mTaskInfo.isFocused) {
+        if (!hasGlobalFocus) {
             closeHandleMenu();
             closeManageWindowsMenu();
             closeMaximizeMenu();
@@ -780,7 +788,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             boolean isStatusBarVisible,
             boolean isKeyguardVisibleAndOccluded,
             boolean inFullImmersiveMode,
-            @NonNull InsetsState displayInsetsState) {
+            @NonNull InsetsState displayInsetsState,
+            boolean hasGlobalFocus) {
         final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
         final boolean isAppHeader =
                 captionLayoutId == R.layout.desktop_mode_app_header;
@@ -790,6 +799,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mLayoutResId = captionLayoutId;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
         relayoutParams.mCaptionWidthId = getCaptionWidthId(relayoutParams.mLayoutResId);
+        relayoutParams.mHasGlobalFocus = hasGlobalFocus;
 
         final boolean showCaption;
         if (Flags.enableFullyImmersiveInDesktop()) {
@@ -812,7 +822,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                     || (isStatusBarVisible && !isKeyguardVisibleAndOccluded);
         }
         relayoutParams.mIsCaptionVisible = showCaption;
-
+        relayoutParams.mIsInsetSource = isAppHeader && !inFullImmersiveMode;
         if (isAppHeader) {
             if (TaskInfoKt.isTransparentCaptionBarAppearance(taskInfo)) {
                 // If the app is requesting to customize the caption bar, allow input to fall
@@ -837,7 +847,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                         WindowInsets.Type.systemBars() & ~WindowInsets.Type.captionBar(),
                         false /* ignoreVisibility */);
                 relayoutParams.mCaptionTopPadding = systemBarInsets.top;
-                relayoutParams.mIsInsetSource = false;
             }
             // Report occluding elements as bounding rects to the insets system so that apps can
             // draw in the empty space in the center:
@@ -865,8 +874,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             relayoutParams.mInputFeatures
                     |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
         }
-        if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ taskInfo.isFocused)) {
-            relayoutParams.mShadowRadiusId = taskInfo.isFocused
+        if (DesktopModeStatus.useWindowShadow(/* isFocusedWindow= */ hasGlobalFocus)) {
+            relayoutParams.mShadowRadiusId = hasGlobalFocus
                     ? R.dimen.freeform_decor_shadow_focused_thickness
                     : R.dimen.freeform_decor_shadow_unfocused_thickness;
         }
@@ -1408,7 +1417,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     }
 
     boolean isFocused() {
-        return mTaskInfo.isFocused;
+        return mHasGlobalFocus;
     }
 
     /**
@@ -1592,7 +1601,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
 
     private static int getCaptionHeightIdStatic(@WindowingMode int windowingMode) {
         return windowingMode == WINDOWING_MODE_FULLSCREEN
-                ? R.dimen.desktop_mode_fullscreen_decor_caption_height
+                ? com.android.internal.R.dimen.status_bar_height_default
                 : R.dimen.desktop_mode_freeform_decor_caption_height;
     }
 

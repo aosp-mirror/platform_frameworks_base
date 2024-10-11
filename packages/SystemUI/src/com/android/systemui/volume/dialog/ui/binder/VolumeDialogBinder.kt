@@ -50,7 +50,7 @@ constructor(
             dialog.setContentView(R.layout.volume_dialog)
             dialog.setCanceledOnTouchOutside(true)
 
-            settingsButtonViewBinder.bind(dialog.requireViewById(R.id.settings_container))
+            settingsButtonViewBinder.bind(dialog.requireViewById(R.id.volume_dialog_settings))
             volumeDialogViewBinder.bind(
                 dialog,
                 dialog.requireViewById(R.id.volume_dialog_container),

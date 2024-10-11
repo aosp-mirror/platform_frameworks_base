@@ -39,6 +39,7 @@ import com.android.settingslib.spa.gallery.page.LoadingBarPageProvider
 import com.android.settingslib.spa.gallery.page.ProgressBarPageProvider
 import com.android.settingslib.spa.gallery.scaffold.NonScrollablePagerPageProvider
 import com.android.settingslib.spa.gallery.page.SliderPageProvider
+import com.android.settingslib.spa.gallery.preference.CheckBoxPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.IntroPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ListPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.MainSwitchPreferencePageProvider
@@ -46,6 +47,7 @@ import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TopIntroPreferencePageProvider
+import com.android.settingslib.spa.gallery.preference.TwoTargetButtonPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.preference.ZeroStatePreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.PagerMainPageProvider
@@ -105,6 +107,8 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 CopyablePageProvider,
                 IntroPreferencePageProvider,
                 TopIntroPreferencePageProvider,
+                CheckBoxPreferencePageProvider,
+                TwoTargetButtonPreferencePageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),

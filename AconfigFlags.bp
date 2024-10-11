@@ -24,6 +24,7 @@ aconfig_declarations_group {
         "android-sdk-flags-java",
         "android.adaptiveauth.flags-aconfig-java",
         "android.app.appfunctions.flags-aconfig-java",
+        "android.app.assist.flags-aconfig-java",
         "android.app.contextualsearch.flags-aconfig-java",
         "android.app.flags-aconfig-java",
         "android.app.jank.flags-aconfig-java",
@@ -64,6 +65,7 @@ aconfig_declarations_group {
         "android.server.app.flags-aconfig-java",
         "android.service.autofill.flags-aconfig-java",
         "android.service.chooser.flags-aconfig-java",
+        "android.service.compat.flags-aconfig-java",
         "android.service.controls.flags-aconfig-java",
         "android.service.dreams.flags-aconfig-java",
         "android.service.notification.flags-aconfig-java",
@@ -862,6 +864,21 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+aconfig_declarations {
+    name: "android.service.compat.flags-aconfig",
+    package: "com.android.server.compat",
+    container: "system",
+    srcs: [
+        "services/core/java/com/android/server/compat/*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "android.service.compat.flags-aconfig-java",
+    aconfig_declarations: "android.service.compat.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Multi user
 aconfig_declarations {
     name: "android.multiuser.flags-aconfig",
@@ -1227,6 +1244,20 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.app.contextualsearch.flags-aconfig-java",
     aconfig_declarations: "android.app.contextualsearch.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Assist
+aconfig_declarations {
+    name: "android.app.assist.flags-aconfig",
+    package: "android.app.assist.flags",
+    container: "system",
+    srcs: ["core/java/android/app/assist/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.app.assist.flags-aconfig-java",
+    aconfig_declarations: "android.app.assist.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

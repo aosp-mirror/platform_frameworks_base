@@ -121,6 +121,8 @@ public class LogicalDisplayMapperTest {
             Set.of(DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE), Collections.emptySet());
     private static final DeviceState DEVICE_STATE_OPEN = createDeviceState(2, "Two",
             Set.of(DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE), Collections.emptySet());
+    private static final DeviceState DEVICE_STATE_EMULATED = createDeviceState(3, "Three",
+            Set.of(DeviceState.PROPERTY_EMULATED_ONLY), Collections.emptySet());
     private static final int FLAG_GO_TO_SLEEP_ON_FOLD = 0;
     private static final int FLAG_GO_TO_SLEEP_FLAG_SOFT_SLEEP = 2;
     private static int sNextNonDefaultDisplayId = DEFAULT_DISPLAY + 1;
@@ -681,6 +683,14 @@ public class LogicalDisplayMapperTest {
     public void testDeviceShouldNotBeWoken() {
         assertFalse(mLogicalDisplayMapper.shouldDeviceBeWoken(DEVICE_STATE_CLOSED,
                 DEVICE_STATE_OPEN,
+                /* isInteractive= */false,
+                /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceShouldNotBeWokenWhenExitingEmulatedState() {
+        assertFalse(mLogicalDisplayMapper.shouldDeviceBeWoken(DEVICE_STATE_OPEN,
+                DEVICE_STATE_EMULATED,
                 /* isInteractive= */false,
                 /* isBootCompleted= */true));
     }

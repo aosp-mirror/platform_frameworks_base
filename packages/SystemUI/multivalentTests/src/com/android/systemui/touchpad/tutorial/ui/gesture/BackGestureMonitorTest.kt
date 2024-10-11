@@ -25,6 +25,7 @@ import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -34,10 +35,12 @@ class BackGestureMonitorTest : SysuiTestCase() {
 
     private var gestureState: GestureState = NotStarted
     private val gestureMonitor =
-        BackGestureMonitor(
-            gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
-            gestureStateChangedCallback = { gestureState = it },
-        )
+        BackGestureMonitor(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
+
+    @Before
+    fun before() {
+        gestureMonitor.addGestureStateCallback { gestureState = it }
+    }
 
     @Test
     fun triggersGestureFinishedForThreeFingerGestureRight() {
@@ -82,7 +85,7 @@ class BackGestureMonitorTest : SysuiTestCase() {
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {
-        events.forEach { gestureMonitor.processTouchpadEvent(it) }
+        events.forEach { gestureMonitor.accept(it) }
         assertThat(gestureState).isEqualTo(expectedState)
     }
 }
