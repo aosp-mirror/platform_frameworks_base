@@ -647,24 +647,29 @@ public final class NfcOemExtension {
      *                   {@link ProtocolAndTechnologyRoute}
      * @param emptyAid Zero-length AID route destination, where the possible inputs are defined in
      *                 {@link ProtocolAndTechnologyRoute}
+     * @param systemCode System Code route destination, where the possible inputs are defined in
+     *                   {@link ProtocolAndTechnologyRoute}
      */
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
     @FlaggedApi(Flags.FLAG_NFC_OEM_EXTENSION)
     public void overwriteRoutingTable(
             @CardEmulation.ProtocolAndTechnologyRoute int protocol,
             @CardEmulation.ProtocolAndTechnologyRoute int technology,
-            @CardEmulation.ProtocolAndTechnologyRoute int emptyAid) {
+            @CardEmulation.ProtocolAndTechnologyRoute int emptyAid,
+            @CardEmulation.ProtocolAndTechnologyRoute int systemCode) {
 
         String protocolRoute = routeIntToString(protocol);
         String technologyRoute = routeIntToString(technology);
         String emptyAidRoute = routeIntToString(emptyAid);
+        String systemCodeRoute = routeIntToString(systemCode);
 
         NfcAdapter.callService(() ->
                 NfcAdapter.sCardEmulationService.overwriteRoutingTable(
                         mContext.getUser().getIdentifier(),
                         emptyAidRoute,
                         protocolRoute,
-                        technologyRoute
+                        technologyRoute,
+                        systemCodeRoute
                 ));
     }
 
