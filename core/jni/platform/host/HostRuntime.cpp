@@ -430,6 +430,7 @@ public:
 
 } // namespace android
 
+#ifndef _WIN32
 using namespace android;
 
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
@@ -438,14 +439,12 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
         return JNI_ERR;
     }
 
-    string useBaseHostRuntime = getJavaProperty(env, "use_base_native_hostruntime");
-    if (useBaseHostRuntime == "true") {
-        Vector<String8> args;
-        HostRuntime runtime;
+    Vector<String8> args;
+    HostRuntime runtime;
 
-        runtime.onVmCreated(env);
-        runtime.start("HostRuntime", args, false);
-    }
+    runtime.onVmCreated(env);
+    runtime.start("HostRuntime", args, false);
 
     return JNI_VERSION_1_6;
 }
+#endif
