@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row.icon
 
+import android.app.ActivityManager
 import android.app.Flags
 import android.content.Context
 import android.content.pm.PackageManager.NameNotFoundException
@@ -41,12 +42,16 @@ interface AppIconProvider {
 @SysUISingleton
 class AppIconProviderImpl @Inject constructor(private val sysuiContext: Context) : AppIconProvider {
     private val iconFactory: BaseIconFactory
-        get() =
-            BaseIconFactory(
-                sysuiContext,
-                sysuiContext.resources.configuration.densityDpi,
-                sysuiContext.resources.getDimensionPixelSize(R.dimen.notification_icon_circle_size),
-            )
+        get() {
+            val isLowRam = ActivityManager.isLowRamDeviceStatic()
+            val res = sysuiContext.resources
+            val iconSize: Int =
+                res.getDimensionPixelSize(
+                    if (isLowRam) R.dimen.notification_small_icon_size_low_ram
+                    else R.dimen.notification_small_icon_size
+                )
+            return BaseIconFactory(sysuiContext, res.configuration.densityDpi, iconSize)
+        }
 
     override fun getOrFetchAppIcon(packageName: String, context: Context): Drawable {
         val icon = context.packageManager.getApplicationIcon(packageName)
