@@ -6913,7 +6913,7 @@ package android.hardware.soundtrigger {
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAllowMultipleTriggers(boolean);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setAudioCapabilities(int);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setCaptureRequested(boolean);
-    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@Nullable byte[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setData(@NonNull byte[]);
     method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig.Builder setKeyphrases(@NonNull java.util.Collection<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
