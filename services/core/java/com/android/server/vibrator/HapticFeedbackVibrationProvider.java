@@ -148,8 +148,8 @@ public final class HapticFeedbackVibrationProvider {
             case HapticFeedbackConstants.SCROLL_TICK:
             case HapticFeedbackConstants.SCROLL_ITEM_FOCUS:
             case HapticFeedbackConstants.SCROLL_LIMIT:
-                attrs = hapticFeedbackInputSourceCustomizationEnabled() ? TOUCH_VIBRATION_ATTRIBUTES
-                        : HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
+                // TODO(b/372820923): use touch attributes by default.
+                attrs = HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES;
                 break;
             case HapticFeedbackConstants.KEYBOARD_TAP:
             case HapticFeedbackConstants.KEYBOARD_RELEASE:
@@ -176,14 +176,15 @@ public final class HapticFeedbackVibrationProvider {
             int inputSource,
             @HapticFeedbackConstants.Flags int flags,
             @HapticFeedbackConstants.PrivateFlags int privFlags) {
-        if (hapticFeedbackInputSourceCustomizationEnabled()
-                && inputSource == InputDevice.SOURCE_ROTARY_ENCODER) {
+        if (hapticFeedbackInputSourceCustomizationEnabled()) {
             switch (effectId) {
                 case HapticFeedbackConstants.SCROLL_TICK,
                         HapticFeedbackConstants.SCROLL_ITEM_FOCUS,
                         HapticFeedbackConstants.SCROLL_LIMIT -> {
-                    return getVibrationAttributesWithFlags(HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES,
-                            effectId, flags);
+                    VibrationAttributes attrs = inputSource == InputDevice.SOURCE_ROTARY_ENCODER
+                            ? HARDWARE_FEEDBACK_VIBRATION_ATTRIBUTES
+                            : TOUCH_VIBRATION_ATTRIBUTES;
+                    return getVibrationAttributesWithFlags(attrs, effectId, flags);
                 }
             }
         }
