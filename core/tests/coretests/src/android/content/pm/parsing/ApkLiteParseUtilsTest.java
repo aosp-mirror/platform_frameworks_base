@@ -86,7 +86,7 @@ public class ApkLiteParseUtilsTest {
 
     @Before
     public void setUp() throws IOException {
-        mTmpDir = mTemporaryFolder.newFolder("DexMetadataHelperTest");
+        mTmpDir = mTemporaryFolder.newFolder("ApkLiteParseUtilsTest");
     }
 
     @After
