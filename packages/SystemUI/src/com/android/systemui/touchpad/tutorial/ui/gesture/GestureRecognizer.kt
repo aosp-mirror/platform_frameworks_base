@@ -19,8 +19,8 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 import android.view.MotionEvent
 import java.util.function.Consumer
 
-/** Monitor for touchpad gestures that can notify callback when [GestureState] changes. */
-interface TouchpadGestureMonitor : Consumer<MotionEvent> {
+/** Based on passed [MotionEvent]s recognizes different states of gesture and notifies callback. */
+interface GestureRecognizer : Consumer<MotionEvent> {
     fun addGestureStateCallback(callback: (GestureState) -> Unit)
 }
 

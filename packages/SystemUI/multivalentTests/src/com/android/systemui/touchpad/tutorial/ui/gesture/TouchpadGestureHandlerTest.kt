@@ -36,13 +36,13 @@ import org.junit.runner.RunWith
 class TouchpadGestureHandlerTest : SysuiTestCase() {
 
     private var gestureState: GestureState = GestureState.NotStarted
-    private val gestureMonitor =
-        BackGestureMonitor(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
-    private val handler = TouchpadGestureHandler(gestureMonitor, EasterEggGestureMonitor {})
+    private val gestureRecognizer =
+        BackGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt())
+    private val handler = TouchpadGestureHandler(gestureRecognizer, EasterEggGestureMonitor {})
 
     @Before
     fun before() {
-        gestureMonitor.addGestureStateCallback { gestureState = it }
+        gestureRecognizer.addGestureStateCallback { gestureState = it }
     }
 
     @Test

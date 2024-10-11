@@ -35,7 +35,7 @@ import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-class RecentAppsGestureMonitorTest : SysuiTestCase() {
+class RecentAppsGestureRecognizerTest : SysuiTestCase() {
 
     companion object {
         const val THRESHOLD_VELOCITY_PX_PER_MS = 0.1f
@@ -50,8 +50,8 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
             // by default return correct speed for the gesture - as if pointer is slowing down
             on { calculateVelocity() } doReturn SLOW
         }
-    private val gestureMonitor =
-        RecentAppsGestureMonitor(
+    private val gestureRecognizer =
+        RecentAppsGestureRecognizer(
             gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
             velocityThresholdPxPerMs = THRESHOLD_VELOCITY_PX_PER_MS,
             velocityTracker = VerticalVelocityTracker(velocityTracker1D),
@@ -59,7 +59,7 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
 
     @Before
     fun before() {
-        gestureMonitor.addGestureStateCallback { gestureState = it }
+        gestureRecognizer.addGestureStateCallback { gestureState = it }
     }
 
     @Test
@@ -107,7 +107,7 @@ class RecentAppsGestureMonitorTest : SysuiTestCase() {
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {
-        events.forEach { gestureMonitor.accept(it) }
+        events.forEach { gestureRecognizer.accept(it) }
         assertThat(gestureState).isEqualTo(expectedState)
     }
 }

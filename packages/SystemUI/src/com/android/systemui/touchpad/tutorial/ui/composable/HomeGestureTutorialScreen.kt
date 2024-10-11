@@ -23,7 +23,7 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureMonitor
+import com.android.systemui.touchpad.tutorial.ui.gesture.HomeGestureRecognizer
 
 @Composable
 fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
@@ -43,15 +43,15 @@ fun HomeGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Uni
                     successResId = R.raw.trackpad_home_success,
                 ),
         )
-    val gestureMonitorProvider =
-        DistanceBasedGestureMonitorProvider(
-            monitorFactory = { distanceThresholdPx, gestureStateCallback ->
-                HomeGestureMonitor(distanceThresholdPx).also {
+    val gestureRecognizerProvider =
+        DistanceBasedGestureRecognizerProvider(
+            recognizerFactory = { distanceThresholdPx, gestureStateCallback ->
+                HomeGestureRecognizer(distanceThresholdPx).also {
                     it.addGestureStateCallback(gestureStateCallback)
                 }
             }
         )
-    GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
+    GestureTutorialScreen(screenConfig, gestureRecognizerProvider, onDoneButtonClicked, onBack)
 }
 
 @Composable
