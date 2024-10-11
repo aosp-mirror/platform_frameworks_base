@@ -170,7 +170,7 @@ public class SplitScreenConstants {
             SNAP_TO_NONE,
             SNAP_TO_START_AND_DISMISS,
             SNAP_TO_END_AND_DISMISS,
-            SNAP_TO_MINIMIZE
+            SNAP_TO_MINIMIZE,
     })
     public @interface SnapPosition {}
 
