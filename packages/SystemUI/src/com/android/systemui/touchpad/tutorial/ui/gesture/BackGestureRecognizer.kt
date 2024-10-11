@@ -19,8 +19,8 @@ package com.android.systemui.touchpad.tutorial.ui.gesture
 import android.view.MotionEvent
 import kotlin.math.abs
 
-/** Monitors for touchpad back gesture, that is three fingers swiping left or right */
-class BackGestureMonitor(private val gestureDistanceThresholdPx: Int) : TouchpadGestureMonitor {
+/** Recognizes touchpad back gesture, that is three fingers swiping left or right */
+class BackGestureRecognizer(private val gestureDistanceThresholdPx: Int) : GestureRecognizer {
 
     private val distanceTracker = DistanceTracker()
     private var gestureStateChangedCallback: (GestureState) -> Unit = {}

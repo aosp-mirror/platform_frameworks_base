@@ -36,7 +36,7 @@ class EasterEggGestureTest : SysuiTestCase() {
     private var triggered = false
     private val handler =
         TouchpadGestureHandler(
-            BackGestureMonitor(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt()),
+            BackGestureRecognizer(gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt()),
             EasterEggGestureMonitor(callback = { triggered = true }),
         )
 

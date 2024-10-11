@@ -17,11 +17,20 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
+import kotlin.math.abs
 
-/** Monitors for touchpad home gesture, that is three fingers swiping up */
-class HomeGestureMonitor(private val gestureDistanceThresholdPx: Int) : TouchpadGestureMonitor {
+/**
+ * Recognizes apps gesture completion. That is - using three fingers on touchpad - swipe up over
+ * some distance threshold and then slow down gesture before fingers are lifted. Implementation is
+ * based on [com.android.quickstep.util.TriggerSwipeUpTouchTracker]
+ */
+class RecentAppsGestureRecognizer(
+    private val gestureDistanceThresholdPx: Int,
+    private val velocityThresholdPxPerMs: Float,
+    private val distanceTracker: DistanceTracker = DistanceTracker(),
+    private val velocityTracker: VerticalVelocityTracker = VerticalVelocityTracker(),
+) : GestureRecognizer {
 
-    private val distanceTracker = DistanceTracker()
     private var gestureStateChangedCallback: (GestureState) -> Unit = {}
 
     override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
@@ -31,10 +40,15 @@ class HomeGestureMonitor(private val gestureDistanceThresholdPx: Int) : Touchpad
     override fun accept(event: MotionEvent) {
         if (!isThreeFingerTouchpadSwipe(event)) return
         val gestureState = distanceTracker.processEvent(event)
+        velocityTracker.accept(event)
+
         updateGestureState(
             gestureStateChangedCallback,
             gestureState,
-            isFinished = { -it.deltaY >= gestureDistanceThresholdPx },
+            isFinished = { state ->
+                -state.deltaY >= gestureDistanceThresholdPx &&
+                    abs(velocityTracker.calculateVelocity().value) <= velocityThresholdPxPerMs
+            },
             progress = { 0f },
         )
     }
