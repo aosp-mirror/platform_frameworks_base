@@ -792,7 +792,8 @@ public class BackgroundActivityStartController {
             // Allowed before V by creator
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 15 BAL hardening this activity start may be blocked"
-                        + " if the PI creator upgrades target_sdk to 35+! "
+                        + " if the PI creator upgrades target_sdk to 35+!"
+                        + " goo.gle/android-bal"
                         + " (missing opt in by PI creator)!" + state);
                 return allowBasedOnCaller(state);
             }
@@ -802,6 +803,7 @@ public class BackgroundActivityStartController {
             if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG, "With Android 14 BAL hardening this activity start will be blocked"
                         + " if the PI sender upgrades target_sdk to 34+! "
+                        + " goo.gle/android-bal"
                         + " (missing opt in by PI sender)!" + state);
                 return allowBasedOnRealCaller(state);
             }
@@ -829,7 +831,8 @@ public class BackgroundActivityStartController {
     }
 
     private BalVerdict abortLaunch(BalState state) {
-        Slog.wtf(TAG, "Background activity launch blocked! " + state);
+        Slog.wtf(TAG, "Background activity launch blocked! goo.gle/android-bal "
+                + state);
         if (balShowToastsBlocked()
                 && (state.mResultForCaller.allows() || state.mResultForRealCaller.allows())) {
             // only show a toast if either caller or real caller could launch if they opted in
