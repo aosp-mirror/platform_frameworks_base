@@ -434,6 +434,20 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * Set the class name of ConfirmDeviceCredentialActivity.
+         *
+         * @return This builder.
+         * @hide
+         */
+        @NonNull
+        @RequiresPermission(anyOf = {TEST_BIOMETRIC, USE_BIOMETRIC_INTERNAL})
+        public Builder setClassNameIfItIsConfirmDeviceCredentialActivity() {
+            mPromptInfo.setClassNameIfItIsConfirmDeviceCredentialActivity(
+                    mContext.getClass().getName());
+            return this;
+        }
+
+        /**
          * Creates a {@link BiometricPrompt}.
          *
          * @return An instance of {@link BiometricPrompt}.
