@@ -156,6 +156,21 @@ class DesktopModeEventLogger {
         )
     }
 
+    fun logTaskInfoStateInit() {
+        logTaskUpdate(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INIT_STATSD,
+            /* session_id */ 0,
+            TaskUpdate(
+                visibleTaskCount = 0,
+                instanceId = 0,
+                uid = 0,
+                taskHeight = 0,
+                taskWidth = 0,
+                taskX = 0,
+                taskY = 0)
+        )
+    }
+
     private fun logTaskUpdate(taskEvent: Int, sessionId: Int, taskUpdate: TaskUpdate) {
         FrameworkStatsLog.write(
             DESKTOP_MODE_TASK_UPDATE_ATOM_ID,

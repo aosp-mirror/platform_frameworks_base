@@ -59,7 +59,6 @@ import android.view.accessibility.CaptioningManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.GuardedBy;
@@ -110,8 +109,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     // It is safe to use 99 as the broadcast stream now. There are only 10+ default audio
     // streams defined in AudioSystem for now and audio team is in the middle of restructure,
     // no new default stream is preferred.
-    @VisibleForTesting static final int DYNAMIC_STREAM_BROADCAST = 99;
-    private static final int DYNAMIC_STREAM_REMOTE_START_INDEX = 100;
+    public static final int DYNAMIC_STREAM_BROADCAST = 99;
+    public static final int DYNAMIC_STREAM_REMOTE_START_INDEX = 100;
     private static final AudioAttributes SONIFICIATION_VIBRATION_ATTRIBUTES =
             new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)

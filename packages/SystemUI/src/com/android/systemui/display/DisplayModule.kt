@@ -24,6 +24,8 @@ import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.DisplayRepositoryImpl
 import com.android.systemui.display.data.repository.DisplayScopeRepository
 import com.android.systemui.display.data.repository.DisplayScopeRepositoryImpl
+import com.android.systemui.display.data.repository.DisplayWindowPropertiesRepository
+import com.android.systemui.display.data.repository.DisplayWindowPropertiesRepositoryImpl
 import com.android.systemui.display.data.repository.FocusedDisplayRepository
 import com.android.systemui.display.data.repository.FocusedDisplayRepositoryImpl
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
@@ -58,6 +60,11 @@ interface DisplayModule {
 
     @Binds fun displayScopeRepository(impl: DisplayScopeRepositoryImpl): DisplayScopeRepository
 
+    @Binds
+    fun displayWindowPropertiesRepository(
+        impl: DisplayWindowPropertiesRepositoryImpl
+    ): DisplayWindowPropertiesRepository
+
     companion object {
         @Provides
         @SysUISingleton
@@ -68,6 +75,20 @@ interface DisplayModule {
         ): CoreStartable {
             return if (StatusBarConnectedDisplays.isEnabled) {
                 repoImplLazy.get()
+            } else {
+                CoreStartable.NOP
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(DisplayWindowPropertiesRepository::class)
+        fun displayWindowPropertiesRepoAsCoreStartable(
+            repoLazy: Lazy<DisplayWindowPropertiesRepositoryImpl>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                return repoLazy.get()
             } else {
                 CoreStartable.NOP
             }

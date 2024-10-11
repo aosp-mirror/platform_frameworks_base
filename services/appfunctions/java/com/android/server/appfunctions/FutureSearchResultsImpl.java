@@ -54,4 +54,9 @@ public class FutureSearchResultsImpl implements FutureSearchResults {
                             }
                         });
     }
+
+    @Override
+    public void close() {
+        mSearchResults.close();
+    }
 }

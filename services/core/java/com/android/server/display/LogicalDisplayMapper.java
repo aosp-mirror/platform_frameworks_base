@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import static android.hardware.devicestate.DeviceState.PROPERTY_EMULATED_ONLY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_SLEEP;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
@@ -594,6 +595,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     boolean shouldDeviceBeWoken(DeviceState pendingState, DeviceState currentState,
             boolean isInteractive, boolean isBootCompleted) {
         if (mDeviceStateManagerFlags.deviceStatePropertyMigration()) {
+            if (currentState.hasProperties(PROPERTY_EMULATED_ONLY)
+                    && !pendingState.hasProperties(PROPERTY_EMULATED_ONLY)) {
+                // Do not wake the device, since this transition may occur due to the user pressing
+                // the power button to exit an emulated state.
+                return false;
+            }
+
             return pendingState.hasProperty(PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE)
                     && !currentState.equals(INVALID_DEVICE_STATE)
                     && !currentState.hasProperty(PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE)

@@ -25,6 +25,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.job.Flags.FLAG_COUNT_QUOTA_FIX;
+import static com.android.server.job.Flags.FLAG_ENFORCE_QUOTA_POLICY_TO_FGS_JOBS;
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
 import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.FREQUENT_INDEX;
@@ -303,6 +304,12 @@ public class QuotaControllerTest {
         }
     }
 
+    private int getProcessStateQuotaFreeThreshold() {
+        synchronized (mQuotaController.mLock) {
+            return mQuotaController.getProcessStateQuotaFreeThreshold();
+        }
+    }
+
     private void setProcessState(int procState) {
         setProcessState(procState, mSourceUid);
     }
@@ -315,7 +322,7 @@ public class QuotaControllerTest {
             final boolean contained = foregroundUids.get(uid);
             mUidObserver.onUidStateChanged(uid, procState, 0,
                     ActivityManager.PROCESS_CAPABILITY_NONE);
-            if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+            if (procState <= getProcessStateQuotaFreeThreshold()) {
                 if (!contained) {
                     verify(foregroundUids, timeout(2 * SECOND_IN_MILLIS).times(1))
                             .put(eq(uid), eq(true));
@@ -1371,7 +1378,7 @@ public class QuotaControllerTest {
         }
 
         setDischarging();
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             assertEquals(timeUntilQuotaConsumedMs,
                     mQuotaController.getMaxJobExecutionTimeMsLocked((job)));
@@ -1473,7 +1480,7 @@ public class QuotaControllerTest {
         }
 
         setDischarging();
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             assertEquals(mQcConstants.EJ_LIMIT_WORKING_MS / 2,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(job));
@@ -1505,7 +1512,7 @@ public class QuotaControllerTest {
                 createTimingSession(sElapsedRealtimeClock.millis() - mQcConstants.EJ_WINDOW_SIZE_MS,
                         timeUsedMs, 5), true);
 
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             assertEquals(mQcConstants.EJ_LIMIT_WORKING_MS / 2,
                     mQuotaController.getMaxJobExecutionTimeMsLocked(job));
@@ -4126,12 +4133,42 @@ public class QuotaControllerTest {
         }
         advanceElapsedClock(5 * SECOND_IN_MILLIS);
         // Change to a state that should still be considered foreground.
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         advanceElapsedClock(5 * SECOND_IN_MILLIS);
         synchronized (mQuotaController.mLock) {
             mQuotaController.maybeStopTrackingJobLocked(jobStatus, null);
         }
         assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+    }
+
+    /** Tests that Timers count FOREGROUND_SERVICE jobs. */
+    @Test
+    @RequiresFlagsEnabled(FLAG_ENFORCE_QUOTA_POLICY_TO_FGS_JOBS)
+    public void testTimerTracking_Fgs() {
+        setDischarging();
+
+        JobStatus jobStatus = createJobStatus("testTimerTracking_Fgs", 1);
+        setProcessState(ActivityManager.PROCESS_STATE_BOUND_TOP);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStartTrackingJobLocked(jobStatus, null);
+        }
+
+        assertNull(mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
+
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.prepareForExecutionLocked(jobStatus);
+        }
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        // Change to FOREGROUND_SERVICE state that should count.
+        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        long start = JobSchedulerService.sElapsedRealtimeClock.millis();
+        advanceElapsedClock(5 * SECOND_IN_MILLIS);
+        synchronized (mQuotaController.mLock) {
+            mQuotaController.maybeStopTrackingJobLocked(jobStatus, null);
+        }
+        List<TimingSession> expected = new ArrayList<>();
+        expected.add(createTimingSession(start, 5 * SECOND_IN_MILLIS, 1));
+        assertEquals(expected, mQuotaController.getTimingSessions(SOURCE_USER_ID, SOURCE_PACKAGE));
     }
 
     /**
@@ -4180,7 +4217,7 @@ public class QuotaControllerTest {
         }
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg3);
         }
@@ -4213,7 +4250,7 @@ public class QuotaControllerTest {
         }
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg3);
         }
@@ -4262,7 +4299,7 @@ public class QuotaControllerTest {
         }
         assertEquals(0, stats.jobCountInRateLimitingWindow);
 
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg1);
         }
@@ -4412,7 +4449,7 @@ public class QuotaControllerTest {
             mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1);
         }
         advanceElapsedClock(5 * SECOND_IN_MILLIS);
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg1);
         }
@@ -4625,7 +4662,7 @@ public class QuotaControllerTest {
 
         // App still in foreground so everything should be in quota.
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         assertTrue(jobTop.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         assertTrue(jobFg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
         assertTrue(jobBg.isConstraintSatisfied(JobStatus.CONSTRAINT_WITHIN_QUOTA));
@@ -5901,7 +5938,7 @@ public class QuotaControllerTest {
         }
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg3);
         }
@@ -5935,7 +5972,7 @@ public class QuotaControllerTest {
         }
         advanceElapsedClock(10 * SECOND_IN_MILLIS);
         expected.add(createTimingSession(start, 10 * SECOND_IN_MILLIS, 1));
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg3);
         }
@@ -6056,7 +6093,7 @@ public class QuotaControllerTest {
             mQuotaController.maybeStopTrackingJobLocked(jobBg1, jobBg1);
         }
         advanceElapsedClock(5 * SECOND_IN_MILLIS);
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         synchronized (mQuotaController.mLock) {
             mQuotaController.prepareForExecutionLocked(jobFg1);
         }
@@ -6534,7 +6571,7 @@ public class QuotaControllerTest {
 
         // App still in foreground so everything should be in quota.
         advanceElapsedClock(20 * SECOND_IN_MILLIS);
-        setProcessState(ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE);
+        setProcessState(getProcessStateQuotaFreeThreshold());
         assertTrue(jobTop2.isExpeditedQuotaApproved());
         assertTrue(jobFg.isExpeditedQuotaApproved());
         assertTrue(jobBg.isExpeditedQuotaApproved());

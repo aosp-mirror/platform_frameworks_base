@@ -16,11 +16,8 @@
 
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
-/**
- * Helper function for gesture recognizers to have common state triggering logic based on distance
- * only.
- */
-inline fun updateGestureStateBasedOnDistance(
+/** Helper function for gesture recognizers to have common state triggering logic */
+inline fun updateGestureState(
     gestureStateChangedCallback: (GestureState) -> Unit,
     gestureState: DistanceGestureState?,
     isFinished: (Finished) -> Boolean,

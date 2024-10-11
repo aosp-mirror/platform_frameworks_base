@@ -16,10 +16,13 @@
 
 package com.android.server.companion.virtual;
 
+import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
+import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_ENABLED;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
 import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED;
+import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_ACTIVITY;
@@ -425,6 +428,27 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mDisplayManager = displayManager;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mPowerManager = context.getSystemService(PowerManager.class);
+
+        if (mDevicePolicies.get(POLICY_TYPE_CLIPBOARD, DEVICE_POLICY_DEFAULT)
+                != DEVICE_POLICY_DEFAULT) {
+            if (mContext.checkCallingOrSelfPermission(ADD_TRUSTED_DISPLAY)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
+                        + "set a custom clipboard policy.");
+            }
+        }
+
+        int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
+        if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
+            if (mContext.checkCallingOrSelfPermission(ADD_ALWAYS_UNLOCKED_DISPLAY)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires ADD_ALWAYS_UNLOCKED_DISPLAY permission to "
+                        + "create an always unlocked virtual device.");
+            }
+            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
+        }
+        mBaseVirtualDisplayFlags = flags;
+
         if (inputController == null) {
             mInputController = new InputController(
                     context.getMainThreadHandler(),
@@ -466,12 +490,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             ? mParams.getBlockedActivities()
                             : mParams.getAllowedActivities();
         }
-
-        int flags = DEFAULT_VIRTUAL_DISPLAY_FLAGS;
-        if (mParams.getLockState() == VirtualDeviceParams.LOCK_STATE_ALWAYS_UNLOCKED) {
-            flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
-        }
-        mBaseVirtualDisplayFlags = flags;
 
         if (Flags.vdmCustomIme() && mParams.getInputMethodComponent() != null) {
             final String imeId = mParams.getInputMethodComponent().flattenToShortString();
@@ -884,8 +902,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 synchronized (mVirtualDeviceLock) {
                     mDevicePolicies.put(policyType, devicePolicy);
                     for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                        mVirtualDisplays.valueAt(i).getWindowPolicyController()
-                                .setShowInHostDeviceRecents(devicePolicy == DEVICE_POLICY_DEFAULT);
+                        VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                        if (wrapper.isTrusted()) {
+                            wrapper.getWindowPolicyController()
+                                    .setShowInHostDeviceRecents(
+                                            devicePolicy == DEVICE_POLICY_DEFAULT);
+                        }
                     }
                 }
                 break;
@@ -905,7 +927,20 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 break;
             case POLICY_TYPE_CLIPBOARD:
                 if (Flags.crossDeviceClipboard()) {
+                    if (policyType == DEVICE_POLICY_CUSTOM
+                            && mContext.checkCallingOrSelfPermission(ADD_TRUSTED_DISPLAY)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
+                                + "set a custom clipboard policy.");
+                    }
                     synchronized (mVirtualDeviceLock) {
+                        for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                            VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                            if (!wrapper.isTrusted() && !wrapper.isMirror()) {
+                                throw new SecurityException("All displays must be trusted for "
+                                        + "devices with custom clipboard policy.");
+                            }
+                        }
                         mDevicePolicies.put(policyType, devicePolicy);
                     }
                 }
@@ -936,8 +971,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             checkDisplayOwnedByVirtualDeviceLocked(displayId);
             switch (policyType) {
                 case POLICY_TYPE_RECENTS:
-                    mVirtualDisplays.get(displayId).getWindowPolicyController()
-                            .setShowInHostDeviceRecents(devicePolicy == DEVICE_POLICY_DEFAULT);
+                    VirtualDisplayWrapper wrapper = mVirtualDisplays.get(displayId);
+                    if (wrapper.isTrusted()) {
+                        wrapper.getWindowPolicyController()
+                                .setShowInHostDeviceRecents(devicePolicy == DEVICE_POLICY_DEFAULT);
+                    }
                     break;
                 case POLICY_TYPE_ACTIVITY:
                     mVirtualDisplays.get(displayId).getWindowPolicyController()
@@ -1247,10 +1285,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         try {
             synchronized (mVirtualDeviceLock) {
                 mDefaultShowPointerIcon = showPointerIcon;
-            }
-            final int[] displayIds = getDisplayIds();
-            for (int i = 0; i < displayIds.length; ++i) {
-                mInputController.setShowPointerIcon(showPointerIcon, displayIds[i]);
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                    if (wrapper.isTrusted() || wrapper.isMirror()) {
+                        mInputController.setShowPointerIcon(
+                                mDefaultShowPointerIcon, mVirtualDisplays.keyAt(i));
+                    }
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1491,6 +1532,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         boolean isTrustedDisplay =
                 (mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
                         == Display.FLAG_TRUSTED;
+        if (!isTrustedDisplay) {
+            if (getDevicePolicy(POLICY_TYPE_CLIPBOARD) != DEVICE_POLICY_DEFAULT) {
+                throw new SecurityException("All displays must be trusted for devices with custom"
+                        + "clipboard policy.");
+            }
+        }
 
         boolean showPointer;
         synchronized (mVirtualDeviceLock) {
@@ -1500,7 +1547,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         "Virtual device already has a virtual display with ID " + displayId);
             }
 
-            PowerManager.WakeLock wakeLock = createAndAcquireWakeLockForDisplay(displayId);
+            PowerManager.WakeLock wakeLock =
+                    isTrustedDisplay ? createAndAcquireWakeLockForDisplay(displayId) : null;
             mVirtualDisplays.put(displayId, new VirtualDisplayWrapper(callback, gwpc, wakeLock,
                     isTrustedDisplay, isMirrorDisplay));
             showPointer = mDefaultShowPointerIcon;
@@ -1508,14 +1556,15 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
         final long token = Binder.clearCallingIdentity();
         try {
-            mInputController.setShowPointerIcon(showPointer, displayId);
             mInputController.setMousePointerAccelerationEnabled(false, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
-            // WM throws a SecurityException if the display is untrusted.
             if (isTrustedDisplay) {
+                mInputController.setShowPointerIcon(showPointer, displayId);
                 mInputController.setDisplayImePolicy(displayId,
                         WindowManager.DISPLAY_IME_POLICY_LOCAL);
+            } else {
+                gwpc.setShowInHostDeviceRecents(true);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -1616,6 +1665,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     != PackageManager.PERMISSION_GRANTED) {
             synchronized (mVirtualDeviceLock) {
                 checkDisplayOwnedByVirtualDeviceLocked(displayId);
+                VirtualDisplayWrapper wrapper = mVirtualDisplays.get(displayId);
+                if (!wrapper.isTrusted() && !wrapper.isMirror()) {
+                    throw new SecurityException(
+                            "Cannot create input device associated with an untrusted display");
+                }
             }
         }
     }
@@ -1665,7 +1719,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      * @param virtualDisplayWrapper - VirtualDisplayWrapper to release resources for.
      */
     private void releaseOwnedVirtualDisplayResources(VirtualDisplayWrapper virtualDisplayWrapper) {
-        virtualDisplayWrapper.getWakeLock().release();
+        virtualDisplayWrapper.releaseWakeLock();
         virtualDisplayWrapper.getWindowPolicyController().unregisterRunningAppsChangedListener(
                 this);
     }
@@ -1833,10 +1887,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
         VirtualDisplayWrapper(@NonNull IVirtualDisplayCallback token,
                 @NonNull GenericWindowPolicyController windowPolicyController,
-                @NonNull PowerManager.WakeLock wakeLock, boolean isTrusted, boolean isMirror) {
+                @Nullable PowerManager.WakeLock wakeLock, boolean isTrusted, boolean isMirror) {
             mToken = Objects.requireNonNull(token);
             mWindowPolicyController = Objects.requireNonNull(windowPolicyController);
-            mWakeLock = Objects.requireNonNull(wakeLock);
+            mWakeLock = wakeLock;
             mIsTrusted = isTrusted;
             mIsMirror = isMirror;
         }
@@ -1845,8 +1899,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             return mWindowPolicyController;
         }
 
-        PowerManager.WakeLock getWakeLock() {
-            return mWakeLock;
+        void releaseWakeLock() {
+            if (mWakeLock != null && mWakeLock.isHeld()) {
+                mWakeLock.release();
+            }
         }
 
         boolean isTrusted() {

@@ -63,6 +63,9 @@ class InputSettingsObserver extends ContentObserver {
         mObservers = Map.ofEntries(
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SPEED),
                         (reason) -> updateMousePointerSpeed()),
+                Map.entry(Settings.System.getUriFor(
+                        Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING),
+                        (reason) -> updateMouseReverseVerticalScrolling()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
                         (reason) -> updateTouchpadPointerSpeed()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
@@ -161,6 +164,11 @@ class InputSettingsObserver extends ContentObserver {
                 Settings.System.POINTER_SPEED, InputSettings.DEFAULT_POINTER_SPEED,
                 UserHandle.USER_CURRENT);
         mNative.setPointerSpeed(constrainPointerSpeedValue(speed));
+    }
+
+    private void updateMouseReverseVerticalScrolling() {
+        mNative.setMouseReverseVerticalScrollingEnabled(
+                InputSettings.isMouseReverseVerticalScrollingEnabled(mContext));
     }
 
     private void updateTouchpadPointerSpeed() {
