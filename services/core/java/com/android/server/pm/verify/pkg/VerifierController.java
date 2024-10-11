@@ -35,7 +35,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningInfo;
-import android.content.pm.verify.pkg.IVerificationSessionCallback;
 import android.content.pm.verify.pkg.IVerificationSessionInterface;
 import android.content.pm.verify.pkg.IVerifierService;
 import android.content.pm.verify.pkg.VerificationSession;
@@ -45,7 +44,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Pair;
@@ -307,8 +305,7 @@ public class VerifierController {
                 /* id= */ verificationId,
                 /* installSessionId= */ installationSessionId,
                 packageName, stagedPackageUri, signingInfo, declaredLibraries, extensionParams,
-                verificationPolicy, new VerificationSessionInterface(callback),
-                new VerificationSessionCallback(callback));
+                verificationPolicy, new VerificationSessionInterface(callback));
         AndroidFuture<Void> unusedFuture = mRemoteService.post(service -> {
             if (!retry) {
                 if (DEBUG) {
@@ -468,17 +465,9 @@ public class VerifierController {
             }
             return mCallback.setVerificationPolicy(policy);
         }
-    }
-
-    private class VerificationSessionCallback extends IVerificationSessionCallback.Stub {
-        private final PackageInstallerSession.VerifierCallback mCallback;
-
-        VerificationSessionCallback(PackageInstallerSession.VerifierCallback callback) {
-            mCallback = callback;
-        }
 
         @Override
-        public void reportVerificationIncomplete(int id, int reason) throws RemoteException {
+        public void reportVerificationIncomplete(int id, int reason) {
             checkCallerPermission();
             final VerificationStatusTracker tracker;
             synchronized (mVerificationStatus) {
@@ -494,16 +483,14 @@ public class VerifierController {
         }
 
         @Override
-        public void reportVerificationComplete(int id, VerificationStatus verificationStatus)
-                throws RemoteException {
+        public void reportVerificationComplete(int id, VerificationStatus verificationStatus) {
             reportVerificationCompleteWithExtensionResponse(id, verificationStatus,
                     /* extensionResponse= */ null);
         }
 
         @Override
         public void reportVerificationCompleteWithExtensionResponse(int id,
-                VerificationStatus verificationStatus, PersistableBundle extensionResponse)
-                throws RemoteException {
+                VerificationStatus verificationStatus, PersistableBundle extensionResponse) {
             checkCallerPermission();
             final VerificationStatusTracker tracker;
             synchronized (mVerificationStatus) {
