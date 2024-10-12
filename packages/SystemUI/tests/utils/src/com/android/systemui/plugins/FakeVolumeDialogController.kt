@@ -37,10 +37,10 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
     var hasUserActivity: Boolean = false
         private set
 
-    private var hasVibrator: Boolean = true
-
-    private val state = VolumeDialogController.State()
     private val callbacks = CopyOnWriteArraySet<VolumeDialogController.Callbacks>()
+
+    private var hasVibrator: Boolean = true
+    private var state = VolumeDialogController.State()
 
     override fun setActiveStream(stream: Int) {
         // ensure streamState existence for the active stream
@@ -108,6 +108,11 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
 
     fun resetUserActivity() {
         hasUserActivity = false
+    }
+
+    fun updateState(update: VolumeDialogController.State.() -> Unit) {
+        state = state.copy().apply(update)
+        getState()
     }
 
     override fun getState() {

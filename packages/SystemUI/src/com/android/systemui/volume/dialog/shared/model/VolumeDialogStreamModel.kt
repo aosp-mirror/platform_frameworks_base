@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.domain.model
+package com.android.systemui.volume.dialog.shared.model
 
 import androidx.annotation.StringRes
 import com.android.systemui.plugins.VolumeDialogController
 
 /** Models a state of an audio stream of the Volume Dialog. */
 data class VolumeDialogStreamModel(
+    val stream: Int,
     val isDynamic: Boolean = false,
+    val isActive: Boolean,
     val level: Int = 0,
     val levelMin: Int = 0,
     val levelMax: Int = 0,
@@ -32,8 +34,12 @@ data class VolumeDialogStreamModel(
     val routedToBluetooth: Boolean = false,
 ) {
     constructor(
-        legacyState: VolumeDialogController.StreamState
+        stream: Int,
+        isActive: Boolean,
+        legacyState: VolumeDialogController.StreamState,
     ) : this(
+        stream = stream,
+        isActive = isActive,
         isDynamic = legacyState.dynamic,
         level = legacyState.level,
         levelMin = legacyState.levelMin,

@@ -16,7 +16,7 @@
 
 package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

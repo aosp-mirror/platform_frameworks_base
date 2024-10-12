@@ -322,6 +322,22 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         return mTaskOrganizer.getRunningTaskInfo(taskId);
     }
 
+    /**
+     * @return an Array of RunningTaskInfo's ordered by leftToRight or topTopBottom
+     */
+    @Nullable
+    public ActivityManager.RunningTaskInfo[] getAllTaskInfos() {
+        // TODO(b/349828130) Add the third stage task info and not rely on positions
+        ActivityManager.RunningTaskInfo topLeftTask = getTaskInfo(SPLIT_POSITION_TOP_OR_LEFT);
+        ActivityManager.RunningTaskInfo bottomRightTask =
+                getTaskInfo(SPLIT_POSITION_BOTTOM_OR_RIGHT);
+        if (topLeftTask != null && bottomRightTask != null) {
+            return new ActivityManager.RunningTaskInfo[]{topLeftTask, bottomRightTask};
+        }
+
+        return null;
+    }
+
     /** Check task is under split or not by taskId. */
     public boolean isTaskInSplitScreen(int taskId) {
         return mStageCoordinator.getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED;
@@ -376,10 +392,6 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
             throw new IllegalArgumentException("taskId is in split" + taskId);
         }
         return mStageCoordinator.moveToStage(task, stagePosition, wct);
-    }
-
-    public boolean removeFromSideStage(int taskId) {
-        return mStageCoordinator.removeFromSideStage(taskId);
     }
 
     public void setSideStagePosition(@SplitPosition int sideStagePosition) {
@@ -1174,12 +1186,6 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
         public void exitSplitScreenOnHide(boolean exitSplitScreenOnHide) {
             executeRemoteCallWithTaskPermission(mController, "exitSplitScreenOnHide",
                     (controller) -> controller.exitSplitScreenOnHide(exitSplitScreenOnHide));
-        }
-
-        @Override
-        public void removeFromSideStage(int taskId) {
-            executeRemoteCallWithTaskPermission(mController, "removeFromSideStage",
-                    (controller) -> controller.removeFromSideStage(taskId));
         }
 
         @Override

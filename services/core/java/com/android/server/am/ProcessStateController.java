@@ -395,10 +395,9 @@ public class ProcessStateController {
      */
     public void removeProviderConnection(@NonNull ProcessRecord client,
             ContentProviderConnection cpc) {
-        client.mProviders.addProviderConnection(cpc);
+        client.mProviders.removeProviderConnection(cpc);
     }
 
-    /********************** Content Provider State Events **********************/
     /*************************** Service State Events **************************/
     /**
      * Note that a process has started hosting a service.
