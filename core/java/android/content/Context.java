@@ -5658,6 +5658,14 @@ public abstract class Context {
     public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
 
     /**
+     * System service name for ForensicService.
+     * The service manages the forensic info on device.
+     * @hide
+     */
+    @FlaggedApi(android.security.Flags.FLAG_AFL_API)
+    public static final String FORENSIC_SERVICE = "forensic";
+
+    /**
      * System service name for the DeviceIdleManager.
      * @see #getSystemService(String)
      * @hide
