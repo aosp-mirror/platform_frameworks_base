@@ -81,6 +81,7 @@ aconfig_declarations_group {
         "android.view.inputmethod.flags-aconfig-java",
         "android.webkit.flags-aconfig-java",
         "android.widget.flags-aconfig-java",
+        "android.xr.flags-aconfig-java",
         "art_exported_aconfig_flags_lib",
         "backstage_power_flags_lib",
         "backup_flags_lib",
@@ -890,6 +891,20 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.multiuser.flags-aconfig-java",
     aconfig_declarations: "android.multiuser.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// XR
+aconfig_declarations {
+    name: "android.xr.flags-aconfig",
+    package: "android.xr",
+    container: "system",
+    srcs: ["core/java/android/content/pm/xr.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.xr.flags-aconfig-java",
+    aconfig_declarations: "android.xr.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
