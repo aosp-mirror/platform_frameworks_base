@@ -690,8 +690,7 @@
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB ශ්‍රව්‍ය"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"මයික් ජැක්කුව"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB මයික්‍රෆෝනය"</string>
-    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
-    <skip />
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"BT මයික්‍රෆෝනය"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"ක්‍රියාත්මකයි"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"ක්‍රියාවිරහිතයි"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"වාහක ජාලය වෙනස් වෙමින්"</string>
