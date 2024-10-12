@@ -116,7 +116,6 @@ import android.virtualdevice.cts.common.VirtualDeviceRule;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.app.BlockedAppStreamingActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.LocalServices;
@@ -161,8 +160,8 @@ public class VirtualDeviceManagerServiceTest {
     private static final int DISPLAY_ID_1 = 2;
     private static final int DISPLAY_ID_2 = 3;
     private static final int NON_EXISTENT_DISPLAY_ID = 42;
-    private static final int DEVICE_OWNER_UID_1 = 50;
-    private static final int DEVICE_OWNER_UID_2 = 51;
+    private static final int DEVICE_OWNER_UID_1 = Process.myUid();
+    private static final int DEVICE_OWNER_UID_2 = DEVICE_OWNER_UID_1 + 1;
     private static final int UID_1 = 0;
     private static final int UID_2 = 10;
     private static final int UID_3 = 10000;
@@ -559,6 +558,68 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void deviceOwner_cannotMessWithAnotherDeviceTheyDoNotOwn() {
+        VirtualDeviceImpl unownedDevice =
+                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_2);
+
+        // The arguments don't matter, the owner uid check is always the first statement.
+        assertThrows(SecurityException.class, () -> unownedDevice.goToSleep());
+        assertThrows(SecurityException.class, () -> unownedDevice.wakeUp());
+
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.launchPendingIntent(0, null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.registerIntentInterceptor(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.unregisterIntentInterceptor(null));
+
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.addActivityPolicyExemption(null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.removeActivityPolicyExemption(null));
+        assertThrows(SecurityException.class, () -> unownedDevice.setDevicePolicy(0, 0));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.setDevicePolicyForDisplay(0, 0, 0));
+        assertThrows(SecurityException.class, () -> unownedDevice.setDisplayImePolicy(0, 0));
+
+        assertThrows(SecurityException.class, () -> unownedDevice.registerVirtualCamera(null));
+        assertThrows(SecurityException.class, () -> unownedDevice.unregisterVirtualCamera(null));
+
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.onAudioSessionStarting(0, null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.onAudioSessionEnded());
+
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualDisplay(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualDpad(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualMouse(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.createVirtualTouchscreen(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.createVirtualNavigationTouchpad(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.createVirtualStylus(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.createVirtualRotaryEncoder(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.unregisterInputDevice(null));
+
+        assertThrows(SecurityException.class, () -> unownedDevice.sendDpadKeyEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendKeyEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendButtonEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendTouchEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendRelativeEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.sendScrollEvent(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.sendStylusMotionEvent(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.sendStylusButtonEvent(null, null));
+        assertThrows(SecurityException.class,
+                () -> unownedDevice.sendRotaryEncoderScrollEvent(null, null));
+        assertThrows(SecurityException.class, () -> unownedDevice.setShowPointerIcon(true));
+
+        assertThrows(SecurityException.class, () -> unownedDevice.getVirtualSensorList());
+        assertThrows(SecurityException.class, () -> unownedDevice.sendSensorEvent(null, null));
+    }
+
+    @Test
     public void getDeviceOwnerUid_oneDevice_returnsCorrectId() {
         int ownerUid = mLocalService.getDeviceOwnerUid(mDeviceImpl.getDeviceId());
         assertThat(ownerUid).isEqualTo(mDeviceImpl.getOwnerUid());
@@ -676,7 +737,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void getDeviceIdsForUid_twoDevicesUidOnOne_returnsCorrectId() {
         VirtualDeviceImpl secondDevice = createVirtualDevice(VIRTUAL_DEVICE_ID_2,
-                DEVICE_OWNER_UID_2);
+                DEVICE_OWNER_UID_1);
         addVirtualDisplay(secondDevice, DISPLAY_ID_2);
 
         secondDevice.getDisplayWindowPolicyControllerForTest(DISPLAY_ID_2).onRunningAppsChanged(
@@ -691,7 +752,7 @@ public class VirtualDeviceManagerServiceTest {
     public void getDeviceIdsForUid_twoDevicesUidOnBoth_returnsCorrectId() {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         VirtualDeviceImpl secondDevice = createVirtualDevice(VIRTUAL_DEVICE_ID_2,
-                DEVICE_OWNER_UID_2);
+                DEVICE_OWNER_UID_1);
         addVirtualDisplay(secondDevice, DISPLAY_ID_2);
 
 
@@ -729,7 +790,7 @@ public class VirtualDeviceManagerServiceTest {
     @Test
     public void getPreferredLocaleListForApp_appOnMultipleVD_localeOnFirstVDReturned() {
         VirtualDeviceImpl secondDevice = createVirtualDevice(VIRTUAL_DEVICE_ID_2,
-                DEVICE_OWNER_UID_2);
+                DEVICE_OWNER_UID_1);
         Binder secondBinder = new Binder("secondBinder");
         VirtualKeyboardConfig firstKeyboardConfig =
                 new VirtualKeyboardConfig.Builder()
@@ -767,7 +828,7 @@ public class VirtualDeviceManagerServiceTest {
         assertThat(mCameraAccessController.getObserverCount()).isEqualTo(1);
 
         VirtualDeviceImpl secondDevice =
-                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_2);
+                createVirtualDevice(VIRTUAL_DEVICE_ID_2, DEVICE_OWNER_UID_1);
         assertThat(mCameraAccessController.getObserverCount()).isEqualTo(2);
 
         mDeviceImpl.close();
@@ -1127,70 +1188,6 @@ public class VirtualDeviceManagerServiceTest {
         assertThrows(SecurityException.class,
                 () -> mDeviceImpl.onAudioSessionStarting(
                         DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback));
-    }
-
-    @Test
-    public void createVirtualDpad_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualDpad(DPAD_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualKeyboard_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualKeyboard(KEYBOARD_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualMouse_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualMouse(MOUSE_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualTouchscreen_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualTouchscreen(TOUCHSCREEN_CONFIG, BINDER)));
-    }
-
-    @Test
-    public void createVirtualNavigationTouchpad_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.createVirtualNavigationTouchpad(
-                                NAVIGATION_TOUCHPAD_CONFIG,
-                                BINDER)));
-    }
-
-    @Test
-    public void onAudioSessionStarting_noPermission_failsSecurityException() {
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class,
-                        () -> mDeviceImpl.onAudioSessionStarting(
-                                DISPLAY_ID_1, mRoutingCallback, mConfigChangedCallback)));
-    }
-
-    @Test
-    public void onAudioSessionEnded_noPermission_failsSecurityException() {
-        // Shell doesn't have CREATE_VIRTUAL_DEVICE permission.
-        SystemUtil.runWithShellPermissionIdentity(() ->
-                assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded()));
     }
 
     @Test

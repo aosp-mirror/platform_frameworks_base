@@ -16,13 +16,16 @@
 
 package com.android.systemui.screenrecord.data.model
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel.Starting.Companion.toCountdownSeconds
 import com.google.common.truth.Truth.assertThat
+import org.junit.runner.RunWith
 import kotlin.test.Test
 
 @SmallTest
+@RunWith(AndroidJUnit4::class)
 class ScreenRecordModelTest : SysuiTestCase() {
     @Test
     fun countdownSeconds_millis0_is0() {

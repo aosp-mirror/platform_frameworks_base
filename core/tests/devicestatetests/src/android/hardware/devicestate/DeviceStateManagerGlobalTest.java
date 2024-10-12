@@ -18,8 +18,10 @@ package android.hardware.devicestate;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -29,15 +31,20 @@ import android.hardware.devicestate.DeviceStateManager.DeviceStateCallback;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.test.FakePermissionEnforcer;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.ConcurrentUtils;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -46,6 +53,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 /**
  * Unit tests for {@link DeviceStateManagerGlobal}.
  *
@@ -53,17 +63,29 @@ import java.util.Set;
  * atest FrameworksCoreDeviceStateManagerTests:DeviceStateManagerGlobalTest
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public final class DeviceStateManagerGlobalTest {
     private static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(
             new DeviceState.Configuration.Builder(0 /* identifier */, "" /* name */).build());
     private static final DeviceState OTHER_DEVICE_STATE = new DeviceState(
             new DeviceState.Configuration.Builder(1 /* identifier */, "" /* name */).build());
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(Flags.FLAG_WLINFO_ONCREATE);
+    }
+
     @NonNull
     private TestDeviceStateManagerService mService;
     @NonNull
     private DeviceStateManagerGlobal mDeviceStateManagerGlobal;
+
+    public DeviceStateManagerGlobalTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(flags);
+    }
 
     @Before
     public void setUp() {
@@ -71,6 +93,36 @@ public final class DeviceStateManagerGlobalTest {
         mService = new TestDeviceStateManagerService(permissionEnforcer);
         mDeviceStateManagerGlobal = new DeviceStateManagerGlobal(mService);
         assertThat(mService.mCallbacks).isNotEmpty();
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_WLINFO_ONCREATE)
+    public void create_whenWlinfoOncreateIsDisabled_receivesDeviceStateInfoFromCallback() {
+        final FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        final TestDeviceStateManagerService service = new TestDeviceStateManagerService(
+                permissionEnforcer, true /* simulatePostCallback */);
+        final DeviceStateManagerGlobal dsmGlobal = new DeviceStateManagerGlobal(service);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        dsmGlobal.registerDeviceStateCallback(callback, ConcurrentUtils.DIRECT_EXECUTOR);
+
+        verify(callback, never()).onDeviceStateChanged(any());
+
+        // Simulate DeviceStateManagerService#registerProcess by notifying clients of current device
+        // state via callback.
+        service.notifyDeviceStateInfoChanged();
+        verify(callback).onDeviceStateChanged(eq(DEFAULT_DEVICE_STATE));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_WLINFO_ONCREATE)
+    public void create_whenWlinfoOncreateIsEnabled_returnsDeviceStateInfoFromRegistration() {
+        final FakePermissionEnforcer permissionEnforcer = new FakePermissionEnforcer();
+        final IDeviceStateManager service = new TestDeviceStateManagerService(permissionEnforcer);
+        final DeviceStateManagerGlobal dsmGlobal = new DeviceStateManagerGlobal(service);
+        final DeviceStateCallback callback = mock(DeviceStateCallback.class);
+        dsmGlobal.registerDeviceStateCallback(callback, ConcurrentUtils.DIRECT_EXECUTOR);
+
+        verify(callback).onDeviceStateChanged(eq(DEFAULT_DEVICE_STATE));
     }
 
     @Test
@@ -267,10 +319,17 @@ public final class DeviceStateManagerGlobalTest {
         @Nullable
         private Request mBaseStateRequest;
 
+        private final boolean mSimulatePostCallback;
         private final Set<IDeviceStateManagerCallback> mCallbacks = new HashSet<>();
 
         TestDeviceStateManagerService(@NonNull FakePermissionEnforcer enforcer) {
+            this(enforcer, false /* simulatePostCallback */);
+        }
+
+        TestDeviceStateManagerService(@NonNull FakePermissionEnforcer enforcer,
+                boolean simulatePostCallback) {
             super(enforcer);
+            mSimulatePostCallback = simulatePostCallback;
         }
 
         @NonNull
@@ -304,18 +363,26 @@ public final class DeviceStateManagerGlobalTest {
             return getInfo();
         }
 
+        @Nullable
         @Override
-        public void registerCallback(IDeviceStateManagerCallback callback) {
+        public DeviceStateInfo registerCallback(IDeviceStateManagerCallback callback) {
             if (mCallbacks.contains(callback)) {
                 throw new SecurityException("Callback is already registered.");
             }
 
             mCallbacks.add(callback);
-            try {
-                callback.onDeviceStateInfoChanged(getInfo());
-            } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+            if (Flags.wlinfoOncreate()) {
+                return getInfo();
             }
+
+            if (!mSimulatePostCallback) {
+                try {
+                    callback.onDeviceStateInfoChanged(getInfo());
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
+            }
+            return null;
         }
 
         @Override

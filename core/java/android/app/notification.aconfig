@@ -251,7 +251,7 @@ flag {
   name: "api_rich_ongoing"
   is_exported: true
   namespace: "systemui"
-  description: "Guards new android.app.richongoingnotification api"
+  description: "[RONs] Guards new RON-related APIs, including Notification.ProgressStyle"
   bug: "337261753"
 }
 
@@ -259,6 +259,6 @@ flag {
   name: "ui_rich_ongoing"
   is_exported: true
   namespace: "systemui"
-  description: "Guards new android.app.richongoingnotification promotion and new uis"
-  bug: "337261753"
+  description: "[RONs] Guards new promotion logic and UI, including AOD notification and Colorization"
+  bug: "367705002"
 }

@@ -25,6 +25,7 @@ import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
+import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
 import static com.android.hardware.input.Flags.touchpadTapDragging;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
@@ -372,6 +373,14 @@ public class InputSettings {
     }
 
     /**
+     * Returns true if the feature flag for mouse swap primary button is enabled.
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonFeatureFlagEnabled() {
+        return mouseSwapPrimaryButton();
+    }
+
+    /**
      * Returns true if the touchpad visualizer is allowed to appear.
      *
      * @param context The application context.
@@ -545,6 +554,47 @@ public class InputSettings {
 
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.MOUSE_REVERSE_VERTICAL_SCROLLING, reverseScrolling ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether the primary mouse button is swapped on connected mice.
+     *
+     * @param context The application context.
+     * @return Whether mice will have their primary buttons swapped, so that left clicking will
+     * perform the secondary action (e.g. show menu) and right clicking will perform the primary
+     * action.
+     *
+     * @hide
+     */
+    public static boolean isMouseSwapPrimaryButtonEnabled(@NonNull Context context) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, 0, UserHandle.USER_CURRENT)
+                != 0;
+    }
+
+    /**
+     * Sets whether mice will have their primary buttons swapped between left and right
+     * clicks.
+     *
+     * @param context The application context.
+     * @param swapPrimaryButton Whether swapping the primary button is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseSwapPrimaryButton(@NonNull Context context,
+            boolean swapPrimaryButton) {
+        if (!isMouseSwapPrimaryButtonFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, swapPrimaryButton ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
 

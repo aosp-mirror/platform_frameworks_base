@@ -44,7 +44,7 @@ private val dialogTimeoutDuration = 3.seconds
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper()
+@TestableLooper.RunWithLooper
 class VolumeDialogVisibilityInteractorTest : SysuiTestCase() {
 
     private val kosmos: Kosmos = testKosmos()

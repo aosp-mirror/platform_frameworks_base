@@ -37,39 +37,39 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.ActionTutorialCon
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
 
-interface GestureMonitorProvider {
+interface GestureRecognizerProvider {
 
     @Composable
-    fun rememberGestureMonitor(
+    fun rememberGestureRecognizer(
         resources: Resources,
         gestureStateChangedCallback: (GestureState) -> Unit,
-    ): TouchpadGestureMonitor
+    ): GestureRecognizer
 }
 
 typealias gestureStateCallback = (GestureState) -> Unit
 
-class DistanceBasedGestureMonitorProvider(
-    val monitorFactory: (Int, gestureStateCallback) -> TouchpadGestureMonitor
-) : GestureMonitorProvider {
+class DistanceBasedGestureRecognizerProvider(
+    val recognizerFactory: (Int, gestureStateCallback) -> GestureRecognizer
+) : GestureRecognizerProvider {
 
     @Composable
-    override fun rememberGestureMonitor(
+    override fun rememberGestureRecognizer(
         resources: Resources,
         gestureStateChangedCallback: (GestureState) -> Unit,
-    ): TouchpadGestureMonitor {
+    ): GestureRecognizer {
         val distanceThresholdPx =
             resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.system_gestures_distance_threshold
             )
         return remember(distanceThresholdPx) {
-            monitorFactory(distanceThresholdPx, gestureStateChangedCallback)
+            recognizerFactory(distanceThresholdPx, gestureStateChangedCallback)
         }
     }
 }
@@ -77,7 +77,7 @@ class DistanceBasedGestureMonitorProvider(
 fun GestureState.toTutorialActionState(): TutorialActionState {
     return when (this) {
         NotStarted -> TutorialActionState.NotStarted
-        is InProgress -> TutorialActionState.InProgress()
+        is InProgress -> TutorialActionState.InProgress(progress)
         Finished -> TutorialActionState.Finished
     }
 }
@@ -85,21 +85,21 @@ fun GestureState.toTutorialActionState(): TutorialActionState {
 @Composable
 fun GestureTutorialScreen(
     screenConfig: TutorialScreenConfig,
-    gestureMonitorProvider: GestureMonitorProvider,
+    gestureRecognizerProvider: GestureRecognizerProvider,
     onDoneButtonClicked: () -> Unit,
     onBack: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
     var gestureState: GestureState by remember { mutableStateOf(NotStarted) }
     var easterEggTriggered by remember { mutableStateOf(false) }
-    val gestureMonitor =
-        gestureMonitorProvider.rememberGestureMonitor(
+    val gestureRecognizer =
+        gestureRecognizerProvider.rememberGestureRecognizer(
             resources = LocalContext.current.resources,
             gestureStateChangedCallback = { gestureState = it },
         )
     val easterEggMonitor = EasterEggGestureMonitor { easterEggTriggered = true }
     val gestureHandler =
-        remember(gestureMonitor) { TouchpadGestureHandler(gestureMonitor, easterEggMonitor) }
+        remember(gestureRecognizer) { TouchpadGestureHandler(gestureRecognizer, easterEggMonitor) }
     TouchpadGesturesHandlingBox(
         gestureHandler,
         gestureState,

@@ -27,7 +27,6 @@ import android.os.UserHandle
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityManager
-import androidx.activity.result.ActivityResultLauncher
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.communal.dagger.CommunalModule.Companion.LAUNCHER_PACKAGE
 import com.android.systemui.communal.data.model.CommunalWidgetCategories
@@ -184,10 +183,10 @@ constructor(
 
     val isIdleOnCommunal: StateFlow<Boolean> = communalInteractor.isIdleOnCommunal
 
-    /** Launch the widget picker activity using the given {@link ActivityResultLauncher}. */
+    /** Launch the widget picker activity using the given startActivity method. */
     suspend fun onOpenWidgetPicker(
         resources: Resources,
-        activityLauncher: ActivityResultLauncher<Intent>,
+        startActivity: (intent: Intent) -> Unit,
     ): Boolean =
         withContext(backgroundDispatcher) {
             val widgets = communalInteractor.widgetContent.first()
@@ -199,7 +198,7 @@ constructor(
                 }
             getWidgetPickerActivityIntent(resources, excludeList)?.let {
                 try {
-                    activityLauncher.launch(it)
+                    startActivity(it)
                     return@withContext true
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to launch widget picker activity", e)
