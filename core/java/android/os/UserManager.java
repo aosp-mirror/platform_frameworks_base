@@ -66,6 +66,7 @@ import android.provider.Settings;
 import android.util.AndroidException;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -3908,11 +3909,57 @@ public class UserManager {
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public @NonNull UserProperties getUserProperties(@NonNull UserHandle userHandle) {
         final int userId = userHandle.getIdentifier();
-        // Avoid calling into system server for invalid user ids.
-        if (android.multiuser.Flags.fixGetUserPropertyCache() && userId < 0) {
+
+        if (userId < 0 && android.multiuser.Flags.fixGetUserPropertyCache()) {
+            // Avoid calling into system server for invalid user ids.
             throw new IllegalArgumentException("Cannot access properties for user " + userId);
         }
-        return mUserPropertiesCache.query(userId);
+
+        if (!android.multiuser.Flags.cacheUserPropertiesCorrectlyReadOnly() || userId < 0) {
+            // This is the historical code path, when all flags are false.
+            try {
+                return mService.getUserPropertiesCopy(userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int processUid = Process.myUid();
+        if (Build.isDebuggable() && callingUid != processUid) {
+            Log.w(TAG, "Uid " + processUid + " is fetching a copy of UserProperties on"
+                            + " behalf of callingUid " + callingUid + ". Possibly"
+                            + " it should carefully first clearCallingIdentity or perhaps use"
+                            + " UserManagerInternal.getUserProperties() instead?",
+                    new Throwable());
+        }
+
+        return getUserPropertiesFromQuery(new QueryUserId(userId));
+    }
+
+    /** @hide */
+    public static final void invalidateUserPropertiesCache() {
+        UserManagerCache.invalidateUserPropertiesFromQuery();
+    }
+
+    /**
+     * Cachable version of {@link #getUserProperties(UserHandle)}, caching the UserProperties
+     * corresponding to the given QueryUserId. The cached copy depends on both the queried userId as
+     * well as the Binder caller querying it, since the result depends on the caller's permissions.
+     */
+    @CachedProperty()
+    private @NonNull UserProperties getUserPropertiesFromQuery(QueryUserId query) {
+        return ((UserManagerCache) mIpcDataCache).getUserPropertiesFromQuery(
+                (QueryUserId q) -> mService.getUserPropertiesCopy(q.getUserId()), query);
+    }
+
+    /** Class keeping track of a userId, as well as the callingUid that is asking about it. */
+    /** @hide */
+    static final class QueryUserId extends Pair<Integer, Integer> {
+        public QueryUserId(@UserIdInt int userId) {
+            super(Binder.getCallingUid(), userId);
+        }
+        public @UserIdInt int getUserId() { return second; }
     }
 
     /**
@@ -6654,34 +6701,6 @@ public class UserManager {
     /** @hide */
     public static final void invalidateStaticUserProperties() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_STATIC_USER_PROPERTIES);
-    }
-
-    /* Cache key for UserProperties object. */
-    private static final String CACHE_KEY_USER_PROPERTIES =
-        PropertyInvalidatedCache.createPropertyName(
-            PropertyInvalidatedCache.MODULE_SYSTEM, "user_properties");
-
-    // TODO: It would be better to somehow have this as static, so that it can work cross-context.
-    private final PropertyInvalidatedCache<Integer, UserProperties> mUserPropertiesCache =
-            new PropertyInvalidatedCache<Integer, UserProperties>(16, CACHE_KEY_USER_PROPERTIES) {
-                @Override
-                public UserProperties recompute(Integer userId) {
-                    try {
-                        // If the userId doesn't exist, this will throw rather than cache garbage.
-                        return mService.getUserPropertiesCopy(userId);
-                    } catch (RemoteException re) {
-                        throw re.rethrowFromSystemServer();
-                    }
-                }
-                @Override
-                public boolean bypass(Integer query) {
-                    return query < 0;
-                }
-            };
-
-    /** @hide */
-    public static final void invalidateUserPropertiesCache() {
-        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_USER_PROPERTIES);
     }
 
     /**

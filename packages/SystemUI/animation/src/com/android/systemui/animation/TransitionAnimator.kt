@@ -23,6 +23,7 @@ import android.content.Context
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.drawable.GradientDrawable
+import android.util.FloatProperty
 import android.util.Log
 import android.util.MathUtils
 import android.view.View
@@ -31,10 +32,15 @@ import android.view.ViewGroupOverlay
 import android.view.ViewOverlay
 import android.view.animation.Interpolator
 import android.window.WindowAnimationState
-import androidx.annotation.VisibleForTesting
 import com.android.app.animation.Interpolators.LINEAR
+import com.android.app.animation.MathUtils.max
+import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.dynamicanimation.animation.SpringAnimation
+import com.android.internal.dynamicanimation.animation.SpringForce
 import com.android.systemui.shared.Flags.returnAnimationFrameworkLibrary
 import java.util.concurrent.Executor
+import kotlin.math.abs
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 private const val TAG = "TransitionAnimator"
@@ -44,10 +50,26 @@ class TransitionAnimator(
     private val mainExecutor: Executor,
     private val timings: Timings,
     private val interpolators: Interpolators,
+
+    /** [springTimings] and [springInterpolators] must either both be null or both not null. */
+    private val springTimings: Timings? = null,
+    private val springInterpolators: Interpolators? = null,
+    private val springParams: SpringParams = DEFAULT_SPRING_PARAMS,
 ) {
     companion object {
         internal const val DEBUG = false
         private val SRC_MODE = PorterDuffXfermode(PorterDuff.Mode.SRC)
+
+        /** Default parameters for the multi-spring animator. */
+        private val DEFAULT_SPRING_PARAMS =
+            SpringParams(
+                centerXStiffness = 450f,
+                centerXDampingRatio = 0.965f,
+                centerYStiffness = 400f,
+                centerYDampingRatio = 0.95f,
+                scaleStiffness = 500f,
+                scaleDampingRatio = 0.99f,
+            )
 
         /**
          * Given the [linearProgress] of a transition animation, return the linear progress of the
@@ -86,10 +108,31 @@ class TransitionAnimator(
                 it.bottomCornerRadius = (bottomLeftRadius + bottomRightRadius) / 2
                 it.topCornerRadius = (topLeftRadius + topRightRadius) / 2
             }
+
+        /** Builds a [FloatProperty] for updating the defined [property] using a spring. */
+        private fun buildProperty(
+            property: SpringProperty,
+            updateProgress: (SpringState) -> Unit,
+        ): FloatProperty<SpringState> {
+            return object : FloatProperty<SpringState>(property.name) {
+                override fun get(state: SpringState): Float {
+                    return property.get(state)
+                }
+
+                override fun setValue(state: SpringState, value: Float) {
+                    property.setValue(state, value)
+                    updateProgress(state)
+                }
+            }
+        }
     }
 
     private val transitionContainerLocation = IntArray(2)
     private val cornerRadii = FloatArray(8)
+
+    init {
+        check((springTimings == null) == (springInterpolators == null))
+    }
 
     /**
      * A controller that takes care of applying the animation to an expanding view.
@@ -198,6 +241,65 @@ class TransitionAnimator(
         var visible: Boolean = true
     }
 
+    /** Encapsulated the state of a multi-spring animation. */
+    internal class SpringState(
+        // Animated values.
+        var centerX: Float,
+        var centerY: Float,
+        var scale: Float = 0f,
+
+        // Cached values.
+        var previousCenterX: Float = -1f,
+        var previousCenterY: Float = -1f,
+        var previousScale: Float = -1f,
+
+        // Completion flags.
+        var isCenterXDone: Boolean = false,
+        var isCenterYDone: Boolean = false,
+        var isScaleDone: Boolean = false,
+    ) {
+        /** Whether all springs composing the animation have settled in the final position. */
+        val isDone
+            get() = isCenterXDone && isCenterYDone && isScaleDone
+    }
+
+    /** Supported [SpringState] properties with getters and setters to update them. */
+    private enum class SpringProperty {
+        CENTER_X {
+            override fun get(state: SpringState): Float {
+                return state.centerX
+            }
+
+            override fun setValue(state: SpringState, value: Float) {
+                state.centerX = value
+            }
+        },
+        CENTER_Y {
+            override fun get(state: SpringState): Float {
+                return state.centerY
+            }
+
+            override fun setValue(state: SpringState, value: Float) {
+                state.centerY = value
+            }
+        },
+        SCALE {
+            override fun get(state: SpringState): Float {
+                return state.scale
+            }
+
+            override fun setValue(state: SpringState, value: Float) {
+                state.scale = value
+            }
+        };
+
+        /** Extracts the current value of the underlying property from [state]. */
+        abstract fun get(state: SpringState): Float
+
+        /** Update's the [value] of the underlying property inside [state]. */
+        abstract fun setValue(state: SpringState, value: Float)
+    }
+
     interface Animation {
         /** Start the animation. */
         fun start()
@@ -214,6 +316,33 @@ class TransitionAnimator(
 
         override fun cancel() {
             animator.cancel()
+        }
+    }
+
+    @VisibleForTesting
+    class MultiSpringAnimation
+    internal constructor(
+        @get:VisibleForTesting val springX: SpringAnimation,
+        @get:VisibleForTesting val springY: SpringAnimation,
+        @get:VisibleForTesting val springScale: SpringAnimation,
+        private val springState: SpringState,
+        private val onAnimationStart: Runnable,
+    ) : Animation {
+        @get:VisibleForTesting
+        val isDone
+            get() = springState.isDone
+
+        override fun start() {
+            onAnimationStart.run()
+            springX.start()
+            springY.start()
+            springScale.start()
+        }
+
+        override fun cancel() {
+            springX.cancel()
+            springY.cancel()
+            springScale.cancel()
         }
     }
 
@@ -256,6 +385,21 @@ class TransitionAnimator(
         val contentAfterFadeInInterpolator: Interpolator,
     )
 
+    /** The parameters (stiffnesses and damping ratios) used by the multi-spring animator. */
+    data class SpringParams(
+        // Parameters for the X position spring.
+        val centerXStiffness: Float,
+        val centerXDampingRatio: Float,
+
+        // Parameters for the Y position spring.
+        val centerYStiffness: Float,
+        val centerYDampingRatio: Float,
+
+        // Parameters for the scale spring.
+        val scaleStiffness: Float,
+        val scaleDampingRatio: Float,
+    )
+
     /**
      * Start a transition animation controlled by [controller] towards [endState]. An intermediary
      * layer with [windowBackgroundColor] will fade in then (optionally) fade out above the
@@ -266,6 +410,9 @@ class TransitionAnimator(
      * the animation (if ![Controller.isLaunching]), and will have SRC blending mode (ultimately
      * punching a hole in the [transition container][Controller.transitionContainer]) iff [drawHole]
      * is true.
+     *
+     * If [useSpring] is true, a multi-spring animation will be used instead of the default
+     * interpolators.
      */
     fun startAnimation(
         controller: Controller,
@@ -273,8 +420,9 @@ class TransitionAnimator(
         windowBackgroundColor: Int,
         fadeWindowBackgroundLayer: Boolean = true,
         drawHole: Boolean = false,
+        useSpring: Boolean = false,
     ): Animation {
-        if (!controller.isLaunching) checkReturnAnimationFrameworkFlag()
+        if (!controller.isLaunching || useSpring) checkReturnAnimationFrameworkFlag()
 
         // We add an extra layer with the same color as the dialog/app splash screen background
         // color, which is usually the same color of the app background. We first fade in this layer
@@ -293,6 +441,7 @@ class TransitionAnimator(
                 windowBackgroundLayer,
                 fadeWindowBackgroundLayer,
                 drawHole,
+                useSpring,
             )
             .apply { start() }
     }
@@ -304,6 +453,7 @@ class TransitionAnimator(
         endState: State,
         windowBackgroundLayer: GradientDrawable,
         fadeWindowBackgroundLayer: Boolean = true,
+        useSpring: Boolean = false,
         drawHole: Boolean = false,
     ): Animation {
         val transitionContainer = controller.transitionContainer
@@ -321,19 +471,35 @@ class TransitionAnimator(
             openingWindowSyncView != null &&
                 openingWindowSyncView.viewRootImpl != controller.transitionContainer.viewRootImpl
 
-        return createInterpolatedAnimation(
-            controller,
-            startState,
-            endState,
-            windowBackgroundLayer,
-            transitionContainer,
-            transitionContainerOverlay,
-            openingWindowSyncView,
-            openingWindowSyncViewOverlay,
-            fadeWindowBackgroundLayer,
-            drawHole,
-            moveBackgroundLayerWhenAppVisibilityChanges,
-        )
+        return if (useSpring && springTimings != null && springInterpolators != null) {
+            createSpringAnimation(
+                controller,
+                startState,
+                endState,
+                windowBackgroundLayer,
+                transitionContainer,
+                transitionContainerOverlay,
+                openingWindowSyncView,
+                openingWindowSyncViewOverlay,
+                fadeWindowBackgroundLayer,
+                drawHole,
+                moveBackgroundLayerWhenAppVisibilityChanges,
+            )
+        } else {
+            createInterpolatedAnimation(
+                controller,
+                startState,
+                endState,
+                windowBackgroundLayer,
+                transitionContainer,
+                transitionContainerOverlay,
+                openingWindowSyncView,
+                openingWindowSyncViewOverlay,
+                fadeWindowBackgroundLayer,
+                drawHole,
+                moveBackgroundLayerWhenAppVisibilityChanges,
+            )
+        }
     }
 
     /**
@@ -478,12 +644,222 @@ class TransitionAnimator(
                 fadeWindowBackgroundLayer,
                 drawHole,
                 controller.isLaunching,
+                useSpring = false,
             )
 
             controller.onTransitionAnimationProgress(state, progress, linearProgress)
         }
 
         return InterpolatedAnimation(animator)
+    }
+
+    /**
+     * Creates a compound animator made up of three springs: one for the center x position, one for
+     * the center-y position, and one for the overall scale.
+     *
+     * This animator uses [springTimings] and [springInterpolators] for opacity, based on the scale
+     * progress.
+     */
+    private fun createSpringAnimation(
+        controller: Controller,
+        startState: State,
+        endState: State,
+        windowBackgroundLayer: GradientDrawable,
+        transitionContainer: View,
+        transitionContainerOverlay: ViewGroupOverlay,
+        openingWindowSyncView: View?,
+        openingWindowSyncViewOverlay: ViewOverlay?,
+        fadeWindowBackgroundLayer: Boolean = true,
+        drawHole: Boolean = false,
+        moveBackgroundLayerWhenAppVisibilityChanges: Boolean = false,
+    ): Animation {
+        var springX: SpringAnimation? = null
+        var springY: SpringAnimation? = null
+        var targetX = endState.centerX
+        var targetY = endState.centerY
+
+        var movedBackgroundLayer = false
+
+        fun maybeUpdateEndState() {
+            if (endState.centerX != targetX && endState.centerY != targetY) {
+                targetX = endState.centerX
+                targetY = endState.centerY
+
+                springX?.animateToFinalPosition(targetX)
+                springY?.animateToFinalPosition(targetY)
+            }
+        }
+
+        fun updateProgress(state: SpringState) {
+            if (
+                (!state.isCenterXDone && state.centerX == state.previousCenterX) ||
+                    (!state.isCenterYDone && state.centerY == state.previousCenterY) ||
+                    (!state.isScaleDone && state.scale == state.previousScale)
+            ) {
+                // Because all three springs use the same update method, we only actually update
+                // when all values have changed, avoiding two redundant calls per frame.
+                return
+            }
+
+            // Update the latest values for the check above.
+            state.previousCenterX = state.centerX
+            state.previousCenterY = state.centerY
+            state.previousScale = state.scale
+
+            // Current scale-based values, that will be used to find the new animation bounds.
+            val width =
+                MathUtils.lerp(startState.width.toFloat(), endState.width.toFloat(), state.scale)
+            val height =
+                MathUtils.lerp(startState.height.toFloat(), endState.height.toFloat(), state.scale)
+
+            val newState =
+                State(
+                        left = (state.centerX - width / 2).toInt(),
+                        top = (state.centerY - height / 2).toInt(),
+                        right = (state.centerX + width / 2).toInt(),
+                        bottom = (state.centerY + height / 2).toInt(),
+                        topCornerRadius =
+                            MathUtils.lerp(
+                                startState.topCornerRadius,
+                                endState.topCornerRadius,
+                                state.scale,
+                            ),
+                        bottomCornerRadius =
+                            MathUtils.lerp(
+                                startState.bottomCornerRadius,
+                                endState.bottomCornerRadius,
+                                state.scale,
+                            ),
+                    )
+                    .apply {
+                        visible = checkVisibility(timings, state.scale, controller.isLaunching)
+                    }
+
+            if (!movedBackgroundLayer) {
+                movedBackgroundLayer =
+                    maybeMoveBackgroundLayer(
+                        controller,
+                        newState,
+                        windowBackgroundLayer,
+                        transitionContainer,
+                        transitionContainerOverlay,
+                        openingWindowSyncView,
+                        openingWindowSyncViewOverlay,
+                        moveBackgroundLayerWhenAppVisibilityChanges,
+                    )
+            }
+
+            val container =
+                if (movedBackgroundLayer) {
+                    openingWindowSyncView!!
+                } else {
+                    controller.transitionContainer
+                }
+            applyStateToWindowBackgroundLayer(
+                windowBackgroundLayer,
+                newState,
+                state.scale,
+                container,
+                fadeWindowBackgroundLayer,
+                drawHole,
+                isLaunching = false,
+                useSpring = true,
+            )
+
+            controller.onTransitionAnimationProgress(newState, state.scale, state.scale)
+
+            maybeUpdateEndState()
+        }
+
+        val springState = SpringState(centerX = startState.centerX, centerY = startState.centerY)
+        val isExpandingFullyAbove = isExpandingFullyAbove(transitionContainer, endState)
+
+        /** End listener for each spring, which only does the end work if all springs are done. */
+        fun onAnimationEnd() {
+            if (!springState.isDone) return
+            onAnimationEnd(
+                controller,
+                isExpandingFullyAbove,
+                windowBackgroundLayer,
+                transitionContainerOverlay,
+                openingWindowSyncViewOverlay,
+                moveBackgroundLayerWhenAppVisibilityChanges,
+            )
+        }
+
+        springX =
+            SpringAnimation(
+                    springState,
+                    buildProperty(SpringProperty.CENTER_X) { state -> updateProgress(state) },
+                )
+                .apply {
+                    spring =
+                        SpringForce(endState.centerX).apply {
+                            stiffness = springParams.centerXStiffness
+                            dampingRatio = springParams.centerXDampingRatio
+                        }
+
+                    setStartValue(startState.centerX)
+                    setMinValue(min(startState.centerX, endState.centerX))
+                    setMaxValue(max(startState.centerX, endState.centerX))
+
+                    addEndListener { _, _, _, _ ->
+                        springState.isCenterXDone = true
+                        onAnimationEnd()
+                    }
+                }
+        springY =
+            SpringAnimation(
+                    springState,
+                    buildProperty(SpringProperty.CENTER_Y) { state -> updateProgress(state) },
+                )
+                .apply {
+                    spring =
+                        SpringForce(endState.centerY).apply {
+                            stiffness = springParams.centerYStiffness
+                            dampingRatio = springParams.centerYDampingRatio
+                        }
+
+                    setStartValue(startState.centerY)
+                    setMinValue(min(startState.centerY, endState.centerY))
+                    setMaxValue(max(startState.centerY, endState.centerY))
+
+                    addEndListener { _, _, _, _ ->
+                        springState.isCenterYDone = true
+                        onAnimationEnd()
+                    }
+                }
+        val springScale =
+            SpringAnimation(
+                    springState,
+                    buildProperty(SpringProperty.SCALE) { state -> updateProgress(state) },
+                )
+                .apply {
+                    spring =
+                        SpringForce(1f).apply {
+                            stiffness = springParams.scaleStiffness
+                            dampingRatio = springParams.scaleDampingRatio
+                        }
+
+                    setStartValue(0f)
+                    setMaxValue(1f)
+                    setMinimumVisibleChange(abs(1f / startState.height))
+
+                    addEndListener { _, _, _, _ ->
+                        springState.isScaleDone = true
+                        onAnimationEnd()
+                    }
+                }
+
+        return MultiSpringAnimation(springX, springY, springScale, springState) {
+            onAnimationStart(
+                controller,
+                isExpandingFullyAbove,
+                windowBackgroundLayer,
+                transitionContainerOverlay,
+                openingWindowSyncViewOverlay,
+            )
+        }
     }
 
     private fun onAnimationStart(
@@ -623,6 +999,7 @@ class TransitionAnimator(
         fadeWindowBackgroundLayer: Boolean,
         drawHole: Boolean,
         isLaunching: Boolean,
+        useSpring: Boolean,
     ) {
         // Update position.
         transitionContainer.getLocationOnScreen(transitionContainerLocation)
@@ -644,14 +1021,32 @@ class TransitionAnimator(
         cornerRadii[7] = state.bottomCornerRadius
         drawable.cornerRadii = cornerRadii
 
-        // We first fade in the background layer to hide the expanding view, then fade it out
-        // with SRC mode to draw a hole punch in the status bar and reveal the opening window.
+        val timings: Timings
+        val interpolators: Interpolators
+        if (useSpring) {
+            timings = springTimings!!
+            interpolators = springInterpolators!!
+        } else {
+            timings = this.timings
+            interpolators = this.interpolators
+        }
+
+        // We first fade in the background layer to hide the expanding view, then fade it out with
+        // SRC mode to draw a hole punch in the status bar and reveal the opening window (if
+        // needed). If !isLaunching, the reverse happens.
         val fadeInProgress =
             getProgress(
                 timings,
                 linearProgress,
                 timings.contentBeforeFadeOutDelay,
                 timings.contentBeforeFadeOutDuration,
+            )
+        val fadeOutProgress =
+            getProgress(
+                timings,
+                linearProgress,
+                timings.contentAfterFadeInDelay,
+                timings.contentAfterFadeInDuration,
             )
 
         if (isLaunching) {
@@ -660,13 +1055,6 @@ class TransitionAnimator(
                     interpolators.contentBeforeFadeOutInterpolator.getInterpolation(fadeInProgress)
                 drawable.alpha = (alpha * 0xFF).roundToInt()
             } else if (fadeWindowBackgroundLayer) {
-                val fadeOutProgress =
-                    getProgress(
-                        timings,
-                        linearProgress,
-                        timings.contentAfterFadeInDelay,
-                        timings.contentAfterFadeInDuration,
-                    )
                 val alpha =
                     1 -
                         interpolators.contentAfterFadeInInterpolator.getInterpolation(
@@ -690,13 +1078,6 @@ class TransitionAnimator(
                     drawable.setXfermode(SRC_MODE)
                 }
             } else {
-                val fadeOutProgress =
-                    getProgress(
-                        timings,
-                        linearProgress,
-                        timings.contentAfterFadeInDelay,
-                        timings.contentAfterFadeInDuration,
-                    )
                 val alpha =
                     1 -
                         interpolators.contentAfterFadeInInterpolator.getInterpolation(

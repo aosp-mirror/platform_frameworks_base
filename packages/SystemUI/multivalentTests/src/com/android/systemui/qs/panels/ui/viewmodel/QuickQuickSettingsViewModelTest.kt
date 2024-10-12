@@ -58,6 +58,11 @@ class QuickQuickSettingsViewModelTest : SysuiTestCase() {
             qsPreferencesInteractor.setLargeTilesSpecs(
                 tiles.filter { it.spec.startsWith(PREFIX_LARGE) }.toSet()
             )
+            testCase.context.orCreateTestableResources.addOverride(
+                R.integer.quick_settings_infinite_grid_num_columns,
+                4,
+            )
+            fakeConfigurationRepository.onConfigurationChange()
         }
 
     private val underTest = kosmos.quickQuickSettingsViewModel

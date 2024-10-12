@@ -35,17 +35,20 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.annotation.NonNull;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.FlakyTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compatibility.common.util.PollingCheck;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowProcessController;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -58,6 +61,9 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 /**
  * Unit tests for {@link DeviceStateManagerService}.
  *
@@ -65,7 +71,7 @@ import javax.annotation.Nullable;
  * atest FrameworksServicesTests:DeviceStateManagerServiceTest
  */
 @Presubmit
-@RunWith(AndroidJUnit4.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 public final class DeviceStateManagerServiceTest {
     private static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(
             new DeviceState.Configuration.Builder(0, "DEFAULT").build());
@@ -99,6 +105,14 @@ public final class DeviceStateManagerServiceTest {
 
     private static final int TIMEOUT = 2000;
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(Flags.FLAG_WLINFO_ONCREATE);
+    }
+
     private final Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
     @NonNull
     private TestDeviceStatePolicy mPolicy;
@@ -111,13 +125,19 @@ public final class DeviceStateManagerServiceTest {
     @NonNull
     private WindowProcessController mWindowProcessController;
 
+    public DeviceStateManagerServiceTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(flags);
+    }
+
     @Before
     public void setup() {
         mProvider = new TestDeviceStateProvider();
         mPolicy = new TestDeviceStatePolicy(mContext, mProvider);
         mSysPropSetter = new TestSystemPropertySetter();
         setupDeviceStateManagerService();
-        flushHandler(); // Flush the handler to ensure the initial values are committed.
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler(); // Flush the handler to ensure the initial values are committed.
+        }
     }
 
     private void setupDeviceStateManagerService() {
@@ -255,9 +275,11 @@ public final class DeviceStateManagerServiceTest {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
 
-        // An initial callback will be triggered on registration, so we clear it here.
-        flushHandler();
-        callback.clearLastNotifiedInfo();
+        if (!Flags.wlinfoOncreate()) {
+            // An initial callback will be triggered on registration, so we clear it here.
+            flushHandler();
+            callback.clearLastNotifiedInfo();
+        }
 
         assertThat(mService.getCommittedState()).hasValue(DEFAULT_DEVICE_STATE);
         assertThat(mService.getPendingState()).isEmpty();
@@ -301,7 +323,9 @@ public final class DeviceStateManagerServiceTest {
         mProvider = new TestDeviceStateProvider(null /* initialState */);
         mPolicy = new TestDeviceStatePolicy(mContext, mProvider);
         setupDeviceStateManagerService();
-        flushHandler(); // Flush the handler to ensure the initial values are committed.
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler(); // Flush the handler to ensure the initial values are committed.
+        }
 
         final DeviceStateInfo info = mService.getBinderService().getDeviceStateInfo();
 
@@ -317,6 +341,9 @@ public final class DeviceStateManagerServiceTest {
         mService.getBinderService().registerCallback(callback);
 
         mProvider.setState(OTHER_DEVICE_STATE_IDENTIFIER);
+        if (Flags.wlinfoOncreate()) {
+            waitAndAssert(() -> callback.getLastNotifiedInfo() != null);
+        }
         waitAndAssert(() -> callback.getLastNotifiedInfo().baseState.getIdentifier()
                 == OTHER_DEVICE_STATE_IDENTIFIER);
         waitAndAssert(() -> callback.getLastNotifiedInfo().currentState.getIdentifier()
@@ -350,9 +377,14 @@ public final class DeviceStateManagerServiceTest {
     public void registerCallback_initialValueAvailable_emitsDeviceState() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
 
-        mService.getBinderService().registerCallback(callback);
-        flushHandler();
-        final DeviceStateInfo stateInfo = callback.getLastNotifiedInfo();
+        final DeviceStateInfo stateInfo;
+        if (Flags.wlinfoOncreate()) {
+            stateInfo = mService.getBinderService().registerCallback(callback);
+        } else {
+            mService.getBinderService().registerCallback(callback);
+            flushHandler();
+            stateInfo = callback.getLastNotifiedInfo();
+        }
 
         assertThat(stateInfo).isNotNull();
         assertThat(stateInfo.baseState).isEqualTo(DEFAULT_DEVICE_STATE);
@@ -365,14 +397,22 @@ public final class DeviceStateManagerServiceTest {
         mProvider = new TestDeviceStateProvider(null /* initialState */);
         mPolicy = new TestDeviceStatePolicy(mContext, mProvider);
         setupDeviceStateManagerService();
-        flushHandler(); // Flush the handler to ensure the initial values are committed.
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler(); // Flush the handler to ensure the initial values are committed.
+        }
 
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
-        mService.getBinderService().registerCallback(callback);
-        flushHandler();
-        final DeviceStateInfo stateInfo = callback.getLastNotifiedInfo();
+        final DeviceStateInfo stateInfo;
+        if (Flags.wlinfoOncreate()) {
+            // Return null when the base state is not set yet.
+            stateInfo = mService.getBinderService().registerCallback(callback);
+        } else {
+            mService.getBinderService().registerCallback(callback);
+            flushHandler();
+            // The callback should never be called when the base state is not set yet.
+            stateInfo = callback.getLastNotifiedInfo();
+        }
 
-        // The callback should never be called when the base state is not set yet.
         assertThat(stateInfo).isNull();
     }
 
@@ -380,7 +420,9 @@ public final class DeviceStateManagerServiceTest {
     public void requestState() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         final IBinder token = new Binder();
         assertThat(callback.getLastNotifiedStatus(token))
@@ -424,7 +466,9 @@ public final class DeviceStateManagerServiceTest {
     public void requestState_pendingStateAtRequest() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         mPolicy.blockConfigure();
 
@@ -498,7 +542,9 @@ public final class DeviceStateManagerServiceTest {
     public void requestState_sameAsBaseState() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         final IBinder token = new Binder();
         assertThat(callback.getLastNotifiedStatus(token))
@@ -516,7 +562,9 @@ public final class DeviceStateManagerServiceTest {
     public void requestState_flagCancelWhenBaseChanges() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         final IBinder token = new Binder();
         assertThat(callback.getLastNotifiedStatus(token))
@@ -613,7 +661,9 @@ public final class DeviceStateManagerServiceTest {
     public void requestState_becomesUnsupported() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         final IBinder token = new Binder();
         assertThat(callback.getLastNotifiedStatus(token))
@@ -687,7 +737,9 @@ public final class DeviceStateManagerServiceTest {
     public void requestBaseStateOverride() throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         final IBinder token = new Binder();
         assertThat(callback.getLastNotifiedStatus(token))
@@ -833,7 +885,9 @@ public final class DeviceStateManagerServiceTest {
     ) throws RemoteException {
         final TestDeviceStateManagerCallback callback = new TestDeviceStateManagerCallback();
         mService.getBinderService().registerCallback(callback);
-        flushHandler();
+        if (!Flags.wlinfoOncreate()) {
+            flushHandler();
+        }
 
         final IBinder token = new Binder();
         assertThat(callback.getLastNotifiedStatus(token))
