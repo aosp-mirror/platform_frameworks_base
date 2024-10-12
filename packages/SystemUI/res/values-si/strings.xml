@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"ක්‍රියාත්මකයි"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"ක්‍රියාත්මකයි • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"ක්‍රියාවිරහිතයි"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"සකසා නැත"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"සැකසීම් තුළ කළමනාකරණය කරන්න"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{සක්‍රිය ප්‍රකාර නොමැත}=1{{mode} සක්‍රියයි}one{ප්‍රකාර #ක් සක්‍රියයි}other{ප්‍රකාර #ක් සක්‍රියයි}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"එලාම සිහිකැඳවීම්, සිදුවීම්, සහ ඔබ සඳහන් කළ අමතන්නන් හැර, ශබ්ද සහ කම්පනවලින් ඔබට බාධා නොවනු ඇත. සංගීතය, වීඩියෝ, සහ ක්‍රීඩා ඇතුළු ඔබ වාදනය කිරීමට තෝරන ලද සියලු දේ ඔබට තවම ඇසෙනු ඇත."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"නාදය නිහඬ කර ඇති නිසා නොලැබේ"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"බාධා නොකරන්න ක්‍රියාත්මකව ඇති බැවින් ලද නොහැක"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"බාධා නොකරන්න ක්‍රියාත්මකව ඇති බැවින් ලද නොහැක"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. නිහඬ කිරීම ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. කම්පනය කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. නිහඬ කිරීමට තට්ටු කරන්න. ප්‍රවේශ්‍යතා සේවා නිහඬ කළ හැකිය."</string>
@@ -706,8 +709,7 @@
     <string name="show_demo_mode" msgid="3677956462273059726">"ආදර්ශන ප්‍රකාරය පෙන්වන්න"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"එලාමය"</string>
-    <!-- no translation found for active_mode_content_description (1627555562186515927) -->
-    <skip />
+    <string name="active_mode_content_description" msgid="1627555562186515927">"<xliff:g id="MODENAME">%1$s</xliff:g> ක්‍රියාත්මකයි"</string>
     <string name="wallet_title" msgid="5369767670735827105">"Wallet"</string>
     <string name="wallet_empty_state_label" msgid="7776761245237530394">"ඔබගේ දුරකථනය සමඟ වඩා වේගවත්, වඩා සුරක්ෂිත මිලදී ගැනීම් සිදු කිරීමට සූදානම් වන්න"</string>
     <string name="wallet_app_button_label" msgid="7123784239111190992">"සියල්ල පෙන්වන්න"</string>
@@ -1407,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"ස්පර්ශක පුවරු අභිනයන් ඉගෙන ගන්න"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ඔබේ යතුරු පුවරුව සහ ස්පර්ශ පෑඩ් භාවිතයෙන් සංචාලනය කරන්න"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"ස්පර්ශ පෑඩ් අභිනයන්, යතුරුපුවරු කෙටිමං සහ තවත් දේ ඉගෙන ගන්න"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"ආපසු යන්න"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"මුල් පිටුවට යන්න"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"මෑත යෙදුම් බලන්න"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"නිමයි"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ආපස්සට යන්න"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"ඔබේ ස්පර්ශ පුවරුව මත ඇඟිලි තුනක් භාවිතයෙන් වමට හෝ දකුණට ස්වයිප් කරන්න"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"කදිමයි!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ඔබ ආපසු යාමේ ඉංගිතය සම්පූර්ණ කරන ලදි."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"මුල් පිටුවට යන්න"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"ඔබේ ස්පර්ශ පුවරුවේ ඇඟිලි තුනකින් ඉහළට ස්වයිප් කරන්න"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"අනර්ඝ වැඩක්!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"ඔබ මුල් පිටුවට යාමේ ඉංගිතය සම්පූර්ණ කරන ලදි"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"මෑත යෙදුම් බලන්න"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"ඉහළට ස්වයිප් කර ඔබේ ස්පර්ශ පුවරුව මත ඇඟිලි තුනක් භාවිත කර රඳවාගෙන සිටින්න"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"අනර්ඝ වැඩක්!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ඔබ මෑත යෙදුම් ඉංගිත බැලීම සම්පූර්ණ කර ඇත."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"සියලු යෙදුම් බලන්න"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"ඔබේ යතුරු පුවරුවේ ක්‍රියාකාරී යතුර ඔබන්න"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"හොඳින් කළා!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"ඔබ සියලු යෙදුම් ඉංගිත බැලීම සම්පූර්ණ කර ඇත"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"යතුරු පුවරු පසු ආලෝකය"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dන් %1$d වැනි මට්ටම"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"නිවෙස් පාලන"</string>

@@ -673,6 +673,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"No disponible por timbre silenciado"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"No disponible si está activado No interrumpir"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"No disponible si está activado No interrumpir"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Presiona para dejar de silenciar."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Presiona para establecer el modo vibración. Es posible que los servicios de accesibilidad estén silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Presiona para silenciar. Es posible que los servicios de accesibilidad estén silenciados."</string>
