@@ -68,6 +68,16 @@ flag {
 }
 
 flag {
+    name: "multiple_alarm_notifications_support"
+    namespace: "multiuser"
+    description: "Implement handling of multiple simultaneous alarms/timers on bg users"
+    bug: "367615180"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "enable_biometrics_to_unlock_private_space"
     is_exported: true
     namespace: "profile_experiences"

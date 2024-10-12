@@ -521,7 +521,6 @@ class DesktopTasksController(
         wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-
     }
 
     private fun exitSplitIfApplicable(wct: WindowContainerTransaction, taskInfo: RunningTaskInfo) {
@@ -663,7 +662,6 @@ class DesktopTasksController(
         wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
 
         transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-
     }
 
     /** Moves a task in/out of full immersive state within the desktop. */
@@ -739,7 +737,6 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
 
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct)
-
     }
 
     private fun getMaximizeBounds(taskInfo: RunningTaskInfo, stableBounds: Rect): Rect {
@@ -851,7 +848,6 @@ class DesktopTasksController(
         val wct = WindowContainerTransaction().setBounds(taskInfo.token, destinationBounds)
 
         toggleResizeDesktopTaskTransitionHandler.startTransition(wct, currentDragBounds)
-
     }
 
     @VisibleForTesting
@@ -1246,10 +1242,23 @@ class DesktopTasksController(
                 error("Invalid windowing mode: ${callingTask.windowingMode}")
             }
         }
+        val bounds = when (newTaskWindowingMode) {
+            WINDOWING_MODE_FREEFORM -> {
+                displayController.getDisplayLayout(callingTask.displayId)
+                    ?.let { getInitialBounds(it, callingTask) }
+            }
+            WINDOWING_MODE_MULTI_WINDOW -> {
+                Rect()
+            }
+            else -> {
+                error("Invalid windowing mode: $newTaskWindowingMode")
+            }
+        }
         return ActivityOptions.makeBasic().apply {
             launchWindowingMode = newTaskWindowingMode
             pendingIntentBackgroundActivityStartMode =
                 ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+            launchBounds = bounds
         }
     }
 
@@ -1405,15 +1414,7 @@ class DesktopTasksController(
             } else {
                 WINDOWING_MODE_FREEFORM
             }
-        val initialBounds = if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
-            calculateInitialBounds(displayLayout, taskInfo)
-        } else {
-            getDefaultDesktopTaskBounds(displayLayout)
-        }
-
-        if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue()) {
-            cascadeWindow(taskInfo, initialBounds, displayLayout)
-        }
+        val initialBounds = getInitialBounds(displayLayout, taskInfo)
 
         if (canChangeTaskPosition(taskInfo)) {
             wct.setBounds(taskInfo.token, initialBounds)
@@ -1423,6 +1424,22 @@ class DesktopTasksController(
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, DESKTOP_DENSITY_OVERRIDE)
         }
+    }
+
+    private fun getInitialBounds(
+        displayLayout: DisplayLayout,
+        taskInfo: RunningTaskInfo
+    ): Rect {
+        val bounds = if (ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue) {
+            calculateInitialBounds(displayLayout, taskInfo)
+        } else {
+            getDefaultDesktopTaskBounds(displayLayout)
+        }
+
+        if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue) {
+            cascadeWindow(taskInfo, bounds, displayLayout)
+        }
+        return bounds
     }
 
     private fun addMoveToFullscreenChanges(

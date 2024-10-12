@@ -27,7 +27,7 @@ import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
 /** Base class of the Settings provider data stores. */
-open abstract class SettingsStore(protected val contentResolver: ContentResolver) :
+abstract class SettingsStore(protected val contentResolver: ContentResolver) :
     KeyedDataObservable<String>(), KeyValueStore {
 
     /**

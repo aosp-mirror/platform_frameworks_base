@@ -29,6 +29,7 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
@@ -54,6 +55,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                 screenBrightnessInteractor,
                 brightnessPolicyEnforcementInteractor,
                 applicationCoroutineScope,
+                sliderHapticsViewModelFactory,
             )
         }
 
@@ -61,7 +63,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
     fun setUp() {
         kosmos.fakeScreenBrightnessRepository.setMinMaxBrightness(
             LinearBrightness(minBrightness),
-            LinearBrightness(maxBrightness)
+            LinearBrightness(maxBrightness),
         )
     }
 
@@ -79,7 +81,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                         BrightnessUtils.convertLinearToGammaFloat(
                             brightness,
                             minBrightness,
-                            maxBrightness
+                            maxBrightness,
                         )
                     )
 
@@ -91,7 +93,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                         BrightnessUtils.convertLinearToGammaFloat(
                             brightness,
                             minBrightness,
-                            maxBrightness
+                            maxBrightness,
                         )
                     )
             }
@@ -122,7 +124,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                     BrightnessUtils.convertGammaToLinearFloat(
                         newBrightness,
                         minBrightness,
-                        maxBrightness
+                        maxBrightness,
                     )
                 val drag = Drag.Dragging(GammaBrightness(newBrightness))
 

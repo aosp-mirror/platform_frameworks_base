@@ -85,7 +85,7 @@ fun Category(title: String? = null, content: @Composable ColumnScope.() -> Unit)
                     }
                     .then(
                         if (isSpaExpressiveEnabled)
-                            Modifier.fillMaxWidth().clip(SettingsShape.categoryCorner)
+                            Modifier.fillMaxWidth().clip(SettingsShape.CornerMedium2)
                         else Modifier
                     ),
             verticalArrangement =

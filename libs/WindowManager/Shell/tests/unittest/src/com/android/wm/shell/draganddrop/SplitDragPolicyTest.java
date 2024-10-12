@@ -150,7 +150,8 @@ public class SplitDragPolicyTest extends ShellTestCase {
         mPortraitDisplayLayout = new DisplayLayout(info2, res, false, false);
         mInsets = Insets.of(0, 0, 0, 0);
 
-        mPolicy = spy(new SplitDragPolicy(mContext, mSplitScreenStarter, mFullscreenStarter));
+        mPolicy = spy(new SplitDragPolicy(mContext, mSplitScreenStarter, mFullscreenStarter,
+                mock(DragZoneAnimator.class)));
         mActivityClipData = createAppClipData(MIMETYPE_APPLICATION_ACTIVITY);
         mLaunchableIntentPendingIntent = mock(PendingIntent.class);
         when(mLaunchableIntentPendingIntent.getCreatorUserHandle())

@@ -24,9 +24,9 @@ sealed interface VolumeDialogSliderType {
     // into separated interactors.
     val audioStream: Int
 
-    class Stream(override val audioStream: Int) : VolumeDialogSliderType
+    data class Stream(override val audioStream: Int) : VolumeDialogSliderType
 
-    class RemoteMediaStream(override val audioStream: Int) : VolumeDialogSliderType
+    data class RemoteMediaStream(override val audioStream: Int) : VolumeDialogSliderType
 
-    class AudioSharingStream(override val audioStream: Int) : VolumeDialogSliderType
+    data class AudioSharingStream(override val audioStream: Int) : VolumeDialogSliderType
 }

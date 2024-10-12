@@ -25,7 +25,7 @@ import java.util.function.Consumer
  * motion events passed to [onMotionEvent] and will filter touchpad events accordingly
  */
 class TouchpadGestureHandler(
-    private val gestureMonitor: Consumer<MotionEvent>,
+    private val gestureRecognizer: Consumer<MotionEvent>,
     private val easterEggGestureMonitor: EasterEggGestureMonitor,
 ) {
 
@@ -41,7 +41,7 @@ class TouchpadGestureHandler(
             if (isTwoFingerSwipe(event)) {
                 easterEggGestureMonitor.processTouchpadEvent(event)
             } else {
-                gestureMonitor.accept(event)
+                gestureRecognizer.accept(event)
             }
             true
         } else {

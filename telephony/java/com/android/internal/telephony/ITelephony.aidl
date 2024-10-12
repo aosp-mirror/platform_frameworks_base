@@ -2977,10 +2977,10 @@ interface ITelephony {
     void requestTimeForNextSatelliteVisibility(in ResultReceiver receiver);
 
     /**
-     * Inform whether the device is aligned with the satellite within in margin for demo mode.
+     * Inform whether the device is aligned with the satellite in both real and demo mode.
      *
-     * @param isAligned {@true} Device is aligned with the satellite for demo mode
-     *                  {@false} Device is not aligned with the satellite for demo mode
+     * @param isAligned {@true} Device is aligned with the satellite.
+     *                  {@false} Device is not aligned with the satellite.
      */
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")

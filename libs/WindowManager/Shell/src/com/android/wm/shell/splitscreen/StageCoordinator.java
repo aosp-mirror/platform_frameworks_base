@@ -499,21 +499,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return true;
     }
 
-    boolean removeFromSideStage(int taskId) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "removeFromSideStage: task=%d", taskId);
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
-
-
-        // MainStage will be deactivated in onStageHasChildrenChanged() if the other stages
-        // no longer have children.
-
-        final boolean result = mSideStage.removeTask(taskId,
-                isSplitActive() ? mMainStage.mRootTaskInfo.token : null,
-                wct);
-        mTaskOrganizer.applyTransaction(wct);
-        return result;
-    }
-
     SplitscreenEventLogger getLogger() {
         return mLogger;
     }

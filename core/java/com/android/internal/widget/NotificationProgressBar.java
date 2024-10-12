@@ -16,15 +16,22 @@
 
 package com.android.internal.widget;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Notification.ProgressStyle;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.RemotableViewMethod;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import androidx.annotation.ColorInt;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.internal.widget.NotificationProgressDrawable.Part;
 import com.android.internal.widget.NotificationProgressDrawable.Point;
 import com.android.internal.widget.NotificationProgressDrawable.Segment;
@@ -42,6 +49,10 @@ import java.util.TreeSet;
  */
 @RemoteViews.RemoteView
 public class NotificationProgressBar extends ProgressBar {
+    private NotificationProgressModel mProgressModel;
+    @Nullable
+    private Drawable mProgressTrackerDrawable = null;
+
     public NotificationProgressBar(Context context) {
         this(context, null);
     }
@@ -57,6 +68,53 @@ public class NotificationProgressBar extends ProgressBar {
     public NotificationProgressBar(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    /**
+     * Setter for the notification progress model.
+     *
+     * @see NotificationProgressModel#fromBundle
+     * @see #setProgressModelAsync
+     */
+    @RemotableViewMethod(asyncImpl = "setProgressModelAsync")
+    public void setProgressModel(@Nullable Bundle bundle) {
+        Preconditions.checkArgument(bundle != null,
+                "Bundle shouldn't be null");
+
+        mProgressModel = NotificationProgressModel.fromBundle(bundle);
+    }
+
+    private void setProgressModel(@NonNull NotificationProgressModel model) {
+        mProgressModel = model;
+    }
+
+    /**
+     * Setter for the progress tracker icon.
+     *
+     * @see #setProgressTrackerIconAsync
+     */
+    @RemotableViewMethod(asyncImpl = "setProgressTrackerIconAsync")
+    public void setProgressTrackerIcon(@Nullable Icon icon) {
+    }
+
+
+    /**
+     * Async version of {@link #setProgressTrackerIcon}
+     */
+    public Runnable setProgressTrackerIconAsync(@Nullable Icon icon) {
+        final Drawable progressTrackerDrawable;
+        if (icon != null) {
+            progressTrackerDrawable = icon.loadDrawable(getContext());
+        } else {
+            progressTrackerDrawable = null;
+        }
+        return () -> {
+            setProgressTrackerDrawable(progressTrackerDrawable);
+        };
+    }
+
+    private void setProgressTrackerDrawable(@Nullable  Drawable drawable) {
+        mProgressTrackerDrawable = drawable;
     }
 
     /**

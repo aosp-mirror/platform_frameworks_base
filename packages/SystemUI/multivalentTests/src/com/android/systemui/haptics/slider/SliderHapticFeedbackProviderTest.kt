@@ -17,13 +17,11 @@
 package com.android.systemui.haptics.slider
 
 import android.os.VibrationEffect
-import android.view.VelocityTracker
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.testKosmos
-import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.fakeSystemClock
 import kotlin.math.max
 import kotlin.test.assertEquals
@@ -31,18 +29,16 @@ import kotlin.test.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class SliderHapticFeedbackProviderTest : SysuiTestCase() {
 
-    @Mock private lateinit var velocityTracker: VelocityTracker
-
     private val kosmos = testKosmos()
 
     private val config = SliderHapticFeedbackConfig()
+
+    private val dragVelocityProvider = SliderDragVelocityProvider { config.maxVelocityToScale }
 
     private val lowTickDuration = 12 // Mocked duration of a low tick
     private val dragTextureThresholdMillis =
@@ -52,17 +48,13 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-        whenever(velocityTracker.isAxisSupported(config.velocityAxis)).thenReturn(true)
-        whenever(velocityTracker.getAxisVelocity(config.velocityAxis))
-            .thenReturn(config.maxVelocityToScale)
 
         vibratorHelper.primitiveDurations[VibrationEffect.Composition.PRIMITIVE_LOW_TICK] =
             lowTickDuration
         sliderHapticFeedbackProvider =
             SliderHapticFeedbackProvider(
                 vibratorHelper,
-                velocityTracker,
+                dragVelocityProvider,
                 config,
                 kosmos.fakeSystemClock,
             )
@@ -75,9 +67,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
                 VibrationEffect.startComposition()
                     .addPrimitive(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(
-                            config.maxVelocityToScale
-                        ),
+                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                     )
                     .compose()
 
@@ -93,7 +83,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
                 VibrationEffect.startComposition()
                     .addPrimitive(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale)
+                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                     )
                     .compose()
 
@@ -110,9 +100,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
                 VibrationEffect.startComposition()
                     .addPrimitive(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(
-                            config.maxVelocityToScale
-                        ),
+                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                     )
                     .compose()
 
@@ -128,9 +116,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
                 VibrationEffect.startComposition()
                     .addPrimitive(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(
-                            config.maxVelocityToScale
-                        ),
+                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                     )
                     .compose()
 
@@ -146,10 +132,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             // GIVEN max velocity and slider progress
             val progress = 1f
             val expectedScale =
-                sliderHapticFeedbackProvider.scaleOnDragTexture(
-                    config.maxVelocityToScale,
-                    progress,
-                )
+                sliderHapticFeedbackProvider.scaleOnDragTexture(config.maxVelocityToScale, progress)
             val ticks = VibrationEffect.startComposition()
             repeat(config.numberOfLowTicks) {
                 ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
@@ -222,10 +205,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             // GIVEN max velocity and slider progress
             val progress = 1f
             val expectedScale =
-                sliderHapticFeedbackProvider.scaleOnDragTexture(
-                    config.maxVelocityToScale,
-                    progress,
-                )
+                sliderHapticFeedbackProvider.scaleOnDragTexture(config.maxVelocityToScale, progress)
             val ticks = VibrationEffect.startComposition()
             repeat(config.numberOfLowTicks) {
                 ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
@@ -234,9 +214,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
                 VibrationEffect.startComposition()
                     .addPrimitive(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(
-                            config.maxVelocityToScale
-                        ),
+                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                     )
                     .compose()
 
@@ -250,7 +228,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             // THEN there are two bookend vibrations
             assertEquals(
                 /* expected= */ 2,
-                vibratorHelper.timesVibratedWithEffect(bookendVibration)
+                vibratorHelper.timesVibratedWithEffect(bookendVibration),
             )
         }
 
@@ -260,10 +238,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             // GIVEN max velocity and slider progress
             val progress = 1f
             val expectedScale =
-                sliderHapticFeedbackProvider.scaleOnDragTexture(
-                    config.maxVelocityToScale,
-                    progress,
-                )
+                sliderHapticFeedbackProvider.scaleOnDragTexture(config.maxVelocityToScale, progress)
             val ticks = VibrationEffect.startComposition()
             repeat(config.numberOfLowTicks) {
                 ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
@@ -272,9 +247,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
                 VibrationEffect.startComposition()
                     .addPrimitive(
                         VibrationEffect.Composition.PRIMITIVE_CLICK,
-                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(
-                            config.maxVelocityToScale
-                        ),
+                        sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                     )
                     .compose()
 
@@ -288,7 +261,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             // THEN there are two bookend vibrations
             assertEquals(
                 /* expected= */ 2,
-                vibratorHelper.timesVibratedWithEffect(bookendVibration)
+                vibratorHelper.timesVibratedWithEffect(bookendVibration),
             )
         }
 

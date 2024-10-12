@@ -18,6 +18,7 @@ package com.android.compose.theme
 
 import android.content.Context
 import androidx.annotation.ColorRes
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.android.internal.R
@@ -38,23 +39,41 @@ val LocalAndroidColorScheme =
  * [androidx.compose.material3.MaterialTheme]. For other colors (e.g. primary), use
  * `MaterialTheme.colorScheme` instead.
  */
-class AndroidColorScheme(val context: Context) {
-    val primaryFixed = color(context, R.color.system_primary_fixed)
-    val primaryFixedDim = color(context, R.color.system_primary_fixed_dim)
-    val onPrimaryFixed = color(context, R.color.system_on_primary_fixed)
-    val onPrimaryFixedVariant = color(context, R.color.system_on_primary_fixed_variant)
-    val secondaryFixed = color(context, R.color.system_secondary_fixed)
-    val secondaryFixedDim = color(context, R.color.system_secondary_fixed_dim)
-    val onSecondaryFixed = color(context, R.color.system_on_secondary_fixed)
-    val onSecondaryFixedVariant = color(context, R.color.system_on_secondary_fixed_variant)
-    val tertiaryFixed = color(context, R.color.system_tertiary_fixed)
-    val tertiaryFixedDim = color(context, R.color.system_tertiary_fixed_dim)
-    val onTertiaryFixed = color(context, R.color.system_on_tertiary_fixed)
-    val onTertiaryFixedVariant = color(context, R.color.system_on_tertiary_fixed_variant)
-
+@Immutable
+class AndroidColorScheme(
+    val primaryFixed: Color,
+    val primaryFixedDim: Color,
+    val onPrimaryFixed: Color,
+    val onPrimaryFixedVariant: Color,
+    val secondaryFixed: Color,
+    val secondaryFixedDim: Color,
+    val onSecondaryFixed: Color,
+    val onSecondaryFixedVariant: Color,
+    val tertiaryFixed: Color,
+    val tertiaryFixedDim: Color,
+    val onTertiaryFixed: Color,
+    val onTertiaryFixedVariant: Color,
+) {
     companion object {
         internal fun color(context: Context, @ColorRes id: Int): Color {
             return Color(context.resources.getColor(id, context.theme))
+        }
+
+        operator fun invoke(context: Context): AndroidColorScheme {
+            return AndroidColorScheme(
+                primaryFixed = color(context, R.color.system_primary_fixed),
+                primaryFixedDim = color(context, R.color.system_primary_fixed_dim),
+                onPrimaryFixed = color(context, R.color.system_on_primary_fixed),
+                onPrimaryFixedVariant = color(context, R.color.system_on_primary_fixed_variant),
+                secondaryFixed = color(context, R.color.system_secondary_fixed),
+                secondaryFixedDim = color(context, R.color.system_secondary_fixed_dim),
+                onSecondaryFixed = color(context, R.color.system_on_secondary_fixed),
+                onSecondaryFixedVariant = color(context, R.color.system_on_secondary_fixed_variant),
+                tertiaryFixed = color(context, R.color.system_tertiary_fixed),
+                tertiaryFixedDim = color(context, R.color.system_tertiary_fixed_dim),
+                onTertiaryFixed = color(context, R.color.system_on_tertiary_fixed),
+                onTertiaryFixedVariant = color(context, R.color.system_on_tertiary_fixed_variant),
+            )
         }
     }
 }

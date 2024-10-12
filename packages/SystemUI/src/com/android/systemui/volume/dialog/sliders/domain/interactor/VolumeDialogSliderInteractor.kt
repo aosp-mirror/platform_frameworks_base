@@ -19,7 +19,7 @@ package com.android.systemui.volume.dialog.sliders.domain.interactor
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -38,7 +38,7 @@ constructor(
 
     val slider: Flow<VolumeDialogStreamModel> =
         volumeDialogStateInteractor.volumeDialogState.mapNotNull {
-            it.states[sliderType.audioStream]
+            it.streamModels[sliderType.audioStream]
         }
 
     fun setStreamVolume(userLevel: Int) {
