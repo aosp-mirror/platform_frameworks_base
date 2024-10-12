@@ -115,7 +115,6 @@ public class TelephonyRegistryManager {
                 ICarrierConfigChangeListener>
             mCarrierConfigChangeListenerMap = new ConcurrentHashMap<>();
 
-
     /** @hide **/
     public TelephonyRegistryManager(@NonNull Context context) {
         mContext = context;
@@ -1721,13 +1720,36 @@ public class TelephonyRegistryManager {
      * @param subId Sender subscription ID.
      * @param type for callback mode entry.
      *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param durationMillis is the number of milliseconds remaining in the emergency callback
+     *                        mode.
      * @hide
      */
-    public void notifyCallBackModeStarted(int phoneId, int subId,
-            @TelephonyManager.EmergencyCallbackModeType int type) {
+    public void notifyCallbackModeStarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis) {
         try {
-            Log.d(TAG, "notifyCallBackModeStarted:type=" + type);
-            sRegistry.notifyCallbackModeStarted(phoneId, subId, type);
+            Log.d(TAG, "notifyCallbackModeStarted:type=" + type);
+            sRegistry.notifyCallbackModeStarted(phoneId, subId, type, durationMillis);
+        } catch (RemoteException ex) {
+            // system process is dead
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notify Callback Mode has been restarted.
+     * @param phoneId Sender phone ID.
+     * @param subId Sender subscription ID.
+     * @param type for callback mode entry.
+     *             See {@link TelephonyManager.EmergencyCallbackModeType}.
+     * @param durationMillis is the number of milliseconds remaining in the emergency callback
+     *                        mode.
+     * @hide
+     */
+    public void notifyCallbackModeRestarted(int phoneId, int subId,
+            @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis) {
+        try {
+            Log.d(TAG, "notifyCallbackModeRestarted:type=" + type);
+            sRegistry.notifyCallbackModeRestarted(phoneId, subId, type, durationMillis);
         } catch (RemoteException ex) {
             // system process is dead
             throw ex.rethrowFromSystemServer();
