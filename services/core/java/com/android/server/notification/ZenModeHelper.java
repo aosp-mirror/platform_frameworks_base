@@ -1567,6 +1567,28 @@ public class ZenModeHelper {
         return azr;
     }
 
+    // Update only the hasPriorityChannels state (aka areChannelsBypassingDnd) without modifying
+    // any of the rest of the existing policy. This allows components that only want to modify
+    // this bit (PreferencesHelper) to not have to adjust the rest of the policy.
+    protected void updateHasPriorityChannels(boolean hasPriorityChannels) {
+        if (!Flags.modesUi()) {
+            Log.wtf(TAG, "updateHasPriorityChannels called without modes_ui");
+        }
+        synchronized (mConfigLock) {
+            // If it already matches, do nothing
+            if (mConfig.areChannelsBypassingDnd == hasPriorityChannels) {
+                return;
+            }
+
+            ZenModeConfig newConfig = mConfig.copy();
+            newConfig.areChannelsBypassingDnd = hasPriorityChannels;
+            // The updated calculation of whether there are priority channels is always done by
+            // the system, even if the event causing the calculation had a different origin.
+            setConfigLocked(newConfig, null, ORIGIN_SYSTEM, "updateHasPriorityChannels",
+                    Process.SYSTEM_UID);
+        }
+    }
+
     @SuppressLint("MissingPermission")
     void scheduleActivationBroadcast(String pkg, @UserIdInt int userId, String ruleId,
             boolean activated) {

@@ -261,7 +261,7 @@ flag {
     is_fixed_read_only: true
     namespace: "permissions"
     description: "If proc state is decreasing over the restriction threshold and capability is changed, delay if no new capabilities are added"
-    bug: "308573169"
+    bug: "347891382"
     metadata {
         purpose: PURPOSE_BUGFIX
     }

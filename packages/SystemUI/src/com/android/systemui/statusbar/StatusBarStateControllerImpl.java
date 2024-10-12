@@ -46,6 +46,7 @@ import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
+import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
@@ -123,6 +124,7 @@ public class StatusBarStateControllerImpl implements
     private final Lazy<SceneContainerOcclusionInteractor> mSceneContainerOcclusionInteractorLazy;
     private final Lazy<KeyguardClockInteractor> mKeyguardClockInteractorLazy;
     private final Lazy<SceneBackInteractor> mSceneBackInteractorLazy;
+    private final Lazy<AlternateBouncerInteractor> mAlternateBouncerInteractorLazy;
     private int mState;
     private int mLastState;
     private int mUpcomingState;
@@ -193,7 +195,8 @@ public class StatusBarStateControllerImpl implements
             Lazy<SceneInteractor> sceneInteractorLazy,
             Lazy<SceneContainerOcclusionInteractor> sceneContainerOcclusionInteractor,
             Lazy<KeyguardClockInteractor> keyguardClockInteractorLazy,
-            Lazy<SceneBackInteractor> sceneBackInteractorLazy) {
+            Lazy<SceneBackInteractor> sceneBackInteractorLazy,
+            Lazy<AlternateBouncerInteractor> alternateBouncerInteractorLazy) {
         mUiEventLogger = uiEventLogger;
         mInteractionJankMonitorLazy = interactionJankMonitorLazy;
         mJavaAdapter = javaAdapter;
@@ -205,6 +208,7 @@ public class StatusBarStateControllerImpl implements
         mSceneContainerOcclusionInteractorLazy = sceneContainerOcclusionInteractor;
         mKeyguardClockInteractorLazy = keyguardClockInteractorLazy;
         mSceneBackInteractorLazy = sceneBackInteractorLazy;
+        mAlternateBouncerInteractorLazy = alternateBouncerInteractorLazy;
         for (int i = 0; i < HISTORY_SIZE; i++) {
             mHistoricalRecords[i] = new HistoricalState();
         }
@@ -233,6 +237,7 @@ public class StatusBarStateControllerImpl implements
                         mSceneInteractorLazy.get().getCurrentOverlays(),
                         mSceneBackInteractorLazy.get().getBackStack(),
                         mSceneContainerOcclusionInteractorLazy.get().getInvisibleDueToOcclusion(),
+                        mAlternateBouncerInteractorLazy.get().isVisible(),
                         this::calculateStateFromSceneFramework),
                     this::onStatusBarStateChanged);
 
@@ -693,7 +698,8 @@ public class StatusBarStateControllerImpl implements
             SceneKey currentScene,
             Set<OverlayKey> currentOverlays,
             SceneStack backStack,
-            boolean isOccluded) {
+            boolean isOccluded,
+            boolean alternateBouncerIsVisible) {
         SceneContainerFlag.isUnexpectedlyInLegacyMode();
 
         final boolean onBouncer = currentScene.equals(Scenes.Bouncer);
@@ -714,7 +720,8 @@ public class StatusBarStateControllerImpl implements
 
         final String inputLogString = "currentScene=" + currentScene.getTestTag()
                 + " currentOverlays=" + currentOverlays + " backStack=" + backStack
-                + " isUnlocked=" + isUnlocked + " isOccluded=" + isOccluded;
+                + " isUnlocked=" + isUnlocked + " isOccluded=" + isOccluded
+                + " alternateBouncerIsVisible=" + alternateBouncerIsVisible;
 
         int newState;
 
@@ -722,6 +729,7 @@ public class StatusBarStateControllerImpl implements
         // 1. deviceUnlockStatus.isUnlocked changes from false to true.
         // 2. Lockscreen changes to Gone, either in currentScene or in backStack.
         // 3. Bouncer is removed from currentScene or backStack, if it was present.
+        // 4. the alternate bouncer is hidden, if it was visible.
         //
         // From this function's perspective, though, deviceUnlockStatus, currentScene, and backStack
         // each update separately, and the relative order of those updates is not well-defined. This
@@ -733,6 +741,7 @@ public class StatusBarStateControllerImpl implements
         // 1. deviceUnlockStatus.isUnlocked is false.
         // 2. currentScene is a keyguardish scene (Lockscreen, Bouncer, or Communal).
         // 3. backStack contains a keyguardish scene (Lockscreen or Communal).
+        // 4. the alternate bouncer is visible.
 
         final boolean onKeyguardish = onLockscreen || onBouncer || onCommunal;
         final boolean overKeyguardish = overLockscreen || overCommunal;
@@ -741,7 +750,7 @@ public class StatusBarStateControllerImpl implements
             // Occlusion is special; even though the device is still technically on the lockscreen,
             // the UI behaves as if it is unlocked.
             newState = StatusBarState.SHADE;
-        } else if (onKeyguardish || overKeyguardish) {
+        } else if (onKeyguardish || overKeyguardish || alternateBouncerIsVisible) {
             // We get here if we are on or over a keyguardish scene, even if isUnlocked is true; we
             // want to return SHADE_LOCKED or KEYGUARD until we are also neither on nor over a
             // keyguardish scene.

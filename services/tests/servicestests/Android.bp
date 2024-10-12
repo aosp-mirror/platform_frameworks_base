@@ -67,6 +67,7 @@ android_test {
         "androidx.test.ext.junit",
         "cts-wm-util",
         "platform-compat-test-rules",
+        "platform-parametric-runner-lib",
         "mockito-target-minus-junit4",
         "mockito-kotlin2",
         "platform-test-annotations",
