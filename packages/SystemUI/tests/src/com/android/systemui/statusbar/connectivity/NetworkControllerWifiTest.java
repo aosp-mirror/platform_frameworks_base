@@ -58,7 +58,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     private static final int MIN_RSSI = -100;
     private static final int MAX_RSSI = -55;
     private WifiInfo mWifiInfo = mock(WifiInfo.class);
-    private VcnTransportInfo mVcnTransportInfo = mock(VcnTransportInfo.class);
+    private VcnTransportInfo mVcnTransportInfo = new VcnTransportInfo.Builder().build();
 
     @Before
     public void setUp() throws Exception {

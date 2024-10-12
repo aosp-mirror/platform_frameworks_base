@@ -7227,7 +7227,7 @@ public final class ActiveServices {
             mAm.mBatteryStatsService.noteServiceStopLaunch(sr.appInfo.uid, sr.name.getPackageName(),
                     sr.name.getClassName());
             if (sr.app != app && sr.app != null && !sr.app.isPersistent()) {
-                mAm.mProcessStateController.stopService(psr, sr);
+                mAm.mProcessStateController.stopService(sr.app.mServices, sr);
                 sr.app.mServices.updateBoundClientUids();
             }
             sr.setProcess(null, null, 0, null);

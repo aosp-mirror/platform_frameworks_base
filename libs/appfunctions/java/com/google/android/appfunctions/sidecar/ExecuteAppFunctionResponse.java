@@ -234,12 +234,13 @@ public final class ExecuteAppFunctionResponse {
     @IntDef(
             prefix = {"RESULT_"},
             value = {
-                    RESULT_OK,
-                    RESULT_DENIED,
-                    RESULT_APP_UNKNOWN_ERROR,
-                    RESULT_INTERNAL_ERROR,
-                    RESULT_INVALID_ARGUMENT,
-                    RESULT_DISABLED
+                RESULT_OK,
+                RESULT_DENIED,
+                RESULT_APP_UNKNOWN_ERROR,
+                RESULT_INTERNAL_ERROR,
+                RESULT_INVALID_ARGUMENT,
+                RESULT_DISABLED,
+                RESULT_CANCELLED
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ResultCode {}

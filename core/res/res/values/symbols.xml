@@ -1582,6 +1582,8 @@
   <java-symbol type="layout" name="input_method" />
   <java-symbol type="layout" name="input_method_extract_view" />
   <java-symbol type="layout" name="input_method_switch_item" />
+  <java-symbol type="layout" name="input_method_switch_item_divider" />
+  <java-symbol type="layout" name="input_method_switch_item_header" />
   <java-symbol type="layout" name="input_method_switch_item_new" />
   <java-symbol type="layout" name="input_method_switch_dialog_new" />
   <java-symbol type="layout" name="input_method_switch_dialog_title" />

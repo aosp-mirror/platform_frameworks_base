@@ -155,6 +155,7 @@
 
     <protected-broadcast android:name="android.bluetooth.intent.DISCOVERABLE_TIMEOUT" />
     <protected-broadcast android:name="android.bluetooth.action.AUTO_ON_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.SCAN_MODE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_STARTED" />
@@ -240,6 +241,8 @@
     <protected-broadcast
         android:name="android.bluetooth.avrcp-controller.profile.action.FOLDER_LIST" />
     <protected-broadcast
+        android:name="android.bluetooth.avrcp-controller.profile.action.PLAYER_SETTING" />
+    <protected-broadcast
         android:name="android.bluetooth.avrcp-controller.profile.action.TRACK_EVENT" />
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
@@ -266,6 +269,7 @@
     <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.HAP_CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.action.HAP_DEVICE_AVAILABLE" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_ACTIVE_DEVICE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.action.LE_AUDIO_CONF_CHANGED" />

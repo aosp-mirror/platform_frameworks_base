@@ -354,11 +354,13 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
     }
 
     @AssistedFactory
-    public interface Factory {
+    public interface Factory extends StatusBarWindowController.Factory {
         /** Creates a new instance. */
+        @NonNull
+        @Override
         StatusBarWindowControllerImpl create(
-                Context context,
-                ViewCaptureAwareWindowManager viewCaptureAwareWindowManager);
+                @NonNull Context context,
+                @NonNull ViewCaptureAwareWindowManager viewCaptureAwareWindowManager);
     }
 
 }

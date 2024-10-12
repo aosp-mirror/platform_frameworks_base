@@ -16,10 +16,12 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
+import android.app.NotificationManager.INTERRUPTION_FILTER_NONE
 import android.content.Context
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
+import android.service.notification.ZenPolicy.STATE_DISALLOW
 import android.service.notification.ZenPolicy.VISUAL_EFFECT_NOTIFICATION_LIST
 import android.util.Log
 import androidx.concurrent.futures.await
@@ -114,6 +116,26 @@ constructor(
             .map { modes -> buildActiveZenModes(modes) }
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
+
+    val activeModesBlockingEverything: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.interruptionFilter == INTERRUPTION_FILTER_NONE
+    }
+
+    val activeModesBlockingMedia: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.policy.priorityCategoryMedia == STATE_DISALLOW
+    }
+
+    val activeModesBlockingAlarms: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
+        mode.policy.priorityCategoryAlarms == STATE_DISALLOW
+    }
+
+    private fun getFilteredActiveModesFlow(predicate: (ZenMode) -> Boolean): Flow<ActiveZenModes> {
+        return modes
+            .map { modes -> modes.filter { mode -> predicate(mode) } }
+            .map { modes -> buildActiveZenModes(modes) }
+            .flowOn(bgDispatcher)
+            .distinctUntilChanged()
+    }
 
     suspend fun getActiveModes() = buildActiveZenModes(zenModeRepository.getModes())
 

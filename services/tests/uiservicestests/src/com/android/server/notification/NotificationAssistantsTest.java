@@ -145,7 +145,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mContext.setMockPackageManager(mPm);
         mContext.addMockSystemService(Context.USER_SERVICE, mUm);
         mContext.getOrCreateTestableResources().addOverride(
-                com.android.internal.R.string.config_defaultAssistantAccessComponent, "a/a");
+                com.android.internal.R.string.config_defaultAssistantAccessComponent,
+                mCn.flattenToString());
         mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
         mContext.ensureTestableResources();
@@ -207,13 +208,43 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         writeXmlAndReload(USER_ALL);
 
-        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(0);
+        ArrayMap<Boolean, ArraySet<String>> approved =
+                mAssistants.mApproved.get(ActivityManager.getCurrentUser());
         // approved should not be null
         assertNotNull(approved);
         assertEquals(new ArraySet<>(), approved.get(true));
 
         // user set is maintained
         assertTrue(mAssistants.mIsUserChanged.get(ActivityManager.getCurrentUser()));
+    }
+
+    @Test
+    public void testWriteXml_userTurnedOffNAS_backup() throws Exception {
+        int userId = 10;
+
+        mAssistants.loadDefaultsFromConfig(true);
+
+        mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
+                true, true);
+
+        ComponentName current = CollectionUtils.firstOrNull(
+                mAssistants.getAllowedComponents(userId));
+        mAssistants.setUserSet(userId, true);
+        mAssistants.setPackageOrComponentEnabled(current.flattenToString(), userId, true, false,
+                true);
+        assertTrue(mAssistants.mIsUserChanged.get(userId));
+        assertThat(mAssistants.getApproved(userId, true)).isEmpty();
+
+        writeXmlAndReload(userId);
+
+        ArrayMap<Boolean, ArraySet<String>> approved = mAssistants.mApproved.get(userId);
+        // approved should not be null
+        assertNotNull(approved);
+        assertEquals(new ArraySet<>(), approved.get(true));
+
+        // user set is maintained
+        assertTrue(mAssistants.mIsUserChanged.get(userId));
+        assertThat(mAssistants.getApproved(userId, true)).isEmpty();
     }
 
     @Test

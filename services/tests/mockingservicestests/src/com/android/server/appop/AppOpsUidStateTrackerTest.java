@@ -31,12 +31,14 @@ import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.UID_STATE_MAX_LAST_NON_RESTRICTED;
 import static android.app.AppOpsManager.UID_STATE_TOP;
+import static android.permission.flags.Flags.delayUidStateChangesFromCapabilityUpdates;
 
 import static com.android.server.appop.AppOpsUidStateTracker.processStateToUidState;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -325,6 +327,10 @@ public class AppOpsUidStateTrackerTest {
                 .backgroundState()
                 .update();
 
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
+        assertEquals(MODE_IGNORED,
+                mIntf.evalMode(UID, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO, MODE_FOREGROUND));
+
         procStateBuilder(UID)
                 .backgroundState()
                 .microphoneCapability()
@@ -342,10 +348,23 @@ public class AppOpsUidStateTrackerTest {
                 .microphoneCapability()
                 .update();
 
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
+        assertEquals(MODE_ALLOWED,
+                mIntf.evalMode(UID, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO, MODE_FOREGROUND));
+
         procStateBuilder(UID)
                 .backgroundState()
                 .update();
 
+        if (delayUidStateChangesFromCapabilityUpdates()) {
+            mClock.advanceTime(mConstants.BG_STATE_SETTLE_TIME - 1);
+            assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
+            assertEquals(MODE_ALLOWED,
+                    mIntf.evalMode(UID, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO,
+                            MODE_FOREGROUND));
+
+            mClock.advanceTime(1);
+        }
         assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
         assertEquals(MODE_IGNORED,
                 mIntf.evalMode(UID, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO, MODE_FOREGROUND));
@@ -356,6 +375,8 @@ public class AppOpsUidStateTrackerTest {
         procStateBuilder(UID)
                 .backgroundState()
                 .update();
+
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
 
         procStateBuilder(UID)
                 .backgroundState()
@@ -372,10 +393,18 @@ public class AppOpsUidStateTrackerTest {
                 .cameraCapability()
                 .update();
 
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
+
         procStateBuilder(UID)
                 .backgroundState()
                 .update();
 
+        if (delayUidStateChangesFromCapabilityUpdates()) {
+            mClock.advanceTime(mConstants.BG_STATE_SETTLE_TIME - 1);
+            assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
+
+            mClock.advanceTime(1);
+        }
         assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
     }
 
@@ -384,6 +413,9 @@ public class AppOpsUidStateTrackerTest {
         procStateBuilder(UID)
                 .backgroundState()
                 .update();
+
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_FINE_LOCATION, MODE_FOREGROUND));
 
         procStateBuilder(UID)
                 .backgroundState()
@@ -401,12 +433,52 @@ public class AppOpsUidStateTrackerTest {
                 .locationCapability()
                 .update();
 
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_FINE_LOCATION, MODE_FOREGROUND));
+
         procStateBuilder(UID)
                 .backgroundState()
                 .update();
 
+        if (delayUidStateChangesFromCapabilityUpdates()) {
+            mClock.advanceTime(mConstants.BG_STATE_SETTLE_TIME - 1);
+            assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
+            assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_FINE_LOCATION, MODE_FOREGROUND));
+
+            mClock.advanceTime(1);
+        }
         assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
         assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_FINE_LOCATION, MODE_FOREGROUND));
+    }
+
+    @Test
+    public void testProcStateChangesAndStaysUnrestrictedAndCapabilityRemoved() {
+        assumeTrue(delayUidStateChangesFromCapabilityUpdates());
+
+        procStateBuilder(UID)
+                .topState()
+                .microphoneCapability()
+                .cameraCapability()
+                .locationCapability()
+                .update();
+
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
+
+        procStateBuilder(UID)
+                .foregroundState()
+                .update();
+
+        mClock.advanceTime(mConstants.TOP_STATE_SETTLE_TIME - 1);
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
+        assertEquals(MODE_ALLOWED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
+
+        mClock.advanceTime(1);
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_RECORD_AUDIO, MODE_FOREGROUND));
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_CAMERA, MODE_FOREGROUND));
+        assertEquals(MODE_IGNORED, mIntf.evalMode(UID, OP_COARSE_LOCATION, MODE_FOREGROUND));
     }
 
     @Test

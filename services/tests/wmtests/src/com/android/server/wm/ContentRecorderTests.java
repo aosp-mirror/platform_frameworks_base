@@ -52,6 +52,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.ContentRecordingSession;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.SurfaceControl;
@@ -93,9 +94,11 @@ public class ContentRecorderTests extends WindowTestsBase {
     private boolean mHandleAnisotropicDisplayMirroring = false;
 
     @Before public void setUp() {
+        mDisplayInfo.type = Display.TYPE_VIRTUAL;
         MockitoAnnotations.initMocks(this);
 
         doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
+        doReturn(false).when(mWm.mDisplayManagerInternal).isDisplayReadyForMirroring(anyInt());
 
         // Skip unnecessary operations of relayout.
         spyOn(mWm.mWindowPlacerLocked);
@@ -156,6 +159,25 @@ public class ContentRecorderTests extends WindowTestsBase {
 
     @Test
     public void testUpdateRecording_display() {
+        defaultInit();
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
+    }
+
+    @Test
+    public void testUpdateRecording_externalDisplayWithoutUserConfirmation() {
+        mDisplayInfo.type = Display.TYPE_EXTERNAL;
+        defaultInit();
+        mContentRecorder.setContentRecordingSession(mDisplaySession);
+        mContentRecorder.updateRecording();
+        assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
+    }
+
+    @Test
+    public void testUpdateRecording_externalDisplayWithUserConfirmation() {
+        doReturn(true).when(mWm.mDisplayManagerInternal).isDisplayReadyForMirroring(anyInt());
+        mDisplayInfo.type = Display.TYPE_EXTERNAL;
         defaultInit();
         mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
