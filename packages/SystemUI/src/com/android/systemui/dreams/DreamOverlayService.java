@@ -297,6 +297,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             mStateController.setLowLightActive(false);
             mStateController.setEntryAnimationsFinished(false);
 
+            mDreamOverlayCallbackController.onWakeUp();
+
             if (mDreamOverlayContainerViewController != null) {
                 mDreamOverlayContainerViewController.destroy();
                 mDreamOverlayContainerViewController = null;

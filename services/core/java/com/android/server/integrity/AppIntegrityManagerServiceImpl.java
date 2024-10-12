@@ -62,7 +62,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
 import com.android.server.integrity.engine.RuleEvaluationEngine;
 import com.android.server.integrity.model.IntegrityCheckResult;

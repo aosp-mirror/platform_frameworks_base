@@ -24,6 +24,7 @@ import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.res.R
 import com.android.systemui.utils.PolicyRestriction
 import javax.inject.Inject
@@ -38,12 +39,13 @@ constructor(
     private val screenBrightnessInteractor: ScreenBrightnessInteractor,
     private val brightnessPolicyEnforcementInteractor: BrightnessPolicyEnforcementInteractor,
     @Application private val applicationScope: CoroutineScope,
+    val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) {
     val currentBrightness =
         screenBrightnessInteractor.gammaBrightness.stateIn(
             applicationScope,
             SharingStarted.WhileSubscribed(),
-            GammaBrightness(0)
+            GammaBrightness(0),
         )
 
     val maxBrightness = screenBrightnessInteractor.maxGammaBrightness
@@ -85,6 +87,8 @@ constructor(
 /** Represents a drag event in a brightness slider. */
 sealed interface Drag {
     val brightness: GammaBrightness
+
     @JvmInline value class Dragging(override val brightness: GammaBrightness) : Drag
+
     @JvmInline value class Stopped(override val brightness: GammaBrightness) : Drag
 }

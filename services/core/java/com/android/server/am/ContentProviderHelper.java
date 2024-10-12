@@ -90,7 +90,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
-import com.android.server.RescueParty;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.sdksandbox.SdkSandboxManagerLocal;
@@ -1382,7 +1382,7 @@ public class ContentProviderHelper {
         mService.mOomAdjuster.initSettings();
 
         // Now that the settings provider is published we can consider sending in a rescue party.
-        RescueParty.onSettingsProviderPublished(mService.mContext);
+        CrashRecoveryAdaptor.rescuePartyOnSettingsProviderPublished(mService.mContext);
     }
 
     /**

@@ -174,7 +174,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     }
 
     @Override
-    void relayout(RunningTaskInfo taskInfo) {
+    void relayout(RunningTaskInfo taskInfo, boolean hasGlobalFocus) {
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         // The crop and position of the task should only be set when a task is fluid resizing. In
         // all other cases, it is expected that the transition handler positions and crops the task
@@ -185,7 +185,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
         // synced with the buffer transaction (that draws the View). Both will be shown on screen
         // at the same, whereas applying them independently causes flickering. See b/270202228.
         relayout(taskInfo, t, t, true /* applyStartTransactionOnDraw */,
-                shouldSetTaskPositionAndCrop);
+                shouldSetTaskPositionAndCrop, hasGlobalFocus);
     }
 
     @VisibleForTesting
@@ -196,12 +196,13 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
             boolean setTaskCropAndPosition,
             boolean isStatusBarVisible,
             boolean isKeyguardVisibleAndOccluded,
-            InsetsState displayInsetsState) {
+            InsetsState displayInsetsState,
+            boolean hasGlobalFocus) {
         relayoutParams.reset();
         relayoutParams.mRunningTaskInfo = taskInfo;
         relayoutParams.mLayoutResId = R.layout.caption_window_decor;
         relayoutParams.mCaptionHeightId = getCaptionHeightIdStatic(taskInfo.getWindowingMode());
-        relayoutParams.mShadowRadiusId = taskInfo.isFocused
+        relayoutParams.mShadowRadiusId = hasGlobalFocus
                 ? R.dimen.freeform_decor_shadow_focused_thickness
                 : R.dimen.freeform_decor_shadow_unfocused_thickness;
         relayoutParams.mApplyStartTransactionOnDraw = applyStartTransactionOnDraw;
@@ -233,7 +234,8 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
     @SuppressLint("MissingPermission")
     void relayout(RunningTaskInfo taskInfo,
             SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
-            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition) {
+            boolean applyStartTransactionOnDraw, boolean setTaskCropAndPosition,
+            boolean hasGlobalFocus) {
         final boolean isFreeform =
                 taskInfo.getWindowingMode() == WindowConfiguration.WINDOWING_MODE_FREEFORM;
         final boolean isDragResizeable = ENABLE_WINDOWING_SCALED_RESIZING.isTrue()
@@ -245,7 +247,7 @@ public class CaptionWindowDecoration extends WindowDecoration<WindowDecorLinearL
 
         updateRelayoutParams(mRelayoutParams, taskInfo, applyStartTransactionOnDraw,
                 setTaskCropAndPosition, mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded,
-                mDisplayController.getInsetsState(taskInfo.displayId));
+                mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus);
 
         relayout(mRelayoutParams, startT, finishT, wct, oldRootView, mResult);
         // After this line, mTaskInfo is up-to-date and should be used instead of taskInfo

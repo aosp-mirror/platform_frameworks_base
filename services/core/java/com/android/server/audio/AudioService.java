@@ -286,7 +286,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -2746,6 +2745,11 @@ public class AudioService extends IAudioService.Stub
             mDeviceBroker.setForceUse_Async(AudioSystem.FOR_ENCODED_SURROUND, forceSetting,
                     eventSource);
         }
+    }
+
+    @Override
+    protected void onUnhandledException(int code, int flags, Exception e) {
+        Slog.wtf(TAG, "Uncaught exception in AudioService: " + code + ", " + flags, e);
     }
 
     @Override // Binder call
@@ -8044,7 +8048,14 @@ public class AudioService extends IAudioService.Stub
         }
         synchronized (mAbsoluteVolumeDeviceInfoMapLock) {
             if (mAbsoluteVolumeDeviceInfoMap.containsKey(audioSystemDeviceOut)) {
-                return mAbsoluteVolumeDeviceInfoMap.get(audioSystemDeviceOut).mDeviceVolumeBehavior;
+                final AbsoluteVolumeDeviceInfo deviceInfo = mAbsoluteVolumeDeviceInfoMap.get(
+                        audioSystemDeviceOut);
+                if (deviceInfo != null) {
+                    return deviceInfo.mDeviceVolumeBehavior;
+                }
+
+                Log.e(TAG,
+                        "Null absolute volume device info stored for key " + audioSystemDeviceOut);
             }
         }
 
@@ -15038,6 +15049,11 @@ public class AudioService extends IAudioService.Stub
 
     private void addAudioSystemDeviceOutToAbsVolumeDevices(int audioSystemDeviceOut,
             AbsoluteVolumeDeviceInfo info) {
+        if (info == null) {
+            Log.e(TAG, "Cannot add null absolute volume info for audioSystemDeviceOut "
+                    + audioSystemDeviceOut);
+            return;
+        }
         if (DEBUG_VOL) {
             Log.d(TAG, "Adding DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
                     + " to mAbsoluteVolumeDeviceInfoMap with behavior "

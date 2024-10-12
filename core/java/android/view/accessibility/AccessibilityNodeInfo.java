@@ -860,6 +860,37 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String EXTRA_DATA_REQUESTED_KEY =
             "android.view.accessibility.AccessibilityNodeInfo.extra_data_requested";
 
+    // Tri-state checked states.
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CHECKED_STATE" }, value = {
+            CHECKED_STATE_FALSE,
+            CHECKED_STATE_TRUE,
+            CHECKED_STATE_PARTIAL
+    })
+    public @interface CheckedState {}
+
+    /**
+     * This node is not checked.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CHECKED_STATE_FALSE = 0;
+
+    /**
+     * This node is checked.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CHECKED_STATE_TRUE = 1;
+
+    /**
+     * This node is partially checked. For example,
+     * when a checkbox owns a number of sub-options and they have
+     * different states, then the main checkbox is in a partially-checked state.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public static final int CHECKED_STATE_PARTIAL = 2;
+
     // Boolean attributes.
 
     private static final int BOOLEAN_PROPERTY_CHECKABLE = 1 /* << 0 */;
@@ -1037,6 +1068,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     private IBinder mLeashedChild;
     private IBinder mLeashedParent;
     private long mLeashedParentNodeId = UNDEFINED_NODE_ID;
+
+    // TODO(b/369951517) Initialize mChecked explicitly with
+    // the CHECKED_FALSE state when flagging is removed.
+    private int mChecked;
 
     /**
      * Creates a new {@link AccessibilityNodeInfo}.
@@ -2319,28 +2354,100 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets whether this node is checked.
+     * Gets whether this node is checked. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
+     *
+     * @deprecated Use {@link #getChecked()} instead.
      *
      * @return True if the node is checked.
      */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    @Deprecated
     public boolean isChecked() {
         return getBooleanProperty(BOOLEAN_PROPERTY_CHECKED);
     }
 
     /**
-     * Sets whether this node is checked.
+     * Sets whether this node is checked. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
+     * @deprecated Use {@link #setChecked(int)} instead.
+     *
      * @param checked True if the node is checked.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    @Deprecated
     public void setChecked(boolean checked) {
         setBooleanProperty(BOOLEAN_PROPERTY_CHECKED, checked);
+        if (Flags.triStateChecked()) {
+            mChecked = checked ? CHECKED_STATE_TRUE : CHECKED_STATE_FALSE;
+        }
+    }
+
+    /**
+     * Gets the checked state of this node. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
+     *
+     * @see #setCheckable(boolean)
+     * @see #isCheckable()
+     * @see #setChecked(int)
+     *
+     * @return The checked state, one of:
+     *          <ul>
+     *          <li>{@link #CHECKED_STATE_FALSE}
+     *          <li>{@link #CHECKED_STATE_TRUE}
+     *          <li>{@link #CHECKED_STATE_PARTIAL}
+     *          </ul>
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public @CheckedState int getChecked() {
+        return mChecked;
+    }
+
+    /**
+     * Sets the checked state of this node. This is only meaningful
+     * when {@link #isCheckable()} returns {@code true}.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @see #setCheckable(boolean)
+     * @see #isCheckable()
+     * @see #getChecked()
+     *
+     * @param checked The checked state. One of
+     *          <ul>
+     *          <li>{@link #CHECKED_STATE_FALSE}
+     *          <li>{@link #CHECKED_STATE_TRUE}
+     *          <li>{@link #CHECKED_STATE_PARTIAL}
+     *          </ul>
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     * @throws IllegalArgumentException if checked is not one of {@link #CHECKED_STATE_FALSE},
+     *          {@link #CHECKED_STATE_TRUE}, or {@link #CHECKED_STATE_PARTIAL}.
+     */
+    @FlaggedApi(Flags.FLAG_TRI_STATE_CHECKED)
+    public void setChecked(@CheckedState int checked) {
+        enforceNotSealed();
+        switch (checked) {
+            case CHECKED_STATE_FALSE:
+            case CHECKED_STATE_TRUE:
+            case CHECKED_STATE_PARTIAL:
+                mChecked = checked;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown checked argument: " + checked);
+        }
+        setBooleanProperty(BOOLEAN_PROPERTY_CHECKED, checked == CHECKED_STATE_TRUE);
     }
 
     /**
@@ -4515,6 +4622,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (mLeashedParentNodeId != DEFAULT.mLeashedParentNodeId) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
+        fieldIndex++;
+        if (mChecked != DEFAULT.mChecked) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
         int totalFields = fieldIndex;
         parcel.writeLong(nonDefaultFields);
 
@@ -4683,6 +4794,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             parcel.writeLong(mLeashedParentNodeId);
         }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            parcel.writeInt(mChecked);
+        }
 
         if (DEBUG) {
             fieldIndex--;
@@ -4771,6 +4885,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mLeashedChild = other.mLeashedChild;
         mLeashedParent = other.mLeashedParent;
         mLeashedParentNodeId = other.mLeashedParentNodeId;
+        mChecked = other.mChecked;
     }
 
     private void initCopyInfos(AccessibilityNodeInfo other) {
@@ -4959,6 +5074,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             mLeashedParentNodeId = parcel.readLong();
+        }
+        if (isBitSet(nonDefaultFields, fieldIndex++)) {
+            mChecked = parcel.readInt();
         }
 
         mSealed = sealed;

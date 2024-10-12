@@ -323,7 +323,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskReorderedToTopWhenNotFocused() = runOnUiThread {
-        mockDesktopWindowDecoration.mTaskInfo.isFocused = false
+        mockDesktopWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -339,7 +339,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_resize_resizingTaskNotReorderedToTopWhenFocused() = runOnUiThread {
-        mockDesktopWindowDecoration.mTaskInfo.isFocused = true
+        mockDesktopWindowDecoration.mHasGlobalFocus = true
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_RIGHT, // Resize right
                 STARTING_BOUNDS.left.toFloat(),
@@ -355,7 +355,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
 
     @Test
     fun testDragResize_drag_draggedTaskNotReorderedToTop() = runOnUiThread {
-        mockDesktopWindowDecoration.mTaskInfo.isFocused = false
+        mockDesktopWindowDecoration.mHasGlobalFocus = false
         taskPositioner.onDragPositioningStart(
                 CTRL_TYPE_UNDEFINED, // drag
                 STARTING_BOUNDS.left.toFloat(),

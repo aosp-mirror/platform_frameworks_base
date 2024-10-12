@@ -12577,18 +12577,31 @@ public class NotificationManagerService extends SystemService {
 
                         // Checks if this is a request to notify system UI about a notification that
                         // has been lifetime extended.
-                        // (We only need to check old for the flag, because in both cancellation and
-                        // update cases, old should have the flag, whereas in update cases the
-                        // new will NOT have the flag.)
-                        // If it is such a request, and this is system UI, we send the post request
-                        // only to System UI, and break as we don't need to continue checking other
-                        // Managed Services.
-                        if (info.isSystemUi() && old != null && old.getNotification() != null
+                        // We check both old and new for the flag, to avoid catching updates
+                        // (where new will not have the flag).
+                        // If it is such a request, and this is the system UI listener, we send
+                        // the post request. If it's any other listener, we skip it.
+                        if (old != null && old.getNotification() != null
                                 && (old.getNotification().flags
+                                & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0
+                                && sbn != null && sbn.getNotification() != null
+                                && (sbn.getNotification().flags
                                 & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY) > 0) {
-                            final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
-                            listenerCalls.add(() -> notifyPosted(info, sbnToPost, update));
-                            break;
+                            if (info.isSystemUi()) {
+                                final NotificationRankingUpdate update =
+                                        makeRankingUpdateLocked(info);
+                                listenerCalls.add(() -> notifyPosted(info, sbnToPost, update));
+                                break;
+                            } else {
+                                // Skipping because this is the direct-reply "update" and we only
+                                // need to send it to sysui, so we immediately continue, before it
+                                // can get sent to other listeners below.
+                                if (DBG) {
+                                    Slog.d(TAG, "prepareNotifyPostedLocked: direct reply update, "
+                                            + "skipping post to " + info.toString());
+                                }
+                                continue;
+                            }
                         }
                     }
 

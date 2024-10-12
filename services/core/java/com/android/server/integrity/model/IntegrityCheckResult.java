@@ -19,8 +19,6 @@ package com.android.server.integrity.model;
 import android.annotation.Nullable;
 import android.content.integrity.Rule;
 
-import com.android.internal.util.FrameworkStatsLog;
-
 import java.util.Collections;
 import java.util.List;
 

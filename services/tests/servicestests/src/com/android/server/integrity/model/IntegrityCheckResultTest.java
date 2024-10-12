@@ -22,8 +22,6 @@ import android.content.integrity.AtomicFormula;
 import android.content.integrity.CompoundFormula;
 import android.content.integrity.Rule;
 
-import com.android.internal.util.FrameworkStatsLog;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;

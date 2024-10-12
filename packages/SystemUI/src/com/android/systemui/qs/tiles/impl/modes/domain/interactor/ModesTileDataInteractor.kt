@@ -76,14 +76,14 @@ constructor(
         } else {
             return ModesTileModel(
                 isActivated = activeModes.isAnyActive(),
-                icon = context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(),
+                icon = Icon.Resource(ModesTile.ICON_RES_ID, null),
                 iconResId = ModesTile.ICON_RES_ID,
                 activeModes = activeModes.modeNames,
             )
         }
     }
 
-    private data class TileIcon(val icon: Icon.Loaded, val resId: Int?)
+    private data class TileIcon(val icon: Icon, val resId: Int?)
 
     private fun getTileIcon(activeMode: ZenModeInfo?): TileIcon {
         return if (activeMode != null) {
@@ -94,7 +94,7 @@ constructor(
                 TileIcon(activeMode.icon.drawable.asIcon(), null)
             }
         } else {
-            TileIcon(context.getDrawable(ModesTile.ICON_RES_ID)!!.asIcon(), ModesTile.ICON_RES_ID)
+            TileIcon(Icon.Resource(ModesTile.ICON_RES_ID, null), ModesTile.ICON_RES_ID)
         }
     }
 

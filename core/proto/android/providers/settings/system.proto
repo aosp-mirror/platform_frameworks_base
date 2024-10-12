@@ -220,6 +220,15 @@ message SystemSettingsProto {
     }
     optional Touchpad touchpad = 36;
 
+    message Mouse {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto reverse_vertical_scrolling = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto swap_primary_button = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+
+    optional Mouse mouse = 38;
+
     optional SettingProto tty_mode = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Vibrate {
@@ -277,5 +286,5 @@ message SystemSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 38;
+    // Next tag = 39;
 }

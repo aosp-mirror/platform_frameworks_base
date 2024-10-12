@@ -18,7 +18,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="30dp" />
+            <corners android:radius="28dp" />
             <solid android:color="@android:color/system_tertiary_fixed" />
         </shape>
     </item>

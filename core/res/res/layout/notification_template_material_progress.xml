@@ -75,10 +75,11 @@
                         />
 
 
-                    <include
+                    <com.android.internal.widget.NotificationProgressBar
+                        android:id="@+id/progress"
                         android:layout_width="0dp"
                         android:layout_height="@dimen/notification_progress_bar_height"
-                        layout="@layout/notification_template_progress"
+                        style="@style/Widget.Material.Light.ProgressBar.Horizontal"
                         android:layout_weight="1"
                         />
 

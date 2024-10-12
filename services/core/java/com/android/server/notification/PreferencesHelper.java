@@ -1986,6 +1986,7 @@ public class PreferencesHelper implements RankingConfig {
      * bypassing DND. It should be called whenever a channel is created, updated, or deleted, or
      * when the current user (or its profiles) change.
      */
+    // TODO: b/368247671 - remove fromSystemOrSystemUi argument when modes_ui is inlined.
     private void updateCurrentUserHasChannelsBypassingDnd(int callingUid,
             boolean fromSystemOrSystemUi) {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
@@ -2016,7 +2017,12 @@ public class PreferencesHelper implements RankingConfig {
         boolean haveBypassingApps = candidatePkgs.size() > 0;
         if (mCurrentUserHasChannelsBypassingDnd != haveBypassingApps) {
             mCurrentUserHasChannelsBypassingDnd = haveBypassingApps;
-            updateZenPolicy(mCurrentUserHasChannelsBypassingDnd, callingUid, fromSystemOrSystemUi);
+            if (android.app.Flags.modesUi()) {
+                mZenModeHelper.updateHasPriorityChannels(mCurrentUserHasChannelsBypassingDnd);
+            } else {
+                updateZenPolicy(mCurrentUserHasChannelsBypassingDnd, callingUid,
+                        fromSystemOrSystemUi);
+            }
         }
     }
 
@@ -2034,6 +2040,9 @@ public class PreferencesHelper implements RankingConfig {
         return true;
     }
 
+    // TODO: b/368247671 - delete this method when modes_ui is inlined, as
+    //                     updateCurrentUserHasChannelsBypassingDnd was the only caller and
+    //                     PreferencesHelper should otherwise not need to modify actual policy
     public void updateZenPolicy(boolean areChannelsBypassingDnd, int callingUid,
             boolean fromSystemOrSystemUi) {
         NotificationManager.Policy policy = mZenModeHelper.getNotificationPolicy();

@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,7 +48,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastIsFinite
-import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.communal.ui.viewmodel.DragHandle
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
@@ -169,7 +169,7 @@ fun ResizableItemFrame(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     outlinePadding: Dp = 8.dp,
-    outlineColor: Color = LocalAndroidColorScheme.current.primary,
+    outlineColor: Color = MaterialTheme.colorScheme.primary,
     cornerRadius: Dp = 37.dp,
     strokeWidth: Dp = 3.dp,
     alpha: () -> Float = { 1f },

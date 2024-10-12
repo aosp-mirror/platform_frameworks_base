@@ -28,7 +28,8 @@ class MSDLCoreStartable @Inject constructor(private val msdlPlayer: MSDLPlayer) 
     override fun start() {}
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
-        pw.println("MSDLPlayer history of the last ${MSDLHistoryLogger.HISTORY_SIZE} events:")
+        pw.println(msdlPlayer)
+        pw.println("MSDL player history of the last ${MSDLHistoryLogger.HISTORY_SIZE} events:")
         msdlPlayer.getHistory().forEach { event -> pw.println("$event") }
     }
 }

@@ -22,6 +22,10 @@ import static com.android.systemui.log.LogBufferHelperKt.logcatLogBuffer;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+import static kotlinx.coroutines.flow.SharedFlowKt.MutableSharedFlow;
+import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
@@ -35,10 +39,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-import static kotlinx.coroutines.flow.SharedFlowKt.MutableSharedFlow;
-import static kotlinx.coroutines.flow.StateFlowKt.MutableStateFlow;
 
 import android.animation.Animator;
 import android.annotation.IdRes;
@@ -201,6 +201,12 @@ import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
+import dagger.Lazy;
+
+import kotlinx.coroutines.CoroutineDispatcher;
+import kotlinx.coroutines.channels.BufferOverflow;
+import kotlinx.coroutines.test.TestScope;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -214,11 +220,6 @@ import org.mockito.stubbing.Answer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-
-import dagger.Lazy;
-import kotlinx.coroutines.CoroutineDispatcher;
-import kotlinx.coroutines.channels.BufferOverflow;
-import kotlinx.coroutines.test.TestScope;
 
 public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
@@ -461,7 +462,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 () -> mKosmos.getSceneInteractor(),
                 () -> mKosmos.getSceneContainerOcclusionInteractor(),
                 () -> mKosmos.getKeyguardClockInteractor(),
-                () -> mKosmos.getSceneBackInteractor());
+                () -> mKosmos.getSceneBackInteractor(),
+                () -> mKosmos.getAlternateBouncerInteractor());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
@@ -622,7 +624,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                                 () -> mKosmos.getSceneInteractor(),
                                 () -> mKosmos.getSceneContainerOcclusionInteractor(),
                                 () -> mKosmos.getKeyguardClockInteractor(),
-                                () -> mKosmos.getSceneBackInteractor()),
+                                () -> mKosmos.getSceneBackInteractor(),
+                                () -> mKosmos.getAlternateBouncerInteractor()),
                         mKeyguardBypassController,
                         mDozeParameters,
                         mScreenOffAnimationController,

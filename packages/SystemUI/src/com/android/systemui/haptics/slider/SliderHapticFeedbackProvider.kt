@@ -38,7 +38,7 @@ import kotlin.math.pow
  */
 class SliderHapticFeedbackProvider(
     private val vibratorHelper: VibratorHelper,
-    private val velocityTracker: VelocityTracker,
+    private val velocityProvider: SliderDragVelocityProvider,
     private val config: SliderHapticFeedbackConfig = SliderHapticFeedbackConfig(),
     private val clock: com.android.systemui.util.time.SystemClock,
 ) : SliderStateListener {
@@ -50,6 +50,7 @@ class SliderHapticFeedbackProvider(
     private var dragTextureLastTime = clock.elapsedRealtime()
     var dragTextureLastProgress = -1f
         private set
+
     private val lowTickDurationMs =
         vibratorHelper.getPrimitiveDurations(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)[0]
     private var hasVibratedAtLowerBookend = false
@@ -99,7 +100,7 @@ class SliderHapticFeedbackProvider(
      */
     private fun vibrateDragTexture(
         absoluteVelocity: Float,
-        @FloatRange(from = 0.0, to = 1.0) normalizedSliderProgress: Float
+        @FloatRange(from = 0.0, to = 1.0) normalizedSliderProgress: Float,
     ) {
         // Check if its time to vibrate
         val currentTime = clock.elapsedRealtime()
@@ -132,7 +133,7 @@ class SliderHapticFeedbackProvider(
     @VisibleForTesting
     fun scaleOnDragTexture(
         absoluteVelocity: Float,
-        @FloatRange(from = 0.0, to = 1.0) normalizedSliderProgress: Float
+        @FloatRange(from = 0.0, to = 1.0) normalizedSliderProgress: Float,
     ): Float {
         val velocityInterpolated =
             velocityAccelerateInterpolator.getInterpolation(
@@ -162,31 +163,22 @@ class SliderHapticFeedbackProvider(
 
     override fun onLowerBookend() {
         if (!hasVibratedAtLowerBookend) {
-            vibrateOnEdgeCollision(abs(getTrackedVelocity()))
+            vibrateOnEdgeCollision(abs(velocityProvider.getTrackedVelocity()))
             hasVibratedAtLowerBookend = true
         }
     }
 
     override fun onUpperBookend() {
         if (!hasVibratedAtUpperBookend) {
-            vibrateOnEdgeCollision(abs(getTrackedVelocity()))
+            vibrateOnEdgeCollision(abs(velocityProvider.getTrackedVelocity()))
             hasVibratedAtUpperBookend = true
         }
     }
 
     override fun onProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float) {
-        vibrateDragTexture(abs(getTrackedVelocity()), progress)
+        vibrateDragTexture(abs(velocityProvider.getTrackedVelocity()), progress)
         hasVibratedAtUpperBookend = false
         hasVibratedAtLowerBookend = false
-    }
-
-    private fun getTrackedVelocity(): Float {
-        velocityTracker.computeCurrentVelocity(UNITS_SECOND, config.maxVelocityToScale)
-        return if (velocityTracker.isAxisSupported(config.velocityAxis)) {
-            velocityTracker.getAxisVelocity(config.velocityAxis)
-        } else {
-            0f
-        }
     }
 
     override fun onProgressJump(@FloatRange(from = 0.0, to = 1.0) progress: Float) {}
@@ -199,6 +191,5 @@ class SliderHapticFeedbackProvider(
                 .setUsage(VibrationAttributes.USAGE_TOUCH)
                 .setFlags(VibrationAttributes.FLAG_PIPELINED_EFFECT)
                 .build()
-        private const val UNITS_SECOND = 1000
     }
 }

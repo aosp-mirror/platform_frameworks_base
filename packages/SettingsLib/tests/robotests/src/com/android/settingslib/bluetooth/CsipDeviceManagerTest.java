@@ -39,6 +39,7 @@ import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
 import android.os.Looper;
 import android.os.Parcel;
+import android.os.UserManager;
 import android.platform.test.flag.junit.SetFlagsRule;
 
 import com.android.settingslib.flags.Flags;
@@ -104,6 +105,8 @@ public class CsipDeviceManagerTest {
     private LocalBluetoothLeBroadcast mBroadcast;
     @Mock
     private LocalBluetoothLeBroadcastAssistant mAssistant;
+    @Mock
+    private UserManager mUserManager;
 
     private ShadowBluetoothAdapter mShadowBluetoothAdapter;
     private CachedBluetoothDevice mCachedDevice1;
@@ -128,7 +131,7 @@ public class CsipDeviceManagerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mContext = RuntimeEnvironment.application;
+        mContext = spy(RuntimeEnvironment.application);
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         mShadowBluetoothAdapter.setEnabled(true);
         mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
@@ -353,6 +356,37 @@ public class CsipDeviceManagerTest {
         assertThat(preferredDevice.getMemberDevice()).contains(mCachedDevice2);
         verify(mAssistant, never()).addSource(any(BluetoothDevice.class),
                 any(BluetoothLeBroadcastMetadata.class), anyBoolean());
+    }
+
+    @Test
+    public void
+            addMemberDevicesIntoMainDevice_preferredDeviceIsMainAndTwoMain_workProfile_doNothing() {
+        // Condition: The preferredDevice is main and there is another main device in top list
+        // Expected Result: return true and there is the preferredDevice in top list
+        CachedBluetoothDevice preferredDevice = mCachedDevice1;
+        mCachedDevice1.getMemberDevice().clear();
+        mCachedDevices.clear();
+        mCachedDevices.add(preferredDevice);
+        mCachedDevices.add(mCachedDevice2);
+        mCachedDevices.add(mCachedDevice3);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        when(mBroadcast.isEnabled(null)).thenReturn(true);
+        BluetoothLeBroadcastMetadata metadata = Mockito.mock(BluetoothLeBroadcastMetadata.class);
+        when(mBroadcast.getLatestBluetoothLeBroadcastMetadata()).thenReturn(metadata);
+        BluetoothLeBroadcastReceiveState state = Mockito.mock(
+                BluetoothLeBroadcastReceiveState.class);
+        when(state.getBisSyncState()).thenReturn(ImmutableList.of(1L));
+        when(mAssistant.getAllSources(mDevice2)).thenReturn(ImmutableList.of(state));
+        when(mContext.getSystemService(UserManager.class)).thenReturn(mUserManager);
+        when(mUserManager.isManagedProfile()).thenReturn(true);
+
+        assertThat(mCsipDeviceManager.addMemberDevicesIntoMainDevice(GROUP1, preferredDevice))
+                .isTrue();
+        assertThat(mCachedDevices.contains(preferredDevice)).isTrue();
+        assertThat(mCachedDevices.contains(mCachedDevice2)).isFalse();
+        assertThat(mCachedDevices.contains(mCachedDevice3)).isTrue();
+        assertThat(preferredDevice.getMemberDevice()).contains(mCachedDevice2);
+        verify(mAssistant, never()).addSource(mDevice1, metadata, /* isGroupOp= */ false);
     }
 
     @Test

@@ -102,6 +102,7 @@ class DesktopModeLoggerTransitionObserver(
         SystemProperties.set(
             VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY,
             VISIBLE_TASKS_COUNTER_SYSTEM_PROPERTY_DEFAULT_VALUE)
+        desktopModeEventLogger.logTaskInfoStateInit()
     }
 
     override fun onTransitionReady(
