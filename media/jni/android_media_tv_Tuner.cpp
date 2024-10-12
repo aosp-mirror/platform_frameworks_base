@@ -1837,7 +1837,7 @@ jobject JTuner::openLnbByHandle(jlong handle) {
     sp<LnbClientCallbackImpl> callback = new LnbClientCallbackImpl();
     lnbClient = sTunerClient->openLnb(handle);
     if (lnbClient == nullptr) {
-        ALOGD("Failed to open lnb, handle = %ld", handle);
+        ALOGD("Failed to open lnb, handle = %s", std::to_string(handle).c_str());
         return nullptr;
     }
 
