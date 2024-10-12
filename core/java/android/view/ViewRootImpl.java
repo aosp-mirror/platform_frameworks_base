@@ -6971,9 +6971,7 @@ public final class ViewRootImpl implements ViewParent,
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
                     break;
                 case MSG_PAUSED_FOR_SYNC_TIMEOUT:
-                    Log.e(mTag, "Timedout waiting to unpause for sync");
-                    mNumPausedForSync = 0;
-                    scheduleTraversals();
+                    resumeAfterSyncTimeout();
                     break;
                 case MSG_CHECK_INVALIDATION_IDLE: {
                     long delta;
@@ -12766,6 +12764,15 @@ public final class ViewRootImpl implements ViewParent,
         activeSurfaceSyncGroup.addTransaction(t);
     }
 
+    /**
+     * Resume rendering after being paused for sync due to a timeout.
+     */
+    private void resumeAfterSyncTimeout() {
+        Log.e(mTag, "Timedout waiting to unpause for sync mNumPausedForSync=" + mNumPausedForSync);
+        mNumPausedForSync = 0;
+        scheduleTraversals();
+    }
+
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
         boolean newSyncGroup = false;
@@ -12793,6 +12800,16 @@ public final class ViewRootImpl implements ViewParent,
                 }
             });
             newSyncGroup = true;
+
+            // If the sync group is marked ready by a timeout, check if rendering is paused and
+            // if it is, resume rendering and trigger a traversal.
+            mActiveSurfaceSyncGroup.addSyncCompleteCallback(mExecutor, () -> {
+                if (mActiveSurfaceSyncGroup != null
+                        && mActiveSurfaceSyncGroup.isComplete() && mNumPausedForSync > 0) {
+                    mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+                    resumeAfterSyncTimeout();
+                }
+            });
         }
 
         Trace.instant(Trace.TRACE_TAG_VIEW,
@@ -12807,12 +12824,20 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        mNumPausedForSync++;
-        mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
-        mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT,
-                1000 * Build.HW_TIMEOUT_MULTIPLIER);
+        // The sync group can be marked ready by a timeout. This makes incrementing
+        // mNumPausedForSync racy. Here we check if the sync group is complete and
+        // if it is then we don't pause for syncing.
+        if (!mActiveSurfaceSyncGroup.isComplete()) {
+            mNumPausedForSync++;
+            mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+            mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT,
+                    1000 * Build.HW_TIMEOUT_MULTIPLIER);
+        } else {
+            Log.d(mTag, "Active sync group is already completed "
+                    + mActiveSurfaceSyncGroup.getName());
+        }
         return mActiveSurfaceSyncGroup;
-    };
+    }
 
     private final Executor mSimpleExecutor = Runnable::run;
 
