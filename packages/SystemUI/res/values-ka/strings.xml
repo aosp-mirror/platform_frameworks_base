@@ -672,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"ზარის დადუმების გამო ხელმისაწვდომი არაა"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"მიუწვდომელია, ჩართულია „არ შემაწუხოთ“ რეჟიმი"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"მიუწვდომელია, ჩართულია „არ შემაწუხოთ“ რეჟიმი"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. შეეხეთ დადუმების გასაუქმებლად."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. შეეხეთ ვიბრაციაზე დასაყენებლად. შეიძლება დადუმდეს მარტივი წვდომის სერვისებიც."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. შეეხეთ დასადუმებლად. შეიძლება დადუმდეს მარტივი წვდომის სერვისებიც."</string>

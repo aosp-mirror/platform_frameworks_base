@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"روشن"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"روشن • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"خاموش"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"تنظیم نشده است"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"مدیریت در تنظیمات"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{حالت فعالی وجود ندارد}=1{‫{mode} فعال است}one{‫# حالت فعال است}other{‫# حالت فعال است}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"به‌جز هشدارها، یادآوری‌ها، رویدادها و تماس‌گیرندگانی که خودتان مشخص می‌کنید، هیچ صدا و لرزشی نخواهید داشت. همچنان صدای مواردی را که پخش می‌کنید می‌شنوید (ازجمله صدای موسیقی، ویدیو و بازی)."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"دردسترس نیست، چون زنگ بی‌صدا شده است"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"دردسترس نیست زیرا «مزاحم نشوید» روشن است"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"دردسترس نیست زیرا «مزاحم نشوید» روشن است"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. برای باصدا کردن تک‌ضرب بزنید."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. برای تنظیم روی لرزش تک‌ضرب بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. برای صامت کردن تک‌ضرب بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"آشنایی با اشاره‌های صفحه لمسی"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"پیمایش کردن بااستفاده از صفحه‌کلید و صفحه لمسی"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"آشنایی با اشاره‌های صفحه لمسی، میان‌برهای صفحه‌کلید، و موارد دیگر"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"برگشتن"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"رفتن به صفحه اصلی"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"مشاهده کردن برنامه‌های اخیر"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"تمام"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"برگشتن"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"با سه انگشت روی صفحه لمسی تند به چپ یا راست بکشید."</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"چه خوب!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"اشاره برگشت را تکمیل کردید."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"رفتن به صفحه اصلی"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"با سه انگشت روی صفحه لمسی تند به بالا بکشید"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"عالی است!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"اشاره رفتن به صفحه اصلی را تکمیل کردید"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"مشاهده کردن برنامه‌های اخیر"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"با سه انگشت روی صفحه لمسی تند به بالا بکشید و نگه دارید"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"عالی است!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"اشاره مشاهده برنامه‌های اخیر را انجام دادید"</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"مشاهده همه برنامه‌ها"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"دکمه کنش را روی صفحه لمسی فشار دهید"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"عالی بود!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"اشاره مشاهده همه برنامه‌ها را انجام دادید"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"نور پس‌زمینه صفحه‌کلید"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏سطح %1$d از %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"کنترل خانه هوشمند"</string>
