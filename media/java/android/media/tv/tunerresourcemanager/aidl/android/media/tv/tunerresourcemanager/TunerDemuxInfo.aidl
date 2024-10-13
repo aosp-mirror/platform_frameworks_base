@@ -26,7 +26,7 @@ parcelable TunerDemuxInfo {
     /**
      * Demux handle
      */
-    int handle;
+    long handle;
 
     /**
      * Supported filter types (defined in {@link android.media.tv.tuner.filter.Filter})

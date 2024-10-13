@@ -690,8 +690,7 @@
     <string name="media_transfer_usb_audio_name" msgid="1789292056757821355">"USB 오디오"</string>
     <string name="media_transfer_wired_device_mic_name" msgid="7417067197803840965">"마이크 잭"</string>
     <string name="media_transfer_usb_device_mic_name" msgid="7171789543226269822">"USB 마이크"</string>
-    <!-- no translation found for media_transfer_bt_device_mic_name (1870669402238687618) -->
-    <skip />
+    <string name="media_transfer_bt_device_mic_name" msgid="1870669402238687618">"블루투스 마이크"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"사용"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"사용 안 함"</string>
     <string name="carrier_network_change_mode" msgid="4257621815706644026">"이동통신사 네트워크 변경"</string>

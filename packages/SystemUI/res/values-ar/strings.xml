@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"مفعَّل"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"مفعّل • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"غير مفعَّل"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"لم يتم ضبط الوضع"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"الإدارة في الإعدادات"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{ما مِن أوضاع مفعَّلة}=1{الوضع \"{mode}\" مفعَّل}two{وضعان مفعَّلان}few{‫# أوضاع مفعَّلة}many{‫# وضعًا مفعَّلاً}other{‫# وضع مفعَّل}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"لن يتم إزعاجك بالأصوات والاهتزاز، باستثناء المُنبِّهات والتذكيرات والأحداث والمتصلين الذين تحددهم. وسيظل بإمكانك سماع أي عناصر أخرى تختار تشغيلها، بما في ذلك الموسيقى والفيديوهات والألعاب."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"غير متاح بسبب كتم صوت الرنين"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"مستوى الصوت غير متاح بسبب تفعيل وضع \"عدم الإزعاج\""</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"مستوى الصوت غير متاح لأنّ وضع \"عدم الإزعاج\" مفعّل"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. انقر لإلغاء التجاهل."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. انقر للتعيين على الاهتزاز. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. انقر للتجاهل. قد يتم تجاهل خدمات \"سهولة الاستخدام\"."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"تعرَّف على إيماءات لوحة اللمس"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"التنقّل باستخدام لوحة المفاتيح ولوحة اللمس"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"تعرَّف على إيماءات لوحة اللمس واختصارات لوحة المفاتيح والمزيد"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"رجوع"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"الانتقال إلى الصفحة الرئيسية"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"عرض التطبيقات المستخدَمة مؤخرًا"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"تم"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"رجوع"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"مرِّر سريعًا لليمين أو لليسار باستخدام 3 أصابع على لوحة اللمس"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"أحسنت."</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"لقد أكملت التدريب على إيماءة الرجوع."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"الانتقال إلى الشاشة الرئيسية"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"مرّر سريعًا للأعلى باستخدام 3 أصابع على لوحة اللمس"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"أحسنت صنعًا."</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"لقد أكملت الدليل التوجيهي عن إيماءة \"الانتقال إلى الشاشة الرئيسية\""</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"عرض التطبيقات المستخدَمة مؤخرًا"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"مرِّر سريعًا للأعلى مع الاستمرار باستخدام 3 أصابع على لوحة اللمس"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"أحسنت."</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"لقد أكملْت الدليل التوجيهي على إيماءة \"عرض التطبيقات المستخدَمة مؤخرًا\"."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"عرض جميع التطبيقات"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"اضغط على مفتاح الإجراء في لوحة المفاتيح"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"أحسنت!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"لقد أكملْت الدليل التوجيهي عن إيماءة \"عرض جميع التطبيقات\""</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"الإضاءة الخلفية للوحة المفاتيح"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏مستوى الإضاءة: %1$d من %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"إدارة المنزل آليًّا"</string>

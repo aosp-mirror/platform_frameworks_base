@@ -98,7 +98,7 @@
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nuk u rregullua?\nTrokit për ta rikthyer"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nuk ka probleme me kamerën? Trokit për ta shpërfillur."</string>
     <string name="windowing_app_handle_education_tooltip" msgid="6398482412956375783">"Trokit për të hapur menynë e aplikacionit"</string>
-    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Trokit për të shfaqur disa aplikacone bashkë"</string>
+    <string name="windowing_desktop_mode_image_button_education_tooltip" msgid="6285279585554484957">"Trokit për të shfaqur disa aplikacione bashkë"</string>
     <string name="windowing_desktop_mode_exit_education_tooltip" msgid="6685429075790085337">"Kthehu tek ekrani i plotë nga menyja e aplikacionit"</string>
     <string name="letterbox_education_dialog_title" msgid="7739895354143295358">"Shiko dhe bëj më shumë"</string>
     <string name="letterbox_education_split_screen_text" msgid="449233070804658627">"Zvarrite në një aplikacion tjetër për ekranin e ndarë"</string>

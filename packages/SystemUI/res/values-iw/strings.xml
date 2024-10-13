@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"מצב מופעל"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"פועל • <xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g>"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"מצב מושבת"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"לא הוגדר"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"שינוי ב\'הגדרות\'"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{אין מצבים פעילים}=1{מצב פעיל אחד ({mode})}one{‫# מצבים פעילים}two{‫# מצבים פעילים}other{‫# מצבים פעילים}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"כדי לא להפריע לך, המכשיר לא ירטוט ולא ישמיע שום צליל, חוץ מהתראות, תזכורות, אירועים ושיחות ממתקשרים מסוימים לבחירתך. המצב הזה לא ישפיע על צלילים שהם חלק מתוכן שבחרת להפעיל, כמו מוזיקה, סרטונים ומשחקים."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"לא זמין כי הצלצול מושתק"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"לא זמין כי התכונה \'נא לא להפריע\' מופעלת"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"לא זמין כי התכונה \'נא לא להפריע\' מופעלת"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"‏%1$s. יש להקיש כדי לבטל את ההשתקה."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"‏%1$s. צריך להקיש כדי להגדיר רטט. ייתכן ששירותי הנגישות מושתקים."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"‏%1$s. יש להקיש כדי להשתיק. ייתכן ששירותי הנגישות יושתקו."</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"מידע על התנועות בלוח המגע"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"ניווט באמצעות המקלדת ולוח המגע"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"מידע על התנועות בלוח המגע, מקשי קיצור ועוד"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"חזרה"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"חזרה לדף הבית"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"הצגת האפליקציות האחרונות"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"סיום"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"חזרה"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"מחליקים שמאלה או ימינה עם שלוש אצבעות על לוח המגע"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"איזה יופי!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"השלמת את התנועה \'הקודם\'."</string>
-    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"מעבר לדף הבית"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"מעבר למסך הבית"</string>
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"מחליקים כלפי מעלה עם שלוש אצבעות על לוח המגע"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"מעולה!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"השלמת את תנועת החזרה למסך הבית"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"הצגת האפליקציות האחרונות"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"מחליקים למעלה ולוחצים לחיצה ארוכה עם שלוש אצבעות על לוח המגע"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"מעולה!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"השלמת את התנועה להצגת האפליקציות האחרונות."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"הצגת כל האפליקציות"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"צריך להקיש על מקש הפעולה במקלדת"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"כל הכבוד!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"השלמת את התנועה להצגת כל האפליקציות"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"התאורה האחורית במקלדת"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"‏רמה %1$d מתוך %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"שליטה במכשירים"</string>

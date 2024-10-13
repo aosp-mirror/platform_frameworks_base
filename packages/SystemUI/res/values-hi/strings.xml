@@ -440,8 +440,7 @@
     <string name="zen_mode_on" msgid="9085304934016242591">"चालू है"</string>
     <string name="zen_mode_on_with_details" msgid="7416143430557895497">"<xliff:g id="TRIGGER_DESCRIPTION">%1$s</xliff:g> • पर"</string>
     <string name="zen_mode_off" msgid="1736604456618147306">"बंद है"</string>
-    <!-- no translation found for zen_mode_set_up (8231201163894922821) -->
-    <skip />
+    <string name="zen_mode_set_up" msgid="8231201163894922821">"सेट नहीं है"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"सेटिंग में जाकर मैनेज करें"</string>
     <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{कोई मोड चालू नहीं है}=1{{mode} चालू है}one{# मोड चालू है}other{# मोड चालू हैं}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"आपको अलार्म, रिमाइंडर, इवेंट और चुनिंदा कॉल करने वालों के अलावा किसी और तरह से (आवाज़ करके और थरथरा कर ) परेशान नहीं किया जाएगा. आप फिर भी संगीत, वीडियो और गेम सहित अपना चुना हुआ सब कुछ सुन सकते हैं."</string>
@@ -673,6 +672,10 @@
     <string name="stream_notification_unavailable" msgid="4313854556205836435">"आवाज़ नहीं आएगी, क्योंकि रिंग म्यूट है"</string>
     <string name="stream_alarm_unavailable" msgid="4059817189292197839">"सुविधा बंद है, क्योंकि \'परेशान न करें\' मोड चालू है"</string>
     <string name="stream_media_unavailable" msgid="6823020894438959853">"आवाज़ बंद है, क्योंकि \'परेशान न करें\' मोड चालू है"</string>
+    <!-- no translation found for stream_unavailable_by_modes (3674139029490353683) -->
+    <skip />
+    <!-- no translation found for stream_unavailable_by_unknown (6908434629318171588) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. अनम्यूट करने के लिए टैप करें."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. कंपन पर सेट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. म्यूट करने के लिए टैप करें. सुलभता सेवाएं म्यूट हो सकती हैं."</string>
@@ -1317,7 +1320,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> को डिवाइस लॉग ऐक्सेस करने की अनुमति देनी है?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"एक बार ऐक्सेस करने की अनुमति दें"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"अनुमति न दें"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए कर सकते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. डिवाइस को बनाने वाली कंपनी फिर भी डिवाइस के कुछ लॉग या जानकारी ऐक्सेस कर सकती है."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"डिवाइस लॉग में आपके डिवाइस पर की गई कार्रवाइयां रिकॉर्ड होती हैं. ऐप्लिकेशन, इन लॉग का इस्तेमाल गड़बड़ियां ढूंढने और उन्हें ठीक करने के लिए कर सकते हैं.\n\nकुछ लॉग में संवेदनशील जानकारी हो सकती है. इसलिए, सिर्फ़ भरोसेमंद ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस दें. \n\nअगर इस ऐप्लिकेशन को डिवाइस के सभी लॉग का ऐक्सेस नहीं दिया जाता है, तब भी यह डिवाइस पर मौजूद अपने लॉग ऐक्सेस कर सकता है. इसके अलावा, डिवाइस को बनाने वाली कंपनी भी डिवाइस के कुछ लॉग या जानकारी ऐक्सेस कर सकती है."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"ज़्यादा जानें"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"ज़्यादा जानने के लिए <xliff:g id="URL">%s</xliff:g> पर जाएं"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"<xliff:g id="APPNAME">%1$s</xliff:g> खोलें"</string>
@@ -1406,38 +1409,26 @@
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"टचपैड पर हाथ के जेस्चर के बारे में जानें"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"कीबोर्ड और टचपैड का इस्तेमाल करके नेविगेट करें"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"टचपैड पर हाथ के जेस्चर, कीबोर्ड शॉर्टकट वगैरह के बारे में जानें"</string>
-    <!-- no translation found for touchpad_tutorial_back_gesture_button (3104716365403620315) -->
-    <skip />
-    <!-- no translation found for touchpad_tutorial_home_gesture_button (8023973153559885624) -->
-    <skip />
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"वापस जाएं"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"होम स्क्रीन पर जाएं"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"हो गया"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"वापस जाएं"</string>
-    <!-- no translation found for touchpad_back_gesture_guidance (5352221087725906542) -->
-    <skip />
-    <!-- no translation found for touchpad_back_gesture_success_title (7370719098633023496) -->
-    <skip />
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"अपने टचपैड पर तीन उंगलियों का इस्तेमाल करके, बाईं या दाईं ओर स्वाइप करें"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"बढ़िया!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"अब आपने जान लिया है कि हाथ का जेस्चर इस्तेमाल करके, पिछली स्क्रीन पर वापस कैसे जाएं."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"होम स्क्रीन पर जाएं"</string>
-    <!-- no translation found for touchpad_home_gesture_guidance (4178219118381915899) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_title (3648264553645798470) -->
-    <skip />
-    <!-- no translation found for touchpad_home_gesture_success_body (2590690589194027059) -->
-    <skip />
+    <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"अपने टचपैड पर तीन उंगलियों से ऊपर की ओर स्वाइप करें"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"बहुत बढ़िया!"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"अब आपको इस बारे में जानकारी है कि हाथ के जेस्चर का इस्तेमाल करके होम स्क्रीन पर कैसे जाते हैं"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखें"</string>
-    <!-- no translation found for touchpad_recent_apps_gesture_guidance (6304446013842271822) -->
-    <skip />
+    <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"अपने टचपैड पर तीन उंगलियों से ऊपर की ओर स्वाइप करें और फिर होल्ड करें"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"बहुत बढ़िया!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"आपने हाल ही में इस्तेमाल किए गए ऐप्लिकेशन देखने के लिए, हाथ के जेस्चर के बारे में जान लिया है."</string>
-    <!-- no translation found for tutorial_action_key_title (8172535792469008169) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_guidance (5040613427202799294) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_title (2371827347071979571) -->
-    <skip />
-    <!-- no translation found for tutorial_action_key_success_body (1688986269491357832) -->
-    <skip />
+    <string name="tutorial_action_key_title" msgid="8172535792469008169">"सभी ऐप्लिकेशन देखें"</string>
+    <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"अपने कीबोर्ड पर ऐक्शन बटन दबाएं"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"बहुत खूब!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"अब आपको इस बारे में जानकारी है कि सभी ऐप्लिकेशन देखने के लिए, हाथ के जेस्चर का इस्तेमाल कैसे किया जाता है"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"कीबोर्ड की बैकलाइट"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d में से %1$d लेवल"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"होम कंट्रोल"</string>

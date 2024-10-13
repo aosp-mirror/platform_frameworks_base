@@ -15426,6 +15426,7 @@ package android.telephony {
     field public static final int EVENT_DATA_CONNECTION_STATE_CHANGED = 7; // 0x7
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_DATA_ENABLED_CHANGED = 34; // 0x22
     field public static final int EVENT_DISPLAY_INFO_CHANGED = 21; // 0x15
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_EMERGENCY_CALLBACK_MODE_CHANGED = 40; // 0x28
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_EMERGENCY_NUMBER_LIST_CHANGED = 25; // 0x19
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED = 28; // 0x1c
     field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_LEGACY_CALL_STATE_CHANGED = 36; // 0x24
@@ -15461,6 +15462,12 @@ package android.telephony {
 
   public static interface TelephonyCallback.DataEnabledListener {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onDataEnabledChanged(boolean, int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static interface TelephonyCallback.EmergencyCallbackModeListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeRestarted(int, @NonNull java.time.Duration, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeStarted(int, @NonNull java.time.Duration, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeStopped(int, int, int);
   }
 
   public static interface TelephonyCallback.LinkCapacityEstimateChangedListener {
@@ -15724,6 +15731,8 @@ package android.telephony {
     field public static final int CELL_BROADCAST_RESULT_SUCCESS = 0; // 0x0
     field public static final int CELL_BROADCAST_RESULT_UNKNOWN = -1; // 0xffffffff
     field public static final int CELL_BROADCAST_RESULT_UNSUPPORTED = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int EMERGENCY_CALLBACK_MODE_CALL = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int EMERGENCY_CALLBACK_MODE_SMS = 2; // 0x2
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_INVALID_STATE = 4; // 0x4
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_NOT_SUPPORTED = 1; // 0x1
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_RADIO_ERROR = 3; // 0x3
@@ -15781,6 +15790,13 @@ package android.telephony {
     field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
     field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
     field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_EMERGENCY_SMS_SENT = 4; // 0x4
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_NORMAL_SMS_SENT = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED = 3; // 0x3
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_TIMER_EXPIRED = 5; // 0x5
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_USER_ACTION = 6; // 0x6
     field public static final int THERMAL_MITIGATION_RESULT_INVALID_STATE = 3; // 0x3
     field public static final int THERMAL_MITIGATION_RESULT_MODEM_ERROR = 1; // 0x1
     field public static final int THERMAL_MITIGATION_RESULT_MODEM_NOT_AVAILABLE = 2; // 0x2
