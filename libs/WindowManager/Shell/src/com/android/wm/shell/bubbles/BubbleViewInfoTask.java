@@ -21,11 +21,10 @@ import static com.android.wm.shell.bubbles.BadgedImageView.WHITE_SCRIM_ALPHA;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
+import static com.android.wm.shell.shared.bubbles.FlyoutDrawableLoader.loadFlyoutDrawable;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -34,7 +33,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.util.Log;
 import android.util.PathParser;
 import android.view.LayoutInflater;
@@ -51,7 +49,6 @@ import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
 import com.android.wm.shell.shared.handles.RegionSamplingHelper;
 
 import java.lang.ref.WeakReference;
-import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -274,7 +271,7 @@ public class BubbleViewInfoTask {
         @Nullable BubbleExpandedView expandedView;
         int dotColor;
         Path dotPath;
-        @Nullable Bubble.FlyoutMessage flyoutMessage;
+        Bubble.FlyoutMessage flyoutMessage;
         Bitmap bubbleBitmap;
         Bitmap badgeBitmap;
 
@@ -299,6 +296,10 @@ public class BubbleViewInfoTask {
                 // if we failed to update common fields return null
                 return null;
             }
+
+            // set the flyout message but don't load the avatar because we can't pass it on the
+            // binder to launcher
+            info.flyoutMessage = b.getFlyoutMessage();
 
             return info;
         }
@@ -336,7 +337,7 @@ public class BubbleViewInfoTask {
             info.flyoutMessage = b.getFlyoutMessage();
             if (info.flyoutMessage != null) {
                 info.flyoutMessage.senderAvatar =
-                        loadSenderAvatar(c, info.flyoutMessage.senderIcon);
+                        loadFlyoutDrawable(info.flyoutMessage.senderIcon, c);
             }
             return info;
         }
@@ -417,22 +418,5 @@ public class BubbleViewInfoTask {
         info.dotColor = ColorUtils.blendARGB(badgeBitmapInfo.color,
                 Color.WHITE, WHITE_SCRIM_ALPHA);
         return true;
-    }
-
-    @Nullable
-    static Drawable loadSenderAvatar(@NonNull final Context context, @Nullable final Icon icon) {
-        Objects.requireNonNull(context);
-        if (icon == null) return null;
-        try {
-            if (icon.getType() == Icon.TYPE_URI
-                    || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
-                context.grantUriPermission(context.getPackageName(),
-                        icon.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            }
-            return icon.loadDrawable(context);
-        } catch (Exception e) {
-            Log.w(TAG, "loadSenderAvatar failed: " + e.getMessage());
-            return null;
-        }
     }
 }

@@ -90,7 +90,7 @@ internal object SingleLineViewInflater {
                 notification = notification,
                 isGroupConversation = isGroupConversation,
                 builder = builder,
-                systemUiContext = systemUiContext
+                systemUiContext = systemUiContext,
             )
 
         val conversationData =
@@ -98,7 +98,7 @@ internal object SingleLineViewInflater {
                 // We don't show the sender's name for one-to-one conversation
                 conversationSenderName =
                     if (isGroupConversation) conversationTextData?.senderName else null,
-                avatar = conversationAvatar
+                avatar = conversationAvatar,
             )
 
         return SingleLineViewModel(
@@ -111,7 +111,7 @@ internal object SingleLineViewInflater {
     @JvmStatic
     fun inflateRedactedSingleLineViewModel(
         context: Context,
-        isConversation: Boolean = false
+        isConversation: Boolean = false,
     ): SingleLineViewModel {
         val conversationData =
             if (isConversation) {
@@ -122,7 +122,7 @@ internal object SingleLineViewInflater {
                             com.android.systemui.res.R.drawable
                                 .ic_redacted_notification_single_line_icon
                         )
-                    )
+                    ),
                 )
             } else {
                 null
@@ -134,7 +134,7 @@ internal object SingleLineViewInflater {
             context.getString(
                 com.android.systemui.res.R.string.redacted_notification_single_line_text
             ),
-            conversationData
+            conversationData,
         )
     }
 
@@ -159,11 +159,13 @@ internal object SingleLineViewInflater {
         }
 
         // load the sender's name to display
-        val name = lastMessage.senderPerson?.name
+        // null senderPerson means the current user.
+        val name = lastMessage.senderPerson?.name ?: user.name
+
         val senderName =
             systemUiContext.resources.getString(
                 R.string.conversation_single_line_name_display,
-                if (Flags.cleanUpSpansAndNewLines()) name?.toString() else name
+                if (Flags.cleanUpSpansAndNewLines()) name?.toString() else name,
             )
 
         // We need to find back-up values for those texts if they are needed and empty
@@ -333,7 +335,7 @@ internal object SingleLineViewInflater {
                         sender.icon
                             ?: builder.getDefaultAvatar(
                                 name = sender.name,
-                                uniqueNames = uniqueNames
+                                uniqueNames = uniqueNames,
                             )
                     lastKey = senderKey
                 } else {
@@ -341,7 +343,7 @@ internal object SingleLineViewInflater {
                         sender.icon
                             ?: builder.getDefaultAvatar(
                                 name = sender.name,
-                                uniqueNames = uniqueNames
+                                uniqueNames = uniqueNames,
                             )
                     break
                 }
@@ -424,7 +426,7 @@ internal object SingleLineViewInflater {
 
     private fun Notification.Builder.getDefaultAvatar(
         name: CharSequence?,
-        uniqueNames: PeopleHelper.NameToPrefixMap? = null
+        uniqueNames: PeopleHelper.NameToPrefixMap? = null,
     ): Icon {
         val layoutColor = getSmallIconColor(/* isHeader= */ false)
         if (!name.isNullOrEmpty()) {
@@ -432,7 +434,7 @@ internal object SingleLineViewInflater {
             return peopleHelper.createAvatarSymbol(
                 /* name = */ name,
                 /* symbol = */ symbol,
-                /* layoutColor = */ layoutColor
+                /* layoutColor = */ layoutColor,
             )
         }
         // If name is null, create default avatar with background color

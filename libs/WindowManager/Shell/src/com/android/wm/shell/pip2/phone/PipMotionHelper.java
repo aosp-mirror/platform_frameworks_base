@@ -336,7 +336,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_NONE, false /* resize */);
-        // mPipTaskOrganizer.exitPip(skipAnimation ? 0 : LEAVE_PIP_DURATION, enterSplit);
+        mPipScheduler.scheduleExitPipViaExpand();
     }
 
     /**

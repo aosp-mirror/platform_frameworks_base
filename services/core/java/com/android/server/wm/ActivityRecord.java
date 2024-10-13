@@ -33,7 +33,6 @@ import static android.app.ActivityOptions.ANIM_UNDEFINED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
-import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_NONE;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
@@ -42,7 +41,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -880,8 +878,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     })
     @interface SplashScreenBehavior { }
 
-    // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
-    boolean mIsExiting;
     // Force an app transition to be ran in the case the visibility of the app did not change.
     // We use this for the case of moving a Root Task to the back with multiple activities, and the
     // top activity enters PIP; the bottom activity's visibility stays the same, but we need to
@@ -1227,10 +1223,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             pw.print(" lastAllDrawn="); pw.print(mLastAllDrawn);
             pw.println(")");
         }
-        if (mStartingData != null || firstWindowDrawn || mIsExiting) {
+        if (mStartingData != null || firstWindowDrawn) {
             pw.print(prefix); pw.print("startingData="); pw.print(mStartingData);
-            pw.print(" firstWindowDrawn="); pw.print(firstWindowDrawn);
-            pw.print(" mIsExiting="); pw.println(mIsExiting);
+            pw.print(" firstWindowDrawn="); pw.println(firstWindowDrawn);
         }
         if (mStartingWindow != null || mStartingData != null || mStartingSurface != null
                 || startingMoved || mVisibleSetFromTransferredStartingWindow) {
@@ -3201,6 +3196,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!compatEnabled && !mWmService.mConstants.mIgnoreActivityOrientationRequest) {
             return false;
         }
+        if (mWmService.mConstants.isPackageOptOutIgnoreActivityOrientationRequest(packageName)) {
+            return false;
+        }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
         return !mAppCompatController.getAppCompatOverrides().getAppCompatAspectRatioOverrides()
                 .shouldApplyUserMinAspectRatioOverride();
@@ -4368,21 +4366,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mActivityRecordInputSink.releaseSurfaceControl();
 
         super.removeImmediately();
-    }
-
-    @Override
-    void removeIfPossible() {
-        mIsExiting = false;
-        removeAllWindowsIfPossible();
-        removeImmediately();
-    }
-
-    @Override
-    boolean handleCompleteDeferredRemoval() {
-        if (mIsExiting) {
-            removeIfPossible();
-        }
-        return super.handleCompleteDeferredRemoval();
     }
 
     void onRemovedFromDisplay() {
@@ -5895,6 +5878,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
+        final State prevState = mState;
         mState = state;
 
         if (getTaskFragment() != null) {
@@ -5934,6 +5918,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             case PAUSED:
                 mAtmService.updateBatteryStats(this, false);
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+                break;
+            case STOPPING:
+                // It is possible that an Activity is scheduled to be STOPPED directly from RESUMED
+                // state. Updating the PAUSED usage state in that case, since the Activity will be
+                // STOPPED while cycled through the PAUSED state.
+                if (prevState == RESUMED) {
+                    mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_PAUSED);
+                }
                 break;
             case STOPPED:
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
@@ -8400,15 +8392,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // and back which can cause visible issues (see b/184078928).
         final int parentWindowingMode =
                 newParentConfiguration.windowConfiguration.getWindowingMode();
-        final boolean isInCameraCompatFreeform = parentWindowingMode == WINDOWING_MODE_FREEFORM
-                && mAppCompatController.getAppCompatCameraOverrides().getFreeformCameraCompatMode()
-                        != CAMERA_COMPAT_FREEFORM_NONE;
 
         // Bubble activities should always fill their parent and should not be letterboxed.
         final boolean isFixedOrientationLetterboxAllowed = !getLaunchedFromBubble()
                 && (parentWindowingMode == WINDOWING_MODE_MULTI_WINDOW
                         || parentWindowingMode == WINDOWING_MODE_FULLSCREEN
-                        || isInCameraCompatFreeform
+                        || AppCompatCameraPolicy.shouldCameraCompatControlOrientation(this)
                         // When starting to switch between PiP and fullscreen, the task is pinned
                         // and the activity is fullscreen. But only allow to apply letterbox if the
                         // activity is exiting PiP because an entered PiP should fill the task.

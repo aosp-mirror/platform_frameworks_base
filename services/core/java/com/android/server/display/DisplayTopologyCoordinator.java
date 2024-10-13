@@ -66,6 +66,16 @@ class DisplayTopologyCoordinator {
     }
 
     /**
+     * Remove a display from the topology.
+     * @param displayId The logical display ID
+     */
+    void onDisplayRemoved(int displayId) {
+        synchronized (mLock) {
+            mTopology.removeDisplay(displayId);
+        }
+    }
+
+    /**
      * Print the object's state and debug information into the given stream.
      * @param pw The stream to dump information to.
      */

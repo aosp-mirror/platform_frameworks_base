@@ -133,6 +133,9 @@ public class LoudnessCodecHelper {
     private static final EventLogger sLogger = new EventLogger(
             AudioService.LOG_NB_EVENTS_LOUDNESS_CODEC, "Loudness updates");
 
+    private final Object mDispatcherLock = new Object();
+
+    @GuardedBy("mDispatcherLock")
     private final LoudnessRemoteCallbackList mLoudnessUpdateDispatchers =
             new LoudnessRemoteCallbackList(this);
 
@@ -339,12 +342,16 @@ public class LoudnessCodecHelper {
     }
 
     void registerLoudnessCodecUpdatesDispatcher(ILoudnessCodecUpdatesDispatcher dispatcher) {
-        mLoudnessUpdateDispatchers.register(dispatcher, Binder.getCallingPid());
+        synchronized (mDispatcherLock) {
+            mLoudnessUpdateDispatchers.register(dispatcher, Binder.getCallingPid());
+        }
     }
 
     void unregisterLoudnessCodecUpdatesDispatcher(
             ILoudnessCodecUpdatesDispatcher dispatcher) {
-        mLoudnessUpdateDispatchers.unregister(dispatcher);
+        synchronized (mDispatcherLock) {
+            mLoudnessUpdateDispatchers.unregister(dispatcher);
+        }
     }
 
     void startLoudnessCodecUpdates(int sessionId) {
@@ -640,17 +647,20 @@ public class LoudnessCodecHelper {
             Log.d(TAG,
                     "dispatchNewLoudnessParameters: sessionId " + sessionId + " bundle: " + bundle);
         }
-        final int nbDispatchers = mLoudnessUpdateDispatchers.beginBroadcast();
-        for (int i = 0; i < nbDispatchers; ++i) {
-            try {
-                mLoudnessUpdateDispatchers.getBroadcastItem(i)
-                        .dispatchLoudnessCodecParameterChange(sessionId, bundle);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error dispatching for sessionId " + sessionId + " bundle: " + bundle,
-                        e);
+        synchronized (mDispatcherLock) {
+            final int nbDispatchers = mLoudnessUpdateDispatchers.beginBroadcast();
+            for (int i = 0; i < nbDispatchers; ++i) {
+                try {
+                    mLoudnessUpdateDispatchers.getBroadcastItem(i)
+                            .dispatchLoudnessCodecParameterChange(sessionId, bundle);
+                } catch (RemoteException e) {
+                    Log.e(TAG,
+                            "Error dispatching for sessionId " + sessionId + " bundle: " + bundle,
+                            e);
+                }
             }
+            mLoudnessUpdateDispatchers.finishBroadcast();
         }
-        mLoudnessUpdateDispatchers.finishBroadcast();
     }
 
     @GuardedBy("mLock")

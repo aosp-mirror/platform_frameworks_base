@@ -16,15 +16,14 @@
 
 package com.android.systemui.volume.dialog.ui.viewmodel
 
-import android.app.Dialog
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.VolumeDialogComponent
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogVisibilityModel
 import com.android.systemui.volume.dialog.shared.VolumeDialogLogger
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.awaitCancellation
@@ -32,8 +31,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.flow.onEach
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogPluginScope
@@ -49,10 +47,11 @@ constructor(
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             dialogVisibilityInteractor.dialogVisibility
+                .onEach { controller.notifyVisible(it is VolumeDialogVisibilityModel.Visible) }
                 .mapLatest { visibilityModel ->
                     with(visibilityModel) {
                         if (this is VolumeDialogVisibilityModel.Visible) {
-                            showDialog(reason, keyguardLocked, lockTaskModeState)
+                            showDialog(reason, keyguardLocked)
                         }
                         if (this is VolumeDialogVisibilityModel.Dismissed) {
                             Events.writeEvent(Events.EVENT_DISMISS_DIALOG, reason)
@@ -65,29 +64,21 @@ constructor(
         awaitCancellation()
     }
 
-    suspend fun showDialog(reason: Int, keyguardLocked: Boolean, lockTaskModeState: Int): Unit =
-        coroutineScope {
-            logger.onShow(reason)
+    suspend fun showDialog(reason: Int, keyguardLocked: Boolean): Unit = coroutineScope {
+        logger.onShow(reason)
 
-            controller.notifyVisible(true)
+        controller.notifyVisible(true)
 
-            val volumeDialogComponent: VolumeDialogComponent = componentFactory.create(this)
-            val dialog =
-                volumeDialogComponent.volumeDialog().apply {
-                    setOnDismissListener {
-                        volumeDialogComponent.coroutineScope().cancel()
-                        dialogVisibilityInteractor.dismissDialog(Events.DISMISS_REASON_UNKNOWN)
-                    }
+        val volumeDialogComponent: VolumeDialogComponent = componentFactory.create(this)
+        val dialog =
+            volumeDialogComponent.volumeDialog().apply {
+                setOnDismissListener {
+                    volumeDialogComponent.coroutineScope().cancel()
+                    dialogVisibilityInteractor.dismissDialog(Events.DISMISS_REASON_UNKNOWN)
                 }
-            launch { dialog.awaitShow() }
+            }
+        dialog.show()
 
-            Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked)
-        }
-}
-
-/** Shows [Dialog] until suspend function is cancelled. */
-private suspend fun Dialog.awaitShow() =
-    suspendCancellableCoroutine<Unit> {
-        show()
-        it.invokeOnCancellation { dismiss() }
+        Events.writeEvent(Events.EVENT_SHOW_DIALOG, reason, keyguardLocked)
     }
+}

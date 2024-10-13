@@ -27,7 +27,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.fakeVolumeDialogController
 import com.android.systemui.testKosmos
 import com.android.systemui.volume.Events
-import com.android.systemui.volume.dialog.domain.model.VolumeDialogVisibilityModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogVisibilityModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
@@ -44,7 +44,7 @@ private val dialogTimeoutDuration = 3.seconds
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
-@TestableLooper.RunWithLooper()
+@TestableLooper.RunWithLooper
 class VolumeDialogVisibilityInteractorTest : SysuiTestCase() {
 
     private val kosmos: Kosmos = testKosmos()

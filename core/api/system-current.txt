@@ -694,6 +694,7 @@ package android.app {
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
     field @FlaggedApi("android.view.contentprotection.flags.rapid_clear_notifications_by_listener_app_op_enabled") public static final String OPSTR_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER = "android:rapid_clear_notifications_by_listener";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
+    field @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled") public static final String OPSTR_READ_HEART_RATE = "android:read_heart_rate";
     field public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
@@ -3488,39 +3489,41 @@ package android.companion.virtual {
 
   public static class VirtualDeviceManager.VirtualDevice implements java.lang.AutoCloseable {
     method public void addActivityListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
-    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.content.ComponentName);
-    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void addActivityPolicyExemption(@NonNull android.companion.virtual.ActivityPolicyExemption);
+    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") public void addActivityPolicyExemption(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public void addActivityPolicyExemption(@NonNull android.companion.virtual.ActivityPolicyExemption);
     method public void addSoundEffectListener(@NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method public void close();
     method @NonNull public android.content.Context createContext();
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
-    method @FlaggedApi("android.companion.virtual.flags.virtual_camera") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.companion.virtual.camera.VirtualCamera createVirtualCamera(@NonNull android.companion.virtual.camera.VirtualCameraConfig);
+    method @NonNull public android.companion.virtual.audio.VirtualAudioDevice createVirtualAudioDevice(@NonNull android.hardware.display.VirtualDisplay, @Nullable java.util.concurrent.Executor, @Nullable android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback);
+    method @FlaggedApi("android.companion.virtual.flags.virtual_camera") @NonNull public android.companion.virtual.camera.VirtualCamera createVirtualCamera(@NonNull android.companion.virtual.camera.VirtualCameraConfig);
     method @Deprecated @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@IntRange(from=1) int, @IntRange(from=1) int, @IntRange(from=1) int, @Nullable android.view.Surface, int, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
     method @Nullable public android.hardware.display.VirtualDisplay createVirtualDisplay(@NonNull android.hardware.display.VirtualDisplayConfig, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.display.VirtualDisplay.Callback);
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualDpad createVirtualDpad(@NonNull android.hardware.input.VirtualDpadConfig);
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.input.VirtualKeyboardConfig);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.input.VirtualMouseConfig);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualNavigationTouchpad createVirtualNavigationTouchpad(@NonNull android.hardware.input.VirtualNavigationTouchpadConfig);
-    method @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualRotaryEncoder createVirtualRotaryEncoder(@NonNull android.hardware.input.VirtualRotaryEncoderConfig);
-    method @FlaggedApi("android.companion.virtual.flags.virtual_stylus") @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualStylus createVirtualStylus(@NonNull android.hardware.input.VirtualStylusConfig);
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.input.VirtualTouchscreenConfig);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+    method @NonNull public android.hardware.input.VirtualDpad createVirtualDpad(@NonNull android.hardware.input.VirtualDpadConfig);
+    method @NonNull public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.input.VirtualKeyboardConfig);
+    method @Deprecated @NonNull public android.hardware.input.VirtualKeyboard createVirtualKeyboard(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+    method @NonNull public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.input.VirtualMouseConfig);
+    method @Deprecated @NonNull public android.hardware.input.VirtualMouse createVirtualMouse(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
+    method @NonNull public android.hardware.input.VirtualNavigationTouchpad createVirtualNavigationTouchpad(@NonNull android.hardware.input.VirtualNavigationTouchpadConfig);
+    method @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") @NonNull public android.hardware.input.VirtualRotaryEncoder createVirtualRotaryEncoder(@NonNull android.hardware.input.VirtualRotaryEncoderConfig);
+    method @FlaggedApi("android.companion.virtual.flags.virtual_stylus") @NonNull public android.hardware.input.VirtualStylus createVirtualStylus(@NonNull android.hardware.input.VirtualStylusConfig);
+    method @NonNull public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.input.VirtualTouchscreenConfig);
+    method @Deprecated @NonNull public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method public int getDeviceId();
     method @FlaggedApi("android.companion.virtual.flags.vdm_public_apis") @Nullable public String getPersistentDeviceId();
     method @NonNull public java.util.List<android.companion.virtual.sensor.VirtualSensor> getVirtualSensorList();
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public void goToSleep();
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
+    method public void registerIntentInterceptor(@NonNull android.content.IntentFilter, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
-    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
-    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.companion.virtual.ActivityPolicyExemption);
+    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public void removeActivityPolicyExemption(@NonNull android.companion.virtual.ActivityPolicyExemption);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
-    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
-    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int, int);
-    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDisplayImePolicy(int, int);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
+    method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") public void setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtualdevice.flags.activity_control_api") public void setDevicePolicy(int, int, int);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public void setDisplayImePolicy(int, int);
+    method public void setShowPointerIcon(boolean);
+    method public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
+    method @FlaggedApi("android.companion.virtualdevice.flags.device_aware_display_power") public void wakeUp();
   }
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
@@ -3629,7 +3632,7 @@ package android.companion.virtual.audio {
 package android.companion.virtual.camera {
 
   @FlaggedApi("android.companion.virtual.flags.virtual_camera") public final class VirtualCamera implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
+    method public void close();
     method @NonNull public android.companion.virtual.camera.VirtualCameraConfig getConfig();
   }
 
@@ -3681,7 +3684,7 @@ package android.companion.virtual.sensor {
     method public int getDeviceId();
     method @NonNull public String getName();
     method public int getType();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendEvent(@NonNull android.companion.virtual.sensor.VirtualSensorEvent);
+    method public void sendEvent(@NonNull android.companion.virtual.sensor.VirtualSensorEvent);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.sensor.VirtualSensor> CREATOR;
   }
@@ -5692,8 +5695,8 @@ package android.hardware.hdmi {
 package android.hardware.input {
 
   public class VirtualDpad implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendKeyEvent(@NonNull android.hardware.input.VirtualKeyEvent);
+    method public void close();
+    method public void sendKeyEvent(@NonNull android.hardware.input.VirtualKeyEvent);
   }
 
   public final class VirtualDpadConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
@@ -5744,8 +5747,8 @@ package android.hardware.input {
   }
 
   public class VirtualKeyboard implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendKeyEvent(@NonNull android.hardware.input.VirtualKeyEvent);
+    method public void close();
+    method public void sendKeyEvent(@NonNull android.hardware.input.VirtualKeyEvent);
   }
 
   public final class VirtualKeyboardConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
@@ -5766,11 +5769,11 @@ package android.hardware.input {
   }
 
   public class VirtualMouse implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.graphics.PointF getCursorPosition();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendButtonEvent(@NonNull android.hardware.input.VirtualMouseButtonEvent);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendRelativeEvent(@NonNull android.hardware.input.VirtualMouseRelativeEvent);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendScrollEvent(@NonNull android.hardware.input.VirtualMouseScrollEvent);
+    method public void close();
+    method @NonNull public android.graphics.PointF getCursorPosition();
+    method public void sendButtonEvent(@NonNull android.hardware.input.VirtualMouseButtonEvent);
+    method public void sendRelativeEvent(@NonNull android.hardware.input.VirtualMouseRelativeEvent);
+    method public void sendScrollEvent(@NonNull android.hardware.input.VirtualMouseScrollEvent);
   }
 
   public final class VirtualMouseButtonEvent implements android.os.Parcelable {
@@ -5843,8 +5846,8 @@ package android.hardware.input {
   }
 
   public class VirtualNavigationTouchpad implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendTouchEvent(@NonNull android.hardware.input.VirtualTouchEvent);
+    method public void close();
+    method public void sendTouchEvent(@NonNull android.hardware.input.VirtualTouchEvent);
   }
 
   public final class VirtualNavigationTouchpadConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
@@ -5861,8 +5864,8 @@ package android.hardware.input {
   }
 
   @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public class VirtualRotaryEncoder implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendScrollEvent(@NonNull android.hardware.input.VirtualRotaryEncoderScrollEvent);
+    method public void close();
+    method public void sendScrollEvent(@NonNull android.hardware.input.VirtualRotaryEncoderScrollEvent);
   }
 
   @FlaggedApi("android.companion.virtualdevice.flags.virtual_rotary") public final class VirtualRotaryEncoderConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
@@ -5892,9 +5895,9 @@ package android.hardware.input {
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public class VirtualStylus implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendButtonEvent(@NonNull android.hardware.input.VirtualStylusButtonEvent);
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendMotionEvent(@NonNull android.hardware.input.VirtualStylusMotionEvent);
+    method public void close();
+    method public void sendButtonEvent(@NonNull android.hardware.input.VirtualStylusButtonEvent);
+    method public void sendMotionEvent(@NonNull android.hardware.input.VirtualStylusMotionEvent);
   }
 
   @FlaggedApi("android.companion.virtual.flags.virtual_stylus") public final class VirtualStylusButtonEvent implements android.os.Parcelable {
@@ -5997,8 +6000,8 @@ package android.hardware.input {
   }
 
   public class VirtualTouchscreen implements java.io.Closeable {
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void close();
-    method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void sendTouchEvent(@NonNull android.hardware.input.VirtualTouchEvent);
+    method public void close();
+    method public void sendTouchEvent(@NonNull android.hardware.input.VirtualTouchEvent);
   }
 
   public final class VirtualTouchscreenConfig extends android.hardware.input.VirtualInputDeviceConfig implements android.os.Parcelable {
@@ -8540,11 +8543,14 @@ package android.media.tv.tuner.filter {
     method public long getAudioHandle();
     method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public long getAvDataId();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") public int getDataGroupId();
     method public long getDataLength();
     method public long getDts();
     method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @IntRange(from=0) public int getIndexInDataGroup();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
     method @IntRange(from=0) public int getMpuSequenceNumber();
+    method @FlaggedApi("android.media.tv.flags.tuner_w_apis") @IntRange(from=0) public int getNumDataPieces();
     method public long getOffset();
     method public long getPts();
     method public int getScIndexMask();
@@ -11951,6 +11957,11 @@ package android.provider {
   }
 
   @FlaggedApi("android.provider.new_default_account_api_enabled") public static final class ContactsContract.RawContacts.DefaultAccount {
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @NonNull @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static java.util.List<android.accounts.Account> getEligibleCloudAccounts(@NonNull android.content.ContentResolver);
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.READ_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static int getNumberOfMovableLocalContacts(@NonNull android.content.ContentResolver);
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.READ_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static int getNumberOfMovableSimContacts(@NonNull android.content.ContentResolver);
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.WRITE_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static void moveLocalContactsToCloudDefaultAccount(@NonNull android.content.ContentResolver);
+    method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(allOf={android.Manifest.permission.WRITE_CONTACTS, android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS}) public static void moveSimContactsToCloudDefaultAccount(@NonNull android.content.ContentResolver);
     method @FlaggedApi("android.provider.new_default_account_api_enabled") @RequiresPermission(android.Manifest.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS) public static void setDefaultAccountForNewContacts(@NonNull android.content.ContentResolver, @NonNull android.provider.ContactsContract.RawContacts.DefaultAccount.DefaultAccountAndState);
   }
 
@@ -15415,6 +15426,7 @@ package android.telephony {
     field public static final int EVENT_DATA_CONNECTION_STATE_CHANGED = 7; // 0x7
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_DATA_ENABLED_CHANGED = 34; // 0x22
     field public static final int EVENT_DISPLAY_INFO_CHANGED = 21; // 0x15
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int EVENT_EMERGENCY_CALLBACK_MODE_CHANGED = 40; // 0x28
     field @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public static final int EVENT_EMERGENCY_NUMBER_LIST_CHANGED = 25; // 0x19
     field @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public static final int EVENT_IMS_CALL_DISCONNECT_CAUSE_CHANGED = 28; // 0x1c
     field @RequiresPermission(android.Manifest.permission.READ_CALL_LOG) public static final int EVENT_LEGACY_CALL_STATE_CHANGED = 36; // 0x24
@@ -15450,6 +15462,12 @@ package android.telephony {
 
   public static interface TelephonyCallback.DataEnabledListener {
     method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void onDataEnabledChanged(boolean, int);
+  }
+
+  @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static interface TelephonyCallback.EmergencyCallbackModeListener {
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeRestarted(int, @NonNull java.time.Duration, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeStarted(int, @NonNull java.time.Duration, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void onCallbackModeStopped(int, int, int);
   }
 
   public static interface TelephonyCallback.LinkCapacityEstimateChangedListener {
@@ -15713,6 +15731,8 @@ package android.telephony {
     field public static final int CELL_BROADCAST_RESULT_SUCCESS = 0; // 0x0
     field public static final int CELL_BROADCAST_RESULT_UNKNOWN = -1; // 0xffffffff
     field public static final int CELL_BROADCAST_RESULT_UNSUPPORTED = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int EMERGENCY_CALLBACK_MODE_CALL = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int EMERGENCY_CALLBACK_MODE_SMS = 2; // 0x2
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_INVALID_STATE = 4; // 0x4
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_NOT_SUPPORTED = 1; // 0x1
     field public static final int ENABLE_NR_DUAL_CONNECTIVITY_RADIO_ERROR = 3; // 0x3
@@ -15770,6 +15790,13 @@ package android.telephony {
     field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
     field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
     field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_EMERGENCY_SMS_SENT = 4; // 0x4
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_NORMAL_SMS_SENT = 2; // 0x2
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_OUTGOING_EMERGENCY_CALL_INITIATED = 3; // 0x3
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_OUTGOING_NORMAL_CALL_INITIATED = 1; // 0x1
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_TIMER_EXPIRED = 5; // 0x5
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_UNKNOWN = 0; // 0x0
+    field @FlaggedApi("com.android.internal.telephony.flags.emergency_callback_mode_notification") public static final int STOP_REASON_USER_ACTION = 6; // 0x6
     field public static final int THERMAL_MITIGATION_RESULT_INVALID_STATE = 3; // 0x3
     field public static final int THERMAL_MITIGATION_RESULT_MODEM_ERROR = 1; // 0x1
     field public static final int THERMAL_MITIGATION_RESULT_MODEM_NOT_AVAILABLE = 2; // 0x2
@@ -18548,6 +18575,7 @@ package android.webkit {
     method @Deprecated public abstract void setUserAgent(int);
     method public abstract void setVideoOverlayForEmbeddedEncryptedVideoEnabled(boolean);
     field public static final long ENABLE_SIMPLIFIED_DARK_MODE = 214741472L; // 0xcccb1e0L
+    field @FlaggedApi("android.webkit.user_agent_reduction") public static final long ENABLE_USER_AGENT_REDUCTION = 371034303L; // 0x161d88bfL
   }
 
   public class WebStorage {

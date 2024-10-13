@@ -121,7 +121,7 @@ constructor(
         state?.apply {
             this.state = tileState.activationState.legacyState
             val tileStateIcon = tileState.icon()
-            icon = tileStateIcon?.asQSTileIcon() ?: ResourceIcon.get(ICON_RES_ID)
+            icon = tileStateIcon?.asQSTileIcon(tileState.iconRes) ?: ResourceIcon.get(ICON_RES_ID)
             label = tileLabel
             secondaryLabel = tileState.secondaryLabel
             contentDescription = tileState.contentDescription

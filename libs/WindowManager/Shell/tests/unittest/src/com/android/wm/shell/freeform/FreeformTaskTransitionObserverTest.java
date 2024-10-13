@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -43,18 +43,14 @@ import android.window.WindowContainerToken;
 import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
-
-import com.android.wm.shell.desktopmode.DesktopTaskChangeListener;
 import com.android.wm.shell.desktopmode.DesktopFullImmersiveTransitionHandler;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
 
-import java.util.Optional;
-
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -79,6 +75,9 @@ public class FreeformTaskTransitionObserverTest {
     private WindowDecorViewModel mWindowDecorViewModel;
     @Mock
     private TaskChangeListener mTaskChangeListener;
+    @Mock
+    private FocusTransitionObserver mFocusTransitionObserver;
+
     private FreeformTaskTransitionObserver mTransitionObserver;
 
     @Before
@@ -94,16 +93,13 @@ public class FreeformTaskTransitionObserverTest {
         mTransitionObserver = new FreeformTaskTransitionObserver(
                 context, mShellInit, mTransitions,
                 Optional.of(mDesktopFullImmersiveTransitionHandler),
-                mWindowDecorViewModel, Optional.of(mTaskChangeListener));
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
-                    Runnable.class);
-            verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
-                    same(mTransitionObserver));
-            initRunnableCaptor.getValue().run();
-        } else {
-            mTransitionObserver.onInit();
-        }
+                mWindowDecorViewModel, Optional.of(mTaskChangeListener), mFocusTransitionObserver);
+
+        final ArgumentCaptor<Runnable> initRunnableCaptor = ArgumentCaptor.forClass(
+                Runnable.class);
+        verify(mShellInit).addInitCallback(initRunnableCaptor.capture(),
+                same(mTransitionObserver));
+        initRunnableCaptor.getValue().run();
     }
 
     @Test
@@ -158,6 +154,22 @@ public class FreeformTaskTransitionObserverTest {
         mTransitionObserver.onTransitionStarting(transition);
 
         verify(mTaskChangeListener).onTaskMovingToFront(change.getTaskInfo());
+    }
+
+    @Test
+    public void toBackTransition_notifiesOnTaskMovingToBack() {
+        final TransitionInfo.Change change =
+                createChange(TRANSIT_TO_BACK, /* taskId= */ 1, WINDOWING_MODE_FREEFORM);
+        final TransitionInfo info = new TransitionInfoBuilder(TRANSIT_TO_BACK, /* flags= */ 0)
+                .addChange(change).build();
+
+        final IBinder transition = mock(IBinder.class);
+        final SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        final SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
+        mTransitionObserver.onTransitionStarting(transition);
+
+        verify(mTaskChangeListener).onTaskMovingToBack(change.getTaskInfo());
     }
 
     @Test
@@ -317,7 +329,7 @@ public class FreeformTaskTransitionObserverTest {
 
         mTransitionObserver.onTransitionReady(transition, info, startT, finishT);
 
-        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition);
+        verify(mDesktopFullImmersiveTransitionHandler).onTransitionReady(transition, info);
     }
 
     private static TransitionInfo.Change createChange(int mode, int taskId, int windowingMode) {

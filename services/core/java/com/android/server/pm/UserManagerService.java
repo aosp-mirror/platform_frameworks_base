@@ -1101,21 +1101,12 @@ public class UserManagerService extends IUserManager.Stub {
         if (android.multiuser.Flags.cachesNotInvalidatedAtStartReadOnly()) {
             UserManager.invalidateIsUserUnlockedCache();
             UserManager.invalidateQuietModeEnabledCache();
-            UserManager.invalidateUserSerialNumberCache();
+            if (android.multiuser.Flags.cacheUserPropertiesCorrectlyReadOnly()) {
+                UserManager.invalidateStaticUserProperties();
+                UserManager.invalidateUserPropertiesCache();
+            }
+            UserManager.invalidateCacheOnUserListChange();
         }
-    }
-
-    private boolean doesDeviceHardwareSupportPrivateSpace() {
-        return !mPm.hasSystemFeature(FEATURE_EMBEDDED, 0)
-                && !mPm.hasSystemFeature(FEATURE_WATCH, 0)
-                && !mPm.hasSystemFeature(FEATURE_LEANBACK, 0)
-                && !mPm.hasSystemFeature(FEATURE_AUTOMOTIVE, 0);
-    }
-
-    private static boolean isAutoLockForPrivateSpaceEnabled() {
-        return android.os.Flags.allowPrivateProfile()
-                && Flags.supportAutolockForPrivateSpace()
-                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     void systemReady() {
@@ -1160,6 +1151,19 @@ public class UserManagerService extends IUserManager.Stub {
         if (Flags.addUiForSoundsFromBackgroundUsers()) {
             new BackgroundUserSoundNotifier(mContext);
         }
+    }
+
+    private boolean doesDeviceHardwareSupportPrivateSpace() {
+        return !mPm.hasSystemFeature(FEATURE_EMBEDDED, 0)
+                && !mPm.hasSystemFeature(FEATURE_WATCH, 0)
+                && !mPm.hasSystemFeature(FEATURE_LEANBACK, 0)
+                && !mPm.hasSystemFeature(FEATURE_AUTOMOTIVE, 0);
+    }
+
+    private static boolean isAutoLockForPrivateSpaceEnabled() {
+        return android.os.Flags.allowPrivateProfile()
+                && Flags.supportAutolockForPrivateSpace()
+                && android.multiuser.Flags.enablePrivateSpaceFeatures();
     }
 
     private boolean isAutoLockingPrivateSpaceOnRestartsEnabled() {
@@ -4448,7 +4452,7 @@ public class UserManagerService extends IUserManager.Stub {
 
                             if (userData != null) {
                                 synchronized (mUsersLock) {
-                                    mUsers.put(userData.info.id, userData);
+                                    addUserDataLU(userData);
                                     if (mNextSerialNumber < 0
                                             || mNextSerialNumber <= userData.info.id) {
                                         mNextSerialNumber = userData.info.id + 1;
@@ -5724,7 +5728,7 @@ public class UserManagerService extends IUserManager.Stub {
                     userData.info = userInfo;
                     userData.userProperties = new UserProperties(
                             userTypeDetails.getDefaultUserPropertiesReference());
-                    mUsers.put(userId, userData);
+                    addUserDataLU(userData);
                 }
                 writeUserLP(userData);
                 writeUserListLP();
@@ -6138,7 +6142,7 @@ public class UserManagerService extends IUserManager.Stub {
         final UserData userData = new UserData();
         userData.info = userInfo;
         synchronized (mUsersLock) {
-            mUsers.put(userInfo.id, userData);
+            addUserDataLU(userData);
         }
         updateUserIds();
         return userData;
@@ -6148,8 +6152,7 @@ public class UserManagerService extends IUserManager.Stub {
     @VisibleForTesting
     void removeUserInfo(@UserIdInt int userId) {
         synchronized (mUsersLock) {
-            UserManager.invalidateUserSerialNumberCache();
-            mUsers.remove(userId);
+            removeUserDataLU(userId);
         }
     }
 
@@ -6579,8 +6582,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         // Remove this user from the list
         synchronized (mUsersLock) {
-            UserManager.invalidateUserSerialNumberCache();
-            mUsers.remove(userId);
+            removeUserDataLU(userId);
             mIsUserManaged.delete(userId);
         }
         synchronized (mUserStates) {
@@ -6966,6 +6968,26 @@ public class UserManagerService extends IUserManager.Stub {
                     + "profile associated with this user");
         }
         return userInfo.creationTime;
+    }
+
+    /**
+     * Adding user data to mUsers list in one place to invalidate related caches.
+     */
+    @GuardedBy("mUsersLock")
+    private void addUserDataLU(UserData userData) {
+        if (android.multiuser.Flags.invalidateCacheOnUsersChangedReadOnly()) {
+            UserManager.invalidateCacheOnUserListChange();
+        }
+        mUsers.put(userData.info.id, userData);
+    }
+
+    /**
+     * Removing user data to mUsers list in one place to invalidate related caches.
+     */
+    @GuardedBy("mUsersLock")
+    private void removeUserDataLU(@UserIdInt int userId) {
+        UserManager.invalidateCacheOnUserListChange();
+        mUsers.remove(userId);
     }
 
     /**

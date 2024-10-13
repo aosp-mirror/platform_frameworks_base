@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Titringur er virkur fyrir símtöl og tilkynningar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Slökkt verður á hljóði símtala og tilkynninga"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Breytingar á kerfi"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ónáðið ekki"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nýtt: „Ónáðið ekki“ er að fela tilkynningar"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ýttu til að fá frekari upplýsingar og breyta."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Ónáðið ekki“ var breytt"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ýttu til að skoða hvað lokað hefur verið á."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Yfirfara tilkynningastillingar"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Frá og með Android 13 þurfa forrit sem þú setur upp heimild frá þér til að senda tilkynningar. Ýttu til að breyta þessari heimild fyrir forrit sem fyrir eru."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Minna mig á seinna"</string>

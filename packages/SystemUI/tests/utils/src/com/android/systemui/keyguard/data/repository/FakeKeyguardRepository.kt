@@ -131,6 +131,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _isEncryptedOrLockdown = MutableStateFlow(true)
     override val isEncryptedOrLockdown: Flow<Boolean> = _isEncryptedOrLockdown
 
+    private val _shortcutAbsoluteTop = MutableStateFlow(0F)
+    override val shortcutAbsoluteTop: StateFlow<Float>
+        get() = _shortcutAbsoluteTop.asStateFlow()
+
     private val _isKeyguardEnabled = MutableStateFlow(true)
     override val isKeyguardEnabled: StateFlow<Boolean> = _isKeyguardEnabled.asStateFlow()
 
@@ -241,7 +245,7 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setBiometricUnlockState(
         mode: BiometricUnlockMode,
-        source: BiometricUnlockSource?
+        source: BiometricUnlockSource?,
     ) {
         _biometricUnlockState.tryEmit(BiometricUnlockModel(mode, source))
     }
@@ -292,6 +296,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun isShowKeyguardWhenReenabled(): Boolean {
         return isShowKeyguardWhenReenabled
+    }
+
+    override fun setShortcutAbsoluteTop(top: Float) {
+        _shortcutAbsoluteTop.value = top
     }
 
     override fun setCanIgnoreAuthAndReturnToGone(canWake: Boolean) {

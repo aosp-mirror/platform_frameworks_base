@@ -1,5 +1,6 @@
 package android.app.assist;
 
+import static android.app.assist.flags.Flags.addPlaceholderViewForNullChild;
 import static android.credentials.Constants.FAILURE_CREDMAN_SELECTOR;
 import static android.credentials.Constants.SUCCESS_CREDMAN_SELECTOR;
 import static android.service.autofill.Flags.FLAG_AUTOFILL_CREDMAN_DEV_INTEGRATION;
@@ -284,12 +285,18 @@ public class AssistStructure implements Parcelable {
             mCurViewStackEntry = entry;
         }
 
-        void writeView(ViewNode child, Parcel out, PooledStringWriter pwriter, int levelAdj) {
+        void writeView(@Nullable ViewNode child, Parcel out, PooledStringWriter pwriter,
+            int levelAdj) {
             if (DEBUG_PARCEL) Log.d(TAG, "write view: at " + out.dataPosition()
                     + ", windows=" + mNumWrittenWindows
                     + ", views=" + mNumWrittenViews
                     + ", level=" + (mCurViewStackPos+levelAdj));
             out.writeInt(VALIDATE_VIEW_TOKEN);
+            if (addPlaceholderViewForNullChild() && child == null) {
+                if (DEBUG_PARCEL_TREE) Log.d(TAG, "Detected an empty child"
+                            + "; writing a placeholder for the child.");
+                child = new ViewNode();
+            }
             int flags = child.writeSelfToParcel(out, pwriter, mSanitizeOnWrite,
                     mTmpMatrix, /*willWriteChildren=*/true);
             mNumWrittenViews++;
@@ -2545,7 +2552,7 @@ public class AssistStructure implements Parcelable {
             ensureData();
         }
         Log.i(TAG, "Task id: " + mTaskId);
-        Log.i(TAG, "Activity: " + (mActivityComponent != null 
+        Log.i(TAG, "Activity: " + (mActivityComponent != null
                 ? mActivityComponent.flattenToShortString()
                 : null));
         Log.i(TAG, "Sanitize on write: " + mSanitizeOnWrite);

@@ -224,6 +224,8 @@
   <java-symbol type="id" name="status_bar_latest_event_content" />
   <java-symbol type="id" name="notification_main_column" />
   <java-symbol type="id" name="notification_headerless_view_column" />
+  <java-symbol type="id" name="notification_progress_start_icon" />
+  <java-symbol type="id" name="notification_progress_end_icon" />
   <java-symbol type="id" name="sms_short_code_confirm_message" />
   <java-symbol type="id" name="sms_short_code_detail_layout" />
   <java-symbol type="id" name="sms_short_code_detail_message" />
@@ -1580,6 +1582,8 @@
   <java-symbol type="layout" name="input_method" />
   <java-symbol type="layout" name="input_method_extract_view" />
   <java-symbol type="layout" name="input_method_switch_item" />
+  <java-symbol type="layout" name="input_method_switch_item_divider" />
+  <java-symbol type="layout" name="input_method_switch_item_header" />
   <java-symbol type="layout" name="input_method_switch_item_new" />
   <java-symbol type="layout" name="input_method_switch_dialog_new" />
   <java-symbol type="layout" name="input_method_switch_dialog_title" />
@@ -2390,6 +2394,7 @@
   <java-symbol type="layout" name="notification_template_material_media" />
   <java-symbol type="layout" name="notification_template_material_big_media" />
   <java-symbol type="layout" name="notification_template_material_big_text" />
+  <java-symbol type="layout" name="notification_template_material_progress" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
   <java-symbol type="color" name="notification_progress_background_color" />
@@ -3205,6 +3210,7 @@
   <java-symbol type="dimen" name="notification_heading_margin_end" />
   <java-symbol type="dimen" name="notification_content_margin_top" />
   <java-symbol type="dimen" name="notification_content_margin" />
+  <java-symbol type="dimen" name="notification_progress_margin_horizontal" />
   <java-symbol type="dimen" name="notification_header_background_height" />
   <java-symbol type="dimen" name="notification_header_touchable_height" />
   <java-symbol type="dimen" name="notification_header_expand_icon_size" />
@@ -4076,6 +4082,7 @@
   <java-symbol type="dimen" name="text_size_body_2_material" />
   <java-symbol type="dimen" name="notification_icon_circle_size" />
   <java-symbol type="drawable" name="notification_icon_circle" />
+  <java-symbol type="drawable" name="notification_progress_icon_background" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
@@ -5234,6 +5241,9 @@
   <java-symbol type="string" name="device_state_notification_settings_button"/>
   <java-symbol type="integer" name="config_deviceStateConcurrentRearDisplay" />
   <java-symbol type="string" name="config_rearDisplayPhysicalAddress" />
+
+  <java-symbol type="integer" name="config_virtualDisplayLimit" />
+  <java-symbol type="integer" name="config_virtualDisplayLimitPerPackage" />
 
   <!-- For app language picker -->
   <java-symbol type="string" name="system_locale_title" />

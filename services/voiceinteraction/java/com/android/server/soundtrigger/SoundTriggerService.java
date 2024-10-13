@@ -504,6 +504,11 @@ public class SoundTriggerService extends SystemService {
             pw.println("\n##Sound Model Stats dump:\n");
             mSoundModelStatTracker.dump(pw);
         }
+
+        @Override
+        protected void onUnhandledException(int code, int flags, Exception e) {
+            Slog.wtf(TAG, "Unhandled exception code: " + code, e);
+        }
     }
 
     class SoundTriggerSessionStub extends ISoundTriggerSession.Stub {

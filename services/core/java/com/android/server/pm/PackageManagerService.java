@@ -204,7 +204,6 @@ import com.android.server.FgThread;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
-import com.android.server.PackageWatchdog;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.ThreadPriorityBooster;
@@ -214,6 +213,7 @@ import com.android.server.art.DexUseManagerLocal;
 import com.android.server.art.model.DeleteResult;
 import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.Settings.VersionInfo;
 import com.android.server.pm.dex.ArtManagerService;
@@ -340,7 +340,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static final boolean DEBUG_UPGRADE = false;
     static final boolean DEBUG_DOMAIN_VERIFICATION = false;
     static final boolean DEBUG_BACKUP = false;
-    public static final boolean DEBUG_INSTALL = false;
+    public static final boolean DEBUG_INSTALL = Build.IS_USERDEBUG;
     public static final boolean DEBUG_REMOVE = false;
     static final boolean DEBUG_PACKAGE_INFO = false;
     static final boolean DEBUG_INTENT_MATCHING = false;
@@ -3048,7 +3048,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         mDexManager.writePackageDexUsageNow();
         mDynamicCodeLogger.writeNow();
         if (!refactorCrashrecovery()) {
-            PackageWatchdog.getInstance(mContext).writeNow();
+            CrashRecoveryAdaptor.packageWatchdogWriteNow(mContext);
         }
 
         synchronized (mLock) {

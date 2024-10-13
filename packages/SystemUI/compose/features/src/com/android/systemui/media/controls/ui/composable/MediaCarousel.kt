@@ -34,7 +34,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.compose.animation.scene.MovableElementKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
-import com.android.internal.R.attr.layout
 import com.android.systemui.media.controls.ui.composable.MediaCarouselStateLoader.stateForMediaCarouselContent
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -60,12 +59,12 @@ fun SceneScope.MediaCarousel(
     carouselController: MediaCarouselController,
     offsetProvider: (() -> IntOffset)? = null,
     usingCollapsedLandscapeMedia: Boolean = false,
+    isInSplitShade: Boolean = false,
 ) {
     if (!isVisible || carouselController.isLockedAndHidden()) {
         return
     }
-
-    val carouselState = remember { { stateForMediaCarouselContent() } }
+    val carouselState = remember { { stateForMediaCarouselContent(isInSplitShade) } }
     val isCollapsed = usingCollapsedLandscapeMedia && isLandscape()
     val mediaHeight =
         if (isCollapsed && mediaHost.expansion == MediaHostState.COLLAPSED) {

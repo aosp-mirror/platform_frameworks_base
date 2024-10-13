@@ -389,7 +389,8 @@ public class AudioDeviceBroker {
      */
     private boolean shouldStartScoForUid(int uid) {
         return !(UserHandle.isSameApp(uid, Process.BLUETOOTH_UID)
-                || UserHandle.isSameApp(uid, Process.PHONE_UID));
+                || UserHandle.isSameApp(uid, Process.PHONE_UID)
+                || UserHandle.isSameApp(uid, Process.SYSTEM_UID));
     }
 
     @GuardedBy("mDeviceStateLock")

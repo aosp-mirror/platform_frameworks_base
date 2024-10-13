@@ -99,10 +99,10 @@ import java.util.function.Predicate;
  * the number of jobs or sessions that can run within the window. Regardless of bucket, apps will
  * not be allowed to run more than 20 jobs within the past 10 minutes.
  *
- * Jobs are throttled while an app is not in a foreground state. All jobs are allowed to run
- * freely when an app enters the foreground state and are restricted when the app leaves the
- * foreground state. However, jobs that are started while the app is in the TOP state do not count
- * towards any quota and are not restricted regardless of the app's state change.
+ * Jobs are throttled while an app is not in a TOP or BOUND_TOP state. All jobs are allowed to run
+ * freely when an app enters the TOP or BOUND_TOP state and are restricted when the app leaves those
+ * states. However, jobs that are started while the app is in the TOP state do not count towards any
+ * quota and are not restricted regardless of the app's state change.
  *
  * Jobs will not be throttled when the device is charging. The device is considered to be charging
  * once the {@link BatteryManager#ACTION_CHARGING} intent has been broadcast.
@@ -567,6 +567,11 @@ public final class QuotaController extends StateController {
             ActivityManager.getService().registerUidObserver(new QcUidObserver(),
                     ActivityManager.UID_OBSERVER_PROCSTATE,
                     ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, null);
+            if (Flags.enforceQuotaPolicyToFgsJobs()) {
+                ActivityManager.getService().registerUidObserver(new QcUidObserver(),
+                        ActivityManager.UID_OBSERVER_PROCSTATE,
+                        ActivityManager.PROCESS_STATE_BOUND_TOP, null);
+            }
             ActivityManager.getService().registerUidObserver(new QcUidObserver(),
                     ActivityManager.UID_OBSERVER_PROCSTATE,
                     ActivityManager.PROCESS_STATE_TOP, null);
@@ -2706,6 +2711,12 @@ public final class QuotaController extends StateController {
         }
     }
 
+    @VisibleForTesting
+    int getProcessStateQuotaFreeThreshold() {
+        return Flags.enforceQuotaPolicyToFgsJobs() ? ActivityManager.PROCESS_STATE_BOUND_TOP :
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+    }
+
     private class QcHandler extends Handler {
 
         QcHandler(Looper looper) {
@@ -2832,15 +2843,15 @@ public final class QuotaController extends StateController {
                                 mTopAppCache.put(uid, true);
                                 mTopAppGraceCache.delete(uid);
                                 if (mForegroundUids.get(uid)) {
-                                    // Went from FGS to TOP. We don't need to reprocess timers or
-                                    // jobs.
+                                    // Went from a process state with quota free to TOP. We don't
+                                    // need to reprocess timers or jobs.
                                     break;
                                 }
                                 mForegroundUids.put(uid, true);
                                 isQuotaFree = true;
                             } else {
                                 final boolean reprocess;
-                                if (procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE) {
+                                if (procState <= getProcessStateQuotaFreeThreshold()) {
                                     reprocess = !mForegroundUids.get(uid);
                                     mForegroundUids.put(uid, true);
                                     isQuotaFree = true;

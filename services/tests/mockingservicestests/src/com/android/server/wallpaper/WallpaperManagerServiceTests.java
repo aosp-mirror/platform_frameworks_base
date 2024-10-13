@@ -506,6 +506,7 @@ public class WallpaperManagerServiceTests {
     }
 
     @Test
+    @Ignore("b/372942682")
     public void testWallpaperManagerCallbackInRightOrder() throws RemoteException {
         WallpaperData wallpaper = new WallpaperData(USER_SYSTEM, FLAG_SYSTEM);
         wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.RED),

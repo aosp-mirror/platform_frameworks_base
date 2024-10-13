@@ -19,6 +19,8 @@ package com.android.server.ondeviceintelligence;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.DEVICE_CONFIG_UPDATE_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BUNDLE_KEY;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_UNLOADED_BUNDLE_KEY;
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_LOADED_BROADCAST_INTENT;
+import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.MODEL_UNLOADED_BROADCAST_INTENT;
 import static android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService.REGISTER_MODEL_UPDATE_CALLBACK_BUNDLE_KEY;
 
 import static com.android.server.ondeviceintelligence.BundleUtil.sanitizeInferenceParams;
@@ -154,7 +156,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
     @GuardedBy("mLock")
     private String[] mTemporaryBroadcastKeys;
     @GuardedBy("mLock")
-    private String mBroadcastPackageName;
+    private String mBroadcastPackageName = SYSTEM_PACKAGE;
     @GuardedBy("mLock")
     private String mTemporaryConfigNamespace;
 
@@ -921,10 +923,7 @@ public class OnDeviceIntelligenceManagerService extends SystemService {
             }
         }
 
-        return new String[]{mContext.getResources().getString(
-                R.string.config_onDeviceIntelligenceModelLoadedBroadcastKey),
-                mContext.getResources().getString(
-                        R.string.config_onDeviceIntelligenceModelUnloadedBroadcastKey)};
+        return new String[]{ MODEL_LOADED_BROADCAST_INTENT, MODEL_UNLOADED_BROADCAST_INTENT };
     }
 
     @RequiresPermission(Manifest.permission.USE_ON_DEVICE_INTELLIGENCE)

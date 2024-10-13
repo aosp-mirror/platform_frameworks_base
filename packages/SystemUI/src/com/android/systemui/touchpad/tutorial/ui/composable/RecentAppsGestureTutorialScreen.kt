@@ -24,15 +24,12 @@ import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureMonitor
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureMonitor
+import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureRecognizer
 
 @Composable
-fun RecentAppsGestureTutorialScreen(
-    onDoneButtonClicked: () -> Unit,
-    onBack: () -> Unit,
-) {
+fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -41,21 +38,21 @@ fun RecentAppsGestureTutorialScreen(
                     titleResId = R.string.touchpad_recent_apps_gesture_action_title,
                     bodyResId = R.string.touchpad_recent_apps_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_recent_apps_gesture_success_title,
-                    bodySuccessResId = R.string.touchpad_recent_apps_gesture_success_body
+                    bodySuccessResId = R.string.touchpad_recent_apps_gesture_success_body,
                 ),
             animations =
                 TutorialScreenConfig.Animations(
                     educationResId = R.raw.trackpad_recent_apps_edu,
-                    successResId = R.raw.trackpad_recent_apps_success
-                )
+                    successResId = R.raw.trackpad_recent_apps_success,
+                ),
         )
-    val gestureMonitorProvider =
-        object : GestureMonitorProvider {
+    val gestureRecognizerProvider =
+        object : GestureRecognizerProvider {
             @Composable
-            override fun rememberGestureMonitor(
+            override fun rememberGestureRecognizer(
                 resources: Resources,
-                gestureStateChangedCallback: (GestureState) -> Unit
-            ): TouchpadGestureMonitor {
+                gestureStateChangedCallback: (GestureState) -> Unit,
+            ): GestureRecognizer {
                 val distanceThresholdPx =
                     resources.getDimensionPixelSize(
                         com.android.internal.R.dimen.system_gestures_distance_threshold
@@ -63,15 +60,12 @@ fun RecentAppsGestureTutorialScreen(
                 val velocityThresholdPxPerMs =
                     resources.getDimension(R.dimen.touchpad_recent_apps_gesture_velocity_threshold)
                 return remember(distanceThresholdPx, velocityThresholdPxPerMs) {
-                    RecentAppsGestureMonitor(
-                        distanceThresholdPx,
-                        gestureStateChangedCallback,
-                        velocityThresholdPxPerMs
-                    )
+                    RecentAppsGestureRecognizer(distanceThresholdPx, velocityThresholdPxPerMs)
+                        .also { it.addGestureStateCallback(gestureStateChangedCallback) }
                 }
             }
         }
-    GestureTutorialScreen(screenConfig, gestureMonitorProvider, onDoneButtonClicked, onBack)
+    GestureTutorialScreen(screenConfig, gestureRecognizerProvider, onDoneButtonClicked, onBack)
 }
 
 @Composable
@@ -83,7 +77,7 @@ private fun rememberScreenColors(): TutorialScreenConfig.Colors {
         rememberLottieDynamicProperties(
             rememberColorFilterProperty(".secondaryFixedDim", secondaryFixedDim),
             rememberColorFilterProperty(".onSecondaryFixed", onSecondaryFixed),
-            rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant)
+            rememberColorFilterProperty(".onSecondaryFixedVariant", onSecondaryFixedVariant),
         )
     val screenColors =
         remember(dynamicProperties) {

@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कल तथा सूचनाहरू आउँदा कम्पन हुने छ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कल तथा सूचनाहरूलाई म्युट गरिने छ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"प्रणालीसम्बन्धी परिवर्तनहरू"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"बाधा नपुऱ्याउनुहोस्"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नयाँ: बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"थप जान्न र परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"सूचनाका सेटिङको समीक्षा गर्नुहोस्"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Android १३ मा तपाईंले अनुमति दिनुभएका खण्डमा मात्र तपाईंले इन्स्टल गर्नुभएका एपले सूचना पठाउन सक्छन्। यसअघि इन्स्टल गरिसकिएका एपका हकमा यो अनुमति परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"मलाई पछि स्मरण गराइयोस्"</string>

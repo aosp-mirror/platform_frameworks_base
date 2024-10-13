@@ -778,15 +778,16 @@ public final class DeviceStateManagerService extends SystemService {
         processRecord.notifyRequestActiveAsync(request.getToken());
     }
 
-    private void registerProcess(int pid, IDeviceStateManagerCallback callback) {
+    @Nullable
+    private DeviceStateInfo registerProcess(int pid, IDeviceStateManagerCallback callback) {
         synchronized (mLock) {
             if (mProcessRecords.contains(pid)) {
                 throw new SecurityException("The calling process has already registered an"
                         + " IDeviceStateManagerCallback.");
             }
 
-            ProcessRecord record = new ProcessRecord(callback, pid, this::handleProcessDied,
-                    mHandler);
+            final ProcessRecord record =
+                    new ProcessRecord(callback, pid, this::handleProcessDied, mHandler);
             try {
                 callback.asBinder().linkToDeath(record, 0);
             } catch (RemoteException ex) {
@@ -794,15 +795,20 @@ public final class DeviceStateManagerService extends SystemService {
             }
             mProcessRecords.put(pid, record);
 
-            // Callback clients should not be notified of invalid device states, so calls to
-            // #getDeviceStateInfoLocked should be gated on checks if a committed state is present
-            // before getting the device state info.
-            DeviceStateInfo currentInfo = mCommittedState.isPresent()
-                    ? getDeviceStateInfoLocked() : null;
-            if (currentInfo != null) {
-                // If there is not a committed state we'll wait to notify the process of the initial
-                // value.
-                record.notifyDeviceStateInfoAsync(currentInfo);
+            final DeviceStateInfo currentInfo =
+                    mCommittedState.isPresent() ? getDeviceStateInfoLocked() : null;
+            if (com.android.window.flags.Flags.wlinfoOncreate()) {
+                return currentInfo;
+            } else {
+                // Callback clients should not be notified of invalid device states, so calls to
+                // #getDeviceStateInfoLocked should be gated on checks if a committed state is
+                // present before getting the device state info.
+                if (currentInfo != null) {
+                    // If there is not a committed state we'll wait to notify the process of the
+                    // initial value.
+                    record.notifyDeviceStateInfoAsync(currentInfo);
+                }
+                return null;
             }
         }
     }
@@ -1286,8 +1292,9 @@ public final class DeviceStateManagerService extends SystemService {
             }
         }
 
+        @Nullable
         @Override // Binder call
-        public void registerCallback(IDeviceStateManagerCallback callback) {
+        public DeviceStateInfo registerCallback(IDeviceStateManagerCallback callback) {
             if (callback == null) {
                 throw new IllegalArgumentException("Device state callback must not be null.");
             }
@@ -1295,7 +1302,7 @@ public final class DeviceStateManagerService extends SystemService {
             final int callingPid = Binder.getCallingPid();
             final long token = Binder.clearCallingIdentity();
             try {
-                registerProcess(callingPid, callback);
+                return registerProcess(callingPid, callback);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

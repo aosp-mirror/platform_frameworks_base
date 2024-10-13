@@ -42,6 +42,7 @@ import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.windowdecor.WindowDecorViewModel;
@@ -75,6 +76,8 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
     @Mock
     private DesktopRepository mDesktopRepository;
     @Mock
+    private DesktopTasksController mDesktopTasksController;
+    @Mock
     private LaunchAdjacentController mLaunchAdjacentController;
     private FreeformTaskListener mFreeformTaskListener;
     private StaticMockitoSession mMockitoSession;
@@ -90,6 +93,7 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
                 mShellInit,
                 mTaskOrganizer,
                 Optional.of(mDesktopRepository),
+                Optional.of(mDesktopTasksController),
                 mLaunchAdjacentController,
                 mWindowDecorViewModel);
     }
@@ -174,7 +178,20 @@ public final class FreeformTaskListenerTests extends ShellTestCase {
         mFreeformTaskListener.onTaskVanished(task);
 
         verify(mDesktopRepository, never()).minimizeTask(task.displayId, task.taskId);
+        verify(mDesktopRepository).removeClosingTask(task.taskId);
         verify(mDesktopRepository).removeFreeformTask(task.displayId, task.taskId);
+    }
+
+    @Test
+    public void onTaskInfoChanged_withDesktopController_forwards() {
+        ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder()
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        task.isVisible = true;
+        mFreeformTaskListener.onTaskAppeared(task, mMockSurfaceControl);
+
+        mFreeformTaskListener.onTaskInfoChanged(task);
+
+        verify(mDesktopTasksController).onTaskInfoChanged(task);
     }
 
     @After

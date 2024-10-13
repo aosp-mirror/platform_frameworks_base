@@ -85,7 +85,7 @@ class BrightnessPowerClamper extends
     private String mDataId = null;
     private float mCurrentBrightness = PowerManager.BRIGHTNESS_INVALID;
     private float mCustomAnimationRateSec = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
-    private float mCustomAnimationRateSecDeviceConfig =
+    private float mCustomAnimationRateDeviceConfig =
                         DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
     private final BiFunction<String, String, ThrottlingLevel> mDataPointMapper = (key, value) -> {
         try {
@@ -117,7 +117,7 @@ class BrightnessPowerClamper extends
         };
         mPowerThrottlingConfigData = powerData.getPowerThrottlingConfigData();
         if (mPowerThrottlingConfigData != null) {
-            mCustomAnimationRateSecDeviceConfig = mPowerThrottlingConfigData.customAnimationRateSec;
+            mCustomAnimationRateDeviceConfig = mPowerThrottlingConfigData.customAnimationRate;
         }
         mThermalLevelListener = new ThermalLevelListener(handler);
         mPmicMonitor =
@@ -228,10 +228,6 @@ class BrightnessPowerClamper extends
         }
 
         mPowerThrottlingConfigData = data.getPowerThrottlingConfigData();
-        if (mPowerThrottlingConfigData == null) {
-            Slog.d(TAG,
-                    "Power throttling data is missing for configuration data.");
-        }
     }
 
     private void recalculateBrightnessCap() {
@@ -282,13 +278,13 @@ class BrightnessPowerClamper extends
             mIsActive = isActive;
             Slog.i(TAG, "Power clamper changing current brightness cap mBrightnessCap: "
                     + mBrightnessCap + " to target brightness cap:" + targetBrightnessCap
-                    + " for current screen brightness: " + mCurrentBrightness);
-            mBrightnessCap = targetBrightnessCap;
-            Slog.i(TAG, "Power clamper changed state: thermalStatus:" + mCurrentThermalLevel
+                    + " for current screen brightness: " + mCurrentBrightness + "\n"
+                    + "Power clamper changed state: thermalStatus:" + mCurrentThermalLevel
                     + " mCurrentThermalLevelChanged:" + mCurrentThermalLevelChanged
                     + " mCurrentAvgPowerConsumed:" + mCurrentAvgPowerConsumed
-                    + " mCustomAnimationRateSec:" + mCustomAnimationRateSecDeviceConfig);
-            mCustomAnimationRateSec = mCustomAnimationRateSecDeviceConfig;
+                    + " mCustomAnimationRateSec:" + mCustomAnimationRateDeviceConfig);
+            mBrightnessCap = targetBrightnessCap;
+            mCustomAnimationRateSec = mCustomAnimationRateDeviceConfig;
             mChangeListener.onChanged();
         } else {
             mCustomAnimationRateSec = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
@@ -344,7 +340,7 @@ class BrightnessPowerClamper extends
                     + mPowerThrottlingConfigData.pollingWindowMinMillis + " msec.");
             return;
         }
-        mCustomAnimationRateSecDeviceConfig = mPowerThrottlingConfigData.customAnimationRateSec;
+        mCustomAnimationRateDeviceConfig = mPowerThrottlingConfigData.customAnimationRate;
         mThermalLevelListener.start();
     }
 

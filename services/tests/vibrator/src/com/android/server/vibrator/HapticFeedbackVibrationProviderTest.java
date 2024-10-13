@@ -453,20 +453,7 @@ public class HapticFeedbackVibrationProviderTest {
     }
 
     @Test
-    public void testVibrationAttribute_scrollFeedback_inputCustomizedFlag_useTouchUsage() {
-        mSetFlagsRule.enableFlags(FLAG_HAPTIC_FEEDBACK_INPUT_SOURCE_CUSTOMIZATION_ENABLED);
-        HapticFeedbackVibrationProvider provider = createProviderWithoutCustomizations();
-
-        for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {
-            VibrationAttributes attrs = provider.getVibrationAttributes(effectId, /* flags */
-                    0, /* privFlags */ 0);
-            assertWithMessage("Expected USAGE_TOUCH for scroll effect " + effectId
-                    + ", if no input customization").that(attrs.getUsage()).isEqualTo(USAGE_TOUCH);
-        }
-    }
-
-    @Test
-    public void testVibrationAttribute_scrollFeedback_noInputCustomizedFlag_useHardwareFeedback() {
+    public void testVibrationAttribute_scrollFeedback_useHardwareFeedback() {
         HapticFeedbackVibrationProvider provider = createProviderWithoutCustomizations();
 
         for (int effectId : SCROLL_FEEDBACK_CONSTANTS) {

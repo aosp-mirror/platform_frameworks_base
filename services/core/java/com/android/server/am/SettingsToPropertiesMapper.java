@@ -138,6 +138,7 @@ public class SettingsToPropertiesMapper {
     // The list is sorted.
     @VisibleForTesting
     static final String[] sDeviceConfigAconfigScopes = new String[] {
+        "aaos_sdv",
         "accessibility",
         "android_core_networking",
         "android_health_services",
@@ -150,6 +151,7 @@ public class SettingsToPropertiesMapper {
         "art_performance",
         "attack_tools",
         "avic",
+        "desktop_firmware",
         "biometrics",
         "biometrics_framework",
         "biometrics_integration",
@@ -211,6 +213,7 @@ public class SettingsToPropertiesMapper {
         "preload_safety",
         "printing",
         "privacy_infra_policy",
+        "ravenwood",
         "resource_manager",
         "responsible_apis",
         "rust",
@@ -243,8 +246,10 @@ public class SettingsToPropertiesMapper {
         "wear_system_health",
         "wear_systems",
         "wear_sysui",
+        "wear_system_managed_surfaces",
         "window_surfaces",
         "windowing_frontend",
+        "xr",
     };
 
     public static final String NAMESPACE_REBOOT_STAGING = "staged";

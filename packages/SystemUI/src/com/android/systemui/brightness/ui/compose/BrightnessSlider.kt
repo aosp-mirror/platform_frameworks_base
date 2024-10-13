@@ -18,6 +18,8 @@ package com.android.systemui.brightness.ui.compose
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -33,12 +35,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.PlatformSlider
+import com.android.systemui.Flags
 import com.android.systemui.brightness.shared.model.GammaBrightness
 import com.android.systemui.brightness.ui.viewmodel.BrightnessSliderViewModel
 import com.android.systemui.brightness.ui.viewmodel.Drag
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.compose.Icon
+import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
+import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
+import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.utils.PolicyRestriction
 import kotlinx.coroutines.launch
 
@@ -54,12 +61,30 @@ private fun BrightnessSlider(
     onStop: (Int) -> Unit,
     modifier: Modifier = Modifier,
     formatter: (Int) -> String = { "$it" },
+    hapticsViewModelFactory: SliderHapticsViewModel.Factory,
 ) {
     var value by remember(gammaValue) { mutableIntStateOf(gammaValue) }
     val animatedValue by
         animateFloatAsState(targetValue = value.toFloat(), label = "BrightnessSliderAnimatedValue")
     val floatValueRange = valueRange.first.toFloat()..valueRange.last.toFloat()
     val isRestricted = remember(restriction) { restriction is PolicyRestriction.Restricted }
+    val interactionSource = remember { MutableInteractionSource() }
+    val hapticsViewModel: SliderHapticsViewModel? =
+        if (Flags.hapticsForComposeSliders()) {
+            rememberViewModel(traceName = "SliderHapticsViewModel") {
+                hapticsViewModelFactory.create(
+                    interactionSource,
+                    floatValueRange,
+                    Orientation.Horizontal,
+                    SliderHapticFeedbackConfig(
+                        maxVelocityToScale = 1f /* slider progress(from 0 to 1) per sec */
+                    ),
+                    SeekableSliderTrackerConfig(),
+                )
+            }
+        } else {
+            null
+        }
 
     PlatformSlider(
         value = animatedValue,
@@ -67,19 +92,19 @@ private fun BrightnessSlider(
         enabled = !isRestricted,
         onValueChange = {
             if (!isRestricted) {
+                hapticsViewModel?.onValueChange(it)
                 value = it.toInt()
                 onDrag(value)
             }
         },
         onValueChangeFinished = {
             if (!isRestricted) {
+                hapticsViewModel?.onValueChangeEnded()
                 onStop(value)
             }
         },
         modifier =
-            modifier.clickable(
-                enabled = isRestricted,
-            ) {
+            modifier.clickable(enabled = isRestricted) {
                 if (restriction is PolicyRestriction.Restricted) {
                     onRestrictedClick(restriction)
                 }
@@ -98,14 +123,12 @@ private fun BrightnessSlider(
                 maxLines = 1,
             )
         },
+        interactionSource = interactionSource,
     )
 }
 
 @Composable
-fun BrightnessSliderContainer(
-    viewModel: BrightnessSliderViewModel,
-    modifier: Modifier = Modifier,
-) {
+fun BrightnessSliderContainer(viewModel: BrightnessSliderViewModel, modifier: Modifier = Modifier) {
     val state by viewModel.currentBrightness.collectAsStateWithLifecycle()
     val gamma = state.value
     val coroutineScope = rememberCoroutineScope()
@@ -125,5 +148,6 @@ fun BrightnessSliderContainer(
         onStop = { coroutineScope.launch { viewModel.onDrag(Drag.Stopped(GammaBrightness(it))) } },
         modifier = modifier.fillMaxWidth(),
         formatter = viewModel::formatValue,
+        hapticsViewModelFactory = viewModel.hapticsViewModelFactory,
     )
 }

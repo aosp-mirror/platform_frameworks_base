@@ -1769,10 +1769,11 @@ public final class DisplayManagerService extends SystemService {
             flags &= ~VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP;
         }
         // Put the display in the virtual device's display group only if it's not a mirror display,
-        // and if it doesn't need its own display group. So effectively, mirror displays go into the
-        // default display group.
+        // it is a trusted display, and it doesn't need its own display group. So effectively,
+        // mirror and untrusted displays go into the default display group.
         if ((flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) == 0
                 && (flags & VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR) == 0
+                && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == VIRTUAL_DISPLAY_FLAG_TRUSTED
                 && virtualDevice != null) {
             flags |= VIRTUAL_DISPLAY_FLAG_DEVICE_DISPLAY_GROUP;
         }
@@ -1848,9 +1849,7 @@ public final class DisplayManagerService extends SystemService {
 
         if (callingUid != Process.SYSTEM_UID
                 && (flags & VIRTUAL_DISPLAY_FLAG_OWN_DISPLAY_GROUP) != 0) {
-            // The virtualDevice instance has been validated above using isValidVirtualDevice
-            if (virtualDevice == null
-                    && !checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+            if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
                 throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
                         + "create a virtual display which is not in the default DisplayGroup.");
             }
@@ -1978,7 +1977,7 @@ public final class DisplayManagerService extends SystemService {
                         // handles stopping the projection.
                         Slog.w(TAG, "Content Recording: failed to start mirroring - "
                                 + "releasing virtual display " + displayId);
-                        releaseVirtualDisplayInternal(callback.asBinder());
+                        releaseVirtualDisplayInternal(callback.asBinder(), callingUid);
                         return Display.INVALID_DISPLAY;
                     } else if (projection != null) {
                         // Indicate that this projection has been used to record, and can't be used
@@ -2067,7 +2066,7 @@ public final class DisplayManagerService extends SystemService {
         // Something weird happened and the logical display was not created.
         Slog.w(TAG, "Rejecting request to create virtual display "
                 + "because the logical display was not created.");
-        mVirtualDisplayAdapter.releaseVirtualDisplayLocked(callback.asBinder());
+        mVirtualDisplayAdapter.releaseVirtualDisplayLocked(callback.asBinder(), callingUid);
         mDisplayDeviceRepo.onDisplayDeviceEvent(device,
                 DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED);
         return -1;
@@ -2094,14 +2093,14 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    private void releaseVirtualDisplayInternal(IBinder appToken) {
+    private void releaseVirtualDisplayInternal(IBinder appToken, int callingUid) {
         synchronized (mSyncRoot) {
             if (mVirtualDisplayAdapter == null) {
                 return;
             }
 
             DisplayDevice device =
-                    mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
+                    mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken, callingUid);
             Slog.d(TAG, "Virtual Display: Display Device released");
             if (device != null) {
                 // TODO: multi-display - handle virtual displays the same as other display adapters.
@@ -2302,6 +2301,14 @@ public final class DisplayManagerService extends SystemService {
         updateLogicalDisplayState(display);
 
         mExternalDisplayPolicy.handleLogicalDisplayAddedLocked(display);
+
+        if (mFlags.isApplyDisplayChangedDuringDisplayAddedEnabled()) {
+            applyDisplayChangedLocked(display);
+        }
+
+        if (mDisplayTopologyCoordinator != null) {
+            mDisplayTopologyCoordinator.onDisplayAdded(display.getDisplayInfoLocked());
+        }
     }
 
     private void handleLogicalDisplayChangedLocked(@NonNull LogicalDisplay display) {
@@ -2388,6 +2395,9 @@ public final class DisplayManagerService extends SystemService {
             }
         } else {
             releaseDisplayAndEmitEvent(display, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+        }
+        if (mDisplayTopologyCoordinator != null) {
+            mDisplayTopologyCoordinator.onDisplayRemoved(display.getDisplayIdLocked());
         }
 
         Slog.i(TAG, "Logical display removed: " + display.getDisplayIdLocked());
@@ -4614,9 +4624,10 @@ public final class DisplayManagerService extends SystemService {
 
         @Override // Binder call
         public void releaseVirtualDisplay(IVirtualDisplayCallback callback) {
+            final int callingUid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                releaseVirtualDisplayInternal(callback.asBinder());
+                releaseVirtualDisplayInternal(callback.asBinder(), callingUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -5233,10 +5244,9 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public boolean isProximitySensorAvailable() {
+        public boolean isProximitySensorAvailable(int displayId) {
             synchronized (mSyncRoot) {
-                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
-                        .isProximitySensorAvailable();
+                return mDisplayPowerControllers.get(displayId).isProximitySensorAvailable();
             }
         }
 
@@ -5660,6 +5670,11 @@ public final class DisplayManagerService extends SystemService {
                 // information from the input manager service
                 displayPowerController.stylusGestureStarted(eventTime);
             }
+        }
+
+        @Override
+        public boolean isDisplayReadyForMirroring(int displayId) {
+            return mExternalDisplayPolicy.isDisplayReadyForMirroring(displayId);
         }
     }
 

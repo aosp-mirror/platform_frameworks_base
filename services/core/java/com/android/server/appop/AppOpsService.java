@@ -72,6 +72,7 @@ import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 import static android.permission.flags.Flags.deviceAwareAppOpNewSchemaEnabled;
 
+import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED;
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION;
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION;
 import static com.android.internal.util.FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_PROXY_OPERATION;
@@ -2833,10 +2834,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkOperation(int code, int uid, String packageName) {
-        if (Flags.appopAccessTrackingLoggingEnabled()) {
+        if (Binder.getCallingPid() != Process.myPid()
+                && Flags.appopAccessTrackingLoggingEnabled()) {
             FrameworkStatsLog.write(
-                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
-                    uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
                     APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
                     false);
         }
@@ -2846,10 +2847,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId) {
-        if (Flags.appopAccessTrackingLoggingEnabled()) {
+        if (Binder.getCallingPid() != Process.myPid()
+                && Flags.appopAccessTrackingLoggingEnabled()) {
             FrameworkStatsLog.write(
-                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
-                    uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
                     APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__CHECK_OPERATION,
                     false);
         }
@@ -3033,14 +3034,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     public SyncNotedAppOp noteProxyOperationWithState(int code,
             AttributionSourceState attributionSourceState, boolean shouldCollectAsyncNotedOp,
             String message, boolean shouldCollectMessage, boolean skipProxyOperation) {
-        if (Flags.appopAccessTrackingLoggingEnabled()) {
+        if (Binder.getCallingPid() != Process.myPid()
+                && Flags.appopAccessTrackingLoggingEnabled()) {
             FrameworkStatsLog.write(
-                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
-                    attributionSourceState.uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, attributionSourceState.uid, code,
                     APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_PROXY_OPERATION,
                     attributionSourceState.attributionTag != null);
         }
-
         AttributionSource attributionSource = new AttributionSource(attributionSourceState);
         return mCheckOpsDelegateDispatcher.noteProxyOperation(code, attributionSource,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, skipProxyOperation);
@@ -3122,14 +3122,13 @@ public class AppOpsService extends IAppOpsService.Stub {
     public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
             String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage) {
-        if (Flags.appopAccessTrackingLoggingEnabled()) {
+        if (Binder.getCallingPid() != Process.myPid()
+                && Flags.appopAccessTrackingLoggingEnabled()) {
             FrameworkStatsLog.write(
-                    FrameworkStatsLog.APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED,
-                    uid, code,
+                    APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED, uid, code,
                     APP_OP_NOTE_OP_OR_CHECK_OP_BINDER_API_CALLED__BINDER_API__NOTE_OPERATION,
                     attributionTag != null);
         }
-
         return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
                 attributionTag, Context.DEVICE_ID_DEFAULT, shouldCollectAsyncNotedOp, message,
                 shouldCollectMessage);

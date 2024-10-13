@@ -7027,6 +7027,29 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ZenModeConfig.EVENTS_OBSOLETE_RULE_ID);
     }
 
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI})
+    public void updateHasPriorityChannels_keepsChannelSettings() {
+        setupZenConfig();
+
+        // Set priority channels setting on manual mode to confirm that it is unaffected by changes
+        // to the state describing the existence of such channels.
+        mZenModeHelper.mConfig.manualRule.zenPolicy =
+                new ZenPolicy.Builder(mZenModeHelper.mConfig.manualRule.zenPolicy)
+                        .allowPriorityChannels(false)
+                        .build();
+
+        mZenModeHelper.updateHasPriorityChannels(true);
+        assertThat(mZenModeHelper.getNotificationPolicy().hasPriorityChannels()).isTrue();
+
+        // getNotificationPolicy() gets its policy from the manual rule; channels not permitted
+        assertThat(mZenModeHelper.getNotificationPolicy().allowPriorityChannels()).isFalse();
+
+        mZenModeHelper.updateHasPriorityChannels(false);
+        assertThat(mZenModeHelper.getNotificationPolicy().hasPriorityChannels()).isFalse();
+        assertThat(mZenModeHelper.getNotificationPolicy().allowPriorityChannels()).isFalse();
+    }
+
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
             @Nullable ZenPolicy zenPolicy) {
         ZenRule rule = new ZenRule();
