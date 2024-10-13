@@ -315,6 +315,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     };
     private final FaceWakeUpTriggersConfig mFaceWakeUpTriggersConfig;
 
+    private final Object mSimDataLockObject = new Object();
     HashMap<Integer, SimData> mSimDatas = new HashMap<>();
     HashMap<Integer, ServiceState> mServiceStates = new HashMap<>();
 
@@ -610,14 +611,26 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         // It is possible for active subscriptions to become invalid (-1), and these will not be
         // present in the subscriptionInfo list
-        Iterator<Map.Entry<Integer, SimData>> iter = mSimDatas.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry<Integer, SimData> simData = iter.next();
-            if (!activeSubIds.contains(simData.getKey())) {
-                mSimLogger.logInvalidSubId(simData.getKey());
-                iter.remove();
+        synchronized (mSimDataLockObject) {
+            Iterator<Map.Entry<Integer, SimData>> iter = mSimDatas.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry<Integer, SimData> simData = iter.next();
+                if (!activeSubIds.contains(simData.getKey())) {
+                    mSimLogger.logInvalidSubId(simData.getKey());
+                    iter.remove();
 
-                SimData data = simData.getValue();
+                    SimData data = simData.getValue();
+                    for (int j = 0; j < mCallbacks.size(); j++) {
+                        KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
+                        if (cb != null) {
+                            cb.onSimStateChanged(data.subId, data.slotId, data.simState);
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < changedSubscriptions.size(); i++) {
+                SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
                 for (int j = 0; j < mCallbacks.size(); j++) {
                     KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
                     if (cb != null) {
@@ -625,18 +638,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     }
                 }
             }
+            callbacksRefreshCarrierInfo();
         }
-
-        for (int i = 0; i < changedSubscriptions.size(); i++) {
-            SimData data = mSimDatas.get(changedSubscriptions.get(i).getSubscriptionId());
-            for (int j = 0; j < mCallbacks.size(); j++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(j).get();
-                if (cb != null) {
-                    cb.onSimStateChanged(data.subId, data.slotId, data.simState);
-                }
-            }
-        }
-        callbacksRefreshCarrierInfo();
     }
 
     private void handleAirplaneModeChanged() {
@@ -1872,7 +1875,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                     if (posture == DEVICE_POSTURE_OPENED) {
                         mLogger.d("Posture changed to open - attempting to request active"
                                 + " unlock and run face auth");
-                        getFaceAuthInteractor().onDeviceUnfolded();
+                        if (getFaceAuthInteractor() != null) {
+                            getFaceAuthInteractor().onDeviceUnfolded();
+                        }
                         requestActiveUnlockFromWakeReason(PowerManager.WAKE_REASON_UNFOLD_DEVICE,
                                 false);
                     }
@@ -3376,12 +3381,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      * Removes all valid subscription info from the map for the given slotId.
      */
     private void invalidateSlot(int slotId) {
-        Iterator<Map.Entry<Integer, SimData>> iter = mSimDatas.entrySet().iterator();
-        while (iter.hasNext()) {
-            SimData data = iter.next().getValue();
-            if (data.slotId == slotId && SubscriptionManager.isValidSubscriptionId(data.subId)) {
-                mSimLogger.logInvalidSubId(data.subId);
-                iter.remove();
+        synchronized (mSimDataLockObject) {
+            Iterator<Map.Entry<Integer, SimData>> iter = mSimDatas.entrySet().iterator();
+            while (iter.hasNext()) {
+                SimData data = iter.next().getValue();
+                if (data.slotId == slotId
+                        && SubscriptionManager.isValidSubscriptionId(data.subId)) {
+                    mSimLogger.logInvalidSubId(data.subId);
+                    iter.remove();
+                }
             }
         }
     }
@@ -3408,23 +3416,25 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
 
         // TODO(b/327476182): Preserve SIM_STATE_CARD_IO_ERROR sims in a separate data source.
-        SimData data = mSimDatas.get(subId);
-        final boolean changed;
-        if (data == null) {
-            data = new SimData(state, slotId, subId);
-            mSimDatas.put(subId, data);
-            changed = true; // no data yet; force update
-        } else {
-            changed = (data.simState != state || data.subId != subId || data.slotId != slotId);
-            data.simState = state;
-            data.subId = subId;
-            data.slotId = slotId;
-        }
-        if ((changed || becameAbsent)) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
-                if (cb != null) {
-                    cb.onSimStateChanged(subId, slotId, state);
+        synchronized (mSimDataLockObject) {
+            SimData data = mSimDatas.get(subId);
+            final boolean changed;
+            if (data == null) {
+                data = new SimData(state, slotId, subId);
+                mSimDatas.put(subId, data);
+                changed = true; // no data yet; force update
+            } else {
+                changed = (data.simState != state || data.subId != subId || data.slotId != slotId);
+                data.simState = state;
+                data.subId = subId;
+                data.slotId = slotId;
+            }
+            if ((changed || becameAbsent)) {
+                for (int i = 0; i < mCallbacks.size(); i++) {
+                    KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+                    if (cb != null) {
+                        cb.onSimStateChanged(subId, slotId, state);
+                    }
                 }
             }
         }
@@ -3684,9 +3694,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         callback.onKeyguardVisibilityChanged(isKeyguardVisible());
         callback.onTelephonyCapable(mTelephonyCapable);
 
-        for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
-            final SimData state = data.getValue();
-            callback.onSimStateChanged(state.subId, state.slotId, state.simState);
+        synchronized (mSimDataLockObject) {
+            for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
+                final SimData state = data.getValue();
+                callback.onSimStateChanged(state.subId, state.slotId, state.simState);
+            }
         }
     }
 
@@ -3823,19 +3835,23 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     public int getSimState(int subId) {
-        if (mSimDatas.containsKey(subId)) {
-            return mSimDatas.get(subId).simState;
-        } else {
-            return TelephonyManager.SIM_STATE_UNKNOWN;
+        synchronized (mSimDataLockObject) {
+            if (mSimDatas.containsKey(subId)) {
+                return mSimDatas.get(subId).simState;
+            } else {
+                return TelephonyManager.SIM_STATE_UNKNOWN;
+            }
         }
     }
 
     private int getSlotId(int subId) {
-        if (!mSimDatas.containsKey(subId)) {
-            refreshSimState(subId, SubscriptionManager.getSlotIndex(subId));
+        synchronized (mSimDataLockObject) {
+            if (!mSimDatas.containsKey(subId)) {
+                refreshSimState(subId, SubscriptionManager.getSlotIndex(subId));
+            }
+            SimData simData = mSimDatas.get(subId);
+            return simData != null ? simData.slotId : SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
-        SimData simData = mSimDatas.get(subId);
-        return simData != null ? simData.slotId : SubscriptionManager.INVALID_SUBSCRIPTION_ID;
     }
 
     private final TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
@@ -3876,22 +3892,24 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     private boolean refreshSimState(int subId, int slotId) {
         int state = mTelephonyManager.getSimState(slotId);
-        SimData data = mSimDatas.get(subId);
+        synchronized (mSimDataLockObject) {
+            SimData data = mSimDatas.get(subId);
 
-        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
-            invalidateSlot(slotId);
-        }
+            if (!SubscriptionManager.isValidSubscriptionId(subId)) {
+                invalidateSlot(slotId);
+            }
 
-        final boolean changed;
-        if (data == null) {
-            data = new SimData(state, slotId, subId);
-            mSimDatas.put(subId, data);
-            changed = true; // no data yet; force update
-        } else {
-            changed = data.simState != state;
-            data.simState = state;
+            final boolean changed;
+            if (data == null) {
+                data = new SimData(state, slotId, subId);
+                mSimDatas.put(subId, data);
+                changed = true; // no data yet; force update
+            } else {
+                changed = data.simState != state;
+                data.simState = state;
+            }
+            return changed;
         }
-        return changed;
     }
 
     /**

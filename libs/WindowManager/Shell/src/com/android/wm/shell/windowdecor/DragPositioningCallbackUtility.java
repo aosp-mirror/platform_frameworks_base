@@ -27,7 +27,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
-import android.window.flags.DesktopModeFlags;
+import android.window.DesktopModeFlags;
 
 import androidx.annotation.NonNull;
 

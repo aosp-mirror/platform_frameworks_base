@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -34,6 +35,7 @@ import android.media.AudioAttributes;
 import android.os.vibrator.Flags;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibratorFrequencyProfile;
+import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 
@@ -290,12 +292,36 @@ public abstract class Vibrator {
      * @hide
      */
     @TestApi
+    @SuppressLint("UnflaggedApi")
+    @Nullable
+    public VibratorFrequencyProfileLegacy getFrequencyProfileLegacy() {
+        VibratorInfo.FrequencyProfileLegacy frequencyProfile =
+                getInfo().getFrequencyProfileLegacy();
+        if (frequencyProfile.isEmpty()) {
+            return null;
+        }
+        return new VibratorFrequencyProfileLegacy(frequencyProfile);
+    }
+
+    /**
+     * Gets the profile that describes the vibrator output across the supported frequency range.
+     *
+     * <p>The profile describes the output acceleration that the device can reach when it
+     * vibrates at different frequencies.
+     *
+     * @return The frequency profile for this vibrator, or null if the vibrator does not have
+     * frequency control. If this vibrator is a composite of multiple physical devices then this
+     * will return a profile supported in all devices, or null if the intersection is empty or not
+     * available.
+     */
+    @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     @Nullable
     public VibratorFrequencyProfile getFrequencyProfile() {
         VibratorInfo.FrequencyProfile frequencyProfile = getInfo().getFrequencyProfile();
         if (frequencyProfile.isEmpty()) {
             return null;
         }
+
         return new VibratorFrequencyProfile(frequencyProfile);
     }
 

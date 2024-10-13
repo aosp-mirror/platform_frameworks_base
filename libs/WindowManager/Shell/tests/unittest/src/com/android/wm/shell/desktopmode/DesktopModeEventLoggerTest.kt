@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.SetFlagsRule
 import com.android.dx.mockito.inline.extended.ExtendedMockito.verify
@@ -393,6 +392,37 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(TASK_SIZE_UPDATE.taskWidth),
                 /* display_area */
                 eq(TASK_SIZE_UPDATE.displayArea),
+            )
+        }
+    }
+
+    @Test
+    fun logTaskInfoStateInit_logsTaskInfoChangedStateInit() {
+        desktopModeEventLogger.logTaskInfoStateInit()
+        verify {
+            FrameworkStatsLog.write(eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
+                /* task_event */
+                eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INIT_STATSD),
+                /* instance_id */
+                eq(0),
+                /* uid */
+                eq(0),
+                /* task_height */
+                eq(0),
+                /* task_width */
+                eq(0),
+                /* task_x */
+                eq(0),
+                /* task_y */
+                eq(0),
+                /* session_id */
+                eq(0),
+                /* minimize_reason */
+                eq(UNSET_MINIMIZE_REASON),
+                /* unminimize_reason */
+                eq(UNSET_UNMINIMIZE_REASON),
+                /* visible_task_count */
+                eq(0)
             )
         }
     }

@@ -20,28 +20,27 @@ import android.app.Dialog
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
-import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import androidx.lifecycle.lifecycleScope
-import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 
+/** Binds the Volume Dialog itself. */
 @VolumeDialogScope
 class VolumeDialogBinder
 @Inject
 constructor(
     @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogViewBinder: VolumeDialogViewBinder,
+    private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
     private val gravityViewModel: VolumeDialogGravityViewModel,
 ) {
 
@@ -49,11 +48,13 @@ constructor(
         with(dialog) {
             setupWindow(window!!)
             dialog.setContentView(R.layout.volume_dialog)
+            dialog.setCanceledOnTouchOutside(true)
 
-            val volumeDialogView: View = dialog.requireViewById(R.id.volume_dialog_container)
-            volumeDialogView.repeatWhenAttached {
-                lifecycleScope.launch { volumeDialogViewBinder.bind(volumeDialogView) }
-            }
+            settingsButtonViewBinder.bind(dialog.requireViewById(R.id.volume_dialog_settings))
+            volumeDialogViewBinder.bind(
+                dialog,
+                dialog.requireViewById(R.id.volume_dialog_container),
+            )
         }
     }
 

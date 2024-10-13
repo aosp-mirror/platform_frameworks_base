@@ -422,9 +422,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private int[] mSimultaneousCellularCallingSubIds = {};
 
     private int[] mECBMReason;
-    private boolean[] mECBMStarted;
+    private long[] mECBMDuration;
     private int[] mSCBMReason;
-    private boolean[] mSCBMStarted;
+    private long[] mSCBMDuration;
 
     private boolean[] mCarrierRoamingNtnMode = null;
     private boolean[] mCarrierRoamingNtnEligible = null;
@@ -724,9 +724,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mAllowedNetworkTypeReason = copyOf(mAllowedNetworkTypeReason, mNumPhones);
             mAllowedNetworkTypeValue = copyOf(mAllowedNetworkTypeValue, mNumPhones);
             mECBMReason = copyOf(mECBMReason, mNumPhones);
-            mECBMStarted = copyOf(mECBMStarted, mNumPhones);
+            mECBMDuration = copyOf(mECBMDuration, mNumPhones);
             mSCBMReason = copyOf(mSCBMReason, mNumPhones);
-            mSCBMStarted = copyOf(mSCBMStarted, mNumPhones);
+            mSCBMDuration = copyOf(mSCBMDuration, mNumPhones);
             mCarrierRoamingNtnMode = copyOf(mCarrierRoamingNtnMode, mNumPhones);
             mCarrierRoamingNtnEligible = copyOf(mCarrierRoamingNtnEligible, mNumPhones);
             // ds -> ss switch.
@@ -784,9 +784,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
                 mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
                 mECBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
-                mECBMStarted[i] = false;
+                mECBMDuration[i] = 0;
                 mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
-                mSCBMStarted[i] = false;
+                mSCBMDuration[i] = 0;
                 mCarrierRoamingNtnMode[i] = false;
                 mCarrierRoamingNtnEligible[i] = false;
             }
@@ -859,9 +859,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCarrierPrivilegeStates = new ArrayList<>();
         mCarrierServiceStates = new ArrayList<>();
         mECBMReason = new int[numPhones];
-        mECBMStarted = new boolean[numPhones];
+        mECBMDuration = new long[numPhones];
         mSCBMReason = new int[numPhones];
-        mSCBMStarted = new boolean[numPhones];
+        mSCBMDuration = new long[numPhones];
         mCarrierRoamingNtnMode = new boolean[numPhones];
         mCarrierRoamingNtnEligible = new boolean[numPhones];
 
@@ -904,9 +904,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCarrierPrivilegeStates.add(i, new Pair<>(Collections.emptyList(), new int[0]));
             mCarrierServiceStates.add(i, new Pair<>(null, Process.INVALID_UID));
             mECBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
-            mECBMStarted[i] = false;
+            mECBMDuration[i] = 0;
             mSCBMReason[i] = TelephonyManager.STOP_REASON_UNKNOWN;
-            mSCBMStarted[i] = false;
+            mSCBMDuration[i] = 0;
             mCarrierRoamingNtnMode[i] = false;
             mCarrierRoamingNtnEligible[i] = false;
         }
@@ -1493,24 +1493,24 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 if (events.contains(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED)) {
                     try {
-                        boolean ecbmStarted = mECBMStarted[r.phoneId];
-                        if (ecbmStarted) {
-                            r.callback.onCallBackModeStarted(
-                                    TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL);
-                        } else {
-                            r.callback.onCallBackModeStopped(
+                        if (mECBMDuration[r.phoneId] != 0) {
+                            r.callback.onCallbackModeStarted(
                                     TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
-                                    mECBMReason[r.phoneId]);
+                                    mECBMDuration[r.phoneId], r.subId);
+                        } else {
+                            r.callback.onCallbackModeStopped(
+                                    TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL,
+                                    mECBMReason[r.phoneId], r.subId);
                         }
 
-                        boolean scbmStarted = mSCBMStarted[r.phoneId];
-                        if (scbmStarted) {
-                            r.callback.onCallBackModeStarted(
-                                    TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS);
-                        } else {
-                            r.callback.onCallBackModeStopped(
+                        if (mSCBMReason[r.phoneId] != 0) {
+                            r.callback.onCallbackModeStarted(
                                     TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS,
-                                    mSCBMReason[r.phoneId]);
+                                    mSCBMDuration[r.phoneId], r.subId);
+                        } else {
+                            r.callback.onCallbackModeStopped(
+                                    TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS,
+                                    mSCBMReason[r.phoneId], r.subId);
                         }
                     } catch (RemoteException ex) {
                         remove(r.binder);
@@ -3457,10 +3457,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     }
 
     @Override
-    public void notifyCallbackModeStarted(int phoneId, int subId, int type) {
-        if (!checkNotifyPermission("notifyCallbackModeStarted()")) {
-            return;
-        }
+    public void notifyCallbackModeStarted(int phoneId, int subId, int type, long durationMillis) {
+        if (!checkNotifyPermission("notifyCallbackModeStarted()")) return;
+
         if (VDBG) {
             log("notifyCallbackModeStarted: phoneId=" + phoneId + ", subId=" + subId
                     + ", type=" + type);
@@ -3468,9 +3467,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 if (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL) {
-                    mECBMStarted[phoneId] = true;
+                    mECBMDuration[phoneId] = durationMillis;
                 } else if (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS) {
-                    mSCBMStarted[phoneId] = true;
+                    mSCBMDuration[phoneId] = durationMillis;
                 }
             }
             for (Record r : mRecords) {
@@ -3478,7 +3477,39 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (r.matchTelephonyCallbackEvent(
                         TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED)) {
                     try {
-                        r.callback.onCallBackModeStarted(type);
+                        r.callback.onCallbackModeStarted(type, durationMillis, subId);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+        }
+        handleRemoveListLocked();
+    }
+
+    @Override
+    public void notifyCallbackModeRestarted(int phoneId, int subId, int type,
+            long durationMillis) {
+        if (!checkNotifyPermission("notifyCallbackModeRestarted()")) return;
+
+        if (VDBG) {
+            log("notifyCallbackModeRestarted: phoneId=" + phoneId + ", subId=" + subId
+                    + ", type=" + type);
+        }
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                if (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL) {
+                    mECBMDuration[phoneId] = durationMillis;
+                } else if (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS) {
+                    mSCBMDuration[phoneId] = durationMillis;
+                }
+            }
+            for (Record r : mRecords) {
+                // Send to all listeners regardless of subscription
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED)) {
+                    try {
+                        r.callback.onCallbackModeRestarted(type, durationMillis, subId);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -3490,9 +3521,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @Override
     public void notifyCallbackModeStopped(int phoneId, int subId, int type, int reason) {
-        if (!checkNotifyPermission("notifyCallbackModeStopped()")) {
-            return;
-        }
+        if (!checkNotifyPermission("notifyCallbackModeStopped()")) return;
+
         if (VDBG) {
             log("notifyCallbackModeStopped: phoneId=" + phoneId + ", subId=" + subId
                     + ", type=" + type + ", reason=" + reason);
@@ -3500,11 +3530,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
                 if (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_CALL) {
-                    mECBMStarted[phoneId] = false;
                     mECBMReason[phoneId] = reason;
+                    mECBMDuration[phoneId] = 0;
                 } else if (type == TelephonyManager.EMERGENCY_CALLBACK_MODE_SMS) {
-                    mSCBMStarted[phoneId] = false;
                     mSCBMReason[phoneId] = reason;
+                    mSCBMDuration[phoneId] = 0;
                 }
             }
             for (Record r : mRecords) {
@@ -3512,7 +3542,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (r.matchTelephonyCallbackEvent(
                         TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED)) {
                     try {
-                        r.callback.onCallBackModeStopped(type, reason);
+                        r.callback.onCallbackModeStopped(type, reason, subId);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
                     }
@@ -3662,9 +3692,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mPhysicalChannelConfigs=" + mPhysicalChannelConfigs.get(i));
                 pw.println("mLinkCapacityEstimateList=" + mLinkCapacityEstimateLists.get(i));
                 pw.println("mECBMReason=" + mECBMReason[i]);
-                pw.println("mECBMStarted=" + mECBMStarted[i]);
+                pw.println("mECBMDuration=" + mECBMDuration[i]);
                 pw.println("mSCBMReason=" + mSCBMReason[i]);
-                pw.println("mSCBMStarted=" + mSCBMStarted[i]);
+                pw.println("mSCBMDuration=" + mSCBMDuration[i]);
                 pw.println("mCarrierRoamingNtnMode=" + mCarrierRoamingNtnMode[i]);
                 pw.println("mCarrierRoamingNtnEligible=" + mCarrierRoamingNtnEligible[i]);
 

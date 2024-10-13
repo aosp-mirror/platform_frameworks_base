@@ -88,6 +88,7 @@ import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.ZenModesCleanupStartable;
 
 import dagger.Binds;
 import dagger.Module;
@@ -299,4 +300,10 @@ public interface NotificationsModule {
             ZenModeRepository repository) {
         return new NotificationsSoundPolicyInteractor(repository);
     }
+
+    /** Binds {@link ZenModesCleanupStartable} as a {@link CoreStartable}. */
+    @Binds
+    @IntoMap
+    @ClassKey(ZenModesCleanupStartable.class)
+    CoreStartable bindsZenModesCleanup(ZenModesCleanupStartable zenModesCleanup);
 }

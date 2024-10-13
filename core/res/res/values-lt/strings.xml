@@ -2131,11 +2131,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Skambučiai ir pranešimai vibruos"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Skambučiai ir pranešimai bus nutildyti"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Sistemos pakeitimai"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Netrukdymo režimas"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Naujiena: naudojant netrukdymo režimą pranešimai slepiami"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Palieskite, kad sužinotumėte daugiau ir pakeistumėte."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Netrukdymo režimas pakeistas"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Palieskite, kad patikrintumėte, kas blokuojama."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Peržiūrėkite pranešimų nustatymus"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Tryliktos ir naujesnių versijų „Android” jūsų įdiegtoms programoms reikia suteikti leidimą siųsti pranešimus. Palieskite, kad pakeistumėte šį leidimą esamoms programoms."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Priminti vėliau"</string>

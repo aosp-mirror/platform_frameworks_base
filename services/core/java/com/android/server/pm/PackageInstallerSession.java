@@ -109,6 +109,7 @@ import android.content.pm.PackageInstaller.UserActionReason;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.dex.DexMetadataHelper;
@@ -2840,19 +2841,38 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             // since installation is in progress.
             activate();
         }
+        try {
+            List<PackageInstallerSession> children = getChildSessions();
+            if (isMultiPackage()) {
+                for (PackageInstallerSession child : children) {
+                    child.prepareInheritedFiles();
+                    child.parseApk();
+                }
+            } else {
+                prepareInheritedFiles();
+                parseApk();
+            }
+        }  catch (PackageManagerException e) {
+            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+            final String errorMsg = PackageManager.installStatusToString(e.error, completeMsg);
+            setSessionFailed(e.error, errorMsg);
+            onSessionVerificationFailure(e.error, errorMsg);
+        }
         if (Flags.verificationService()) {
             final Supplier<Computer> snapshotSupplier = mPm::snapshotComputer;
             if (mVerifierController.isVerifierInstalled(snapshotSupplier, userId)) {
-                // TODO: extract shared library declarations
                 final SigningInfo signingInfo;
+                final List<SharedLibraryInfo> declaredLibraries;
                 synchronized (mLock) {
                     signingInfo = new SigningInfo(mSigningDetails);
+                    declaredLibraries =
+                            mPackageLite == null ? null : mPackageLite.getDeclaredLibraries();
                 }
                 // Send the request to the verifier and wait for its response before the rest of
                 // the installation can proceed.
                 if (!mVerifierController.startVerificationSession(snapshotSupplier, userId,
-                        sessionId, params.appPackageName, Uri.fromFile(stageDir), signingInfo,
-                        /* declaredLibraries= */null, /* extensionParams= */ null,
+                        sessionId, getPackageName(), Uri.fromFile(stageDir), signingInfo,
+                        declaredLibraries, /* extensionParams= */ null,
                         new VerifierCallback(), /* retry= */ false)) {
                     // A verifier is installed but cannot be connected. Installation disallowed.
                     onSessionVerificationFailure(INSTALL_FAILED_INTERNAL_ERROR,
@@ -2887,12 +2907,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             List<PackageInstallerSession> children = getChildSessions();
             if (isMultiPackage()) {
                 for (PackageInstallerSession child : children) {
-                    child.prepareInheritedFiles();
-                    child.parseApkAndExtractNativeLibraries();
+                    child.extractNativeLibraries();
                 }
             } else {
-                prepareInheritedFiles();
-                parseApkAndExtractNativeLibraries();
+                extractNativeLibraries();
             }
             verifyNonStaged();
         } catch (PackageManagerException e) {
@@ -3069,7 +3087,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mStageDirInUse = true;
     }
 
-    private void parseApkAndExtractNativeLibraries() throws PackageManagerException {
+    private void parseApk() throws PackageManagerException {
         synchronized (mLock) {
             if (mStageDirInUse) {
                 throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
@@ -3102,12 +3120,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // stage dir here.
                 // Besides, PackageLite may be null for staged sessions that don't complete
                 // pre-reboot verification.
-                result = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
+                mPackageLite = getOrParsePackageLiteLocked(stageDir, /* flags */ 0);
             } else {
-                result = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
+                mPackageLite = getOrParsePackageLiteLocked(mResolvedBaseFile, /* flags */ 0);
             }
-            if (result != null) {
-                mPackageLite = result;
+        }
+    }
+
+    private void extractNativeLibraries() throws PackageManagerException {
+        synchronized (mLock) {
+            if (mPackageLite != null) {
                 if (!isApexSession()) {
                     synchronized (mProgressLock) {
                         mInternalProgress = 0.5f;

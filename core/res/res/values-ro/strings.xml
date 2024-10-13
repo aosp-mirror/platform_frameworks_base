@@ -2130,11 +2130,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Apelurile și notificările vor vibra"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Apelurile și notificările vor avea sunetul dezactivat"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modificări de sistem"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nu deranja"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Funcția nouă Nu deranja ascunde notificările"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Atinge ca să afli mai multe și să modifici"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Funcția Nu deranja s-a schimbat"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Atinge pentru a verifica ce este blocat."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Verifică setările pentru notificări"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Începând cu Android 13, aplicațiile pe care le instalezi necesită permisiunea de a trimite notificări. Atinge ca să modifici permisiunea pentru aplicațiile existente."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Mai târziu"</string>

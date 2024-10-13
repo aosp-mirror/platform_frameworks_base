@@ -49,6 +49,7 @@ import android.gui.DropInputMode;
 import android.gui.StalledTransactionInfo;
 import android.gui.TrustedOverlay;
 import android.hardware.DataSpace;
+import android.hardware.DisplayLuts;
 import android.hardware.HardwareBuffer;
 import android.hardware.OverlayProperties;
 import android.hardware.SyncFence;
@@ -307,9 +308,9 @@ public final class SurfaceControl implements Parcelable {
     private static native StalledTransactionInfo nativeGetStalledTransactionInfo(int pid);
     private static native void nativeSetDesiredPresentTimeNanos(long transactionObj,
                                                                 long desiredPresentTimeNanos);
-    private static native void nativeSetFrameTimeline(long transactionObj,
-                                                           long vsyncId);
     private static native void nativeNotifyShutdown();
+    private static native void nativeSetLuts(long transactionObj, long nativeObject,
+            float[] buffers, int[] slots, int[] dimensions, int[] sizes, int[] samplingKeys);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -4396,6 +4397,17 @@ public final class SurfaceControl implements Parcelable {
                         "desiredRatio must be finite && >= 1.0f or 0; got " + desiredRatio);
             }
             nativeSetDesiredHdrHeadroom(mNativeObject, sc.mNativeObject, desiredRatio);
+            return this;
+        }
+
+        /** @hide */
+        public @NonNull Transaction setLuts(@NonNull SurfaceControl sc,
+                @NonNull DisplayLuts displayLuts) {
+            checkPreconditions(sc);
+
+            nativeSetLuts(mNativeObject, sc.mNativeObject, displayLuts.getLutBuffers(),
+                    displayLuts.getOffsets(), displayLuts.getLutDimensions(),
+                    displayLuts.getLutSizes(), displayLuts.getLutSamplingKeys());
             return this;
         }
 

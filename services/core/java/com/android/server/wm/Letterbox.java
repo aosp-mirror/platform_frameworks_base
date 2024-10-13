@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.SurfaceControl.HIDDEN;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_LETTERBOX_BACKGROUND;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_TASK_OVERLAY;
 
 import android.annotation.NonNull;
 import android.graphics.Color;
@@ -37,6 +38,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 
 import com.android.server.UiThread;
+import com.android.window.flags.Flags;
 
 import java.util.function.Supplier;
 
@@ -66,6 +68,7 @@ public class Letterbox {
     // for overlaping an app window and letterbox surfaces.
     private final LetterboxSurface mFullWindowSurface = new LetterboxSurface("fullWindow");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
+
     @NonNull
     private final AppCompatReachabilityPolicy mAppCompatReachabilityPolicy;
     @NonNull
@@ -222,12 +225,14 @@ public class Letterbox {
 
     void onMovedToDisplay(int displayId) {
         for (LetterboxSurface surface : mSurfaces) {
-            if (surface.mInputInterceptor != null) {
-                surface.mInputInterceptor.mWindowHandle.displayId = displayId;
-            }
+            setSurfaceDisplayID(surface, displayId);
         }
-        if (mFullWindowSurface.mInputInterceptor != null) {
-            mFullWindowSurface.mInputInterceptor.mWindowHandle.displayId = displayId;
+        setSurfaceDisplayID(mFullWindowSurface, displayId);
+    }
+
+    private void setSurfaceDisplayID(LetterboxSurface surface, int displayId) {
+        if (surface.mInputInterceptor != null) {
+            surface.mInputInterceptor.mWindowHandle.displayId = displayId;
         }
     }
 
@@ -242,14 +247,13 @@ public class Letterbox {
     private final class TapEventReceiver extends InputEventReceiver {
 
         private final GestureDetector mDoubleTapDetector;
-        private final DoubleTapListener mDoubleTapListener;
 
         TapEventReceiver(InputChannel inputChannel, WindowManagerService wmService,
                 Handler uiHandler) {
             super(inputChannel, uiHandler.getLooper());
-            mDoubleTapListener = new DoubleTapListener(wmService);
-            mDoubleTapDetector = new GestureDetector(wmService.mContext, mDoubleTapListener,
-                    uiHandler);
+            final DoubleTapListener doubleTapListener = new DoubleTapListener(wmService);
+            mDoubleTapDetector =
+                    new GestureDetector(wmService.mContext, doubleTapListener, uiHandler);
         }
 
         @Override
@@ -293,7 +297,8 @@ public class Letterbox {
         InputInterceptor(String namePrefix, WindowState win) {
             mWmService = win.mWmService;
             mHandler = UiThread.getHandler();
-            final String name = namePrefix + (win.mActivityRecord != null ? win.mActivityRecord : win);
+            final String name = namePrefix
+                    + (win.mActivityRecord != null ? win.mActivityRecord : win);
             mClientChannel = mWmService.mInputManager.createInputChannel(name);
             mInputEventReceiver = new TapEventReceiver(mClientChannel, mWmService, mHandler);
 
@@ -303,12 +308,15 @@ public class Letterbox {
                     win.getDisplayId());
             mWindowHandle.name = name;
             mWindowHandle.token = mToken;
-            mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
+            mWindowHandle.layoutParamsType = Flags.scrollingFromLetterbox()
+                    ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    : WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
             mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
             mWindowHandle.ownerPid = WindowManagerService.MY_PID;
             mWindowHandle.ownerUid = WindowManagerService.MY_UID;
             mWindowHandle.scaleFactor = 1.0f;
-            mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE | InputConfig.SLIPPERY;
+            mWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE
+                    | (Flags.scrollingFromLetterbox() ? InputConfig.SPY : InputConfig.SLIPPERY);
         }
 
         void updateTouchableRegion(Rect frame) {
@@ -341,6 +349,7 @@ public class Letterbox {
 
         private final String mType;
         private SurfaceControl mSurface;
+        private SurfaceControl mInputSurface;
         private Color mColor;
         private boolean mHasWallpaperBackground;
         private SurfaceControl mParentSurface;
@@ -373,21 +382,35 @@ public class Letterbox {
                     .setColorSpaceAgnostic(mSurface, true);
         }
 
+        private void createInputSurface(SurfaceControl.Transaction t) {
+            mInputSurface = mSurfaceControlFactory.get()
+                    .setName("LetterboxInput - " + mType)
+                    .setFlags(HIDDEN)
+                    .setContainerLayer()
+                    .setOpaque(true)
+                    .setCallsite("LetterboxSurface.createInputSurface")
+                    .build();
+
+            t.setLayer(mInputSurface, TASK_CHILD_LAYER_TASK_OVERLAY);
+        }
+
         void attachInput(WindowState win) {
             if (mInputInterceptor != null) {
                 mInputInterceptor.dispose();
             }
+            // TODO(b/371179559): only detect double tap on LB surfaces not used for cutout area.
+            // Potentially, the input interceptor may still be needed for slippery feature.
             mInputInterceptor = new InputInterceptor("Letterbox_" + mType + "_", win);
-        }
-
-        boolean isRemoved() {
-            return mSurface != null || mInputInterceptor != null;
         }
 
         public void remove() {
             if (mSurface != null) {
                 mTransactionFactory.get().remove(mSurface).apply();
                 mSurface = null;
+            }
+            if (mInputSurface != null) {
+                mTransactionFactory.get().remove(mInputSurface).apply();
+                mInputSurface = null;
             }
             if (mInputInterceptor != null) {
                 mInputInterceptor.dispose();
@@ -415,26 +438,52 @@ public class Letterbox {
                     createSurface(t);
                 }
 
+                if (Flags.scrollingFromLetterbox()
+                        && mInputInterceptor != null
+                        && mInputSurface == null) {
+                    createInputSurface(inputT);
+                }
+
                 mColor = mAppCompatLetterboxOverrides.getLetterboxBackgroundColor();
                 mParentSurface = mParentSurfaceSupplier.get();
                 t.setColor(mSurface, getRgbColorArray());
-                t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
-                t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),
-                        mSurfaceFrameRelative.height());
-                t.reparent(mSurface, mParentSurface);
+                setPositionAndReparent(t, mSurface);
 
                 mHasWallpaperBackground = mAppCompatLetterboxOverrides
                         .hasWallpaperBackgroundForLetterbox();
                 updateAlphaAndBlur(t);
 
                 t.show(mSurface);
-            } else if (mSurface != null) {
-                t.hide(mSurface);
+
+                if (mInputSurface != null) {
+                    setPositionAndReparent(inputT, mInputSurface);
+                    inputT.setTrustedOverlay(mInputSurface, true);
+                    inputT.show(mInputSurface);
+                }
+
+            } else {
+                if (mSurface != null) {
+                    t.hide(mSurface);
+                }
+                if (mInputSurface != null) {
+                    inputT.hide(mInputSurface);
+                }
             }
-            if (mSurface != null && mInputInterceptor != null) {
+
+            SurfaceControl surfaceWithInput =
+                    Flags.scrollingFromLetterbox() ? mInputSurface : mSurface;
+            if (surfaceWithInput != null && mInputInterceptor != null) {
                 mInputInterceptor.updateTouchableRegion(mSurfaceFrameRelative);
-                inputT.setInputWindowInfo(mSurface, mInputInterceptor.mWindowHandle);
+                inputT.setInputWindowInfo(surfaceWithInput, mInputInterceptor.mWindowHandle);
             }
+        }
+
+        private void setPositionAndReparent(@NonNull SurfaceControl.Transaction t,
+                @NonNull SurfaceControl surface) {
+            t.setPosition(surface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
+            t.setWindowCrop(surface, mSurfaceFrameRelative.width(),
+                    mSurfaceFrameRelative.height());
+            t.reparent(surface, mParentSurface);
         }
 
         private void updateAlphaAndBlur(SurfaceControl.Transaction t) {

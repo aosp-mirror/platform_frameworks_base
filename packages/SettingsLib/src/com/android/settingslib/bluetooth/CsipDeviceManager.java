@@ -21,8 +21,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
+import android.content.Context;
 import android.os.Build;
 import android.os.ParcelUuid;
+import android.os.UserManager;
 import android.util.Log;
 
 import androidx.annotation.ChecksSdkIntAtLeast;
@@ -45,9 +47,11 @@ public class CsipDeviceManager {
 
     private final LocalBluetoothManager mBtManager;
     private final List<CachedBluetoothDevice> mCachedDevices;
+    private final Context mContext;
 
-    CsipDeviceManager(LocalBluetoothManager localBtManager,
+    CsipDeviceManager(Context context, LocalBluetoothManager localBtManager,
             List<CachedBluetoothDevice> cachedDevices) {
+        mContext = context;
         mBtManager = localBtManager;
         mCachedDevices = cachedDevices;
     }
@@ -379,13 +383,22 @@ public class CsipDeviceManager {
                 preferredMainDevice.refresh();
                 hasChanged = true;
             }
-            syncAudioSharingSourceIfNeeded(preferredMainDevice);
+            if (isWorkProfile()) {
+                log("addMemberDevicesIntoMainDevice: skip sync source for work profile");
+            } else {
+                syncAudioSharingSourceIfNeeded(preferredMainDevice);
+            }
         }
         if (hasChanged) {
             log("addMemberDevicesIntoMainDevice: After changed, CachedBluetoothDevice list: "
                     + mCachedDevices);
         }
         return hasChanged;
+    }
+
+    private boolean isWorkProfile() {
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        return userManager != null && userManager.isManagedProfile();
     }
 
     private void syncAudioSharingSourceIfNeeded(CachedBluetoothDevice mainDevice) {

@@ -914,6 +914,7 @@ package android.companion {
     ctor public AssociationInfo.Builder(@NonNull android.companion.AssociationInfo);
     method @NonNull public android.companion.AssociationInfo build();
     method @NonNull public android.companion.AssociationInfo.Builder setAssociatedDevice(@Nullable android.companion.AssociatedDevice);
+    method @FlaggedApi("android.companion.association_device_icon") @NonNull public android.companion.AssociationInfo.Builder setDeviceIcon(@Nullable android.graphics.drawable.Icon);
     method @NonNull public android.companion.AssociationInfo.Builder setDeviceMacAddress(@Nullable android.net.MacAddress);
     method @NonNull public android.companion.AssociationInfo.Builder setDeviceProfile(@Nullable String);
     method @NonNull public android.companion.AssociationInfo.Builder setDisplayName(@Nullable CharSequence);
@@ -2603,7 +2604,7 @@ package android.os {
 
   public abstract class Vibrator {
     method public int getDefaultVibrationIntensity(int);
-    method @Nullable public android.os.vibrator.VibratorFrequencyProfile getFrequencyProfile();
+    method @Nullable public android.os.vibrator.VibratorFrequencyProfileLegacy getFrequencyProfileLegacy();
     method public boolean hasFrequencyControl();
     field public static final int VIBRATION_INTENSITY_HIGH = 3; // 0x3
     field public static final int VIBRATION_INTENSITY_LOW = 1; // 0x1
@@ -2793,7 +2794,7 @@ package android.os.vibrator {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.vibrator.VibrationEffectSegment> CREATOR;
   }
 
-  public final class VibratorFrequencyProfile {
+  public final class VibratorFrequencyProfileLegacy {
     method public float getMaxAmplitudeMeasurementInterval();
     method @FloatRange(from=0, to=1) @NonNull public float[] getMaxAmplitudeMeasurements();
     method public float getMaxFrequency();

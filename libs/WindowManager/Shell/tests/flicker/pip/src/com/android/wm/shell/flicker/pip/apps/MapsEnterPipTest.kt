@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized
 /**
  * Test entering pip from Maps app by interacting with the app UI
  *
- * To run this test: `atest WMShellFlickerTests:MapsEnterPipTest`
+ * To run this test: `atest WMShellFlickerTestsPipAppsCSuite:MapsEnterPipTest`
  *
  * Actions:
  * ```

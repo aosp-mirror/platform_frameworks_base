@@ -537,7 +537,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
         mWindow.setAttributes(lp);
         mWindow.setLayout(WRAP_CONTENT, WRAP_CONTENT);
-        mDialog.setContentView(R.layout.volume_dialog);
+        mDialog.setContentView(R.layout.volume_dialog_legacy);
         mDialogView = mDialog.findViewById(R.id.volume_dialog);
         mDialogView.setAlpha(0);
         mDialogTimeoutMillis = mSecureSettings.get().getInt(

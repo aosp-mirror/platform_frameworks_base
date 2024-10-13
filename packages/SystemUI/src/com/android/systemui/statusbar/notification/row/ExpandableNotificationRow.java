@@ -1015,7 +1015,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mNotificationParent = isChildInGroup ? parent : null;
         mPrivateLayout.setIsChildInGroup(isChildInGroup);
-        if (LockscreenOtpRedaction.isEnabled()) {
+        if (LockscreenOtpRedaction.isSingleLineViewEnabled()) {
             mPublicLayout.setIsChildInGroup(isChildInGroup);
         }
 
@@ -3218,7 +3218,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    protected void resetAllContentAlphas() {
+    public void resetAllContentAlphas() {
         mLogger.logResetAllContentAlphas(getEntry());
         mPrivateLayout.setAlpha(1f);
         mPrivateLayout.setLayerType(LAYER_TYPE_NONE, null);
@@ -3873,13 +3873,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             pw.print(", mShowingPublicInitialized: " + mShowingPublicInitialized);
             NotificationContentView showingLayout = getShowingLayout();
             pw.print(", privateShowing: " + (showingLayout == mPrivateLayout));
+            pw.print(", childrenContainerShowing: "
+                    + (!shouldShowPublic() && mIsSummaryWithChildren));
             pw.print(", mShowNoBackground: " + mShowNoBackground);
+            pw.print(", clipBounds: " + getClipBounds());
+
             pw.println();
             if (NotificationContentView.INCLUDE_HEIGHTS_TO_DUMP) {
                 dumpHeights(pw);
             }
             showingLayout.dump(pw, args);
-
+            dumpCustomOutline(pw, args);
+            dumpClipping(pw, args);
             if (getViewState() != null) {
                 getViewState().dump(pw, args);
                 pw.println();
@@ -3896,6 +3901,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     ? 0 : mChildrenContainer.getTransientViewCount();
             if (mIsSummaryWithChildren || transientViewCount > 0) {
                 pw.println(mChildrenContainer.debugString());
+                pw.println("Children Container Intrinsic Height: "
+                        + mChildrenContainer.getIntrinsicHeight());
                 pw.println();
                 List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
                 pw.print("Children: " + notificationChildren.size() + " {");

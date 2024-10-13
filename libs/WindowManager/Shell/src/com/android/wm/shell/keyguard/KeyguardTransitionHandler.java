@@ -28,6 +28,8 @@ import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_LOCKED;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_OCCLUDING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.view.WindowManager.TRANSIT_SLEEP;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningType;
 
@@ -44,6 +46,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.IRemoteTransition;
 import android.window.IRemoteTransitionFinishedCallback;
+import android.window.KeyguardState;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
@@ -387,6 +390,19 @@ public class KeyguardTransitionHandler
         public void setLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen) {
             mMainExecutor.execute(() ->
                     mIsLaunchingActivityOverLockscreen = isLaunchingActivityOverLockscreen);
+        }
+
+        @Override
+        public void startKeyguardTransition(boolean keyguardShowing, boolean aodShowing) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            final KeyguardState keyguardState =
+                    new KeyguardState.Builder(android.view.Display.DEFAULT_DISPLAY)
+                            .setKeyguardShowing(keyguardShowing).setAodShowing(aodShowing).build();
+            wct.addKeyguardState(keyguardState);
+            mMainExecutor.execute(() -> {
+                mTransitions.startTransition(keyguardShowing ? TRANSIT_TO_FRONT : TRANSIT_TO_BACK,
+                        wct, KeyguardTransitionHandler.this);
+            });
         }
     }
 }

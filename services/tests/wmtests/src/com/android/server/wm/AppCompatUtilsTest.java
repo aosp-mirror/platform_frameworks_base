@@ -18,15 +18,25 @@ package com.android.server.wm;
 
 import static android.app.CameraCompatTaskInfo.CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 import android.app.TaskInfo;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.annotation.NonNull;
+
+import com.android.window.flags.Flags;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -174,9 +184,13 @@ public class AppCompatUtilsTest extends WindowTestsBase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
     public void getTaskInfoPropagatesCameraCompatMode() {
         runTestScenario((robot) -> {
-            robot.applyOnActivity(AppCompatActivityRobot::createActivityWithComponentInNewTask);
+            robot.dw().allowEnterDesktopMode(/* isAllowed= */ true);
+            robot.applyOnActivity(
+                    AppCompatActivityRobot::createActivityWithComponentInNewTaskAndDisplay);
+            robot.setCameraCompatTreatmentEnabledForActivity(/* enabled= */ true);
 
             robot.setFreeformCameraCompatMode(CAMERA_COMPAT_FREEFORM_PORTRAIT_DEVICE_IN_LANDSCAPE);
             robot.checkTaskInfoFreeformCameraCompatMode(
@@ -212,6 +226,15 @@ public class AppCompatUtilsTest extends WindowTestsBase {
             spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
         }
 
+        @Override
+        void onPostDisplayContentCreation(@NonNull DisplayContent displayContent) {
+            super.onPostDisplayContentCreation(displayContent);
+            mockPortraitDisplay(displayContent);
+            if (displayContent.mAppCompatCameraPolicy.hasCameraCompatFreeformPolicy()) {
+                spyOn(displayContent.mAppCompatCameraPolicy.mCameraCompatFreeformPolicy);
+            }
+        }
+
         void transparentActivity(@NonNull Consumer<AppCompatTransparentActivityRobot> consumer) {
             // We always create at least an opaque activity in a Task.
             activity().createNewTaskWithBaseActivity();
@@ -235,8 +258,8 @@ public class AppCompatUtilsTest extends WindowTestsBase {
         }
 
         void setFreeformCameraCompatMode(@FreeformCameraCompatMode int mode) {
-            activity().top().mAppCompatController.getAppCompatCameraOverrides()
-                    .setFreeformCameraCompatMode(mode);
+            doReturn(mode).when(activity().top().mDisplayContent.mAppCompatCameraPolicy
+                    .mCameraCompatFreeformPolicy).getCameraCompatMode(activity().top());
         }
 
         void checkTopActivityLetterboxReason(@NonNull String expected) {
@@ -258,6 +281,24 @@ public class AppCompatUtilsTest extends WindowTestsBase {
             Assert.assertEquals(mode, getTopTaskInfo().appCompatTaskInfo
                     .cameraCompatTaskInfo.freeformCameraCompatMode);
         }
-    }
 
+        void setCameraCompatTreatmentEnabledForActivity(boolean enabled) {
+            doReturn(enabled).when(activity().displayContent().mAppCompatCameraPolicy
+                    .mCameraCompatFreeformPolicy).isTreatmentEnabledForActivity(
+                            eq(activity().top()), anyBoolean());
+        }
+
+        private void mockPortraitDisplay(DisplayContent displayContent) {
+            doAnswer(invocation -> {
+                DisplayInfo displayInfo = new DisplayInfo();
+                displayContent.getDisplay().getDisplayInfo(displayInfo);
+                displayInfo.rotation = Surface.ROTATION_90;
+                // Set height and width so that the natural orientation (when rotation is 0) is
+                // portrait.
+                displayInfo.logicalHeight = 600;
+                displayInfo.logicalWidth =  800;
+                return displayInfo;
+            }).when(displayContent.mWmService.mDisplayManagerInternal).getDisplayInfo(anyInt());
+        }
+    }
 }

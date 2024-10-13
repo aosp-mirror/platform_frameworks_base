@@ -16,7 +16,6 @@
 
 package com.android.settingslib.bluetooth.devicesettings;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -36,7 +35,7 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
     private final String mTitle;
     private final String mSummary;
     private final Bitmap mIcon;
-    private final Intent mIntent;
+    private final DeviceSettingAction mAction;
     private final boolean mHasSwitch;
     private final boolean mChecked;
     private final boolean mIsAllowedChangingState;
@@ -46,7 +45,7 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
             String title,
             @Nullable String summary,
             @Nullable Bitmap icon,
-            @Nullable Intent intent,
+            @NonNull DeviceSettingAction action,
             boolean hasSwitch,
             boolean checked,
             boolean allowChangingState,
@@ -56,7 +55,7 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
         mTitle = title;
         mSummary = summary;
         mIcon = icon;
-        mIntent = intent;
+        mAction = action;
         mHasSwitch = hasSwitch;
         mChecked = checked;
         mIsAllowedChangingState = allowChangingState;
@@ -79,13 +78,13 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
         String title = in.readString();
         String summary = in.readString();
         Bitmap icon = in.readParcelable(Bitmap.class.getClassLoader());
-        Intent intent = in.readParcelable(Intent.class.getClassLoader());
+        DeviceSettingAction action = DeviceSettingAction.readFromParcel(in);
         boolean hasSwitch = in.readBoolean();
         boolean checked = in.readBoolean();
         boolean allowChangingState = in.readBoolean();
         Bundle extras = in.readBundle(Bundle.class.getClassLoader());
         return new ActionSwitchPreference(
-                title, summary, icon, intent, hasSwitch, checked, allowChangingState, extras);
+                title, summary, icon, action, hasSwitch, checked, allowChangingState, extras);
     }
 
     public static final Creator<ActionSwitchPreference> CREATOR =
@@ -115,7 +114,7 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
         dest.writeString(mTitle);
         dest.writeString(mSummary);
         dest.writeParcelable(mIcon, flags);
-        dest.writeParcelable(mIntent, flags);
+        mAction.writeToParcel(dest, flags);
         dest.writeBoolean(mHasSwitch);
         dest.writeBoolean(mChecked);
         dest.writeBoolean(mIsAllowedChangingState);
@@ -127,7 +126,7 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
         private String mTitle;
         private String mSummary;
         private Bitmap mIcon;
-        private Intent mIntent;
+        private DeviceSettingAction mAction = DeviceSettingAction.EMPTY_ACTION;
         private boolean mHasSwitch;
         private boolean mChecked;
         private boolean mIsAllowedChangingState;
@@ -170,14 +169,14 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
         }
 
         /**
-         * Sets the Intent to launch when the preference is clicked, optional.
+         * Sets the action to trigger when the preference is clicked, optional.
          *
-         * @param intent The Intent.
+         * @param action The action to trigger.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setIntent(@Nullable Intent intent) {
-            mIntent = intent;
+        public Builder setAction(@Nullable DeviceSettingAction action) {
+            mAction = action == null ? DeviceSettingAction.EMPTY_ACTION : action;
             return this;
         }
 
@@ -239,7 +238,7 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
                     mTitle,
                     mSummary,
                     mIcon,
-                    mIntent,
+                    mAction,
                     mHasSwitch,
                     mChecked,
                     mIsAllowedChangingState,
@@ -278,13 +277,13 @@ public class ActionSwitchPreference extends DeviceSettingPreference implements P
     }
 
     /**
-     * Gets the Intent to launch when the preference is clicked.
+     * Gets the action to trigger when the preference is clicked.
      *
      * @return Returns the intent to launch.
      */
-    @Nullable
-    public Intent getIntent() {
-        return mIntent;
+    @NonNull
+    public DeviceSettingAction getAction() {
+        return mAction;
     }
 
     /**

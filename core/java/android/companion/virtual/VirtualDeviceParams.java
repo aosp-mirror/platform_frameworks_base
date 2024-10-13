@@ -159,7 +159,7 @@ public final class VirtualDeviceParams implements Parcelable {
      * @hide
      */
     @IntDef(prefix = "POLICY_TYPE_", value = {POLICY_TYPE_SENSORS, POLICY_TYPE_AUDIO,
-            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY, POLICY_TYPE_CAMERA,
+            POLICY_TYPE_RECENTS, POLICY_TYPE_ACTIVITY, POLICY_TYPE_CLIPBOARD, POLICY_TYPE_CAMERA,
             POLICY_TYPE_BLOCKED_ACTIVITY})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
@@ -220,11 +220,16 @@ public final class VirtualDeviceParams implements Parcelable {
      * Tells the activity manager how to handle recents entries for activities run on this device.
      *
      * <ul>
-     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Activities launched on VirtualDisplays owned by this
+     *     <li>{@link #DEVICE_POLICY_DEFAULT}: Activities launched on trusted displays owned by this
      *     device will appear in the host device recents.
-     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Activities launched on VirtualDisplays owned by this
+     *     <li>{@link #DEVICE_POLICY_CUSTOM}: Activities launched on trusted displays owned by this
      *     device will not appear in recents.
      * </ul>
+     *
+     * <p>Activities launched on untrusted displays will always show in the host device recents,
+     * regardless of the policy.</p>
+     *
+     * @see android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED
      */
     public static final int POLICY_TYPE_RECENTS = 2;
 
@@ -254,8 +259,10 @@ public final class VirtualDeviceParams implements Parcelable {
      *     not shared with other devices' clipboards, including the clipboard of the default device.
      *     <li>{@link #DEVICE_POLICY_CUSTOM}: The device's clipboard is shared with the default
      *     device's clipboard. Any clipboard operation on the virtual device is as if it was done on
-     *     the default device.
+     *     the default device. Requires all displays of the virtual device to be trusted.
      * </ul>
+     *
+     * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
      */
     @FlaggedApi(Flags.FLAG_CROSS_DEVICE_CLIPBOARD)
     public static final int POLICY_TYPE_CLIPBOARD = 4;
@@ -821,8 +828,8 @@ public final class VirtualDeviceParams implements Parcelable {
         }
 
         /**
-         * Specifies a component to be used as input method on all displays owned by this virtual
-         * device.
+         * Specifies a component to be used as input method on all trusted displays owned by this
+         * virtual device.
          *
          * @param inputMethodComponent The component name to be used as input method. Must comply to
          *   all general input method requirements described in the guide to
@@ -831,6 +838,7 @@ public final class VirtualDeviceParams implements Parcelable {
          *   may interact with the virtual device, then there will effectively be no IME on this
          *   device's displays for that user.
          *
+         * @see android.hardware.display.DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED
          * @see android.inputmethodservice.InputMethodService
          * @attr ref android.R.styleable#InputMethod_isVirtualDeviceOnly
          * @attr ref android.R.styleable#InputMethod_showInInputMethodPicker

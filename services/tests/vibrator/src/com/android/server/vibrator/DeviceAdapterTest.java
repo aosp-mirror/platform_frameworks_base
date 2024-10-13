@@ -35,7 +35,9 @@ import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationConfig;
 import android.os.vibrator.VibrationEffectSegment;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.SparseArray;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -63,6 +65,8 @@ public class DeviceAdapterTest {
 
     @Rule
     public MockitoRule mMockitoRule = MockitoJUnit.rule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private PackageManagerInternal mPackageManagerInternalMock;
@@ -186,6 +190,7 @@ public class DeviceAdapterTest {
     }
 
     @Test
+    @DisableFlags(android.os.vibrator.Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public void testStepAndRampSegments_withValidFreqMapping_returnsClippedValuesOnlyInRamps() {
         VibrationEffect.Composed effect = new VibrationEffect.Composed(Arrays.asList(
                 // Individual step without frequency control, will not use PWLE composition

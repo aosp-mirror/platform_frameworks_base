@@ -49,4 +49,7 @@ interface IDesktopMode {
 
     /** Move a task with given `taskId` to desktop */
     void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource);
+
+    /** Remove desktop on the given display */
+    oneway void removeDesktop(int displayId);
 }

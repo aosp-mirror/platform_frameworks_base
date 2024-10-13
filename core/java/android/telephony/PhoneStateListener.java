@@ -1671,14 +1671,22 @@ public class PhoneStateListener {
         }
 
         /** @hide */
-        public final void onCallBackModeStarted(
-                @TelephonyManager.EmergencyCallbackModeType int type) {
+        public final void onCallbackModeStarted(
+                @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis,
+                int subId) {
             // not support. Can't override. Use TelephonyCallback.
         }
 
         /** @hide */
-        public final void onCallBackModeStopped(@EmergencyCallbackModeType int type,
-                @EmergencyCallbackModeStopReason int reason) {
+        public final void onCallbackModeRestarted(
+                @TelephonyManager.EmergencyCallbackModeType int type, long durationMillis,
+                int subId) {
+            // not support. Can't override. Use TelephonyCallback.
+        }
+
+        /** @hide */
+        public final void onCallbackModeStopped(@EmergencyCallbackModeType int type,
+                @EmergencyCallbackModeStopReason int reason, int subId) {
             // not support. Can't override. Use TelephonyCallback.
         }
 

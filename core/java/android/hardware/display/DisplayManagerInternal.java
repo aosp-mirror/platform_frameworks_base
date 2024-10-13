@@ -92,9 +92,10 @@ public abstract class DisplayManagerInternal {
             boolean waitForNegativeProximity);
 
     /**
-     * Returns {@code true} if the proximity sensor screen-off function is available.
+     * Returns {@code true} if the proximity sensor screen-off function is available for the given
+     * display.
      */
-    public abstract boolean isProximitySensorAvailable();
+    public abstract boolean isProximitySensorAvailable(int displayId);
 
     /**
      * Registers a display group listener which will be informed of the addition, removal, or change
@@ -458,6 +459,16 @@ public abstract class DisplayManagerInternal {
      * Called upon the usage of stylus.
      */
     public abstract void stylusGestureStarted(long eventTime);
+
+    /**
+     * Called by {@link com.android.server.wm.ContentRecorder} to verify whether
+     * the display is allowed to mirror primary display's content.
+     * @param displayId the id of the display where we mirror to.
+     * @return true if the mirroring dialog is confirmed (display is enabled), or
+     * {@link com.android.server.display.ExternalDisplayPolicy#ENABLE_ON_CONNECT}
+     * system property is enabled.
+     */
+    public abstract boolean isDisplayReadyForMirroring(int displayId);
 
     /**
      * Describes the requested power state of the display.

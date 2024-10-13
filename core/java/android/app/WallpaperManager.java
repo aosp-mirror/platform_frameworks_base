@@ -285,6 +285,14 @@ public class WallpaperManager {
     public static final String COMMAND_UNFREEZE = "android.wallpaper.unfreeze";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: in sendWallpaperCommand put extra to this command
+     * to give the bounds of space between the bottom of notifications and the top of shortcuts
+     * @hide
+     */
+    public static final String COMMAND_LOCKSCREEN_LAYOUT_CHANGED =
+            "android.wallpaper.lockscreen_layout_changed";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */

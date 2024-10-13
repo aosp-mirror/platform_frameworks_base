@@ -130,6 +130,7 @@ import static android.os.Process.setThreadScheduler;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
+import static android.security.Flags.preventIntentRedirect;
 import static android.util.FeatureFlagUtils.SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -420,6 +421,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
 import com.android.server.DeviceIdleInternal;
@@ -439,6 +441,7 @@ import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.appop.AppOpsService;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
+import com.android.server.crashrecovery.CrashRecoveryAdaptor;
 import com.android.server.crashrecovery.CrashRecoveryHelper;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.firewall.IntentFirewall;
@@ -624,6 +627,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZ");
 
     OomAdjuster mOomAdjuster;
+    @GuardedBy("this")
+    ProcessStateController mProcessStateController;
 
     static final String EXTRA_TITLE = "android.intent.extra.TITLE";
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
@@ -1956,7 +1961,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         new HostingRecord(HostingRecord.HOSTING_TYPE_SYSTEM));
                 app.setPersistent(true);
                 app.setPid(MY_PID);
-                app.mState.setMaxAdj(ProcessList.SYSTEM_ADJ);
+                mProcessStateController.setMaxAdj(app, ProcessList.SYSTEM_ADJ);
                 app.makeActive(new ApplicationThreadDeferred(mSystemThread.getApplicationThread()),
                         mProcessStats);
                 app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_SYSTEM);
@@ -2206,7 +2211,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mService.mBroadcastController.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 if (!refactorCrashrecovery()) {
-                    mService.mPackageWatchdog.onPackagesReady();
+                    CrashRecoveryAdaptor.packageWatchdogOnPackagesReady(mService.mPackageWatchdog);
                 } else {
                     mService.mCrashRecoveryHelper.registerConnectivityModuleHealthListener();
                 }
@@ -2392,9 +2397,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcessList.init(this, activeUids, mPlatformCompat);
         mAppProfiler = new AppProfiler(this, BackgroundThread.getHandler().getLooper(), null);
         mPhantomProcessList = new PhantomProcessList(this);
-        mOomAdjuster = mConstants.ENABLE_NEW_OOMADJ
-                ? new OomAdjusterModernImpl(this, mProcessList, activeUids, handlerThread)
-                : new OomAdjuster(this, mProcessList, activeUids, handlerThread);
+        mProcessStateController = new ProcessStateController.Builder(this, mProcessList, activeUids)
+                .setHandlerThread(handlerThread)
+                .useModernOomAdjuster(mConstants.ENABLE_NEW_OOMADJ)
+                .build();
+        mOomAdjuster = mProcessStateController.getOomAdjuster();
 
         mIntentFirewall = injector.getIntentFirewall();
         mProcessStats = new ProcessStatsService(this, mContext.getCacheDir());
@@ -2420,6 +2427,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBroadcastController = new BroadcastController(mContext, this, mBroadcastQueue);
         mComponentAliasResolver = new ComponentAliasResolver(this);
         mApplicationSharedMemoryReadOnlyFd = null;
+        sCreatorTokenCacheCleaner = new Handler(mHandlerThread.getLooper());
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -2456,9 +2464,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppProfiler = new AppProfiler(this, BackgroundThread.getHandler().getLooper(),
                 new LowMemDetector(this));
         mPhantomProcessList = new PhantomProcessList(this);
-        mOomAdjuster = mConstants.ENABLE_NEW_OOMADJ
-                ? new OomAdjusterModernImpl(this, mProcessList, activeUids)
-                : new OomAdjuster(this, mProcessList, activeUids);
+        mProcessStateController = new ProcessStateController.Builder(this, mProcessList, activeUids)
+                .useModernOomAdjuster(mConstants.ENABLE_NEW_OOMADJ)
+                .build();
+        mOomAdjuster = mProcessStateController.getOomAdjuster();
 
         mBroadcastQueue = mInjector.getBroadcastQueue(this);
         mBroadcastController = new BroadcastController(mContext, this, mBroadcastQueue);
@@ -2526,6 +2535,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids();
         mTraceErrorLogger = new TraceErrorLogger();
         mComponentAliasResolver = new ComponentAliasResolver(this);
+        sCreatorTokenCacheCleaner = new Handler(mHandlerThread.getLooper());
         try {
             mApplicationSharedMemoryReadOnlyFd =
                     ApplicationSharedMemory.getInstance().getReadOnlyFileDescriptor();
@@ -4570,7 +4580,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            mOomAdjuster.setAttachingProcessStatesLSP(app);
+            mProcessStateController.setAttachingProcessStatesLSP(app);
             clearProcessForegroundLocked(app);
             app.setDebugging(false);
             app.setKilledByAm(false);
@@ -4766,7 +4776,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(new ApplicationThreadDeferred(thread), mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
-            app.setPendingFinishAttach(true);
+            mProcessStateController.setPendingFinishAttach(app, true);
 
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
@@ -4850,7 +4860,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized (this) {
             // Mark the finish attach application phase as completed
-            app.setPendingFinishAttach(false);
+            mProcessStateController.setPendingFinishAttach(app, false);
 
             final boolean normalMode = mProcessesReady || isAllowedWhileBooting(app.info);
             final String processName = app.processName;
@@ -5005,7 +5015,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If another follow up update is needed, it will be scheduled by OomAdjuster.
         mHandler.removeMessages(FOLLOW_UP_OOMADJUSTER_UPDATE_MSG);
         synchronized (this) {
-            mOomAdjuster.updateOomAdjFollowUpTargetsLocked();
+            mProcessStateController.runFollowUpUpdate();
         }
     }
 
@@ -5532,6 +5542,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int sendIntentSender(IApplicationThread caller, IIntentSender target,
             IBinder allowlistToken, int code, Intent intent, String resolvedType,
             IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
+        addCreatorToken(intent);
         if (target instanceof PendingIntentRecord) {
             final PendingIntentRecord originalRecord = (PendingIntentRecord) target;
 
@@ -5799,10 +5810,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (pr == null) {
                     return;
                 }
-                pr.mState.setForcingToImportant(null);
+                mProcessStateController.setForcingToImportant(pr, null);
                 clearProcessForegroundLocked(pr);
             }
-            updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
+            mProcessStateController.runUpdate(pr, OOM_ADJ_REASON_UI_VISIBILITY);
         }
     }
 
@@ -5825,7 +5836,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     oldToken.token.unlinkToDeath(oldToken, 0);
                     mImportantProcesses.remove(pid);
                     if (pr != null) {
-                        pr.mState.setForcingToImportant(null);
+                        mProcessStateController.setForcingToImportant(pr, null);
                     }
                     changed = true;
                 }
@@ -5839,7 +5850,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     try {
                         token.linkToDeath(newToken, 0);
                         mImportantProcesses.put(pid, newToken);
-                        pr.mState.setForcingToImportant(newToken);
+                        mProcessStateController.setForcingToImportant(pr, newToken);
                         changed = true;
                     } catch (RemoteException e) {
                         // If the process died while doing this, we will later
@@ -5849,7 +5860,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (changed) {
-                updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
+                mProcessStateController.runUpdate(pr, OOM_ADJ_REASON_UI_VISIBILITY);
             }
         }
     }
@@ -7269,7 +7280,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if ((info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
             app.setPersistent(true);
-            app.mState.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
+            mProcessStateController.setMaxAdj(app, ProcessList.PERSISTENT_PROC_ADJ);
         }
         if (app.getThread() == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
@@ -7372,7 +7383,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.updateScreenStateLocked(isAwake);
                 reportCurWakefulnessUsageEvent();
                 mActivityTaskManager.onScreenAwakeChanged(isAwake);
-                mOomAdjuster.onWakefulnessChanged(wakefulness);
+                mProcessStateController.setWakefulness(wakefulness);
 
                 updateOomAdjLocked(OOM_ADJ_REASON_UI_VISIBILITY);
             }
@@ -8269,7 +8280,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                         setThreadScheduler(proc.getRenderThreadTid(),
                                 SCHED_FIFO | SCHED_RESET_ON_FORK, 1);
                     } else {
-                        setThreadPriority(proc.getRenderThreadTid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                        if (Flags.resetOnForkEnabled()) {
+                            if (Process.getThreadScheduler(proc.getRenderThreadTid())
+                                    == Process.SCHED_OTHER) {
+                                Process.setThreadScheduler(proc.getRenderThreadTid(),
+                                    Process.SCHED_OTHER | Process.SCHED_RESET_ON_FORK,
+                                    0);
+                            }
+                        }
+                        setThreadPriority(proc.getRenderThreadTid(),
+                            THREAD_PRIORITY_TOP_APP_BOOST);
                     }
                 }
             } else {
@@ -8332,16 +8352,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Slog.w(TAG, "setHasTopUi called on unknown pid: " + pid);
                         return;
                     }
-                    if (pr.mState.hasTopUi() != hasTopUi) {
-                        if (DEBUG_OOM_ADJ) {
-                            Slog.d(TAG, "Setting hasTopUi=" + hasTopUi + " for pid=" + pid);
-                        }
-                        pr.mState.setHasTopUi(hasTopUi);
-                        changed = true;
-                    }
+                    changed = mProcessStateController.setHasTopUi(pr, hasTopUi);
                 }
                 if (changed) {
-                    updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
+                    mProcessStateController.runUpdate(pr, OOM_ADJ_REASON_UI_VISIBILITY);
                 }
             }
         } finally {
@@ -12811,6 +12825,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                    // NR_SHMEM is subtracted twice (getCachedSizeKb() and getKernelUsedSizeKb())
+                    + memInfo.getShmemSizeKb()
                     - kernelUsed - memInfo.getZramTotalSizeKb();
             if (!opts.isCompact) {
                 pw.print(" Used RAM: "); pw.print(stringifyKBSize(ss[INDEX_TOTAL_PSS] - cachedPss
@@ -13324,6 +13340,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
+                    // NR_SHMEM is subtracted twice (getCachedSizeKb() and getKernelUsedSizeKb())
+                    + memInfo.getShmemSizeKb()
                     - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
             proto.write(MemInfoDumpProto.USED_PSS_KB, ss[INDEX_TOTAL_PSS] - cachedPss);
             proto.write(MemInfoDumpProto.USED_KERNEL_KB, memInfo.getKernelUsedSizeKb());
@@ -13610,6 +13628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("startService");
         enforceAllowedToStartOrBindServiceIfSdkSandbox(service);
+        addCreatorToken(service);
         if (service != null) {
             // Refuse possible leaked file descriptors
             if (service.hasFileDescriptors()) {
@@ -13871,6 +13890,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         validateServiceInstanceName(instanceName);
 
+        addCreatorToken(service);
         try {
             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
                 final ComponentName cn = service.getComponent();
@@ -14068,10 +14088,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proc.setInFullBackup(true);
             }
             r.app = proc;
+            // TODO(b/369300367): This code suggests there could be a previous backup being
+            //  replaced here, but an OomAdjsuter update is not triggered on the previous app
+            //  (whose state will change from being removed from mBackupTargets).
             final BackupRecord backupTarget = mBackupTargets.get(targetUserId);
             oldBackupUid = backupTarget != null ? backupTarget.appInfo.uid : -1;
             newBackupUid = proc.isInFullBackup() ? r.appInfo.uid : -1;
             mBackupTargets.put(targetUserId, r);
+            mProcessStateController.setBackupTarget(proc, targetUserId);
 
             proc.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_BACKUP);
 
@@ -14125,6 +14149,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 mBackupTargets.removeAt(indexOfKey);
             }
+            mProcessStateController.stopBackupTarget(userId);
         }
 
         JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
@@ -14203,6 +14228,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Not backing this app up any more; reset its OOM adjustment
                 final ProcessRecord proc = backupTarget.app;
+                // TODO(b/369300367): Triggering the update before the state is actually set
+                //  seems wrong.
                 updateOomAdjLocked(proc, OOM_ADJ_REASON_BACKUP);
                 proc.setInFullBackup(false);
                 proc.mProfile.clearHostingComponentType(HOSTING_COMPONENT_TYPE_BACKUP);
@@ -14221,6 +14248,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } finally {
                 mBackupTargets.delete(userId);
+                mProcessStateController.stopBackupTarget(userId);
             }
         }
 
@@ -15293,7 +15321,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             proc.info.packageName, proc.info.uid, proc.getPid(), isForeground);
                 }
             }
-            psr.setHasForegroundServices(isForeground, fgServiceTypes, hasTypeNoneFgs);
+            mProcessStateController.setHasForegroundServices(psr, isForeground, fgServiceTypes,
+                    hasTypeNoneFgs);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
             if (isForeground) {
@@ -15324,7 +15353,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ProcessChangeItem.CHANGE_FOREGROUND_SERVICES, fgServiceTypes);
         }
         if (oomAdj) {
-            updateOomAdjLocked(proc, OOM_ADJ_REASON_UI_VISIBILITY);
+            mProcessStateController.runUpdate(proc, OOM_ADJ_REASON_UI_VISIBILITY);
         }
     }
 
@@ -15374,7 +15403,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void enqueueOomAdjTargetLocked(ProcessRecord app) {
-        mOomAdjuster.enqueueOomAdjTargetLocked(app);
+        mProcessStateController.enqueueUpdateTarget(app);
     }
 
     /**
@@ -15382,7 +15411,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void removeOomAdjTargetLocked(ProcessRecord app, boolean procDied) {
-        mOomAdjuster.removeOomAdjTargetLocked(app, procDied);
+        mProcessStateController.removeUpdateTarget(app, procDied);
     }
 
     /**
@@ -15391,7 +15420,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void updateOomAdjPendingTargetsLocked(@OomAdjReason int oomAdjReason) {
-        mOomAdjuster.updateOomAdjPendingTargetsLocked(oomAdjReason);
+        mProcessStateController.runPendingUpdate(oomAdjReason);
     }
 
     static final class ProcStatsRunnable implements Runnable {
@@ -15410,7 +15439,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final void updateOomAdjLocked(@OomAdjReason int oomAdjReason) {
-        mOomAdjuster.updateOomAdjLocked(oomAdjReason);
+        mProcessStateController.runFullUpdate(oomAdjReason);
     }
 
     /**
@@ -15422,7 +15451,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final boolean updateOomAdjLocked(ProcessRecord app, @OomAdjReason int oomAdjReason) {
-        return mOomAdjuster.updateOomAdjLocked(app, oomAdjReason);
+        return mProcessStateController.runUpdate(app, oomAdjReason);
     }
 
     @Override
@@ -15687,7 +15716,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy({"this", "mProcLock"})
     final void setUidTempAllowlistStateLSP(int uid, boolean onAllowlist) {
-        mOomAdjuster.setUidTempAllowlistStateLSP(uid, onAllowlist);
+        mProcessStateController.setUidTempAllowlistStateLSP(uid, onAllowlist);
     }
 
     private void trimApplications(boolean forceFullOomAdj, @OomAdjReason int oomAdjReason) {
@@ -16737,12 +16766,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         return;
                     }
                 }
-                if (pr.mState.hasOverlayUi() == hasOverlayUi) {
-                    return;
+                if (mProcessStateController.setHasOverlayUi(pr, hasOverlayUi)) {
+                    mProcessStateController.runUpdate(pr, OOM_ADJ_REASON_UI_VISIBILITY);
                 }
-                pr.mState.setHasOverlayUi(hasOverlayUi);
-                //Slog.i(TAG, "Setting hasOverlayUi=" + pr.hasOverlayUi + " for pid=" + pid);
-                updateOomAdjLocked(pr, OOM_ADJ_REASON_UI_VISIBILITY);
             }
         }
 
@@ -17148,6 +17174,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.v(TAG_SERVICE,
                         "startServiceInPackage: " + service + " type=" + resolvedType);
             }
+            addCreatorToken(service);
             final long origId = Binder.clearCallingIdentity();
             ComponentName res;
             try {
@@ -17972,6 +17999,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                         /* uninstalling= */ false, /* packageStateStopped= */ false,
                         userId, reason, exitInfoReason);
             }
+        }
+
+        @Override
+        public void addCreatorToken(Intent intent) {
+            ActivityManagerService.this.addCreatorToken(intent);
         }
     }
 
@@ -19114,6 +19146,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final Map<IntentCreatorToken.Key, WeakReference<IntentCreatorToken>>
             sIntentCreatorTokenCache = new ConcurrentHashMap<>();
 
+    private static Handler sCreatorTokenCacheCleaner;
     /**
      * A binder token used to keep track of which app created the intent. This token can be used to
      * defend against intent redirect attacks. It stores uid of the intent creator and key fields of
@@ -19121,13 +19154,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @hide
      */
+    @VisibleForTesting
     public static final class IntentCreatorToken extends Binder {
         @NonNull
         private final Key mKeyFields;
+        private final WeakReference<IntentCreatorToken> mRef;
 
         public IntentCreatorToken(int creatorUid, Intent intent) {
             super();
             this.mKeyFields = new Key(creatorUid, intent);
+            mRef = new WeakReference<>(this);
         }
 
         public int getCreatorUid() {
@@ -19143,6 +19179,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return token != null && token.mKeyFields.equals(
                     new Key(token.mKeyFields.mCreatorUid, intent));
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                sCreatorTokenCacheCleaner.sendMessage(PooledLambda.obtainMessage(
+                        IntentCreatorToken::completeFinalize, this));
+            } finally {
+                super.finalize();
+            }
+        }
+
+        private void completeFinalize() {
+            synchronized (sIntentCreatorTokenCache) {
+                WeakReference<IntentCreatorToken> current = sIntentCreatorTokenCache.get(
+                        mKeyFields);
+                if (current == mRef) {
+                    sIntentCreatorTokenCache.remove(mKeyFields);
+                }
+            }
         }
 
         private static class Key {
@@ -19187,9 +19243,57 @@ public class ActivityManagerService extends IActivityManager.Stub
             @Override
             public int hashCode() {
                 return Objects.hash(mCreatorUid, mAction, mData, mType, mPackage, mComponent,
-                        mFlags,
-                        mClipDataUris);
+                        mFlags, mClipDataUris);
             }
         }
+    }
+
+    /**
+     * Add a creator token for all embedded intents (stored as extra) of the given intent.
+     *
+     * @param intent The given intent
+     * @hide
+     */
+    public void addCreatorToken(@Nullable Intent intent) {
+        if (!preventIntentRedirect()) return;
+
+        if (intent == null || intent.getExtraIntentKeys() == null) return;
+        for (String key : intent.getExtraIntentKeys()) {
+            try {
+                Intent extraIntent = intent.getParcelableExtra(key, Intent.class);
+                if (extraIntent == null) {
+                    Slog.w(TAG, "The key {" + key
+                            + "} does not correspond to an intent in the extra bundle.");
+                    continue;
+                }
+                Slog.wtf(TAG, "A creator token is added to an intent.");
+                IBinder creatorToken = createIntentCreatorToken(extraIntent);
+                if (creatorToken != null) {
+                    extraIntent.setCreatorToken(creatorToken);
+                }
+            } catch (Exception e) {
+                Slog.wtf(TAG,
+                        "Something went wrong when trying to add creator token for embedded "
+                                + "intents of intent: ."
+                                + intent, e);
+            }
+        }
+    }
+
+    private IBinder createIntentCreatorToken(Intent intent) {
+        if (IntentCreatorToken.isValid(intent)) return null;
+        int creatorUid = getCallingUid();
+        IntentCreatorToken.Key key = new IntentCreatorToken.Key(creatorUid, intent);
+        IntentCreatorToken token;
+        synchronized (sIntentCreatorTokenCache) {
+            WeakReference<IntentCreatorToken> ref = sIntentCreatorTokenCache.get(key);
+            if (ref == null || ref.get() == null) {
+                token = new IntentCreatorToken(creatorUid, intent);
+                sIntentCreatorTokenCache.put(key, token.mRef);
+            } else {
+                token = ref.get();
+            }
+        }
+        return token;
     }
 }

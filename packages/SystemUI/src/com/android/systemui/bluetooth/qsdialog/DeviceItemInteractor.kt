@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
@@ -54,6 +55,8 @@ constructor(
     private val localBluetoothManager: LocalBluetoothManager?,
     private val systemClock: SystemClock,
     private val logger: BluetoothTileDialogLogger,
+    private val deviceItemFactoryList: List<@JvmSuppressWildcards DeviceItemFactory>,
+    private val deviceItemDisplayPriority: List<@JvmSuppressWildcards DeviceItemType>,
     @Application private val coroutineScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
@@ -67,7 +70,7 @@ constructor(
     internal val showSeeAllUpdate
         get() = mutableShowSeeAllUpdate.asStateFlow()
 
-    internal val deviceItemUpdateRequest: SharedFlow<Unit> =
+    val deviceItemUpdateRequest: SharedFlow<Unit> =
         conflatedCallbackFlow {
                 val listener =
                     object : BluetoothCallback {
@@ -112,27 +115,8 @@ constructor(
                 localBluetoothManager?.eventManager?.registerCallback(listener)
                 awaitClose { localBluetoothManager?.eventManager?.unregisterCallback(listener) }
             }
+            .flowOn(backgroundDispatcher)
             .shareIn(coroutineScope, SharingStarted.WhileSubscribed(replayExpirationMillis = 0))
-
-    private var deviceItemFactoryList: List<DeviceItemFactory> =
-        listOf(
-            ActiveMediaDeviceItemFactory(),
-            AudioSharingMediaDeviceItemFactory(localBluetoothManager),
-            AvailableAudioSharingMediaDeviceItemFactory(localBluetoothManager),
-            AvailableMediaDeviceItemFactory(),
-            ConnectedDeviceItemFactory(),
-            SavedDeviceItemFactory()
-        )
-
-    private var displayPriority: List<DeviceItemType> =
-        listOf(
-            DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE,
-            DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
-            DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
-            DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE,
-            DeviceItemType.CONNECTED_BLUETOOTH_DEVICE,
-            DeviceItemType.SAVED_BLUETOOTH_DEVICE,
-        )
 
     internal suspend fun updateDeviceItems(context: Context, trigger: DeviceFetchTrigger) {
         withContext(backgroundDispatcher) {
@@ -144,7 +128,7 @@ constructor(
                             .firstOrNull { it.isFilterMatched(context, cachedDevice, audioManager) }
                             ?.create(context, cachedDevice)
                     }
-                    .sort(displayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
+                    .sort(deviceItemDisplayPriority, bluetoothAdapter?.mostRecentlyConnectedDevices)
             // Only emit when the job is not cancelled
             if (isActive) {
                 mutableDeviceItemUpdate.tryEmit(deviceItems.take(MAX_DEVICE_ITEM_ENTRY))
@@ -174,14 +158,6 @@ constructor(
                     mostRecentlyConnectedDevices?.indexOf(it.cachedBluetoothDevice.device) ?: 0
                 }
         )
-    }
-
-    internal fun setDeviceItemFactoryListForTesting(list: List<DeviceItemFactory>) {
-        deviceItemFactoryList = list
-    }
-
-    internal fun setDisplayPriorityForTesting(list: List<DeviceItemType>) {
-        displayPriority = list
     }
 
     companion object {

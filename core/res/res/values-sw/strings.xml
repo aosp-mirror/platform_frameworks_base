@@ -2129,11 +2129,6 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Itatetema arifa ikitumwa au simu ikipigwa"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Haitatoa mlio arifa ikitumwa au simu ikipigwa"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mabadiliko kwenye mfumo"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Usinisumbue"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mpya: Kipengele cha Usinisumbue kinaficha arifa"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Gusa ili upate maelezo zaidi na ubadilishe."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Kipengele cha Usinisumbue kimebadilishwa"</string>
-    <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="review_notification_settings_title" msgid="5102557424459810820">"Kagua mipangilio ya arifa"</string>
     <string name="review_notification_settings_text" msgid="5916244866751849279">"Kuanzia Android toleo la 13, programu unazosakinisha zitahitaji ruhusa yako ili zitume arifa. Gusa ili ubadilishe ruhusa hii kwa programu zilizopo."</string>
     <string name="review_notification_settings_remind_me_action" msgid="1081081018678480907">"Nikumbushe baadaye"</string>

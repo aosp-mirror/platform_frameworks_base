@@ -40,6 +40,7 @@ import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
 import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.VibratorFrequencyProfileLegacy;
 import android.util.MathUtils;
 
 import com.android.internal.util.Preconditions;
@@ -1761,7 +1762,7 @@ public abstract class VibrationEffect implements Parcelable {
          * new value as fast as possible.
          *
          * <p>Vibration parameter values will be truncated to conform to the device capabilities
-         * according to the {@link android.os.vibrator.VibratorFrequencyProfile}.
+         * according to the {@link VibratorFrequencyProfileLegacy}.
          *
          * @param duration        The length of time this transition should take. Value must be
          *                        non-negative and will be truncated to milliseconds.
@@ -1792,7 +1793,7 @@ public abstract class VibrationEffect implements Parcelable {
          * new values as fast as possible.
          *
          * <p>Vibration parameters values will be truncated to conform to the device capabilities
-         * according to the {@link android.os.vibrator.VibratorFrequencyProfile}.
+         * according to the {@link VibratorFrequencyProfileLegacy}.
          *
          * @param duration         The length of time this transition should take. Value must be
          *                         non-negative and will be truncated to milliseconds.
