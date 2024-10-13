@@ -157,3 +157,11 @@ flag {
     description: "Enable EUICC card emulation"
     bug: "321314635"
 }
+
+flag {
+    name: "nfc_state_change_security_log_event_enabled"
+    is_exported: true
+    namespace: "nfc"
+    description: "Enabling security log for nfc state change"
+    bug: "319934052"
+}

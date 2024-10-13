@@ -38,7 +38,7 @@ import java.util.zip.GZIPOutputStream;
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class ProtoLogViewerConfigReaderTest {
+public class LegacyProtoLogViewerConfigReaderTest {
     private static final String TEST_VIEWER_CONFIG = "{\n"
             + "  \"version\": \"1.0.0\",\n"
             + "  \"messages\": {\n"
